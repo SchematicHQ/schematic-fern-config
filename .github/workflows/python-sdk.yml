@@ -25,4 +25,4 @@ jobs:
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
         run: |
-          fern generate --group python-cloud --version ${{ inputs.version }} --log-level debug
+          fern generate --group public --version ${{ inputs.version }} --log-level debug
