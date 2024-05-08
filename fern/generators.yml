@@ -1,6 +1,8 @@
-default-group: public
+api: 
+  path: ../schematic.yaml
+  # overrides: ../overrides.yml
 groups:
-  public:
+  python-sdk:
     generators: 
       - name: fernapi/fern-python-sdk
         version: 1.5.3-rc0
@@ -10,3 +12,11 @@ groups:
         #   token: ${ PYPI_TOKEN }
         github:
           repository: fern-demo/schematic-python
+        config: 
+          inline_request_params: true
+          client: 
+            class_name: BaseSchematic
+            filename: base_client.py
+            exported_class_name: Schematic
+            exported_filename: client.py
+
