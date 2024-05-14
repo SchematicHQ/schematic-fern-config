@@ -1,17 +1,17 @@
 api: 
   path: ../schematic.yaml
-  # overrides: ../overrides.yml
 groups:
   python-sdk:
     generators: 
       - name: fernapi/fern-python-sdk
         version: 1.5.3-rc0
-        # output: 
-        #   location: pypi
-        #   package-name: "schematic"
-        #   token: ${ PYPI_TOKEN }
+        output: 
+          location: pypi
+          package-name: "schematic"
+          token: ${ PYPI_API_TOKEN }
         github:
           repository: fern-demo/schematic-python
+          mode: pull-request
         config: 
           inline_request_params: true
           client: 
@@ -20,3 +20,16 @@ groups:
             exported_class_name: Schematic
             exported_filename: client.py
 
+  csharp-sdk:
+    generators: 
+      - name: fernapi/fern-csharp-sdk
+        version: 0.0.9
+        github:
+          repository: fern-demo/schematic-csharp
+        output:
+          location: nuget
+          package-name: Schematic.Client
+          api-key: ${NUGET_API_TOKEN}
+        config:
+          namespace: Schematic.Client
+          client-class-name: Schematic
