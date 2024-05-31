@@ -1,0 +1,100 @@
+instances:
+  - url: https://schematic.docs.buildwithfern.com
+title: SchematicHQ
+tabs:
+  documentation:
+    display-name: Home
+    icon: "fa-regular fa-book"
+  api:
+    display-name: API Reference
+    icon: "fa-regular fa-file-contract"
+navigation:
+  - tab: documentation
+    layout: 
+      - section: Get Started
+        skip-slug: true
+        contents: 
+          - page: What is Schematic? 
+            path: ./docs/pages/get_started/introduction.mdx
+          - page: How to use Schematic
+            path: ./docs/pages/get_started/howto.mdx
+          - page: Quickstart
+            path: ./docs/pages/get_started/quickstart.mdx
+          - page: Availability 
+            path: ./docs/pages/get_started/availability.mdx
+          - page: Observability & Support
+            path: ./docs/pages/get_started/observability.mdx
+          - page: Security
+            path: ./docs/pages/get_started/security.mdx
+      - section: Developer Resources
+        contents:
+          - page: Concepts
+            path: ./docs/pages/developer_resources/concepts.mdx
+          - page: Environments
+            path: ./docs/pages/developer_resources/environments.mdx
+          - page: Entity Relation Diagram
+            path: ./docs/pages/developer_resources/erd.mdx
+          - section: SDKs
+            contents: 
+              - page: Go
+                path: ./docs/pages/developer_resources/sdks/go.mdx
+              - page: Node.js
+                path: ./docs/pages/developer_resources/sdks/nodejs.mdx
+              - page: Python
+                path: ./docs/pages/developer_resources/sdks/python.mdx
+              - page: Javascript (Client-side)
+                path: ./docs/pages/developer_resources/sdks/javascript.mdx
+              - page: PHP
+                path: ./docs/pages/developer_resources/sdks/php.mdx
+              - page: Ruby
+                path: ./docs/pages/developer_resources/sdks/ruby.mdx
+      - section: Integrations
+        contents: 
+          - page: Stripe Integration
+            path: ./docs/pages/integrations/stripe.mdx
+          - page: Segment Integration
+            path: ./docs/pages/integrations/segment.mdx
+          - page: Salesforce Integration
+            path: ./docs/pages/integrations/salesforce.mdx
+          - page: Hubspot Integration
+            path: ./docs/pages/integrations/hubspot.mdx
+  - tab: api
+    layout:
+      - page: Resources
+        path: ./docs/pages/api_documentation/resources.mdx
+      - page: Authentication
+        path: ./docs/pages/api_documentation/authentication.mdx
+      - page: Pagination
+        path: ./docs/pages/api_documentation/pagination.mdx
+      - page: Rate limiting
+        path: ./docs/pages/api_documentation/rate_limiting.mdx
+      - api: API Reference
+        skip-slug: true
+          
+colors:
+  accentPrimary:
+    dark: "#db6769"
+    light: "#db6769"
+  background:
+    dark: "#000000"
+    light: "#FFFFFF"
+
+typography:
+  bodyFont:
+    name: Public Sans Thin
+    path: ./docs/assets/Public-Sans-Thin.woff2
+  headingsFont:
+    name: Inter
+    path: ./docs/assets/Manrope-ExtraLight.woff2
+
+layout:
+  page-width: full
+  tabs-placement: sidebar
+  searchbar-placement: header
+
+logo:
+  dark: ./docs/assets/logo-dark.svg
+  light: ./docs/assets/logo-light.svg
+  height: 30
+
+favicon: ./docs/assets/favicon.png

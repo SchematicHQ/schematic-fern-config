@@ -13,7 +13,7 @@ To validate your API, run:
 npm install -g fern-api # only required once
 fern check
 ```
-
+c
 ## Generating your SDK
 
 To upgrade your SDK, click on `Actions` and then hit `Release Python SDK`. Under the 
