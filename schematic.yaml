@@ -1164,6 +1164,22 @@ components:
         - feature_id
         - value_type
       title: CreateReqCommon
+    CreateWebhookRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+        request_types:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+      required:
+        - name
+        - url
+        - request_types
+      title: CreateWebhookRequestBody
     DeleteResponse:
       type: object
       properties:
@@ -2570,6 +2586,22 @@ components:
       required:
         - rules
       title: RulesDetailResponseData
+    SegmentStatusResp:
+      type: object
+      description: The returned resource
+      properties:
+        connected:
+          type: boolean
+        environment_id:
+          type: string
+        last_event_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - connected
+        - environment_id
+      title: SegmentStatusResp
     UpdateApiKeyRequestBody:
       type: object
       properties:
@@ -2797,6 +2829,20 @@ components:
         - priority
         - value
       title: UpdateRuleRequestBody
+    UpdateWebhookRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        request_types:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+          nullable: true
+      title: UpdateWebhookRequestBody
     UpsertCompanyRequestBody:
       type: object
       properties:
@@ -2972,6 +3018,69 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WebhookEventResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        request_type:
+          type: string
+        response_code:
+          type: integer
+          nullable: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        webhook_id:
+          type: string
+      required:
+        - id
+        - webhook_id
+        - request_type
+        - status
+        - created_at
+        - updated_at
+      title: WebhookEventResponseData
+    WebhookResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        name:
+          type: string
+        request_types:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+      required:
+        - id
+        - name
+        - url
+        - status
+        - request_types
+        - created_at
+        - updated_at
+      title: WebhookResponseData
 paths:
   /api-keys:
     get:
@@ -8259,6 +8368,38 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /segment-integration:
+    get:
+      operationId: getSegmentIntegrationStatus
+      summary: Get segment integration status
+      tags:
+        - events
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SegmentStatusResp'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetSegmentIntegrationStatusParams
+                required:
+                  - data
+                  - params
+                title: GetSegmentIntegrationStatusResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /usage-by-company:
     get:
       operationId: getFeatureUsageByCompany
@@ -8737,6 +8878,433 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /webhook-events:
+    get:
+      operationId: listWebhookEvents
+      summary: List webhook events
+      tags:
+        - webhooks
+      parameters:
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/WebhookEventResponseData'
+                    title: ListWebhookEventsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        example: '100'
+                      offset:
+                        type: integer
+                        example: '0'
+                    title: ListWebhookEventsParams
+                required:
+                  - data
+                  - params
+                title: ListWebhookEventsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhook-events/{webhook_event_id}:
+    get:
+      operationId: getWebhookEvent
+      summary: Get webhook event
+      tags:
+        - webhooks
+      parameters:
+        - name: webhook_event_id
+          in: path
+          description: webhook_event_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/WebhookEventResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetWebhookEventParams
+                required:
+                  - data
+                  - params
+                title: GetWebhookEventResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhook-events/count:
+    get:
+      operationId: countWebhookEvents
+      summary: Count webhook events
+      tags:
+        - webhooks
+      parameters:
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        example: '100'
+                      offset:
+                        type: integer
+                        example: '0'
+                    title: CountWebhookEventsParams
+                required:
+                  - data
+                  - params
+                title: CountWebhookEventsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      summary: List webhooks
+      tags:
+        - webhooks
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/WebhookResponseData'
+                    title: ListWebhooksResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        example: '100'
+                      offset:
+                        type: integer
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListWebhooksParams
+                required:
+                  - data
+                  - params
+                title: ListWebhooksResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createWebhook
+      summary: Create webhook
+      tags:
+        - webhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/WebhookResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateWebhookParams
+                required:
+                  - data
+                  - params
+                title: CreateWebhookResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhooks/{webhook_id}:
+    get:
+      operationId: getWebhook
+      summary: Get webhook
+      tags:
+        - webhooks
+      parameters:
+        - name: webhook_id
+          in: path
+          description: webhook_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/WebhookResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetWebhookParams
+                required:
+                  - data
+                  - params
+                title: GetWebhookResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateWebhook
+      summary: Update webhook
+      tags:
+        - webhooks
+      parameters:
+        - name: webhook_id
+          in: path
+          description: webhook_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/WebhookResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateWebhookParams
+                required:
+                  - data
+                  - params
+                title: UpdateWebhookResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteWebhook
+      summary: Delete webhook
+      tags:
+        - webhooks
+      parameters:
+        - name: webhook_id
+          in: path
+          description: webhook_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteWebhookParams
+                required:
+                  - data
+                  - params
+                title: DeleteWebhookResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhooks/count:
+    get:
+      operationId: countWebhooks
+      summary: Count webhooks
+      tags:
+        - webhooks
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        example: '100'
+                      offset:
+                        type: integer
+                        example: '0'
+                      q:
+                        type: string
+                    title: CountWebhooksParams
+                required:
+                  - data
+                  - params
+                title: CountWebhooksResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
 tags:
   - name: accounts
   - name: companies
@@ -8745,3 +9313,4 @@ tags:
   - name: plans
   - name: entitlements
   - name: billing
+  - name: webhooks
