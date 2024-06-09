@@ -20,6 +20,12 @@ groups:
             filename: base_client.py
             exported_class_name: Schematic
             exported_filename: client.py
+          additional_init_exports:
+            - from: client
+              imports:
+                - AsyncSchematic
+                - LocalCache
+                - Schematic
 
   csharp-sdk:
     generators:
