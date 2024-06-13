@@ -3018,6 +3018,40 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WebhookEventDetailResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        request_type:
+          type: string
+        response_code:
+          type: integer
+          nullable: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        webhook:
+          $ref: '#/components/schemas/WebhookResponseData'
+        webhook_id:
+          type: string
+      required:
+        - id
+        - webhook_id
+        - request_type
+        - status
+        - created_at
+        - updated_at
+      title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
       properties:
@@ -3052,7 +3086,6 @@ components:
       title: WebhookEventResponseData
     WebhookResponseData:
       type: object
-      description: The updated resource
       properties:
         created_at:
           type: string
@@ -8885,6 +8918,20 @@ paths:
       tags:
         - webhooks
       parameters:
+        - name: webhook_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8909,18 +8956,26 @@ paths:
                     type: array
                     description: The returned resources
                     items:
-                      $ref: '#/components/schemas/WebhookEventResponseData'
+                      $ref: '#/components/schemas/WebhookEventDetailResponseData'
                     title: ListWebhookEventsResponseData
                   params:
                     type: object
                     description: Input parameters
                     properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         example: '100'
                       offset:
                         type: integer
                         example: '0'
+                      q:
+                        type: string
+                      webhook_id:
+                        type: string
                     title: ListWebhookEventsParams
                 required:
                   - data
@@ -8956,7 +9011,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/WebhookEventResponseData'
+                    $ref: '#/components/schemas/WebhookEventDetailResponseData'
                   params:
                     type: object
                     description: Input parameters
@@ -8980,6 +9035,20 @@ paths:
       tags:
         - webhooks
       parameters:
+        - name: webhook_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9006,12 +9075,20 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         example: '100'
                       offset:
                         type: integer
                         example: '0'
+                      q:
+                        type: string
+                      webhook_id:
+                        type: string
                     title: CountWebhookEventsParams
                 required:
                   - data
