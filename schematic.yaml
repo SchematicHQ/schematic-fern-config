@@ -420,6 +420,28 @@ components:
       required:
         - flags
       title: CheckFlagsResponseData
+    CompanyCrmDealsResponseData:
+      type: object
+      properties:
+        deal_arr:
+          type: string
+        deal_external_id:
+          type: string
+        deal_mrr:
+          type: string
+        deal_name:
+          type: string
+          nullable: true
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CrmDealLineItem'
+      required:
+        - deal_external_id
+        - deal_arr
+        - deal_mrr
+        - line_items
+      title: CompanyCrmDealsResponseData
     CompanyDetailResponseData:
       type: object
       properties:
@@ -744,6 +766,107 @@ components:
         - feature_id
         - value_type
       title: CreateCompanyOverrideRequestBody
+    CreateCrmDealLineItemAssociationRequestBody:
+      type: object
+      properties:
+        deal_external_id:
+          type: string
+        line_item_external_id:
+          type: string
+      required:
+        - deal_external_id
+        - line_item_external_id
+      title: CreateCrmDealLineItemAssociationRequestBody
+    CreateCrmDealRequestBody:
+      type: object
+      properties:
+        arr:
+          type: string
+          nullable: true
+        crm_company_id:
+          type: string
+          nullable: true
+        crm_company_key:
+          type: string
+        crm_product_id:
+          type: string
+          nullable: true
+        crm_type:
+          type: string
+        deal_external_id:
+          type: string
+        deal_name:
+          type: string
+          nullable: true
+        deal_stage:
+          type: string
+          nullable: true
+        mrr:
+          type: string
+          nullable: true
+      required:
+        - deal_external_id
+        - crm_type
+        - crm_company_key
+      title: CreateCrmDealRequestBody
+    CreateCrmLineItemRequestBody:
+      type: object
+      properties:
+        TermMonth:
+          type: integer
+          nullable: true
+        amount:
+          type: string
+        discount_percentage:
+          type: string
+          nullable: true
+        interval:
+          type: string
+        line_item_external_id:
+          type: string
+        product_external_id:
+          type: string
+        quantity:
+          type: integer
+        total_discount:
+          type: string
+          nullable: true
+      required:
+        - product_external_id
+        - line_item_external_id
+        - amount
+        - quantity
+        - interval
+      title: CreateCrmLineItemRequestBody
+    CreateCrmProductRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+        description:
+          type: string
+        external_id:
+          type: string
+        interval:
+          type: string
+        name:
+          type: string
+        price:
+          type: string
+        quantity:
+          type: integer
+        sku:
+          type: string
+      required:
+        - external_id
+        - name
+        - price
+        - description
+        - sku
+        - currency
+        - quantity
+        - interval
+      title: CreateCrmProductRequestBody
     CreateEntityTraitDefinitionRequestBody:
       type: object
       properties:
@@ -965,6 +1088,7 @@ components:
             - user
             - plan
             - billing_product
+            - crm_product
         event_subtype:
           type: string
           description: Name of track event type used to measure this condition
@@ -1180,6 +1304,171 @@ components:
         - url
         - request_types
       title: CreateWebhookRequestBody
+    CrmDealLineItem:
+      type: object
+      properties:
+        billing_frequency:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        description:
+          type: string
+        discount_percentage:
+          $ref: '#/components/schemas/Decimal'
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        term_month:
+          type: integer
+          nullable: true
+        total_discount:
+          $ref: '#/components/schemas/Decimal'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - price
+        - billing_frequency
+        - quantity
+        - currency
+        - description
+        - created_at
+        - updated_at
+      title: CrmDealLineItem
+    CrmDealResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        arr:
+          type: string
+        company_external_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        deal_external_id:
+          type: string
+        deal_id:
+          type: string
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+        mrr:
+          type: string
+        name:
+          type: string
+          nullable: true
+        product_external_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - deal_id
+        - deal_external_id
+        - account_id
+        - environment_id
+        - mrr
+        - arr
+        - created_at
+        - updated_at
+      title: CrmDealResponseData
+    CrmLineItemResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        deal_id:
+          type: string
+          nullable: true
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+        product_external_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - environment_id
+        - created_at
+        - updated_at
+      title: CrmLineItemResponseData
+    CrmProductResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        name:
+          type: string
+        price:
+          type: string
+        product_id:
+          type: string
+        quantity:
+          type: number
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - product_id
+        - external_id
+        - account_id
+        - environment_id
+        - name
+        - price
+        - currency
+        - quantity
+        - created_at
+        - updated_at
+      title: CrmProductResponseData
+    Decimal:
+      type: object
+      title: Decimal
     DeleteResponse:
       type: object
       properties:
@@ -3018,6 +3307,40 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WebhookEventDetailResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        request_type:
+          type: string
+        response_code:
+          type: integer
+          nullable: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        webhook:
+          $ref: '#/components/schemas/WebhookResponseData'
+        webhook_id:
+          type: string
+      required:
+        - id
+        - webhook_id
+        - request_type
+        - status
+        - created_at
+        - updated_at
+      title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
       properties:
@@ -3052,7 +3375,6 @@ components:
       title: WebhookEventResponseData
     WebhookResponseData:
       type: object
-      description: The updated resource
       properties:
         created_at:
           type: string
@@ -4271,6 +4593,76 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /company-crm-deals:
+    get:
+      operationId: getActiveDeals
+      summary: Get active deals
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: deal_stage
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/CompanyCrmDealsResponseData'
+                    title: GetActiveDealsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      deal_stage:
+                        type: string
+                      limit:
+                        type: integer
+                        example: '100'
+                      offset:
+                        type: integer
+                        example: '0'
+                    title: GetActiveDealsParams
+                required:
+                  - data
+                  - params
+                title: GetActiveDealsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /company-memberships:
     get:
       operationId: listCompanyMemberships
@@ -4928,6 +5320,230 @@ paths:
                   - data
                   - params
                 title: UpsertCompanyTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /crm/associations/deal-line-item:
+    post:
+      operationId: upsertDealLineItemAssociation
+      summary: Upsert deal line item association
+      tags:
+        - crm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCrmDealLineItemAssociationRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CrmLineItemResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertDealLineItemAssociationParams
+                required:
+                  - data
+                  - params
+                title: UpsertDealLineItemAssociationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /crm/deal-line-item/upsert:
+    post:
+      operationId: upsertLineItem
+      summary: Upsert line item
+      tags:
+        - crm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCrmLineItemRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CrmLineItemResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertLineItemParams
+                required:
+                  - data
+                  - params
+                title: UpsertLineItemResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /crm/deals/upsert:
+    post:
+      operationId: upsertCrmDeal
+      summary: Upsert crm deal
+      tags:
+        - crm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCrmDealRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CrmDealResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertCrmDealParams
+                required:
+                  - data
+                  - params
+                title: UpsertCrmDealResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /crm/products:
+    get:
+      operationId: listCrmProducts
+      summary: List crm products
+      tags:
+        - crm
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/CrmProductResponseData'
+                    title: ListCrmProductsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        example: '100'
+                      name:
+                        type: string
+                      offset:
+                        type: integer
+                        example: '0'
+                    title: ListCrmProductsParams
+                required:
+                  - data
+                  - params
+                title: ListCrmProductsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /crm/products/upsert:
+    post:
+      operationId: upsertCrmProduct
+      summary: Upsert crm product
+      tags:
+        - crm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCrmProductRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CrmProductResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertCrmProductParams
+                required:
+                  - data
+                  - params
+                title: UpsertCrmProductResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -8885,6 +9501,20 @@ paths:
       tags:
         - webhooks
       parameters:
+        - name: webhook_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8909,18 +9539,26 @@ paths:
                     type: array
                     description: The returned resources
                     items:
-                      $ref: '#/components/schemas/WebhookEventResponseData'
+                      $ref: '#/components/schemas/WebhookEventDetailResponseData'
                     title: ListWebhookEventsResponseData
                   params:
                     type: object
                     description: Input parameters
                     properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         example: '100'
                       offset:
                         type: integer
                         example: '0'
+                      q:
+                        type: string
+                      webhook_id:
+                        type: string
                     title: ListWebhookEventsParams
                 required:
                   - data
@@ -8956,7 +9594,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/WebhookEventResponseData'
+                    $ref: '#/components/schemas/WebhookEventDetailResponseData'
                   params:
                     type: object
                     description: Input parameters
@@ -8980,6 +9618,20 @@ paths:
       tags:
         - webhooks
       parameters:
+        - name: webhook_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9006,12 +9658,20 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         example: '100'
                       offset:
                         type: integer
                         example: '0'
+                      q:
+                        type: string
+                      webhook_id:
+                        type: string
                     title: CountWebhookEventsParams
                 required:
                   - data
@@ -9313,4 +9973,5 @@ tags:
   - name: plans
   - name: entitlements
   - name: billing
+  - name: crm
   - name: webhooks
