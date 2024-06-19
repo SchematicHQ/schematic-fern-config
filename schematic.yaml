@@ -273,10 +273,12 @@ components:
           type: integer
           description: Page limit (default 100)
           nullable: true
+          example: '100'
         offset:
           type: integer
           description: Page offset (default 0)
           nullable: true
+          example: '0'
         q:
           type: string
           nullable: true
@@ -379,9 +381,13 @@ components:
       type: object
       properties:
         company:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
         user:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
       title: CheckFlagRequestBody
@@ -930,6 +936,8 @@ components:
             - type: object
               properties:
                 company:
+                  additionalProperties:
+                    type: string
                   type: object
                   description: >-
                     Key-value pairs to identify company associated with track
@@ -938,9 +946,21 @@ components:
                   type: string
                   description: The name of the type of track event
                 traits:
+                  additionalProperties:
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - type: boolean
+                      - type: object
+                        oneOf:
+                          - type: string
+                          - type: number
+                          - type: boolean
                   type: object
                   description: A map of trait names to trait values
                 user:
+                  additionalProperties:
+                    type: string
                   type: object
                   description: Key-value pairs to identify user associated with track event
               required:
@@ -955,6 +975,8 @@ components:
                     required only if it is a new user
                   properties:
                     keys:
+                      additionalProperties:
+                        type: string
                       type: object
                       description: Key-value pairs to identify the company
                     name:
@@ -963,12 +985,24 @@ components:
                         The display name of the company; required only if it is
                         a new company
                     traits:
+                      additionalProperties:
+                        oneOf:
+                          - type: string
+                          - type: number
+                          - type: boolean
+                          - type: object
+                            oneOf:
+                              - type: string
+                              - type: number
+                              - type: boolean
                       type: object
-                      description: A map of company trait names to trait values
+                      description: A map of trait names to trait values
                   required:
                     - keys
                   title: EventBodyIdentifyCompany
                 keys:
+                  additionalProperties:
+                    type: string
                   type: object
                   description: Key-value pairs to identify the user
                 name:
@@ -977,8 +1011,18 @@ components:
                     The display name of the user being identified; required only
                     if it is a new user
                 traits:
+                  additionalProperties:
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - type: boolean
+                      - type: object
+                        oneOf:
+                          - type: string
+                          - type: number
+                          - type: boolean
                   type: object
-                  description: A map of user trait names to trait values
+                  description: A map of trait names to trait values
               required:
                 - keys
               title: EventBodyIdentify
@@ -1717,6 +1761,16 @@ components:
           type: string
           nullable: true
         body:
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+              - type: object
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -1793,6 +1847,16 @@ components:
           type: string
           nullable: true
         body:
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+              - type: object
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -2113,9 +2177,13 @@ components:
         reason:
           type: string
         req_company:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
         req_user:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
         rule:
@@ -2169,9 +2237,13 @@ components:
         reason:
           type: string
         req_company:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
         req_user:
+          additionalProperties:
+            type: string
           type: object
           nullable: true
         rule_id:
@@ -2287,6 +2359,8 @@ components:
       type: object
       properties:
         keys:
+          additionalProperties:
+            type: string
           type: object
       required:
         - keys
@@ -2326,10 +2400,12 @@ components:
           type: integer
           description: Page limit (default 100)
           nullable: true
+          example: '100'
         offset:
           type: integer
           description: Page offset (default 0)
           nullable: true
+          example: '0'
       title: PaginationFilter
     PlanAudienceDetailResponseData:
       type: object
@@ -3139,6 +3215,8 @@ components:
           type: string
           nullable: true
         keys:
+          additionalProperties:
+            type: string
           type: object
         last_seen_at:
           type: string
@@ -3164,6 +3242,8 @@ components:
           description: Amount to increment the trait by (positive or negative)
           nullable: true
         keys:
+          additionalProperties:
+            type: string
           type: object
           description: Key/value pairs too identify a company or user
         set:
@@ -3187,6 +3267,8 @@ components:
       type: object
       properties:
         company:
+          additionalProperties:
+            type: string
           type: object
           description: Optionally specify company using key/value pairs
         company_id:
@@ -3194,6 +3276,8 @@ components:
           description: Optionally specify company using Schematic company ID
           nullable: true
         keys:
+          additionalProperties:
+            type: string
           type: object
         last_seen_at:
           type: string
@@ -3220,6 +3304,8 @@ components:
           description: Optionally specify company using Schematic company ID
           nullable: true
         keys:
+          additionalProperties:
+            type: string
           type: object
         last_seen_at:
           type: string
@@ -3425,12 +3511,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -3454,9 +3542,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       require_environment:
                         type: boolean
@@ -3654,12 +3744,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -3679,9 +3771,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       require_environment:
                         type: boolean
@@ -3722,12 +3816,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -3751,9 +3847,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -3835,12 +3933,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -3860,9 +3960,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -4101,12 +4203,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4132,11 +4236,13 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       name:
                         type: string
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListProductsParams
                 required:
@@ -4211,6 +4317,7 @@ paths:
           description: Search filter
           schema:
             type: string
+            description: Search filter
         - name: without_feature_override_for
           in: query
           description: >-
@@ -4218,17 +4325,22 @@ paths:
             specified feature ID
           schema:
             type: string
+            description: >-
+              Filter out companies that already have a company override for the
+              specified feature ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4254,16 +4366,22 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
                       q:
                         type: string
+                        description: Search filter
                       without_feature_override_for:
                         type: string
+                        description: >-
+                          Filter out companies that already have a company
+                          override for the specified feature ID
                     title: ListCompaniesParams
                 required:
                   - data
@@ -4413,6 +4531,7 @@ paths:
           description: Search filter
           schema:
             type: string
+            description: Search filter
         - name: without_feature_override_for
           in: query
           description: >-
@@ -4420,17 +4539,22 @@ paths:
             specified feature ID
           schema:
             type: string
+            description: >-
+              Filter out companies that already have a company override for the
+              specified feature ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4452,16 +4576,22 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
                       q:
                         type: string
+                        description: Search filter
                       without_feature_override_for:
                         type: string
+                        description: >-
+                          Filter out companies that already have a company
+                          override for the specified feature ID
                     title: CountCompaniesParams
                 required:
                   - data
@@ -4615,12 +4745,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4646,9 +4778,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: GetActiveDealsParams
                 required:
@@ -4683,12 +4817,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4712,9 +4848,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       user_id:
                         type: string
@@ -4845,12 +4983,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -4888,9 +5028,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListCompanyOverridesParams
                 required:
@@ -5103,12 +5245,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5142,9 +5286,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: CountCompanyOverridesParams
                 required:
@@ -5179,12 +5325,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5208,9 +5356,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
@@ -5244,12 +5394,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5273,9 +5425,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: GetActiveCompanySubscriptionParams
                 required:
@@ -5464,12 +5618,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5495,11 +5651,13 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       name:
                         type: string
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListCrmProductsParams
                 required:
@@ -5578,12 +5736,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5613,9 +5773,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListEntityKeyDefinitionsParams
                 required:
@@ -5656,12 +5818,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5687,9 +5851,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: CountEntityKeyDefinitionsParams
                 required:
@@ -5734,12 +5900,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5767,9 +5935,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -5940,12 +6110,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -5969,9 +6141,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6011,12 +6185,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6040,9 +6216,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6077,12 +6255,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6108,9 +6288,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListEnvironmentsParams
                 required:
@@ -6345,12 +6527,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6376,9 +6560,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6458,12 +6644,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6489,9 +6677,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       user_id:
                         type: string
@@ -6605,12 +6795,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6634,9 +6826,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6674,12 +6868,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6699,9 +6895,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6732,6 +6930,8 @@ paths:
         - name: company_keys
           in: query
           schema:
+            additionalProperties:
+              type: string
             type: object
         - name: feature_ids
           in: query
@@ -6748,12 +6948,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6776,6 +6978,8 @@ paths:
                       company_id:
                         type: string
                       company_keys:
+                        additionalProperties:
+                          type: string
                         type: object
                       feature_ids:
                         type: array
@@ -6783,9 +6987,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6816,6 +7022,8 @@ paths:
         - name: company_keys
           in: query
           schema:
+            additionalProperties:
+              type: string
             type: object
         - name: feature_ids
           in: query
@@ -6832,12 +7040,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6856,6 +7066,8 @@ paths:
                       company_id:
                         type: string
                       company_keys:
+                        additionalProperties:
+                          type: string
                         type: object
                       feature_ids:
                         type: array
@@ -6863,9 +7075,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6903,12 +7117,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6932,9 +7148,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -6972,12 +7190,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -6997,9 +7217,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -7040,6 +7262,9 @@ paths:
             specified company ID
           schema:
             type: string
+            description: >-
+              Filter out features that already have a company override for the
+              specified company ID
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -7047,17 +7272,22 @@ paths:
             specified plan ID
           schema:
             type: string
+            description: >-
+              Filter out features that already have a plan entitlement for the
+              specified plan ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7083,16 +7313,24 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
                       without_company_override_for:
                         type: string
+                        description: >-
+                          Filter out features that already have a company
+                          override for the specified company ID
                       without_plan_entitlement_for:
                         type: string
+                        description: >-
+                          Filter out features that already have a plan
+                          entitlement for the specified plan ID
                     title: ListFeaturesParams
                 required:
                   - data
@@ -7290,6 +7528,9 @@ paths:
             specified company ID
           schema:
             type: string
+            description: >-
+              Filter out features that already have a company override for the
+              specified company ID
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -7297,17 +7538,22 @@ paths:
             specified plan ID
           schema:
             type: string
+            description: >-
+              Filter out features that already have a plan entitlement for the
+              specified plan ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7329,16 +7575,24 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
                       without_company_override_for:
                         type: string
+                        description: >-
+                          Filter out features that already have a company
+                          override for the specified company ID
                       without_plan_entitlement_for:
                         type: string
+                        description: >-
+                          Filter out features that already have a plan
+                          entitlement for the specified plan ID
                     title: CountFeaturesParams
                 required:
                   - data
@@ -7378,12 +7632,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7413,9 +7669,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: ListFlagChecksParams
                 required:
@@ -7495,12 +7753,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7526,9 +7786,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: CountFlagChecksParams
                 required:
@@ -7569,12 +7831,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7604,9 +7868,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                     title: GetLatestFlagChecksParams
                 required:
@@ -7647,12 +7913,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -7680,9 +7948,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -8015,12 +8285,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -8044,9 +8316,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -8109,12 +8383,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
         - name: grouping
           in: query
@@ -8157,9 +8433,11 @@ paths:
                         type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       start_time:
                         type: string
@@ -8340,12 +8618,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -8377,9 +8657,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
@@ -8598,12 +8880,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -8631,9 +8915,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
@@ -8682,17 +8968,22 @@ paths:
             specified feature ID
           schema:
             type: string
+            description: >-
+              Filter out plans that already have a plan entitlement for the
+              specified feature ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -8720,14 +9011,19 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
                       without_entitlement_for:
                         type: string
+                        description: >-
+                          Filter out plans that already have a plan entitlement
+                          for the specified feature ID
                     title: ListPlansParams
                 required:
                   - data
@@ -8929,17 +9225,22 @@ paths:
             specified feature ID
           schema:
             type: string
+            description: >-
+              Filter out plans that already have a plan entitlement for the
+              specified feature ID
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -8963,14 +9264,19 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
                       without_entitlement_for:
                         type: string
+                        description: >-
+                          Filter out plans that already have a plan entitlement
+                          for the specified feature ID
                     title: CountPlansParams
                 required:
                   - data
@@ -9122,17 +9428,20 @@ paths:
           description: Search filter
           schema:
             type: string
+            description: Search filter
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9160,14 +9469,17 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
                       q:
                         type: string
+                        description: Search filter
                     title: ListUsersParams
                 required:
                   - data
@@ -9321,17 +9633,20 @@ paths:
           description: Search filter
           schema:
             type: string
+            description: Search filter
         - name: limit
           in: query
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9355,14 +9670,17 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       plan_id:
                         type: string
                       q:
                         type: string
+                        description: Search filter
                     title: CountUsersParams
                 required:
                   - data
@@ -9520,12 +9838,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9551,9 +9871,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -9637,12 +9959,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9664,9 +9988,11 @@ paths:
                           type: string
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -9701,12 +10027,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9728,9 +10056,11 @@ paths:
                     properties:
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
@@ -9923,12 +10253,14 @@ paths:
           description: Page limit (default 100)
           schema:
             type: integer
+            description: Page limit (default 100)
             example: '100'
         - name: offset
           in: query
           description: Page offset (default 0)
           schema:
             type: integer
+            description: Page offset (default 0)
             example: '0'
       responses:
         '200':
@@ -9946,9 +10278,11 @@ paths:
                     properties:
                       limit:
                         type: integer
+                        description: Page limit (default 100)
                         example: '100'
                       offset:
                         type: integer
+                        description: Page offset (default 0)
                         example: '0'
                       q:
                         type: string
