@@ -1341,6 +1341,28 @@ components:
           type: array
           items:
             type: string
+            enum:
+              - user.created
+              - user.updated
+              - user.deleted
+              - company.created
+              - company.updated
+              - company.deleted
+              - plan.created
+              - plan.updated
+              - plan.deleted
+              - plan.entitlement.created
+              - plan.entitlement.updated
+              - plan.entitlement.deleted
+              - company.override.created
+              - company.override.updated
+              - company.override.deleted
+              - feature.created
+              - feature.updated
+              - feature.deleted
+              - flag.created
+              - flag.updated
+              - flag.deleted
         url:
           type: string
       required:
@@ -3204,6 +3226,29 @@ components:
           type: array
           items:
             type: string
+            enum:
+              - user.created
+              - user.updated
+              - user.deleted
+              - company.created
+              - company.updated
+              - company.deleted
+              - plan.created
+              - plan.updated
+              - plan.deleted
+              - plan.entitlement.created
+              - plan.entitlement.updated
+              - plan.entitlement.deleted
+              - company.override.created
+              - company.override.updated
+              - company.override.deleted
+              - feature.created
+              - feature.updated
+              - feature.deleted
+              - flag.created
+              - flag.updated
+              - flag.deleted
+          nullable: true
         url:
           type: string
           nullable: true
@@ -5721,6 +5766,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5765,6 +5813,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5803,6 +5854,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5843,6 +5897,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5881,6 +5938,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5891,6 +5951,13 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - boolean
+              - currency
+              - date
+              - number
+              - string
+              - url
         - name: q
           in: query
           schema:
@@ -5929,6 +5996,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5945,6 +6015,13 @@ paths:
                         type: string
                       trait_type:
                         type: string
+                        enum:
+                          - boolean
+                          - currency
+                          - date
+                          - number
+                          - string
+                          - url
                     title: ListEntityTraitDefinitionsParams
                 required:
                   - data
@@ -6091,6 +6168,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -6101,6 +6181,13 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - boolean
+              - currency
+              - date
+              - number
+              - string
+              - url
         - name: q
           in: query
           schema:
@@ -6135,6 +6222,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -6151,6 +6241,13 @@ paths:
                         type: string
                       trait_type:
                         type: string
+                        enum:
+                          - boolean
+                          - currency
+                          - date
+                          - number
+                          - string
+                          - url
                     title: CountEntityTraitDefinitionsParams
                 required:
                   - data
