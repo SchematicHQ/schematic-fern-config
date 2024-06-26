@@ -946,16 +946,6 @@ components:
                   type: string
                   description: The name of the type of track event
                 traits:
-                  additionalProperties:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - type: boolean
-                      - type: object
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
                   type: object
                   description: A map of trait names to trait values
                 user:
@@ -985,16 +975,6 @@ components:
                         The display name of the company; required only if it is
                         a new company
                     traits:
-                      additionalProperties:
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
-                          - type: object
-                            oneOf:
-                              - type: string
-                              - type: number
-                              - type: boolean
                       type: object
                       description: A map of trait names to trait values
                   required:
@@ -1011,16 +991,6 @@ components:
                     The display name of the user being identified; required only
                     if it is a new user
                 traits:
-                  additionalProperties:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - type: boolean
-                      - type: object
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
                   type: object
                   description: A map of trait names to trait values
               required:
@@ -1342,27 +1312,29 @@ components:
           items:
             type: string
             enum:
-              - user.created
-              - user.updated
-              - user.deleted
-              - company.created
               - company.updated
-              - company.deleted
-              - plan.created
+              - user.updated
               - plan.updated
-              - plan.deleted
-              - plan.entitlement.created
               - plan.entitlement.updated
-              - plan.entitlement.deleted
-              - company.override.created
               - company.override.updated
-              - company.override.deleted
-              - feature.created
               - feature.updated
-              - feature.deleted
-              - flag.created
               - flag.updated
+              - flag_rules.updated
+              - company.created
+              - user.created
+              - plan.created
+              - plan.entitlement.created
+              - company.override.created
+              - feature.created
+              - flag.created
+              - company.deleted
+              - user.deleted
+              - plan.deleted
+              - plan.entitlement.deleted
+              - company.override.deleted
+              - feature.deleted
               - flag.deleted
+              - test.send
         url:
           type: string
       required:
@@ -1783,16 +1755,6 @@ components:
           type: string
           nullable: true
         body:
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              - type: object
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -1869,16 +1831,6 @@ components:
           type: string
           nullable: true
         body:
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              - type: object
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -3227,27 +3179,29 @@ components:
           items:
             type: string
             enum:
-              - user.created
-              - user.updated
-              - user.deleted
-              - company.created
               - company.updated
-              - company.deleted
-              - plan.created
+              - user.updated
               - plan.updated
-              - plan.deleted
-              - plan.entitlement.created
               - plan.entitlement.updated
-              - plan.entitlement.deleted
-              - company.override.created
               - company.override.updated
-              - company.override.deleted
-              - feature.created
               - feature.updated
-              - feature.deleted
-              - flag.created
               - flag.updated
+              - flag_rules.updated
+              - company.created
+              - user.created
+              - plan.created
+              - plan.entitlement.created
+              - company.override.created
+              - feature.created
+              - flag.created
+              - company.deleted
+              - user.deleted
+              - plan.deleted
+              - plan.entitlement.deleted
+              - company.override.deleted
+              - feature.deleted
               - flag.deleted
+              - test.send
           nullable: true
         url:
           type: string
