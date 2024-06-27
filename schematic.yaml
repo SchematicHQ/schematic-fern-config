@@ -8664,6 +8664,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8720,6 +8724,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      q:
+                        type: string
                     title: ListPlanEntitlementsParams
                 required:
                   - data
@@ -8926,6 +8932,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8978,6 +8988,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      q:
+                        type: string
                     title: CountPlanEntitlementsParams
                 required:
                   - data
