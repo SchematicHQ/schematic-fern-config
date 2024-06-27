@@ -946,16 +946,6 @@ components:
                   type: string
                   description: The name of the type of track event
                 traits:
-                  additionalProperties:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - type: boolean
-                      - type: object
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
                   type: object
                   description: A map of trait names to trait values
                 user:
@@ -985,16 +975,6 @@ components:
                         The display name of the company; required only if it is
                         a new company
                     traits:
-                      additionalProperties:
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
-                          - type: object
-                            oneOf:
-                              - type: string
-                              - type: number
-                              - type: boolean
                       type: object
                       description: A map of trait names to trait values
                   required:
@@ -1011,16 +991,6 @@ components:
                     The display name of the user being identified; required only
                     if it is a new user
                 traits:
-                  additionalProperties:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - type: boolean
-                      - type: object
-                        oneOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
                   type: object
                   description: A map of trait names to trait values
               required:
@@ -1341,6 +1311,30 @@ components:
           type: array
           items:
             type: string
+            enum:
+              - company.updated
+              - user.updated
+              - plan.updated
+              - plan.entitlement.updated
+              - company.override.updated
+              - feature.updated
+              - flag.updated
+              - flag_rules.updated
+              - company.created
+              - user.created
+              - plan.created
+              - plan.entitlement.created
+              - company.override.created
+              - feature.created
+              - flag.created
+              - company.deleted
+              - user.deleted
+              - plan.deleted
+              - plan.entitlement.deleted
+              - company.override.deleted
+              - feature.deleted
+              - flag.deleted
+              - test.send
         url:
           type: string
       required:
@@ -1761,16 +1755,6 @@ components:
           type: string
           nullable: true
         body:
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              - type: object
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -1847,16 +1831,6 @@ components:
           type: string
           nullable: true
         body:
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              - type: object
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
           type: object
         body_preview:
           type: string
@@ -3204,6 +3178,31 @@ components:
           type: array
           items:
             type: string
+            enum:
+              - company.updated
+              - user.updated
+              - plan.updated
+              - plan.entitlement.updated
+              - company.override.updated
+              - feature.updated
+              - flag.updated
+              - flag_rules.updated
+              - company.created
+              - user.created
+              - plan.created
+              - plan.entitlement.created
+              - company.override.created
+              - feature.created
+              - flag.created
+              - company.deleted
+              - user.deleted
+              - plan.deleted
+              - plan.entitlement.deleted
+              - company.override.deleted
+              - feature.deleted
+              - flag.deleted
+              - test.send
+          nullable: true
         url:
           type: string
           nullable: true
@@ -5721,6 +5720,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5765,6 +5767,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5803,6 +5808,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5843,6 +5851,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5881,6 +5892,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -5891,6 +5905,13 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - boolean
+              - currency
+              - date
+              - number
+              - string
+              - url
         - name: q
           in: query
           schema:
@@ -5929,6 +5950,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -5945,6 +5969,13 @@ paths:
                         type: string
                       trait_type:
                         type: string
+                        enum:
+                          - boolean
+                          - currency
+                          - date
+                          - number
+                          - string
+                          - url
                     title: ListEntityTraitDefinitionsParams
                 required:
                   - data
@@ -6091,6 +6122,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - company
+              - user
         - name: ids
           in: query
           schema:
@@ -6101,6 +6135,13 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - boolean
+              - currency
+              - date
+              - number
+              - string
+              - url
         - name: q
           in: query
           schema:
@@ -6135,6 +6176,9 @@ paths:
                     properties:
                       entity_type:
                         type: string
+                        enum:
+                          - company
+                          - user
                       ids:
                         type: array
                         items:
@@ -6151,6 +6195,13 @@ paths:
                         type: string
                       trait_type:
                         type: string
+                        enum:
+                          - boolean
+                          - currency
+                          - date
+                          - number
+                          - string
+                          - url
                     title: CountEntityTraitDefinitionsParams
                 required:
                   - data
@@ -8613,6 +8664,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8669,6 +8724,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      q:
+                        type: string
                     title: ListPlanEntitlementsParams
                 required:
                   - data
@@ -8875,6 +8932,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8927,6 +8988,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      q:
+                        type: string
                     title: CountPlanEntitlementsParams
                 required:
                   - data
