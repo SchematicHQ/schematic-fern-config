@@ -3203,6 +3203,12 @@ components:
               - flag.deleted
               - test.send
           nullable: true
+        status:
+          type: string
+          nullable: true
+          enum:
+            - active
+            - inactive
         url:
           type: string
           nullable: true
@@ -3400,6 +3406,8 @@ components:
           format: date-time
         id:
           type: string
+        payload:
+          type: string
         request_type:
           type: string
         response_code:
@@ -3425,6 +3433,7 @@ components:
         - status
         - created_at
         - updated_at
+        - payload
       title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
@@ -3433,6 +3442,8 @@ components:
           type: string
           format: date-time
         id:
+          type: string
+        payload:
           type: string
         request_type:
           type: string
@@ -3457,6 +3468,7 @@ components:
         - status
         - created_at
         - updated_at
+        - payload
       title: WebhookEventResponseData
     WebhookResponseData:
       type: object
