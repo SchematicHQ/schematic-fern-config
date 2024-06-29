@@ -5741,7 +5741,7 @@ paths:
             type: array
             items:
               type: string
-        - name: key
+        - name: q
           in: query
           schema:
             type: string
@@ -5786,8 +5786,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      key:
-                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -5796,6 +5794,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListEntityKeyDefinitionsParams
                 required:
                   - data
@@ -5829,7 +5829,7 @@ paths:
             type: array
             items:
               type: string
-        - name: key
+        - name: q
           in: query
           schema:
             type: string
@@ -5870,8 +5870,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      key:
-                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -5880,6 +5878,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: CountEntityKeyDefinitionsParams
                 required:
                   - data
