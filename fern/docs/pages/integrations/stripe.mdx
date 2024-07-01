@@ -30,7 +30,7 @@ Why use the integration?
 ### Prerequisites
 
 1. **Stripe Account** - You must have a Stripe account.
-2. **Schematic Company Identifiers** - Each company you want to map must have a `stripe_customer_id` key in Schematic that corresponds to a `Customer ID` found in Stripe.
+2. **Schematic Company Identifiers** - Each company you want to map must have a `stripe_customer_id` `key` in Schematic that corresponds to a `Customer ID` found in Stripe.
 
 <img
   src="../../assets/images/stripe_subscription.png"
@@ -55,11 +55,20 @@ For companies in Schematic that have an associated Stripe subscription, you can 
 
 ### Using within Flag Rules and Plan Audiences
 
-You can use subscrition data as criterion when building plan audiences or flag rules in Schematic. This allows you to clearly align what a customer is billed with what they have access to within your application.
+You can use subscription data as criterion when building plan audiences or flag rules in Schematic. This allows you to clearly align what a customer is billed with what they have access to within your application.
 
 <img
   src="../../assets/images/stripe_rules.png"
 />
+
+ ## Stripe Restricted Key permissions
+
+If you are using a restricted key to connect to Schematic, make sure it has the following permissions:
+
+-   Web hooks
+-   Subscriptions
+-   Product
+-   Pricing
 
 ## Additional context
 

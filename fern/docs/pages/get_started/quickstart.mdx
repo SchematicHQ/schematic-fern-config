@@ -170,7 +170,7 @@ If you use Segment already, you can set up [the Schematic destination](/integrat
 
 Follow the guide to install the client-side Javascript library [here](https://docs.schematichq.com/developer_resources/sdks/javascript).
 
-<Info>Schematic supports several SDKs. Check them out [here](/developer_resources/sdks).</Info>
+<Info>Schematic supports several SDKs. Check them out [here](/developer_resources/sdks/go).</Info>
 
 ### Create a new event 
 
@@ -255,7 +255,7 @@ src="../../assets/images/quickstart_features_1.png"
 
 ### Define a flag key
 
-You’ll use this key in your application to reference this feature.
+You’ll use this `key` in your application to reference this feature.
 
 <img
 src="../../assets/images/quickstart_features_2.png"
@@ -318,9 +318,11 @@ The flag check is the main point of integration between Schematic and your appli
 <Steps>
 ### Check entitlements
 
-The only context you need to evaluate entitlements from your application is the key you passed earlier when you created “Example Company”. You do not need to store any data about products, features, or rules.
+The only context you need to evaluate entitlements from your application is the `key` you passed earlier when you created “Example Company”. You do not need to store any data about products, features, or rules.
 
-<Info>checkFlags accepts any key that you submit when you upsert companies.</Info>
+<Info>
+checkFlags accepts any `key` that you submit when you upsert companies.
+</Info>
 
 Use the following code to perform a bulk flag check.
 
