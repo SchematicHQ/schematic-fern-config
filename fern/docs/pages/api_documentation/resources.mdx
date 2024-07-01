@@ -1,0 +1,108 @@
+---
+title: Resources
+
+slug: api-reference/resources
+---
+
+
+## API Keys
+
+API keys allows you to create and manage API keys across environments.
+- [GET /api-keys](/api-reference/accounts/list-api-keys)
+- [GET /api-keys/`{api_key_id}`](/api-reference/accounts/get-api-key)
+- [POST /api-keys](/api-reference/accounts/create-api-key)
+- [PUT /api-keys/`{api_key_id}`](/api-reference/accounts/update-api-key)
+- [DEL /api-keys/`{api_key_id}`](/api-reference/accounts/update-api-key)
+
+## Environments
+
+Environments typically represent the stages of your software development lifecylce (common environments include development, staging, and production). With this resource, you can create and manage environments. [Some objects](/api-reference/developer_resources/environments) are shared across environments.
+- [POST /environments](/api-reference/accounts/create-environment)
+- [PUT /environments/`{environment_id}`](/api-reference/accounts/update-environment)
+- [DEL /environments/`{environment_id}`](/api-reference/accounts/delete-environment)
+
+## Plans
+
+Plans allows you to create and manage both plans and plan audiences, making it easier to ensure plan audiences are governed by the right conditions. You can also retrieve plans for one or more companies.
+- [GET /plans](/api-reference/plans/list-plans)
+- [GET /plans/`{plan_id}`](/api-reference/plans/get-plans)
+- [POST /plans](/api-reference/plans/create-plan)
+- [PUT /plans/`{plan_id}`](/api-reference/plans/create-plan)
+- [DEL /plans/`{plan_id}`](/api-reference/plans/delete-plan)
+- [PUT /plan-audiences/`{plan_audience_id}`](/api-reference/plans/update-audience)
+- [DEL /plan-audiences/`{plan_audience_id}`](/api-reference/plans/update-audience)
+
+## Companies
+
+Companies allows you to upsert and delete companies and their corresponding metadata, as well as create user and company associations. You can also retrieve company plans, users, and metadata with this resource.
+- [GET /companies](/api-reference/companies/list-companies)
+- [POST /companies](/api-reference/companies/list-companies)
+- [GET /companies/lookup](/api-reference/companies/lookup-company)
+- [DEL /companies/`{company_id}`](/api-reference/companies/delete-company)
+- [POST /companies/delete](/api-reference/companies/delete-company-by-keys)
+- [GET /company-memberships](/api-reference/companies/list-company-memberships)
+- [POST /company-memberships](/api-reference/companies/get-or-create-company-membership)
+- [DEL /company-memberships/`{company_membership_id}`](/api-reference/companies/delete-company-membership)
+- [GET /company-plans](/api-reference/companies/list-company-plans)
+- [POST /company-traits](/api-reference/companies/upsert-company-trait)
+
+## Users
+
+Users allows you to upsert and delete users, as well as lookup a user's company associations.
+- [GET /users](/api-reference/companies/list-users)
+- [GET /users/lookup](/api-reference/companies/lookup-user)
+- [POST /users](/api-reference/companies/upsert-user)
+- [DEL /users/`{user_id}`](/api-reference/companies/delete-user)
+- [POST /users/delete](/api-reference/companies/delete-user-by-keys)
+- [POST /user-traits](/api-reference/companies/delete-user-by-keys)
+
+## Events
+
+Events allows you to create identify and track event calls either indivdually or in a batched fashion, making it easier to update company and user traits as well as emit usage data to Schematic.
+- [GET /events](/api-reference/events/list-events)
+- [POST /events](/api-reference/events/create-event)
+- [POST /event-batch](/api-reference/events/create-event-batch)
+- [GET /events/`{event_id}`](/api-reference/events/get-event)
+
+## Features
+
+Features allows you to create and manage features, making it easier to build and manage default feature configuration.
+- [GET /features](/api-reference/features/list-features)
+- [GET /features/`{feature_id}`](/api-reference/features/get-feature)
+- [POST /features](/api-reference/features/create-feature)
+- [PUT /features/`{feature_id}`](/api-reference/features/update-feature)
+- [DEL /features/`{feature_id}`](/api-reference/features/delete-feature)
+
+## Flags
+
+Flags allows you to create and manage flags, making it easier to programatically build and manage flag conditions. You can also use this resource to retrieve flag evaluations individually or in a batched fashion with or without a context (e.g. company).
+- [GET /flags](/api-reference/features/list-flags)
+- [GET /flags/`{flag_id}`](/api-reference/features/get-flag)
+- [POST /flags](/api-reference/features/create-flag)
+- [PUT /flags/`{flag_id}`](/api-reference/features/create-flag)
+- [DEL /flags/`{flag_id}`](/api-reference/features/delete-flag)
+- [PUT /flags/`{flag_id}`/rules](/api-reference/features/update-flag-rules)
+- [POST /flags/`{key}`/check](/api-reference/features/check-flag)
+- [POST /flags/check](/api-reference/features/check-flags)
+- [GET /flag-checks](/api-reference/features/list-flag-checks)
+- [GET /flag-checks/`{flag_check_id}`](/api-reference/features/get-flag-check)
+- [GET /flag-checks/latest](/api-reference/features/get-latest-flag-checks)
+
+## Entitlements
+
+Entitlements allows you to manage default plan entitlements and individual company entitlements (aka overrides). You can also retrieve feature usage data at the feature or company levels from this resource.
+- [GET /company-overrides](/api-reference/entitlements/list-company-overrides)
+- [GET /company-overrides/`{company_override_id}`](/api-reference/entitlements/get-company-override)
+- [POST /company-overrides](/api-reference/entitlements/create-company-override)
+- [POST /company-overrides/`{company_override_id}`](/api-reference/entitlements/update-company-override)
+- [DEL /company-overrides/`{company_override_id}`](/api-reference/entitlements/delete-company-override)
+- [GET /plan-entitlements](/api-reference/entitlements/list-plan-entitlements)
+- [GET /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/get-plan-entitlement)
+- [POST /plan-entitlements](/api-reference/entitlements/create-plan-entitlement)
+- [PUT /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/update-plan-entitlement)
+- [DEL /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/update-plan-entitlement)
+
+## Feature Usage
+Feature Usage allows you to retrieve usage at the feature and company-feature levels, making it easy to populate components within your application.
+- [GET /feature-usage](/api-reference/entitlements/list-feature-usage)
+- [GET /usage-by-company](/api-reference/entitlements/get-feature-usage-by-company)
