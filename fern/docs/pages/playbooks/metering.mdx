@@ -10,8 +10,10 @@ Metered features are features that have a pre-defined limit either set globally 
 
 There are two types of metered features in Schematic - trait-based and event-based.
 
+### Trait-based features
 **Trait-based** features are best suited for resource utilization that could increase or decrease. Some examples of features that fit this criteria are seats, projects, devices, etc. Traits should be upserted on company profiles to specify utilization against a pre-defined limit at the feature level.
 
+### Event-based features
 **Event-based** features are best suited for resource utilization that simply goes up, and/or is metered on a perodic basis (e.g. per day, per week, per month). Some examples of features that fit this criteria are API requests, queries, etc. Individual events should be sent into Schematic, which will be automatically aggregated to calculate utilization against a pre-defined limit at the feature level.
 
 ## Setting up an Event-based metered feature
@@ -95,16 +97,16 @@ response = client.companies.upsert_company(
 
 ## Entitlement options
 
-Once you've created a feature, you can entitle it to a plan and specify a limit. You'll have three options for each entitlement set for a feature:
-1. **Numerical limit** - Schematic will apply the same limit to every company with the entitlement.
-2. **No limit** - Schematic will not apply a limit to any company with the entitlement.
-3. **Trait** - Schematic will refer to a trait at the company level to apply a limit, and the value of the limit can differ by company (e.g. for scenarios such as custom limits sold in a sales process, or defined by the user in the product).
+Once you've created a feature, you can entitle it to a plan and specify a limit. If you think of the event or trait you selected when you created the feature as the numerator of your meter, the limit you select when creating an entitlement is functionally the denominator. You'll have three options for each entitlement you create for a feature:
+1. **Numerical limit** - Schematic will apply the same limit to every company with the entitlement. For example, if you set the numerical limit as 5, all companies that have this entitlement can utilize up to 5 of the feature.
+2. **No limit** - Schematic will not apply a limit to any company with the entitlement. For example, all companies that have this entitlement will have no limit to their usage of the feature.
+3. **Trait** - Schematic will refer to a trait at the company level to apply a limit, and the value of the limit can differ by company (e.g. for scenarios such as custom limits sold in a sales process, or defined by the user in the product). For example, if you set the dynamic limit as a trait named `seats_allocated`, all companies that have this entitlement can utilize up to the number of `seats_allocated` for the feature -- this can be different from company to company.
 
 <iframe
   width="560"
   height="400"
   src="https://schematichq-1.wistia.com/embed/iframe/lnaguz1r2m"
-  title="Trait Based Feature"
+  title="Entitlements"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowFullScreen

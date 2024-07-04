@@ -12,7 +12,7 @@ API keys allows you to create and manage API keys across environments.
 - [GET /api-keys/`{api_key_id}`](/api-reference/accounts/get-api-key)
 - [POST /api-keys](/api-reference/accounts/create-api-key)
 - [PUT /api-keys/`{api_key_id}`](/api-reference/accounts/update-api-key)
-- [DEL /api-keys/`{api_key_id}`](/api-reference/accounts/update-api-key)
+- [DEL /api-keys/`{api_key_id}`](/api-reference/accounts/delete-api-key)
 
 ## Environments
 
@@ -30,7 +30,7 @@ Plans allows you to create and manage both plans and plan audiences, making it e
 - [PUT /plans/`{plan_id}`](/api-reference/plans/create-plan)
 - [DEL /plans/`{plan_id}`](/api-reference/plans/delete-plan)
 - [PUT /plan-audiences/`{plan_audience_id}`](/api-reference/plans/update-audience)
-- [DEL /plan-audiences/`{plan_audience_id}`](/api-reference/plans/update-audience)
+- [DEL /plan-audiences/`{plan_audience_id}`](/api-reference/plans/delete-audience)
 
 ## Companies
 
@@ -54,7 +54,7 @@ Users allows you to upsert and delete users, as well as lookup a user's company 
 - [POST /users](/api-reference/companies/upsert-user)
 - [DEL /users/`{user_id}`](/api-reference/companies/delete-user)
 - [POST /users/delete](/api-reference/companies/delete-user-by-keys)
-- [POST /user-traits](/api-reference/companies/delete-user-by-keys)
+- [POST /user-traits](/api-reference/companies/upsert-user-traits)
 
 ## Events
 
@@ -100,7 +100,7 @@ Entitlements allows you to manage default plan entitlements and individual compa
 - [GET /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/get-plan-entitlement)
 - [POST /plan-entitlements](/api-reference/entitlements/create-plan-entitlement)
 - [PUT /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/update-plan-entitlement)
-- [DEL /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/update-plan-entitlement)
+- [DEL /plan-entitlements/`{plan_entitlement_id}`](/api-reference/entitlements/delete-plan-entitlement)
 
 ## Feature Usage
 Feature Usage allows you to retrieve usage at the feature and company-feature levels, making it easy to populate components within your application.

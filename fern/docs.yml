@@ -8,6 +8,10 @@ tabs:
   api:
     display-name: API Reference
     icon: "fa-regular fa-file-contract"
+  blog: 
+    display-name: Blog
+    icon: "fa-regular fa-newspaper"
+    href: "https://schematichq.com/blog"
 navigation:
   - tab: documentation
     layout: 
@@ -70,7 +74,11 @@ navigation:
       - section: Playbooks
         contents: 
           - page: Creating a metered feature
+            slug: metering
             path: ./docs/pages/playbooks/metering.mdx
+          - page: Rolling out beta functionality with Flags
+            slug: rollout
+            path: ./docs/pages/playbooks/rollout.mdx
   - tab: api
     layout:
       - page: Resources
@@ -85,9 +93,10 @@ navigation:
         skip-slug: true
         flattened: true
         snippets: 
-          python: schemqtichq
+          python: schematichq
         layout: 
           - section: API Keys
+            slug: accounts
             contents: 
               - GET /api-keys
               - GET /api-keys/{api_key_id}
@@ -95,6 +104,7 @@ navigation:
               - PUT /api-keys/{api_key_id}
               - DELETE /api-keys/{api_key_id}
           - section: Environments
+            slug: accounts
             contents: 
               - POST /environments
               - PUT /environments/{environment_id}
@@ -121,6 +131,7 @@ navigation:
               - GET /company-plans
               - POST /company-traits
           - section: Users
+            slug: companies
             contents: 
               - GET /users
               - GET /users/lookup
@@ -142,6 +153,7 @@ navigation:
               - PUT /features/{feature_id}
               - DELETE /features/{feature_id}
           - section: Flags
+            slug: features
             contents: 
               - GET /flags
               - GET /flags/{flag_id}
@@ -167,6 +179,7 @@ navigation:
               - PUT /plan-entitlements/{plan_entitlement_id}
               - DELETE /plan-entitlements/{plan_entitlement_id}
           - section: Feature Usage
+            slug: entitlements
             contents:
               - GET /feature-usage
               - GET /usage-by-company
@@ -184,6 +197,7 @@ navigation:
               hidden: true
           - plans: 
               hidden: true
+  - tab: blog
 
 navbar-links: 
   - type: minimal

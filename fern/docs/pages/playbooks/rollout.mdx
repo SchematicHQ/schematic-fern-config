@@ -1,0 +1,117 @@
+---
+title: Rolling out beta functionality with Flags
+---
+
+## What is beta rollout?
+
+Beta functionality are typically released to select customers for early access. With Schematic, you can not only roll beta functionality out using Flags, but also subsequently entitle them into Plans you already offer your customers with no additional code changes. 
+
+## Setting up a Flag
+
+Flags are the primary building block in Schematic, and they allow you to turn features on or off without modifying application code.
+
+To set up a Flag, do the following:
+1. Navigate to the Flags tab and click "Create"
+2. Choose a Flag name that will be visible to all users, and a Flag key, which you'll use in your application to instrument the Flag
+3. Add the Flag to your application code using our `check_flag` endpoint (Follow the instructions [here](/playbooks/rollout#adding-a-beta-flag-to-your-application))
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/hzujaixjw0"
+  title="Add flag"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+## Defining a beta segment
+
+Typically a beta group is a set of your customers that have opted into new functionality. To create one in Schematic, you will need to use Company traits.
+
+Traits can be added to Company profiles using the Company upsert API.
+
+Here's an example of adding a `beta` trait to a company:
+
+```python
+from schematic.client import Schematic
+
+client = Schematic(
+    api_key = "your-api-key"
+)
+
+response = client.companies.upsert_company(
+    keys={
+        "your-company-key" : "value"
+    },
+    traits={
+        "beta" : true
+    }
+)
+```
+
+## Targeting your beta segment with Flag Rules
+
+Once you've segmented companies within Schematic, you can set up a rule to target them.
+
+To set up a Flag Rule, do the following:
+1. Navigate to your Flag
+2. Click "Add new rule"
+3. Target Companies with the trait corresponding to the beta segment
+
+<Info>You can also individually target Companies or Users with Flag Rules</Info>
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/4ifwaqd7jy"
+  title="Add flag targeting"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+## Adding a beta Flag to your application
+
+Adding a beta flag from Schematic in your application is relatively straightforward. The following code performs a Flag check for a Flag with a key `beta-flag`. Schematic only requires a Company key and a Flag key to evaluate Flag conditions, and this is possible because context associated with companies is stored within Schematic (e.g. the trait we set up above). When a `check_flag` request is performed, Schematic will refer to the data already stored on the Company or User profile to evaluate Flag Rules.
+
+```python
+from schematic import Schematic
+
+client = Schematic(
+    api_key = "your-api-key"
+)
+
+company = {
+   "your-company-key" : "value"
+}
+
+if client.features.check_flag(flag_key='beta-flag', company=company):
+    do something
+else:
+    do something else
+```
+
+## Turning Flags into Plan Entitlements
+
+Once you are ready to fully release a beta feature, you can easily convert it within Schematic so that you can add it to a plan to offer it more widely.
+
+To convert a Flag into a Plan Entitlement, do the following:
+1. In the Flag view, click "Convert to feature"
+2. Choose the feature type (Boolean, Event-based, Trait-based) and finish the wizard
+
+<Info>To learn more about Event-based and Trait-based Features, click [here](/playbooks/metering)</Info>
+
+3. Click "Add plan entitlement" and add to an existing Plan
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/r5scozc4xj"
+  title="Add flag to plan"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+You can optionally remove the Rule in the Flag view that is targeting your beta segment to ensure only those that should have access to the new functionality receive that access.
