@@ -1121,6 +1121,7 @@ components:
         metric_value:
           type: integer
           description: Value to compare the track event metric against
+          nullable: true
         operator:
           type: string
           enum:
@@ -1149,7 +1150,6 @@ components:
         - condition_type
         - operator
         - resource_ids
-        - metric_value
       title: CreateOrUpdateConditionRequestBody
     CreateOrUpdateFlagRequestBody:
       type: object
@@ -1927,6 +1927,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
@@ -1949,6 +1957,7 @@ components:
           nullable: true
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureCompanyResponseData
@@ -1964,6 +1973,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
@@ -1988,6 +2005,7 @@ components:
           $ref: '#/components/schemas/UserResponseData'
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureCompanyUserResponseData
@@ -2096,6 +2114,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         entitlement_id:
           type: string
         entitlement_type:
@@ -2116,6 +2142,7 @@ components:
           nullable: true
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureUsageResponseData
@@ -2652,6 +2679,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          nullable: true
         operator:
           type: string
         plan_id:
@@ -2689,7 +2717,6 @@ components:
         - created_at
         - updated_at
         - resource_ids
-        - metric_value
         - trait_value
         - resources
       title: RuleConditionDetailResponseData
@@ -2794,6 +2821,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          nullable: true
         operator:
           type: string
         plan_id:
@@ -2825,7 +2853,6 @@ components:
         - created_at
         - updated_at
         - resource_ids
-        - metric_value
         - trait_value
       title: RuleConditionResponseData
     RuleDetailResponseData:
@@ -4989,6 +5016,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5045,6 +5076,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListCompanyOverridesParams
                 required:
                   - data
@@ -5251,6 +5284,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5303,6 +5340,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: CountCompanyOverridesParams
                 required:
                   - data
