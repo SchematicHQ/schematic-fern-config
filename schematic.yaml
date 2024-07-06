@@ -4236,6 +4236,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -4282,6 +4286,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListProductsParams
                 required:
                   - data
