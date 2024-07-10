@@ -3245,6 +3245,7 @@ components:
       properties:
         id:
           type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
           nullable: true
         keys:
           additionalProperties:
@@ -3307,6 +3308,10 @@ components:
           type: string
           description: Optionally specify company using Schematic company ID
           nullable: true
+        id:
+          type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
+          nullable: true
         keys:
           additionalProperties:
             type: string
@@ -3334,6 +3339,10 @@ components:
         company_id:
           type: string
           description: Optionally specify company using Schematic company ID
+          nullable: true
+        id:
+          type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
           nullable: true
         keys:
           additionalProperties:
