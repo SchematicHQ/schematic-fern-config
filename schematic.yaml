@@ -671,6 +671,34 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
+    ComponentResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - ast
+        - created_at
+        - updated_at
+      title: ComponentResponseData
     CountResponse:
       type: object
       description: The created resource
@@ -772,6 +800,25 @@ components:
         - feature_id
         - value_type
       title: CreateCompanyOverrideRequestBody
+    CreateComponentRequestBody:
+      type: object
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+        entity_type:
+          type: string
+          enum:
+            - entitlement
+            - billing
+        name:
+          type: string
+      required:
+        - name
+        - entity_type
+        - ast
+      title: CreateComponentRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
       type: object
       properties:
@@ -3022,6 +3069,24 @@ components:
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
+    UpdateComponentRequestBody:
+      type: object
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+          nullable: true
+        entity_type:
+          type: string
+          nullable: true
+          enum:
+            - entitlement
+            - billing
+        name:
+          type: string
+          nullable: true
+      title: UpdateComponentRequestBody
     UpdateEntityTraitDefinitionRequestBody:
       type: object
       properties:
@@ -5539,6 +5604,294 @@ paths:
                   - data
                   - params
                 title: UpsertCompanyTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components:
+    get:
+      operationId: listComponents
+      summary: List components
+      tags:
+        - components
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/ComponentResponseData'
+                    title: ListComponentsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListComponentsParams
+                required:
+                  - data
+                  - params
+                title: ListComponentsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createComponent
+      summary: Create component
+      tags:
+        - components
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComponentRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateComponentParams
+                required:
+                  - data
+                  - params
+                title: CreateComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/{component_id}:
+    get:
+      operationId: getComponent
+      summary: Get component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetComponentParams
+                required:
+                  - data
+                  - params
+                title: GetComponentResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateComponent
+      summary: Update component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateComponentRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateComponentParams
+                required:
+                  - data
+                  - params
+                title: UpdateComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteComponent
+      summary: Delete component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteComponentParams
+                required:
+                  - data
+                  - params
+                title: DeleteComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/count:
+    get:
+      operationId: countComponents
+      summary: Count components
+      tags:
+        - components
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: CountComponentsParams
+                required:
+                  - data
+                  - params
+                title: CountComponentsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -10438,3 +10791,4 @@ tags:
   - name: billing
   - name: crm
   - name: webhooks
+  - name: components
