@@ -763,10 +763,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - company_id
         - feature_id
@@ -1240,10 +1240,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - plan_id
         - feature_id
@@ -1294,10 +1294,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - feature_id
         - value_type
@@ -2988,10 +2988,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
@@ -3087,10 +3087,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - value_type
       title: UpdatePlanEntitlementRequestBody
@@ -3137,10 +3137,10 @@ components:
         value_type:
           type: string
           enum:
-            - Boolean
-            - Numeric
-            - Trait
-            - Unlimited
+            - boolean
+            - numeric
+            - trait
+            - unlimited
       required:
         - value_type
       title: UpdateReqCommon
@@ -3203,6 +3203,12 @@ components:
               - flag.deleted
               - test.send
           nullable: true
+        status:
+          type: string
+          nullable: true
+          enum:
+            - active
+            - inactive
         url:
           type: string
           nullable: true
@@ -3400,6 +3406,8 @@ components:
           format: date-time
         id:
           type: string
+        payload:
+          type: string
         request_type:
           type: string
         response_code:
@@ -3425,6 +3433,7 @@ components:
         - status
         - created_at
         - updated_at
+        - payload
       title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
@@ -3433,6 +3442,8 @@ components:
           type: string
           format: date-time
         id:
+          type: string
+        payload:
           type: string
         request_type:
           type: string
@@ -3457,6 +3468,7 @@ components:
         - status
         - created_at
         - updated_at
+        - payload
       title: WebhookEventResponseData
     WebhookResponseData:
       type: object
@@ -5729,7 +5741,7 @@ paths:
             type: array
             items:
               type: string
-        - name: key
+        - name: q
           in: query
           schema:
             type: string
@@ -5774,8 +5786,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      key:
-                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -5784,6 +5794,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListEntityKeyDefinitionsParams
                 required:
                   - data
@@ -5817,7 +5829,7 @@ paths:
             type: array
             items:
               type: string
-        - name: key
+        - name: q
           in: query
           schema:
             type: string
@@ -5858,8 +5870,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      key:
-                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -5868,6 +5878,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: CountEntityKeyDefinitionsParams
                 required:
                   - data
