@@ -286,6 +286,24 @@ components:
         - conditions
         - condition_groups
       title: AudienceRequestBody
+    BillingProductPlanResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        account_id:
+          type: string
+        billing_product_id:
+          type: string
+        environment_id:
+          type: string
+        plan_id:
+          type: string
+      required:
+        - account_id
+        - environment_id
+        - plan_id
+        - billing_product_id
+      title: BillingProductPlanResponseData
     BillingProductResponseData:
       type: object
       properties:
@@ -671,6 +689,34 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
+    ComponentResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - ast
+        - created_at
+        - updated_at
+      title: ComponentResponseData
     CountResponse:
       type: object
       description: The created resource
@@ -772,6 +818,25 @@ components:
         - feature_id
         - value_type
       title: CreateCompanyOverrideRequestBody
+    CreateComponentRequestBody:
+      type: object
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+        entity_type:
+          type: string
+          enum:
+            - entitlement
+            - billing
+        name:
+          type: string
+      required:
+        - name
+        - entity_type
+        - ast
+      title: CreateComponentRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
       type: object
       properties:
@@ -1121,6 +1186,7 @@ components:
         metric_value:
           type: integer
           description: Value to compare the track event metric against
+          nullable: true
         operator:
           type: string
           enum:
@@ -1149,7 +1215,6 @@ components:
         - condition_type
         - operator
         - resource_ids
-        - metric_value
       title: CreateOrUpdateConditionRequestBody
     CreateOrUpdateFlagRequestBody:
       type: object
@@ -1252,6 +1317,9 @@ components:
     CreatePlanRequestBody:
       type: object
       properties:
+        audience_type:
+          type: string
+          nullable: true
         description:
           type: string
         name:
@@ -1927,6 +1995,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
@@ -1949,6 +2025,7 @@ components:
           nullable: true
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureCompanyResponseData
@@ -1964,6 +2041,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
@@ -1988,6 +2073,7 @@ components:
           $ref: '#/components/schemas/UserResponseData'
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureCompanyUserResponseData
@@ -2096,6 +2182,14 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
           nullable: true
+        allocation_type:
+          type: string
+          description: The type of allocation that is being used.
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
         entitlement_id:
           type: string
         entitlement_type:
@@ -2116,6 +2210,7 @@ components:
           nullable: true
       required:
         - access
+        - allocation_type
         - entitlement_id
         - entitlement_type
       title: FeatureUsageResponseData
@@ -2470,6 +2565,8 @@ components:
       type: object
       description: The updated resource
       properties:
+        audience_type:
+          type: string
         company_count:
           type: integer
         created_at:
@@ -2497,6 +2594,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - audience_type
         - company_count
         - features
       title: PlanDetailResponseData
@@ -2553,6 +2651,8 @@ components:
     PlanResponseData:
       type: object
       properties:
+        audience_type:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -2574,6 +2674,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - audience_type
       title: PlanResponseData
     PreviewObject:
       type: object
@@ -2652,6 +2753,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          nullable: true
         operator:
           type: string
         plan_id:
@@ -2689,7 +2791,6 @@ components:
         - created_at
         - updated_at
         - resource_ids
-        - metric_value
         - trait_value
         - resources
       title: RuleConditionDetailResponseData
@@ -2794,6 +2895,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          nullable: true
         operator:
           type: string
         plan_id:
@@ -2825,7 +2927,6 @@ components:
         - created_at
         - updated_at
         - resource_ids
-        - metric_value
         - trait_value
       title: RuleConditionResponseData
     RuleDetailResponseData:
@@ -2995,6 +3096,24 @@ components:
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
+    UpdateComponentRequestBody:
+      type: object
+      properties:
+        ast:
+          type: array
+          items:
+            type: integer
+          nullable: true
+        entity_type:
+          type: string
+          nullable: true
+          enum:
+            - entitlement
+            - billing
+        name:
+          type: string
+          nullable: true
+      title: UpdateComponentRequestBody
     UpdateEntityTraitDefinitionRequestBody:
       type: object
       properties:
@@ -3097,6 +3216,8 @@ components:
     UpdatePlanRequestBody:
       type: object
       properties:
+        audience_type:
+          type: string
         description:
           type: string
           nullable: true
@@ -3114,6 +3235,7 @@ components:
             - other
       required:
         - name
+        - audience_type
       title: UpdatePlanRequestBody
     UpdateReqCommon:
       type: object
@@ -3213,11 +3335,20 @@ components:
           type: string
           nullable: true
       title: UpdateWebhookRequestBody
+    UpsertBillingProductRequestBody:
+      type: object
+      properties:
+        BillingProductID:
+          type: string
+      required:
+        - BillingProductID
+      title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
       type: object
       properties:
         id:
           type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
           nullable: true
         keys:
           additionalProperties:
@@ -3280,6 +3411,10 @@ components:
           type: string
           description: Optionally specify company using Schematic company ID
           nullable: true
+        id:
+          type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
+          nullable: true
         keys:
           additionalProperties:
             type: string
@@ -3307,6 +3442,10 @@ components:
         company_id:
           type: string
           description: Optionally specify company using Schematic company ID
+          nullable: true
+        id:
+          type: string
+          description: If you know the Schematic ID, you can use that here instead of keys
           nullable: true
         keys:
           additionalProperties:
@@ -3408,6 +3547,7 @@ components:
           type: string
         payload:
           type: string
+          nullable: true
         request_type:
           type: string
         response_code:
@@ -3433,7 +3573,6 @@ components:
         - status
         - created_at
         - updated_at
-        - payload
       title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
@@ -3445,6 +3584,7 @@ components:
           type: string
         payload:
           type: string
+          nullable: true
         request_type:
           type: string
         response_code:
@@ -3468,7 +3608,6 @@ components:
         - status
         - created_at
         - updated_at
-        - payload
       title: WebhookEventResponseData
     WebhookResponseData:
       type: object
@@ -4209,6 +4348,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -4255,6 +4398,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListProductsParams
                 required:
                   - data
@@ -4989,6 +5134,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5045,6 +5194,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: ListCompanyOverridesParams
                 required:
                   - data
@@ -5251,6 +5402,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5303,6 +5458,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      q:
+                        type: string
                     title: CountCompanyOverridesParams
                 required:
                   - data
@@ -5485,6 +5642,294 @@ paths:
                   - data
                   - params
                 title: UpsertCompanyTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components:
+    get:
+      operationId: listComponents
+      summary: List components
+      tags:
+        - components
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/ComponentResponseData'
+                    title: ListComponentsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListComponentsParams
+                required:
+                  - data
+                  - params
+                title: ListComponentsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createComponent
+      summary: Create component
+      tags:
+        - components
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComponentRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateComponentParams
+                required:
+                  - data
+                  - params
+                title: CreateComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/{component_id}:
+    get:
+      operationId: getComponent
+      summary: Get component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetComponentParams
+                required:
+                  - data
+                  - params
+                title: GetComponentResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateComponent
+      summary: Update component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateComponentRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateComponentParams
+                required:
+                  - data
+                  - params
+                title: UpdateComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteComponent
+      summary: Delete component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteComponentParams
+                required:
+                  - data
+                  - params
+                title: DeleteComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/count:
+    get:
+      operationId: countComponents
+      summary: Count components
+      tags:
+        - components
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: CountComponentsParams
+                required:
+                  - data
+                  - params
+                title: CountComponentsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -9272,6 +9717,53 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plans/{plan_id}/billing_products:
+    put:
+      operationId: upsertBillingProductPlan
+      summary: Upsert billing product plan
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingProductPlanResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingProductPlanParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingProductPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plans/count:
     get:
       operationId: countPlans
@@ -10384,3 +10876,4 @@ tags:
   - name: billing
   - name: crm
   - name: webhooks
+  - name: components
