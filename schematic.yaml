@@ -286,6 +286,24 @@ components:
         - conditions
         - condition_groups
       title: AudienceRequestBody
+    BillingProductPlanResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        account_id:
+          type: string
+        billing_product_id:
+          type: string
+        environment_id:
+          type: string
+        plan_id:
+          type: string
+      required:
+        - account_id
+        - environment_id
+        - plan_id
+        - billing_product_id
+      title: BillingProductPlanResponseData
     BillingProductResponseData:
       type: object
       properties:
@@ -1299,6 +1317,9 @@ components:
     CreatePlanRequestBody:
       type: object
       properties:
+        audience_type:
+          type: string
+          nullable: true
         description:
           type: string
         name:
@@ -2544,6 +2565,8 @@ components:
       type: object
       description: The updated resource
       properties:
+        audience_type:
+          type: string
         company_count:
           type: integer
         created_at:
@@ -2571,6 +2594,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - audience_type
         - company_count
         - features
       title: PlanDetailResponseData
@@ -2627,6 +2651,8 @@ components:
     PlanResponseData:
       type: object
       properties:
+        audience_type:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -2648,6 +2674,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - audience_type
       title: PlanResponseData
     PreviewObject:
       type: object
@@ -3189,6 +3216,8 @@ components:
     UpdatePlanRequestBody:
       type: object
       properties:
+        audience_type:
+          type: string
         description:
           type: string
           nullable: true
@@ -3206,6 +3235,7 @@ components:
             - other
       required:
         - name
+        - audience_type
       title: UpdatePlanRequestBody
     UpdateReqCommon:
       type: object
@@ -3305,6 +3335,14 @@ components:
           type: string
           nullable: true
       title: UpdateWebhookRequestBody
+    UpsertBillingProductRequestBody:
+      type: object
+      properties:
+        BillingProductID:
+          type: string
+      required:
+        - BillingProductID
+      title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
       type: object
       properties:
@@ -9677,6 +9715,53 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/{plan_id}/billing_products:
+    put:
+      operationId: upsertBillingProductPlan
+      summary: Upsert billing product plan
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingProductPlanResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingProductPlanParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingProductPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /plans/count:
