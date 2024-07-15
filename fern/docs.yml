@@ -1,0 +1,260 @@
+instances:
+  - url: https://schematic.docs.buildwithfern.com
+    custom-domain: https://docs.schematichq.com
+title: SchematicHQ
+tabs:
+  documentation:
+    display-name: Home
+    icon: "fa-regular fa-book"
+  api:
+    display-name: API Reference
+    icon: "fa-regular fa-file-contract"
+  blog: 
+    display-name: Blog
+    icon: "fa-regular fa-newspaper"
+    href: "https://schematichq.com/blog"
+navigation:
+  - tab: documentation
+    layout: 
+      - section: Get Started
+        skip-slug: true
+        contents: 
+          - page: What is Schematic? 
+            path: ./docs/pages/get_started/introduction.mdx
+          - page: How to use Schematic
+            path: ./docs/pages/get_started/howto.mdx
+          - page: Quickstart
+            path: ./docs/pages/get_started/quickstart.mdx
+          - page: Availability 
+            path: ./docs/pages/get_started/availability.mdx
+          - page: Observability & Support
+            path: ./docs/pages/get_started/observability.mdx
+          - page: Security
+            path: ./docs/pages/get_started/security.mdx
+      - section: Developer Resources
+        contents:
+          - page: Concepts
+            path: ./docs/pages/developer_resources/concepts.mdx
+          - page: Environments
+            path: ./docs/pages/developer_resources/environments.mdx
+          - page: Entity Relation Diagram
+            path: ./docs/pages/developer_resources/erd.mdx
+          - section: SDKs
+            contents: 
+              - page: Go
+                path: ./docs/pages/developer_resources/sdks/go.mdx
+                icon: "fa-brands fa-golang"
+              - page: Node.js
+                path: ./docs/pages/developer_resources/sdks/nodejs.mdx
+                icon: "fa-brands fa-node-js"
+              - page: Python
+                path: ./docs/pages/developer_resources/sdks/python.mdx
+                icon: "fa-brands fa-python"
+              - page: C# 
+                path: ./docs/pages/developer_resources/sdks/csharp.mdx
+              - page: Javascript (Client-side)
+                path: ./docs/pages/developer_resources/sdks/javascript.mdx
+                icon: "fa-brands fa-js"
+              - page: PHP
+                path: ./docs/pages/developer_resources/sdks/php.mdx
+                icon: "fa-brands fa-php"
+      - section: Integrations
+        contents: 
+          - page: Stripe Integration
+            path: ./docs/pages/integrations/stripe.mdx
+            icon: "fa-brands fa-stripe"
+          - page: Segment Integration
+            path: ./docs/pages/integrations/segment.mdx
+            icon: "fa-solid fa-circle-nodes"
+          - page: Salesforce Integration
+            path: ./docs/pages/integrations/salesforce.mdx
+            icon: "fa-brands fa-salesforce"
+          - page: Hubspot Integration
+            path: ./docs/pages/integrations/hubspot.mdx
+            icon: "fa-brands fa-hubspot"
+      - section: Playbooks
+        contents: 
+          - page: Creating a metered feature
+            slug: metering
+            path: ./docs/pages/playbooks/metering.mdx
+          - page: Rolling out beta functionality with Flags
+            slug: rollout
+            path: ./docs/pages/playbooks/rollout.mdx
+  - tab: api
+    layout:
+      - page: Resources
+        path: ./docs/pages/api_documentation/resources.mdx
+      - page: Authentication
+        path: ./docs/pages/api_documentation/authentication.mdx
+      - page: Pagination
+        path: ./docs/pages/api_documentation/pagination.mdx
+      - page: Rate limiting
+        path: ./docs/pages/api_documentation/rate_limiting.mdx
+      - api: API Reference
+        skip-slug: true
+        flattened: true
+        snippets: 
+          python: schematichq
+        layout: 
+          - section: API Keys
+            slug: accounts
+            contents: 
+              - GET /api-keys
+              - GET /api-keys/{api_key_id}
+              - POST /api-keys
+              - PUT /api-keys/{api_key_id}
+              - DELETE /api-keys/{api_key_id}
+          - section: Environments
+            slug: accounts
+            contents: 
+              - POST /environments
+              - PUT /environments/{environment_id}
+              - DELETE /environments/{environment_id}
+          - section: Plans
+            contents: 
+              - page: The Plan object
+                path: ./docs/pages/api_documentation/plan.mdx
+              - GET /plans
+              - GET /plans/{plan_id}
+              - POST /plans
+              - PUT /plans/{plan_id}
+              - DELETE /plans/{plan_id}
+              - PUT /plan-audiences/{plan_audience_id}
+              - DELETE /plan-audiences/{plan_audience_id}
+          - section: Companies
+            contents: 
+              - page: The Company object
+                path: ./docs/pages/api_documentation/company.mdx
+              - GET /companies
+              - POST /companies
+              - GET /companies/lookup
+              - DELETE /companies/{company_id}
+              - POST /companies/delete
+              - GET /company-memberships
+              - POST /company-memberships
+              - DELETE /company-memberships/{company_membership_id}
+              - GET /company-plans
+              - POST /company-traits
+          - section: Users
+            slug: companies
+            contents: 
+              - page: The User object
+                path: ./docs/pages/api_documentation/user.mdx
+              - GET /users
+              - GET /users/lookup
+              - POST /users
+              - DELETE /users/{user_id}
+              - POST /users/delete
+              - POST /user-traits
+          - section: Events
+            contents:
+              - page: The Event object
+                path: ./docs/pages/api_documentation/event.mdx
+              - GET /events
+              - POST /events
+              - POST /event-batch
+              - GET /events/{event_id}
+          - section: Features
+            contents:
+              - page: The Feature object
+                path: ./docs/pages/api_documentation/feature.mdx
+              - GET /features
+              - GET /features/{feature_id}
+              - POST /features
+              - PUT /features/{feature_id}
+              - DELETE /features/{feature_id}
+          - section: Flags
+            slug: features
+            contents: 
+              - page: The Flag object
+                path: ./docs/pages/api_documentation/flag.mdx
+              - GET /flags
+              - GET /flags/{flag_id}
+              - POST /flags
+              - PUT /flags/{flag_id}
+              - DELETE /flags/{flag_id}
+              - PUT /flags/{flag_id}/rules
+              - POST /flags/{key}/check
+              - POST /flags/check
+              - GET /flag-checks
+              - GET /flag-checks/{flag_check_id}
+              - GET /flag-checks/latest
+          - section: Entitlements
+            contents: 
+              - GET /company-overrides
+              - GET /company-overrides/{company_override_id}
+              - POST /company-overrides
+              - PUT /company-overrides/{company_override_id}
+              - DELETE /company-overrides/{company_override_id}
+              - GET /plan-entitlements
+              - GET /plan-entitlements/{plan_entitlement_id}
+              - POST /plan-entitlements
+              - PUT /plan-entitlements/{plan_entitlement_id}
+              - DELETE /plan-entitlements/{plan_entitlement_id}
+          - section: Feature Usage
+            slug: entitlements
+            contents:
+              - GET /feature-usage
+              - GET /usage-by-company
+          - accounts: 
+              hidden: true
+          - features: 
+              hidden: true
+          - billing: 
+              hidden: true
+          - companies: 
+              hidden: true
+          - entitlements: 
+              hidden: true
+          - events: 
+              hidden: true
+          - plans: 
+              hidden: true
+  - tab: blog
+
+navbar-links: 
+  - type: minimal
+    text: Support
+    url: "mailto:hi@schematichq.com"
+  - type: filled
+    text: Dashboard
+    url: "https://app.schematichq.com/"
+
+footer-links: 
+  github: "https://github.com/schematichq"
+  linkedin: "https://www.linkedin.com/company/96648350/"
+  website: "https://schematichq.com/"
+
+colors:
+  accentPrimary:
+    dark: "#db6769"
+    light: "#db6769"
+  background:
+    dark: "#000000"
+    light: "#FFFFFF"
+  card-background: 
+    dark: "#1A1A1A"
+
+typography:
+  bodyFont:
+    name: Public Sans Thin
+    path: ./docs/assets/Public-Sans-Thin.woff2
+  headingsFont:
+    name: Inter
+    path: ./docs/assets/Manrope-ExtraLight.woff2
+
+layout:
+  page-width: full
+  tabs-placement: header
+  searchbar-placement: header
+
+logo:
+  dark: ./docs/assets/logo-dark.svg
+  light: ./docs/assets/logo-light.svg
+  height: 30
+
+favicon: ./docs/assets/favicon.png
+
+js: 
+  - ./docs/assets/fullstory.js
+  - ./docs/assets/koala.js
