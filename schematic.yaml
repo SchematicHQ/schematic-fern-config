@@ -688,12 +688,6 @@ components:
         component:
           $ref: '#/components/schemas/ComponentResponseData'
         data:
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              - type: object
           type: object
       required:
         - data
@@ -2419,6 +2413,53 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    IssueTemporaryAccessTokenRequestBody:
+      type: object
+      properties:
+        lookup:
+          type: object
+        resource_type:
+          type: string
+      required:
+        - resource_type
+        - lookup
+      title: IssueTemporaryAccessTokenRequestBody
+    IssueTemporaryAccessTokenResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        api_key_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        expired_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        resource_type:
+          type: string
+        token:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - resource_type
+        - api_key_id
+        - expired_at
+        - created_at
+        - updated_at
+        - token
+      title: IssueTemporaryAccessTokenResponseData
     KeysRequestBody:
       type: object
       properties:
@@ -3037,6 +3078,38 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    TemporaryAccessTokenResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        api_key_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        expired_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        resource_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - resource_type
+        - api_key_id
+        - expired_at
+        - created_at
+        - updated_at
+      title: TemporaryAccessTokenResponseData
     UpdateApiKeyRequestBody:
       type: object
       properties:
@@ -9929,6 +10002,44 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /temporary-access-tokens:
+    post:
+      operationId: issueTemporaryAccessToken
+      summary: Issue temporary access token
+      tags:
+        - accesstokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueTemporaryAccessTokenRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/IssueTemporaryAccessTokenResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: IssueTemporaryAccessTokenParams
+                required:
+                  - data
+                  - params
+                title: IssueTemporaryAccessTokenResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /usage-by-company:
     get:
       operationId: getFeatureUsageByCompany
@@ -10907,6 +11018,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 tags:
+  - name: accesstokens
   - name: accounts
   - name: companies
   - name: events
