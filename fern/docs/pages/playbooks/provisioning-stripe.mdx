@@ -1,0 +1,36 @@
+---
+title: Automatically provision customers using Stripe
+---
+
+When you connect Stripe to Schematic, any subscription updates will be picked up by Schematic and applied to company profiles. This means that when a new customer signs up, they'll automatically get the right entitlements based on the plan they were sold. Moreover, if that ever changes, Schematic will listen to Stripe to keep access in sync.
+
+To get setup, follow the steps below.
+
+1. Set up the Stripe integration [here](https://docs.schematichq.com/integrations/stripe).
+2. Map Products from Stripe to Plans in Schematic using Plan Audiences.
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/rdpqfrbxi7"
+  title="Add flag"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+3. Add a new subscription to a customer in Stripe
+
+Once the subscription is applied, it will be synced to Schematic and appear under the company profile.
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/f6ktk9ufmp"
+  title="Add flag"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+Every subsequent change, will also be synced to Schematic so entitlements are updated accordingly. Furthermore, if the customer ever ends their subscription, Schematic will automatically remove all entitlements.
