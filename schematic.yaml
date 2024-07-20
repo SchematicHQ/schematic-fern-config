@@ -681,17 +681,17 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
-    ComponentHydrateView:
+    ComponentHydrateResponseData:
       type: object
       description: The returned resource
       properties:
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
         component:
           $ref: '#/components/schemas/ComponentResponseData'
-        data:
-          type: object
-      required:
-        - data
-      title: ComponentHydrateView
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+      title: ComponentHydrateResponseData
     ComponentResponseData:
       type: object
       properties:
@@ -717,8 +717,8 @@ components:
         - id
         - name
         - type
-        - ast
         - state
+        - ast
         - created_at
         - updated_at
       title: ComponentResponseData
@@ -2150,7 +2150,6 @@ components:
       title: FeatureResponseData
     FeatureUsageDetailResponseData:
       type: object
-      description: The returned resource
       properties:
         features:
           type: array
@@ -2417,6 +2416,8 @@ components:
       type: object
       properties:
         lookup:
+          additionalProperties:
+            type: string
           type: object
         resource_type:
           type: string
@@ -2428,8 +2429,6 @@ components:
       type: object
       description: The created resource
       properties:
-        account_id:
-          type: string
         api_key_id:
           type: string
         created_at:
@@ -2451,7 +2450,6 @@ components:
           format: date-time
       required:
         - id
-        - account_id
         - environment_id
         - resource_type
         - api_key_id
@@ -3081,8 +3079,6 @@ components:
     TemporaryAccessTokenResponseData:
       type: object
       properties:
-        account_id:
-          type: string
         api_key_id:
           type: string
         created_at:
@@ -3102,7 +3098,6 @@ components:
           format: date-time
       required:
         - id
-        - account_id
         - environment_id
         - resource_type
         - api_key_id
@@ -5972,7 +5967,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ComponentHydrateView'
+                    $ref: '#/components/schemas/ComponentHydrateResponseData'
                   params:
                     type: object
                     description: Input parameters
