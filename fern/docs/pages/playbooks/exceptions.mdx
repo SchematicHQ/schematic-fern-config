@@ -1,0 +1,52 @@
+---
+title: Handling customer exceptions and feature trials
+---
+
+## What are examples of customer exceptions?
+
+In many scenarios customers might need features that don't come standard in a pre-baked package. That's often handled through one off flags in application code, and eventually leads to a mess to maintain over time. Some examples when you might need to apply custom configuration for a specific customer:
+- A sales-led deal that doesn't fit perfectly into the good-better-best packages that are on your pricing page
+- Feature trials
+- Testing 
+
+In Schematic, we call these "Company Overrides", and they can be applied individually to any company, or programatically via our API. We'll cover both scenarios below.
+
+## Applying an override in the Schematic UI
+
+1. Navigate to a company profile.
+2. Click add override and choose a feature.
+
+<iframe
+  width="560"
+  height="400"
+  src="https://schematichq-1.wistia.com/embed/iframe/uaavkg9bwn"
+  title="Company Override"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+## Applying an override programatically
+
+In situations where you may allow the user to enable an individual feature themselves in your application (e.g. trying a specific within their account) or otherwise manage exceptions outside of Schematic (e.g. in Hubspot or your own admin layer), you can use our API to apply the override by using the `/company-overrides` endpoint.
+
+Here's an example:
+
+```python
+from schematic import Schematic
+
+# initialize the client
+client = Schematic(
+    api_key = "your-api-key"
+)
+
+# create company override in Schematic
+response = client.entitlements.create_company_override(
+    company_id= "comp_3bTKVfV6GD1",
+    feature_id= "feat_FbseajjPuA6",
+    value_type= "numeric",
+    value_numeric= 10
+)
+```
+
+Once the override is applied via the API, it will also appear in the UI and can be managed within Schematic like other overrides.
