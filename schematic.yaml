@@ -681,9 +681,19 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
+    ComponentHydrateResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+      title: ComponentHydrateResponseData
     ComponentResponseData:
       type: object
-      description: The updated resource
       properties:
         ast:
           type: array
@@ -696,6 +706,8 @@ components:
           type: string
         name:
           type: string
+        state:
+          type: string
         type:
           type: string
         updated_at:
@@ -705,6 +717,7 @@ components:
         - id
         - name
         - type
+        - state
         - ast
         - created_at
         - updated_at
@@ -2137,7 +2150,6 @@ components:
       title: FeatureResponseData
     FeatureUsageDetailResponseData:
       type: object
-      description: The returned resource
       properties:
         features:
           type: array
@@ -2400,6 +2412,52 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    IssueTemporaryAccessTokenRequestBody:
+      type: object
+      properties:
+        lookup:
+          additionalProperties:
+            type: string
+          type: object
+        resource_type:
+          type: string
+      required:
+        - resource_type
+        - lookup
+      title: IssueTemporaryAccessTokenRequestBody
+    IssueTemporaryAccessTokenResponseData:
+      type: object
+      description: The created resource
+      properties:
+        api_key_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        expired_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        resource_type:
+          type: string
+        token:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - environment_id
+        - resource_type
+        - api_key_id
+        - expired_at
+        - created_at
+        - updated_at
+        - token
+      title: IssueTemporaryAccessTokenResponseData
     KeysRequestBody:
       type: object
       properties:
@@ -3018,6 +3076,35 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    TemporaryAccessTokenResponseData:
+      type: object
+      properties:
+        api_key_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        expired_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        resource_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - environment_id
+        - resource_type
+        - api_key_id
+        - expired_at
+        - created_at
+        - updated_at
+      title: TemporaryAccessTokenResponseData
     UpdateApiKeyRequestBody:
       type: object
       properties:
@@ -3089,6 +3176,12 @@ components:
         name:
           type: string
           nullable: true
+        state:
+          type: string
+          nullable: true
+          enum:
+            - draft
+            - live
       title: UpdateComponentRequestBody
     UpdateEntityTraitDefinitionRequestBody:
       type: object
@@ -5850,6 +5943,45 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/{component_id}/hydrate:
+    get:
+      operationId: hydrateComponent
+      summary: Hydrate component
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentHydrateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: HydrateComponentParams
+                required:
+                  - data
+                  - params
+                title: HydrateComponentResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /components/count:
@@ -9865,6 +9997,44 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /temporary-access-tokens:
+    post:
+      operationId: issueTemporaryAccessToken
+      summary: Issue temporary access token
+      tags:
+        - accesstokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueTemporaryAccessTokenRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/IssueTemporaryAccessTokenResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: IssueTemporaryAccessTokenParams
+                required:
+                  - data
+                  - params
+                title: IssueTemporaryAccessTokenResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /usage-by-company:
     get:
       operationId: getFeatureUsageByCompany
@@ -10843,6 +11013,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 tags:
+  - name: accesstokens
   - name: accounts
   - name: companies
   - name: events
