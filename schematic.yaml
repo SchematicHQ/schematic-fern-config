@@ -2601,6 +2601,10 @@ components:
       properties:
         audience_type:
           type: string
+        billing_products:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingProductResponseData'
         company_count:
           type: integer
         created_at:
@@ -2631,6 +2635,7 @@ components:
         - audience_type
         - company_count
         - features
+        - billing_products
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
