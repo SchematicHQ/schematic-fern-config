@@ -286,6 +286,86 @@ components:
         - conditions
         - condition_groups
       title: AudienceRequestBody
+    BillingCustomerResponseData:
+      type: object
+      description: The created resource
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        email:
+          type: string
+        external_id:
+          type: string
+        failed_to_import:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - external_id
+        - name
+        - failed_to_import
+        - email
+        - updated_at
+      title: BillingCustomerResponseData
+    BillingCustomerSubscription:
+      type: object
+      properties:
+        expired_at:
+          type: string
+          format: date-time
+          nullable: true
+        total_price:
+          type: number
+      required:
+        - total_price
+      title: BillingCustomerSubscription
+    BillingCustomerWithSubscriptionsResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        email:
+          type: string
+        external_id:
+          type: string
+        failed_to_import:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingCustomerSubscription'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - external_id
+        - name
+        - failed_to_import
+        - email
+        - subscriptions
+        - updated_at
+      title: BillingCustomerWithSubscriptionsResponseData
     BillingProductPlanResponseData:
       type: object
       description: The updated resource
@@ -304,6 +384,17 @@ components:
         - plan_id
         - billing_product_id
       title: BillingProductPlanResponseData
+    BillingProductPricing:
+      type: object
+      properties:
+        price:
+          type: integer
+        product_external_id:
+          type: string
+      required:
+        - product_external_id
+        - price
+      title: BillingProductPricing
     BillingProductResponseData:
       type: object
       properties:
@@ -745,6 +836,31 @@ components:
       required:
         - name
       title: CreateApiKeyRequestBody
+    CreateBillingCustomerRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        email:
+          type: string
+        external_id:
+          type: string
+        failed_to_import:
+          type: boolean
+        meta:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+      required:
+        - external_id
+        - name
+        - email
+        - failed_to_import
+        - meta
+      title: CreateBillingCustomerRequestBody
     CreateBillingProductRequestBody:
       type: object
       properties:
@@ -779,12 +895,15 @@ components:
         product_external_ids:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/BillingProductPricing'
         subscription_external_id:
           type: string
+        total_price:
+          type: integer
       required:
         - customer_external_id
         - subscription_external_id
+        - total_price
         - expired_at
         - product_external_ids
       title: CreateBillingSubscriptionsRequestBody
@@ -1028,6 +1147,66 @@ components:
               title: EventBodyTrack
             - type: object
               properties:
+                company_id:
+                  type: string
+                  description: >-
+                    Schematic company ID (starting with 'comp_') of the company
+                    evaluated, if any
+                  nullable: true
+                error:
+                  type: string
+                  description: Report an error that occurred during the flag check
+                  nullable: true
+                flag_id:
+                  type: string
+                  description: >-
+                    Schematic flag ID (starting with 'flag_') for the flag
+                    matching the key, if any
+                  nullable: true
+                flag_key:
+                  type: string
+                  description: The key of the flag being checked
+                reason:
+                  type: string
+                  description: The reason why the value was returned
+                req_company:
+                  additionalProperties:
+                    type: string
+                  type: object
+                  description: >-
+                    Key-value pairs used to to identify company for which the
+                    flag was checked
+                  nullable: true
+                req_user:
+                  additionalProperties:
+                    type: string
+                  type: object
+                  description: >-
+                    Key-value pairs used to to identify user for which the flag
+                    was checked
+                  nullable: true
+                rule_id:
+                  type: string
+                  description: >-
+                    Schematic rule ID (starting with 'rule_') of the rule that
+                    matched for the flag, if any
+                  nullable: true
+                user_id:
+                  type: string
+                  description: >-
+                    Schematic user ID (starting with 'user_') of the user
+                    evaluated, if any
+                  nullable: true
+                value:
+                  type: boolean
+                  description: The value of the flag for the given company and/or user
+              required:
+                - flag_key
+                - reason
+                - value
+              title: EventBodyFlagCheck
+            - type: object
+              properties:
                 company:
                   type: object
                   description: >-
@@ -1073,6 +1252,7 @@ components:
           enum:
             - identify
             - track
+            - flag_check
         sent_at:
           type: string
           description: >-
@@ -2345,6 +2525,10 @@ components:
           type: string
         key:
           type: string
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
         latest_check:
           $ref: '#/components/schemas/FlagCheckLogResponseData'
         name:
@@ -4359,6 +4543,197 @@ paths:
                   - data
                   - params
                 title: ListAudienceUsersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/customer/upsert:
+    post:
+      operationId: upsertBillingCustomer
+      summary: Upsert billing customer
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingCustomerRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingCustomerResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingCustomerParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingCustomerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/customers:
+    get:
+      operationId: listCustomers
+      summary: List customers
+      tags:
+        - billing
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: failed_to_import
+          in: query
+          schema:
+            type: boolean
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: >-
+                        #/components/schemas/BillingCustomerWithSubscriptionsResponseData
+                    title: ListCustomersResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      failed_to_import:
+                        type: boolean
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      name:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListCustomersParams
+                required:
+                  - data
+                  - params
+                title: ListCustomersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/customers/count:
+    get:
+      operationId: countCustomers
+      summary: Count customers
+      tags:
+        - billing
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: failed_to_import
+          in: query
+          schema:
+            type: boolean
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      failed_to_import:
+                        type: boolean
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      name:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: CountCustomersParams
+                required:
+                  - data
+                  - params
+                title: CountCustomersResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -7252,11 +7627,21 @@ paths:
           in: query
           schema:
             type: string
-        - name: user_id
+        - name: event_subtype
           in: query
           schema:
             type: string
-        - name: event_subtype
+        - name: event_types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: flag_id
+          in: query
+          schema:
+            type: string
+        - name: user_id
           in: query
           schema:
             type: string
@@ -7295,6 +7680,12 @@ paths:
                       company_id:
                         type: string
                       event_subtype:
+                        type: string
+                      event_types:
+                        type: array
+                        items:
+                          type: string
+                      flag_id:
                         type: string
                       limit:
                         type: integer
