@@ -366,6 +366,23 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingPriceResponseData:
+      type: object
+      properties:
+        external_price_id:
+          type: string
+        id:
+          type: string
+        interval:
+          type: string
+        price:
+          type: integer
+      required:
+        - id
+        - external_price_id
+        - price
+        - interval
+      title: BillingPriceResponseData
     BillingProductPlanResponseData:
       type: object
       description: The updated resource
@@ -861,6 +878,23 @@ components:
         - failed_to_import
         - meta
       title: CreateBillingCustomerRequestBody
+    CreateBillingPriceRequestBody:
+      type: object
+      properties:
+        interval:
+          type: string
+        price:
+          type: integer
+        price_external_id:
+          type: string
+        product_external_id:
+          type: string
+      required:
+        - product_external_id
+        - price_external_id
+        - interval
+        - price
+      title: CreateBillingPriceRequestBody
     CreateBillingProductRequestBody:
       type: object
       properties:
@@ -1279,7 +1313,13 @@ components:
             - trait
         flag:
           $ref: '#/components/schemas/CreateOrUpdateFlagRequestBody'
+        icon:
+          type: string
+          nullable: true
         lifecycle_phase:
+          type: string
+          nullable: true
+        maintainer_id:
           type: string
           nullable: true
         name:
@@ -1306,6 +1346,9 @@ components:
           type: string
         key:
           type: string
+        maintainer_id:
+          type: string
+          nullable: true
         name:
           type: string
       required:
@@ -1418,6 +1461,9 @@ components:
           nullable: true
         key:
           type: string
+        maintainer_id:
+          type: string
+          nullable: true
         name:
           type: string
       required:
@@ -1507,6 +1553,9 @@ components:
           nullable: true
         description:
           type: string
+        icon:
+          type: string
+          nullable: true
         name:
           type: string
         plan_type:
@@ -2265,9 +2314,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FlagDetailResponseData'
+        icon:
+          type: string
         id:
           type: string
         lifecycle_phase:
+          type: string
+          nullable: true
+        maintainer_id:
           type: string
           nullable: true
         name:
@@ -2289,6 +2343,7 @@ components:
         - name
         - description
         - feature_type
+        - icon
         - created_at
         - updated_at
         - flags
@@ -2307,9 +2362,14 @@ components:
           nullable: true
         feature_type:
           type: string
+        icon:
+          type: string
         id:
           type: string
         lifecycle_phase:
+          type: string
+          nullable: true
+        maintainer_id:
           type: string
           nullable: true
         name:
@@ -2325,6 +2385,7 @@ components:
         - name
         - description
         - feature_type
+        - icon
         - created_at
         - updated_at
       title: FeatureResponseData
@@ -2531,6 +2592,9 @@ components:
           nullable: true
         latest_check:
           $ref: '#/components/schemas/FlagCheckLogResponseData'
+        maintainer_id:
+          type: string
+          nullable: true
         name:
           type: string
         rules:
@@ -2570,6 +2634,9 @@ components:
           type: string
         key:
           type: string
+        maintainer_id:
+          type: string
+          nullable: true
         name:
           type: string
         updated_at:
@@ -2800,6 +2867,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
         id:
           type: string
         name:
@@ -2810,13 +2879,14 @@ components:
           type: string
           format: date-time
       required:
+        - audience_type
         - created_at
         - description
         - id
+        - icon
         - name
         - plan_type
         - updated_at
-        - audience_type
         - company_count
         - features
         - billing_products
@@ -2881,6 +2951,8 @@ components:
           format: date-time
         description:
           type: string
+        icon:
+          type: string
         id:
           type: string
         name:
@@ -2891,17 +2963,21 @@ components:
           type: string
           format: date-time
       required:
+        - audience_type
         - created_at
         - description
         - id
+        - icon
         - name
         - plan_type
         - updated_at
-        - audience_type
       title: PlanResponseData
     PreviewObject:
       type: object
       properties:
+        description:
+          type: string
+          nullable: true
         id:
           type: string
         image_url:
@@ -3422,7 +3498,13 @@ components:
             - trait
         flag:
           $ref: '#/components/schemas/CreateOrUpdateFlagRequestBody'
+        icon:
+          type: string
+          nullable: true
         lifecycle_phase:
+          type: string
+          nullable: true
+        maintainer_id:
           type: string
           nullable: true
         name:
@@ -3479,6 +3561,9 @@ components:
         description:
           type: string
           nullable: true
+        icon:
+          type: string
+          nullable: true
         name:
           type: string
         plan_type:
@@ -3492,8 +3577,8 @@ components:
             - billable_metric
             - other
       required:
-        - name
         - audience_type
+        - name
       title: UpdatePlanRequestBody
     UpdateReqCommon:
       type: object
@@ -4734,6 +4819,126 @@ paths:
                   - data
                   - params
                 title: CountCustomersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/price/upsert:
+    post:
+      operationId: upsertBillingPrice
+      summary: Upsert billing price
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingPriceRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPriceResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingPriceParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingPriceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/product/prices:
+    get:
+      operationId: listProductPrices
+      summary: List product prices
+      tags:
+        - billing
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingPriceResponseData'
+                    title: ListProductPricesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      name:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListProductPricesParams
+                required:
+                  - data
+                  - params
+                title: ListProductPricesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
