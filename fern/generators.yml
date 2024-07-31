@@ -46,3 +46,21 @@ groups:
           extra-dependencies:
             moq: "4.20.70"
             "Moq.Contrib.HttpClient": "1.4.0"
+
+ts-sdk:
+    generators:
+      - name: fernapi/fern-typescript-node-sdk
+        version: 0.36.6
+        output:
+          location: npm
+          package-name: "@schematichq/schematic-typescript-node"
+          token: ${NPM_API_TOKEN}
+        github:
+          repository: schematichq/schematic-node
+          mode: pull-request
+        smart-casing: true
+        config:
+          allowCustomFetcher: true
+          includeApiReference: true
+          namespaceExport: Schematic
+          skipResponseValidation: true
