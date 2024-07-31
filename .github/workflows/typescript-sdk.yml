@@ -24,6 +24,6 @@ jobs:
       - name: Release SDKs
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_API_TOKEN }}
+          NPM_API_TOKEN: ${{ secrets.NPM_API_TOKEN }}
         run: |
           fern generate --group ts-sdk --version ${{ inputs.version }} --log-level debug
