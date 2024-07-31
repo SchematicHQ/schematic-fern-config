@@ -611,6 +611,10 @@ components:
     CompanyDetailResponseData:
       type: object
       properties:
+        add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewObject'
         created_at:
           type: string
           format: date-time
@@ -635,6 +639,8 @@ components:
           nullable: true
         name:
           type: string
+        plan:
+          $ref: '#/components/schemas/PreviewObject'
         plans:
           type: array
           items:
@@ -653,8 +659,9 @@ components:
         - id
         - name
         - updated_at
-        - keys
+        - add_ons
         - entity_traits
+        - keys
         - plans
         - user_count
       title: CompanyDetailResponseData
@@ -1603,12 +1610,8 @@ components:
         plan_type:
           type: string
           enum:
-            - product
-            - pricing_plan
+            - plan
             - add_on
-            - overage
-            - billable_metric
-            - other
       required:
         - description
         - name
@@ -3482,16 +3485,6 @@ components:
           nullable: true
         name:
           type: string
-        plan_type:
-          type: string
-          nullable: true
-          enum:
-            - product
-            - pricing_plan
-            - add_on
-            - overage
-            - billable_metric
-            - other
       required:
         - audience_type
         - name
