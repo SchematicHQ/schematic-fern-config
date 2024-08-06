@@ -1040,9 +1040,9 @@ components:
       type: object
       properties:
         ast:
-          type: array
-          items:
-            type: integer
+          additionalProperties:
+            type: number
+          type: object
         entity_type:
           type: string
           enum:
@@ -1053,7 +1053,6 @@ components:
       required:
         - name
         - entity_type
-        - ast
       title: CreateComponentRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
       type: object
@@ -3358,10 +3357,9 @@ components:
       type: object
       properties:
         ast:
-          type: array
-          items:
-            type: integer
-          nullable: true
+          additionalProperties:
+            type: number
+          type: object
         entity_type:
           type: string
           nullable: true
