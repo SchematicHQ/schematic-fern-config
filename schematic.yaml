@@ -859,9 +859,9 @@ components:
       type: object
       properties:
         ast:
-          type: array
-          items:
-            type: integer
+          additionalProperties:
+            type: number
+          type: object
         created_at:
           type: string
           format: date-time
@@ -881,7 +881,6 @@ components:
         - name
         - type
         - state
-        - ast
         - created_at
         - updated_at
       title: ComponentResponseData
@@ -9836,6 +9835,15 @@ paths:
           in: query
           schema:
             type: string
+        - name: plan_type
+          in: query
+          description: Filter by plan type
+          schema:
+            type: string
+            description: Filter by plan type
+            enum:
+              - plan
+              - add_on
         - name: without_entitlement_for
           in: query
           description: >-
@@ -9892,6 +9900,12 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      plan_type:
+                        type: string
+                        description: Filter by plan type
+                        enum:
+                          - plan
+                          - add_on
                       q:
                         type: string
                       without_entitlement_for:
@@ -10140,6 +10154,15 @@ paths:
           in: query
           schema:
             type: string
+        - name: plan_type
+          in: query
+          description: Filter by plan type
+          schema:
+            type: string
+            description: Filter by plan type
+            enum:
+              - plan
+              - add_on
         - name: without_entitlement_for
           in: query
           description: >-
@@ -10192,6 +10215,12 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      plan_type:
+                        type: string
+                        description: Filter by plan type
+                        enum:
+                          - plan
+                          - add_on
                       q:
                         type: string
                       without_entitlement_for:
