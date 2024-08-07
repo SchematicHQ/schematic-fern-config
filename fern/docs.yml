@@ -9,23 +9,23 @@ tabs:
   api:
     display-name: API Reference
     icon: "fa-regular fa-file-contract"
-  blog: 
+  blog:
     display-name: Blog
     icon: "fa-regular fa-newspaper"
     href: "https://schematichq.com/blog"
 navigation:
   - tab: documentation
-    layout: 
+    layout:
       - section: Get Started
         skip-slug: true
-        contents: 
-          - page: What is Schematic? 
+        contents:
+          - page: What is Schematic?
             path: ./docs/pages/get_started/introduction.mdx
           - page: How to use Schematic
             path: ./docs/pages/get_started/howto.mdx
           - page: Quickstart
             path: ./docs/pages/get_started/quickstart.mdx
-          - page: Availability 
+          - page: Availability
             path: ./docs/pages/get_started/availability.mdx
           - page: Observability & Support
             path: ./docs/pages/get_started/observability.mdx
@@ -44,7 +44,7 @@ navigation:
               - page: Python - Image Search App
                 path: ./docs/pages/developer_resources/sample_apps/sample_python.mdx
           - section: SDKs
-            contents: 
+            contents:
               - page: Go
                 path: ./docs/pages/developer_resources/sdks/go.mdx
                 icon: "fa-brands fa-golang"
@@ -54,7 +54,7 @@ navigation:
               - page: Python
                 path: ./docs/pages/developer_resources/sdks/python.mdx
                 icon: "fa-brands fa-python"
-              - page: C# 
+              - page: C#
                 path: ./docs/pages/developer_resources/sdks/csharp.mdx
               - page: Javascript (Client-side)
                 path: ./docs/pages/developer_resources/sdks/javascript.mdx
@@ -63,7 +63,7 @@ navigation:
                 path: ./docs/pages/developer_resources/sdks/php.mdx
                 icon: "fa-brands fa-php"
       - section: Integrations
-        contents: 
+        contents:
           - page: Stripe Integration
             path: ./docs/pages/integrations/stripe.mdx
             icon: "fa-brands fa-stripe"
@@ -77,7 +77,7 @@ navigation:
             path: ./docs/pages/integrations/hubspot.mdx
             icon: "fa-brands fa-hubspot"
       - section: Playbooks
-        contents: 
+        contents:
           - page: Creating a metered feature
             slug: metering
             path: ./docs/pages/playbooks/metering.mdx
@@ -101,16 +101,17 @@ navigation:
       - page: Rate limiting
         path: ./docs/pages/api_documentation/rate_limiting.mdx
       - api: API Reference
-        audiences: 
+        audiences:
           - public
         skip-slug: true
         flattened: true
-        snippets: 
+        snippets:
           python: schematichq
-        layout: 
+          typescript: "@schematichq/schematic-typescript-node"
+        layout:
           - section: API Keys
             slug: accounts
-            contents: 
+            contents:
               - GET /api-keys
               - GET /api-keys/{api_key_id}
               - POST /api-keys
@@ -118,12 +119,12 @@ navigation:
               - DELETE /api-keys/{api_key_id}
           - section: Environments
             slug: accounts
-            contents: 
+            contents:
               - POST /environments
               - PUT /environments/{environment_id}
               - DELETE /environments/{environment_id}
           - section: Plans
-            contents: 
+            contents:
               - page: The Plan object
                 path: ./docs/pages/api_documentation/plan.mdx
               - GET /plans
@@ -134,7 +135,7 @@ navigation:
               - PUT /plan-audiences/{plan_audience_id}
               - DELETE /plan-audiences/{plan_audience_id}
           - section: Companies
-            contents: 
+            contents:
               - page: The Company object
                 path: ./docs/pages/api_documentation/company.mdx
               - GET /companies
@@ -149,7 +150,7 @@ navigation:
               - POST /company-traits
           - section: Users
             slug: companies
-            contents: 
+            contents:
               - page: The User object
                 path: ./docs/pages/api_documentation/user.mdx
               - GET /users
@@ -177,7 +178,7 @@ navigation:
               - DELETE /features/{feature_id}
           - section: Flags
             slug: features
-            contents: 
+            contents:
               - page: The Flag object
                 path: ./docs/pages/api_documentation/flag.mdx
               - GET /flags
@@ -189,7 +190,7 @@ navigation:
               - POST /flags/{key}/check
               - POST /flags/check
           - section: Entitlements
-            contents: 
+            contents:
               - GET /company-overrides
               - GET /company-overrides/{company_override_id}
               - POST /company-overrides
@@ -205,21 +206,21 @@ navigation:
             contents:
               - GET /feature-usage
               - GET /usage-by-company
-          - accounts: 
+          - accounts:
               hidden: true
-          - features: 
+          - features:
               hidden: true
-          - billing: 
+          - billing:
               hidden: true
-          - entitlements: 
+          - entitlements:
               hidden: true
-          - events: 
+          - events:
               hidden: true
-          - plans: 
+          - plans:
               hidden: true
   - tab: blog
 
-navbar-links: 
+navbar-links:
   - type: minimal
     text: Support
     url: "mailto:hi@schematichq.com"
@@ -227,7 +228,7 @@ navbar-links:
     text: Dashboard
     url: "https://app.schematichq.com/"
 
-footer-links: 
+footer-links:
   github: "https://github.com/schematichq"
   linkedin: "https://www.linkedin.com/company/96648350/"
   website: "https://schematichq.com/"
@@ -239,7 +240,7 @@ colors:
   background:
     dark: "#000000"
     light: "#FFFFFF"
-  card-background: 
+  card-background:
     dark: "#1A1A1A"
 
 typography:
@@ -262,7 +263,7 @@ logo:
 
 favicon: ./docs/assets/favicon.png
 
-js: 
+js:
   - ./docs/assets/fullstory.js
   - ./docs/assets/koala.js
   - ./docs/assets/segment.js
