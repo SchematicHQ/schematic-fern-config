@@ -1,0 +1,882 @@
+paths:
+  /api-keys:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: listApiKeys
+    post:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: createApiKey
+  /api-keys/{api_key_id}:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: getApiKey
+    put:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: updateApiKey
+    delete:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: deleteApiKey
+  /api-keys/count:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: countApiKeys
+  /api-requests:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: listApiRequests
+  /api-requests/{api_request_id}:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: getApiRequest
+  /api-requests/count:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: countApiRequests
+  /audience/count-companies:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: countAudienceCompanies
+  /audience/count-users:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: countAudienceUsers
+  /audience/get-companies:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: listAudienceCompanies
+  /audience/get-users:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: listAudienceUsers
+  /billing/customer/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: upsertBillingCustomer
+  /billing/customers:
+    get:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: listCustomers
+  /billing/customers/count:
+    get:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: countCustomers
+  /billing/price/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: upsertBillingPrice
+  /billing/product/prices:
+    get:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: listProductPrices
+  /billing/product/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: upsertBillingProduct
+  /billing/products:
+    get:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: listBillingProducts
+  /billing/subscription/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - billing
+      x-fern-sdk-method-name: upsertBillingSubscription
+  /companies:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listCompanies
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: upsertCompany
+  /companies/{company_id}:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getCompany
+    delete:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: deleteCompany
+  /companies/count:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: countCompanies
+  /companies/create:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: createCompany
+  /companies/delete:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: deleteCompanyByKeys
+  /companies/lookup:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: lookupCompany
+  /company-crm-deals:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getActiveDeals
+  /company-memberships:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listCompanyMemberships
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getOrCreateCompanyMembership
+  /company-memberships/{company_membership_id}:
+    delete:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: deleteCompanyMembership
+  /company-overrides:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: listCompanyOverrides
+    post:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: createCompanyOverride
+  /company-overrides/{company_override_id}:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: getCompanyOverride
+    put:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: updateCompanyOverride
+    delete:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: deleteCompanyOverride
+  /company-overrides/count:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: countCompanyOverrides
+  /company-plans:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listCompanyPlans
+  /company-subscriptions:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getActiveCompanySubscription
+  /company-traits:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: upsertCompanyTrait
+  /components:
+    get:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: listComponents
+    post:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: createComponent
+  /components/{component_id}:
+    get:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: getComponent
+    put:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: updateComponent
+    delete:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: deleteComponent
+  /components/{component_id}/hydrate:
+    get:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: hydrateComponent
+  /components/count:
+    get:
+      x-fern-sdk-group-name:
+        - components
+      x-fern-sdk-method-name: countComponents
+  /crm/associations/deal-line-item:
+    post:
+      x-fern-sdk-group-name:
+        - crm
+      x-fern-sdk-method-name: upsertDealLineItemAssociation
+  /crm/deal-line-item/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - crm
+      x-fern-sdk-method-name: upsertLineItem
+  /crm/deals/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - crm
+      x-fern-sdk-method-name: upsertCrmDeal
+  /crm/products:
+    get:
+      x-fern-sdk-group-name:
+        - crm
+      x-fern-sdk-method-name: listCrmProducts
+  /crm/products/upsert:
+    post:
+      x-fern-sdk-group-name:
+        - crm
+      x-fern-sdk-method-name: upsertCrmProduct
+  /entity-key-definitions:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listEntityKeyDefinitions
+  /entity-key-definitions/count:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: countEntityKeyDefinitions
+  /entity-trait-definitions:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listEntityTraitDefinitions
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getOrCreateEntityTraitDefinition
+  /entity-trait-definitions/{entity_trait_definition_id}:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getEntityTraitDefinition
+    put:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: updateEntityTraitDefinition
+  /entity-trait-definitions/count:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: countEntityTraitDefinitions
+  /entity-trait-values:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getEntityTraitValues
+  /environments:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: listEnvironments
+    post:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: createEnvironment
+  /environments/{environment_id}:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: getEnvironment
+    put:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: updateEnvironment
+    delete:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: deleteEnvironment
+  /event-batch:
+    post:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: createEventBatch
+  /event-types:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: getEventSummaries
+  /event-types/{key}:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: getEventSummaryBySubtype
+  /events:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: listEvents
+    post:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: createEvent
+  /events/{event_id}:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: getEvent
+  /feature-companies:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: listFeatureCompanies
+  /feature-companies/count:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: countFeatureCompanies
+  /feature-usage:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: listFeatureUsage
+  /feature-usage/count:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: countFeatureUsage
+  /feature-users:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: listFeatureUsers
+  /feature-users/count:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: countFeatureUsers
+  /features:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: listFeatures
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: createFeature
+  /features/{feature_id}:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: getFeature
+    put:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: updateFeature
+    delete:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: deleteFeature
+  /features/count:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: countFeatures
+  /flags:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: listFlags
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: createFlag
+  /flags/{flag_id}:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: getFlag
+    put:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: updateFlag
+    delete:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: deleteFlag
+  /flags/{flag_id}/rules:
+    put:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: updateFlagRules
+  /flags/{key}/check:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: checkFlag
+  /flags/check:
+    post:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: checkFlags
+  /flags/count:
+    get:
+      x-fern-sdk-group-name:
+        - features
+      x-fern-sdk-method-name: countFlags
+  /metric-counts:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: listMetricCounts
+  /plan-audiences/{plan_audience_id}:
+    get:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: getAudience
+    put:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: updateAudience
+    delete:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: deleteAudience
+  /plan-entitlements:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: listPlanEntitlements
+    post:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: createPlanEntitlement
+  /plan-entitlements/{plan_entitlement_id}:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: getPlanEntitlement
+    put:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: updatePlanEntitlement
+    delete:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: deletePlanEntitlement
+  /plan-entitlements/count:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: countPlanEntitlements
+  /plans:
+    get:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: listPlans
+    post:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: createPlan
+  /plans/{plan_id}:
+    get:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: getPlan
+    put:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: updatePlan
+    delete:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: deletePlan
+  /plans/{plan_id}/billing_products:
+    put:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: upsertBillingProductPlan
+  /plans/count:
+    get:
+      x-fern-sdk-group-name:
+        - plans
+      x-fern-sdk-method-name: countPlans
+  /segment-integration:
+    get:
+      x-fern-sdk-group-name:
+        - events
+      x-fern-sdk-method-name: getSegmentIntegrationStatus
+  /temporary-access-tokens:
+    post:
+      x-fern-sdk-group-name:
+        - accesstokens
+      x-fern-sdk-method-name: issueTemporaryAccessToken
+  /usage-by-company:
+    get:
+      x-fern-sdk-group-name:
+        - entitlements
+      x-fern-sdk-method-name: getFeatureUsageByCompany
+  /user-traits:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: upsertUserTrait
+  /users:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: listUsers
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: upsertUser
+  /users/{user_id}:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: getUser
+    delete:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: deleteUser
+  /users/count:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: countUsers
+  /users/create:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: createUser
+  /users/delete:
+    post:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: deleteUserByKeys
+  /users/lookup:
+    get:
+      x-fern-sdk-group-name:
+        - companies
+      x-fern-sdk-method-name: lookupUser
+  /webhook-events:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: listWebhookEvents
+  /webhook-events/{webhook_event_id}:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: getWebhookEvent
+  /webhook-events/count:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: countWebhookEvents
+  /webhooks:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: listWebhooks
+    post:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: createWebhook
+  /webhooks/{webhook_id}:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: getWebhook
+    put:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: updateWebhook
+    delete:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: deleteWebhook
+  /webhooks/count:
+    get:
+      x-fern-sdk-group-name:
+        - webhooks
+      x-fern-sdk-method-name: countWebhooks
+components:
+  schemas:
+    ApiError:
+      x-fern-type-name: ApiError
+    ApiKeyCreateResponseData:
+      x-fern-type-name: ApiKeyCreateResponseData
+    ApiKeyRequestListResponseData:
+      x-fern-type-name: ApiKeyRequestListResponseData
+    ApiKeyRequestResponseData:
+      x-fern-type-name: ApiKeyRequestResponseData
+    ApiKeyResponseData:
+      x-fern-type-name: ApiKeyResponseData
+    AudienceRequestBody:
+      x-fern-type-name: AudienceRequestBody
+    BillingCustomerResponseData:
+      x-fern-type-name: BillingCustomerResponseData
+    BillingCustomerSubscription:
+      x-fern-type-name: BillingCustomerSubscription
+    BillingCustomerWithSubscriptionsResponseData:
+      x-fern-type-name: BillingCustomerWithSubscriptionsResponseData
+    BillingPriceResponseData:
+      x-fern-type-name: BillingPriceResponseData
+    BillingProductDetailResponseData:
+      x-fern-type-name: BillingProductDetailResponseData
+    BillingProductPlanResponseData:
+      x-fern-type-name: BillingProductPlanResponseData
+    BillingProductPricing:
+      x-fern-type-name: BillingProductPricing
+    BillingProductResponseData:
+      x-fern-type-name: BillingProductResponseData
+    BillingSubscriptionResponseData:
+      x-fern-type-name: BillingSubscriptionResponseData
+    CheckFlagOutputWithFlagKey:
+      x-fern-type-name: CheckFlagOutputWithFlagKey
+    CheckFlagRequestBody:
+      x-fern-type-name: CheckFlagRequestBody
+    CheckFlagResponseData:
+      x-fern-type-name: CheckFlagResponseData
+    CheckFlagsResponseData:
+      x-fern-type-name: CheckFlagsResponseData
+    CompanyCrmDealsResponseData:
+      x-fern-type-name: CompanyCrmDealsResponseData
+    CompanyDetailResponseData:
+      x-fern-type-name: CompanyDetailResponseData
+    CompanyMembershipDetailResponseData:
+      x-fern-type-name: CompanyMembershipDetailResponseData
+    CompanyMembershipResponseData:
+      x-fern-type-name: CompanyMembershipResponseData
+    CompanyOverrideResponseData:
+      x-fern-type-name: CompanyOverrideResponseData
+    CompanyPlanResponseData:
+      x-fern-type-name: CompanyPlanResponseData
+    CompanyResponseData:
+      x-fern-type-name: CompanyResponseData
+    CompanySubscriptionResponseData:
+      x-fern-type-name: CompanySubscriptionResponseData
+    ComponentHydrateResponseData:
+      x-fern-type-name: ComponentHydrateResponseData
+    ComponentResponseData:
+      x-fern-type-name: ComponentResponseData
+    CountResponse:
+      x-fern-type-name: CountResponse
+    CreateApiKeyRequestBody:
+      x-fern-type-name: CreateApiKeyRequestBody
+    CreateBillingCustomerRequestBody:
+      x-fern-type-name: CreateBillingCustomerRequestBody
+    CreateBillingPriceRequestBody:
+      x-fern-type-name: CreateBillingPriceRequestBody
+    CreateBillingProductRequestBody:
+      x-fern-type-name: CreateBillingProductRequestBody
+    CreateBillingSubscriptionsRequestBody:
+      x-fern-type-name: CreateBillingSubscriptionsRequestBody
+    CreateCompanyOverrideRequestBody:
+      x-fern-type-name: CreateCompanyOverrideRequestBody
+    CreateComponentRequestBody:
+      x-fern-type-name: CreateComponentRequestBody
+    CreateCrmDealLineItemAssociationRequestBody:
+      x-fern-type-name: CreateCrmDealLineItemAssociationRequestBody
+    CreateCrmDealRequestBody:
+      x-fern-type-name: CreateCrmDealRequestBody
+    CreateCrmLineItemRequestBody:
+      x-fern-type-name: CreateCrmLineItemRequestBody
+    CreateCrmProductRequestBody:
+      x-fern-type-name: CreateCrmProductRequestBody
+    CreateEntityTraitDefinitionRequestBody:
+      x-fern-type-name: CreateEntityTraitDefinitionRequestBody
+    CreateEnvironmentRequestBody:
+      x-fern-type-name: CreateEnvironmentRequestBody
+    CreateEventBatchRequestBody:
+      x-fern-type-name: CreateEventBatchRequestBody
+    CreateEventRequestBody:
+      x-fern-type-name: CreateEventRequestBody
+    CreateFeatureRequestBody:
+      x-fern-type-name: CreateFeatureRequestBody
+    CreateFlagRequestBody:
+      x-fern-type-name: CreateFlagRequestBody
+    CreateOrUpdateConditionGroupRequestBody:
+      x-fern-type-name: CreateOrUpdateConditionGroupRequestBody
+    CreateOrUpdateConditionRequestBody:
+      x-fern-type-name: CreateOrUpdateConditionRequestBody
+    CreateOrUpdateFlagRequestBody:
+      x-fern-type-name: CreateOrUpdateFlagRequestBody
+    CreateOrUpdateRuleRequestBody:
+      x-fern-type-name: CreateOrUpdateRuleRequestBody
+    CreatePlanEntitlementRequestBody:
+      x-fern-type-name: CreatePlanEntitlementRequestBody
+    CreatePlanRequestBody:
+      x-fern-type-name: CreatePlanRequestBody
+    CreateReqCommon:
+      x-fern-type-name: CreateReqCommon
+    CreateWebhookRequestBody:
+      x-fern-type-name: CreateWebhookRequestBody
+    CrmDealLineItem:
+      x-fern-type-name: CrmDealLineItem
+    CrmDealResponseData:
+      x-fern-type-name: CrmDealResponseData
+    CrmLineItemResponseData:
+      x-fern-type-name: CrmLineItemResponseData
+    CrmProductResponseData:
+      x-fern-type-name: CrmProductResponseData
+    Decimal:
+      x-fern-type-name: Decimal
+    DeleteResponse:
+      x-fern-type-name: DeleteResponse
+    EntityKeyDefinitionResponseData:
+      x-fern-type-name: EntityKeyDefinitionResponseData
+    EntityKeyDetailResponseData:
+      x-fern-type-name: EntityKeyDetailResponseData
+    EntityKeyResponseData:
+      x-fern-type-name: EntityKeyResponseData
+    EntityTraitDefinitionResponseData:
+      x-fern-type-name: EntityTraitDefinitionResponseData
+    EntityTraitDetailResponseData:
+      x-fern-type-name: EntityTraitDetailResponseData
+    EntityTraitResponseData:
+      x-fern-type-name: EntityTraitResponseData
+    EntityTraitValue:
+      x-fern-type-name: EntityTraitValue
+    EnvironmentDetailResponseData:
+      x-fern-type-name: EnvironmentDetailResponseData
+    EnvironmentResponseData:
+      x-fern-type-name: EnvironmentResponseData
+    EventDetailResponseData:
+      x-fern-type-name: EventDetailResponseData
+    EventResponseData:
+      x-fern-type-name: EventResponseData
+    EventSummaryResponseData:
+      x-fern-type-name: EventSummaryResponseData
+    FeatureCompanyResponseData:
+      x-fern-type-name: FeatureCompanyResponseData
+    FeatureCompanyUserResponseData:
+      x-fern-type-name: FeatureCompanyUserResponseData
+    FeatureDetailResponseData:
+      x-fern-type-name: FeatureDetailResponseData
+    FeatureResponseData:
+      x-fern-type-name: FeatureResponseData
+    FeatureUsageDetailResponseData:
+      x-fern-type-name: FeatureUsageDetailResponseData
+    FeatureUsageResponseData:
+      x-fern-type-name: FeatureUsageResponseData
+    FlagDetailResponseData:
+      x-fern-type-name: FlagDetailResponseData
+    FlagResponseData:
+      x-fern-type-name: FlagResponseData
+    GetOrCreateCompanyMembershipRequestBody:
+      x-fern-type-name: GetOrCreateCompanyMembershipRequestBody
+    IssueTemporaryAccessTokenRequestBody:
+      x-fern-type-name: IssueTemporaryAccessTokenRequestBody
+    IssueTemporaryAccessTokenResponseData:
+      x-fern-type-name: IssueTemporaryAccessTokenResponseData
+    KeysRequestBody:
+      x-fern-type-name: KeysRequestBody
+    MetricCountsHourlyResponseData:
+      x-fern-type-name: MetricCountsHourlyResponseData
+    PaginationFilter:
+      x-fern-type-name: PaginationFilter
+    PlanAudienceDetailResponseData:
+      x-fern-type-name: PlanAudienceDetailResponseData
+    PlanAudienceResponseData:
+      x-fern-type-name: PlanAudienceResponseData
+    PlanDetailResponseData:
+      x-fern-type-name: PlanDetailResponseData
+    PlanEntitlementResponseData:
+      x-fern-type-name: PlanEntitlementResponseData
+    PlanResponseData:
+      x-fern-type-name: PlanResponseData
+    PreviewObject:
+      x-fern-type-name: PreviewObject
+    RawEventBatchResponseData:
+      x-fern-type-name: RawEventBatchResponseData
+    RawEventResponseData:
+      x-fern-type-name: RawEventResponseData
+    RuleConditionDetailResponseData:
+      x-fern-type-name: RuleConditionDetailResponseData
+    RuleConditionGroupDetailResponseData:
+      x-fern-type-name: RuleConditionGroupDetailResponseData
+    RuleConditionGroupResponseData:
+      x-fern-type-name: RuleConditionGroupResponseData
+    RuleConditionResourceResponseData:
+      x-fern-type-name: RuleConditionResourceResponseData
+    RuleConditionResponseData:
+      x-fern-type-name: RuleConditionResponseData
+    RuleDetailResponseData:
+      x-fern-type-name: RuleDetailResponseData
+    RuleResponseData:
+      x-fern-type-name: RuleResponseData
+    RulesDetailResponseData:
+      x-fern-type-name: RulesDetailResponseData
+    SegmentStatusResp:
+      x-fern-type-name: SegmentStatusResp
+    TemporaryAccessTokenResponseData:
+      x-fern-type-name: TemporaryAccessTokenResponseData
+    UpdateApiKeyRequestBody:
+      x-fern-type-name: UpdateApiKeyRequestBody
+    UpdateAudienceRequestBody:
+      x-fern-type-name: UpdateAudienceRequestBody
+    UpdateCompanyOverrideRequestBody:
+      x-fern-type-name: UpdateCompanyOverrideRequestBody
+    UpdateComponentRequestBody:
+      x-fern-type-name: UpdateComponentRequestBody
+    UpdateEntityTraitDefinitionRequestBody:
+      x-fern-type-name: UpdateEntityTraitDefinitionRequestBody
+    UpdateEnvironmentRequestBody:
+      x-fern-type-name: UpdateEnvironmentRequestBody
+    UpdateFeatureRequestBody:
+      x-fern-type-name: UpdateFeatureRequestBody
+    UpdateFlagRulesRequestBody:
+      x-fern-type-name: UpdateFlagRulesRequestBody
+    UpdatePlanEntitlementRequestBody:
+      x-fern-type-name: UpdatePlanEntitlementRequestBody
+    UpdatePlanRequestBody:
+      x-fern-type-name: UpdatePlanRequestBody
+    UpdateReqCommon:
+      x-fern-type-name: UpdateReqCommon
+    UpdateRuleRequestBody:
+      x-fern-type-name: UpdateRuleRequestBody
+    UpdateWebhookRequestBody:
+      x-fern-type-name: UpdateWebhookRequestBody
+    UpsertBillingProductRequestBody:
+      x-fern-type-name: UpsertBillingProductRequestBody
+    UpsertCompanyRequestBody:
+      x-fern-type-name: UpsertCompanyRequestBody
+    UpsertTraitRequestBody:
+      x-fern-type-name: UpsertTraitRequestBody
+    UpsertUserRequestBody:
+      x-fern-type-name: UpsertUserRequestBody
+    UpsertUserSubRequestBody:
+      x-fern-type-name: UpsertUserSubRequestBody
+    UserDetailResponseData:
+      x-fern-type-name: UserDetailResponseData
+    UserResponseData:
+      x-fern-type-name: UserResponseData
+    WebhookEventDetailResponseData:
+      x-fern-type-name: WebhookEventDetailResponseData
+    WebhookEventResponseData:
+      x-fern-type-name: WebhookEventResponseData
+    WebhookResponseData:
+      x-fern-type-name: WebhookResponseData
