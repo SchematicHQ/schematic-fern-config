@@ -366,6 +366,23 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingPlanGroupResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - plan_ids
+      title: BillingPlanGroupResponseData
     BillingPriceResponseData:
       type: object
       properties:
@@ -517,6 +534,20 @@ components:
         - external_id
         - updated_at
       title: BillingSubscriptionResponseData
+    ChangeSubscriptionRequestBody:
+      type: object
+      properties:
+        action:
+          type: string
+        new_plan_id:
+          type: string
+        new_price_id:
+          type: string
+      required:
+        - action
+        - new_plan_id
+        - new_price_id
+      title: ChangeSubscriptionRequestBody
     CheckFlagOutputWithFlagKey:
       type: object
       properties:
@@ -932,6 +963,19 @@ components:
         - failed_to_import
         - meta
       title: CreateBillingCustomerRequestBody
+    CreateBillingPlanGroupRequestBody:
+      type: object
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - plan_ids
+      title: CreateBillingPlanGroupRequestBody
     CreateBillingPriceRequestBody:
       type: object
       properties:
@@ -3324,6 +3368,19 @@ components:
         - conditions
         - condition_groups
       title: UpdateAudienceRequestBody
+    UpdateBillingPlanGroupRequestBody:
+      type: object
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - plan_ids
+      title: UpdateBillingPlanGroupRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -4751,6 +4808,122 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/plan-group:
+    get:
+      operationId: getBillingPlanGroupByAccountID
+      summary: Get billing plan group by account i d
+      tags:
+        - billing
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetBillingPlanGroupByAccountIDParams
+                required:
+                  - data
+                  - params
+                title: GetBillingPlanGroupByAccountIDResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createBillingPlanGroup
+      summary: Create billing plan group
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingPlanGroupRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateBillingPlanGroupParams
+                required:
+                  - data
+                  - params
+                title: CreateBillingPlanGroupResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/plan-group/{billing_id}:
+    put:
+      operationId: updateBillingPlanGroup
+      summary: Update billing plan group
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBillingPlanGroupRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateBillingPlanGroupParams
+                required:
+                  - data
+                  - params
+                title: UpdateBillingPlanGroupResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/price/upsert:
     post:
       operationId: upsertBillingPrice
@@ -5021,6 +5194,44 @@ paths:
                   - data
                   - params
                 title: UpsertBillingSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /checkout:
+    post:
+      operationId: changeSubscriptionWeb
+      summary: Change subscription web
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSubscriptionRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSubscriptionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ChangeSubscriptionWebParams
+                required:
+                  - data
+                  - params
+                title: ChangeSubscriptionWebResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -10129,6 +10340,42 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/active:
+    get:
+      operationId: listActivePlans
+      summary: List active plans
+      tags:
+        - plans
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/PlanDetailResponseData'
+                    title: ListActivePlansResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ListActivePlansParams
+                required:
+                  - data
+                  - params
+                title: ListActivePlansResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
   /plans/count:
