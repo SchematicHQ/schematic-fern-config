@@ -366,6 +366,29 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingPlan:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        name:
+          type: string
+        plan_period:
+          type: string
+          nullable: true
+        plan_price:
+          type: integer
+          nullable: true
+      required:
+        - id
+        - name
+      title: BillingPlan
     BillingPlanGroupResponseData:
       type: object
       description: The updated resource
@@ -442,6 +465,46 @@ components:
         - updated_at
         - Prices
       title: BillingProductDetailResponseData
+    BillingProductForSubscriptionResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        interval:
+          type: string
+          nullable: true
+        name:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: number
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - external_id
+        - name
+        - price
+        - currency
+        - quantity
+        - created_at
+        - updated_at
+      title: BillingProductForSubscriptionResponseData
     BillingProductPlanResponseData:
       type: object
       description: The updated resource
@@ -469,8 +532,14 @@ components:
     BillingProductPricing:
       type: object
       properties:
+        interval:
+          type: string
+          nullable: true
         price:
           type: integer
+        price_external_id:
+          type: string
+          nullable: true
         product_external_id:
           type: string
       required:
@@ -677,7 +746,7 @@ components:
         name:
           type: string
         plan:
-          $ref: '#/components/schemas/PreviewObject'
+          $ref: '#/components/schemas/BillingPlan'
         plans:
           type: array
           items:
@@ -866,7 +935,7 @@ components:
         products:
           type: array
           items:
-            $ref: '#/components/schemas/BillingProductResponseData'
+            $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
         subscription_external_id:
           type: string
       required:
@@ -1651,9 +1720,6 @@ components:
     CreatePlanRequestBody:
       type: object
       properties:
-        audience_type:
-          type: string
-          nullable: true
         description:
           type: string
         icon:
@@ -2826,8 +2892,6 @@ components:
       type: object
       description: The updated resource
       properties:
-        audience_type:
-          type: string
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         company_count:
@@ -2853,7 +2917,6 @@ components:
           type: string
           format: date-time
       required:
-        - audience_type
         - created_at
         - description
         - id
@@ -2917,8 +2980,6 @@ components:
     PlanResponseData:
       type: object
       properties:
-        audience_type:
-          type: string
         created_at:
           type: string
           format: date-time
@@ -2936,7 +2997,6 @@ components:
           type: string
           format: date-time
       required:
-        - audience_type
         - created_at
         - description
         - id
@@ -3541,8 +3601,6 @@ components:
     UpdatePlanRequestBody:
       type: object
       properties:
-        audience_type:
-          type: string
         description:
           type: string
           nullable: true
@@ -3552,7 +3610,6 @@ components:
         name:
           type: string
       required:
-        - audience_type
         - name
       title: UpdatePlanRequestBody
     UpdateReqCommon:
