@@ -603,20 +603,6 @@ components:
         - external_id
         - updated_at
       title: BillingSubscriptionResponseData
-    ChangeSubscriptionRequestBody:
-      type: object
-      properties:
-        action:
-          type: string
-        new_plan_id:
-          type: string
-        new_price_id:
-          type: string
-      required:
-        - action
-        - new_plan_id
-        - new_price_id
-      title: ChangeSubscriptionRequestBody
     CheckFlagOutputWithFlagKey:
       type: object
       properties:
@@ -919,19 +905,9 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
-    ComponentHydrateResponseData:
-      type: object
-      description: The returned resource
-      properties:
-        company:
-          $ref: '#/components/schemas/CompanyDetailResponseData'
-        component:
-          $ref: '#/components/schemas/ComponentResponseData'
-        feature_usage:
-          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
-      title: ComponentHydrateResponseData
     ComponentResponseData:
       type: object
+      description: The updated resource
       properties:
         ast:
           additionalProperties:
@@ -2532,6 +2508,7 @@ components:
       title: FeatureResponseData
     FeatureUsageDetailResponseData:
       type: object
+      description: The returned resource
       properties:
         features:
           type: array
@@ -2867,6 +2844,9 @@ components:
       type: object
       description: The updated resource
       properties:
+        audience_type:
+          type: string
+          nullable: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         company_count:
@@ -2955,6 +2935,9 @@ components:
     PlanResponseData:
       type: object
       properties:
+        audience_type:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -5234,44 +5217,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
-  /checkout:
-    post:
-      operationId: changeSubscriptionWeb
-      summary: Change subscription web
-      tags:
-        - billing
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChangeSubscriptionRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/BillingSubscriptionResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: ChangeSubscriptionWebParams
-                required:
-                  - data
-                  - params
-                title: ChangeSubscriptionWebResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /companies:
     get:
       operationId: listCompanies
@@ -6623,45 +6568,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /components/{component_id}/hydrate:
-    get:
-      operationId: hydrateComponent
-      summary: Hydrate component
-      tags:
-        - components
-      parameters:
-        - name: component_id
-          in: path
-          description: component_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ComponentHydrateResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: HydrateComponentParams
-                required:
-                  - data
-                  - params
-                title: HydrateComponentResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /components/count:
@@ -10300,42 +10206,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /plans/active:
-    get:
-      operationId: listActivePlans
-      summary: List active plans
-      tags:
-        - plans
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    description: The returned resources
-                    items:
-                      $ref: '#/components/schemas/PlanDetailResponseData'
-                    title: ListActivePlansResponseData
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: ListActivePlansParams
-                required:
-                  - data
-                  - params
-                title: ListActivePlansResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
   /plans/count:
