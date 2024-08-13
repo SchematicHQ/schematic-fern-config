@@ -28,6 +28,16 @@ In addition to explicit targeting, flags can be associated with Features that re
 
 At this time, flags and features are one-to-one and share a common `key`. Using the [check flag endpoint](/api-reference/features/check-flag), you may evaluate features and flags using a company and/or user `key`.
 
+### Plans vs. Add-ons
+
+Plans and Add-ons are separate concepts in Schematic, and when you create a new product you can choose the product type. 
+
+Companies can only have 1 Plan, but they can have any number of Add-ons with distinct entitlements.
+
+There are a number of scenarios where you may want to support an Add On, and the two most common are:
+1. You sell additional functionality or licenses that increase the value of your core plans (e.g. Zoom Workplace) 
+2. Each of your products is sold separately (e.g. DataDog)
+
 ### Verifying events
 
 You can use the [Events](https://app.schematichq.com/events) tab to verify identify and track requests are getting to Schematic and that they are being properly associated with users, companies, and features. This is also possible in the company and user profile views.
