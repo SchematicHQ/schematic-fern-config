@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "The version of the SDKs that you would like to release"
+        description: "The version of the C# SDK that you would like to release"
         required: true
         type: string
 
@@ -21,7 +21,7 @@ jobs:
       - name: Install Fern
         run: npm install -g fern-api
 
-      - name: Release SDKs
+      - name: Release C# SDK
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
           NUGET_API_TOKEN: ${{ secrets.NUGET_API_TOKEN }}
