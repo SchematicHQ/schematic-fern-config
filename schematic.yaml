@@ -888,6 +888,43 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
+    ComponentHydratePreview:
+      type: object
+      properties:
+        featureUsage:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureUsage'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethod'
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plan'
+      required:
+        - payment_method
+        - plans
+        - featureUsage
+      title: ComponentHydratePreview
+    ComponentPreviewResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        featureUsage:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureUsage'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethod'
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plan'
+      required:
+        - payment_method
+        - plans
+        - featureUsage
+      title: ComponentPreviewResponseData
     ComponentResponseData:
       type: object
       description: The updated resource
@@ -2301,6 +2338,20 @@ components:
         - event_subtype
         - user_count
       title: EventSummaryResponseData
+    Feature:
+      type: object
+      properties:
+        description:
+          type: string
+        icon:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - description
+        - icon
+      title: Feature
     FeatureCompanyResponseData:
       type: object
       properties:
@@ -2489,6 +2540,23 @@ components:
         - created_at
         - updated_at
       title: FeatureResponseData
+    FeatureUsage:
+      type: object
+      properties:
+        allocation:
+          type: integer
+          nullable: true
+        allocationType:
+          type: string
+        feature:
+          $ref: '#/components/schemas/Feature'
+        usage:
+          type: integer
+          nullable: true
+      required:
+        - allocationType
+        - feature
+      title: FeatureUsage
     FeatureUsageDetailResponseData:
       type: object
       description: The returned resource
@@ -2738,6 +2806,37 @@ components:
           nullable: true
           example: '0'
       title: PaginationFilter
+    PaymentMethod:
+      type: object
+      properties:
+        card_number:
+          type: string
+        cvc:
+          type: string
+        exp_month:
+          type: integer
+        exp_year:
+          type: integer
+      required:
+        - card_number
+        - exp_month
+        - exp_year
+        - cvc
+      title: PaymentMethod
+    Plan:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        is_primary:
+          type: boolean
+        name:
+          type: string
+      required:
+        - name
+        - is_primary
+      title: Plan
     PlanAudienceDetailResponseData:
       type: object
       description: The updated resource
@@ -6244,6 +6343,77 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /component/state/demo/preview:
+    get:
+      operationId: demoPreviewState
+      summary: Demo preview state
+      tags:
+        - components
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentPreviewResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DemoPreviewStateParams
+                required:
+                  - data
+                  - params
+                title: DemoPreviewStateResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /component/state/preview/{component_id}:
+    get:
+      operationId: previewStateByCompany
+      summary: Preview state by company
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentPreviewResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewStateByCompanyParams
+                required:
+                  - data
+                  - params
+                title: PreviewStateByCompanyResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /components:
