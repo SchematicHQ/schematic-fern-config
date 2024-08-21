@@ -65,3 +65,17 @@ groups:
           includeApiReference: true
           namespaceExport: Schematic
           skipResponseValidation: true
+          
+  go-sdk:
+    generators:
+      - name: fernapi/fern-go-sdk
+        version: 0.23.1
+        github:
+          repository: schematichq/schematic-go
+          mode: pull-request
+        config:
+          module:
+            version: "1.18"
+          union: v1
+          packageName: schematichq
+        smart-casing: true
