@@ -2946,6 +2946,8 @@ components:
           type: string
         id:
           type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plan_type:
@@ -2953,6 +2955,8 @@ components:
         updated_at:
           type: string
           format: date-time
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
       required:
         - created_at
         - description
