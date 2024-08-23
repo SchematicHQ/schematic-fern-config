@@ -836,6 +836,62 @@ components:
         - updated_at
         - value_type
       title: CompanyOverrideResponseData
+    CompanyPlanDetailResponseData:
+      type: object
+      properties:
+        audience_type:
+          type: string
+          nullable: true
+        billing_product:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
+        id:
+          type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        name:
+          type: string
+        plan_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        valid:
+          type: boolean
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - created_at
+        - description
+        - id
+        - icon
+        - name
+        - plan_type
+        - updated_at
+        - company_count
+        - features
+        - current
+        - valid
+        - entitlements
+      title: CompanyPlanDetailResponseData
     CompanyResponseData:
       type: object
       properties:
@@ -888,43 +944,25 @@ components:
         - interval
         - products
       title: CompanySubscriptionResponseData
-    ComponentHydratePreview:
-      type: object
-      properties:
-        featureUsage:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeatureUsage'
-        payment_method:
-          $ref: '#/components/schemas/PaymentMethod'
-        plans:
-          type: array
-          items:
-            $ref: '#/components/schemas/Plan'
-      required:
-        - payment_method
-        - plans
-        - featureUsage
-      title: ComponentHydratePreview
-    ComponentPreviewResponseData:
+    ComponentHydrateResponseData:
       type: object
       description: The returned resource
       properties:
-        featureUsage:
+        active_plans:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureUsage'
-        payment_method:
-          $ref: '#/components/schemas/PaymentMethod'
-        plans:
-          type: array
-          items:
-            $ref: '#/components/schemas/Plan'
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        stripe_embed:
+          $ref: '#/components/schemas/StripeEmbedInfo'
       required:
-        - payment_method
-        - plans
-        - featureUsage
-      title: ComponentPreviewResponseData
+        - active_plans
+      title: ComponentHydrateResponseData
     ComponentResponseData:
       type: object
       description: The updated resource
@@ -2338,20 +2376,6 @@ components:
         - event_subtype
         - user_count
       title: EventSummaryResponseData
-    Feature:
-      type: object
-      properties:
-        description:
-          type: string
-        icon:
-          type: string
-        name:
-          type: string
-      required:
-        - name
-        - description
-        - icon
-      title: Feature
     FeatureCompanyResponseData:
       type: object
       properties:
@@ -2540,26 +2564,8 @@ components:
         - created_at
         - updated_at
       title: FeatureResponseData
-    FeatureUsage:
-      type: object
-      properties:
-        allocation:
-          type: integer
-          nullable: true
-        allocationType:
-          type: string
-        feature:
-          $ref: '#/components/schemas/Feature'
-        usage:
-          type: integer
-          nullable: true
-      required:
-        - allocationType
-        - feature
-      title: FeatureUsage
     FeatureUsageDetailResponseData:
       type: object
-      description: The returned resource
       properties:
         features:
           type: array
@@ -2806,37 +2812,6 @@ components:
           nullable: true
           example: '0'
       title: PaginationFilter
-    PaymentMethod:
-      type: object
-      properties:
-        card_number:
-          type: string
-        cvc:
-          type: string
-        exp_month:
-          type: integer
-        exp_year:
-          type: integer
-      required:
-        - card_number
-        - exp_month
-        - exp_year
-        - cvc
-      title: PaymentMethod
-    Plan:
-      type: object
-      properties:
-        description:
-          type: string
-          nullable: true
-        is_primary:
-          type: boolean
-        name:
-          type: string
-      required:
-        - name
-        - is_primary
-      title: Plan
     PlanAudienceDetailResponseData:
       type: object
       description: The updated resource
@@ -2924,7 +2899,6 @@ components:
       title: PlanAudienceResponseData
     PlanDetailResponseData:
       type: object
-      description: The updated resource
       properties:
         audience_type:
           type: string
@@ -2970,7 +2944,6 @@ components:
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
-      description: The updated resource
       properties:
         created_at:
           type: string
@@ -3018,6 +2991,78 @@ components:
         - updated_at
         - value_type
       title: PlanEntitlementResponseData
+    PlanGroupDetailResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        default_plan:
+          $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+        default_plan_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+      required:
+        - id
+        - plans
+      title: PlanGroupDetailResponseData
+    PlanGroupPlanDetailResponseData:
+      type: object
+      properties:
+        audience_type:
+          type: string
+          nullable: true
+        billing_product:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
+        id:
+          type: string
+        is_default:
+          type: boolean
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        name:
+          type: string
+        plan_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - created_at
+        - description
+        - id
+        - icon
+        - name
+        - plan_type
+        - updated_at
+        - company_count
+        - features
+        - is_default
+        - entitlements
+      title: PlanGroupPlanDetailResponseData
     PlanGroupResponseData:
       type: object
       description: The updated resource
@@ -3435,6 +3480,17 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    StripeEmbedInfo:
+      type: object
+      properties:
+        customer_ekey:
+          type: string
+        publishable_key:
+          type: string
+      required:
+        - publishable_key
+        - customer_ekey
+      title: StripeEmbedInfo
     TemporaryAccessTokenResponseData:
       type: object
       properties:
@@ -6349,77 +6405,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
-  /component/state/demo/preview:
-    get:
-      operationId: demoPreviewState
-      summary: Demo preview state
-      tags:
-        - components
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ComponentPreviewResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: DemoPreviewStateParams
-                required:
-                  - data
-                  - params
-                title: DemoPreviewStateResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /component/state/preview/{component_id}:
-    get:
-      operationId: previewStateByCompany
-      summary: Preview state by company
-      tags:
-        - components
-      parameters:
-        - name: component_id
-          in: path
-          description: component_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ComponentPreviewResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: PreviewStateByCompanyParams
-                required:
-                  - data
-                  - params
-                title: PreviewStateByCompanyResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /components:
     get:
       operationId: listComponents
@@ -6644,6 +6629,52 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/{component_id}/preview:
+    get:
+      operationId: previewComponentData
+      summary: Preview component data
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentHydrateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                    title: PreviewComponentDataParams
+                required:
+                  - data
+                  - params
+                title: PreviewComponentDataResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /components/count:
@@ -9967,10 +9998,10 @@ paths:
           $ref: '#/components/responses/ServerError'
   /plan-groups:
     get:
-      operationId: getPlanGroupByAccountID
-      summary: Get plan group by account i d
+      operationId: getPlanGroup
+      summary: Get plan group
       tags:
-        - plans
+        - plangroups
       responses:
         '200':
           description: OK
@@ -9980,15 +10011,15 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/PlanGroupResponseData'
+                    $ref: '#/components/schemas/PlanGroupDetailResponseData'
                   params:
                     type: object
                     description: Input parameters
-                    title: GetPlanGroupByAccountIDParams
+                    title: GetPlanGroupParams
                 required:
                   - data
                   - params
-                title: GetPlanGroupByAccountIDResponse
+                title: GetPlanGroupResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -10001,7 +10032,7 @@ paths:
       operationId: createPlanGroup
       summary: Create plan group
       tags:
-        - plans
+        - plangroups
       requestBody:
         content:
           application/json:
@@ -10039,7 +10070,7 @@ paths:
       operationId: updatePlanGroup
       summary: Update plan group
       tags:
-        - plans
+        - plangroups
       parameters:
         - name: plan_group_id
           in: path
@@ -11577,6 +11608,7 @@ tags:
   - name: accesstokens
   - name: accounts
   - name: companies
+  - name: plangroups
   - name: events
   - name: features
   - name: plans
