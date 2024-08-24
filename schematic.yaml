@@ -6631,52 +6631,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
-  /components/{component_id}/preview:
-    get:
-      operationId: previewComponentData
-      summary: Preview component data
-      tags:
-        - components
-      parameters:
-        - name: component_id
-          in: path
-          description: component_id
-          required: true
-          schema:
-            type: string
-        - name: company_id
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ComponentHydrateResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    properties:
-                      company_id:
-                        type: string
-                    title: PreviewComponentDataParams
-                required:
-                  - data
-                  - params
-                title: PreviewComponentDataResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /components/count:
     get:
       operationId: countComponents
@@ -6737,6 +6691,52 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/preview-data:
+    get:
+      operationId: previewComponentData
+      summary: Preview component data
+      tags:
+        - components
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: component_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentHydrateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      component_id:
+                        type: string
+                    title: PreviewComponentDataParams
+                required:
+                  - data
+                  - params
+                title: PreviewComponentDataResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /crm/associations/deal-line-item:
