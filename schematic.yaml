@@ -938,10 +938,13 @@ components:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
         subscription_external_id:
           type: string
+        total_price:
+          type: integer
       required:
         - subscription_external_id
         - customer_external_id
         - interval
+        - total_price
         - products
       title: CompanySubscriptionResponseData
     ComponentHydrateResponseData:
@@ -3485,11 +3488,11 @@ components:
       properties:
         customer_ekey:
           type: string
+          nullable: true
         publishable_key:
           type: string
       required:
         - publishable_key
-        - customer_ekey
       title: StripeEmbedInfo
     TemporaryAccessTokenResponseData:
       type: object
