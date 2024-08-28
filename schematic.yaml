@@ -389,23 +389,6 @@ components:
         - id
         - name
       title: BillingPlan
-    BillingPlanGroupResponseData:
-      type: object
-      description: The updated resource
-      properties:
-        default_plan_id:
-          type: string
-          nullable: true
-        id:
-          type: string
-        plan_ids:
-          type: array
-          items:
-            type: string
-      required:
-        - id
-        - plan_ids
-      title: BillingPlanGroupResponseData
     BillingPriceResponseData:
       type: object
       properties:
@@ -706,7 +689,7 @@ components:
         add_ons:
           type: array
           items:
-            $ref: '#/components/schemas/PreviewObject'
+            $ref: '#/components/schemas/BillingPlan'
         created_at:
           type: string
           format: date-time
@@ -853,6 +836,62 @@ components:
         - updated_at
         - value_type
       title: CompanyOverrideResponseData
+    CompanyPlanDetailResponseData:
+      type: object
+      properties:
+        audience_type:
+          type: string
+          nullable: true
+        billing_product:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
+        id:
+          type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        name:
+          type: string
+        plan_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        valid:
+          type: boolean
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - created_at
+        - description
+        - id
+        - icon
+        - name
+        - plan_type
+        - updated_at
+        - company_count
+        - features
+        - current
+        - valid
+        - entitlements
+      title: CompanyPlanDetailResponseData
     CompanyResponseData:
       type: object
       properties:
@@ -899,12 +938,34 @@ components:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
         subscription_external_id:
           type: string
+        total_price:
+          type: integer
       required:
         - subscription_external_id
         - customer_external_id
         - interval
+        - total_price
         - products
       title: CompanySubscriptionResponseData
+    ComponentHydrateResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        active_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        stripe_embed:
+          $ref: '#/components/schemas/StripeEmbedInfo'
+      required:
+        - active_plans
+      title: ComponentHydrateResponseData
     ComponentResponseData:
       type: object
       description: The updated resource
@@ -983,19 +1044,6 @@ components:
         - failed_to_import
         - meta
       title: CreateBillingCustomerRequestBody
-    CreateBillingPlanGroupRequestBody:
-      type: object
-      properties:
-        default_plan_id:
-          type: string
-          nullable: true
-        plan_ids:
-          type: array
-          items:
-            type: string
-      required:
-        - plan_ids
-      title: CreateBillingPlanGroupRequestBody
     CreateBillingPriceRequestBody:
       type: object
       properties:
@@ -1668,6 +1716,19 @@ components:
         - feature_id
         - value_type
       title: CreatePlanEntitlementRequestBody
+    CreatePlanGroupRequestBody:
+      type: object
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - plan_ids
+      title: CreatePlanGroupRequestBody
     CreatePlanRequestBody:
       type: object
       properties:
@@ -2508,7 +2569,6 @@ components:
       title: FeatureResponseData
     FeatureUsageDetailResponseData:
       type: object
-      description: The returned resource
       properties:
         features:
           type: array
@@ -2842,7 +2902,6 @@ components:
       title: PlanAudienceResponseData
     PlanDetailResponseData:
       type: object
-      description: The updated resource
       properties:
         audience_type:
           type: string
@@ -2864,6 +2923,8 @@ components:
           type: string
         id:
           type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plan_type:
@@ -2871,6 +2932,8 @@ components:
         updated_at:
           type: string
           format: date-time
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
       required:
         - created_at
         - description
@@ -2884,7 +2947,6 @@ components:
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
-      description: The updated resource
       properties:
         created_at:
           type: string
@@ -2932,6 +2994,95 @@ components:
         - updated_at
         - value_type
       title: PlanEntitlementResponseData
+    PlanGroupDetailResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        default_plan:
+          $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+        default_plan_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+      required:
+        - id
+        - plans
+      title: PlanGroupDetailResponseData
+    PlanGroupPlanDetailResponseData:
+      type: object
+      properties:
+        audience_type:
+          type: string
+          nullable: true
+        billing_product:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
+        id:
+          type: string
+        is_default:
+          type: boolean
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        name:
+          type: string
+        plan_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - created_at
+        - description
+        - id
+        - icon
+        - name
+        - plan_type
+        - updated_at
+        - company_count
+        - features
+        - is_default
+        - entitlements
+      title: PlanGroupPlanDetailResponseData
+    PlanGroupResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - plan_ids
+      title: PlanGroupResponseData
     PlanResponseData:
       type: object
       properties:
@@ -3332,6 +3483,17 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    StripeEmbedInfo:
+      type: object
+      properties:
+        customer_ekey:
+          type: string
+          nullable: true
+        publishable_key:
+          type: string
+      required:
+        - publishable_key
+      title: StripeEmbedInfo
     TemporaryAccessTokenResponseData:
       type: object
       properties:
@@ -3386,19 +3548,6 @@ components:
         - conditions
         - condition_groups
       title: UpdateAudienceRequestBody
-    UpdateBillingPlanGroupRequestBody:
-      type: object
-      properties:
-        default_plan_id:
-          type: string
-          nullable: true
-        plan_ids:
-          type: array
-          items:
-            type: string
-      required:
-        - plan_ids
-      title: UpdateBillingPlanGroupRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -3556,6 +3705,19 @@ components:
       required:
         - value_type
       title: UpdatePlanEntitlementRequestBody
+    UpdatePlanGroupRequestBody:
+      type: object
+      properties:
+        default_plan_id:
+          type: string
+          nullable: true
+        plan_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - plan_ids
+      title: UpdatePlanGroupRequestBody
     UpdatePlanRequestBody:
       type: object
       properties:
@@ -4823,122 +4985,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
-  /billing/plan-group:
-    get:
-      operationId: getBillingPlanGroupByAccountID
-      summary: Get billing plan group by account i d
-      tags:
-        - billing
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: GetBillingPlanGroupByAccountIDParams
-                required:
-                  - data
-                  - params
-                title: GetBillingPlanGroupByAccountIDResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    post:
-      operationId: createBillingPlanGroup
-      summary: Create billing plan group
-      tags:
-        - billing
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateBillingPlanGroupRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CreateBillingPlanGroupParams
-                required:
-                  - data
-                  - params
-                title: CreateBillingPlanGroupResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /billing/plan-group/{billing_id}:
-    put:
-      operationId: updateBillingPlanGroup
-      summary: Update billing plan group
-      tags:
-        - billing
-      parameters:
-        - name: billing_id
-          in: path
-          description: billing_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateBillingPlanGroupRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/BillingPlanGroupResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: UpdateBillingPlanGroupParams
-                required:
-                  - data
-                  - params
-                title: UpdateBillingPlanGroupResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /billing/price/upsert:
     post:
       operationId: upsertBillingPrice
@@ -5250,6 +5296,12 @@ paths:
             description: >-
               Filter out companies that already have a company override for the
               specified feature ID
+        - name: without_plan
+          in: query
+          description: Filter out companies that have a plan
+          schema:
+            type: boolean
+            description: Filter out companies that have a plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5304,6 +5356,9 @@ paths:
                         description: >-
                           Filter out companies that already have a company
                           override for the specified feature ID
+                      without_plan:
+                        type: boolean
+                        description: Filter out companies that have a plan
                     title: ListCompaniesParams
                 required:
                   - data
@@ -5464,6 +5519,12 @@ paths:
             description: >-
               Filter out companies that already have a company override for the
               specified feature ID
+        - name: without_plan
+          in: query
+          description: Filter out companies that have a plan
+          schema:
+            type: boolean
+            description: Filter out companies that have a plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5514,6 +5575,9 @@ paths:
                         description: >-
                           Filter out companies that already have a company
                           override for the specified feature ID
+                      without_plan:
+                        type: boolean
+                        description: Filter out companies that have a plan
                     title: CountCompaniesParams
                 required:
                   - data
@@ -6630,6 +6694,52 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/preview-data:
+    get:
+      operationId: previewComponentData
+      summary: Preview component data
+      tags:
+        - components
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: component_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentHydrateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      component_id:
+                        type: string
+                    title: PreviewComponentDataParams
+                required:
+                  - data
+                  - params
+                title: PreviewComponentDataResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /crm/associations/deal-line-item:
@@ -9889,6 +9999,122 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plan-groups:
+    get:
+      operationId: getPlanGroup
+      summary: Get plan group
+      tags:
+        - plangroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanGroupDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPlanGroupParams
+                required:
+                  - data
+                  - params
+                title: GetPlanGroupResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createPlanGroup
+      summary: Create plan group
+      tags:
+        - plangroups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanGroupRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanGroupResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreatePlanGroupParams
+                required:
+                  - data
+                  - params
+                title: CreatePlanGroupResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-groups/{plan_group_id}:
+    put:
+      operationId: updatePlanGroup
+      summary: Update plan group
+      tags:
+        - plangroups
+      parameters:
+        - name: plan_group_id
+          in: path
+          description: plan_group_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanGroupRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanGroupResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdatePlanGroupParams
+                required:
+                  - data
+                  - params
+                title: UpdatePlanGroupResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plans:
     get:
       operationId: listPlans
@@ -9919,6 +10145,12 @@ paths:
             enum:
               - plan
               - add_on
+        - name: has_product_id
+          in: query
+          description: Filter out plans that do not have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that do not have a billing product ID
         - name: without_entitlement_for
           in: query
           description: >-
@@ -9963,6 +10195,9 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      has_product_id:
+                        type: boolean
+                        description: Filter out plans that do not have a billing product ID
                       ids:
                         type: array
                         items:
@@ -10238,6 +10473,12 @@ paths:
             enum:
               - plan
               - add_on
+        - name: has_product_id
+          in: query
+          description: Filter out plans that do not have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that do not have a billing product ID
         - name: without_entitlement_for
           in: query
           description: >-
@@ -10278,6 +10519,9 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      has_product_id:
+                        type: boolean
+                        description: Filter out plans that do not have a billing product ID
                       ids:
                         type: array
                         items:
@@ -11367,6 +11611,7 @@ tags:
   - name: accesstokens
   - name: accounts
   - name: companies
+  - name: plangroups
   - name: events
   - name: features
   - name: plans
