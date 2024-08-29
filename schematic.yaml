@@ -473,6 +473,8 @@ components:
           type: number
         quantity:
           type: number
+        subscription_id:
+          type: string
         updated_at:
           type: string
           format: date-time
@@ -481,6 +483,7 @@ components:
         - account_id
         - environment_id
         - external_id
+        - subscription_id
         - name
         - price
         - currency
@@ -932,6 +935,10 @@ components:
           nullable: true
         interval:
           type: string
+        latest_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodResponseData'
         products:
           type: array
           items:
@@ -941,11 +948,11 @@ components:
         total_price:
           type: integer
       required:
-        - subscription_external_id
         - customer_external_id
         - interval
-        - total_price
         - products
+        - subscription_external_id
+        - total_price
       title: CompanySubscriptionResponseData
     ComponentHydrateResponseData:
       type: object
@@ -963,6 +970,8 @@ components:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         stripe_embed:
           $ref: '#/components/schemas/StripeEmbedInfo'
+        subscription:
+          $ref: '#/components/schemas/CompanySubscriptionResponseData'
       required:
         - active_plans
       title: ComponentHydrateResponseData
@@ -1529,6 +1538,42 @@ components:
         - key
         - name
       title: CreateFlagRequestBody
+    CreateInvoiceRequestBody:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+        amount_paid:
+          type: integer
+        amount_remaining:
+          type: integer
+        collection_method:
+          type: string
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        external_id:
+          type: string
+        subscription_external_id:
+          type: string
+          nullable: true
+        subtotal:
+          type: integer
+      required:
+        - external_id
+        - amount_due
+        - amount_paid
+        - amount_remaining
+        - collection_method
+        - currency
+        - customer_external_id
+        - subtotal
+      title: CreateInvoiceRequestBody
     CreateOrUpdateConditionGroupRequestBody:
       type: object
       properties:
@@ -1681,6 +1726,38 @@ components:
         - priority
         - value
       title: CreateOrUpdateRuleRequestBody
+    CreatePaymentMethodRequestBody:
+      type: object
+      properties:
+        card_brand:
+          type: string
+          nullable: true
+        card_exp_month:
+          type: integer
+          nullable: true
+        card_exp_year:
+          type: integer
+          nullable: true
+        card_last4:
+          type: string
+          nullable: true
+        customer_external_id:
+          type: string
+        external_id:
+          type: string
+        invoice_external_id:
+          type: string
+          nullable: true
+        payment_method_type:
+          type: string
+        subscription_external_id:
+          type: string
+          nullable: true
+      required:
+        - external_id
+        - customer_external_id
+        - payment_method_type
+      title: CreatePaymentMethodRequestBody
     CreatePlanEntitlementRequestBody:
       type: object
       properties:
@@ -2717,6 +2794,92 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    InvoiceRequestBody:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+        amount_paid:
+          type: integer
+        amount_remaining:
+          type: integer
+        collection_method:
+          type: string
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        subscription_external_id:
+          type: string
+          nullable: true
+        subtotal:
+          type: integer
+      required:
+        - amount_due
+        - amount_paid
+        - amount_remaining
+        - collection_method
+        - currency
+        - customer_external_id
+        - subtotal
+      title: InvoiceRequestBody
+    InvoiceResponseData:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+        amount_paid:
+          type: integer
+        amount_remaining:
+          type: integer
+        collection_method:
+          type: string
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        subscription_external_id:
+          type: string
+          nullable: true
+        subtotal:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - environment_id
+        - customer_external_id
+        - external_id
+        - created_at
+        - updated_at
+        - amount_due
+        - amount_paid
+        - amount_remaining
+        - collection_method
+        - currency
+        - subtotal
+      title: InvoiceResponseData
     IssueTemporaryAccessTokenRequestBody:
       type: object
       properties:
@@ -2815,6 +2978,84 @@ components:
           nullable: true
           example: '0'
       title: PaginationFilter
+    PaymentMethodRequestBody:
+      type: object
+      properties:
+        card_brand:
+          type: string
+          nullable: true
+        card_exp_month:
+          type: integer
+          nullable: true
+        card_exp_year:
+          type: integer
+          nullable: true
+        card_last4:
+          type: string
+          nullable: true
+        customer_external_id:
+          type: string
+        invoice_external_id:
+          type: string
+          nullable: true
+        payment_method_type:
+          type: string
+        subscription_external_id:
+          type: string
+          nullable: true
+      required:
+        - customer_external_id
+        - payment_method_type
+      title: PaymentMethodRequestBody
+    PaymentMethodResponseData:
+      type: object
+      properties:
+        card_brand:
+          type: string
+          nullable: true
+        card_exp_month:
+          type: integer
+          nullable: true
+        card_exp_year:
+          type: integer
+          nullable: true
+        card_last4:
+          type: string
+          nullable: true
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        customer_external_id:
+          type: string
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        invoice_external_id:
+          type: string
+          nullable: true
+        payment_method_type:
+          type: string
+        subscription_external_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - environment_id
+        - customer_external_id
+        - external_id
+        - created_at
+        - updated_at
+        - payment_method_type
+      title: PaymentMethodResponseData
     PlanAudienceDetailResponseData:
       type: object
       description: The updated resource
@@ -4977,6 +5218,244 @@ paths:
                   - data
                   - params
                 title: CountCustomersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/invoices:
+    get:
+      operationId: listInvoices
+      summary: List invoices
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: customer_external_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: subscription_external_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/InvoiceResponseData'
+                    title: ListInvoicesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      customer_external_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      subscription_external_id:
+                        type: string
+                    title: ListInvoicesParams
+                required:
+                  - data
+                  - params
+                title: ListInvoicesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: upsertInvoice
+      summary: Upsert invoice
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/InvoiceResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertInvoiceParams
+                required:
+                  - data
+                  - params
+                title: UpsertInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/payment-methods:
+    get:
+      operationId: listPaymentMethods
+      summary: List payment methods
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: customer_external_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: invoice_external_id
+          in: query
+          schema:
+            type: string
+        - name: subscription_external_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/PaymentMethodResponseData'
+                    title: ListPaymentMethodsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      customer_external_id:
+                        type: string
+                      invoice_external_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      subscription_external_id:
+                        type: string
+                    title: ListPaymentMethodsParams
+                required:
+                  - data
+                  - params
+                title: ListPaymentMethodsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: upsertPaymentMethod
+      summary: Upsert payment method
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentMethodRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PaymentMethodResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertPaymentMethodParams
+                required:
+                  - data
+                  - params
+                title: UpsertPaymentMethodResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
