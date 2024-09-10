@@ -3734,6 +3734,9 @@ components:
           nullable: true
         publishable_key:
           type: string
+        setup_intent_client_secret:
+          type: string
+          nullable: true
       required:
         - publishable_key
       title: StripeEmbedInfo
@@ -5698,6 +5701,84 @@ paths:
                   - data
                   - params
                 title: ListBillingProductsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/products/count:
+    get:
+      operationId: countBillingProducts
+      summary: Count billing products
+      tags:
+        - billing
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      name:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: CountBillingProductsParams
+                required:
+                  - data
+                  - params
+                title: CountBillingProductsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
