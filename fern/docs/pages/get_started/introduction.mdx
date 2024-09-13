@@ -4,78 +4,90 @@ title: What is Schematic?
 slug: introduction
 ---
 
+## What is Schematic?
 
-Schematic is a feature management platform that extends from deployment all the way through monetization. 
+Schematic allows businesses to outsource pricing and packaging with a few lines of code, enabling them to quickly launch new packaging models, take the burden off of engineering, and flexibly adjust their pricing and packaging to individual customer preferences.
 
-We believe that B2B businesses should not reinvent the wheel to support pricing and packaging, and that a single platform, not a collection of disconnected code, tools, and processes, should support customers from purchase to feature delivery and ultimately billing.
-
-With Schematic, teams can ship features faster, centralize data from tools such as CRMs and billing systems for precise targeting and state management, and define & enforce packaging all in one place.
+With Schematic, teams can ship faster, delight customers, and get out of billing projects forever.
 
 ## What can I do with Schematic?
 
+Our platform integrates bi-directionally with Stripe to facilitate payments while adding powerful capabilities on top of it such as embeddable UI components, internal admin dashboards, feature flags to power entitlements, and usage-based metering. This means you can manage your entire pricing and packaging surface area — from how you charge your customers to how they experience your product — without the need for brittle, homegrown solutions that tightly couple pricing and packaging logic into application code.
+
 <img
-  src="../../assets/images/Archv2.png"
+  src="../../assets/images/iso-with-background.png"
 />
 
-- **Ship new features quickly and safely** - Use granular targeting to roll out individual or sets of features. Target complete profiles housed directly within Schematic.
-- **Tie features to plans and customers** - Deploy any business model easily, with support for boolean or metered features. Group features into plans to reflect tiering, add-ons, and usage-based packaging.
-- **Experiment, enable feature trials, and manage customer lifecycle** -  Empower product and success to manage per-customer overrides, and run packaging experiments with cohorts without custom code.
-- **Marry account, usage, and billing data in one place** - Integrate once with Schematic and leverage our integrations with Segment, CRMs, and billing systems for the data you need to define and evaluate access.
+With Schematic, you can:
+
+- **Embed Powerful UI Components**: Add drop-in purchasing components beyond basic checkout, such as upgrade/downgrade, customer portals, pricing tables, and usage meters. Power internal workflows for sales and account management.
+- **Control Access with Feature Flags**: Manage which customers have access to which features without needing to touch your application code.
+- **Usage-Based Metering**: Easily track customer usage and bill accordingly, supporting modern, flexible pricing models.
+- **Manage Plans with Ease**: Update plans, bundle & unbundle features, offer add-ons, support custom configuration, and handle exceptions — all with minimal code changes.
+- **Get a 360-Degree View of Your Customers**: Combine account, usage, and billing data into a single, easy-to-access profile, giving your team the insights they need.
 
 ## Major concepts
 
-There are several major concepts built into Schematic. Together, they allow teams to solve for billing and entitlements needs from one flexible tool that fits a variety of customers, stacks, & processes as businesses grow.
+There are several major concepts built into Schematic that you can read about in more depth in other sections of our documentation.
 
-You can read about these concepts in depth [here](https://schematichq.com/operate-pricing-packaging).
-
-### Product Catalog
+### **Product Catalog**
 
 <img
-  src="../../assets/images/intro_plans.png"
+  src="../../assets/images/get-started/get-started-product-catalog-1.png"
 />
 
-This describes a company's products (also known as SKUs or plans) and associated features. Products can describe platforms, tiers, or add-ons. The definition of features within a product includes default values for allocations or limits, and pricing (coming soon). 
-
-This catalog can be referenced across systems to inform sales, marketing, support, and billing functions.
-
-### Company Profiles
+The Catalog describes a company’s Plans and Add Ons and associated Entitlements. The definition of an Entitlement within a Plan or Add On includes default values for allocations or limits, and pricing.
 
 <img
-  src="../../assets/images/intro_profiles.png"
+  src="../../assets/images/get-started/get-started-product-catalog-2.png"
 />
 
-The Company Profile is a centralized record for company state, aggregating all relevant company traits, subscription details, and usage data into a single, coherent profile that can be leveraged across tools.
+If a Company is a part of a Plan, access can be gated in your application based on associated Entitlements with Flags.
 
-The profile is `key`-based and `key` uniqueness is enforced across profiles to prevent duplicates. Profiles can have multiple keys so any one `key` does not need to be replicated across systems.
+### **Company Profiles**
+
+The Company Profile is a centralized record of company information, aggregating all relevant company traits, subscription details, and usage data into a single profile that can be leveraged across tools.
+
+<img
+  src="../../assets/images/get-started/get-started-profiles-1.png"
+/>
+
+The profile is `key`-based and `key` uniqueness is enforced across profiles to prevent duplicates. Profiles can have multiple keys so any one `key` does not need to be persisted across systems.
 
 Profiles and profile traits can be referenced in flag targeting and plan audiences.
 
-### Metering
+### **Metering**
+
+Metering is crucial for supporting usage-based models. Metered properties can be monetized or un-monetized (tracked for telemetry or enforcing a packaged limit).
 
 <img
-  src="../../assets/images/intro_metering.png"
+  src="../../assets/images/get-started/get-started-metering-1.png"
 />
 
-Metering is crucial for supporting usage-based models. Metered properties can be monetized or unmonetized (tracked for telemetry or enforcing a packaged limit).
+A usage event can be attributed to companies, users, and features within Schematic, forming the basis for enforcement and insights into customer behavior.
 
-A usage event can be attributed to companies, users, and features within Schematic, forming the basis for enforcement and insights into behavior.
+### **Subscriptions**
 
-### Subscriptions
+Subscriptions from Stripe are automatically linked to Company Profiles.
 
 <img
-  src="../../assets/images/intro_licenses.png"
+  src="../../assets/images/get-started/get-started-subscriptions-1.png"
 />
 
-Subscriptions are essentially a relationship between a plan in the Product Catalog and a Company Profile. This is intentionally rule-based in Schematic to handle exceptions.
-
-A company may have more than one active subscription at any given time, which would result in a superset of entitlements among them.
-
-### Flags
+Companies can then be assigned membership in Schematic Plans based on those Subscriptions, or by creating explicit audiences based on Company attributes.
 
 <img
-  src="../../assets/images/intro_entitlements.png"
+  src="../../assets/images/get-started/get-started-subscriptions-2.png"
 />
 
-Flags dictate who gets access to what features or services based on their context, and how much of a particular feature they get. This ensures customers can access only the features they should have access to, which is crucial for trials, tiered services, and premium offerings.
+A company may have membership in more than one Plan or Add On in the Catalog at any given time, which would result in the most permissive entitlements among them.
 
-Company access is driven by flag checks that occur at the feature level, informed by the parameters of a company’s subscription and other policy set up in Schematic.
+### **Flags**
+
+<img
+  src="../../assets/images/get-started/get-started-flags-1.png"
+/>
+
+Flags dictate who gets access to what features or services based on their context, and how much of a particular feature they get. This ensures companies can access only the features they should have access to, which is important for trials, tiered services, and premium offerings.
+
+Company access is informed by the parameters of a company’s subscription and other policies set up in Schematic.
