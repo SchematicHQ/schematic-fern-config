@@ -1750,9 +1750,6 @@ components:
           type: string
         external_id:
           type: string
-        invoice_external_id:
-          type: string
-          nullable: true
         payment_method_type:
           type: string
         subscription_external_id:
@@ -3006,9 +3003,6 @@ components:
           nullable: true
         customer_external_id:
           type: string
-        invoice_external_id:
-          type: string
-          nullable: true
         payment_method_type:
           type: string
         subscription_external_id:
@@ -3047,9 +3041,6 @@ components:
           type: string
         id:
           type: string
-        invoice_external_id:
-          type: string
-          nullable: true
         payment_method_type:
           type: string
         subscription_external_id:
@@ -5372,10 +5363,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: invoice_external_id
-          in: query
-          schema:
-            type: string
         - name: subscription_external_id
           in: query
           schema:
@@ -5415,8 +5402,6 @@ paths:
                       company_id:
                         type: string
                       customer_external_id:
-                        type: string
-                      invoice_external_id:
                         type: string
                       limit:
                         type: integer
