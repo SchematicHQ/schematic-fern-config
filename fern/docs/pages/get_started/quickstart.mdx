@@ -51,7 +51,7 @@ Let’s set up companies within the Schematic Dashboard. We’ll do this by sett
     1. If you store a unique identifier in Stripe Customer metadata that you also use in your application (e.g. a `company_id` that is a GUID from your application), choose the first option
     2. If the unique ID that Stripe generates for you (e.g. `cus_nffrfeufn2hib`) is persisted in your application, choose the second option
 
-We’ll opt for the second option (using the Stripe customer ID). Once connected, Schematic should sync companies, subscriptions, and products from Stripe and you should see them appear in the Schematic Dashboard.
+We’ll opt for the second option in this guide (using the Stripe customer ID). Once connected, Schematic should sync companies, subscriptions, and products from Stripe and you should see them appear in the Schematic Dashboard.
 
 <img
 src="../../assets/images/quickstart/quickstart-stripe-import.png"
@@ -70,7 +70,7 @@ src="../../assets/images/quickstart/quickstart-plan-creation.png"
 />
 
 3. In the Billing step, link the Schematic Plan to a Stripe Product
-    1. Select the Stripe Product that reflects the Schematic Plan. Companies that have active subscriptions will automatically become a member of the Schematic Plan.
+    1. Select the Stripe Product that reflects the Schematic Plan. Companies that have active Stripe subscriptions with the mapped product will automatically become a member of the Schematic Plan.
 
 <img
 src="../../assets/images/quickstart/quickstart-plan-mapping.png"
@@ -154,7 +154,7 @@ After [configuring your Catalog](https://docs.schematichq.com/components/overvie
 src="../../assets/images/quickstart/quickstart-components-builder.png"
 />
 
-<Info>Once you configure a Component to your liking, you can drop it directly into your application.</Info>
+<Info>Once you configure a component to your liking, you can [drop it directly into your application](/components/set-up).</Info>
 
 ## Integrate Schematic into your application
 
