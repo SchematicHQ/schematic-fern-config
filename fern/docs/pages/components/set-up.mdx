@@ -3,3 +3,80 @@ title: Set Up Components
 
 slug: components/set-up
 ---
+
+Components are simple to set up and maintain. Once you've integrated a component into your application, it will reflect up-to-date data for the given company that is accessing it in your application. 
+
+To set up components, you'll need to do two things:
+1. Generate a short-lived access token to make requests on behalf of a given company
+2. Embed the SchematicEmbed component in your React frontend using a Component ID from Schematic
+
+Both steps are covered below.
+
+### 1. Set up your server for token exchange
+
+Schematic components use short-lived, company-scoped temporary access tokens to make requests on behalf of a company. You'll need to issue these from your server, using a secret access token.
+
+If you haven't already done so, start by installing the Schematic developer SDK of your choosing. Then, you can implement the token exchange:
+
+<Tabs>
+  <Tab title="Node.js">
+```typescript
+// Initialize Schematic SDK
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+const apiKey = process.env.SCHEMATIC_API_KEY;
+const client = new SchematicClient({ apiKey });
+
+// Get a temporary access token
+export async function getTemporaryAccessToken(companyId: string) {
+    resourceType: "company",
+    lookup: { companyId }, // Use your company keys
+  });
+
+  return resp.data?.token;
+}
+```
+  </Tab>
+  <Tab title="Go">
+```go
+import (
+  "github.com/SchematicHQ/schematic-go"
+  schematicapi "github.com/SchematicHQ/schematic-go/api"
+)
+
+func GetTemporaryAccessToken(ctx context.Context, client schematic.Client, companyId string) (string, error) {
+	resp, _, err := client.API().AccesstokensAPI.IssueTemporaryAccessToken(ctx).IssueTemporaryAccessTokenRequestBody(api.IssueTemporaryAccessTokenRequestBody{
+		Lookup: map[string]string{
+			"company_id": companyId,
+		},
+		ResourceType: "company",
+	}).Execute()
+	if err != nil {
+		return "", err
+	}
+
+	return resp.Data.Token, nil
+}
+```
+  </Tab>
+</Tabs>
+
+Temporary access tokens are valid for 15 minutes.
+
+### 2. Use the SchematicEmbed component in your React frontend application
+
+Once you've issued a temporary access token and provided it to your frontend React application, you can simply pass it to the SchematicEmbed component along with your Component ID to render it:
+
+```typescript
+import { SchematicEmbed } from "@schematichq/schematic-react";
+
+export default function CustomerPortal({ accessToken }: { accessToken: string }) {
+  const componentId = process.env.NEXT_PUBLIC_SCHEMATIC_COMPONENT_ID;
+  if (!componentId) {
+    return <NotFound />;
+  }
+
+  return (
+    <SchematicEmbed accessToken={accessToken} id={componentId} />
+  );
+}
+```
