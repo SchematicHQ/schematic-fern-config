@@ -1,14 +1,14 @@
 api:
-  specs: 
+  specs:
     - openapi: ../schematic.yaml
       overrides: ../overrides.yaml
-      settings: 
-        optional-additional-properties: false 
+      settings:
+        optional-additional-properties: false
 groups:
   python-sdk:
     generators:
       - name: fernapi/fern-python-sdk
-        version: 2.16.0
+        version: 4.2.7
         output:
           location: pypi
           package-name: "schematichq"
