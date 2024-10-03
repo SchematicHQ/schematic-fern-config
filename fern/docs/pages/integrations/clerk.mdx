@@ -1,0 +1,31 @@
+---
+title: Clerk Integration
+
+slug: integrations/clerk
+---
+
+The Clerk integration for Schematic allows you to:
+
+- Automatically import organizations and users from Clerk
+- Enrich existing company profiles with stored metadata
+- Assign entitlements to Clerk organizations
+
+This integration allows you to tie entitlements to new and existing identities managed by Clerk, so you can extend your authentication implemenation and add end-to-end pricing & packaging to your application quickly.
+
+### **Connecting Clerk to Schematic**
+
+- navigate to integrations
+- create Webhook
+- get api key for import
+- activate integration
+- upserts identities
+- updates will be captured via Webhook
+
+### **Implement entitlements**
+
+Once companies are imported into Schematic, you can assign plans and entitlements to them just as you would any other company via plan rules or direct targeting.
+
+In your application, simply add flag checks where appropriate with one of our SDKs.
+
+<Info>To see a full example using the Clerk integration and entitlements from Schematic, check out this sample app.</Info>
+
