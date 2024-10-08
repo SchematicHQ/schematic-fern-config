@@ -321,6 +321,8 @@ components:
     BillingCustomerSubscription:
       type: object
       properties:
+        currency:
+          type: string
         expired_at:
           type: string
           format: date-time
@@ -329,6 +331,7 @@ components:
           type: integer
       required:
         - total_price
+        - currency
       title: BillingCustomerSubscription
     BillingCustomerWithSubscriptionsResponseData:
       type: object
@@ -392,6 +395,8 @@ components:
     BillingPriceResponseData:
       type: object
       properties:
+        currency:
+          type: string
         external_price_id:
           type: string
         id:
@@ -404,6 +409,7 @@ components:
         - id
         - external_price_id
         - price
+        - currency
         - interval
       title: BillingPriceResponseData
     BillingProductDetailResponseData:
@@ -466,11 +472,12 @@ components:
           type: string
         interval:
           type: string
-          nullable: true
         name:
           type: string
         price:
           type: number
+        price_external_id:
+          type: string
         quantity:
           type: number
         subscription_id:
@@ -486,6 +493,8 @@ components:
         - subscription_id
         - name
         - price
+        - price_external_id
+        - interval
         - currency
         - quantity
         - created_at
@@ -518,19 +527,22 @@ components:
     BillingProductPricing:
       type: object
       properties:
+        currency:
+          type: string
         interval:
           type: string
-          nullable: true
         price:
           type: integer
         price_external_id:
           type: string
-          nullable: true
         product_external_id:
           type: string
       required:
         - product_external_id
         - price
+        - interval
+        - currency
+        - price_external_id
       title: BillingProductPricing
     BillingProductResponseData:
       type: object
@@ -571,23 +583,45 @@ components:
       title: BillingProductResponseData
     BillingSubscriptionResponseData:
       type: object
-      description: The created resource
       properties:
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        customer_external_id:
+          type: string
         expired_at:
           type: string
           format: date-time
           nullable: true
-        external_id:
-          type: string
         id:
-          type: integer
-        updated_at:
           type: string
-          format: date-time
+        interval:
+          type: string
+        metadata:
+          type: array
+          items:
+            type: integer
+        status:
+          type: string
+        subscription_external_id:
+          type: string
+        total_price:
+          type: integer
       required:
         - id
-        - external_id
-        - updated_at
+        - customer_external_id
+        - total_price
+        - status
+        - subscription_external_id
+        - interval
+        - currency
+        - metadata
+        - created_at
       title: BillingSubscriptionResponseData
     CheckFlagOutputWithFlagKey:
       type: object
@@ -693,6 +727,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingPlan'
+        billing_subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionResponseData'
         created_at:
           type: string
           format: date-time
@@ -741,6 +779,7 @@ components:
         - entity_traits
         - keys
         - plans
+        - billing_subscriptions
         - user_count
       title: CompanyDetailResponseData
     CompanyMembershipDetailResponseData:
@@ -868,6 +907,8 @@ components:
           type: string
         id:
           type: string
+        is_default:
+          type: boolean
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         name:
@@ -891,9 +932,10 @@ components:
         - updated_at
         - company_count
         - features
+        - is_default
+        - entitlements
         - current
         - valid
-        - entitlements
       title: CompanyPlanDetailResponseData
     CompanyResponseData:
       type: object
@@ -927,6 +969,8 @@ components:
     CompanySubscriptionResponseData:
       type: object
       properties:
+        currency:
+          type: string
         customer_external_id:
           type: string
         expired_at:
@@ -943,6 +987,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+        status:
+          type: string
         subscription_external_id:
           type: string
         total_price:
@@ -953,10 +999,39 @@ components:
         - products
         - subscription_external_id
         - total_price
+        - status
+        - currency
       title: CompanySubscriptionResponseData
-    ComponentHydrateResponseData:
+    ComponenetPreviewResponseData:
       type: object
       description: The returned resource
+      properties:
+        active_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        invoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceResponseData'
+        stripe_embed:
+          $ref: '#/components/schemas/StripeEmbedInfo'
+        subscription:
+          $ref: '#/components/schemas/CompanySubscriptionResponseData'
+        upcoming_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+      required:
+        - active_plans
+        - invoices
+      title: ComponenetPreviewResponseData
+    ComponentHydrateResponseData:
+      type: object
       properties:
         active_plans:
           type: array
@@ -1058,6 +1133,8 @@ components:
     CreateBillingPriceRequestBody:
       type: object
       properties:
+        currency:
+          type: string
         interval:
           type: string
         price:
@@ -1071,6 +1148,7 @@ components:
         - price_external_id
         - interval
         - price
+        - currency
       title: CreateBillingPriceRequestBody
     CreateBillingProductRequestBody:
       type: object
@@ -1095,6 +1173,8 @@ components:
     CreateBillingSubscriptionsRequestBody:
       type: object
       properties:
+        currency:
+          type: string
         customer_external_id:
           type: string
         expired_at:
@@ -1121,6 +1201,7 @@ components:
         - customer_external_id
         - subscription_external_id
         - total_price
+        - currency
         - expired_at
         - product_external_ids
       title: CreateBillingSubscriptionsRequestBody
@@ -1561,6 +1642,7 @@ components:
           nullable: true
         external_id:
           type: string
+          nullable: true
         payment_method_external_id:
           type: string
           nullable: true
@@ -1570,7 +1652,6 @@ components:
         subtotal:
           type: integer
       required:
-        - external_id
         - amount_due
         - amount_paid
         - amount_remaining
@@ -1617,6 +1698,7 @@ components:
             - plan
             - billing_product
             - crm_product
+            - base_plan
         event_subtype:
           type: string
           description: Name of track event type used to measure this condition
@@ -1645,6 +1727,8 @@ components:
             - gte
             - lt
             - lte
+            - is_empty
+            - not_empty
         resource_ids:
           type: array
           description: >-
@@ -2861,6 +2945,7 @@ components:
           type: string
         external_id:
           type: string
+          nullable: true
         id:
           type: string
         payment_method_external_id:
@@ -2878,7 +2963,6 @@ components:
         - id
         - environment_id
         - customer_external_id
-        - external_id
         - created_at
         - updated_at
         - amount_due
@@ -3166,6 +3250,8 @@ components:
           type: string
         id:
           type: string
+        is_default:
+          type: boolean
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         name:
@@ -3187,6 +3273,7 @@ components:
         - updated_at
         - company_count
         - features
+        - is_default
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
@@ -3729,9 +3816,6 @@ components:
     StripeEmbedInfo:
       type: object
       properties:
-        customer_ekey:
-          type: string
-          nullable: true
         publishable_key:
           type: string
         setup_intent_client_secret:
@@ -5522,6 +5606,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_linked_to_plan
+          in: query
+          description: Filter products that are not linked to any plan
+          schema:
+            type: boolean
+            description: Filter products that are not linked to any plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5570,6 +5660,9 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_linked_to_plan:
+                        type: boolean
+                        description: Filter products that are not linked to any plan
                     title: ListProductPricesParams
                 required:
                   - data
@@ -5642,6 +5735,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_linked_to_plan
+          in: query
+          description: Filter products that are not linked to any plan
+          schema:
+            type: boolean
+            description: Filter products that are not linked to any plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5690,6 +5789,9 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_linked_to_plan:
+                        type: boolean
+                        description: Filter products that are not linked to any plan
                     title: ListBillingProductsParams
                 required:
                   - data
@@ -5724,6 +5826,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_linked_to_plan
+          in: query
+          description: Filter products that are not linked to any plan
+          schema:
+            type: boolean
+            description: Filter products that are not linked to any plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -5768,6 +5876,9 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_linked_to_plan:
+                        type: boolean
+                        description: Filter products that are not linked to any plan
                     title: CountBillingProductsParams
                 required:
                   - data
@@ -5828,20 +5939,24 @@ paths:
       parameters:
         - name: ids
           in: query
+          description: Filter companies by multiple company IDs (starts with comp_)
           schema:
             type: array
+            description: Filter companies by multiple company IDs (starts with comp_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter companies by plan ID (starts with plan_)
           schema:
             type: string
+            description: Filter companies by plan ID (starts with plan_)
         - name: q
           in: query
-          description: Search filter
+          description: Search for companies by name, keys or string traits
           schema:
             type: string
-            description: Search filter
+            description: Search for companies by name, keys or string traits
         - name: without_feature_override_for
           in: query
           description: >-
@@ -5892,6 +6007,9 @@ paths:
                     properties:
                       ids:
                         type: array
+                        description: >-
+                          Filter companies by multiple company IDs (starts with
+                          comp_)
                         items:
                           type: string
                       limit:
@@ -5904,9 +6022,10 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: Filter companies by plan ID (starts with plan_)
                       q:
                         type: string
-                        description: Search filter
+                        description: Search for companies by name, keys or string traits
                       without_feature_override_for:
                         type: string
                         description: >-
@@ -6051,20 +6170,24 @@ paths:
       parameters:
         - name: ids
           in: query
+          description: Filter companies by multiple company IDs (starts with comp_)
           schema:
             type: array
+            description: Filter companies by multiple company IDs (starts with comp_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter companies by plan ID (starts with plan_)
           schema:
             type: string
+            description: Filter companies by plan ID (starts with plan_)
         - name: q
           in: query
-          description: Search filter
+          description: Search for companies by name, keys or string traits
           schema:
             type: string
-            description: Search filter
+            description: Search for companies by name, keys or string traits
         - name: without_feature_override_for
           in: query
           description: >-
@@ -6111,6 +6234,9 @@ paths:
                     properties:
                       ids:
                         type: array
+                        description: >-
+                          Filter companies by multiple company IDs (starts with
+                          comp_)
                         items:
                           type: string
                       limit:
@@ -6123,9 +6249,10 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: Filter companies by plan ID (starts with plan_)
                       q:
                         type: string
-                        description: Search filter
+                        description: Search for companies by name, keys or string traits
                       without_feature_override_for:
                         type: string
                         description: >-
@@ -6496,34 +6623,66 @@ paths:
       parameters:
         - name: company_id
           in: query
+          description: >-
+            Filter company overrides by a single company ID (starting with
+            comp_)
           schema:
             type: string
+            description: >-
+              Filter company overrides by a single company ID (starting with
+              comp_)
         - name: company_ids
           in: query
+          description: >-
+            Filter company overrides by multiple company IDs (starting with
+            comp_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple company IDs (starting with
+              comp_)
             items:
               type: string
         - name: feature_id
           in: query
+          description: >-
+            Filter company overrides by a single feature ID (starting with
+            feat_)
           schema:
             type: string
+            description: >-
+              Filter company overrides by a single feature ID (starting with
+              feat_)
         - name: feature_ids
           in: query
+          description: >-
+            Filter company overrides by multiple feature IDs (starting with
+            feat_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple feature IDs (starting with
+              feat_)
             items:
               type: string
         - name: ids
           in: query
+          description: >-
+            Filter company overrides by multiple company override IDs (starting
+            with cmov_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple company override IDs
+              (starting with cmov_)
             items:
               type: string
         - name: q
           in: query
+          description: Search for company overrides by feature or company name
           schema:
             type: string
+            description: Search for company overrides by feature or company name
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6558,18 +6717,33 @@ paths:
                     properties:
                       company_id:
                         type: string
+                        description: >-
+                          Filter company overrides by a single company ID
+                          (starting with comp_)
                       company_ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple company IDs
+                          (starting with comp_)
                         items:
                           type: string
                       feature_id:
                         type: string
+                        description: >-
+                          Filter company overrides by a single feature ID
+                          (starting with feat_)
                       feature_ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple feature IDs
+                          (starting with feat_)
                         items:
                           type: string
                       ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple company override
+                          IDs (starting with cmov_)
                         items:
                           type: string
                       limit:
@@ -6582,6 +6756,9 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: >-
+                          Search for company overrides by feature or company
+                          name
                     title: ListCompanyOverridesParams
                 required:
                   - data
@@ -6764,34 +6941,66 @@ paths:
       parameters:
         - name: company_id
           in: query
+          description: >-
+            Filter company overrides by a single company ID (starting with
+            comp_)
           schema:
             type: string
+            description: >-
+              Filter company overrides by a single company ID (starting with
+              comp_)
         - name: company_ids
           in: query
+          description: >-
+            Filter company overrides by multiple company IDs (starting with
+            comp_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple company IDs (starting with
+              comp_)
             items:
               type: string
         - name: feature_id
           in: query
+          description: >-
+            Filter company overrides by a single feature ID (starting with
+            feat_)
           schema:
             type: string
+            description: >-
+              Filter company overrides by a single feature ID (starting with
+              feat_)
         - name: feature_ids
           in: query
+          description: >-
+            Filter company overrides by multiple feature IDs (starting with
+            feat_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple feature IDs (starting with
+              feat_)
             items:
               type: string
         - name: ids
           in: query
+          description: >-
+            Filter company overrides by multiple company override IDs (starting
+            with cmov_)
           schema:
             type: array
+            description: >-
+              Filter company overrides by multiple company override IDs
+              (starting with cmov_)
             items:
               type: string
         - name: q
           in: query
+          description: Search for company overrides by feature or company name
           schema:
             type: string
+            description: Search for company overrides by feature or company name
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6822,18 +7031,33 @@ paths:
                     properties:
                       company_id:
                         type: string
+                        description: >-
+                          Filter company overrides by a single company ID
+                          (starting with comp_)
                       company_ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple company IDs
+                          (starting with comp_)
                         items:
                           type: string
                       feature_id:
                         type: string
+                        description: >-
+                          Filter company overrides by a single feature ID
+                          (starting with feat_)
                       feature_ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple feature IDs
+                          (starting with feat_)
                         items:
                           type: string
                       ids:
                         type: array
+                        description: >-
+                          Filter company overrides by multiple company override
+                          IDs (starting with cmov_)
                         items:
                           type: string
                       limit:
@@ -6846,6 +7070,9 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: >-
+                          Search for company overrides by feature or company
+                          name
                     title: CountCompanyOverridesParams
                 required:
                   - data
@@ -7276,7 +7503,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ComponentHydrateResponseData'
+                    $ref: '#/components/schemas/ComponenetPreviewResponseData'
                   params:
                     type: object
                     description: Input parameters
@@ -10192,34 +10419,60 @@ paths:
       parameters:
         - name: feature_id
           in: query
+          description: >-
+            Filter plan entitlements by a single feature ID (starting with
+            feat_)
           schema:
             type: string
+            description: >-
+              Filter plan entitlements by a single feature ID (starting with
+              feat_)
         - name: feature_ids
           in: query
+          description: >-
+            Filter plan entitlements by multiple feature IDs (starting with
+            feat_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple feature IDs (starting with
+              feat_)
             items:
               type: string
         - name: ids
           in: query
+          description: >-
+            Filter plan entitlements by multiple plan entitlement IDs (starting
+            with pltl_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple plan entitlement IDs
+              (starting with pltl_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter plan entitlements by a single plan ID (starting with plan_)
           schema:
             type: string
+            description: Filter plan entitlements by a single plan ID (starting with plan_)
         - name: plan_ids
           in: query
+          description: Filter plan entitlements by multiple plan IDs (starting with plan_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple plan IDs (starting with
+              plan_)
             items:
               type: string
         - name: q
           in: query
+          description: Search for plan entitlements by feature or company name
           schema:
             type: string
+            description: Search for plan entitlements by feature or company name
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10254,12 +10507,21 @@ paths:
                     properties:
                       feature_id:
                         type: string
+                        description: >-
+                          Filter plan entitlements by a single feature ID
+                          (starting with feat_)
                       feature_ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple feature IDs
+                          (starting with feat_)
                         items:
                           type: string
                       ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan entitlement
+                          IDs (starting with pltl_)
                         items:
                           type: string
                       limit:
@@ -10272,12 +10534,21 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: >-
+                          Filter plan entitlements by a single plan ID (starting
+                          with plan_)
                       plan_ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan IDs
+                          (starting with plan_)
                         items:
                           type: string
                       q:
                         type: string
+                        description: >-
+                          Search for plan entitlements by feature or company
+                          name
                     title: ListPlanEntitlementsParams
                 required:
                   - data
@@ -10460,34 +10731,60 @@ paths:
       parameters:
         - name: feature_id
           in: query
+          description: >-
+            Filter plan entitlements by a single feature ID (starting with
+            feat_)
           schema:
             type: string
+            description: >-
+              Filter plan entitlements by a single feature ID (starting with
+              feat_)
         - name: feature_ids
           in: query
+          description: >-
+            Filter plan entitlements by multiple feature IDs (starting with
+            feat_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple feature IDs (starting with
+              feat_)
             items:
               type: string
         - name: ids
           in: query
+          description: >-
+            Filter plan entitlements by multiple plan entitlement IDs (starting
+            with pltl_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple plan entitlement IDs
+              (starting with pltl_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter plan entitlements by a single plan ID (starting with plan_)
           schema:
             type: string
+            description: Filter plan entitlements by a single plan ID (starting with plan_)
         - name: plan_ids
           in: query
+          description: Filter plan entitlements by multiple plan IDs (starting with plan_)
           schema:
             type: array
+            description: >-
+              Filter plan entitlements by multiple plan IDs (starting with
+              plan_)
             items:
               type: string
         - name: q
           in: query
+          description: Search for plan entitlements by feature or company name
           schema:
             type: string
+            description: Search for plan entitlements by feature or company name
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10518,12 +10815,21 @@ paths:
                     properties:
                       feature_id:
                         type: string
+                        description: >-
+                          Filter plan entitlements by a single feature ID
+                          (starting with feat_)
                       feature_ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple feature IDs
+                          (starting with feat_)
                         items:
                           type: string
                       ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan entitlement
+                          IDs (starting with pltl_)
                         items:
                           type: string
                       limit:
@@ -10536,12 +10842,21 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: >-
+                          Filter plan entitlements by a single plan ID (starting
+                          with plan_)
                       plan_ids:
                         type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan IDs
+                          (starting with plan_)
                         items:
                           type: string
                       q:
                         type: string
+                        description: >-
+                          Search for plan entitlements by feature or company
+                          name
                     title: CountPlanEntitlementsParams
                 required:
                   - data
@@ -10707,6 +11022,12 @@ paths:
           schema:
             type: boolean
             description: Filter out plans that do not have a billing product ID
+        - name: without_product_id
+          in: query
+          description: Filter out plans that have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a billing product ID
         - name: without_entitlement_for
           in: query
           description: >-
@@ -10779,6 +11100,9 @@ paths:
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_product_id:
+                        type: boolean
+                        description: Filter out plans that have a billing product ID
                     title: ListPlansParams
                 required:
                   - data
@@ -11035,6 +11359,12 @@ paths:
           schema:
             type: boolean
             description: Filter out plans that do not have a billing product ID
+        - name: without_product_id
+          in: query
+          description: Filter out plans that have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a billing product ID
         - name: without_entitlement_for
           in: query
           description: >-
@@ -11103,6 +11433,9 @@ paths:
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_product_id:
+                        type: boolean
+                        description: Filter out plans that have a billing product ID
                     title: CountPlansParams
                 required:
                   - data
@@ -11275,24 +11608,30 @@ paths:
       parameters:
         - name: company_id
           in: query
+          description: Filter users by company ID (starts with comp_)
           schema:
             type: string
+            description: Filter users by company ID (starts with comp_)
         - name: ids
           in: query
+          description: Filter users by multiple user IDs (starts with user_)
           schema:
             type: array
+            description: Filter users by multiple user IDs (starts with user_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter users by plan ID (starts with plan_)
           schema:
             type: string
+            description: Filter users by plan ID (starts with plan_)
         - name: q
           in: query
-          description: Search filter
+          description: Search for users by name, keys or string traits
           schema:
             type: string
-            description: Search filter
+            description: Search for users by name, keys or string traits
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11327,8 +11666,10 @@ paths:
                     properties:
                       company_id:
                         type: string
+                        description: Filter users by company ID (starts with comp_)
                       ids:
                         type: array
+                        description: Filter users by multiple user IDs (starts with user_)
                         items:
                           type: string
                       limit:
@@ -11341,9 +11682,10 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: Filter users by plan ID (starts with plan_)
                       q:
                         type: string
-                        description: Search filter
+                        description: Search for users by name, keys or string traits
                     title: ListUsersParams
                 required:
                   - data
@@ -11480,24 +11822,30 @@ paths:
       parameters:
         - name: company_id
           in: query
+          description: Filter users by company ID (starts with comp_)
           schema:
             type: string
+            description: Filter users by company ID (starts with comp_)
         - name: ids
           in: query
+          description: Filter users by multiple user IDs (starts with user_)
           schema:
             type: array
+            description: Filter users by multiple user IDs (starts with user_)
             items:
               type: string
         - name: plan_id
           in: query
+          description: Filter users by plan ID (starts with plan_)
           schema:
             type: string
+            description: Filter users by plan ID (starts with plan_)
         - name: q
           in: query
-          description: Search filter
+          description: Search for users by name, keys or string traits
           schema:
             type: string
-            description: Search filter
+            description: Search for users by name, keys or string traits
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11528,8 +11876,10 @@ paths:
                     properties:
                       company_id:
                         type: string
+                        description: Filter users by company ID (starts with comp_)
                       ids:
                         type: array
+                        description: Filter users by multiple user IDs (starts with user_)
                         items:
                           type: string
                       limit:
@@ -11542,9 +11892,10 @@ paths:
                         example: '0'
                       plan_id:
                         type: string
+                        description: Filter users by plan ID (starts with plan_)
                       q:
                         type: string
-                        description: Search filter
+                        description: Search for users by name, keys or string traits
                     title: CountUsersParams
                 required:
                   - data
