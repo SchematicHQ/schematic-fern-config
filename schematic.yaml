@@ -584,44 +584,30 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
-        company_id:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
         currency:
-          type: string
-        customer_external_id:
           type: string
         expired_at:
           type: string
           format: date-time
           nullable: true
+        external_id:
+          type: string
         id:
           type: string
         interval:
           type: string
-        metadata:
-          type: array
-          items:
-            type: integer
-        status:
-          type: string
-        subscription_external_id:
-          type: string
         total_price:
           type: integer
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
-        - customer_external_id
+        - external_id
+        - updated_at
         - total_price
-        - status
-        - subscription_external_id
         - interval
         - currency
-        - metadata
-        - created_at
       title: BillingSubscriptionResponseData
     CheckFlagOutputWithFlagKey:
       type: object
@@ -1002,7 +988,29 @@ components:
         - status
         - currency
       title: CompanySubscriptionResponseData
-    ComponenetPreviewResponseData:
+    ComponentHydrateResponseData:
+      type: object
+      properties:
+        active_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        stripe_embed:
+          $ref: '#/components/schemas/StripeEmbedInfo'
+        subscription:
+          $ref: '#/components/schemas/CompanySubscriptionResponseData'
+        upcoming_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+      required:
+        - active_plans
+      title: ComponentHydrateResponseData
+    ComponentPreviewResponseData:
       type: object
       description: The returned resource
       properties:
@@ -1029,29 +1037,7 @@ components:
       required:
         - active_plans
         - invoices
-      title: ComponenetPreviewResponseData
-    ComponentHydrateResponseData:
-      type: object
-      properties:
-        active_plans:
-          type: array
-          items:
-            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
-        company:
-          $ref: '#/components/schemas/CompanyDetailResponseData'
-        component:
-          $ref: '#/components/schemas/ComponentResponseData'
-        feature_usage:
-          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
-        stripe_embed:
-          $ref: '#/components/schemas/StripeEmbedInfo'
-        subscription:
-          $ref: '#/components/schemas/CompanySubscriptionResponseData'
-        upcoming_invoice:
-          $ref: '#/components/schemas/InvoiceResponseData'
-      required:
-        - active_plans
-      title: ComponentHydrateResponseData
+      title: ComponentPreviewResponseData
     ComponentResponseData:
       type: object
       description: The updated resource
@@ -7503,7 +7489,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ComponenetPreviewResponseData'
+                    $ref: '#/components/schemas/ComponentPreviewResponseData'
                   params:
                     type: object
                     description: Input parameters
