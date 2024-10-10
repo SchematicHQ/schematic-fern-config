@@ -584,44 +584,30 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
-        company_id:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
         currency:
-          type: string
-        customer_external_id:
           type: string
         expired_at:
           type: string
           format: date-time
           nullable: true
+        external_id:
+          type: string
         id:
           type: string
         interval:
           type: string
-        metadata:
-          type: array
-          items:
-            type: integer
-        status:
-          type: string
-        subscription_external_id:
-          type: string
         total_price:
           type: integer
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
-        - customer_external_id
+        - external_id
+        - updated_at
         - total_price
-        - status
-        - subscription_external_id
         - interval
         - currency
-        - metadata
-        - created_at
       title: BillingSubscriptionResponseData
     CheckFlagOutputWithFlagKey:
       type: object
@@ -1002,7 +988,29 @@ components:
         - status
         - currency
       title: CompanySubscriptionResponseData
-    ComponenetPreviewResponseData:
+    ComponentHydrateResponseData:
+      type: object
+      properties:
+        active_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        component:
+          $ref: '#/components/schemas/ComponentResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        stripe_embed:
+          $ref: '#/components/schemas/StripeEmbedInfo'
+        subscription:
+          $ref: '#/components/schemas/CompanySubscriptionResponseData'
+        upcoming_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+      required:
+        - active_plans
+      title: ComponentHydrateResponseData
+    ComponentPreviewResponseData:
       type: object
       description: The returned resource
       properties:
@@ -1029,29 +1037,7 @@ components:
       required:
         - active_plans
         - invoices
-      title: ComponenetPreviewResponseData
-    ComponentHydrateResponseData:
-      type: object
-      properties:
-        active_plans:
-          type: array
-          items:
-            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
-        company:
-          $ref: '#/components/schemas/CompanyDetailResponseData'
-        component:
-          $ref: '#/components/schemas/ComponentResponseData'
-        feature_usage:
-          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
-        stripe_embed:
-          $ref: '#/components/schemas/StripeEmbedInfo'
-        subscription:
-          $ref: '#/components/schemas/CompanySubscriptionResponseData'
-        upcoming_invoice:
-          $ref: '#/components/schemas/InvoiceResponseData'
-      required:
-        - active_plans
-      title: ComponentHydrateResponseData
+      title: ComponentPreviewResponseData
     ComponentResponseData:
       type: object
       description: The updated resource
@@ -7503,7 +7489,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ComponenetPreviewResponseData'
+                    $ref: '#/components/schemas/ComponentPreviewResponseData'
                   params:
                     type: object
                     description: Input parameters
@@ -7945,6 +7931,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: trait_type
           in: query
           schema:
@@ -7956,10 +7946,6 @@ paths:
               - number
               - string
               - url
-        - name: q
-          in: query
-          schema:
-            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8175,6 +8161,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: trait_type
           in: query
           schema:
@@ -8186,10 +8176,6 @@ paths:
               - number
               - string
               - url
-        - name: q
-          in: query
-          schema:
-            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10997,16 +10983,18 @@ paths:
           in: query
           schema:
             type: string
+        - name: has_product_id
+          in: query
+          description: Filter out plans that do not have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that do not have a billing product ID
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
-        - name: q
-          in: query
-          schema:
-            type: string
         - name: plan_type
           in: query
           description: Filter by plan type
@@ -11016,18 +11004,10 @@ paths:
             enum:
               - plan
               - add_on
-        - name: has_product_id
+        - name: q
           in: query
-          description: Filter out plans that do not have a billing product ID
           schema:
-            type: boolean
-            description: Filter out plans that do not have a billing product ID
-        - name: without_product_id
-          in: query
-          description: Filter out plans that have a billing product ID
-          schema:
-            type: boolean
-            description: Filter out plans that have a billing product ID
+            type: string
         - name: without_entitlement_for
           in: query
           description: >-
@@ -11038,6 +11018,12 @@ paths:
             description: >-
               Filter out plans that already have a plan entitlement for the
               specified feature ID
+        - name: without_product_id
+          in: query
+          description: Filter out plans that have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a billing product ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11334,16 +11320,18 @@ paths:
           in: query
           schema:
             type: string
+        - name: has_product_id
+          in: query
+          description: Filter out plans that do not have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that do not have a billing product ID
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
-        - name: q
-          in: query
-          schema:
-            type: string
         - name: plan_type
           in: query
           description: Filter by plan type
@@ -11353,18 +11341,10 @@ paths:
             enum:
               - plan
               - add_on
-        - name: has_product_id
+        - name: q
           in: query
-          description: Filter out plans that do not have a billing product ID
           schema:
-            type: boolean
-            description: Filter out plans that do not have a billing product ID
-        - name: without_product_id
-          in: query
-          description: Filter out plans that have a billing product ID
-          schema:
-            type: boolean
-            description: Filter out plans that have a billing product ID
+            type: string
         - name: without_entitlement_for
           in: query
           description: >-
@@ -11375,6 +11355,12 @@ paths:
             description: >-
               Filter out plans that already have a plan entitlement for the
               specified feature ID
+        - name: without_product_id
+          in: query
+          description: Filter out plans that have a billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a billing product ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12034,10 +12020,6 @@ paths:
       tags:
         - webhooks
       parameters:
-        - name: webhook_id
-          in: query
-          schema:
-            type: string
         - name: ids
           in: query
           schema:
@@ -12045,6 +12027,10 @@ paths:
             items:
               type: string
         - name: q
+          in: query
+          schema:
+            type: string
+        - name: webhook_id
           in: query
           schema:
             type: string
@@ -12155,10 +12141,6 @@ paths:
       tags:
         - webhooks
       parameters:
-        - name: webhook_id
-          in: query
-          schema:
-            type: string
         - name: ids
           in: query
           schema:
@@ -12166,6 +12148,10 @@ paths:
             items:
               type: string
         - name: q
+          in: query
+          schema:
+            type: string
+        - name: webhook_id
           in: query
           schema:
             type: string
