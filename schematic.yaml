@@ -1172,6 +1172,12 @@ components:
         metadata:
           type: object
           nullable: true
+        period_end:
+          type: integer
+          nullable: true
+        period_start:
+          type: integer
+          nullable: true
         product_external_ids:
           type: array
           items:
@@ -1202,6 +1208,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1697,6 +1704,7 @@ components:
           description: Period of time over which to measure the track event metric
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1839,6 +1847,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1907,6 +1916,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -3871,6 +3881,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -3999,6 +4010,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -4055,6 +4067,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -9040,6 +9053,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_negative_entitlements
+          in: query
+          schema:
+            type: boolean
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9092,6 +9109,8 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_negative_entitlements:
+                        type: boolean
                     title: ListFeatureUsageParams
                 required:
                   - data
@@ -9132,6 +9151,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_negative_entitlements
+          in: query
+          schema:
+            type: boolean
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9180,6 +9203,8 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_negative_entitlements:
+                        type: boolean
                     title: CountFeatureUsageParams
                 required:
                   - data
