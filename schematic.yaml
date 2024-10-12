@@ -1644,6 +1644,9 @@ components:
           nullable: true
         subtotal:
           type: integer
+        url:
+          type: string
+          nullable: true
       required:
         - amount_due
         - amount_paid
@@ -1812,6 +1815,21 @@ components:
     CreatePaymentMethodRequestBody:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
@@ -2903,6 +2921,9 @@ components:
           nullable: true
         subtotal:
           type: integer
+        url:
+          type: string
+          nullable: true
       required:
         - amount_due
         - amount_paid
@@ -2955,6 +2976,9 @@ components:
         updated_at:
           type: string
           format: date-time
+        url:
+          type: string
+          nullable: true
       required:
         - id
         - environment_id
@@ -3069,6 +3093,21 @@ components:
     PaymentMethodRequestBody:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
@@ -3095,6 +3134,21 @@ components:
     PaymentMethodResponseData:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
