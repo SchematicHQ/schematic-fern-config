@@ -1172,6 +1172,12 @@ components:
         metadata:
           type: object
           nullable: true
+        period_end:
+          type: integer
+          nullable: true
+        period_start:
+          type: integer
+          nullable: true
         product_external_ids:
           type: array
           items:
@@ -1202,6 +1208,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1637,6 +1644,9 @@ components:
           nullable: true
         subtotal:
           type: integer
+        url:
+          type: string
+          nullable: true
       required:
         - amount_due
         - amount_paid
@@ -1697,6 +1707,7 @@ components:
           description: Period of time over which to measure the track event metric
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1804,6 +1815,21 @@ components:
     CreatePaymentMethodRequestBody:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
@@ -1839,6 +1865,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -1907,6 +1934,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -2893,6 +2921,9 @@ components:
           nullable: true
         subtotal:
           type: integer
+        url:
+          type: string
+          nullable: true
       required:
         - amount_due
         - amount_paid
@@ -2945,6 +2976,9 @@ components:
         updated_at:
           type: string
           format: date-time
+        url:
+          type: string
+          nullable: true
       required:
         - id
         - environment_id
@@ -3059,6 +3093,21 @@ components:
     PaymentMethodRequestBody:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
@@ -3085,6 +3134,21 @@ components:
     PaymentMethodResponseData:
       type: object
       properties:
+        account_last4:
+          type: string
+          nullable: true
+        account_name:
+          type: string
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        billing_email:
+          type: string
+          nullable: true
+        billing_name:
+          type: string
+          nullable: true
         card_brand:
           type: string
           nullable: true
@@ -3871,6 +3935,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -3999,6 +4064,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -4055,6 +4121,7 @@ components:
           type: string
           nullable: true
           enum:
+            - billing
             - current_month
             - current_week
             - current_day
@@ -9040,6 +9107,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_negative_entitlements
+          in: query
+          schema:
+            type: boolean
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9092,6 +9163,8 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_negative_entitlements:
+                        type: boolean
                     title: ListFeatureUsageParams
                 required:
                   - data
@@ -9132,6 +9205,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: without_negative_entitlements
+          in: query
+          schema:
+            type: boolean
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -9180,6 +9257,8 @@ paths:
                         example: '0'
                       q:
                         type: string
+                      without_negative_entitlements:
+                        type: boolean
                     title: CountFeatureUsageParams
                 required:
                   - data
