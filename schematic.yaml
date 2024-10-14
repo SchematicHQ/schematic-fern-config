@@ -369,29 +369,6 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
-    BillingPlan:
-      type: object
-      properties:
-        description:
-          type: string
-          nullable: true
-        id:
-          type: string
-        image_url:
-          type: string
-          nullable: true
-        name:
-          type: string
-        plan_period:
-          type: string
-          nullable: true
-        plan_price:
-          type: integer
-          nullable: true
-      required:
-        - id
-        - name
-      title: BillingPlan
     BillingPriceResponseData:
       type: object
       properties:
@@ -712,7 +689,7 @@ components:
         add_ons:
           type: array
           items:
-            $ref: '#/components/schemas/BillingPlan'
+            $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
         billing_subscriptions:
           type: array
           items:
@@ -742,7 +719,7 @@ components:
         name:
           type: string
         plan:
-          $ref: '#/components/schemas/BillingPlan'
+          $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
         plans:
           type: array
           items:
@@ -923,6 +900,32 @@ components:
         - current
         - valid
       title: CompanyPlanDetailResponseData
+    CompanyPlanWithBillingSubView:
+      type: object
+      properties:
+        billing_product_id:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        interval:
+          type: string
+          nullable: true
+        name:
+          type: string
+        price:
+          type: integer
+          nullable: true
+      required:
+        - id
+        - name
+      title: CompanyPlanWithBillingSubView
     CompanyResponseData:
       type: object
       properties:
@@ -1895,6 +1898,10 @@ components:
     CreatePlanGroupRequestBody:
       type: object
       properties:
+        add_on_ids:
+          type: array
+          items:
+            type: string
         default_plan_id:
           type: string
           nullable: true
@@ -1903,6 +1910,7 @@ components:
           items:
             type: string
       required:
+        - add_on_ids
         - plan_ids
       title: CreatePlanGroupRequestBody
     CreatePlanRequestBody:
@@ -3450,6 +3458,10 @@ components:
       type: object
       description: The updated resource
       properties:
+        add_on_ids:
+          type: array
+          items:
+            type: string
         default_plan_id:
           type: string
           nullable: true
@@ -3461,6 +3473,7 @@ components:
             type: string
       required:
         - id
+        - add_on_ids
         - plan_ids
       title: PlanGroupResponseData
     PlanResponseData:
@@ -4090,6 +4103,10 @@ components:
     UpdatePlanGroupRequestBody:
       type: object
       properties:
+        add_on_ids:
+          type: array
+          items:
+            type: string
         default_plan_id:
           type: string
           nullable: true
@@ -4098,6 +4115,7 @@ components:
           items:
             type: string
       required:
+        - add_on_ids
         - plan_ids
       title: UpdatePlanGroupRequestBody
     UpdatePlanRequestBody:
