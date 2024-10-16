@@ -723,7 +723,7 @@ components:
         plans:
           type: array
           items:
-            $ref: '#/components/schemas/PreviewObject'
+            $ref: '#/components/schemas/GenericPreviewObject'
         traits:
           type: object
           description: A map of trait names to trait values
@@ -914,12 +914,12 @@ components:
         image_url:
           type: string
           nullable: true
-        interval:
-          type: string
-          nullable: true
         name:
           type: string
-        price:
+        plan_period:
+          type: string
+          nullable: true
+        plan_price:
           type: integer
           nullable: true
       required:
@@ -2891,6 +2891,23 @@ components:
         - name
         - updated_at
       title: FlagResponseData
+    GenericPreviewObject:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: GenericPreviewObject
     GetOrCreateCompanyMembershipRequestBody:
       type: object
       properties:
