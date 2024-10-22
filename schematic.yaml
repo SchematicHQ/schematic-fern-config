@@ -1014,6 +1014,10 @@ components:
     ComponentHydrateResponseData:
       type: object
       properties:
+        ActiveAddOns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
         active_plans:
           type: array
           items:
@@ -1031,12 +1035,17 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
+        - ActiveAddOns
         - active_plans
       title: ComponentHydrateResponseData
     ComponentPreviewResponseData:
       type: object
       description: The returned resource
       properties:
+        ActiveAddOns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
         active_plans:
           type: array
           items:
@@ -1058,6 +1067,7 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
+        - ActiveAddOns
         - active_plans
         - invoices
       title: ComponentPreviewResponseData
