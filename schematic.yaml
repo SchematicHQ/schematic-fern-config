@@ -369,6 +369,26 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingMeterResponseData:
+      type: object
+      properties:
+        dispaly_name:
+          type: string
+        event_name:
+          type: string
+        event_payload_key:
+          type: string
+        external_price_id:
+          type: string
+        id:
+          type: string
+      required:
+        - id
+        - external_price_id
+        - dispaly_name
+        - event_name
+        - event_payload_key
+      title: BillingMeterResponseData
     BillingPriceResponseData:
       type: object
       properties:
@@ -994,6 +1014,10 @@ components:
     ComponentHydrateResponseData:
       type: object
       properties:
+        ActiveAddOns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
         active_plans:
           type: array
           items:
@@ -1011,12 +1035,17 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
+        - ActiveAddOns
         - active_plans
       title: ComponentHydrateResponseData
     ComponentPreviewResponseData:
       type: object
       description: The returned resource
       properties:
+        ActiveAddOns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyPlanDetailResponseData'
         active_plans:
           type: array
           items:
@@ -1038,6 +1067,7 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
+        - ActiveAddOns
         - active_plans
         - invoices
       title: ComponentPreviewResponseData
@@ -1659,6 +1689,23 @@ components:
         - customer_external_id
         - subtotal
       title: CreateInvoiceRequestBody
+    CreateMeterRequestBody:
+      type: object
+      properties:
+        DisplayName:
+          type: string
+        EventName:
+          type: string
+        EventPayloadKey:
+          type: string
+        external_id:
+          type: string
+      required:
+        - external_id
+        - DisplayName
+        - EventName
+        - EventPayloadKey
+      title: CreateMeterRequestBody
     CreateOrUpdateConditionGroupRequestBody:
       type: object
       properties:
@@ -3073,6 +3120,20 @@ components:
       required:
         - keys
       title: KeysRequestBody
+    MeterRequestBody:
+      type: object
+      properties:
+        DisplayName:
+          type: string
+        EventName:
+          type: string
+        EventPayloadKey:
+          type: string
+      required:
+        - DisplayName
+        - EventName
+        - EventPayloadKey
+      title: MeterRequestBody
     MetricCountsHourlyResponseData:
       type: object
       properties:
@@ -5519,6 +5580,110 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/meter:
+    get:
+      operationId: listMeters
+      summary: List meters
+      tags:
+        - billing
+      parameters:
+        - name: display_name
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingMeterResponseData'
+                    title: ListMetersResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      display_name:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                    title: ListMetersParams
+                required:
+                  - data
+                  - params
+                title: ListMetersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/meter/upsert:
+    post:
+      operationId: upsertBillingMeter
+      summary: Upsert billing meter
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeterRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingMeterResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingMeterParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingMeterResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/payment-methods:
     get:
       operationId: listPaymentMethods
@@ -5756,6 +5921,45 @@ paths:
                   - data
                   - params
                 title: ListProductPricesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/product/prices/{billing_id}:
+    delete:
+      operationId: deleteProductPrice
+      summary: Delete product price
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteProductPriceParams
+                required:
+                  - data
+                  - params
+                title: DeleteProductPriceResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
