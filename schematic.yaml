@@ -412,10 +412,6 @@ components:
     BillingProductDetailResponseData:
       type: object
       properties:
-        Prices:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingPriceResponseData'
         account_id:
           type: string
         created_at:
@@ -431,6 +427,10 @@ components:
           type: string
         price:
           type: number
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPriceResponseData'
         product_id:
           type: string
         quantity:
@@ -449,13 +449,11 @@ components:
         - quantity
         - created_at
         - updated_at
-        - Prices
+        - prices
       title: BillingProductDetailResponseData
     BillingProductForSubscriptionResponseData:
       type: object
       properties:
-        account_id:
-          type: string
         created_at:
           type: string
           format: date-time
@@ -472,7 +470,7 @@ components:
         name:
           type: string
         price:
-          type: number
+          type: integer
         price_external_id:
           type: string
         quantity:
@@ -484,16 +482,15 @@ components:
           format: date-time
       required:
         - id
-        - account_id
         - environment_id
         - external_id
-        - subscription_id
         - name
+        - quantity
+        - currency
         - price
         - price_external_id
         - interval
-        - currency
-        - quantity
+        - subscription_id
         - created_at
         - updated_at
       title: BillingProductForSubscriptionResponseData
@@ -581,31 +578,102 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
         currency:
+          type: string
+        customer_external_id:
           type: string
         expired_at:
           type: string
           format: date-time
           nullable: true
-        external_id:
-          type: string
         id:
           type: string
         interval:
           type: string
+        metadata:
+          type: object
+        period_end:
+          type: integer
+        period_start:
+          type: integer
+        status:
+          type: string
+        subscription_external_id:
+          type: string
         total_price:
           type: integer
-        updated_at:
+      required:
+        - created_at
+        - currency
+        - customer_external_id
+        - period_start
+        - period_end
+        - subscription_external_id
+        - id
+        - interval
+        - total_price
+        - status
+      title: BillingSubscriptionResponseData
+    BillingSubscriptionView:
+      type: object
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        created_at:
           type: string
           format: date-time
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        expired_at:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        interval:
+          type: string
+        latest_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+        metadata:
+          type: object
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodResponseData'
+        period_end:
+          type: integer
+        period_start:
+          type: integer
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+        status:
+          type: string
+        subscription_external_id:
+          type: string
+        total_price:
+          type: integer
       required:
-        - id
-        - external_id
-        - updated_at
-        - total_price
-        - interval
+        - created_at
         - currency
-      title: BillingSubscriptionResponseData
+        - customer_external_id
+        - period_start
+        - period_end
+        - subscription_external_id
+        - id
+        - interval
+        - total_price
+        - status
+        - products
+      title: BillingSubscriptionView
     CheckFlagOutputWithFlagKey:
       type: object
       properties:
@@ -713,7 +781,7 @@ components:
         billing_subscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/BillingSubscriptionResponseData'
+            $ref: '#/components/schemas/BillingSubscriptionView'
         created_at:
           type: string
           format: date-time
@@ -1011,10 +1079,18 @@ components:
         - status
         - currency
       title: CompanySubscriptionResponseData
+    ComponentCapabilities:
+      type: object
+      properties:
+        checkout:
+          type: boolean
+      required:
+        - checkout
+      title: ComponentCapabilities
     ComponentHydrateResponseData:
       type: object
       properties:
-        ActiveAddOns:
+        active_add_ons:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
@@ -1022,6 +1098,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        capabilities:
+          $ref: '#/components/schemas/ComponentCapabilities'
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         component:
@@ -1035,14 +1113,14 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
-        - ActiveAddOns
+        - active_add_ons
         - active_plans
       title: ComponentHydrateResponseData
     ComponentPreviewResponseData:
       type: object
       description: The returned resource
       properties:
-        ActiveAddOns:
+        active_add_ons:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
@@ -1050,6 +1128,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        capabilities:
+          $ref: '#/components/schemas/ComponentCapabilities'
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         component:
@@ -1067,7 +1147,7 @@ components:
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
-        - ActiveAddOns
+        - active_add_ons
         - active_plans
         - invoices
       title: ComponentPreviewResponseData
@@ -1330,9 +1410,6 @@ components:
     CreateCrmLineItemRequestBody:
       type: object
       properties:
-        TermMonth:
-          type: integer
-          nullable: true
         amount:
           type: string
         discount_percentage:
@@ -1346,6 +1423,9 @@ components:
           type: string
         quantity:
           type: integer
+        term_month:
+          type: integer
+          nullable: true
         total_discount:
           type: string
           nullable: true
@@ -1692,19 +1772,19 @@ components:
     CreateMeterRequestBody:
       type: object
       properties:
-        DisplayName:
+        display_name:
           type: string
-        EventName:
+        event_name:
           type: string
-        EventPayloadKey:
+        event_payload_key:
           type: string
         external_id:
           type: string
       required:
         - external_id
-        - DisplayName
-        - EventName
-        - EventPayloadKey
+        - display_name
+        - event_name
+        - event_payload_key
       title: CreateMeterRequestBody
     CreateOrUpdateConditionGroupRequestBody:
       type: object
@@ -3123,16 +3203,16 @@ components:
     MeterRequestBody:
       type: object
       properties:
-        DisplayName:
+        display_name:
           type: string
-        EventName:
+        event_name:
           type: string
-        EventPayloadKey:
+        event_payload_key:
           type: string
       required:
-        - DisplayName
-        - EventName
-        - EventPayloadKey
+        - display_name
+        - event_name
+        - event_payload_key
       title: MeterRequestBody
     MetricCountsHourlyResponseData:
       type: object
@@ -3929,7 +4009,7 @@ components:
       type: object
       description: The updated resource
       properties:
-        Flag:
+        flag:
           $ref: '#/components/schemas/FlagResponseData'
         rules:
           type: array
@@ -4314,14 +4394,13 @@ components:
       properties:
         billing_product_id:
           type: string
+          nullable: true
         monthly_price_id:
           type: string
           nullable: true
         yearly_price_id:
           type: string
           nullable: true
-      required:
-        - billing_product_id
       title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
       type: object
@@ -7387,9 +7466,14 @@ paths:
       parameters:
         - name: company_id
           in: query
-          required: true
           schema:
             type: string
+        - name: company_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -7424,6 +7508,10 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      company_ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
