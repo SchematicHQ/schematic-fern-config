@@ -412,10 +412,6 @@ components:
     BillingProductDetailResponseData:
       type: object
       properties:
-        Prices:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingPriceResponseData'
         account_id:
           type: string
         created_at:
@@ -431,6 +427,10 @@ components:
           type: string
         price:
           type: number
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPriceResponseData'
         product_id:
           type: string
         quantity:
@@ -449,7 +449,7 @@ components:
         - quantity
         - created_at
         - updated_at
-        - Prices
+        - prices
       title: BillingProductDetailResponseData
     BillingProductForSubscriptionResponseData:
       type: object
@@ -1410,9 +1410,6 @@ components:
     CreateCrmLineItemRequestBody:
       type: object
       properties:
-        TermMonth:
-          type: integer
-          nullable: true
         amount:
           type: string
         discount_percentage:
@@ -1426,6 +1423,9 @@ components:
           type: string
         quantity:
           type: integer
+        term_month:
+          type: integer
+          nullable: true
         total_discount:
           type: string
           nullable: true
@@ -1772,19 +1772,19 @@ components:
     CreateMeterRequestBody:
       type: object
       properties:
-        DisplayName:
+        display_name:
           type: string
-        EventName:
+        event_name:
           type: string
-        EventPayloadKey:
+        event_payload_key:
           type: string
         external_id:
           type: string
       required:
         - external_id
-        - DisplayName
-        - EventName
-        - EventPayloadKey
+        - display_name
+        - event_name
+        - event_payload_key
       title: CreateMeterRequestBody
     CreateOrUpdateConditionGroupRequestBody:
       type: object
@@ -3203,16 +3203,16 @@ components:
     MeterRequestBody:
       type: object
       properties:
-        DisplayName:
+        display_name:
           type: string
-        EventName:
+        event_name:
           type: string
-        EventPayloadKey:
+        event_payload_key:
           type: string
       required:
-        - DisplayName
-        - EventName
-        - EventPayloadKey
+        - display_name
+        - event_name
+        - event_payload_key
       title: MeterRequestBody
     MetricCountsHourlyResponseData:
       type: object
@@ -4009,7 +4009,7 @@ components:
       type: object
       description: The updated resource
       properties:
-        Flag:
+        flag:
           $ref: '#/components/schemas/FlagResponseData'
         rules:
           type: array
@@ -4394,14 +4394,13 @@ components:
       properties:
         billing_product_id:
           type: string
+          nullable: true
         monthly_price_id:
           type: string
           nullable: true
         yearly_price_id:
           type: string
           nullable: true
-      required:
-        - billing_product_id
       title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
       type: object
