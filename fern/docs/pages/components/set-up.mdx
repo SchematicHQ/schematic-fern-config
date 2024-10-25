@@ -16,7 +16,7 @@ Both steps are covered below.
 
 Schematic components use short-lived, company-scoped temporary access tokens to make requests on behalf of a company. You'll need to issue these from your server, using a secret access token.
 
-If you haven't already done so, start by installing the Schematic developer SDK of your choosing. Then, you can implement the token exchange:
+If you haven't already done so, start by installing the Schematic developer SDK of your choosing. Then, you can implement the token exchange for a specific company using its [keys](https://docs.schematichq.com/developer_resources/concepts#keys-vs-traits):
 
 <Tabs>
   <Tab title="Node.js">
@@ -28,8 +28,9 @@ const client = new SchematicClient({ apiKey });
 
 // Get a temporary access token
 export async function getTemporaryAccessToken(companyId: string) {
+  const resp = await client.accesstokens.issueTemporaryAccessToken({
     resourceType: "company",
-    lookup: { companyId }, // Use your company keys
+    lookup: { companyId }, // The lookup will vary depending on how you have configured your company keys
   });
 
   return resp.data?.token;
