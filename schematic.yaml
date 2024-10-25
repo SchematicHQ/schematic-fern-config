@@ -327,10 +327,19 @@ components:
           type: string
           format: date-time
           nullable: true
+        interval:
+          type: string
+        metered_usage:
+          type: boolean
+        per_unit_price:
+          type: integer
         total_price:
           type: integer
       required:
         - total_price
+        - interval
+        - metered_usage
+        - per_unit_price
         - currency
       title: BillingCustomerSubscription
     BillingCustomerWithSubscriptionsResponseData:
@@ -467,6 +476,9 @@ components:
           type: string
         interval:
           type: string
+        meter_id:
+          type: string
+          nullable: true
         name:
           type: string
         price:
@@ -480,6 +492,8 @@ components:
         updated_at:
           type: string
           format: date-time
+        usage_type:
+          type: string
       required:
         - id
         - environment_id
@@ -491,6 +505,7 @@ components:
         - price_external_id
         - interval
         - subscription_id
+        - usage_type
         - created_at
         - updated_at
       title: BillingProductForSubscriptionResponseData
@@ -525,17 +540,26 @@ components:
           type: string
         interval:
           type: string
+        meter_id:
+          type: string
+          nullable: true
         price:
           type: integer
         price_external_id:
           type: string
         product_external_id:
           type: string
+        quantity:
+          type: integer
+        usage_type:
+          type: string
       required:
         - product_external_id
         - price
+        - quantity
         - interval
         - currency
+        - usage_type
         - price_external_id
       title: BillingProductPricing
     BillingProductResponseData:
@@ -1236,11 +1260,16 @@ components:
           type: string
         interval:
           type: string
+        meter_id:
+          type: string
+          nullable: true
         price:
           type: integer
         price_external_id:
           type: string
         product_external_id:
+          type: string
+        usage_type:
           type: string
       required:
         - product_external_id
@@ -1248,6 +1277,7 @@ components:
         - interval
         - price
         - currency
+        - usage_type
       title: CreateBillingPriceRequestBody
     CreateBillingProductRequestBody:
       type: object
