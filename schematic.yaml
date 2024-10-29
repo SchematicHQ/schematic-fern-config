@@ -3574,6 +3574,10 @@ components:
       type: object
       description: The returned resource
       properties:
+        add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         default_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         default_plan_id:
@@ -3586,6 +3590,7 @@ components:
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
       required:
+        - add_ons
         - id
         - plans
       title: PlanGroupDetailResponseData
