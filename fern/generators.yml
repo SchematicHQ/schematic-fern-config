@@ -36,7 +36,7 @@ groups:
   csharp-sdk:
     generators:
       - name: fernapi/fern-csharp-sdk
-        version: 0.12.0
+        version: 1.8.5
         github:
           repository: schematichq/schematic-csharp
           mode: pull-request
@@ -47,6 +47,9 @@ groups:
         config:
           namespace: SchematicHQ.Client
           client-class-name: SchematicApi
+          pascal-case-environments: false
+          root-namespace-for-core-classes: false
+          simplify-object-dictionaries: false
           extra-dependencies:
             moq: "4.20.70"
             "Moq.Contrib.HttpClient": "1.4.0"
