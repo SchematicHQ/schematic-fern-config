@@ -49,9 +49,11 @@ src="../../assets/images/stripe/stripe-lifecycle.png"
 ### **Connecting Stripe to Schematic**
 
 1. In Schematic, go to **Settings > Stripe integration**
-2. Grab your publishable and secret API keys from Stripe by going to **Developers > API Keys** (link [**here**](https://dashboard.stripe.com/apikeys)).
-3. Go back to Schematic and input your Stripe API keys to authenticate.
-4. Schematic will ask you to choose a unique key to map Stripe Customers to Schematic Companies. Ideally this key is also used in your application so that when you call Schematic’s API there is a common key to reference. There are two options:
+2. Depending on what type of Stripe instance you want to connect to, select Live or Test
+3. Click "Connect Stripe" and you will be redirected to Stripe in another tab
+4. Select the account you want to connect to Schematic and click "Continue"
+5. Once redirected back to Schematic, select "Start data import"
+6. Schematic will ask you to choose a unique key to map Stripe Customers to Schematic Companies. Ideally this key is also used in your application so that when you call Schematic’s API there is a common key to reference. There are two options:
     1. If you store a unique identifier in Stripe Customer metadata that you also use in your application (e.g. a `company_id` that is a GUID from your application), choose the first option
     2. If the unique ID that Stripe generates for you (e.g. `cus_nffrfeufn2hib`) is persisted in your application, choose the second option
 
