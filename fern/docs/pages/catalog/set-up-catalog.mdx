@@ -6,17 +6,38 @@ slug: catalog/configuration
 
 The Configuration tab in the Catalog serves two purposes:
 
-1. To define lifecycle rules for new companies and when companies change plans or add ons
+1. To define subscription lifecycle rules when subscriptions change
 2. To define what plans or add ons should be user-facing and accessible via Schematic Components
+
+Live Plans, Live Add Ons, and Plan Change Rules are only relevant if you are using Schematic with Stripe. In that case, selected plans and add ons will appear in Schematic Components and users will be able to manage their subscription directly. In all other cases, that configuration can be skipped and user-facing components will simply be read only with no option to manage subscriptions.
+
+<img
+src="../../assets/images/catalog/configure-table.png"
+/>
 
 ## Glossary
 
-- **Live Plans** - The base plans that your end users can choose to downgrade from or upgrade to
-- **Live Add ons** - The add ons that your end users can select
-- **Default Plan** - The plan assigned to companies that are not associated with any plans
-- **Plan Change Rules** - the rules Schematic will validate company plan changes against (e.g. upgrade rules, downgrade rules)
+### Live Plans
 
-Live Plans, Live Add Ons, and Plan Change Rules are only relevant if you are using Schematic with Stripe. In that case, selected plans and add ons will appear in Schematic Components and users will be able to manage their subscription directly. In all other cases, these sections can be skipped and user-facing components will simply reflect company state (read only) with no option to manage subscriptions.
+The plans that your end users can choose to downgrade from or upgrade to. If enabled, each plan included in Live Plans will appear as an option in the checkout flow.
+
+Companies in Schematic may be assigned plans that are not included here, but there will be no option to independently subscribe to them using Schematic Components.
+
+### Live Add Ons
+
+The add ons that your end users can select. If enabled, each add on included in Live Add Ons will appear as an option in the checkout flow.
+
+Companies in Schematic may be assigned add ons that are not included here, but there will be no option to independently subscribe to them using Schematic Components.
+
+<Info>Live Add Ons are limited to features that can be turned on or turned off (Boolean entitlements), but metered Add Ons are coming soon.</Info>
+
+### Default Plan
+
+This is the plan that will be assigned to companies that are not associated with any plans already in Schematic. For instance, this might be your freemium or trial plan that a new user is automatically assigned to prior to conversion into a paid plan.
+
+### Plan Change Rules
+
+The rules Schematic will validate subscription changes against (e.g. upgrade rules, downgrade rules).
 
 ## **Configuring the Catalog**
 
