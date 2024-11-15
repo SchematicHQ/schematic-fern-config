@@ -519,19 +519,25 @@ components:
           type: string
         environment_id:
           type: string
+        is_trialable:
+          type: boolean
         monthly_price_id:
           type: string
           nullable: true
         plan_id:
           type: string
+        trial_days:
+          type: integer
+          nullable: true
         yearly_price_id:
           type: string
           nullable: true
       required:
         - account_id
+        - billing_product_id
+        - is_trialable
         - environment_id
         - plan_id
-        - billing_product_id
       title: BillingProductPlanResponseData
     BillingProductPricing:
       type: object
@@ -916,6 +922,10 @@ components:
           format: date-time
         environment_id:
           type: string
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
         feature:
           $ref: '#/components/schemas/FeatureResponseData'
         feature_id:
@@ -925,8 +935,12 @@ components:
         metric_period:
           type: string
           nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
         rule_id:
           type: string
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -949,7 +963,6 @@ components:
         - environment_id
         - feature_id
         - id
-        - rule_id
         - updated_at
         - value_type
       title: CompanyOverrideResponseData
@@ -984,12 +997,17 @@ components:
           type: string
         is_default:
           type: boolean
+        is_trialable:
+          type: boolean
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plan_type:
           type: string
+        trial_days:
+          type: integer
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -1008,6 +1026,7 @@ components:
         - company_count
         - features
         - is_default
+        - is_trialable
         - entitlements
         - current
         - valid
@@ -1345,6 +1364,10 @@ components:
       properties:
         company_id:
           type: string
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
         feature_id:
           type: string
         metric_period:
@@ -1356,6 +1379,12 @@ components:
             - current_month
             - current_week
             - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         value_bool:
           type: boolean
           nullable: true
@@ -1496,6 +1525,46 @@ components:
         - quantity
         - interval
       title: CreateCrmProductRequestBody
+    CreateEntitlementReqCommon:
+      type: object
+      properties:
+        feature_id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - billing
+            - current_month
+            - current_week
+            - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        value_bool:
+          type: boolean
+          nullable: true
+        value_numeric:
+          type: integer
+          nullable: true
+        value_trait_id:
+          type: string
+          nullable: true
+        value_type:
+          type: string
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
+      required:
+        - feature_id
+        - value_type
+      title: CreateEntitlementReqCommon
     CreateEntityTraitDefinitionRequestBody:
       type: object
       properties:
@@ -1873,6 +1942,15 @@ components:
             - current_month
             - current_week
             - current_day
+        metric_period_month_reset:
+          type: string
+          description: >-
+            When metric_period=current_month, specify whether the month restarts
+            based on the calendar month or the billing period
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         metric_value:
           type: integer
           description: Value to compare the track event metric against
@@ -2032,6 +2110,12 @@ components:
             - current_month
             - current_week
             - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         plan_id:
           type: string
         value_bool:
@@ -2069,6 +2153,12 @@ components:
           type: array
           items:
             type: string
+        trial_days:
+          type: integer
+          nullable: true
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
       required:
         - add_on_ids
         - plan_ids
@@ -2093,40 +2183,6 @@ components:
         - name
         - plan_type
       title: CreatePlanRequestBody
-    CreateReqCommon:
-      type: object
-      properties:
-        feature_id:
-          type: string
-        metric_period:
-          type: string
-          nullable: true
-          enum:
-            - all_time
-            - billing
-            - current_month
-            - current_week
-            - current_day
-        value_bool:
-          type: boolean
-          nullable: true
-        value_numeric:
-          type: integer
-          nullable: true
-        value_trait_id:
-          type: string
-          nullable: true
-        value_type:
-          type: string
-          enum:
-            - boolean
-            - numeric
-            - trait
-            - unlimited
-      required:
-        - feature_id
-        - value_type
-      title: CreateReqCommon
     CreateWebhookRequestBody:
       type: object
       properties:
@@ -2753,6 +2809,10 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        month_reset:
+          type: string
+          description: If the period is current_month, when the month resets.
+          nullable: true
         period:
           type: string
           description: The period over which usage is measured.
@@ -2799,6 +2859,10 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        month_reset:
+          type: string
+          description: If the period is current_month, when the month resets.
+          nullable: true
         period:
           type: string
           description: The period over which usage is measured.
@@ -2949,6 +3013,10 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        month_reset:
+          type: string
+          description: If the period is current_month, when the month resets.
+          nullable: true
         period:
           type: string
           description: The period over which usage is measured.
@@ -3474,12 +3542,17 @@ components:
           type: string
         is_default:
           type: boolean
+        is_trialable:
+          type: boolean
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plan_type:
           type: string
+        trial_days:
+          type: integer
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -3496,6 +3569,7 @@ components:
         - company_count
         - features
         - is_default
+        - is_trialable
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
@@ -3512,6 +3586,9 @@ components:
         id:
           type: string
         metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
           type: string
           nullable: true
         plan:
@@ -3565,6 +3642,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+        trial_days:
+          type: integer
+          nullable: true
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
       required:
         - add_ons
         - id
@@ -3599,12 +3682,17 @@ components:
           type: string
         is_default:
           type: boolean
+        is_trialable:
+          type: boolean
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plan_type:
           type: string
+        trial_days:
+          type: integer
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -3621,6 +3709,7 @@ components:
         - company_count
         - features
         - is_default
+        - is_trialable
         - entitlements
       title: PlanGroupPlanDetailResponseData
     PlanGroupResponseData:
@@ -3640,6 +3729,12 @@ components:
           type: array
           items:
             type: string
+        trial_days:
+          type: integer
+          nullable: true
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
       required:
         - id
         - add_on_ids
@@ -3693,6 +3788,23 @@ components:
         - id
         - name
       title: PreviewObject
+    PreviewObjectResponseData:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: PreviewObjectResponseData
     RawEventBatchResponseData:
       type: object
       description: The created resource
@@ -3754,6 +3866,9 @@ components:
         metric_period:
           type: string
           nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
         metric_value:
           type: integer
           nullable: true
@@ -3769,7 +3884,7 @@ components:
         resources:
           type: array
           items:
-            $ref: '#/components/schemas/RuleConditionResourceResponseData'
+            $ref: '#/components/schemas/PreviewObjectResponseData'
         rule_id:
           type: string
         trait:
@@ -3858,17 +3973,6 @@ components:
         - created_at
         - updated_at
       title: RuleConditionGroupResponseData
-    RuleConditionResourceResponseData:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      required:
-        - id
-        - name
-      title: RuleConditionResourceResponseData
     RuleConditionResponseData:
       type: object
       properties:
@@ -3894,6 +3998,9 @@ components:
         id:
           type: string
         metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
           type: string
           nullable: true
         metric_value:
@@ -4113,6 +4220,10 @@ components:
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -4122,6 +4233,12 @@ components:
             - current_month
             - current_week
             - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         value_bool:
           type: boolean
           nullable: true
@@ -4164,6 +4281,43 @@ components:
             - draft
             - live
       title: UpdateComponentRequestBody
+    UpdateEntitlementReqCommon:
+      type: object
+      properties:
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - billing
+            - current_month
+            - current_week
+            - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        value_bool:
+          type: boolean
+          nullable: true
+        value_numeric:
+          type: integer
+          nullable: true
+        value_trait_id:
+          type: string
+          nullable: true
+        value_type:
+          type: string
+          enum:
+            - boolean
+            - numeric
+            - trait
+            - unlimited
+      required:
+        - value_type
+      title: UpdateEntitlementReqCommon
     UpdateEntityTraitDefinitionRequestBody:
       type: object
       properties:
@@ -4252,6 +4406,12 @@ components:
             - current_month
             - current_week
             - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         value_bool:
           type: boolean
           nullable: true
@@ -4285,6 +4445,12 @@ components:
           type: array
           items:
             type: string
+        trial_days:
+          type: integer
+          nullable: true
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
       required:
         - add_on_ids
         - plan_ids
@@ -4303,37 +4469,6 @@ components:
       required:
         - name
       title: UpdatePlanRequestBody
-    UpdateReqCommon:
-      type: object
-      properties:
-        metric_period:
-          type: string
-          nullable: true
-          enum:
-            - all_time
-            - billing
-            - current_month
-            - current_week
-            - current_day
-        value_bool:
-          type: boolean
-          nullable: true
-        value_numeric:
-          type: integer
-          nullable: true
-        value_trait_id:
-          type: string
-          nullable: true
-        value_type:
-          type: string
-          enum:
-            - boolean
-            - numeric
-            - trait
-            - unlimited
-      required:
-        - value_type
-      title: UpdateReqCommon
     UpdateRuleRequestBody:
       type: object
       properties:
@@ -4409,12 +4544,19 @@ components:
         billing_product_id:
           type: string
           nullable: true
+        is_trialable:
+          type: boolean
         monthly_price_id:
           type: string
+          nullable: true
+        trial_days:
+          type: integer
           nullable: true
         yearly_price_id:
           type: string
           nullable: true
+      required:
+        - is_trialable
       title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
       type: object
