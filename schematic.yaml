@@ -418,6 +418,52 @@ components:
         - currency
         - interval
       title: BillingPriceResponseData
+    BillingPriceView:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        id:
+          type: string
+        interval:
+          type: string
+        meter_id:
+          type: string
+          nullable: true
+        price:
+          type: integer
+        price_external_id:
+          type: string
+        price_id:
+          type: string
+        product_external_id:
+          type: string
+        product_id:
+          type: string
+        product_name:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        usage_type:
+          type: string
+      required:
+        - id
+        - price_external_id
+        - product_external_id
+        - interval
+        - usage_type
+        - price
+        - currency
+        - created_at
+        - updated_at
+        - price_id
+        - product_id
+        - product_name
+      title: BillingPriceView
     BillingProductDetailResponseData:
       type: object
       properties:
@@ -539,6 +585,43 @@ components:
         - environment_id
         - plan_id
       title: BillingProductPlanResponseData
+    BillingProductPriceResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        id:
+          type: string
+        interval:
+          type: string
+        meter_id:
+          type: string
+          nullable: true
+        price:
+          type: integer
+        price_external_id:
+          type: string
+        product_external_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        usage_type:
+          type: string
+      required:
+        - id
+        - price_external_id
+        - product_external_id
+        - interval
+        - usage_type
+        - price
+        - currency
+        - created_at
+        - updated_at
+      title: BillingProductPriceResponseData
     BillingProductPricing:
       type: object
       properties:
@@ -638,6 +721,9 @@ components:
           type: string
         total_price:
           type: integer
+        trial_end:
+          type: integer
+          nullable: true
       required:
         - created_at
         - currency
@@ -691,6 +777,9 @@ components:
           type: string
         total_price:
           type: integer
+        trial_end:
+          type: integer
+          nullable: true
       required:
         - created_at
         - currency
@@ -999,6 +1088,8 @@ components:
           type: string
         is_default:
           type: boolean
+        is_free:
+          type: boolean
         is_trialable:
           type: boolean
         monthly_price:
@@ -1029,6 +1120,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - is_free
         - entitlements
         - current
         - valid
@@ -1353,6 +1445,9 @@ components:
           type: string
         total_price:
           type: integer
+        trial_end:
+          type: integer
+          nullable: true
       required:
         - customer_external_id
         - subscription_external_id
@@ -1372,6 +1467,9 @@ components:
           nullable: true
         feature_id:
           type: string
+        metered_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -1532,6 +1630,9 @@ components:
       properties:
         feature_id:
           type: string
+        metered_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -2103,6 +2204,12 @@ components:
       properties:
         feature_id:
           type: string
+        metered_price_id:
+          type: string
+          nullable: true
+        metered_product_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -2120,6 +2227,9 @@ components:
             - billing_cycle
         plan_id:
           type: string
+        price_behavior:
+          type: string
+          nullable: true
         value_bool:
           type: boolean
           nullable: true
@@ -3544,6 +3654,8 @@ components:
           type: string
         is_default:
           type: boolean
+        is_free:
+          type: boolean
         is_trialable:
           type: boolean
         monthly_price:
@@ -3572,6 +3684,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - is_free
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
@@ -3587,6 +3700,8 @@ components:
           type: string
         id:
           type: string
+        metered_price:
+          $ref: '#/components/schemas/BillingPriceView'
         metric_period:
           type: string
           nullable: true
@@ -3597,6 +3712,9 @@ components:
           $ref: '#/components/schemas/PlanResponseData'
         plan_id:
           type: string
+        price_behavior:
+          type: string
+          nullable: true
         rule_id:
           type: string
         updated_at:
@@ -3684,6 +3802,8 @@ components:
           type: string
         is_default:
           type: boolean
+        is_free:
+          type: boolean
         is_trialable:
           type: boolean
         monthly_price:
@@ -3712,6 +3832,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - is_free
         - entitlements
       title: PlanGroupPlanDetailResponseData
     PlanGroupResponseData:
@@ -4226,6 +4347,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        metered_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -4286,6 +4410,9 @@ components:
     UpdateEntitlementReqCommon:
       type: object
       properties:
+        metered_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -4399,6 +4526,9 @@ components:
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
+        metered_price_id:
+          type: string
+          nullable: true
         metric_period:
           type: string
           nullable: true
@@ -4546,6 +4676,8 @@ components:
         billing_product_id:
           type: string
           nullable: true
+        is_free_plan:
+          type: boolean
         is_trialable:
           type: boolean
         monthly_price_id:
@@ -4558,6 +4690,7 @@ components:
           type: string
           nullable: true
       required:
+        - is_free_plan
         - is_trialable
       title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
@@ -6037,6 +6170,88 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/price:
+    get:
+      operationId: searchBillingPrices
+      summary: Search billing prices
+      tags:
+        - billing
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: usage_type
+          in: query
+          schema:
+            type: string
+        - name: price
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingPriceView'
+                    title: SearchBillingPricesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      price:
+                        type: integer
+                      usage_type:
+                        type: string
+                    title: SearchBillingPricesParams
+                required:
+                  - data
+                  - params
+                title: SearchBillingPricesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/price/upsert:
     post:
       operationId: upsertBillingPrice
@@ -6096,12 +6311,28 @@ paths:
           in: query
           schema:
             type: string
+        - name: price_usage_type
+          in: query
+          schema:
+            type: string
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
           schema:
             type: boolean
             description: Filter products that are not linked to any plan
+        - name: with_zero_price
+          in: query
+          description: Filter products that have zero price for free subscription type
+          schema:
+            type: boolean
+            description: Filter products that have zero price for free subscription type
+        - name: with_prices_only
+          in: query
+          description: Filter products that have prices
+          schema:
+            type: boolean
+            description: Filter products that have prices
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6148,8 +6379,18 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      price_usage_type:
+                        type: string
                       q:
                         type: string
+                      with_prices_only:
+                        type: boolean
+                        description: Filter products that have prices
+                      with_zero_price:
+                        type: boolean
+                        description: >-
+                          Filter products that have zero price for free
+                          subscription type
                       without_linked_to_plan:
                         type: boolean
                         description: Filter products that are not linked to any plan
@@ -6264,12 +6505,28 @@ paths:
           in: query
           schema:
             type: string
+        - name: price_usage_type
+          in: query
+          schema:
+            type: string
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
           schema:
             type: boolean
             description: Filter products that are not linked to any plan
+        - name: with_zero_price
+          in: query
+          description: Filter products that have zero price for free subscription type
+          schema:
+            type: boolean
+            description: Filter products that have zero price for free subscription type
+        - name: with_prices_only
+          in: query
+          description: Filter products that have prices
+          schema:
+            type: boolean
+            description: Filter products that have prices
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6316,8 +6573,18 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      price_usage_type:
+                        type: string
                       q:
                         type: string
+                      with_prices_only:
+                        type: boolean
+                        description: Filter products that have prices
+                      with_zero_price:
+                        type: boolean
+                        description: >-
+                          Filter products that have zero price for free
+                          subscription type
                       without_linked_to_plan:
                         type: boolean
                         description: Filter products that are not linked to any plan
@@ -6355,12 +6622,28 @@ paths:
           in: query
           schema:
             type: string
+        - name: price_usage_type
+          in: query
+          schema:
+            type: string
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
           schema:
             type: boolean
             description: Filter products that are not linked to any plan
+        - name: with_zero_price
+          in: query
+          description: Filter products that have zero price for free subscription type
+          schema:
+            type: boolean
+            description: Filter products that have zero price for free subscription type
+        - name: with_prices_only
+          in: query
+          description: Filter products that have prices
+          schema:
+            type: boolean
+            description: Filter products that have prices
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6403,8 +6686,18 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      price_usage_type:
+                        type: string
                       q:
                         type: string
+                      with_prices_only:
+                        type: boolean
+                        description: Filter products that have prices
+                      with_zero_price:
+                        type: boolean
+                        description: >-
+                          Filter products that have zero price for free
+                          subscription type
                       without_linked_to_plan:
                         type: boolean
                         description: Filter products that are not linked to any plan
@@ -10903,6 +11196,12 @@ paths:
           schema:
             type: string
             description: Search for plan entitlements by feature or company name
+        - name: with_metered_products
+          in: query
+          description: Filter plan entitlements only with metered products
+          schema:
+            type: boolean
+            description: Filter plan entitlements only with metered products
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10979,6 +11278,9 @@ paths:
                         description: >-
                           Search for plan entitlements by feature or company
                           name
+                      with_metered_products:
+                        type: boolean
+                        description: Filter plan entitlements only with metered products
                     title: ListPlanEntitlementsParams
                 required:
                   - data
@@ -11215,6 +11517,12 @@ paths:
           schema:
             type: string
             description: Search for plan entitlements by feature or company name
+        - name: with_metered_products
+          in: query
+          description: Filter plan entitlements only with metered products
+          schema:
+            type: boolean
+            description: Filter plan entitlements only with metered products
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11287,6 +11595,9 @@ paths:
                         description: >-
                           Search for plan entitlements by feature or company
                           name
+                      with_metered_products:
+                        type: boolean
+                        description: Filter plan entitlements only with metered products
                     title: CountPlanEntitlementsParams
                 required:
                   - data
