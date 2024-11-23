@@ -1065,6 +1065,8 @@ components:
           nullable: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_can_trial:
+          type: boolean
         company_count:
           type: integer
         created_at:
@@ -1124,6 +1126,7 @@ components:
         - entitlements
         - current
         - valid
+        - company_can_trial
       title: CompanyPlanDetailResponseData
     CompanyPlanWithBillingSubView:
       type: object
