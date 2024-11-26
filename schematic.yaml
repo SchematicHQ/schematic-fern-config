@@ -804,6 +804,9 @@ components:
           nullable: true
         flag:
           type: string
+        flag_id:
+          type: string
+          nullable: true
         reason:
           type: string
         rule_id:
@@ -841,6 +844,9 @@ components:
           type: string
           nullable: true
         error:
+          type: string
+          nullable: true
+        flag_id:
           type: string
           nullable: true
         reason:
@@ -1065,6 +1071,8 @@ components:
           nullable: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        company_can_trial:
+          type: boolean
         company_count:
           type: integer
         created_at:
@@ -1124,6 +1132,7 @@ components:
         - entitlements
         - current
         - valid
+        - company_can_trial
       title: CompanyPlanDetailResponseData
     CompanyPlanWithBillingSubView:
       type: object
@@ -1235,6 +1244,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        active_usage_based_entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
         capabilities:
           $ref: '#/components/schemas/ComponentCapabilities'
         company:
@@ -1252,6 +1265,7 @@ components:
       required:
         - active_add_ons
         - active_plans
+        - active_usage_based_entitlements
       title: ComponentHydrateResponseData
     ComponentPreviewResponseData:
       type: object
@@ -1265,6 +1279,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+        active_usage_based_entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
         capabilities:
           $ref: '#/components/schemas/ComponentCapabilities'
         company:
@@ -1286,6 +1304,7 @@ components:
       required:
         - active_add_ons
         - active_plans
+        - active_usage_based_entitlements
         - invoices
       title: ComponentPreviewResponseData
     ComponentResponseData:
@@ -1467,7 +1486,10 @@ components:
           nullable: true
         feature_id:
           type: string
-        metered_price_id:
+        metered_monthly_price_id:
+          type: string
+          nullable: true
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -1630,7 +1652,10 @@ components:
       properties:
         feature_id:
           type: string
-        metered_price_id:
+        metered_monthly_price_id:
+          type: string
+          nullable: true
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -2204,10 +2229,10 @@ components:
       properties:
         feature_id:
           type: string
-        metered_price_id:
+        metered_monthly_price_id:
           type: string
           nullable: true
-        metered_product_price_id:
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -2225,6 +2250,9 @@ components:
           enum:
             - first_of_month
             - billing_cycle
+        monthly_metered_price_id:
+          type: string
+          nullable: true
         plan_id:
           type: string
         price_behavior:
@@ -2246,6 +2274,9 @@ components:
             - numeric
             - trait
             - unlimited
+        yearly_metered_price_id:
+          type: string
+          nullable: true
       required:
         - plan_id
         - feature_id
@@ -2921,6 +2952,11 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        metric_reset_at:
+          type: string
+          description: The time at which the metric will resets.
+          format: date-time
+          nullable: true
         month_reset:
           type: string
           description: If the period is current_month, when the month resets.
@@ -2971,6 +3007,11 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        metric_reset_at:
+          type: string
+          description: The time at which the metric will resets.
+          format: date-time
+          nullable: true
         month_reset:
           type: string
           description: If the period is current_month, when the month resets.
@@ -3125,6 +3166,11 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        metric_reset_at:
+          type: string
+          description: The time at which the metric will resets.
+          format: date-time
+          nullable: true
         month_reset:
           type: string
           description: If the period is current_month, when the month resets.
@@ -3700,7 +3746,9 @@ components:
           type: string
         id:
           type: string
-        metered_price:
+        metered_monthly_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        metered_yearly_price:
           $ref: '#/components/schemas/BillingPriceView'
         metric_period:
           type: string
@@ -4347,7 +4395,10 @@ components:
           type: string
           format: date-time
           nullable: true
-        metered_price_id:
+        metered_monthly_price_id:
+          type: string
+          nullable: true
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -4410,7 +4461,10 @@ components:
     UpdateEntitlementReqCommon:
       type: object
       properties:
-        metered_price_id:
+        metered_monthly_price_id:
+          type: string
+          nullable: true
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -4526,7 +4580,10 @@ components:
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
-        metered_price_id:
+        metered_monthly_price_id:
+          type: string
+          nullable: true
+        metered_yearly_price_id:
           type: string
           nullable: true
         metric_period:
@@ -4817,6 +4874,34 @@ components:
       required:
         - keys
       title: UpsertUserSubRequestBody
+    UsageBasedEntitlementResponseData:
+      type: object
+      properties:
+        feature_id:
+          type: string
+        metered_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
+        price_behavior:
+          type: string
+          nullable: true
+        value_bool:
+          type: boolean
+          nullable: true
+        value_numeric:
+          type: integer
+          nullable: true
+        value_type:
+          type: string
+      required:
+        - feature_id
+        - value_type
+      title: UsageBasedEntitlementResponseData
     UserDetailResponseData:
       type: object
       properties:
@@ -6183,6 +6268,10 @@ paths:
             type: array
             items:
               type: string
+        - name: interval
+          in: query
+          schema:
+            type: string
         - name: usage_type
           in: query
           schema:
@@ -6227,6 +6316,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      interval:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
