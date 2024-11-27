@@ -89,3 +89,18 @@ groups:
           packageName: schematichq
           union: v1
         smart-casing: true
+
+  java-sdk:
+    generators:
+      - name: fernapi/fern-java-sdk
+        version: 1.0.1
+        output:
+          location: maven
+          coordinate: schematichq:schematichq-java
+          username: ${SCHEMATIC_MAVEN_USERNAME}
+          password: ${SCHEMATIC_MAVEN_PASSWORD}
+        github:
+          repository: schematichq/schematic-java
+          mode: pull-request
+        config:
+          generate-unknown-as-json-node: true
