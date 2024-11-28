@@ -2946,6 +2946,10 @@ components:
             - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
+        entitlement_expiration_date:
+          type: string
+          format: date-time
+          nullable: true
         entitlement_id:
           type: string
         entitlement_type:
@@ -3160,6 +3164,10 @@ components:
             - numeric
             - trait
             - unlimited
+        entitlement_expiration_date:
+          type: string
+          format: date-time
+          nullable: true
         entitlement_id:
           type: string
         entitlement_type:
@@ -9596,45 +9604,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /event-types/{key}:
-    get:
-      operationId: getEventSummaryBySubtype
-      summary: Get event summary by subtype
-      tags:
-        - events
-      parameters:
-        - name: key
-          in: path
-          description: key
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/EventSummaryResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: GetEventSummaryBySubtypeParams
-                required:
-                  - data
-                  - params
-                title: GetEventSummaryBySubtypeResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /events:
