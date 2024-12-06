@@ -286,6 +286,62 @@ components:
         - conditions
         - condition_groups
       title: AudienceRequestBody
+    BillingCouponResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        amount_off:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+        duration_in_months:
+          type: integer
+          nullable: true
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        max_redemptions:
+          type: integer
+          nullable: true
+        metadata:
+          type: object
+        name:
+          type: string
+        percent_off:
+          type: integer
+          nullable: true
+        times_redeemed:
+          type: integer
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - account_id
+        - environment_id
+        - external_id
+        - name
+        - times_redeemed
+        - is_active
+        - metadata
+      title: BillingCouponResponseData
     BillingCustomerResponseData:
       type: object
       description: The created resource
@@ -691,6 +747,72 @@ components:
         - created_at
         - updated_at
       title: BillingProductResponseData
+    BillingSubscriptionDiscount:
+      type: object
+      properties:
+        coupon_external_id:
+          type: string
+        customer_facing_code:
+          type: string
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        external_id:
+          type: string
+        promo_code_external_id:
+          type: string
+          nullable: true
+      required:
+        - external_id
+        - coupon_external_id
+      title: BillingSubscriptionDiscount
+    BillingSubscriptionDiscountView:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+          nullable: true
+        coupon_id:
+          type: string
+        coupon_name:
+          type: string
+        currency:
+          type: string
+          nullable: true
+        customer_facing_code:
+          type: string
+          nullable: true
+        discount_external_id:
+          type: string
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        percent_off:
+          type: number
+          nullable: true
+        promo_code_external_id:
+          type: string
+          nullable: true
+        subscription_external_id:
+          type: string
+      required:
+        - discount_external_id
+        - subscription_external_id
+        - coupon_id
+        - coupon_name
+        - duration
+        - is_active
+      title: BillingSubscriptionDiscountView
     BillingSubscriptionResponseData:
       type: object
       properties:
@@ -752,6 +874,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscountView'
         expired_at:
           type: string
           format: date-time
@@ -795,6 +921,7 @@ components:
         - total_price
         - status
         - products
+        - discounts
       title: BillingSubscriptionView
     CheckFlagOutputWithFlagKey:
       type: object
@@ -1199,6 +1326,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscountView'
         expired_at:
           type: string
           format: date-time
@@ -1223,6 +1354,7 @@ components:
         - customer_external_id
         - interval
         - products
+        - discounts
         - subscription_external_id
         - total_price
         - status
@@ -1349,6 +1481,35 @@ components:
       required:
         - count
       title: CountResponse
+    CouponRequestBody:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+        max_redemptions:
+          type: integer
+        name:
+          type: string
+        percent_off:
+          type: number
+        times_redeemed:
+          type: integer
+      required:
+        - name
+        - percent_off
+        - amount_off
+        - times_redeemed
+        - max_redemptions
+        - duration
+        - duration_in_months
+      title: CouponRequestBody
     CreateApiKeyRequestBody:
       type: object
       properties:
@@ -1441,6 +1602,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscount'
         expired_at:
           type: string
           format: date-time
@@ -1477,6 +1642,7 @@ components:
         - currency
         - expired_at
         - product_external_ids
+        - discounts
       title: CreateBillingSubscriptionsRequestBody
     CreateCompanyOverrideRequestBody:
       type: object
@@ -1549,6 +1715,38 @@ components:
         - name
         - entity_type
       title: CreateComponentRequestBody
+    CreateCouponRequestBody:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+        external_id:
+          type: string
+        max_redemptions:
+          type: integer
+        name:
+          type: string
+        percent_off:
+          type: number
+        times_redeemed:
+          type: integer
+      required:
+        - external_id
+        - name
+        - percent_off
+        - amount_off
+        - times_redeemed
+        - max_redemptions
+        - duration
+        - duration_in_months
+      title: CreateCouponRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
       type: object
       properties:
@@ -5731,6 +5929,44 @@ paths:
                   - data
                   - params
                 title: ListAudienceUsersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/coupons:
+    post:
+      operationId: upsertBillingCoupon
+      summary: Upsert billing coupon
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCouponRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingCouponResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingCouponParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingCouponResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
