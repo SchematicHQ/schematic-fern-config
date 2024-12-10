@@ -761,11 +761,18 @@ components:
           nullable: true
         external_id:
           type: string
+        is_active:
+          type: boolean
         promo_code_external_id:
           type: string
           nullable: true
+        started_at:
+          type: string
+          format: date-time
       required:
         - external_id
+        - started_at
+        - is_active
         - coupon_external_id
       title: BillingSubscriptionDiscount
     BillingSubscriptionDiscountView:
@@ -803,12 +810,16 @@ components:
         promo_code_external_id:
           type: string
           nullable: true
+        started_at:
+          type: string
+          format: date-time
         subscription_external_id:
           type: string
       required:
         - discount_external_id
         - subscription_external_id
         - coupon_id
+        - started_at
         - coupon_name
         - duration
         - is_active
