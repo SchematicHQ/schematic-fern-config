@@ -874,6 +874,7 @@ components:
       title: BillingSubscriptionResponseData
     BillingSubscriptionView:
       type: object
+      description: The updated resource
       properties:
         company_id:
           type: string
@@ -934,6 +935,63 @@ components:
         - products
         - discounts
       title: BillingSubscriptionView
+    ChangeSubscriptionInternalRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAddOnRequestBody'
+        company_id:
+          type: string
+        new_plan_id:
+          type: string
+        new_price_id:
+          type: string
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+        payment_method_id:
+          type: string
+          nullable: true
+        promo_code:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+        - pay_in_advance
+        - new_plan_id
+        - new_price_id
+        - company_id
+      title: ChangeSubscriptionInternalRequestBody
+    ChangeSubscriptionRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAddOnRequestBody'
+        new_plan_id:
+          type: string
+        new_price_id:
+          type: string
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+        payment_method_id:
+          type: string
+          nullable: true
+        promo_code:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+        - pay_in_advance
+        - new_plan_id
+        - new_price_id
+      title: ChangeSubscriptionRequestBody
     CheckFlagOutputWithFlagKey:
       type: object
       properties:
@@ -1361,6 +1419,10 @@ components:
           type: string
         total_price:
           type: integer
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
       required:
         - customer_external_id
         - interval
@@ -4196,6 +4258,38 @@ components:
         - id
         - name
       title: PreviewObjectResponseData
+    PreviewSubscriptionChangeResponseData:
+      type: object
+      description: The requested resource
+      properties:
+        amount_off:
+          type: integer
+        due_now:
+          type: integer
+        new_charges:
+          type: integer
+        percent_off:
+          type: number
+        period_start:
+          type: string
+          format: date-time
+        promo_code_applied:
+          type: boolean
+        proration:
+          type: integer
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - due_now
+        - new_charges
+        - proration
+        - period_start
+        - promo_code_applied
+        - percent_off
+        - amount_off
+      title: PreviewSubscriptionChangeResponseData
     RawEventBatchResponseData:
       type: object
       description: The created resource
@@ -4583,6 +4677,17 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    UpdateAddOnRequestBody:
+      type: object
+      properties:
+        add_on_id:
+          type: string
+        price_id:
+          type: string
+      required:
+        - add_on_id
+        - price_id
+      title: UpdateAddOnRequestBody
     UpdateApiKeyRequestBody:
       type: object
       properties:
@@ -4797,6 +4902,17 @@ components:
       required:
         - rules
       title: UpdateFlagRulesRequestBody
+    UpdatePayInAdvanceRequestBody:
+      type: object
+      properties:
+        price_id:
+          type: string
+        quantity:
+          type: integer
+      required:
+        - price_id
+        - quantity
+      title: UpdatePayInAdvanceRequestBody
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
@@ -4902,6 +5018,14 @@ components:
         - priority
         - value
       title: UpdateRuleRequestBody
+    UpdateTrialEndRequestBody:
+      type: object
+      properties:
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
+      title: UpdateTrialEndRequestBody
     UpdateWebhookRequestBody:
       type: object
       properties:
@@ -7093,6 +7217,82 @@ paths:
                   - data
                   - params
                 title: UpsertBillingSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /checkout-internal:
+    post:
+      operationId: checkoutInternal
+      summary: Checkout internal
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSubscriptionInternalRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSubscriptionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CheckoutInternalParams
+                required:
+                  - data
+                  - params
+                title: CheckoutInternalResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /checkout-internal/preview:
+    post:
+      operationId: previewCheckoutInternal
+      summary: Preview checkout internal
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSubscriptionInternalRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PreviewSubscriptionChangeResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewCheckoutInternalParams
+                required:
+                  - data
+                  - params
+                title: PreviewCheckoutInternalResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -12532,6 +12732,53 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /subscription/{subscription_id}/edit-trial-end:
+    put:
+      operationId: updateCustomerSubscriptionTrialEnd
+      summary: Update customer subscription trial end
+      tags:
+        - checkout
+      parameters:
+        - name: subscription_id
+          in: path
+          description: subscription_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTrialEndRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSubscriptionView'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCustomerSubscriptionTrialEndParams
+                required:
+                  - data
+                  - params
+                title: UpdateCustomerSubscriptionTrialEndResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /temporary-access-tokens:
     post:
       operationId: issueTemporaryAccessToken
@@ -13578,3 +13825,4 @@ tags:
   - name: crm
   - name: webhooks
   - name: components
+  - name: checkout
