@@ -286,6 +286,62 @@ components:
         - conditions
         - condition_groups
       title: AudienceRequestBody
+    BillingCouponResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        amount_off:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+        duration_in_months:
+          type: integer
+          nullable: true
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        max_redemptions:
+          type: integer
+          nullable: true
+        metadata:
+          type: object
+        name:
+          type: string
+        percent_off:
+          type: integer
+          nullable: true
+        times_redeemed:
+          type: integer
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - account_id
+        - environment_id
+        - external_id
+        - name
+        - times_redeemed
+        - is_active
+        - metadata
+      title: BillingCouponResponseData
     BillingCustomerResponseData:
       type: object
       description: The created resource
@@ -531,6 +587,8 @@ components:
           type: integer
         price_external_id:
           type: string
+        price_id:
+          type: string
         quantity:
           type: number
         subscription_id:
@@ -548,6 +606,7 @@ components:
         - quantity
         - currency
         - price
+        - price_id
         - price_external_id
         - interval
         - subscription_id
@@ -688,6 +747,83 @@ components:
         - created_at
         - updated_at
       title: BillingProductResponseData
+    BillingSubscriptionDiscount:
+      type: object
+      properties:
+        coupon_external_id:
+          type: string
+        customer_facing_code:
+          type: string
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        external_id:
+          type: string
+        is_active:
+          type: boolean
+        promo_code_external_id:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+      required:
+        - external_id
+        - started_at
+        - is_active
+        - coupon_external_id
+      title: BillingSubscriptionDiscount
+    BillingSubscriptionDiscountView:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+          nullable: true
+        coupon_id:
+          type: string
+        coupon_name:
+          type: string
+        currency:
+          type: string
+          nullable: true
+        customer_facing_code:
+          type: string
+          nullable: true
+        discount_external_id:
+          type: string
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        percent_off:
+          type: number
+          nullable: true
+        promo_code_external_id:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+        subscription_external_id:
+          type: string
+      required:
+        - discount_external_id
+        - subscription_external_id
+        - coupon_id
+        - started_at
+        - coupon_name
+        - duration
+        - is_active
+      title: BillingSubscriptionDiscountView
     BillingSubscriptionResponseData:
       type: object
       properties:
@@ -738,6 +874,7 @@ components:
       title: BillingSubscriptionResponseData
     BillingSubscriptionView:
       type: object
+      description: The updated resource
       properties:
         company_id:
           type: string
@@ -749,6 +886,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscountView'
         expired_at:
           type: string
           format: date-time
@@ -792,7 +933,65 @@ components:
         - total_price
         - status
         - products
+        - discounts
       title: BillingSubscriptionView
+    ChangeSubscriptionInternalRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAddOnRequestBody'
+        company_id:
+          type: string
+        new_plan_id:
+          type: string
+        new_price_id:
+          type: string
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+        payment_method_id:
+          type: string
+          nullable: true
+        promo_code:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+        - pay_in_advance
+        - new_plan_id
+        - new_price_id
+        - company_id
+      title: ChangeSubscriptionInternalRequestBody
+    ChangeSubscriptionRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAddOnRequestBody'
+        new_plan_id:
+          type: string
+        new_price_id:
+          type: string
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+        payment_method_id:
+          type: string
+          nullable: true
+        promo_code:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+        - pay_in_advance
+        - new_plan_id
+        - new_price_id
+      title: ChangeSubscriptionRequestBody
     CheckFlagOutputWithFlagKey:
       type: object
       properties:
@@ -1196,6 +1395,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscountView'
         expired_at:
           type: string
           format: date-time
@@ -1216,10 +1419,15 @@ components:
           type: string
         total_price:
           type: integer
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
       required:
         - customer_external_id
         - interval
         - products
+        - discounts
         - subscription_external_id
         - total_price
         - status
@@ -1346,6 +1554,35 @@ components:
       required:
         - count
       title: CountResponse
+    CouponRequestBody:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+        max_redemptions:
+          type: integer
+        name:
+          type: string
+        percent_off:
+          type: number
+        times_redeemed:
+          type: integer
+      required:
+        - name
+        - percent_off
+        - amount_off
+        - times_redeemed
+        - max_redemptions
+        - duration
+        - duration_in_months
+      title: CouponRequestBody
     CreateApiKeyRequestBody:
       type: object
       properties:
@@ -1438,6 +1675,10 @@ components:
           type: string
         customer_external_id:
           type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscount'
         expired_at:
           type: string
           format: date-time
@@ -1474,6 +1715,7 @@ components:
         - currency
         - expired_at
         - product_external_ids
+        - discounts
       title: CreateBillingSubscriptionsRequestBody
     CreateCompanyOverrideRequestBody:
       type: object
@@ -1546,6 +1788,38 @@ components:
         - name
         - entity_type
       title: CreateComponentRequestBody
+    CreateCouponRequestBody:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+        currency:
+          type: string
+          nullable: true
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+        external_id:
+          type: string
+        max_redemptions:
+          type: integer
+        name:
+          type: string
+        percent_off:
+          type: number
+        times_redeemed:
+          type: integer
+      required:
+        - external_id
+        - name
+        - percent_off
+        - amount_off
+        - times_redeemed
+        - max_redemptions
+        - duration
+        - duration_in_months
+      title: CreateCouponRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
       type: object
       properties:
@@ -3183,18 +3457,25 @@ components:
           type: string
           description: If the period is current_month, when the month resets.
           nullable: true
+        monthly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
         period:
           type: string
           description: The period over which usage is measured.
           nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
+        price_behavior:
+          type: string
+          nullable: true
         usage:
           type: integer
           description: >-
             The amount of usage that has been consumed; a null value indicates
             that usage is not being measured.
           nullable: true
+        yearly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
       required:
         - access
         - allocation_type
@@ -3984,6 +4265,38 @@ components:
         - id
         - name
       title: PreviewObjectResponseData
+    PreviewSubscriptionChangeResponseData:
+      type: object
+      description: The requested resource
+      properties:
+        amount_off:
+          type: integer
+        due_now:
+          type: integer
+        new_charges:
+          type: integer
+        percent_off:
+          type: number
+        period_start:
+          type: string
+          format: date-time
+        promo_code_applied:
+          type: boolean
+        proration:
+          type: integer
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - due_now
+        - new_charges
+        - proration
+        - period_start
+        - promo_code_applied
+        - percent_off
+        - amount_off
+      title: PreviewSubscriptionChangeResponseData
     RawEventBatchResponseData:
       type: object
       description: The created resource
@@ -4371,6 +4684,17 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    UpdateAddOnRequestBody:
+      type: object
+      properties:
+        add_on_id:
+          type: string
+        price_id:
+          type: string
+      required:
+        - add_on_id
+        - price_id
+      title: UpdateAddOnRequestBody
     UpdateApiKeyRequestBody:
       type: object
       properties:
@@ -4585,6 +4909,17 @@ components:
       required:
         - rules
       title: UpdateFlagRulesRequestBody
+    UpdatePayInAdvanceRequestBody:
+      type: object
+      properties:
+        price_id:
+          type: string
+        quantity:
+          type: integer
+      required:
+        - price_id
+        - quantity
+      title: UpdatePayInAdvanceRequestBody
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
@@ -4690,6 +5025,14 @@ components:
         - priority
         - value
       title: UpdateRuleRequestBody
+    UpdateTrialEndRequestBody:
+      type: object
+      properties:
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
+      title: UpdateTrialEndRequestBody
     UpdateWebhookRequestBody:
       type: object
       properties:
@@ -5728,6 +6071,44 @@ paths:
                   - data
                   - params
                 title: ListAudienceUsersResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/coupons:
+    post:
+      operationId: upsertBillingCoupon
+      summary: Upsert billing coupon
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCouponRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingCouponResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertBillingCouponParams
+                required:
+                  - data
+                  - params
+                title: UpsertBillingCouponResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -6843,6 +7224,82 @@ paths:
                   - data
                   - params
                 title: UpsertBillingSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /checkout-internal:
+    post:
+      operationId: checkoutInternal
+      summary: Checkout internal
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSubscriptionInternalRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSubscriptionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CheckoutInternalParams
+                required:
+                  - data
+                  - params
+                title: CheckoutInternalResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /checkout-internal/preview:
+    post:
+      operationId: previewCheckoutInternal
+      summary: Preview checkout internal
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSubscriptionInternalRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PreviewSubscriptionChangeResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewCheckoutInternalParams
+                required:
+                  - data
+                  - params
+                title: PreviewCheckoutInternalResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -12282,6 +12739,53 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /subscription/{subscription_id}/edit-trial-end:
+    put:
+      operationId: updateCustomerSubscriptionTrialEnd
+      summary: Update customer subscription trial end
+      tags:
+        - checkout
+      parameters:
+        - name: subscription_id
+          in: path
+          description: subscription_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTrialEndRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSubscriptionView'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCustomerSubscriptionTrialEndParams
+                required:
+                  - data
+                  - params
+                title: UpdateCustomerSubscriptionTrialEndResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /temporary-access-tokens:
     post:
       operationId: issueTemporaryAccessToken
@@ -13328,3 +13832,4 @@ tags:
   - name: crm
   - name: webhooks
   - name: components
+  - name: checkout
