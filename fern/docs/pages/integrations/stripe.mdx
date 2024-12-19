@@ -79,6 +79,25 @@ Schematic also links directly to Stripe if you need additional information.
 src="../../assets/images/stripe/stripe-subscription-view-2.png"
 />
 
+#### Stripe Subscription statuses
+
+Stripe supports a number of statuses that correspond to the subscription lifecycle. Schematic treats subscriptions differently based on that status. The table below summarizes how Schematic handles a Stripe subscription based on each status.
+
+When a company’s subscription is active in Schematic, they are granted entitlements that correspond to the products in that subscription. When a company’s subscription is inactive, entitlements are revoked.
+
+More on Stripe subscription statuses [here](https://docs.stripe.com/billing/subscriptions/overview#subscription-statuses).
+
+| **Stripe Subscription status** | **Schematic Subscription status** | **Notes** |
+| --- | --- | --- |
+| trialing | active | We do not make a distinction between subscriptions in a trialing state and those in an active state. |
+| active | active |  |
+| incomplete | inactive | If a subscription moves from active to incomplete, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
+| incomplete_expired | inactive | The same as incomplete. |
+| past_due | active | Schematic treats past_due subscriptions as active. |
+| cancelled | inactive | If a subscription moves from active to cancelled, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
+| unpaid | inactive | If a subscription moves from past_due to unpaid, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
+| paused | inactive | Schematic treats paused subscriptions as inactive. |
+
 ### Mapping Products to Plans
 
 1. Go to a Plan you have created in Schematic (or create a brand new one)
