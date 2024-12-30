@@ -860,6 +860,9 @@ components:
         trial_end:
           type: integer
           nullable: true
+        trial_end_setting:
+          type: string
+          nullable: true
       required:
         - created_at
         - currency
@@ -920,6 +923,9 @@ components:
           type: integer
         trial_end:
           type: integer
+          nullable: true
+        trial_end_setting:
+          type: string
           nullable: true
       required:
         - created_at
@@ -1130,6 +1136,10 @@ components:
         logo_url:
           type: string
           nullable: true
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyEventPeriodMetricsResponseData'
         name:
           type: string
         plan:
@@ -1155,10 +1165,53 @@ components:
         - add_ons
         - entity_traits
         - keys
+        - metrics
         - plans
         - billing_subscriptions
         - user_count
       title: CompanyDetailResponseData
+    CompanyEventPeriodMetricsResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        captured_at_max:
+          type: string
+          format: date-time
+        captured_at_min:
+          type: string
+          format: date-time
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+        month_reset:
+          type: string
+        period:
+          type: string
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+        value:
+          type: integer
+      required:
+        - account_id
+        - environment_id
+        - company_id
+        - event_subtype
+        - period
+        - month_reset
+        - captured_at_min
+        - captured_at_max
+        - value
+        - created_at
+      title: CompanyEventPeriodMetricsResponseData
     CompanyMembershipDetailResponseData:
       type: object
       properties:
@@ -1468,6 +1521,9 @@ components:
           $ref: '#/components/schemas/StripeEmbedInfo'
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
@@ -1507,6 +1563,9 @@ components:
           $ref: '#/components/schemas/StripeEmbedInfo'
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
+        trial_payment_method_required:
+          type: boolean
+          nullable: true
         upcoming_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
       required:
@@ -1708,6 +1767,9 @@ components:
         trial_end:
           type: integer
           nullable: true
+        trial_end_setting:
+          type: string
+          nullable: true
       required:
         - customer_external_id
         - subscription_external_id
@@ -1728,18 +1790,11 @@ components:
           nullable: true
         feature_id:
           type: string
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -1926,18 +1981,11 @@ components:
       properties:
         feature_id:
           type: string
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -2340,7 +2388,6 @@ components:
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -2503,18 +2550,11 @@ components:
       properties:
         feature_id:
           type: string
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -3450,7 +3490,7 @@ components:
           $ref: '#/components/schemas/FeatureDetailResponseData'
         metric_reset_at:
           type: string
-          description: The time at which the metric will resets.
+          description: The time at which the metric will reset.
           format: date-time
           nullable: true
         month_reset:
@@ -4727,18 +4767,11 @@ components:
           type: string
           format: date-time
           nullable: true
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -4793,18 +4826,11 @@ components:
     UpdateEntitlementReqCommon:
       type: object
       properties:
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -4923,18 +4949,11 @@ components:
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
-        metered_monthly_price_id:
-          type: string
-          nullable: true
-        metered_yearly_price_id:
-          type: string
-          nullable: true
         metric_period:
           type: string
           nullable: true
           enum:
             - all_time
-            - billing
             - current_month
             - current_week
             - current_day
@@ -4944,6 +4963,12 @@ components:
           enum:
             - first_of_month
             - billing_cycle
+        monthly_metered_price_id:
+          type: string
+          nullable: true
+        price_behavior:
+          type: string
+          nullable: true
         value_bool:
           type: boolean
           nullable: true
@@ -4960,6 +4985,9 @@ components:
             - numeric
             - trait
             - unlimited
+        yearly_metered_price_id:
+          type: string
+          nullable: true
       required:
         - value_type
       title: UpdatePlanEntitlementRequestBody
@@ -8055,6 +8083,12 @@ paths:
               (starting with cmov_)
             items:
               type: string
+        - name: without_expired
+          in: query
+          description: Filter company overrides by whether they have not expired
+          schema:
+            type: boolean
+            description: Filter company overrides by whether they have not expired
         - name: q
           in: query
           description: Search for company overrides by feature or company name
@@ -8137,6 +8171,11 @@ paths:
                         description: >-
                           Search for company overrides by feature or company
                           name
+                      without_expired:
+                        type: boolean
+                        description: >-
+                          Filter company overrides by whether they have not
+                          expired
                     title: ListCompanyOverridesParams
                 required:
                   - data
@@ -8373,6 +8412,12 @@ paths:
               (starting with cmov_)
             items:
               type: string
+        - name: without_expired
+          in: query
+          description: Filter company overrides by whether they have not expired
+          schema:
+            type: boolean
+            description: Filter company overrides by whether they have not expired
         - name: q
           in: query
           description: Search for company overrides by feature or company name
@@ -8451,6 +8496,11 @@ paths:
                         description: >-
                           Search for company overrides by feature or company
                           name
+                      without_expired:
+                        type: boolean
+                        description: >-
+                          Filter company overrides by whether they have not
+                          expired
                     title: CountCompanyOverridesParams
                 required:
                   - data
