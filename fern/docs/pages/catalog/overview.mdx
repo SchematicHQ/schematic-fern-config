@@ -17,72 +17,46 @@ You can also associate Catalog items to Stripe products directly to:
 src="../../assets/images/catalog/catalog.png"
 />
 
-## Plans vs. Add ons
+## Terminology
 
-Plans and Add ons are separate concepts in Schematic.
+### Plans
 
-Companies can only have 1 Plan, but they can have any number of Add ons with distinct entitlements.
+A plan in Schematic represents the base billing and entitlement configuration for a given company. For example, if you offer Basic, Standard, and Pro packaging, these would represent mutually exclusive Plans in Schematic.
+
+Schematic limits companies to only 1 plan at a time.
+
+<img
+src="../../assets/images/catalog/catalog-plans-addons-example.png"
+/>
+
+There are two options that can be defined with each plan - billing and the trial period
+
+**Billing**
+
+Defining billing in Schematic functionally is mapping Stripe products to Schematic plans.
+
+If you do define billing, those that have a Stripe subscription with the mapped product will be assigned the corresponding plan in Schematic. Moreover, if a company changes plans via Schematic (either via Schematic admin options or via in-app [components](https://docs.schematichq.com/components/overview)), the Stripe subscription will be updated accordingly.
+
+Defining billing is optional -- you can define a plan in Schematic that is not linked to Stripe billing at all. In that case, you can indepedently manage plan membership and how companies are charged.
+
+<img
+src="../../assets/images/catalog/catalog-plans-billing.png"
+/>
+
+**Trial**
+
+When a trial period is defined for a plan, Schematic will ensure that the company receives the corresponding entitlements for that period the first time they are assigned that plan. You can configure whether payment is required up front or not.
+
+<img
+src="../../assets/images/catalog/catalog-plans-trial.png"
+/>
+
+### Add Ons
+
+Add Ons are additional modules or packages that can be added to a base plan. Each add on can be 
 
 There are a number of scenarios where you may want to support an Add On, and the most common scenario is that you sell additional functionality that increases the value of your core plans (e.g. Zoom Workplace).
 
-## Creating a Plan or Add on
+### Entitlements
 
-The following steps are valid for both Plans and Add ons.
 
-1. Navigate to **Catalog** and click “Create”
-2. Add name and a description
-
-<img
-src="../../assets/images/quickstart/quickstart-plan-creation.png"
-/>
-
-3. In the Billing step, link the Schematic Plan to a Stripe Product
-    a. Select the Stripe Product that reflects the Schematic Plan. Companies that have active Stripe subscriptions with the mapped product will automatically become a member of the Schematic Plan.
-
-<img
-src="../../assets/images/quickstart/quickstart-plan-mapping.png"
-/>
-
-4. Once the Plan is created, click the Audience tab and verify the Audience rule and corresponding Companies that have been associated to the Plan.
-
-<img
-src="../../assets/images/quickstart/quickstart-plan-audience.png"
-/>
-
-<Info>Linking Schematic Plans to Stripe Products is optional, but allows Schematic to ensure both products are synchronized in terms of metadata and company assignment. Alternatively, you can set up your own targeting rules based on company attributes or usage. Here’s an [**example**](https://docs.schematichq.com/playbooks/rollout).</Info>
-
-### **Setting up Features and Entitlements**
-
-Let’s add one feature to Schematic and entitle it to your plan.
-
-1. Navigate to **Features** and click “Create”.
-2. In the modal, add a name, description, and pick the event-based feature type. Click “Continue”.
-
-<img
-src="../../assets/images/quickstart/quickstart-features-create.png"
-/>
-
-You can choose between Boolean, Event-based, or Trait-based feature types.
-
-3. Define a flag key.
-    a. You’ll use this `key` in your application to reference this feature.
-
-<img
-src="../../assets/images/quickstart/quickstart-features-create-2.png"
-/>
-
-4. Attach an event to the feature. Add the `query` event to meter the feature and measure feature usage (if it doesn’t exist already, create it).
-
-<img
-src="../../assets/images/quickstart/quickstart-features-create-3.png"
-/>
-
-5. Once the feature is created, click ”Add plan entitlement” to add an entitlement and specify the limit for Search Query for a given plan.
-
-<Info>Event-based features can have no limit, some numerical limit that is static within a period, or a limit that is dynamic based on traits that exist at the company level. Read more [**here**](https://docs.schematichq.com/playbooks/metering#entitlement-options).</Info>
-
-<img
-src="../../assets/images/quickstart/quickstart-features-entitlements.png"
-/>
-
-<Info>You’ll need to make sure to send usage events to Schematic to track feature utilization as it occurs. Read more [**here**](https://docs.schematichq.com/playbooks/metering#setting-up-an-event-based-metered-feature).</Info>
