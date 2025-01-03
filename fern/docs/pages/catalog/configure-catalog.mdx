@@ -1,5 +1,5 @@
 ---
-title: Catalog Configuration
+title: Configuring the Catalog
 
 slug: catalog/configuration
 ---
@@ -15,7 +15,7 @@ Live Plans, Live Add Ons, and Plan Change Rules are only relevant if you are usi
 src="../../assets/images/catalog/configure-table.png"
 />
 
-## Glossary
+## Options
 
 ### Live Plans
 
@@ -35,6 +35,10 @@ Companies in Schematic may be assigned add ons that are not included here, but t
 
 This is the plan that will be assigned to companies that are not associated with any plans already in Schematic. For instance, this might be your freemium or trial plan that a new user is automatically assigned to prior to conversion into a paid plan.
 
+### Trial Rules
+
+The default trial behavior that will apply to trials when configured at the plan level.
+
 ### Plan Change Rules
 
 The rules Schematic will validate subscription changes against (e.g. upgrade rules, downgrade rules).
@@ -50,6 +54,12 @@ The rules Schematic will validate subscription changes against (e.g. upgrade rul
 
 <img
 src="../../assets/images/catalog/catalog-config.png"
+/>
+
+Trials Rules can be modified to require a credit card to start a trial. At the end of the trial, companies will automaticaly convert into the corresponding paid plan.
+
+<img
+src="../../assets/images/catalog/catalog-trial-rules.png"
 />
 
 Currently, Plan Change Rules cannot be modified; however, we will be introducing more optionality here in the future.

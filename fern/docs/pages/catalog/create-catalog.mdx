@@ -1,12 +1,14 @@
 ---
-title: Defining Your Catalog
+title: Defining the Catalog
 
 slug: catalog/create-catalog
 ---
 
+Your catalog should reflect the plans and add ons that you offer your customers, including the corresponding entitlements. Below, we'll walk through creating plans and add ons, mapping them to Stripe products, and assigning an entitlement to a plan.
+
 ## Creating a Plan or Add on
 
-The following steps are valid for both Plans and Add ons.
+The following steps are the same for both Plans and Add ons.
 
 1. Navigate to **Catalog** and click “Create”
 2. Add name and a description
@@ -15,24 +17,30 @@ The following steps are valid for both Plans and Add ons.
 src="../../assets/images/quickstart/quickstart-plan-creation.png"
 />
 
-3. In the Billing step, link the Schematic Plan to a Stripe Product
-    a. Select the Stripe Product that reflects the Schematic Plan. Companies that have active Stripe subscriptions with the mapped product will automatically become a member of the Schematic Plan.
+3. In the Billing step, choose whether the plan is Free or Paid
 
 <img
-src="../../assets/images/quickstart/quickstart-plan-mapping.png"
+src="../../assets/images/catalog/catalog-billing-type.png"
 />
 
-4. Once the Plan is created, click the Audience tab and verify the Audience rule and corresponding Companies that have been associated to the Plan.
+4. Link the Schematic plan to a Stripe product
+    a. Companies that have active Stripe subscriptions with the mapped product will automatically become a member of the Schematic plan.
+
+<img
+src="../../assets/images/catalog/catalog-billing-paid-option.png"
+/>
+
+4. Once the plan is created, click the Audience tab and verify the Audience rule and corresponding Companies that have been associated to the plan.
 
 <img
 src="../../assets/images/quickstart/quickstart-plan-audience.png"
 />
 
-<Info>Linking Schematic Plans to Stripe Products is optional, but allows Schematic to ensure both products are synchronized in terms of metadata and company assignment. Alternatively, you can set up your own targeting rules based on company attributes or usage. Here’s an [**example**](https://docs.schematichq.com/playbooks/rollout).</Info>
+<Info>Linking Schematic plans to Stripe products is optional, but allows Schematic to ensure both products are synchronized with respect to billing configuration and company assignment. Alternatively, you can set up your own targeting rules based on company attributes or usage. Here’s an [**example**](https://docs.schematichq.com/playbooks/rollout).</Info>
 
-### **Setting up Features and Entitlements**
+### **Setting up Entitlements**
 
-Let’s add one feature to Schematic and entitle it to your plan.
+Let’s add one feature to Schematic and entitle it to the above plan. For additional features, use the same steps.
 
 1. Navigate to **Features** and click “Create”.
 2. In the modal, add a name, description, and pick the event-based feature type. Click “Continue”.
