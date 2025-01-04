@@ -17,72 +17,54 @@ You can also associate Catalog items to Stripe products directly to:
 src="../../assets/images/catalog/catalog.png"
 />
 
-## Plans vs. Add ons
+## Terminology
 
-Plans and Add ons are separate concepts in Schematic.
+### Plans
 
-Companies can only have 1 Plan, but they can have any number of Add ons with distinct entitlements.
+A plan in Schematic represents the base billing and entitlement configuration for a given company. For example, if you offer Basic, Standard, and Pro packaging, these would represent mutually exclusive Plans in Schematic.
 
-There are a number of scenarios where you may want to support an Add On, and the most common scenario is that you sell additional functionality that increases the value of your core plans (e.g. Zoom Workplace).
-
-## Creating a Plan or Add on
-
-The following steps are valid for both Plans and Add ons.
-
-1. Navigate to **Catalog** and click “Create”
-2. Add name and a description
+Schematic limits companies to only 1 plan at a time. For a step-by-step guide about creating a plan in Schematic, click [here](/catalog/create-catalog).
 
 <img
-src="../../assets/images/quickstart/quickstart-plan-creation.png"
+src="../../assets/images/catalog/catalog-plans-addons-example.png"
 />
 
-3. In the Billing step, link the Schematic Plan to a Stripe Product
-    a. Select the Stripe Product that reflects the Schematic Plan. Companies that have active Stripe subscriptions with the mapped product will automatically become a member of the Schematic Plan.
+There are two options that can be defined with each plan - billing and the trial period:
+
+#### **Billing**
+
+Defining billing in Schematic functionally maps Stripe products to Schematic plans.
+
+If you do define billing, those that have a Stripe subscription with the mapped product will be assigned the corresponding plan in Schematic. Moreover, if a company changes plans via Schematic (either via Schematic admin options or via in-app [components](https://docs.schematichq.com/components/overview)), the Stripe subscription will be updated accordingly.
+
+Defining billing is optional -- you can define a plan in Schematic that is not linked to Stripe billing at all. In that case, you can indepedently manage plan membership and how companies are charged.
 
 <img
-src="../../assets/images/quickstart/quickstart-plan-mapping.png"
+src="../../assets/images/catalog/catalog-plans-billing.png"
 />
 
-4. Once the Plan is created, click the Audience tab and verify the Audience rule and corresponding Companies that have been associated to the Plan.
+#### **Trial**
+
+When a trial period is defined for a plan, Schematic will ensure that the company receives the corresponding entitlements for that period the first time they are assigned that plan. You can configure whether payment is required up front or not -- if it is required, the company will convert into the corresponding paid plan automatically; if not, they will downgrade to your default plan.
 
 <img
-src="../../assets/images/quickstart/quickstart-plan-audience.png"
+src="../../assets/images/catalog/catalog-plans-trial.png"
 />
 
-<Info>Linking Schematic Plans to Stripe Products is optional, but allows Schematic to ensure both products are synchronized in terms of metadata and company assignment. Alternatively, you can set up your own targeting rules based on company attributes or usage. Here’s an [**example**](https://docs.schematichq.com/playbooks/rollout).</Info>
+### Add Ons
 
-### **Setting up Features and Entitlements**
+Add Ons are additional modules or packages that can be assigned to companies in addition to a plan. Companies can have any number of add ons. For a step-by-step guide about creating add ons in Schematic, click [here](/catalog/create-catalog).
 
-Let’s add one feature to Schematic and entitle it to your plan.
+There are a number of scenarios where you may want to offer add ons, and the most common scenario is that you sell additional functionality that increases the value of your core plan (e.g. Zoom Workplace).
 
-1. Navigate to **Features** and click “Create”.
-2. In the modal, add a name, description, and pick the event-based feature type. Click “Continue”.
+### Entitlements
 
-<img
-src="../../assets/images/quickstart/quickstart-features-create.png"
-/>
+Entitlements represent the unique relationship between a plan (or add on) and a feature. Depending on what entitlements a company has and, in the case of a metered feature, their usage relative to a given limit, you can use Schematic's feature management capabilities to grant or revoke functionality in your application.
 
-You can choose between Boolean, Event-based, or Trait-based feature types.
+<Info>Read more about feature management in Schematic here</Info>
 
-3. Define a flag key.
-    a. You’ll use this `key` in your application to reference this feature.
+Entitlements may be boolean or be metered, and there is no limit to the number entitlements in any given plan.
 
-<img
-src="../../assets/images/quickstart/quickstart-features-create-2.png"
-/>
+<Info>To learn more about how to set up metered features, refer to his [playbook](/playbooks/metering).</Info>
 
-4. Attach an event to the feature. Add the `query` event to meter the feature and measure feature usage (if it doesn’t exist already, create it).
 
-<img
-src="../../assets/images/quickstart/quickstart-features-create-3.png"
-/>
-
-5. Once the feature is created, click ”Add plan entitlement” to add an entitlement and specify the limit for Search Query for a given plan.
-
-<Info>Event-based features can have no limit, some numerical limit that is static within a period, or a limit that is dynamic based on traits that exist at the company level. Read more [**here**](https://docs.schematichq.com/playbooks/metering#entitlement-options).</Info>
-
-<img
-src="../../assets/images/quickstart/quickstart-features-entitlements.png"
-/>
-
-<Info>You’ll need to make sure to send usage events to Schematic to track feature utilization as it occurs. Read more [**here**](https://docs.schematichq.com/playbooks/metering#setting-up-an-event-based-metered-feature).</Info>
