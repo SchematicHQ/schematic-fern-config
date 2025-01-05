@@ -1,0 +1,64 @@
+---
+title: Entity Key Management
+
+description: 
+
+slug: developer_resources/entity_key_management
+---
+
+Managing IDs across systems can be challenging, especially when integrating tools like Schematic, Stripe, your application, and GTM tools. This guide outlines how we think about ID management (which we call `keys` in Schematic) and how we recommend our customers approach it to ensure a smooth implementation of Schematic.
+
+Where we refer to "entities" below, we are referring to companies and users, which are each an entity type within Schematic.
+
+## How Schematic handles `keys`
+
+<img
+src="../../assets/images/developer_resources/ekm-profile.png"
+/>
+
+Whenever you create a new entity in Schematic, you can optionally submit `keys` that can be used to uniquely identify the entity via the Schematic app or API. For example, you may have a Stripe Customer ID, a Salesforce Account ID, and an application ID that correspond to an individual company -- each can be stored as separate `keys` that independently and uniquely identify the company when searching for them within the app or referring to them via our API.
+
+```python
+client.companies.lookup_company(
+    keys={"keys": {"key": "value"}},
+)
+```
+
+This design effectively allows you to use Schematic to resolve `keys` between your systems. The benefit is that there is no need to persist an ID from your application to Stripe or vice-versa -- Schematic can maintain that mapping for you, and you can use whichever `key` is convenient in any given context to submit requests to Schematic.
+
+<img
+src="../../assets/images/developer_resources/ekm-figma-diagram.png"
+/>
+
+With all that said, this type of flexibility means that properly setting up Schematic is crucial to avoid unecessary rework and bad data. Moreover, in many cases, persisting at least one `key` may simplify ongoing maintenance.
+
+## Key management best practices
+
+`Keys` can be added when creating or updating entities. Schematic will enforce a uniqueness constraint to prevent companies or users from having the same `key` (e.g. the same Stripe Customer ID).
+
+Whenever you introduce a new `key` to an existing entity (company or user) using the API, you will need to ensure an existing `key` is present in addition to the new `key` to avoid entity duplication.
+
+### Choose a primary `key`
+
+Primary `key` in this context refers to an entity's first `key`. Your primary `key` should be accessible across systems or a `key` you can map across systems without too much trouble to avoid entity duplication. For some, this is the stripe_customer_id; for others, this might be the UUID used for organizations in your application.
+
+One common scenario is the latter because often other systems map to UUIDs from the application in service of additional automation.
+
+<Info>While Schematic generates IDs for users, customers, and other objects, these are meant for internal system operations. Only use these IDs when necessary (e.g. some Schematic endpoints require them).</Info>
+
+### Lean into using Schematic as a `key` map
+
+Whenever creating a new entity in Schematic, be liberal about submitting `keys`. Often this is possible when creating or updating entities from your application because a `key` map may already exist.
+
+This will give you flexibility in the future to use the most convenient `key` when submitting requests to Schematic, and avoid duplicate entities from being created from integrations.
+
+### Identify entities often to update context
+
+Schematic offers an asynchronous endpoint to [identify](/api-reference/events/create-event) users and companies. 
+
+You should submit an identify call in the following situations:
+- When you first create a user or company in your application
+- When a user or company logs in
+- When a user or company changes information
+
+In each situation, be sure to submit any additional `keys`.
