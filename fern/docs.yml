@@ -16,7 +16,7 @@ tabs:
 navigation:
   - tab: documentation
     layout:
-      - section: Get Started
+      - section: Getting Started
         skip-slug: true
         contents:
           - page: What is Schematic?
@@ -31,7 +31,7 @@ navigation:
             path: ./docs/pages/get_started/observability.mdx
           - page: Security
             path: ./docs/pages/get_started/security.mdx
-      - section: Feature Management
+      - section: Using Feature Flags
         contents:
           - page: Overview
             path: ./docs/pages/feature_management/overview.mdx
@@ -44,12 +44,14 @@ navigation:
             href: /feature_management/feature_flags#features
           - page: Tracking Feature Usage
             path: ./docs/pages/feature_management/tracking-usage.mdx
-      - section: Catalog
+      - section: Building Your Catalog
         contents:
           - page: Overview
             path: ./docs/pages/catalog/overview.mdx
           - page: Defining the Catalog
             path: ./docs/pages/catalog/create-catalog.mdx
+          - page: Managing Company Plans
+            path: ./docs/pages/catalog/management.mdx
           - section: Configuring the Catalog
             path: ./docs/pages/catalog/configure-catalog.mdx
             contents:
@@ -71,7 +73,7 @@ navigation:
             href: /catalog/overview#trial 
           - link: Entitlements
             href: /catalog/overview#entitlements 
-      - section: Billing
+      - section: Setting Up Billing
         contents:
           - page: Overview
             path: ./docs/pages/billing/overview.mdx
@@ -86,9 +88,7 @@ navigation:
                 href: /billing/usage-based-billing#fixed-fee-with-overage
               - link: Credit burndown
                 href: /billing/usage-based-billing#credit-burndown
-          - page: Managing Company Plans
-            path: ./docs/pages/billing/management.mdx
-      - section: Components
+      - section: Using UI Components
         contents:
           - page: Overview
             path: ./docs/pages/components/overview.mdx
@@ -342,9 +342,11 @@ typography:
   bodyFont:
     name: Public Sans Thin
     path: ./docs/assets/Public-Sans-Thin.woff2
+    weight: 400
   headingsFont:
     name: Inter
     path: ./docs/assets/Manrope-ExtraLight.woff2
+    weight: 600 900
 
 layout:
   page-width: full
@@ -362,3 +364,5 @@ js:
   - ./docs/assets/fullstory.js
   - ./docs/assets/koala.js
   - ./docs/assets/segment.js
+
+css: ./styles.css
