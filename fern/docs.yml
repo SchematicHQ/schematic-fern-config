@@ -9,6 +9,10 @@ tabs:
   api:
     display-name: API Reference
     icon: "fa-regular fa-file-contract"
+  roadmap:
+    display-name: Roadmap
+    icon: "fa-regular fa-map"
+    href: "https://roadmap.schematichq.com/"
   blog:
     display-name: Blog
     icon: "fa-regular fa-newspaper"
@@ -35,13 +39,10 @@ navigation:
         contents:
           - page: Overview
             path: ./docs/pages/feature_management/overview.mdx
-          - page: Feature Flags
-            hidden: true
-            path: ./docs/pages/feature_management/feature-flags.mdx
-          - link: Flags
-            href: /feature_management/feature_flags#flags
-          - link: Features
-            href: /feature_management/feature_flags#features
+          - page: Flags
+            path: ./docs/pages/feature_management/flags.mdx
+          - page: Features
+            path: ./docs/pages/feature_management/features.mdx
           - page: Tracking Feature Usage
             path: ./docs/pages/feature_management/tracking-usage.mdx
       - section: Building Your Catalog
@@ -65,14 +66,14 @@ navigation:
                 href: /catalog/configuration#trial-rules
               - link: Plan Change Rules
                 href: /catalog/configuration#plan-change-rules
-          - link: Plans
-            href: /catalog/overview#plans
-          - link: Add Ons
-            href: /catalog/overview#add-ons
-          - link: Trials
-            href: /catalog/overview#trial 
-          - link: Entitlements
-            href: /catalog/overview#entitlements 
+          - page: Plans
+            path: ./docs/pages/catalog/plans.mdx
+          - page: Add Ons
+            path: ./docs/pages/catalog/add-ons.mdx
+          - page: Trials
+            path: ./docs/pages/catalog/trials.mdx
+          - page: Entitlements
+            path: ./docs/pages/catalog/entitlements.mdx
       - section: Setting Up Billing
         contents:
           - page: Overview
@@ -116,7 +117,7 @@ navigation:
           - page: Concepts
             path: ./docs/pages/developer_resources/concepts.mdx
           - page: Key Management
-            path: ./docs/pages/developer_resources/key-management.mdx            
+            path: ./docs/pages/developer_resources/entity-key-management.mdx            
           - page: Environments
             path: ./docs/pages/developer_resources/environments.mdx
           - page: Entity Relationship Diagram
@@ -313,6 +314,7 @@ navigation:
               hidden: true
           - plans:
               hidden: true
+  - tab: roadmap
   - tab: blog
 
 navbar-links:
