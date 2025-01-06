@@ -9,6 +9,10 @@ tabs:
   api:
     display-name: API Reference
     icon: "fa-regular fa-file-contract"
+  roadmap:
+    display-name: Roadmap
+    icon: "fa-regular fa-map"
+    href: "https://roadmap.schematichq.com/"
   blog:
     display-name: Blog
     icon: "fa-regular fa-newspaper"
@@ -17,7 +21,7 @@ default-language: typescript
 navigation:
   - tab: documentation
     layout:
-      - section: Get Started
+      - section: Getting Started
         skip-slug: true
         contents:
           - page: What is Schematic?
@@ -32,25 +36,92 @@ navigation:
             path: ./docs/pages/get_started/observability.mdx
           - page: Security
             path: ./docs/pages/get_started/security.mdx
-      - section: Catalog
+      - section: Using Feature Flags
+        contents:
+          - page: Overview
+            path: ./docs/pages/feature_management/overview.mdx
+          - page: Flags
+            path: ./docs/pages/feature_management/flags.mdx
+          - page: Features
+            path: ./docs/pages/feature_management/features.mdx
+          - page: Tracking Feature Usage
+            path: ./docs/pages/feature_management/tracking-usage.mdx
+      - section: Building Your Catalog
         contents:
           - page: Overview
             path: ./docs/pages/catalog/overview.mdx
-          - page: Configure the Catalog
-            path: ./docs/pages/catalog/set-up-catalog.mdx
-      - section: Components
+          - page: Defining the Catalog
+            path: ./docs/pages/catalog/create-catalog.mdx
+          - page: Managing Company Plans
+            path: ./docs/pages/catalog/management.mdx
+          - section: Configuring the Catalog
+            path: ./docs/pages/catalog/configure-catalog.mdx
+            contents:
+              - link: Live Plans
+                href: /catalog/configuration#live-plans
+              - link: Live Add Ons
+                href: /catalog/configuration#live-add-ons
+              - link: Default Plan
+                href: /catalog/configuration#default-plan
+              - link: Trial Rules
+                href: /catalog/configuration#trial-rules
+              - link: Plan Change Rules
+                href: /catalog/configuration#plan-change-rules
+          - page: Plans
+            path: ./docs/pages/catalog/plans.mdx
+          - page: Add Ons
+            path: ./docs/pages/catalog/add-ons.mdx
+          - page: Trials
+            path: ./docs/pages/catalog/trials.mdx
+          - page: Entitlements
+            path: ./docs/pages/catalog/entitlements.mdx
+      - section: Setting Up Billing
+        contents:
+          - page: Overview
+            path: ./docs/pages/billing/overview.mdx
+          - section: Usage Based Billing Models
+            path: ./docs/pages/billing/usage-based-billing.mdx
+            contents:
+              - link: Pay as you go
+                href: /billing/usage-based-billing#pay-as-you-go
+              - link: Pay in advance
+                href: /billing/usage-based-billing#pay-in-advance
+              - link: Fixed fee with overage
+                href: /billing/usage-based-billing#fixed-fee-with-overage
+              - link: Credit burndown
+                href: /billing/usage-based-billing#credit-burndown
+      - section: Using UI Components
         contents:
           - page: Overview
             path: ./docs/pages/components/overview.mdx
+          - section: Element Library
+            path: ./docs/pages/components/element-library.mdx
+            contents:
+              - link: Current Plan
+                href: /components/element-library#current-plan
+              - link: Included Features
+                href: /components/element-library#included-features
+              - link: Next Bill Due
+                href: /components/element-library#next-bill-due
+              - link: Payment Methods
+                href: /components/element-library#payment-methods
+              - link: Invoices
+                href: /components/element-library#invoices
+              - link: Metered Features
+                href: /components/element-library#meatured-features
+              - link: Pricing Table
+                href: /components/element-library#pricing-table
           - page: Set Up Components
             path: ./docs/pages/components/set-up.mdx
       - section: Developer Resources
         contents:
           - page: Concepts
             path: ./docs/pages/developer_resources/concepts.mdx
+          - page: Key Management
+            path: ./docs/pages/developer_resources/entity-key-management.mdx            
           - page: Environments
             path: ./docs/pages/developer_resources/environments.mdx
-          - page: Entity Relation Diagram
+          - page: Entity Relationship Diagram
             path: ./docs/pages/developer_resources/erd.mdx
           - section: Sample Apps
             contents:
@@ -244,6 +315,7 @@ navigation:
               hidden: true
           - plans:
               hidden: true
+  - tab: roadmap
   - tab: blog
 
 navbar-links:
@@ -273,9 +345,11 @@ typography:
   bodyFont:
     name: Public Sans Thin
     path: ./docs/assets/Public-Sans-Thin.woff2
+    weight: 400
   headingsFont:
     name: Inter
     path: ./docs/assets/Manrope-ExtraLight.woff2
+    weight: 600 900
 
 layout:
   page-width: full
@@ -293,3 +367,5 @@ js:
   - ./docs/assets/fullstory.js
   - ./docs/assets/koala.js
   - ./docs/assets/segment.js
+
+css: ./styles.css

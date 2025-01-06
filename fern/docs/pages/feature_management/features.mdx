@@ -1,0 +1,59 @@
+---
+title: Flags
+
+slug: feature_management/features
+---
+
+As noted in the overview, features are an abstraction on top of flags in Schematic used primarily to allow Schematic users to explicitly assign features to companies and set up entitlement-level policy. They can be on/off or metered (trait-based or event-based).
+
+<Info>You can read more about setting up a metered feature [here](/playbooks/metering)</Info>
+
+<img
+src="../../assets/images/features/features-policy.png"
+/>
+
+Ultimately, features should represent functionality that the business may market or sell.
+
+All policy created at the feature level is reflected in the corresponding flag. You can see the associated flag and derived rules using the Flag tab within a Feature.
+
+<img
+src="../../assets/images/features/features-flag-tab.png"
+/>
+
+Currently, features and flags are one-to-one, but in the future more than one flag may be represented by one feature.
+
+### Setting up Features
+
+Let’s add one feature to Schematic and entitle it to a plan.
+
+1. Navigate to **Features** and click “Create”.
+2. In the modal, add a name, description, and pick the event-based feature type. Click “Continue”.
+
+<img
+src="../../assets/images/quickstart/quickstart-features-create.png"
+/>
+
+<Info>You can choose between Boolean, Event-based, or Trait-based feature types.</Info>
+
+3. Define a flag key. 
+    1. You’ll use this `key` in your application to reference this feature.
+
+<img
+src="../../assets/images/quickstart/quickstart-features-create-2.png"
+/>
+
+4. Attach an event to the feature. Add the `query` event to meter the feature and measure feature usage (if it doesn’t exist already, create it).
+
+<img
+src="../../assets/images/quickstart/quickstart-features-create-3.png"
+/>
+
+5. Once the feature is created, click ”Add plan entitlement” to add an entitlement and specify the limit for Search Query for a given plan.
+
+<Info>Event-based features can have no limit, some numerical limit that is static within a period, or a limit that is dynamic based on traits that exist at the company level. Read more [here](https://docs.schematichq.com/playbooks/metering#entitlement-options).</Info>
+
+<img
+src="../../assets/images/quickstart/quickstart-features-entitlements.png"
+/>
+
+<Info>You’ll need to make sure to send usage events to Schematic to track feature utilization as it occurs. Read more [here](https://docs.schematichq.com/playbooks/metering#setting-up-an-event-based-metered-feature).</Info>

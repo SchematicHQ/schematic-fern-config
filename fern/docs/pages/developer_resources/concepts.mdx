@@ -4,21 +4,21 @@ description: "Schematic provides SDKs that you can use to manage your plans and 
 slug: developer_resources/concepts
 ---
 
-## Concepts
-
 ### User and company profiles
 
-Schematic logs all traits and events submitted via the API or client libraries, as well as data synced from third party tools such as Stripe. You can use this data to construct rules for feature targeting within Schematic.
+Schematic centralizes all traits and events submitted via the API or client libraries, as well as data synced from third party tools such as Stripe. You can use this data to construct rules for feature targeting within Schematic or as variables for metered features.
 
-Because Schematic creates and updates user and company profiles by storing context and usage data from your application and business tools, it is not necessary to pass additional context when initializing an SDK.
+Because Schematic creates and updates user and company profiles by storing context and usage data from your application and business tools, it is not necessary to pass additional context at runtime when evaluating a flag.
 
 ### Keys vs. traits
 
 Schematic uses `keys` as a unique identifier for companies and users. You can store any number of `keys`, however `keys` must be unique between each user and each company, respectively. For example, you may have a Stripe Customer ID, a Salesforce Account ID, and an application ID that correspond to an individual company. Each can be stored as separate `keys` that can be referenced by any tool interacting with Schematic.
 
+To read more about the ideal way to manage `keys` with Schematic, click [here](/developer_resources/entity_key_management)
+
 **Traits** are pieces of information you may know about a user, a company, or an event. This could be metadata such as start date, renewal date, industry, employees, or role. This could also be data relevant to usage-based limits, like number of seats in use.
 
-SDKs can reference companies or users by their Schematic ID using the `id` key or by any `key` you have defined and passed to Schematic.
+SDKs can reference companies or users by their Schematic ID using the `id` key or by any `key` you have defined and passed to Schematic previously.
 
 ### Flags vs. Features
 
@@ -32,9 +32,13 @@ At this time, flags and features are one-to-one and share a common `key`. Using 
 
 Plans and Add-ons are separate concepts in Schematic.
 
-Companies can only have 1 Plan, but they can have any number of Add-ons with distinct entitlements.
+Companies can only have 1 plan, but they can have any number of Add-ons with distinct entitlements.
 
 There are a number of scenarios where you may want to support an Add On, and the most common scenario is that you sell additional functionality that increases the value of your core plans (e.g. Zoom Workplace).
+
+### Components
+
+Schematic components are out of the box UI elements that can be embedded directly in your application to provide complete plan management UI to end users. Components are React-based, and you can read more about them [here](/components/overview)
 
 ### Verifying events
 
