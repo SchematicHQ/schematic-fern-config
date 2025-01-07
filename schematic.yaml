@@ -486,6 +486,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -513,6 +515,7 @@ components:
         - interval
         - usage_type
         - price
+        - is_active
         - currency
         - created_at
         - updated_at
@@ -656,6 +659,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -677,6 +682,7 @@ components:
         - interval
         - usage_type
         - price
+        - is_active
         - currency
         - created_at
         - updated_at
@@ -1688,6 +1694,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -1703,6 +1711,7 @@ components:
         - product_external_id
         - price_external_id
         - interval
+        - is_active
         - price
         - currency
         - usage_type
@@ -4800,6 +4809,19 @@ components:
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
+    UpdateCompanyPlansRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            type: string
+        base_plan_id:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+      title: UpdateCompanyPlansRequestBody
     UpdateComponentRequestBody:
       type: object
       properties:
@@ -8512,6 +8534,53 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /company-plans/{company_plan_id}:
+    put:
+      operationId: updateCompanyPlans
+      summary: Update company plans
+      tags:
+        - plans
+      parameters:
+        - name: company_plan_id
+          in: path
+          description: company_plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyPlansRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCompanyPlansParams
+                required:
+                  - data
+                  - params
+                title: UpdateCompanyPlansResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /company-subscriptions:
