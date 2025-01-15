@@ -1296,6 +1296,9 @@ components:
         rule_id:
           type: string
           nullable: true
+        rule_id_usage_exceeded:
+          type: string
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -4107,6 +4110,9 @@ components:
           nullable: true
         rule_id:
           type: string
+        rule_id_usage_exceeded:
+          type: string
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -5279,6 +5285,19 @@ components:
       required:
         - keys
       title: UpsertUserSubRequestBody
+    UsageBasedEntitlementRequestBody:
+      type: object
+      properties:
+        monthly_metered_price_id:
+          type: string
+          nullable: true
+        price_behavior:
+          type: string
+          nullable: true
+        yearly_metered_price_id:
+          type: string
+          nullable: true
+      title: UsageBasedEntitlementRequestBody
     UsageBasedEntitlementResponseData:
       type: object
       properties:
