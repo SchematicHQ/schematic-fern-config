@@ -1004,35 +1004,6 @@ components:
         - new_plan_id
         - new_price_id
       title: ChangeSubscriptionRequestBody
-    CheckFlagOutputWithFlagKey:
-      type: object
-      properties:
-        company_id:
-          type: string
-          nullable: true
-        error:
-          type: string
-          nullable: true
-        flag:
-          type: string
-        flag_id:
-          type: string
-          nullable: true
-        reason:
-          type: string
-        rule_id:
-          type: string
-          nullable: true
-        user_id:
-          type: string
-          nullable: true
-        value:
-          type: boolean
-      required:
-        - reason
-        - value
-        - flag
-      title: CheckFlagOutputWithFlagKey
     CheckFlagRequestBody:
       type: object
       properties:
@@ -1053,24 +1024,65 @@ components:
       properties:
         company_id:
           type: string
+          description: If company keys were provided and matched a company, its ID
           nullable: true
         error:
           type: string
+          description: If an error occurred while checking the flag, the error message
           nullable: true
+        feature_allocation:
+          type: integer
+          description: If a numeric feature entitlement rule was matched, its allocation
+          nullable: true
+        feature_usage:
+          type: integer
+          description: >-
+            If a numeric feature entitlement rule was matched, the company's
+            usage
+          nullable: true
+        feature_usage_period:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, the period over which
+            usage is tracked (current_month, current_day, current_week,
+            all_time)
+          nullable: true
+        feature_usage_reset_at:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, when the usage period
+            will reset
+          format: date-time
+          nullable: true
+        flag:
+          type: string
+          description: The key used to check the flag
         flag_id:
           type: string
+          description: If a flag was found, its ID
           nullable: true
         reason:
           type: string
+          description: A human-readable explanation of the result
         rule_id:
           type: string
+          description: If a rule was found, its ID
+          nullable: true
+        rule_type:
+          type: string
+          description: If a rule was found, its type
           nullable: true
         user_id:
           type: string
+          description: If user keys were provided and matched a user, its ID
           nullable: true
         value:
           type: boolean
+          description: >-
+            A boolean flag check result; for feature entitlements, this
+            represents whether further consumption of the feature is permitted
       required:
+        - flag
         - reason
         - value
       title: CheckFlagResponseData
@@ -1081,7 +1093,7 @@ components:
         flags:
           type: array
           items:
-            $ref: '#/components/schemas/CheckFlagOutputWithFlagKey'
+            $ref: '#/components/schemas/CheckFlagResponseData'
       required:
         - flags
       title: CheckFlagsResponseData
