@@ -486,6 +486,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -513,6 +515,7 @@ components:
         - interval
         - usage_type
         - price
+        - is_active
         - currency
         - created_at
         - updated_at
@@ -656,6 +659,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -677,6 +682,7 @@ components:
         - interval
         - usage_type
         - price
+        - is_active
         - currency
         - created_at
         - updated_at
@@ -998,35 +1004,6 @@ components:
         - new_plan_id
         - new_price_id
       title: ChangeSubscriptionRequestBody
-    CheckFlagOutputWithFlagKey:
-      type: object
-      properties:
-        company_id:
-          type: string
-          nullable: true
-        error:
-          type: string
-          nullable: true
-        flag:
-          type: string
-        flag_id:
-          type: string
-          nullable: true
-        reason:
-          type: string
-        rule_id:
-          type: string
-          nullable: true
-        user_id:
-          type: string
-          nullable: true
-        value:
-          type: boolean
-      required:
-        - reason
-        - value
-        - flag
-      title: CheckFlagOutputWithFlagKey
     CheckFlagRequestBody:
       type: object
       properties:
@@ -1047,24 +1024,65 @@ components:
       properties:
         company_id:
           type: string
+          description: If company keys were provided and matched a company, its ID
           nullable: true
         error:
           type: string
+          description: If an error occurred while checking the flag, the error message
           nullable: true
+        feature_allocation:
+          type: integer
+          description: If a numeric feature entitlement rule was matched, its allocation
+          nullable: true
+        feature_usage:
+          type: integer
+          description: >-
+            If a numeric feature entitlement rule was matched, the company's
+            usage
+          nullable: true
+        feature_usage_period:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, the period over which
+            usage is tracked (current_month, current_day, current_week,
+            all_time)
+          nullable: true
+        feature_usage_reset_at:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, when the usage period
+            will reset
+          format: date-time
+          nullable: true
+        flag:
+          type: string
+          description: The key used to check the flag
         flag_id:
           type: string
+          description: If a flag was found, its ID
           nullable: true
         reason:
           type: string
+          description: A human-readable explanation of the result
         rule_id:
           type: string
+          description: If a rule was found, its ID
+          nullable: true
+        rule_type:
+          type: string
+          description: If a rule was found, its type
           nullable: true
         user_id:
           type: string
+          description: If user keys were provided and matched a user, its ID
           nullable: true
         value:
           type: boolean
+          description: >-
+            A boolean flag check result; for feature entitlements, this
+            represents whether further consumption of the feature is permitted
       required:
+        - flag
         - reason
         - value
       title: CheckFlagResponseData
@@ -1075,7 +1093,7 @@ components:
         flags:
           type: array
           items:
-            $ref: '#/components/schemas/CheckFlagOutputWithFlagKey'
+            $ref: '#/components/schemas/CheckFlagResponseData'
       required:
         - flags
       title: CheckFlagsResponseData
@@ -1288,6 +1306,9 @@ components:
           type: string
           nullable: true
         rule_id:
+          type: string
+          nullable: true
+        rule_id_usage_exceeded:
           type: string
           nullable: true
         updated_at:
@@ -1515,6 +1536,8 @@ components:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         component:
           $ref: '#/components/schemas/ComponentResponseData'
+        default_plan:
+          $ref: '#/components/schemas/PlanDetailResponseData'
         feature_usage:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         stripe_embed:
@@ -1553,6 +1576,8 @@ components:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         component:
           $ref: '#/components/schemas/ComponentResponseData'
+        default_plan:
+          $ref: '#/components/schemas/PlanDetailResponseData'
         feature_usage:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         invoices:
@@ -1688,6 +1713,8 @@ components:
           type: string
         interval:
           type: string
+        is_active:
+          type: boolean
         meter_id:
           type: string
           nullable: true
@@ -1703,6 +1730,7 @@ components:
         - product_external_id
         - price_external_id
         - interval
+        - is_active
         - price
         - currency
         - usage_type
@@ -4094,6 +4122,9 @@ components:
           nullable: true
         rule_id:
           type: string
+        rule_id_usage_exceeded:
+          type: string
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -4800,6 +4831,19 @@ components:
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
+    UpdateCompanyPlansRequestBody:
+      type: object
+      properties:
+        add_on_ids:
+          type: array
+          items:
+            type: string
+        base_plan_id:
+          type: string
+          nullable: true
+      required:
+        - add_on_ids
+      title: UpdateCompanyPlansRequestBody
     UpdateComponentRequestBody:
       type: object
       properties:
@@ -5253,6 +5297,19 @@ components:
       required:
         - keys
       title: UpsertUserSubRequestBody
+    UsageBasedEntitlementRequestBody:
+      type: object
+      properties:
+        monthly_metered_price_id:
+          type: string
+          nullable: true
+        price_behavior:
+          type: string
+          nullable: true
+        yearly_metered_price_id:
+          type: string
+          nullable: true
+      title: UsageBasedEntitlementRequestBody
     UsageBasedEntitlementResponseData:
       type: object
       properties:
@@ -8514,6 +8571,53 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /company-plans/{company_plan_id}:
+    put:
+      operationId: updateCompanyPlans
+      summary: Update company plans
+      tags:
+        - plans
+      parameters:
+        - name: company_plan_id
+          in: path
+          description: company_plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyPlansRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCompanyPlansParams
+                required:
+                  - data
+                  - params
+                title: UpdateCompanyPlansResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /company-subscriptions:
     get:
       operationId: getActiveCompanySubscription
@@ -10134,10 +10238,6 @@ paths:
             type: array
             items:
               type: string
-        - name: flag_id
-          in: query
-          schema:
-            type: string
         - name: user_id
           in: query
           schema:
@@ -10182,8 +10282,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      flag_id:
-                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
