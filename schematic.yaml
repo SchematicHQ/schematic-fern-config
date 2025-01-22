@@ -1097,6 +1097,30 @@ components:
       required:
         - flags
       title: CheckFlagsResponseData
+    CheckoutDataResponseData:
+      type: object
+      description: The returned resource
+      properties:
+        active_add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanDetailResponseData'
+        active_plan:
+          $ref: '#/components/schemas/PlanDetailResponseData'
+        active_usage_based_entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        feature_usage:
+          $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        subscription:
+          $ref: '#/components/schemas/CompanySubscriptionResponseData'
+      required:
+        - active_add_ons
+        - active_usage_based_entitlements
+      title: CheckoutDataResponseData
     CompanyCrmDealsResponseData:
       type: object
       properties:
@@ -7355,6 +7379,45 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
+  /checkout-internal/{checkout_internal_id}/data:
+    get:
+      operationId: getCheckoutData
+      summary: Get checkout data
+      tags:
+        - checkout
+      parameters:
+        - name: checkout_internal_id
+          in: path
+          description: checkout_internal_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckoutDataResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCheckoutDataParams
+                required:
+                  - data
+                  - params
+                title: GetCheckoutDataResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /checkout-internal/preview:
     post:
       operationId: previewCheckoutInternal
@@ -10238,6 +10301,10 @@ paths:
             type: array
             items:
               type: string
+        - name: flag_id
+          in: query
+          schema:
+            type: string
         - name: user_id
           in: query
           schema:
@@ -10282,6 +10349,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      flag_id:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
