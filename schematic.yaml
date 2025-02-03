@@ -2139,6 +2139,9 @@ components:
                 event:
                   type: string
                   description: The name of the type of track event
+                quantity:
+                  type: integer
+                  description: Optionally specify the quantity of the event
                 traits:
                   type: object
                   description: A map of trait names to trait values
@@ -3170,6 +3173,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        quantity:
+          type: integer
         sent_at:
           type: string
           format: date-time
@@ -3196,6 +3201,7 @@ components:
         - type
         - feature_ids
         - id
+        - quantity
         - status
         - updated_at
         - features
@@ -3240,6 +3246,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        quantity:
+          type: integer
         sent_at:
           type: string
           format: date-time
@@ -3264,6 +3272,7 @@ components:
         - type
         - feature_ids
         - id
+        - quantity
         - status
         - updated_at
       title: EventResponseData
@@ -5349,6 +5358,8 @@ components:
         metric_period_month_reset:
           type: string
           nullable: true
+        monthly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
         price_behavior:
           type: string
           nullable: true
@@ -5360,6 +5371,8 @@ components:
           nullable: true
         value_type:
           type: string
+        yearly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
       required:
         - feature_id
         - value_type
@@ -12515,6 +12528,12 @@ paths:
           schema:
             type: boolean
             description: Filter out plans that have a billing product ID
+        - name: without_paid_product_id
+          in: query
+          description: Filter out plans that have a paid billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a paid billing product ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12577,6 +12596,9 @@ paths:
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_paid_product_id:
+                        type: boolean
+                        description: Filter out plans that have a paid billing product ID
                       without_product_id:
                         type: boolean
                         description: Filter out plans that have a billing product ID
@@ -12852,6 +12874,12 @@ paths:
           schema:
             type: boolean
             description: Filter out plans that have a billing product ID
+        - name: without_paid_product_id
+          in: query
+          description: Filter out plans that have a paid billing product ID
+          schema:
+            type: boolean
+            description: Filter out plans that have a paid billing product ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12910,6 +12938,9 @@ paths:
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_paid_product_id:
+                        type: boolean
+                        description: Filter out plans that have a paid billing product ID
                       without_product_id:
                         type: boolean
                         description: Filter out plans that have a billing product ID
