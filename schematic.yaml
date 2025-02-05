@@ -6919,6 +6919,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - licensed
+              - metered
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
@@ -6985,6 +6988,9 @@ paths:
                         example: '0'
                       price_usage_type:
                         type: string
+                        enum:
+                          - licensed
+                          - metered
                       q:
                         type: string
                       with_prices_only:
@@ -7113,6 +7119,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - licensed
+              - metered
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
@@ -7179,6 +7188,9 @@ paths:
                         example: '0'
                       price_usage_type:
                         type: string
+                        enum:
+                          - licensed
+                          - metered
                       q:
                         type: string
                       with_prices_only:
@@ -7230,6 +7242,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - licensed
+              - metered
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
@@ -7292,6 +7307,9 @@ paths:
                         example: '0'
                       price_usage_type:
                         type: string
+                        enum:
+                          - licensed
+                          - metered
                       q:
                         type: string
                       with_prices_only:
