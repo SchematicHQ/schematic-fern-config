@@ -707,9 +707,6 @@ components:
           type: integer
         usage_type:
           type: string
-          enum:
-            - licensed
-            - metered
       required:
         - product_external_id
         - price
@@ -1828,9 +1825,6 @@ components:
         trial_end_setting:
           type: string
           nullable: true
-          enum:
-            - subscribe
-            - cancel
       required:
         - customer_external_id
         - subscription_external_id
@@ -6798,9 +6792,6 @@ paths:
           in: query
           schema:
             type: string
-            enum:
-              - licensed
-              - metered
         - name: price
           in: query
           schema:
@@ -6855,9 +6846,6 @@ paths:
                         type: integer
                       usage_type:
                         type: string
-                        enum:
-                          - licensed
-                          - metered
                     title: SearchBillingPricesParams
                 required:
                   - data
