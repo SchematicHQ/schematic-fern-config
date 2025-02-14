@@ -288,7 +288,6 @@ components:
       title: AudienceRequestBody
     BillingCouponResponseData:
       type: object
-      description: The created resource
       properties:
         account_id:
           type: string
@@ -956,6 +955,9 @@ components:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
         company_id:
           type: string
+        coupon_external_id:
+          type: string
+          nullable: true
         new_plan_id:
           type: string
         new_price_id:
@@ -984,6 +986,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
+        coupon_external_id:
+          type: string
+          nullable: true
         new_plan_id:
           type: string
         new_price_id:
@@ -6207,6 +6212,77 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /billing/coupons:
+    get:
+      operationId: listCoupons
+      summary: List coupons
+      tags:
+        - billing
+      parameters:
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingCouponResponseData'
+                    title: ListCouponsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      is_active:
+                        type: boolean
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                    title: ListCouponsParams
+                required:
+                  - data
+                  - params
+                title: ListCouponsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: upsertBillingCoupon
       summary: Upsert billing coupon
