@@ -1102,9 +1102,20 @@ components:
       required:
         - flags
       title: CheckFlagsResponseData
+    CheckoutDataRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+        selected_plan_id:
+          type: string
+          nullable: true
+      required:
+        - company_id
+      title: CheckoutDataRequestBody
     CheckoutDataResponseData:
       type: object
-      description: The returned resource
+      description: The requested resource
       properties:
         active_add_ons:
           type: array
@@ -1120,11 +1131,18 @@ components:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         feature_usage:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
+        selected_plan:
+          $ref: '#/components/schemas/PlanDetailResponseData'
+        selected_usage_based_entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
       required:
         - active_add_ons
         - active_usage_based_entitlements
+        - selected_usage_based_entitlements
       title: CheckoutDataResponseData
     CompanyCrmDealsResponseData:
       type: object
@@ -7491,19 +7509,18 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/ServerError'
-  /checkout-internal/{checkout_internal_id}/data:
-    get:
+  /checkout-internal/data:
+    post:
       operationId: getCheckoutData
       summary: Get checkout data
       tags:
         - checkout
-      parameters:
-        - name: checkout_internal_id
-          in: path
-          description: checkout_internal_id
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutDataRequestBody'
+        required: true
       responses:
         '200':
           description: OK
@@ -7522,12 +7539,12 @@ paths:
                   - data
                   - params
                 title: GetCheckoutDataResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /checkout-internal/preview:
