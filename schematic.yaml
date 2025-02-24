@@ -1400,6 +1400,10 @@ components:
           format: date-time
         current:
           type: boolean
+        custom:
+          type: boolean
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanConfig'
         description:
           type: string
         entitlements:
@@ -1414,6 +1418,8 @@ components:
           type: string
         id:
           type: string
+        is_custom:
+          type: boolean
         is_default:
           type: boolean
         is_free:
@@ -1449,8 +1455,10 @@ components:
         - is_default
         - is_trialable
         - is_free
+        - is_custom
         - entitlements
         - current
+        - custom
         - valid
         - company_can_trial
       title: CompanyPlanDetailResponseData
@@ -2684,6 +2692,11 @@ components:
           type: array
           items:
             type: string
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanConfig'
+        custom_plan_id:
+          type: string
+          nullable: true
         default_plan_id:
           type: string
           nullable: true
@@ -2908,6 +2921,34 @@ components:
         - created_at
         - updated_at
       title: CrmProductResponseData
+    CustomPlanConfig:
+      type: object
+      properties:
+        cta_text:
+          type: string
+        cta_web_site:
+          type: string
+        price_text:
+          type: string
+      required:
+        - cta_web_site
+        - cta_text
+        - price_text
+      title: CustomPlanConfig
+    CustomPlanViewConfigResponseData:
+      type: object
+      properties:
+        cta_text:
+          type: string
+        cta_web_site:
+          type: string
+        price_text:
+          type: string
+      required:
+        - cta_web_site
+        - cta_text
+        - price_text
+      title: CustomPlanViewConfigResponseData
     Decimal:
       type: object
       title: Decimal
@@ -4219,6 +4260,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
+        custom_plan_id:
+          type: string
+          nullable: true
         default_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         default_plan_id:
@@ -4254,6 +4300,8 @@ components:
         created_at:
           type: string
           format: date-time
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
         description:
           type: string
         entitlements:
@@ -4268,6 +4316,8 @@ components:
           type: string
         id:
           type: string
+        is_custom:
+          type: boolean
         is_default:
           type: boolean
         is_free:
@@ -4301,6 +4351,7 @@ components:
         - is_default
         - is_trialable
         - is_free
+        - is_custom
         - entitlements
       title: PlanGroupPlanDetailResponseData
     PlanGroupResponseData:
@@ -5102,6 +5153,11 @@ components:
           type: array
           items:
             type: string
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanConfig'
+        custom_plan_id:
+          type: string
+          nullable: true
         default_plan_id:
           type: string
           nullable: true
@@ -6878,6 +6934,10 @@ paths:
             type: array
             items:
               type: string
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: interval
           in: query
           schema:
@@ -6938,6 +6998,8 @@ paths:
                         example: '0'
                       price:
                         type: integer
+                      q:
+                        type: string
                       usage_type:
                         type: string
                     title: SearchBillingPricesParams
