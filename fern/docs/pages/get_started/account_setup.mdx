@@ -1,0 +1,54 @@
+---
+title: Account Setup
+subtitle: Create a Schematic account
+slug: account_setup
+---
+
+First, you'll need to create a Schematic account. This is free and will only take a few minutes. 
+
+## 1. Create an account
+Go to [Schematic](https://app.schematichq.com/sign-in) and create an account with your Google account, or Github account, or email.
+
+This flow will ask you a few simple questions. 
+
+## 2. Link your Stripe account?
+
+#### Yes - Recommended
+Connecting your Stripe account to Schematic allows Schematic to easily import your existing customers and products. This lets you more quickly model your actual plans and features in Schematic.
+
+#### Not Yet
+While Stripe is required for production use of Schematic, you can easily explore and use Schematic without linking your Stripe account. It is easy to link Stripe later when you're ready to deploy Schematic in production.
+
+See [Stripe Integration](./stripe) for more information.
+
+## 3. Setup a Plan
+
+Select the option to create a Plan, then create your first Plan. 
+
+If you haven't thought about pricing plans, we suggest naming your first plan "Developers" and setting the plan type to "Free".
+
+*If you linked your Stripe account, you can map this plan to a Stripe product.*
+
+If you'd like to learn more about Plans, see [Plans](../catalog/plans).
+
+## 4. Create a Feature
+
+Select Features from the nav bar, then click "Create Feature".
+
+1. If you're not sure what features you'll need, we suggest creating a feature called "Mechanical Keyboards". *IMPORTANT* Make sure to leave the feature type as "Boolean".
+2. Leave the flag key as "mechanical-keyboards".
+3. Just click continue for the "Events" Tab. We'll explore these later.
+
+## 5. Add the Feature to your Plan (Create an Entitlement)
+
+In Schematic, a Feature that is connected to a Plan is called an Entitlement. 
+
+1. On the Feature page, click "Add Plan Entitlement".
+2. Select the plan you created in step 3.
+3. Click "Save Changes".
+
+### You're done!
+
+You've now created your first Entitlement of "Mechanical Keyboards" and added it to the "Developers" Plan.
+
+Next, we'll look at integrating the Schematic SDK into your application, to make sure that developers always have access to mechanical keyboards.

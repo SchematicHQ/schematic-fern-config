@@ -4,7 +4,7 @@ instances:
 title: SchematicHQ
 tabs:
   documentation:
-    display-name: Home
+    display-name: Getting Started
     icon: "fa-regular fa-book"
   api:
     display-name: API Reference
@@ -24,18 +24,16 @@ navigation:
       - section: Getting Started
         skip-slug: true
         contents:
-          - page: What is Schematic?
-            path: ./docs/pages/get_started/introduction.mdx
-          - page: How to use Schematic
-            path: ./docs/pages/get_started/howto.mdx
           - page: Quickstart
             path: ./docs/pages/get_started/quickstart.mdx
-          - page: Availability
-            path: ./docs/pages/get_started/availability.mdx
-          - page: Observability & Support
-            path: ./docs/pages/get_started/observability.mdx
-          - page: Security
-            path: ./docs/pages/get_started/security.mdx
+          - page: Account Setup
+            path: ./docs/pages/get_started/account_setup.mdx
+          - page: Setup the SDK
+            path: ./docs/pages/get_started/setup_sdk.mdx
+          # - page: What is Schematic?
+          #   path: ./docs/pages/get_started/introduction.mdx
+          # - page: How to use Schematic
+          #   path: ./docs/pages/get_started/howto.mdx
       - section: Using Feature Flags
         contents:
           - page: Overview
@@ -142,7 +140,7 @@ navigation:
                 icon: "fa-brands fa-python"
               - page: C#
                 path: ./docs/pages/developer_resources/sdks/csharp.mdx
-                icon: "fa-brands fa-hashtag"
+                icon: "fa-solid fa-hashtag"
               - page: Java
                 path: ./docs/pages/developer_resources/sdks/java.mdx
                 icon: "fa-brands fa-java"
@@ -155,6 +153,14 @@ navigation:
               - page: React
                 path: ./docs/pages/developer_resources/sdks/react.mdx
                 icon: "fa-brands fa-react"
+      - section: Production Readiness
+        contents:
+          - page: Availability
+            path: ./docs/pages/production_readiness/availability.mdx
+          - page: Observability & Support
+            path: ./docs/pages/production_readiness/observability.mdx
+          - page: Security
+            path: ./docs/pages/production_readiness/security.mdx
       - section: Integrations
         contents:
           - page: Stripe Integration
