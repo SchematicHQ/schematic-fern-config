@@ -835,6 +835,11 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
+        cancel_at:
+          type: integer
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
         company_id:
           type: string
           nullable: true
@@ -882,11 +887,17 @@ components:
         - interval
         - total_price
         - status
+        - cancel_at_period_end
       title: BillingSubscriptionResponseData
     BillingSubscriptionView:
       type: object
       description: The updated resource
       properties:
+        cancel_at:
+          type: integer
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
         company_id:
           type: string
           nullable: true
@@ -946,6 +957,7 @@ components:
         - interval
         - total_price
         - status
+        - cancel_at_period_end
         - products
         - discounts
       title: BillingSubscriptionView
@@ -1523,6 +1535,12 @@ components:
     CompanySubscriptionResponseData:
       type: object
       properties:
+        cancel_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
         currency:
           type: string
         customer_external_id:
@@ -1564,6 +1582,7 @@ components:
         - total_price
         - status
         - currency
+        - cancel_at_period_end
       title: CompanySubscriptionResponseData
     ComponentCapabilities:
       type: object
@@ -1819,6 +1838,11 @@ components:
     CreateBillingSubscriptionsRequestBody:
       type: object
       properties:
+        cancel_at:
+          type: integer
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
         currency:
           type: string
         customer_external_id:
@@ -1870,6 +1894,7 @@ components:
         - expired_at
         - product_external_ids
         - discounts
+        - cancel_at_period_end
       title: CreateBillingSubscriptionsRequestBody
     CreateCompanyOverrideRequestBody:
       type: object
