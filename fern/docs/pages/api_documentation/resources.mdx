@@ -25,7 +25,7 @@ Environments typically represent the stages of your software development lifecyl
 
 Plans allows you to create and manage both plans and plan audiences, making it easier to ensure plan audiences are governed by the right conditions. You can also retrieve plans for one or more companies.
 - [GET /plans](/api-reference/plans/list-plans)
-- [GET /plans/`{plan_id}`](/api-reference/plans/get-plans)
+- [GET /plans/`{plan_id}`](/api-reference/plans/get-plan)
 - [POST /plans](/api-reference/plans/create-plan)
 - [PUT /plans/`{plan_id}`](/api-reference/plans/create-plan)
 - [DEL /plans/`{plan_id}`](/api-reference/plans/delete-plan)
@@ -43,7 +43,6 @@ Companies allows you to upsert and delete companies and their corresponding meta
 - [GET /company-memberships](/api-reference/companies/list-company-memberships)
 - [POST /company-memberships](/api-reference/companies/get-or-create-company-membership)
 - [DEL /company-memberships/`{company_membership_id}`](/api-reference/companies/delete-company-membership)
-- [GET /company-plans](/api-reference/companies/list-company-plans)
 - [POST /company-traits](/api-reference/companies/upsert-company-trait)
 
 ## Users
@@ -54,7 +53,7 @@ Users allows you to upsert and delete users, as well as lookup a user's company 
 - [POST /users](/api-reference/companies/upsert-user)
 - [DEL /users/`{user_id}`](/api-reference/companies/delete-user)
 - [POST /users/delete](/api-reference/companies/delete-user-by-keys)
-- [POST /user-traits](/api-reference/companies/upsert-user-traits)
+- [POST /user-traits](/api-reference/companies/upsert-user-trait)
 
 ## Events
 
@@ -84,9 +83,6 @@ Flags allows you to create and manage flags, making it easier to programatically
 - [PUT /flags/`{flag_id}`/rules](/api-reference/features/update-flag-rules)
 - [POST /flags/`{key}`/check](/api-reference/features/check-flag)
 - [POST /flags/check](/api-reference/features/check-flags)
-- [GET /flag-checks](/api-reference/features/list-flag-checks)
-- [GET /flag-checks/`{flag_check_id}`](/api-reference/features/get-flag-check)
-- [GET /flag-checks/latest](/api-reference/features/get-latest-flag-checks)
 
 ## Entitlements
 
