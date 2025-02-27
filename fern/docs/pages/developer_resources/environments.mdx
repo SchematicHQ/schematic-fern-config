@@ -7,13 +7,11 @@ slug: developer_resources/environments
 
 Schematic supports multiple environments (e.g. development and production) to support your development workflow.
 
-Resources in Schematic are predominately environment-scoped, but some are available account-wide (regardless of the selected environment). The table below highlights available resources and how they are scoped.
-
-
+Resources in Schematic are predominately environment-scoped, but some are available account-wide (regardless of the selected environment).
 
 ## Account Scoped Resources
 
-Account scoped resources are the same across all environments. For example, a plan is scoped to your entire Account, so whenever you make a plan, it is accessible across all environments. This is helpful to create new plans in development and then they'll be ready in production without additional release work.
+Account scoped resources are the same across all environments. For example, a plan is scoped to your entire Account, so whenever you make a plan, it is accessible and consistent across all environments. This makes it easy to prepare plans in development and then roll them out production without additional release work.
 
 | Resource type | Definition / Notes |
 | --- | --- |
@@ -22,33 +20,6 @@ Account scoped resources are the same across all environments. For example, a pl
 | Feature | A feature is a product or service that can be enabled or disabled for a company |
 | Feature flag | A feature flag is a way to enable or disable a feature for a company |
 
-## Environment Scoped Resources
+## Special Case
 
-An environment scoped resource is only available in a specific environment. For example, a company is scoped to a specific environment (e.g. development), so you can setup test cases while developing to make sure all of the different billing states are covered wihtout affecting your production environment. 
-
-| Resource type | Definition / Notes |
-| --- | --- |
-| Plan entitlement | A feature is associated with a plan (e.g. Pro plan allows SSO) |
-| Companies | An organization that is using your product |
-| Company override | An allowance for a specific company to have more entitlements than their current plan. This is often used for enterprise customers or customers on legacy plans. |
-| Users | A user is an individual person |
-| Events | An event is an action that you're tracking (often for usage-based billing) |
-| Metric counts | This is an aggregated count of events grouped by type/hour/company/user primarily used for rule-based targeting |
-| Flag rule | A rule that determines when a feature flag should be enabled or disabled, based on the context of the user or company |
-| Rule condition | A condition that is part of a flag rule |
-
-## Special Cases
-
-API keys are always environment-specific, but can be accessed in the Application account-wide.
-
-
-## TO DROP (leaving here for discussion)
-
-I think these can be implicitly understood without needing a callout.
-
-| Resource type | Environment scope | Originates from | Concept exists in | Definition / Notes |
-| --- | --- | --- | --- | --- |
-| Entity key type | Account | API | App & API | A type of key that can be used to look up an entity (user or company). For example, “email” or “id” |
-| Entity trait type | Account | API | App & API | Arbitrary data that can be attached to entities (Users/Companies), which can later be used for flag targeting via rule conditions. This model defines a type of trait, e.g. “location” being a string |
-| Entity key value | Environment | API | App & API | The value for a given entity key, e.g. the value “ben@schematichq.com” in the context of the key “email” as a lookup for a specific user |
-| Entity trait value | Environment | API | API | The value for a given entity trait, e.g. the value “Atlanta, GA” in the context of the “location” trait for a specific  |
+API keys are always environment-specific, but API keys from all environments are always shown in the settings page.
