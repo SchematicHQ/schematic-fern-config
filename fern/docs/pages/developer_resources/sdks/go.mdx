@@ -395,3 +395,61 @@ func TestSomeFunctionality(t *testing.T) {
   // test code that expects the flag to be on
 }
 ```
+
+## Errors
+
+Structured error types are returned from API calls that return non-success status codes. For example,
+you can check if the error was due to an unauthorized request (i.e. status code 401) with the following:
+
+```go
+import (
+  "context"
+  "os"
+
+  core "github.com/schematichq/schematic-go/core"
+  option "github.com/schematichq/schematic-go/option"
+  schematicclient "github.com/schematichq/schematic-go/client"
+  schematicgo "github.com/schematichq/schematic-go"
+)
+
+func main() {
+  apiKey := os.Getenv("SCHEMATIC_API_KEY")
+  client := schematicclient.NewSchematicClient(option.WithAPIKey(apiKey))
+  defer client.Close()
+
+  body := &schematicgo.UpsertCompanyRequestBody{
+    Keys: map[string]string{
+      "id": "your-company-id",
+    },
+    Name: "Acme Widgets, Inc.",
+    Traits: map[string]any{
+      "city":       "Atlanta",
+      "high_score": 25,
+      "is_active":  true,
+    },
+  })
+  resp, err := client.API().Companies.UpsertCompany(context.Background, body)
+  if err != nil {
+    if apiError, ok := err.(*core.APIError); ok {
+      switch (apiError.StatusCode) {
+        case http.StatusUnauthorized:
+          // Do something with the unauthorized request ...
+        }
+      }
+    return err
+  }
+}
+```
+
+These errors are also compatible with the `errors.Is` and `errors.As` APIs, so you can access the error
+like so:
+
+```go
+if err != nil {
+    var apiError *core.APIError
+    if errors.As(err, apiError) {
+        // Do something with the API error ...
+    }
+    return err
+}
+```
