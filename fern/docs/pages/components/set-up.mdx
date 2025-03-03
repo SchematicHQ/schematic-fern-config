@@ -23,6 +23,8 @@ yarn add @schematichq/schematic-components @stripe/react-stripe-js
 pnp add @schematichq/schematic-components @stripe/react-stripe-js
 ```
 
+<Note>The Stripe library is required for the Schematic checkout components. If you _know_ you won't be using checkout components, you can omit it.</Note>
+
 ### 2. Set up your server for token exchange
 
 Schematic components use short-lived, company-scoped temporary access tokens to make requests on behalf of a company. You'll need to issue these from your server, using a secret access token.
