@@ -7,12 +7,25 @@ slug: components/set-up
 Components are simple to set up and maintain. Once you've integrated a component into your application, it will reflect up-to-date data for the given company that is accessing it in your application.
 
 To set up components, you'll need to do two things:
-1. Generate a short-lived access token to make requests on behalf of a given company
-2. Embed the SchematicEmbed component in your React frontend using a Component ID from Schematic
+1. Install the required libraries
+2. Generate a short-lived access token to make requests on behalf of a given company
+3. Embed the SchematicEmbed component in your React frontend using a Component ID from Schematic
 
-Both steps are covered below.
+All steps are covered below.
 
-### 1. Set up your server for token exchange
+### 1. Install the required libraries
+
+There are two libraries you'll need to install:
+
+```typescript
+npm install @schematichq/schematic-components @stripe/react-stripe-js
+yarn add @schematichq/schematic-components @stripe/react-stripe-js
+pnp add @schematichq/schematic-components @stripe/react-stripe-js
+```
+
+<Note>The Stripe library is required for the Schematic checkout components. If you _know_ you won't be using checkout components, you can omit it.</Note>
+
+### 2. Set up your server for token exchange
 
 Schematic components use short-lived, company-scoped temporary access tokens to make requests on behalf of a company. You'll need to issue these from your server, using a secret access token.
 
@@ -63,7 +76,7 @@ func GetTemporaryAccessToken(ctx context.Context, client schematic.Client, compa
 
 Temporary access tokens are valid for 15 minutes.
 
-### 2. Use the SchematicEmbed component in your React frontend application
+### 3. Use the SchematicEmbed component in your React frontend application
 
 Once you've issued a temporary access token and provided it to your frontend React application, you can simply pass it to the SchematicEmbed component along with your Component ID to render it:
 
