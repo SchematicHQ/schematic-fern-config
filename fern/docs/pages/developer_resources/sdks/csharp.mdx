@@ -116,7 +116,7 @@ Schematic schematic = new Schematic("YOUR_API_KEY");
 // Creating and updating companies
 async Task UpsertCompanyExample()
 {
-    var response = await schematic.API.Companies.UpsertCompanyAsync(new UpsertCompanyRequestBody
+    var response = await schematic.Companies.UpsertCompanyAsync(new UpsertCompanyRequestBody
     {
         Keys = new Dictionary<string, string> { { "id", "your-company-id" } },
         Name = "Acme Widgets, Inc.",
@@ -151,7 +151,7 @@ Schematic schematic = new Schematic("YOUR_API_KEY");
 // Creating and updating users
 async Task UpsertUserExample()
 {
-    var response = await schematic.API.Companies.UpsertUserAsync(new UpsertUserRequestBody
+    var response = await schematic.Companies.UpsertUserAsync(new UpsertUserRequestBody
     {
         Keys = new Dictionary<string, string>
         {
