@@ -5,26 +5,21 @@ slug: developer_resources/environments
 ---
 
 
-Schematic supports multiple environments (e.g. staging and production) to support your development workflow.
+Schematic supports multiple environments (e.g. development and production) to support your development workflow.
 
-Resources in Schematic are predominately environment-scoped, but some are available account-wide (regardless of the selected environment). The table below highlights available resources and how they are scoped.
+Resources in Schematic are predominately environment-scoped, but some are available account-wide (regardless of the selected environment).
 
-| Resource type | Account/environment scope | Originates from | Concept exists in | Definition / Notes |
-| --- | --- | --- | --- | --- |
-| Environment | Account | App & API | App & API |  |
-| Plan | Account | App & API| App & API |  |
-| Feature | Account | App & API | App & API |  |
-| Feature flag | Account | App & API | App & API |  |
-| Flag rule | Environment | App & API | App & API |  |
-| Rule condition | Environment | App & API | App & API |  |
-| API key | Account and Environment | App & API | App & API | API keys are always environment-specific, but can be accessed in the Application account-wide. |
-| Companies | Environment | API | App & API |  |
-| Users | Environment | API | App & API |  |
-| Events | Environment | API | App & API |  |
-| Plan entitlement | Environment | App & API | App & API | An association between a feature and a plan |
-| Company override | Environment | App & API | App & API | An association between a feature and a company |
-| Entity key type | Account | API | App & API | A type of key that can be used to look up an entity (user or company). For example, “email” or “id” |
-| Entity key value | Environment | API | App & API | The value for a given entity key, e.g. the value “ben@schematichq.com” in the context of the key “email” as a lookup for a specific user |
-| Entity trait type | Account | API | App & API | Arbitrary data that can be attached to entities (Users/Companies), which can later be used for flag targeting via rule conditions. This model defines a type of trait, e.g. “location” being a string |
-| Entity trait value | Environment | API | API | The value for a given entity trait, e.g. the value “Atlanta, GA” in the context of the “location” trait for a specific  |
-| Metric counts | Environment | API | App & API | This is an aggregated count of events grouped by type/hour/company/user primarily used for rule-based targeting |
+## Account Scoped Resources
+
+Account scoped resources are the same across all environments. For example, a plan is scoped to your entire Account, so whenever you make a plan, it is accessible and consistent across all environments. This makes it easy to prepare plans in development and then roll them out production without additional release work.
+
+| Resource type | Definition / Notes |
+| --- | --- |
+| Environment | An environment (e.g. development, staging, production) |
+| Plan | A plan is a collection of features that can be assigned to a company |
+| Feature | A feature is a product or service that can be enabled or disabled for a company |
+| Feature flag | A feature flag is a way to enable or disable a feature for a company |
+
+## Special Case
+
+API keys are always environment-specific, but API keys from all environments are always shown in the settings page.

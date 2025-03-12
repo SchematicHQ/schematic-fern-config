@@ -51,3 +51,9 @@ response = client.entitlements.create_company_override(
 ```
 
 Once the override is applied via the API, it will also appear in the UI and can be managed within Schematic like other overrides.
+
+## Most Generous Policy
+
+In the case that an override provides _less_ quota than a plan entitlement, users will receive the more generous amount. 
+
+For example, if a company has a plan entitlement of 1000 API calls, and an override of 500 API calls, the company will receive 1000 API calls.

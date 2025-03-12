@@ -55,12 +55,14 @@ navigation:
           - section: Configuring the Catalog
             path: ./docs/pages/catalog/configure-catalog.mdx
             contents:
-              - link: Live Plans
-                href: /catalog/configuration#live-plans
-              - link: Live Add Ons
-                href: /catalog/configuration#live-add-ons
               - link: Default Plan
                 href: /catalog/configuration#default-plan
+              - link: Live Plans
+                href: /catalog/configuration#live-plans
+              - link: Custom Plans
+                href: /catalog/configuration#custom-plans
+              - link: Live Add Ons
+                href: /catalog/configuration#live-add-ons
               - link: Trial Rules
                 href: /catalog/configuration#trial-rules
               - link: Plan Change Rules
@@ -150,6 +152,11 @@ navigation:
               - page: PHP
                 path: ./docs/pages/developer_resources/sdks/php.mdx
                 icon: "fa-brands fa-php"
+                hidden: true
+              - page: Ruby
+                path: ./docs/pages/developer_resources/sdks/ruby.mdx
+                icon: "fa-regular fa-gem"
+                hidden: true
               - page: React
                 path: ./docs/pages/developer_resources/sdks/react.mdx
                 icon: "fa-brands fa-react"
@@ -214,6 +221,7 @@ navigation:
           go: "https://github.com/schematichq/schematic-go"
           python: schematichq
           typescript: "@schematichq/schematic-typescript-node"
+          csharp: "SchematicHQ.Client"
         layout:
           - section: API Keys
             slug: accounts
@@ -252,7 +260,6 @@ navigation:
               - GET /company-memberships
               - POST /company-memberships
               - DELETE /company-memberships/{company_membership_id}
-              - GET /company-plans
               - POST /company-traits
           - section: Users
             slug: companies
