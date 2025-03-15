@@ -10,9 +10,7 @@ For instance if you have a pay in advance model, when a customer reaches the cre
 
 While base charges (e.g. a subscription fee) are defined at the plan level, as described [here](/catalog/create-catalog#creating-a-plan-or-add-on), usage-based billing is defined at the individual entitlement level.
 
-<img
-  src="../../assets/images/billing/ubp-entitlement-configuration-paygo.png"
-/>
+![Pay as you go](../../assets/images/billing/ubp-entitlement-configuration-paygo.png)
 
 ## What is usage based billing?
 
@@ -33,9 +31,7 @@ This is ideal for **event-based features** in Schematic such API calls or SMS us
 2. Click on the entitlement that you'd like to monetize.
 3. Select "Pay as you go" and the corresponding product from Stripe to aggregate usage against.
 
-<img
-  src="../../assets/images/billing/ubp-entitlement-configuration-paygo.png"
-/>
+![Pay as you go](../../assets/images/billing/ubp-entitlement-configuration-paygo.png)
 
 ### Pay in advance
 
@@ -48,13 +44,29 @@ This is ideal for scenarios where customers prefer buying usage in pre-determine
 2. Click on the entitlement that you'd like to monetize.
 3. Select "Pay in advance" and the corresponding product from Stripe to aggregate usage against.
 
-<img
-  src="../../assets/images/billing/ubp-entitlement-configuration-pia.png"
-/>
+![Pay in advance](../../assets/images/billing/ubp-entitlement-configuration-pia.png)
 
 ### Fixed fee with overage
 
-Coming soon.
+Include some amount of usage for a fixed fee, and then charge customers for any additional usage.
+
+This is ideal for scenarios where many customers will fall into the plan's quota, but you want to allow (and benefit from) customers with heavy usage.
+
+#### Configuring fixed fee with overage
+1. Navigate to a plan with a metered entitlement.
+2. Click on the entitlement that you'd like to monetize.
+3. Select "Overage" and the corresponding product from Stripe to aggregate usage against.
+
+![Fixed fee with overage](../../assets/images/billing/ubp-entitlement-configuration-overages-selection.png)
+
+#### Options in details
+
+![Fixed fee with overage details](../../assets/images/billing/ubp-entitlement-configuration-overages-details.png)
+
+The above example would create a monetization system as follows:
+1. 100 Usages/mo included in the plan (Soft limit)
+2. Never more than 1000 Usages/mo (Hard limit). This is optional, but can be helpful if there are resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold.
+3. Usages 101-1000 will cost $1 per 10 usages for customers paying monthly. These map directly to stripe products and cost and unit size should be configured in Stripe.
 
 ### Credit burndown
 
