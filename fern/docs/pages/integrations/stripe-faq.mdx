@@ -8,23 +8,23 @@ We've compiled a list of common pitfalls that we've seen in the wild. If you're 
 
 ## No Change Plan Button in Schematic Customer Portal Component
 
-![No change plan button](./images/no-change-plan-button.png)
+![No change plan button](../../assets/images/stripe/stripe-faq-no-change-plan-button.png)
 
-There are a few reasons a user might not be able to change their plan in the Schematic Customer Portal Component. These will affect 
+The most common reason a customer can't change plans is that are no live plans that they can switch to. Live Plans can be configured in Plans > Configuration > Live Plans (see screenshot below). Be sure to "Save Changes" on this page for the changes to take effect.
 
-### 1. There are no other live plans to switch to
+![Update live plans](../../assets/images/stripe/stripe-faq-update-live-plans.png)
 
-A common cause is that the live plans within Schematic have not been configured. These can be configured in Plans > Configuration > Live Plans (see screenshot below). Be sure to "Save Changes" on this page for the changes to take effect.
+## Unable to change plan in Schematic App
 
-![Update live plans](./images/update-live-plans.png)
+The most common reason you can't change a customer's plan via the Schematic App is that the customer doesn't have a payment method on file with Stripe. The easiest way to solve this is to have the customer checkout via the Schematic Customer Portal Component. Alternatively (mostly for development purposes), you can enter a payment method in the Stripe Dashboard.
 
-### 2. There are no valid plans to change to
+## Plan Change Flows
 
-If a plan is linked to a Stripe product, it can only be changed to other plans that are also linked to a Stripe product. Likewise, a plan _not_ linked to a Stripe product can only be changed to other plans _not_ linked to a Stripe product. This is done to ensure that customers are billed correctly through Stripe. 
+Within the schematic app, there are a few cases in which a plan can't be changed. The following table outlines these cases
 
-## Issues changing a customer's plan within the Schematic App
-
-First, check the section about ensuring there are [valid plans to change to](#2-there-are-no-valid-plans-to-change-to). Those issues will also affect your ability to change a customer's plan within the Schematic App. 
-
-If the issue persists, and the plan is linked to a Stripe product, the customer must have billing information on file with Stripe. The easiest way to achieve this is for the customer to checkout via the Schematic Customer Portal Component.
-
+| Plan Change | Self-service via Component | Sechamtic UI via "Manage Plan" | 
+| --- | --- | --- |
+| Free plan -> Free plan | ❌ | ✅ |
+| Free plan -> Paid Plan <br /> *Company is not in stripe OR Company is in Stripe without a payment method* | ✅ <br />(Must enter a payment method) | ❌ |
+| Paid Plan -> Paid Plan <br /> *Company is in Stripe with a payment method* | ✅ | ✅ |
+| Paid Plan -> Free Plan <br /> *This is effectively a cancellation* | ✅ | ✅ |
