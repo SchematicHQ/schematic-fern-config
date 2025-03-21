@@ -103,3 +103,16 @@ The Next Bill Due Element shows the upcoming bill associated with the Company’
 - Visibility of plans and/or add-ons are visible
 - Visibility of upgrade and downgrade buttons
 - Button sizing and styling
+
+*Checkout Flow*
+
+After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. While not strictly necessary, a good practice is to perform a hard refresh of the page to ensure all flag checks and usage quotas are updated.
+
+```javascript
+window.addEventListener("plan-changed", (event) => {
+  // event.detail will contain the response data from checkout/unsubscribe
+});
+```
+
+If you're using the typed frontend SDKs, the event will be either `components/src/api/models/CheckoutResponse.ts`
+or `components/src/api/models/CheckoutUnsubscribeResponse.ts`, depending on whether the customer is subscribing or unsubscribing.
