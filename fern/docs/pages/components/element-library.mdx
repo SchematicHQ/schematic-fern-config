@@ -15,6 +15,7 @@ If Stripe is not connected to Schematic, some Elements will either be unavailabl
 | Next Bill Due | Billing | Not available unless Stripe is connected |
 | Payment Methods | Billing | Not available unless Stripe is connected |
 | Invoices | Billing | Not available unless Stripe is connected |
+| Unsubscribe Button | Billing | Available with or without Stripe connected |
 | Metered Features | Entitlements | Available with or without Stripe connected |
 | Pricing Table | Entitlements | Not available unless Stripe is connected |
 
@@ -24,9 +25,7 @@ Below, each Element that is currently available is highlighted (with plans for m
 
 The Current Plan Element reflects the Schematic Plan a Company is a member of and the associated metadata. It also optionally includes a button for end users to self manage their plan. If Stripe is connected, any changes made to a Company’s plan will reflect in Schematic and Stripe; if it is not, this element is read only.
 
-<img
-  src="../../assets/images/components/components-current-plan.png"
-/>
+![Current plan](../../assets/images/components/components-current-plan.png)
 
 *Design options*
 
@@ -37,9 +36,7 @@ The Current Plan Element reflects the Schematic Plan a Company is a member of an
 
 The Included Features Element shows the entitlements, including usage and limits, granted to an individual customer based on their Plan membership.
 
-<img
-  src="../../assets/images/components/components-included-features.png"
-/>
+![Included features](../../assets/images/components/components-included-features.png)
 
 *Design options*
 
@@ -51,9 +48,7 @@ The Included Features Element shows the entitlements, including usage and limits
 
 The Next Bill Due Element shows the upcoming bill associated with the Company’s Stripe subscription.
 
-<img
-  src="../../assets/images/components/components-upcoming-bill.png"
-/>
+![Upcoming bill](../../assets/images/components/components-upcoming-bill.png)
 
 *Design options*
 
@@ -63,9 +58,7 @@ The Next Bill Due Element shows the upcoming bill associated with the Company’
 
 #### **Payment Methods**
 
-<img
-  src="../../assets/images/components/components-payment-method.png"
-/>
+![Payment method](../../assets/images/components/components-payment-method.png)
 
 *Design options*
 
@@ -74,9 +67,7 @@ The Next Bill Due Element shows the upcoming bill associated with the Company’
 
 #### **Invoices**
 
-<img
-  src="../../assets/images/components/components-invoices.png"
-/>
+![Components invoices](../../assets/images/components/components-invoices.png)
 
 *Design options*
 
@@ -84,11 +75,17 @@ The Next Bill Due Element shows the upcoming bill associated with the Company’
 - Number of invoices visible
 - Weight of header, date, amount
 
+#### **Unsubscribe Button**
+
+![Components unsubscribe button](../../assets/images/components/components-unsubscribe-button.png)
+
+*Design options*
+
+- Text styling and placement
+
 #### **Metered Features**
 
-<img
-  src="../../assets/images/components/components-meteredfeatures.png"
-/>
+![Metered features](../../assets/images/components/components-metered-features.png)
 
 *Design options*
 
@@ -99,12 +96,23 @@ The Next Bill Due Element shows the upcoming bill associated with the Company’
 
 #### **Pricing Table**
 
-<img
-  src="../../assets/images/components/components-pricingtable.png"
-/>
+![Pricing table](../../assets/images/components/components-pricing-table.png)
 
 *Design options*
 
 - Visibility of plans and/or add-ons are visible
 - Visibility of upgrade and downgrade buttons
 - Button sizing and styling
+
+*Checkout Flow*
+
+After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. While not strictly necessary, a good practice is to perform a hard refresh of the page to ensure all flag checks and usage quotas are updated.
+
+```javascript
+window.addEventListener("plan-changed", (event) => {
+  // event.detail will contain the response data from checkout/unsubscribe
+});
+```
+
+If you're using the typed frontend SDKs, the event will be either `components/src/api/models/CheckoutResponse.ts`
+or `components/src/api/models/CheckoutUnsubscribeResponse.ts`, depending on whether the customer is subscribing or unsubscribing.
