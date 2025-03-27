@@ -548,6 +548,8 @@ components:
           type: string
         quantity:
           type: number
+        subscription_count:
+          type: integer
         updated_at:
           type: string
           format: date-time
@@ -563,6 +565,7 @@ components:
         - created_at
         - updated_at
         - prices
+        - subscription_count
       title: BillingProductDetailResponseData
     BillingProductForSubscriptionResponseData:
       type: object
@@ -850,6 +853,9 @@ components:
           type: string
         customer_external_id:
           type: string
+        default_payment_method_id:
+          type: string
+          nullable: true
         expired_at:
           type: string
           format: date-time
@@ -908,6 +914,9 @@ components:
           type: string
         customer_external_id:
           type: string
+        default_payment_method_id:
+          type: string
+          nullable: true
         discounts:
           type: array
           items:
@@ -1222,6 +1231,10 @@ components:
             $ref: '#/components/schemas/CompanyEventPeriodMetricsResponseData'
         name:
           type: string
+        payment_methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodResponseData'
         plan:
           $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
         plans:
@@ -1246,6 +1259,7 @@ components:
         - entity_traits
         - keys
         - metrics
+        - payment_methods
         - plans
         - billing_subscriptions
         - user_count
@@ -1587,10 +1601,13 @@ components:
     ComponentCapabilities:
       type: object
       properties:
+        badge_visibility:
+          type: boolean
         checkout:
           type: boolean
       required:
         - checkout
+        - badge_visibility
       title: ComponentCapabilities
     ComponentHydrateResponseData:
       type: object
@@ -1764,6 +1781,9 @@ components:
         company_id:
           type: string
           nullable: true
+        default_payment_method_id:
+          type: string
+          nullable: true
         email:
           type: string
         external_id:
@@ -1788,6 +1808,8 @@ components:
       properties:
         currency:
           type: string
+        external_account_id:
+          type: string
         interval:
           type: string
         is_active:
@@ -1799,14 +1821,25 @@ components:
           type: integer
         price_external_id:
           type: string
+        price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateBillingPriceTierRequestBody'
         product_external_id:
           type: string
+        tier_mode:
+          type: string
+          nullable: true
+          enum:
+            - volume
+            - graduated
         usage_type:
           type: string
           enum:
             - licensed
             - metered
       required:
+        - external_account_id
         - product_external_id
         - price_external_id
         - interval
@@ -1814,10 +1847,30 @@ components:
         - price
         - currency
         - usage_type
+        - price_tiers
       title: CreateBillingPriceRequestBody
+    CreateBillingPriceTierRequestBody:
+      type: object
+      properties:
+        flat_amount:
+          type: integer
+          nullable: true
+        per_unit_price:
+          type: integer
+          nullable: true
+        price_external_id:
+          type: string
+        up_to:
+          type: integer
+          nullable: true
+      required:
+        - price_external_id
+      title: CreateBillingPriceTierRequestBody
     CreateBillingProductRequestBody:
       type: object
       properties:
+        active:
+          type: boolean
         currency:
           type: string
         external_id:
@@ -1834,6 +1887,7 @@ components:
         - price
         - currency
         - quantity
+        - active
       title: CreateBillingProductRequestBody
     CreateBillingSubscriptionsRequestBody:
       type: object
@@ -1847,6 +1901,9 @@ components:
           type: string
         customer_external_id:
           type: string
+        default_payment_method_id:
+          type: string
+          nullable: true
         discounts:
           type: array
           items:
@@ -2363,6 +2420,12 @@ components:
           nullable: true
         name:
           type: string
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
         trait_id:
           type: string
           nullable: true
@@ -2657,9 +2720,6 @@ components:
           type: string
         payment_method_type:
           type: string
-        subscription_external_id:
-          type: string
-          nullable: true
       required:
         - external_id
         - customer_external_id
@@ -2691,6 +2751,9 @@ components:
           type: string
         price_behavior:
           type: string
+          nullable: true
+        soft_limit:
+          type: integer
           nullable: true
         value_bool:
           type: boolean
@@ -2731,10 +2794,10 @@ components:
         default_plan_id:
           type: string
           nullable: true
-        plan_ids:
+        ordered_plans:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/OrderedPlansInGroup'
         trial_days:
           type: integer
           nullable: true
@@ -2743,7 +2806,7 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - plan_ids
+        - ordered_plans
       title: CreatePlanGroupRequestBody
     CreatePlanRequestBody:
       type: object
@@ -2989,6 +3052,17 @@ components:
         deleted:
           type: boolean
           description: Whether the delete was successful
+    EntitlementsInPlan:
+      type: object
+      properties:
+        entitlement_id:
+          type: string
+        visible:
+          type: boolean
+          nullable: true
+      required:
+        - entitlement_id
+      title: EntitlementsInPlan
     EntityKeyDefinitionResponseData:
       type: object
       properties:
@@ -3549,6 +3623,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PreviewObject'
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
         trait:
           $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
         trait_id:
@@ -3593,6 +3673,12 @@ components:
           nullable: true
         name:
           type: string
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
         trait_id:
           type: string
           nullable: true
@@ -3667,6 +3753,12 @@ components:
           $ref: '#/components/schemas/PlanResponseData'
         price_behavior:
           type: string
+          nullable: true
+        soft_limit:
+          type: integer
+          description: >-
+            The soft limit for the feature usage. Available only for overage
+            price behavior
           nullable: true
         usage:
           type: integer
@@ -3963,6 +4055,19 @@ components:
         - event_name
         - event_payload_key
       title: MeterRequestBody
+    OrderedPlansInGroup:
+      type: object
+      properties:
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementsInPlan'
+          nullable: true
+        plan_id:
+          type: string
+      required:
+        - plan_id
+      title: OrderedPlansInGroup
     PaginationFilter:
       type: object
       properties:
@@ -4011,9 +4116,6 @@ components:
           type: string
         payment_method_type:
           type: string
-        subscription_external_id:
-          type: string
-          nullable: true
       required:
         - customer_external_id
         - payment_method_type
@@ -4064,9 +4166,6 @@ components:
           type: string
         payment_method_type:
           type: string
-        subscription_external_id:
-          type: string
-          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -4257,6 +4356,9 @@ components:
         rule_id_usage_exceeded:
           type: string
           nullable: true
+        soft_limit:
+          type: integer
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -4283,6 +4385,17 @@ components:
         - updated_at
         - value_type
       title: PlanEntitlementResponseData
+    PlanEntitlementsOrder:
+      type: object
+      properties:
+        plan_entitlement_id:
+          type: string
+        visible:
+          type: boolean
+          nullable: true
+      required:
+        - plan_entitlement_id
+      title: PlanEntitlementsOrder
     PlanGroupDetailResponseData:
       type: object
       description: The returned resource
@@ -4303,6 +4416,10 @@ components:
           nullable: true
         id:
           type: string
+        ordered_plan_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanEntitlementsOrder'
         plans:
           type: array
           items:
@@ -4317,6 +4434,7 @@ components:
         - add_ons
         - id
         - plans
+        - ordered_plan_list
       title: PlanGroupDetailResponseData
     PlanGroupPlanDetailResponseData:
       type: object
@@ -4385,6 +4503,19 @@ components:
         - is_custom
         - entitlements
       title: PlanGroupPlanDetailResponseData
+    PlanGroupPlanEntitlementsOrder:
+      type: object
+      properties:
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementsOrder'
+          nullable: true
+        plan_id:
+          type: string
+      required:
+        - plan_id
+      title: PlanGroupPlanEntitlementsOrder
     PlanGroupResponseData:
       type: object
       description: The updated resource
@@ -4401,7 +4532,7 @@ components:
         plan_ids:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/OrderedPlansInGroup'
         trial_days:
           type: integer
           nullable: true
@@ -5107,6 +5238,12 @@ components:
         name:
           type: string
           nullable: true
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
         trait_id:
           type: string
           nullable: true
@@ -5155,6 +5292,9 @@ components:
         price_behavior:
           type: string
           nullable: true
+        soft_limit:
+          type: integer
+          nullable: true
         value_bool:
           type: boolean
           nullable: true
@@ -5192,10 +5332,10 @@ components:
         default_plan_id:
           type: string
           nullable: true
-        plan_ids:
+        ordered_plans:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/OrderedPlansInGroup'
         trial_days:
           type: integer
           nullable: true
@@ -5204,7 +5344,7 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - plan_ids
+        - ordered_plans
       title: UpdatePlanGroupRequestBody
     UpdatePlanRequestBody:
       type: object
@@ -5454,6 +5594,9 @@ components:
         price_behavior:
           type: string
           nullable: true
+        soft_limit:
+          type: integer
+          nullable: true
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -5646,6 +5789,8 @@ components:
           type: array
           items:
             type: string
+        secret:
+          type: string
         status:
           type: string
         updated_at:
@@ -5654,12 +5799,13 @@ components:
         url:
           type: string
       required:
+        - created_at
         - id
         - name
-        - url
-        - status
         - request_types
-        - created_at
+        - secret
+        - status
+        - url
         - updated_at
       title: WebhookResponseData
 paths:
@@ -6852,10 +6998,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: subscription_external_id
-          in: query
-          schema:
-            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -6900,8 +7042,6 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
-                      subscription_external_id:
-                        type: string
                     title: ListPaymentMethodsParams
                 required:
                   - data
@@ -7082,6 +7222,45 @@ paths:
                   - data
                   - params
                 title: UpsertBillingPriceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/product/{billing_id}:
+    delete:
+      operationId: deleteBillingProduct
+      summary: Delete billing product
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteBillingProductParams
+                required:
+                  - data
+                  - params
+                title: DeleteBillingProductResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
