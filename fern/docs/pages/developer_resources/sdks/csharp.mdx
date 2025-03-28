@@ -191,6 +191,93 @@ bool flagValue = await schematic.CheckFlag(
 );
 ```
 
+## Webhook Verification
+
+Schematic can send webhooks to notify your application of events. To ensure the security of these webhooks, Schematic signs each request using HMAC-SHA256. The .NET SDK provides utility functions to verify these signatures.
+
+### Verifying Webhook Signatures
+
+When your application receives a webhook request from Schematic, you should verify its signature to ensure it's authentic:
+
+```csharp
+using SchematicHQ.Client.Webhooks.WebhookUtils;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+public class WebhooksController : ControllerBase
+{
+    [HttpPost("schematic")]
+    public async Task<IActionResult> HandleSchematicWebhook()
+    {
+        try
+        {
+            // Read the request body
+            string body;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                body = await reader.ReadToEndAsync();
+            }
+
+            // Extract headers into a dictionary
+            var headers = new Dictionary<string, string>();
+            foreach (var header in Request.Headers)
+            {
+                headers[header.Key] = header.Value;
+            }
+
+            // Each webhook has a distinct secret; you can access this via the Schematic app
+            string webhookSecret = "your-webhook-secret";
+
+            // Verify the webhook signature
+            WebhookVerifier.VerifyWebhookSignature(body, headers, webhookSecret);
+
+            // Process the webhook payload
+            // ...
+
+            return Ok();
+        }
+        catch (WebhookSignatureException ex)
+        {
+            // Handle signature verification failure
+            return Unauthorized(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            // Handle other errors
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+}
+```
+
+### Verifying Signatures Manually
+
+If you need to verify a webhook signature outside of the context of an HTTP request, you can use the `VerifySignature` method:
+
+```csharp
+using SchematicHQ.Client.Webhooks.WebhookUtils;
+
+public bool VerifyWebhookManually(string body, string signature, string timestamp, string secret)
+{
+    try
+    {
+        WebhookVerifier.VerifySignature(body, signature, timestamp, secret);
+        Console.WriteLine("Signature verification successful!");
+        return true;
+    }
+    catch (WebhookSignatureException ex)
+    {
+        Console.WriteLine($"Signature verification failed: {ex.Message}");
+        return false;
+    }
+}
+```
+
 ## Configuration Options
 
 There are a number of configuration options that can be specified passing in `ClientOptions` as a second parameter when instantiating the Schematic client.

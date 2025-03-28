@@ -168,17 +168,32 @@ This call is non-blocking and there is no response to check.
 If you want to record large numbers of the same event at once, or perhaps measure usage in terms of a unit like tokens or memory, you can optionally specify a quantity for your event:
 
 ```go
-client.Track(context.Background(), &schematicgo.EventBodyTrack{
-  Event: "query-tokens",
-  Company: map[string]stringh{
-    "id": "your-company-id",
-  },
-  User: map[string]string{
-    "email":   "wcoyote@acme.net",
-    "user-id": "your-user-id",
-  },
-  Quantity: schematicgo.Int(1500),
-})
+import (
+  "context"
+  "os"
+
+  option "github.com/schematichq/schematic-go/option"
+  schematicclient "github.com/schematichq/schematic-go/client"
+  schematicgo "github.com/schematichq/schematic-go"
+)
+
+func main() {
+  apiKey := os.Getenv("SCHEMATIC_API_KEY")
+  client := schematicclient.NewSchematicClient(option.WithAPIKey(apiKey))
+  defer client.Close()
+
+  client.Track(context.Background(), &schematicgo.EventBodyTrack{
+    Event: "query-tokens",
+    Company: map[string]string{
+      "id": "your-company-id",
+    },
+    User: map[string]string{
+      "email":   "wcoyote@acme.net",
+      "user-id": "your-user-id",
+    },
+    Quantity: schematicgo.Int(1500),
+  })
+}
 ```
 
 ### Creating and updating companies
@@ -380,6 +395,40 @@ func TestSomeFunctionality(t *testing.T) {
   // test code that expects the flag to be on
 }
 ```
+
+## Webhook Verification
+
+Schematic can send webhooks to notify your application of events. To ensure the security of these webhooks, Schematic signs each request using HMAC-SHA256. The Go SDK provides utility functions to verify these signatures.
+
+### Verifying Webhook Signatures
+
+When your application receives a webhook request from Schematic, you should verify its signature to ensure it's authentic. The SDK provides a simple function to verify webhook signatures:
+
+```go
+import (
+  "net/http"
+
+  "github.com/schematichq/schematic-go/webhooks"
+)
+
+func yourWebhookHandler(w http.ResponseWriter, r *http.Request) {
+  // Each webhook has a distinct secret; you can access this via the Schematic app
+  webhookSecret := "your-webhook-secret"
+
+  // Verify the webhook signature
+  // The request body is preserved for later reading
+  err := webhooks.VerifyWebhookSignature(r, webhookSecret)
+  if err != nil {
+    // The signature is invalid or there was another error
+    http.Error(w, "Invalid signature", http.StatusBadRequest)
+    return
+  }
+
+  // The signature is valid, process the webhook...
+}
+```
+
+If you want to verify a webhook signature outside of the context of a web request, you can also do that using the `webhooks.VerifySignature` function.
 
 ## Errors
 
