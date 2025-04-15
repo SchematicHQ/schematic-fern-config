@@ -161,7 +161,7 @@ In each situation, be sure to submit any additional `keys`.
 
 ### Frontend SDKs only require settings keys once
 
-For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. If you need to update the keys, you can call `identify` again with the additional keys (as shown above).
+For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. If you need to update the keys, you can call `identify` again with the additional keys (as shown above). Underneath the hood, the `identify` call calls the company upsert endpoint, so it will create or update the company with new keys, name, and traits.
 
 ```tsx
 "use client";
