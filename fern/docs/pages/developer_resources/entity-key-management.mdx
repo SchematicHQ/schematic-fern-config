@@ -40,6 +40,44 @@ With all that said, this type of flexibility means that properly setting up Sche
 - Sending identify or track events
 - Retrieving feature usage data
 - Searching for entities within the Schematic app
+- Using Company Lookup SDK methods or api [/companies/lookup](/api-reference/companies/lookup-company)
+
+## Examples
+
+Let's imagine you have a customer identified the following ways:
+
+```
+Stripe Customer ID: stripe_abc123
+In your application: company_abc123
+```
+
+In Schematic, this would correspond to a keys map like this:
+
+```
+{
+    "stripe_customer_id": "stripe_abc123",
+    "company_id": "company_abc123"
+}
+```
+
+If both of those keys were setup in Schematic, any of the following requests would find your company:
+
+```python
+client.companies.lookup_company(
+    keys={"stripe_customer_id": "stripe_abc123"},
+)
+
+client.companies.lookup_company(
+    keys={"company_id": "company_abc123"},
+)
+
+client.companies.lookup_company(
+    keys={
+        "stripe_customer_id": "stripe_abc123",
+        "company_id": "company_abc123"
+    },
+)
+```
 
 ## Key management best practices
 
@@ -60,6 +98,41 @@ If you do not plan to use Stripe with Schematic or would like to use another `ke
 When making requests to Schematic, ensure the `key` is available or that you've provided Schematic with a mapping to other `keys` you may use in requests.
 
 One common scenario is using a UUID from your application because often other systems map to those UUIDs in service of additional automation.
+
+### Examples
+
+Using our example from above, you could create this company in any of the following ways. All 3 of the examples below will end up with the same result in Schematic. 
+
+```python
+// Add both keys on creation
+client.companies.upsert_company(
+    keys={
+        "stripe_customer_id": "stripe_abc123",
+        "company_id": "company_abc123"
+    },
+    name="Your Company",
+)
+
+// Create with internal key, add the Stripe key later
+client.companies.upsert_company(
+    keys={"company_id": "company_abc123"},
+    name="Your Company",
+)
+
+client.companies.upsert_company(
+    keys={"stripe_customer_id": "stripe_abc123"},
+)
+
+// Create with Stripe key, add the internal key later
+client.companies.upsert_company(
+    keys={"stripe_customer_id": "stripe_abc123"},
+    name="Your Company",
+)
+
+client.companies.upsert_company(
+    keys={"company_id": "company_abc123"},
+)
+```
 
 ## Other tips
 
@@ -85,3 +158,31 @@ You should submit an identify call in the following situations:
 - When a user or company changes information
 
 In each situation, be sure to submit any additional `keys`.
+
+### Frontend SDKs only require settings keys once
+
+For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. If you need to update the keys, you can call `identify` again with the additional keys (as shown above).
+
+```tsx
+"use client";
+
+import React, { useEffect } from "react";
+import { useSchematicEvents } from "@schematichq/schematic-react";
+
+const SchematicWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { identify } = useSchematicEvents();
+
+  useEffect(() => {
+    identify({
+      company: {
+        keys: { "stripe_customer_id": "stripe_abc123" }
+      },
+      keys: { "key": "value"},
+    })
+  }, [authContext, identify]);
+
+  return children;
+};
+```
