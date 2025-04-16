@@ -1152,6 +1152,12 @@ components:
             If a numeric feature entitlement rule was matched, the company's
             usage
           nullable: true
+        feature_usage_event:
+          type: string
+          description: >-
+            If an event-based numeric feature entitlement rule was matched, the
+            event used to track its usage
+          nullable: true
         feature_usage_period:
           type: string
           description: >-
@@ -4806,15 +4812,40 @@ components:
           type: string
           format: date-time
           nullable: true
+        upcoming_invoice_line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewSubscriptionUpcomingInvoiceLineItems'
       required:
         - due_now
         - new_charges
         - proration
         - period_start
         - promo_code_applied
+        - upcoming_invoice_line_items
         - percent_off
         - amount_off
       title: PreviewSubscriptionFinanceResponseData
+    PreviewSubscriptionUpcomingInvoiceLineItems:
+      type: object
+      properties:
+        amount:
+          type: integer
+        description:
+          type: string
+        price_id:
+          type: string
+        proration:
+          type: boolean
+        quantity:
+          type: integer
+      required:
+        - price_id
+        - quantity
+        - proration
+        - amount
+        - description
+      title: PreviewSubscriptionUpcomingInvoiceLineItems
     RawEventBatchResponseData:
       type: object
       description: The created resource
@@ -5697,7 +5728,7 @@ components:
           additionalProperties:
             type: string
           type: object
-          description: Key/value pairs too identify a company or user
+          description: Key/value pairs to identify a company or user
         set:
           type: string
           description: Value to set the trait to
@@ -8611,6 +8642,8 @@ paths:
           description: Key/value pairs
           required: true
           schema:
+            additionalProperties:
+              type: string
             type: object
       responses:
         '200':
@@ -8627,6 +8660,8 @@ paths:
                     description: Input parameters
                     properties:
                       keys:
+                        additionalProperties:
+                          type: string
                         type: object
                     title: LookupCompanyParams
                 required:
@@ -13794,6 +13829,8 @@ paths:
           description: Key/value pairs
           required: true
           schema:
+            additionalProperties:
+              type: string
             type: object
       responses:
         '200':
@@ -13810,6 +13847,8 @@ paths:
                     description: Input parameters
                     properties:
                       keys:
+                        additionalProperties:
+                          type: string
                         type: object
                     title: GetFeatureUsageByCompanyParams
                 required:
@@ -14260,6 +14299,8 @@ paths:
           description: Key/value pairs
           required: true
           schema:
+            additionalProperties:
+              type: string
             type: object
       responses:
         '200':
@@ -14276,6 +14317,8 @@ paths:
                     description: Input parameters
                     properties:
                       keys:
+                        additionalProperties:
+                          type: string
                         type: object
                     title: LookupUserParams
                 required:
