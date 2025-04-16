@@ -43,7 +43,7 @@ You can generate a publishable key from the [Schematic Dashboard](https://app.sc
 
 ### Identifying the user with Schematic
 
-To set the user context for events and flag checks, you can use the `identify` function provided by the `useSchematicEvents` hook:
+To set the user context for events and flag checks, you can use the `identify` function provided by the `useSchematicEvents` hook. The example below assumes your company has an application id of `company123`. This will upsert the company into Schematic, and set the context for the current web session (i.e. later calls will operate on this company).
 
 ```tsx
 import { useSchematicEvents } from "@schematichq/schematic-react";
@@ -63,7 +63,7 @@ const MyComponent = () => {
 };
 ```
 
-This call will upsert the company into Schematic, and set the context for the current session.
+<Note> See [Key Management](/developer_resources/entity-key-management) for more information on keys and how to use them in Schematic.</Note>
 
 ### Check a flag
 
