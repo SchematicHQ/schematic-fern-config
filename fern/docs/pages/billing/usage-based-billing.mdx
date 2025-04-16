@@ -60,11 +60,11 @@ This is ideal for scenarios where many customers will fall into the plan's quota
 
 ![Steps 1-4](../../assets/images/billing/ubp-entitlement-configuration-overage-1.png)
 
-5. The soft limit represents the amount of usage included in the plan. Below this is set to 500, which means the first 500 fast requests are included.
-6. Next, select how the duration of the period to track usage. Montly is by far the most common, but you can also choose daily or yearly.
-7. If monthly is selected (as is done here), you will need to determine if the period should reset at the beginning of the month or based off of the billing period of the subscription (i.e. if the customer signed up on the 15th, the period would be measured 15th-14th of next month). Basing it off of the billing period is the most common choice. 
+5. The Soft Limit represents the amount of usage included in the plan. Below this is set to 500, which means the first 500 fast requests are included.
+6. Next, select the duration of the period to track usage. Monthly is by far the most common, and Schematic also supports daily and yearly.
+7. If monthly is selected (as is done here), you will need to determine if the period should reset at the beginning of the month or based off of the billing period of the subscription (e.g. if the customer signed up on the 15th, the period would be measured 15th-14th of next month). Basing it off of the billing period is the most common choice. 
 8. The Overage price is the amount to charge for each unit of usage over the soft limit. Here, we set that to $.01 (1 cent) per usage.
-9. Finally, a hard limit can be set (this is optional, but can be helpful if there are resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold). At this limit, Schematic will prevent the customer from using more.
+9. Finally, you can optionally configure a Hard Limit (here 5,000) -- this represents the maximum amount of usage, at which Schematic will always turn off the flag. Hard Limits can be helpful if there are global resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold. 
 
 ![Steps 5-9](../../assets/images/billing/ubp-entitlement-configuration-overage-2.png)
 
