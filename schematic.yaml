@@ -495,6 +495,12 @@ components:
           type: string
         is_active:
           type: boolean
+        meter_event_name:
+          type: string
+          nullable: true
+        meter_event_payload_key:
+          type: string
+          nullable: true
         meter_id:
           type: string
           nullable: true
@@ -2262,6 +2268,24 @@ components:
         - quantity
         - interval
       title: CreateCrmProductRequestBody
+    CreateDataExportRequestBody:
+      type: object
+      properties:
+        export_type:
+          type: string
+          enum:
+            - company-feature-usage
+        metadata:
+          type: string
+        output_file_type:
+          type: string
+          enum:
+            - csv
+      required:
+        - export_type
+        - output_file_type
+        - metadata
+      title: CreateDataExportRequestBody
     CreateEntitlementReqCommon:
       type: object
       properties:
@@ -2958,9 +2982,28 @@ components:
         - name
         - plan_type
       title: CreatePlanRequestBody
+    CreatePlanTraitRequestBody:
+      type: object
+      properties:
+        plan_id:
+          type: string
+        trait_id:
+          type: string
+        trait_value:
+          type: string
+      required:
+        - plan_id
+        - trait_id
+        - trait_value
+      title: CreatePlanTraitRequestBody
     CreateWebhookRequestBody:
       type: object
       properties:
+        entitlement_trigger_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementTriggerConfig'
+          nullable: true
         name:
           type: string
         request_types:
@@ -2992,6 +3035,8 @@ components:
               - flag.deleted
               - test.send
               - subscription.trial.ended
+              - entitlement.limit.warning
+              - entitlement.limit.reached
         url:
           type: string
       required:
@@ -3173,6 +3218,41 @@ components:
         - cta_text
         - price_text
       title: CustomPlanViewConfigResponseData
+    DataExportResponseData:
+      type: object
+      description: The created resource
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        export_type:
+          type: string
+        id:
+          type: string
+        metadata:
+          type: string
+        output_file_type:
+          type: string
+        status:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - export_type
+        - status
+        - metadata
+        - output_file_type
+        - created_at
+        - updated_at
+      title: DataExportResponseData
     Decimal:
       type: object
       title: Decimal
@@ -3182,6 +3262,14 @@ components:
         deleted:
           type: boolean
           description: Whether the delete was successful
+    EntitlementTriggerConfig:
+      type: object
+      properties:
+        feature_id:
+          type: string
+      required:
+        - feature_id
+      title: EntitlementTriggerConfig
     EntitlementsInPlan:
       type: object
       properties:
@@ -4717,6 +4805,38 @@ components:
         - plan_type
         - updated_at
       title: PlanResponseData
+    PlanTraitResponseData:
+      type: object
+      description: The updated resource
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        id:
+          type: string
+        plan_id:
+          type: string
+        trait_id:
+          type: string
+        trait_value:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - plan_id
+        - trait_id
+        - trait_value
+        - created_at
+        - updated_at
+      title: PlanTraitResponseData
     PreviewObject:
       type: object
       properties:
@@ -5583,6 +5703,17 @@ components:
       required:
         - name
       title: UpdatePlanRequestBody
+    UpdatePlanTraitRequestBody:
+      type: object
+      properties:
+        plan_id:
+          type: string
+        trait_value:
+          type: string
+      required:
+        - plan_id
+        - trait_value
+      title: UpdatePlanTraitRequestBody
     UpdateRuleRequestBody:
       type: object
       properties:
@@ -5618,6 +5749,11 @@ components:
     UpdateWebhookRequestBody:
       type: object
       properties:
+        entitlement_trigger_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementTriggerConfig'
+          nullable: true
         name:
           type: string
           nullable: true
@@ -5650,6 +5786,8 @@ components:
               - flag.deleted
               - test.send
               - subscription.trial.ended
+              - entitlement.limit.warning
+              - entitlement.limit.reached
           nullable: true
         status:
           type: string
@@ -5701,6 +5839,10 @@ components:
           additionalProperties:
             type: string
           type: object
+          description: >-
+            See [Key
+            Management](https://docs.schematichq.com/developer_resources/key_management)
+            for more information
         last_seen_at:
           type: string
           format: date-time
@@ -5783,6 +5925,10 @@ components:
           additionalProperties:
             type: string
           type: object
+          description: >-
+            See [Key
+            Management](https://docs.schematichq.com/developer_resources/key_management)
+            for more information
         last_seen_at:
           type: string
           format: date-time
@@ -5824,6 +5970,10 @@ components:
           additionalProperties:
             type: string
           type: object
+          description: >-
+            See [Key
+            Management](https://docs.schematichq.com/developer_resources/key_management)
+            for more information
         last_seen_at:
           type: string
           format: date-time
@@ -6054,6 +6204,11 @@ components:
         created_at:
           type: string
           format: date-time
+        entitlement_trigger_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementTriggerConfig'
+          nullable: true
         id:
           type: string
         name:
@@ -8253,6 +8408,12 @@ paths:
           schema:
             type: boolean
             description: Filter out companies that have a plan
+        - name: with_subscription
+          in: query
+          description: Filter companies that have a subscription
+          schema:
+            type: boolean
+            description: Filter companies that have a subscription
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8306,6 +8467,9 @@ paths:
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
+                      with_subscription:
+                        type: boolean
+                        description: Filter companies that have a subscription
                       without_feature_override_for:
                         type: string
                         description: >-
@@ -8484,6 +8648,12 @@ paths:
           schema:
             type: boolean
             description: Filter out companies that have a plan
+        - name: with_subscription
+          in: query
+          description: Filter companies that have a subscription
+          schema:
+            type: boolean
+            description: Filter companies that have a subscription
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -8533,6 +8703,9 @@ paths:
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
+                      with_subscription:
+                        type: boolean
+                        description: Filter companies that have a subscription
                       without_feature_override_for:
                         type: string
                         description: >-
@@ -10113,6 +10286,85 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /data-exports:
+    post:
+      operationId: createDataExport
+      summary: Create data export
+      tags:
+        - dataexports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDataExportRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DataExportResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateDataExportParams
+                required:
+                  - data
+                  - params
+                title: CreateDataExportResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /data-exports/{data_export_id}/artifact:
+    get:
+      operationId: getDataExportArtifact
+      summary: Get data export artifact
+      tags:
+        - dataexports
+      parameters:
+        - name: data_export_id
+          in: path
+          description: data_export_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: >-
+                Indicates whether the content is expected to be displayed inline
+                by the client or treated as an attachment to be downloaded.
+              schema:
+                type: string
+                example: attachment; filename="file.csv"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /entity-key-definitions:
@@ -13219,6 +13471,326 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plan-traits:
+    get:
+      operationId: listPlanTraits
+      summary: List plan traits
+      tags:
+        - plans
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: plan_id
+          in: query
+          schema:
+            type: string
+        - name: trait_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/PlanTraitResponseData'
+                    title: ListPlanTraitsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      plan_id:
+                        type: string
+                      trait_id:
+                        type: string
+                    title: ListPlanTraitsParams
+                required:
+                  - data
+                  - params
+                title: ListPlanTraitsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createPlanTrait
+      summary: Create plan trait
+      tags:
+        - plans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanTraitRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanTraitResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreatePlanTraitParams
+                required:
+                  - data
+                  - params
+                title: CreatePlanTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-traits/{plan_trait_id}:
+    get:
+      operationId: getPlanTrait
+      summary: Get plan trait
+      tags:
+        - plans
+      parameters:
+        - name: plan_trait_id
+          in: path
+          description: plan_trait_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanTraitResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPlanTraitParams
+                required:
+                  - data
+                  - params
+                title: GetPlanTraitResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updatePlanTrait
+      summary: Update plan trait
+      tags:
+        - plans
+      parameters:
+        - name: plan_trait_id
+          in: path
+          description: plan_trait_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanTraitRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanTraitResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdatePlanTraitParams
+                required:
+                  - data
+                  - params
+                title: UpdatePlanTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deletePlanTrait
+      summary: Delete plan trait
+      tags:
+        - plans
+      parameters:
+        - name: plan_trait_id
+          in: path
+          description: plan_trait_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeletePlanTraitParams
+                required:
+                  - data
+                  - params
+                title: DeletePlanTraitResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-traits/count:
+    get:
+      operationId: countPlanTraits
+      summary: Count plan traits
+      tags:
+        - plans
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: plan_id
+          in: query
+          schema:
+            type: string
+        - name: trait_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      plan_id:
+                        type: string
+                      trait_id:
+                        type: string
+                    title: CountPlanTraitsParams
+                required:
+                  - data
+                  - params
+                title: CountPlanTraitsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plans:
     get:
       operationId: listPlans
@@ -14834,3 +15406,4 @@ tags:
   - name: webhooks
   - name: components
   - name: checkout
+  - name: dataexports
