@@ -24,16 +24,20 @@ navigation:
       - section: Getting Started
         skip-slug: true
         contents:
-          - page: Quickstart
-            path: ./docs/pages/get_started/quickstart.mdx
-          - page: Account Setup
-            path: ./docs/pages/get_started/account_setup.mdx
-          - page: Setup the SDK
-            path: ./docs/pages/get_started/setup_sdk.mdx
+          - page: Overview
+            path: ./docs/pages/get_started/overview.mdx
           - page: What is Schematic?
             path: ./docs/pages/get_started/introduction.mdx
           # - page: How to use Schematic
           #   path: ./docs/pages/get_started/howto.mdx
+      - section: Quickstart
+        contents:
+          - page: Quickstart
+            path: ./docs/pages/quickstart/quickstart.mdx
+          - page: Account Setup
+            path: ./docs/pages/quickstart/account-setup.mdx
+          - page: Setup the SDK
+            path: ./docs/pages/quickstart/setup-sdk.mdx
       - section: Using Feature Flags
         contents:
           - page: Overview
@@ -133,6 +137,11 @@ navigation:
                 path: ./docs/pages/developer_resources/sample_apps/sample_python.mdx
           - section: SDKs
             contents:
+              - page: Overview
+                path: ./docs/pages/developer_resources/sdks/overview.mdx
+              - page: React
+                path: ./docs/pages/developer_resources/sdks/react.mdx
+                icon: "fa-brands fa-react"
               - page: Go
                 path: ./docs/pages/developer_resources/sdks/go.mdx
                 icon: "fa-brands fa-golang"
@@ -159,9 +168,6 @@ navigation:
                 path: ./docs/pages/developer_resources/sdks/ruby.mdx
                 icon: "fa-regular fa-gem"
                 hidden: true
-              - page: React
-                path: ./docs/pages/developer_resources/sdks/react.mdx
-                icon: "fa-brands fa-react"
       - section: Production Readiness
         contents:
           - page: Availability
@@ -196,6 +202,9 @@ navigation:
             icon: "fa-brands fa-connectdevelop"
       - section: Playbooks
         contents:
+          - page: Overview
+            slug: overview
+            path: ./docs/pages/playbooks/overview.mdx
           - page: Creating a metered feature
             slug: metering
             path: ./docs/pages/playbooks/metering.mdx
