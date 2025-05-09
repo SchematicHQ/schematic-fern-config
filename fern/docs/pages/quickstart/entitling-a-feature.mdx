@@ -1,12 +1,14 @@
 ---
 title: Adding your first feature
-subtitle: Start using Schematic in under 5 minutes
+subtitle: Quickly gate access to features
 slug: quickstart/entitling-a-feature
 ---
 
 In the [quickstart app](https://github.com/schematichq/quickstart), the entitlements page shows 2 buttons, one of which is disabled. Let's create a feature in Schematic and entitle it to our plan so that this button will become clickable. 
 
-## Create a feature
+TODO video!
+
+## Create a boolean feature
 
 First, we'll need to create a feature in Schematic. 
 
@@ -46,8 +48,6 @@ Below is the code that controls the button we just enabled. Tracking users and p
 const {
   value: isNewBooleanFeatureEnabled,
 } = useSchematicEntitlement("new-boolean-feature");
-
-...
 
 <button 
   className="bg-blue-500 text-white px-4 py-2 rounded-md"
