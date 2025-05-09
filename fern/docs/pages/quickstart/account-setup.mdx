@@ -13,42 +13,26 @@ This flow will ask you a few simple questions.
 
 ## 2. Link your Stripe account?
 
-#### Yes - Recommended
-Connecting your Stripe account to Schematic allows Schematic to easily import your existing customers and products. This lets you more quickly model your actual plans and features in Schematic.
+Skip this step for now. When you're ready, checkout our [Stripe Integration](/integrations/stripe) docs for more information.
 
-#### Not Yet
-While Stripe is required for production use of Schematic, you can easily explore and use Schematic without linking your Stripe account. It is easy to link Stripe later when you're ready to deploy Schematic in production.
+## 3. Create an API Key
 
-See [Stripe Integration](/integrations/stripe) for more information.
+TODO
+In the top right 
 
-## 3. Setup a Plan
-
-Select the option to create a Plan, then create your first Plan. 
-
-If you haven't thought about pricing plans, we suggest naming your first plan "Developers" and setting the plan type to "Free".
-
-*If you linked your Stripe account, you can map this plan to a Stripe product.*
-
-If you'd like to learn more about Plans, see [Plans](/catalog/plans).
-
-## 4. Create a Feature
-
-Select Features from the nav bar, then click "Create Feature".
-
-1. If you're not sure what features you'll need, we suggest creating a feature called "Mechanical Keyboards". *IMPORTANT* Make sure to leave the feature type as "Boolean".
-2. Leave the flag key as "mechanical-keyboards".
-3. Just click continue for the "Events" Tab. We'll explore these later.
-
-## 5. Add the Feature to your Plan (Create an Entitlement)
-
-In Schematic, a Feature that is connected to a Plan is called an Entitlement. 
-
-1. On the Feature page, click "Add Plan Entitlement".
-2. Select the plan you created in step 3.
-3. Click "Save Changes".
+<li>Next, we'll need to create a Schematic api key.
+            <div className="mt-4 rounded-lg overflow-hidden">
+              <img src="https://prod.ferndocs.com/_next/image?url=https%3A%2F%2Ffiles.buildwithfern.com%2Fhttps%3A%2F%2Fschematic.docs.buildwithfern.com%2F2025-04-16T20%3A18%3A05.794Z%2Fdocs%2Fpages%2Fget_started%2Fimages%2Fapi-key.png&w=3840&q=75" alt="API Key instructions" className="w-full" />
+            </div>
+          </li>
+          <li>Add your Schematic publishable key and secret key to the `.env.local` file. (We'll add the component id later)</li>
+          <li>Restart this application and you should be good to go!</li>
 
 ### You're done!
 
 You've now created your first Entitlement of "Mechanical Keyboards" and added it to the "Developers" Plan.
 
 Next, we'll look at integrating the Schematic SDK into your application, to make sure that developers always have access to mechanical keyboards.
+
+
+*NOTE: To simplify this quickstart and demonstrate key Schematic features, each new account is provisioned with a demo customer, plan, and a few features. This quickstart is designed to leverage those to help guide you through Schematic. Feel free to delete those when you're ready.*
