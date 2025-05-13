@@ -3037,6 +3037,8 @@ components:
               - subscription.trial.ended
               - entitlement.limit.warning
               - entitlement.limit.reached
+              - entitlement.soft_limit.warning
+              - entitlement.soft_limit.reached
         url:
           type: string
       required:
@@ -3671,6 +3673,7 @@ components:
       properties:
         company_count:
           type: integer
+          nullable: true
         environment_id:
           type: string
         event_count:
@@ -3683,12 +3686,11 @@ components:
           nullable: true
         user_count:
           type: integer
+          nullable: true
       required:
-        - company_count
         - environment_id
         - event_count
         - event_subtype
-        - user_count
       title: EventSummaryResponseData
     FeatureCompanyResponseData:
       type: object
@@ -5788,6 +5790,8 @@ components:
               - subscription.trial.ended
               - entitlement.limit.warning
               - entitlement.limit.reached
+              - entitlement.soft_limit.warning
+              - entitlement.soft_limit.reached
           nullable: true
         status:
           type: string
