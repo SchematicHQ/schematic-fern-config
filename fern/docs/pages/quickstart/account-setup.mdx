@@ -6,27 +6,25 @@ slug: quickstart/account-setup
 
 First, you'll need to create a Schematic account. This is free and will only take a few minutes. 
 
+TODO video
+
 ## 1. Create an account
+
 Go to [Schematic](https://app.schematichq.com/sign-in) and create an account with your Google account, or Github account, or email.
 
-This flow will ask you a few simple questions. 
+This flow will ask you a few simple questions about your company.
 
-## 2. Link your Stripe account?
+## 2. Create an API Key
 
-Skip this step for now. When you're ready, checkout our [Stripe Integration](/integrations/stripe) docs for more information.
+1. Click the Gear icon in the top right
+2. Click "API Keys" on the left menu
+3. Click "Create" in the top right
+4. Give the key a name, e.g. "Quickstart"
+5. Click "Create"
+6. Copy the publishable key and secret key, and add them to the `.env.local` file.
+7. *NOTE: the secret key is never shown again, so make sure to save it in a secure location. You can always create a new key if you lose it.*
 
-## 3. Create an API Key
-
-TODO
-In the top right 
-
-<li>Next, we'll need to create a Schematic api key.
-            <div className="mt-4 rounded-lg overflow-hidden">
-              <img src="https://prod.ferndocs.com/_next/image?url=https%3A%2F%2Ffiles.buildwithfern.com%2Fhttps%3A%2F%2Fschematic.docs.buildwithfern.com%2F2025-04-16T20%3A18%3A05.794Z%2Fdocs%2Fpages%2Fget_started%2Fimages%2Fapi-key.png&w=3840&q=75" alt="API Key instructions" className="w-full" />
-            </div>
-          </li>
-          <li>Add your Schematic publishable key and secret key to the `.env.local` file. (We'll add the component id later)</li>
-          <li>Restart this application and you should be good to go!</li>
+![Create an API Key](../../assets/images/quickstart/quickstart-account-setup-api-key.png)
 
 ### You're done!
 
