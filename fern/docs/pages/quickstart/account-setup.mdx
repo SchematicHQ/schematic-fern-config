@@ -6,49 +6,39 @@ slug: quickstart/account-setup
 
 First, you'll need to create a Schematic account. This is free and will only take a few minutes. 
 
+<iframe
+  width="100%"
+  height="450px"
+  src="https://www.youtube.com/watch?v=30V1OTAVM00&list=PLaAbRmJj8zVr0zLAL_GDgcF2NpgHSGO4S"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen
+></iframe>
+
 ## 1. Create an account
+
 Go to [Schematic](https://app.schematichq.com/sign-in) and create an account with your Google account, or Github account, or email.
 
-This flow will ask you a few simple questions. 
+This flow will ask you a few simple questions about your company.
 
-## 2. Link your Stripe account?
+## 2. Create an API Key
 
-#### Yes - Recommended
-Connecting your Stripe account to Schematic allows Schematic to easily import your existing customers and products. This lets you more quickly model your actual plans and features in Schematic.
+1. Click the Gear icon in the top right
+2. Click "API Keys" on the left menu
+3. Click "Create" in the top right
+4. Give the key a name, e.g. "Quickstart"
+5. Click "Create"
+6. Copy the publishable key and secret key, and add them to the `.env.local` file.
+7. *NOTE: the secret key is never shown again, so make sure to save it in a secure location. You can always create a new key if you lose it.*
 
-#### Not Yet
-While Stripe is required for production use of Schematic, you can easily explore and use Schematic without linking your Stripe account. It is easy to link Stripe later when you're ready to deploy Schematic in production.
-
-See [Stripe Integration](/integrations/stripe) for more information.
-
-## 3. Setup a Plan
-
-Select the option to create a Plan, then create your first Plan. 
-
-If you haven't thought about pricing plans, we suggest naming your first plan "Developers" and setting the plan type to "Free".
-
-*If you linked your Stripe account, you can map this plan to a Stripe product.*
-
-If you'd like to learn more about Plans, see [Plans](/catalog/plans).
-
-## 4. Create a Feature
-
-Select Features from the nav bar, then click "Create Feature".
-
-1. If you're not sure what features you'll need, we suggest creating a feature called "Mechanical Keyboards". *IMPORTANT* Make sure to leave the feature type as "Boolean".
-2. Leave the flag key as "mechanical-keyboards".
-3. Just click continue for the "Events" Tab. We'll explore these later.
-
-## 5. Add the Feature to your Plan (Create an Entitlement)
-
-In Schematic, a Feature that is connected to a Plan is called an Entitlement. 
-
-1. On the Feature page, click "Add Plan Entitlement".
-2. Select the plan you created in step 3.
-3. Click "Save Changes".
+![Create an API Key](../../assets/images/quickstart/quickstart-account-setup-api-key.png)
 
 ### You're done!
 
 You've now created your first Entitlement of "Mechanical Keyboards" and added it to the "Developers" Plan.
 
 Next, we'll look at integrating the Schematic SDK into your application, to make sure that developers always have access to mechanical keyboards.
+
+
+*NOTE: To simplify this quickstart and demonstrate key Schematic features, each new account is provisioned with a demo customer, plan, and a few features. This quickstart is designed to leverage those to help guide you through Schematic. Feel free to delete those when you're ready.*
