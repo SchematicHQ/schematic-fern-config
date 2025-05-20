@@ -675,6 +675,8 @@ components:
           type: string
         charge_type:
           type: string
+        controlled_by:
+          type: string
         environment_id:
           type: string
         is_trialable:
@@ -695,11 +697,12 @@ components:
           nullable: true
       required:
         - account_id
-        - billing_product_id
         - charge_type
-        - is_trialable
         - environment_id
         - plan_id
+        - billing_product_id
+        - controlled_by
+        - is_trialable
       title: BillingProductPlanResponseData
     BillingProductPriceResponseData:
       type: object
@@ -1523,6 +1526,8 @@ components:
           type: boolean
         company_count:
           type: integer
+        controlled_by:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -1585,6 +1590,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - controlled_by
         - is_free
         - is_custom
         - entitlements
@@ -4495,6 +4501,8 @@ components:
           type: string
         company_count:
           type: integer
+        controlled_by:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -4543,6 +4551,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - controlled_by
         - is_free
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
@@ -4675,6 +4684,8 @@ components:
           type: string
         company_count:
           type: integer
+        controlled_by:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -4731,6 +4742,7 @@ components:
         - features
         - is_default
         - is_trialable
+        - controlled_by
         - is_free
         - is_custom
         - entitlements
@@ -5819,13 +5831,19 @@ components:
           nullable: true
         charge_type:
           type: string
+        currency:
+          type: string
           nullable: true
-        is_free_plan:
-          type: boolean
         is_trialable:
           type: boolean
+        monthly_price:
+          type: integer
+          nullable: true
         monthly_price_id:
           type: string
+          nullable: true
+        one_time_price:
+          type: integer
           nullable: true
         one_time_price_id:
           type: string
@@ -5833,11 +5851,14 @@ components:
         trial_days:
           type: integer
           nullable: true
+        yearly_price:
+          type: integer
+          nullable: true
         yearly_price_id:
           type: string
           nullable: true
       required:
-        - is_free_plan
+        - charge_type
         - is_trialable
       title: UpsertBillingProductRequestBody
     UpsertCompanyRequestBody:
