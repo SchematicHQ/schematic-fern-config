@@ -37,7 +37,7 @@ With all that said, this type of flexibility means that properly setting up Sche
 `Keys` are used in a few important places:
 - When checking a flag, you will use a `key` to establish context (e.g. which entity are you checking a flag for?)
 - Updating or retrieving information about users or companies
-- Sending identify or track events
+- Sending `identify` or `track` events
 - Retrieving feature usage data
 - Searching for entities within the Schematic app
 - Using Company Lookup SDK methods or api [/companies/lookup](/api-reference/companies/lookup-company)
@@ -75,6 +75,22 @@ client.companies.lookup_company(
     keys={
         "stripe_customer_id": "stripe_abc123",
         "company_id": "company_abc123"
+    },
+)
+```
+
+### Changing a company's `keys`
+
+If you need to add or update a company's `keys`, you can do so by calling the `upsert_company` endpoint with the new/updated `key` alongside an existing `key(s)`. 
+
+Using our example above, if we wanted to update the company's `stripe_customer_id`, to `stripe_def456` and add a new `key` of `app_id` with the value `app_abc123` we could do so like this:
+
+```python
+client.companies.lookup_company(
+    keys={
+        "stripe_customer_id": "stripe_def456",
+        "company_id": "company_abc123",
+        "app_id": "app_abc123"
     },
 )
 ```
@@ -120,7 +136,10 @@ client.companies.upsert_company(
 )
 
 client.companies.upsert_company(
-    keys={"stripe_customer_id": "stripe_abc123"},
+    keys={
+        "stripe_customer_id": "stripe_abc123",
+        "company_id": "company_abc123"
+    },
 )
 
 // Create with Stripe key, add the internal key later
@@ -130,9 +149,29 @@ client.companies.upsert_company(
 )
 
 client.companies.upsert_company(
-    keys={"company_id": "company_abc123"},
+    keys={
+        "stripe_customer_id": "stripe_abc123",
+        "company_id": "company_abc123"
+    },
+)
+
+// Create with 2 keys, then change one
+client.companies.upsert_company(
+    keys={
+        "stripe_customer_id": "wrong_stripe_customer_id",
+        "company_id": "company_abc123"
+    },
+)
+
+client.companies.upsert_company(
+    keys={
+        "stripe_customer_id": "stripe_abc123",
+        "company_id": "company_abc123"
+    },
 )
 ```
+
+<Info>If the `keys` provided in a lookup or upsert match multiple entities, the request will error out.</Info>
 
 ## Other tips
 
@@ -161,7 +200,7 @@ In each situation, be sure to submit any additional `keys`.
 
 ### Frontend SDKs only require settings keys once
 
-For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. If you need to update the keys, you can call `identify` again with the additional keys (as shown above). Underneath the hood, the `identify` call calls the company upsert endpoint, so it will create or update the company with new keys, name, and traits.
+For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. Underneath the hood, the `identify` call calls the company upsert endpoint, so it will create or update the company with new keys, name, and traits (see [changing a company's keys](#changing-a-companys-keys) for more information).
 
 ```tsx
 "use client";
