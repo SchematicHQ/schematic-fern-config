@@ -4,8 +4,24 @@ title: Rate limiting
 slug: api-reference/rate_limiting
 ---
 
+The Schematic API leverages rate limiting to ensure your applications remain performant and available. Our infrastructure is built to support high-scale production environments where reliability is critical. We have two distinct rate limiting tiers:
 
-The Schematic API has a number of safeguards against bursts of requests to help maximize its stability. Users who send many requests in a quick succession might see error responses that show up as a `429`. We have a couple of mechanisms in the API, regardless of the environment, including:
+1. **Application Hot Path** - Optimized for application hot paths
+2. **Core API** - For creating and managing resources
+
+These rate limits are designed to protect your service while allowing for normal usage patterns. The specific limits are enforced separately for each tier to ensure your user experience remains performant.
+
+## Application Hot Path APIs
+
+These APIs handle the hot paths of your application that must remain low latency -- mainly feature flag evaluations and event reporting. These routes are designed for high-performance and rely heavily on caching (especially for flag checks). Rate limits on these APIs primarily serve as safety mechanisms to protect against implementation issues (like infinite re-render loops in frontend applications) rather than as practical constraints on normal usage.
+
+<Info>
+We recommend using our SDKs, especially our front end SDKs, for optimal performance. They implement caching, bulk flag checks, and Web Socket connections for real-time updates.
+</Info>
+
+## Core APIs
+
+These APIs are used to create and manage resources in Schematic. These APIs are subject to typical api rate limits, specifically:
 
 1. A defined rate limit that allows up to 20 write operations per second and 20 read operations per second.
 2. A concurrency limit that limits the number of requests that are active at any given time.
@@ -18,6 +34,4 @@ Common causes and mitigations:
 
 ## Handling limiting gracefully
 
-A basic technique to gracefully handle rate limiting is to build in a retry mechanism. The retry mechanism should follow an exponential backoff schedule to reduce request volume when necessary. 
-
-We also recommend implementing local caching with a TTL (either via our SDK or implemented independently).
+Users who send many requests in a quick succession might see error responses that show up as a `429`. A basic technique to gracefully handle rate limiting is to build in a retry mechanism. The retry mechanism should follow an exponential backoff schedule to reduce request volume when necessary. 
