@@ -5,11 +5,19 @@ slug: architecture/availability
 ---
 
 
-As a business implementing Schematic, we understand you are trusting the solution to be highly available and reliable. Given the nature of the transactions that Schematic supports for businesses, we’re committed to both. 
+As a business implementing Schematic, we understand you are trusting the solution to be highly available and reliable. Given the nature of the transactions that Schematic supports for businesses, we're committed to both. 
 
 Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks/go). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
 
-Schematic maintains a cache to minimize latency for every request.
+## Hot Path Optimization
+
+Schematic's infrastructure is optimized for application hot paths -- primarily feature flag evaluations and event reporting. These routes are designed for high performance and rely heavily on caching, especially for flag checks. Our architecture ensures these critical paths remain low latency and highly available.
+
+<Info>
+For optimal performance, we strongly recommend using our SDKs, particularly our frontend SDKs which implement these optimizations automatically including caching, bulk operations, and WebSocket connections.
+</Info>
+
+For more information on API avaliability and rate limiting, please see our [API documentation](/api-reference/rate_limiting).
 
 ### Local caching
 
