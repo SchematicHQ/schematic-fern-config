@@ -1,0 +1,39 @@
+---
+title: Feature Types
+slug: feature-management/feature-types
+description: The 3 different types of features in Schematic -- Boolean, Trait-based, and Event-based.
+---
+
+There are 3 different types of features in Schematic
+- **Boolean** - A simple on/off feature.
+- **Event-based** - A feature that is metered against user events reported to Schematic (e.g. api calls, reports generated).
+- **Trait-based** - A feature that is based off of information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size).
+
+## Boolean Features
+
+Boolean features are the simplest type of feature. They are often used to represent features that are either available or not available to a user. They are the most commonly used type of feature and are the backbone of most plans. 
+
+## Event-based Features
+
+Event-based features are features that are metered against user events reported to Schematic. This can be usage (e.g. api calls, reports generated). Events are sent to Schematic via the `track` function provided by each SDK. Schematic automatically aggregates these events to dynamically determine whether a company has exceeded their entitlement.
+
+<Info>
+You can read more about tracking usage [here](/feature-management/tracking-usage).
+</Info>
+
+## Trait-based Features
+
+Trait-based features are features based off of information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size). Traits can be updated via the `POST /companies` in [the API](/api-reference/companies/upsert-company) or via the `upsertCompany` or `identify` functions provided by each SDK.
+
+### Usage-based Traits
+
+Traits can be used to supply usage information that is more easily managed in your application:  user seats are a common example. Whenever a company adds or removes a seat, the updateed value should be provided to Schematic. Unlike event tracking, the current value should be passed each time: this means usage of a trait based feature can increase or decrease (unlike event-based features). 
+
+While not necessary, there are a few advantages of tracking and managing these features in Schematic:
+
+1. Centralize customer usage data as it pertains to monetization
+2. Seamlessly leverage customer overrides for these features in your application
+
+### Metadata-based Traits
+
+Metadata can be provided to Schematic for use in pricing and plan management. The most common example is to apply a plan to customers based off of a trait. This is commonly used when migrating from a legacy system of plan management. 

@@ -50,15 +50,17 @@ navigation:
       - section: Using Feature Flags
         contents:
           - page: Overview
-            path: ./docs/pages/feature_management/overview.mdx
+            path: ./docs/pages/feature-management/overview.mdx
           - page: Flags
-            path: ./docs/pages/feature_management/flags.mdx
+            path: ./docs/pages/feature-management/flags.mdx
           - page: Features
-            path: ./docs/pages/feature_management/features.mdx
+            path: ./docs/pages/feature-management/features.mdx
           - page: Tracking Feature Usage
-            path: ./docs/pages/feature_management/tracking-usage.mdx
+            path: ./docs/pages/feature-management/tracking-usage.mdx
           - page: Company Overrides
-            path: ./docs/pages/feature_management/overrides.mdx
+            path: ./docs/pages/feature-management/overrides.mdx
+          - page: Feature Types
+            path: ./docs/pages/feature-management/feature-types.mdx
       - section: Building Your Catalog
         contents:
           - page: Overview
@@ -419,4 +421,7 @@ redirects:
     permanent: true
   - source: "/setup_sdk"
     destination: "/quickstart/setup-sdk"
+    permanent: true
+  - source: "/feature_management/:slug"
+    destination: "/feature-management/:slug"
     permanent: true
