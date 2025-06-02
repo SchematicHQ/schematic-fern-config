@@ -18,6 +18,10 @@ There are two types of metered features in Schematic - trait-based and event-bas
 ### Event-based features
 **Event-based** features are best suited for resource utilization that simply goes up, and/or is metered on a perodic basis (e.g. per day, per week, per month). Some examples of features that fit this criteria are API requests, queries, etc. Individual events should be sent into Schematic, which will be automatically aggregated to calculate utilization against a pre-defined limit at the feature level.
 
+<Info>
+You can read more about feature types [here](/feature-management/feature-types).
+</Info>
+
 ## Setting up an Event-based metered feature
 
 To set up an event-based metered feature, do the following:
