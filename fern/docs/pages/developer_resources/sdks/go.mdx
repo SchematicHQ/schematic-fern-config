@@ -432,6 +432,93 @@ func yourWebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 If you want to verify a webhook signature outside of the context of a web request, you can also do that using the `webhooks.VerifySignature` function.
 
+## DataStream
+
+The `DataStream` functionality in Schematic provides real-time updates for flags, companies, and users. It uses WebSocket connections to receive updates from the Schematic backend and caches the data locally or in Redis for efficient access.
+
+### Key Features:
+- **Real-Time Updates**: Automatically updates cached data when changes occur on the backend.
+- **Configurable Caching**: Supports both in-memory (local) caching and Redis-based caching.
+- **Efficient Flag Checks**: Flag evaluation happens locally reducing number of network calls.
+
+---
+
+### How to Enable DataStream
+
+To enable the `DataStream` functionality, you need to pass the `WithDatastream` option when creating a new `SchematicClient`.
+
+#### Example:
+
+```go
+import (
+	schematicclient "github.com/schematichq/schematic-go/client"
+	schematicoption "github.com/schematichq/schematic-go/option"
+)
+
+func main() {
+	apiKey := "your-api-key"
+
+	options := &core.DatastreamOptions{
+		CacheTTL: 5 * time.Minute, // Set the cache TTL (time-to-live)
+	}
+
+	client := schematicclient.NewSchematicClient(
+		schematicoption.WithAPIKey(apiKey),
+		schematicoption.WithDatastream(options),
+	)
+
+  defer client.Close()
+}
+```
+---
+
+### Configuring Redis Cache
+
+The `DataStream` functionality supports Redis for caching company and user data. You can configure it to use either a single Redis instance or a Redis cluster.
+
+#### 1. Single Redis Instance
+
+To use a single Redis instance, create a `RedisCacheConfig` and pass it to the `DatastreamOptions`.
+
+#### Example:
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute, // Set the cache TTL
+	CacheConfig: &schematicoption.RedisCacheConfig{
+		Addr:         "localhost:6379", // Redis server address
+		Password:     "",              // Redis password (if any)
+		DB:           0,               // Redis database index
+		MaxRetries:   3,               // Number of retries for failed operations
+		DialTimeout:  5 * time.Second, // Connection timeout
+		ReadTimeout:  3 * time.Second, // Read timeout
+		WriteTimeout: 3 * time.Second, // Write timeout
+	},
+}
+```
+
+#### 2. Redis Cluster
+
+To use a Redis cluster, create a `RedisCacheClusterConfig` and pass it to the `DatastreamOptions`.
+
+#### Example:
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute, // Set the cache TTL
+	CacheConfig: &schematicoption.RedisCacheClusterConfig{
+		Addrs:            []string{"localhost:7000", "localhost:7001", "localhost:7002"}, // Cluster node addresses
+		Password:         "",              // Redis password (if any)
+		MaxRetries:       3,               // Number of retries for failed operations
+		DialTimeout:      5 * time.Second, // Connection timeout
+		ReadTimeout:      3 * time.Second, // Read timeout
+		WriteTimeout:     3 * time.Second, // Write timeout
+		RouteByLatency:   true,            // Route requests to the node with the lowest latency
+		RouteRandomly:    false,           // Disable random routing
+	},
+}
+```
+
 ## Errors
 
 Structured error types are returned from API calls that return non-success status codes. For example,
