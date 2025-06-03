@@ -319,7 +319,7 @@ components:
         name:
           type: string
         percent_off:
-          type: integer
+          type: number
           nullable: true
         times_redeemed:
           type: integer
@@ -2557,6 +2557,16 @@ components:
         lifecycle_phase:
           type: string
           nullable: true
+          enum:
+            - add_on
+            - alpha
+            - beta
+            - deprecated
+            - ga
+            - in_plan
+            - inactive
+            - internal_testing
+            - legacy
         maintainer_id:
           type: string
           nullable: true
@@ -2588,6 +2598,8 @@ components:
           nullable: true
         flag_type:
           type: string
+          enum:
+            - boolean
         key:
           type: string
         maintainer_id:
@@ -2772,6 +2784,8 @@ components:
           nullable: true
         flag_type:
           type: string
+          enum:
+            - boolean
         id:
           type: string
           nullable: true
@@ -4220,6 +4234,8 @@ components:
           type: object
         resource_type:
           type: string
+          enum:
+            - company
       required:
         - resource_type
         - lookup
@@ -5579,6 +5595,16 @@ components:
         lifecycle_phase:
           type: string
           nullable: true
+          enum:
+            - add_on
+            - alpha
+            - beta
+            - deprecated
+            - ga
+            - in_plan
+            - inactive
+            - internal_testing
+            - legacy
         maintainer_id:
           type: string
           nullable: true
@@ -5831,6 +5857,10 @@ components:
           nullable: true
         charge_type:
           type: string
+          enum:
+            - one_time
+            - recurring
+            - free
         currency:
           type: string
           nullable: true
@@ -5931,6 +5961,7 @@ components:
             additionalProperties:
               type: string
             type: object
+          nullable: true
         company:
           additionalProperties:
             type: string
@@ -5938,6 +5969,7 @@ components:
           description: >-
             Add user to this company. Takes priority over companies. For
             exhaustive list of companies, use companies
+          nullable: true
         company_id:
           type: string
           description: >-
@@ -5977,8 +6009,6 @@ components:
           nullable: true
       required:
         - keys
-        - company
-        - companies
       title: UpsertUserRequestBody
     UpsertUserSubRequestBody:
       type: object
@@ -11484,6 +11514,10 @@ paths:
             type: array
             items:
               type: string
+              enum:
+                - identify
+                - track
+                - flag_check
         - name: flag_id
           in: query
           schema:
@@ -11532,6 +11566,10 @@ paths:
                         type: array
                         items:
                           type: string
+                          enum:
+                            - identify
+                            - track
+                            - flag_check
                       flag_id:
                         type: string
                       limit:
