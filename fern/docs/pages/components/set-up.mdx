@@ -81,7 +81,7 @@ Temporary access tokens are valid for 15 minutes.
 Once you've issued a temporary access token and provided it to your frontend React application, you can simply pass it to the SchematicEmbed component along with your Component ID to render it:
 
 ```typescript
-import { SchematicEmbed } from "@schematichq/schematic-components";
+import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
 
 export default function CustomerPortal({ accessToken }: { accessToken: string }) {
   const componentId = process.env.NEXT_PUBLIC_SCHEMATIC_COMPONENT_ID;
@@ -90,7 +90,32 @@ export default function CustomerPortal({ accessToken }: { accessToken: string })
   }
 
   return (
-    <SchematicEmbed accessToken={accessToken} id={componentId} />
+    <EmbedProvider>
+      <SchematicEmbed accessToken={accessToken} id={componentId} />
+    </EmbedProvider>
+  );
+}
+```
+
+#### Standalone components
+
+Some components can be used standalone. If you'd like more customization options or just need a single component, you have the option to render it directly within our provider. The difference with this method is that you no longer need to generate an access token but instead simply provide your Schematic API key.
+
+```typescript
+import { EmbedProvider, PricingTable } from "@schematichq/schematic-components";
+
+export default function CustomerPortal({ accessToken }: { accessToken: string }) {
+  const apiKey = process.env.NEXT_PUBLIC_SCHEMATIC_API_KEY;
+  const componentId = process.env.NEXT_PUBLIC_SCHEMATIC_COMPONENT_ID;
+
+  if (!componentId || !apiKey) {
+    return <NotFound />;
+  }
+
+  return (
+    <EmbedProvider apiKey={apiKey}>
+      <PricingTable callToActionUrl="https://your-website.com/sign-up" />
+    </EmbedProvider>
   );
 }
 ```
