@@ -439,3 +439,123 @@ try {
   System.Console.WriteLine(e.StatusCode)
 }
 ```
+
+## Datastream
+
+Datastream is Schematic's real-time connection service that optimizes flag check performance and reliability. When enabled, the Schematic client maintains a WebSocket connection to our servers, which pushes down feature flag definitions, company data, and user data as needed.
+
+### Benefits of Datastream
+
+- **Improved Performance**: Flag checks become near-instantaneous after the initial data load
+- **Reduced API Load**: Minimizes HTTP requests to the Schematic API
+- **Real-time Updates**: Flag changes are immediately pushed to your application
+- **Fault Tolerance**: Falls back to standard API requests when needed
+
+### Enabling Datastream
+
+**Important**: Datastream is disabled by default. You must explicitly enable it in your client options:
+
+```csharp
+using SchematicHQ.Client;
+
+// Create options with Datastream enabled
+var options = new ClientOptions
+{
+    UseDatastream = true  // Enable Datastream
+};
+
+// Initialize client with options
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+### Customizing Datastream
+
+You can customize Datastream's behavior through additional client options:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+using SchematicHQ.Client.Datastream;
+
+// Create options with Datastream configuration
+var options = new ClientOptions
+{
+    // Enable Datastream (required)
+    UseDatastream = true,
+    
+    // Configure Datastream-specific options
+    DatastreamOptions = new DatastreamOptions()
+        // Use Redis cache for better performance in distributed environments
+        .WithRedisCache(
+            connectionStrings: new List<string> 
+            { 
+                "redis-primary.example.com:6379",
+                "redis-replica.example.com:6379"
+            },
+            keyPrefix: "my-app:",
+            cacheTtl: TimeSpan.FromMinutes(10),
+            database: 0
+        )
+        // Or use local cache for single-instance applications
+        //.WithLocalCache(capacity: 10000, ttl: TimeSpan.FromMinutes(5))
+};
+
+// Initialize client with options
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+### Using Datastream with Shared Cache Configuration
+
+You can configure your main client cache and Datastream to use the same cache settings:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+
+// Configure with multiple Redis endpoints for high availability
+var options = new ClientOptions
+{
+    // Enable Datastream
+    UseDatastream = true,
+    
+    // Create cache configuration with Redis settings (used by both main client and Datastream)
+    CacheConfiguration = new CacheConfiguration
+    {
+        ProviderType = CacheProviderType.Redis,
+        RedisConnectionStrings = new List<string> 
+        { 
+            "redis-1.example.com:6379",
+            "redis-2.example.com:6379",
+            "redis-3.example.com:6379" 
+        },
+        RedisKeyPrefix = "prod:",
+        CacheTtl = TimeSpan.FromMinutes(10)
+    }
+};
+
+// Schematic will use the same cache configuration for both
+// the main client and Datastream client
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+### Checking Flags with Datastream
+
+The flag checking experience remains the same whether Datastream is enabled or not:
+
+```csharp
+// Check a feature flag with Datastream enabled
+bool flagValue = await schematic.CheckFlag(
+    "premium-feature",
+    company: new Dictionary<string, string> { { "id", "company-123" } },
+    user: new Dictionary<string, string> { { "email", "user@example.com" } }
+);
+
+// Use the flag result
+if (flagValue) {
+    // Enable premium feature
+} else {
+    // Use standard feature
+}
+```
+
+The difference is that with Datastream enabled, after the initial data load, subsequent flag checks for the same company and user will be nearly instantaneous and won't require additional network requests.
