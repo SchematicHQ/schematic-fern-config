@@ -24,21 +24,25 @@ This flow will ask you a few simple questions about your company.
 
 ## 2. Create an API Key
 
-1. Click the Gear icon in the top right
-2. Click "API Keys" on the left menu
-3. Click "Create" in the top right
-4. Give the key a name, e.g. "Quickstart"
-5. Click "Create"
-6. Copy the publishable key and secret key, and add them to the `.env.local` file.
-7. *NOTE: the secret key is never shown again, so make sure to save it in a secure location. You can always create a new key if you lose it.*
+1. First, create a file at the root of your project called `.env.local`. Copy the contents of `.env.sample` to `.env.local`, which will provide you the names of the 2 keys we'll setup here (the components one we'll setup later).
+2. Click the Gear icon in the top right
+3. Click "API Keys" on the left menu
+4. Click "Create" in the top right
+5. Give the key a name, e.g. "Quickstart"
+6. Click "Create"
+7. Copy the publishable key and secret key, and add them to the `.env.local` file. 
+8. *NOTE: the secret key is never shown again, so make sure to save it in a secure location. You can always create a new key if you lose it.*
 
 ![Create an API Key](../../assets/images/quickstart/quickstart-account-setup-api-key.png)
 
-### You're done!
+### 3. Create Sample data
 
-You've now created your first Entitlement of "Mechanical Keyboards" and added it to the "Developers" Plan.
+On the Quickstart page in your Schematic account, click the "Generate Sample Data" button. This will create a demo customer, plan, and a few features.
 
-Next, we'll look at integrating the Schematic SDK into your application, to make sure that developers always have access to mechanical keyboards.
+![Generate Sample Data](../../assets/images/quickstart/quickstart-account-setup-sample-data.png)
 
+<Info>The sample data is only for demonstration purposes. You can delete freely delete it when you've finished the quickstart.</Info>
 
-*NOTE: To simplify this quickstart and demonstrate key Schematic features, each new account is provisioned with a demo customer, plan, and a few features. This quickstart is designed to leverage those to help guide you through Schematic. Feel free to delete those when you're ready.*
+## Next steps
+
+We recommend you checkout the entitlements page in the quickstart app to see how to a feature to a plan.

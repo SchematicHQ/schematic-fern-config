@@ -16,9 +16,9 @@ Schematic frontend SDKs provide an `identify` function that can be used to ident
 useEffect(() => {
   identify({
     company: {
-      keys: { id: 'demo-company' },
+      keys: { 'demo-id': 'demo-company' },
     },
-    keys: { id: 'demo-user' },
+    keys: { 'demo-id': 'demo-user' },
   });
 }, [identify]);
 ```
@@ -31,7 +31,7 @@ The API calls that the backend SDKs wrap all take a `keys` argument that are use
 
 ```python
 client.companies.upsert_company(
-    keys={"id": "demo-company"},
+    keys={"demo-id": "demo-company"},
 )
 ```
 
@@ -47,7 +47,7 @@ Below are examples of `identify` and `upsertCompany` that use keys, traits, and 
 useEffect(() => {
   identify({
     company: {
-      keys: { id: 'demo-company' },
+      keys: { 'demo-id': 'demo-company' },
       name: "Acme Widgets, Inc.",
       traits: {
         "city": "Atlanta",
@@ -55,7 +55,7 @@ useEffect(() => {
         "is_active": true,
       }
     },
-    keys: { id: 'demo-user' },
+    keys: { 'demo-id': 'demo-user' },
     traits: {
       "role": "admin",
     },
@@ -66,7 +66,7 @@ useEffect(() => {
 
 ```python
 client.companies.upsert_company(
-    keys={"id": "demo-company"},
+    keys={"demo-id": "demo-company"},
     name="Acme Widgets, Inc.",
     traits={
         "city": "Atlanta",
