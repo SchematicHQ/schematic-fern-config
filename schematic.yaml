@@ -351,6 +351,8 @@ components:
           format: date-time
         credit_id:
           type: string
+        currency:
+          type: string
         expiry_type:
           type: string
         expiry_unit:
@@ -376,6 +378,7 @@ components:
       required:
         - id
         - credit_id
+        - currency
         - price_per_unit
         - status
         - bundle_type
@@ -384,6 +387,70 @@ components:
         - created_at
         - updated_at
       title: BillingCreditBundleResponseData
+    BillingCreditGrantResponseData:
+      type: object
+      properties:
+        bundle_currency:
+          type: string
+          nullable: true
+        bundle_price_decimal:
+          type: string
+          nullable: true
+        bundle_price_per_unit:
+          type: integer
+          nullable: true
+        company_id:
+          type: string
+        company_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        grant_reason:
+          type: string
+        id:
+          type: string
+        plan_id:
+          type: string
+          nullable: true
+        plan_name:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        quantity_remaining:
+          type: number
+        source_label:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+        zeroed_out_date:
+          type: string
+          format: date-time
+          nullable: true
+        zeroed_out_reason:
+          type: string
+          nullable: true
+      required:
+        - id
+        - quantity
+        - quantity_remaining
+        - company_id
+        - company_name
+        - source_label
+        - created_at
+        - updated_at
+        - grant_reason
+      title: BillingCreditGrantResponseData
     BillingCreditResponseData:
       type: object
       properties:
@@ -406,19 +473,23 @@ components:
           nullable: true
         id:
           type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         name:
           type: string
         plural_name:
           type: string
           nullable: true
-        price_per_unit:
-          type: integer
+        product:
+          $ref: '#/components/schemas/BillingProductResponseData'
         singular_name:
           type: string
           nullable: true
         updated_at:
           type: string
           format: date-time
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
       required:
         - id
         - name
@@ -426,7 +497,6 @@ components:
         - default_expiry_unit
         - default_rollover_policy
         - burn_strategy
-        - price_per_unit
         - created_at
         - updated_at
       title: BillingCreditResponseData
@@ -1615,6 +1685,9 @@ components:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         company_id:
           type: string
+        consumption_rate:
+          type: number
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -2178,11 +2251,11 @@ components:
             - first_in_first_out
             - last_in_first_out
             - expiration_priority
+        currency:
+          type: string
         default_expiry_unit:
           type: string
           nullable: true
-          enum:
-            - days
         default_expiry_unit_count:
           type: integer
           nullable: true
@@ -2200,6 +2273,12 @@ components:
           nullable: true
         name:
           type: string
+        per_unit_price:
+          type: integer
+          nullable: true
+        per_unit_price_decimal:
+          type: string
+          nullable: true
         plural_name:
           type: string
           nullable: true
@@ -2209,6 +2288,7 @@ components:
       required:
         - name
         - description
+        - currency
       title: CreateBillingCreditRequestBody
     CreateBillingCustomerRequestBody:
       type: object
@@ -2535,6 +2615,8 @@ components:
             - fixed
         credit_id:
           type: string
+        currency:
+          type: string
         expiry_type:
           type: string
           nullable: true
@@ -2565,6 +2647,7 @@ components:
             - inactive
       required:
         - credit_id
+        - currency
         - price_per_unit
       title: CreateCreditBundleRequestBody
     CreateCrmDealLineItemAssociationRequestBody:
@@ -3282,6 +3365,9 @@ components:
     CreatePlanEntitlementRequestBody:
       type: object
       properties:
+        credit_consumption_rate:
+          type: number
+          nullable: true
         currency:
           type: string
           nullable: true
@@ -3318,6 +3404,12 @@ components:
         price_behavior:
           type: string
           nullable: true
+          enum:
+            - pay_as_you_go
+            - pay_in_advance
+            - overage
+            - credit_burndown
+            - tier
         price_tiers:
           type: array
           items:
@@ -4385,9 +4477,6 @@ components:
           type: string
         entitlement_value_type:
           type: string
-        event_count:
-          type: integer
-          nullable: true
         feature_id:
           type: string
         feature_name:
@@ -5052,6 +5141,9 @@ components:
     PlanEntitlementResponseData:
       type: object
       properties:
+        consumption_rate:
+          type: number
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -5921,6 +6013,55 @@ components:
         - conditions
         - condition_groups
       title: UpdateAudienceRequestBody
+    UpdateBillingCreditRequestBody:
+      type: object
+      properties:
+        burn_strategy:
+          type: string
+          nullable: true
+          enum:
+            - plan_first_then_credit_bundles_first_in_first_out
+            - first_in_first_out
+            - last_in_first_out
+            - expiration_priority
+        default_expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+        default_expiry_unit_count:
+          type: integer
+          nullable: true
+        default_rollover_policy:
+          type: string
+          nullable: true
+          enum:
+            - none
+            - rollover
+            - expire
+        description:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        name:
+          type: string
+        per_unit_price:
+          type: integer
+          nullable: true
+        per_unit_price_decimal:
+          type: string
+          nullable: true
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
+      required:
+        - name
+        - description
+      title: UpdateBillingCreditRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -6158,6 +6299,9 @@ components:
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
+        credit_consumption_rate:
+          type: number
+          nullable: true
         currency:
           type: string
           nullable: true
@@ -6190,6 +6334,12 @@ components:
         price_behavior:
           type: string
           nullable: true
+          enum:
+            - pay_as_you_go
+            - pay_in_advance
+            - overage
+            - credit_burndown
+            - tier
         price_tiers:
           type: array
           items:
@@ -6586,6 +6736,9 @@ components:
     UsageBasedEntitlementRequestBody:
       type: object
       properties:
+        credit_consumption_rate:
+          type: number
+          nullable: true
         currency:
           type: string
           nullable: true
@@ -6604,6 +6757,12 @@ components:
         price_behavior:
           type: string
           nullable: true
+          enum:
+            - pay_as_you_go
+            - pay_in_advance
+            - overage
+            - credit_burndown
+            - tier
         price_tiers:
           type: array
           items:
@@ -6629,6 +6788,9 @@ components:
     UsageBasedEntitlementResponseData:
       type: object
       properties:
+        consumption_rate:
+          type: number
+          nullable: true
         feature_id:
           type: string
         metered_price:
@@ -6838,6 +7000,16 @@ components:
         - url
         - updated_at
       title: WebhookResponseData
+    ZeroOutGrantRequestBody:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+          enum:
+            - plan_change
+            - manual
+      title: ZeroOutGrantRequestBody
 paths:
   /api-keys:
     get:
@@ -7781,9 +7953,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    delete:
-      operationId: deleteBillingCredit
-      summary: Delete billing credit
+    put:
+      operationId: updateBillingCredit
+      summary: Update billing credit
       tags:
         - credits
       parameters:
@@ -7793,6 +7965,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBillingCreditRequestBody'
+        required: true
       responses:
         '200':
           description: OK
@@ -7802,15 +7980,15 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/DeleteResponse'
+                    $ref: '#/components/schemas/BillingCreditResponseData'
                   params:
                     type: object
                     description: Input parameters
-                    title: DeleteBillingCreditParams
+                    title: UpdateBillingCreditParams
                 required:
                   - data
                   - params
-                title: DeleteBillingCreditResponse
+                title: UpdateBillingCreditResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -7828,6 +8006,12 @@ paths:
       tags:
         - credits
       parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: credit_id
           in: query
           schema:
@@ -7883,6 +8067,10 @@ paths:
                           - fixed
                       credit_id:
                         type: string
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -8082,6 +8270,12 @@ paths:
       tags:
         - credits
       parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: credit_id
           in: query
           schema:
@@ -8133,6 +8327,10 @@ paths:
                           - fixed
                       credit_id:
                         type: string
+                      ids:
+                        type: array
+                        items:
+                          type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -8225,6 +8423,301 @@ paths:
                   - data
                   - params
                 title: CountBillingCreditsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/grants/{billing_id}/zero-out:
+    put:
+      operationId: zeroOutGrant
+      summary: Zero out grant
+      tags:
+        - credits
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZeroOutGrantRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingCreditGrantResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ZeroOutGrantParams
+                required:
+                  - data
+                  - params
+                title: ZeroOutGrantResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/grants/company/list:
+    get:
+      operationId: listCompanyGrants
+      summary: List company grants
+      tags:
+        - credits
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - created_at
+              - expires_at
+              - quantity
+              - quantity_remaining
+        - name: dir
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingCreditGrantResponseData'
+                    title: ListCompanyGrantsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      dir:
+                        type: string
+                        enum:
+                          - asc
+                          - desc
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      order:
+                        type: string
+                        enum:
+                          - created_at
+                          - expires_at
+                          - quantity
+                          - quantity_remaining
+                    title: ListCompanyGrantsParams
+                required:
+                  - data
+                  - params
+                title: ListCompanyGrantsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/grants/count:
+    get:
+      operationId: countBillingCreditsGrants
+      summary: Count billing credits grants
+      tags:
+        - credits
+      parameters:
+        - name: credit_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      credit_id:
+                        type: string
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                    title: CountBillingCreditsGrantsParams
+                required:
+                  - data
+                  - params
+                title: CountBillingCreditsGrantsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/grants/list:
+    get:
+      operationId: listGrantsForCredit
+      summary: List grants for credit
+      tags:
+        - credits
+      parameters:
+        - name: credit_id
+          in: query
+          schema:
+            type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The returned resources
+                    items:
+                      $ref: '#/components/schemas/BillingCreditGrantResponseData'
+                    title: ListGrantsForCreditResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      credit_id:
+                        type: string
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                    title: ListGrantsForCreditParams
+                required:
+                  - data
+                  - params
+                title: ListGrantsForCreditResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -8348,6 +8841,47 @@ paths:
                   - data
                   - params
                 title: CreateBillingPlanCreditGrantResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/plan-grants/{billing_id}:
+    delete:
+      operationId: deleteBillingPlanCreditGrant
+      summary: Delete billing plan credit grant
+      tags:
+        - credits
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteBillingPlanCreditGrantParams
+                required:
+                  - data
+                  - params
+                title: DeleteBillingPlanCreditGrantResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
