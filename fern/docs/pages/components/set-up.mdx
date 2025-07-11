@@ -53,17 +53,17 @@ export async function getTemporaryAccessToken(companyId: string) {
   <Tab title="Go">
 ```go
 import (
-  "github.com/SchematicHQ/schematic-go"
-  schematicapi "github.com/SchematicHQ/schematic-go/api"
+  schematicgo "github.com/schematichq/schematic-go"
+  schematicClient "github.com/schematichq/schematic-go/client"
 )
 
-func GetTemporaryAccessToken(ctx context.Context, client schematic.Client, companyId string) (string, error) {
-	resp, _, err := client.API().AccesstokensAPI.IssueTemporaryAccessToken(ctx).IssueTemporaryAccessTokenRequestBody(api.IssueTemporaryAccessTokenRequestBody{
+func GetTemporaryAccessToken(ctx context.Context, client schematicClient.SchematicClient, companyId string) (string, error) {
+	resp, _, err := client.Accesstokens.IssueTemporaryAccessToken(ctx, schematicgo.IssueTemporaryAccessTokenRequestBody{
 		Lookup: map[string]string{
 			"company_id": companyId,
 		},
 		ResourceType: "company",
-	}).Execute()
+	})
 	if err != nil {
 		return "", err
 	}
