@@ -156,23 +156,6 @@ You can also use data from Stripe as criterion when building plan audiences or f
 src="../../assets/images/stripe/stripe-rules.png"
 />
 
-## **Stripe Restricted Key permissions**
-
-When using a restricted key to connect to Schematic, make sure it has the following permissions:
-
-* Core resources
-  * Customers - Read/Write
-  * PaymentIntents - Read/Write
-  * PaymentMethods - Read/Write
-  * Products - Read
-  * SetupIntents - Read/Write
-* Billing resources
-  * Invoices - Read
-  * Prices - Read
-  * Subscriptions - Read/Write
-* Webhook resources
-  * Webhook Endpoints - Read/Write
-
 ## **Additional notes**
 
 The Stripe integration is environment-scoped, so you can have a separate connection in each Schematic environment.
