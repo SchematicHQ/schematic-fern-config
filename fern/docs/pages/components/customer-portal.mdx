@@ -1,7 +1,142 @@
 ---
-title: Customer Portal
+title: Customer Portal and Checkout Flow
 
 slug: components/customer-portal
 ---
 
-hello, customer portal
+Schematic provides a customizable customer portal and checkout flow that allows your customers to easily complete common billing tasks like:
+1. Purchasing a plan or add-on
+2. Upgrading, downgrading, or canceling their subscription
+3. View upcoming and past invoices
+4. Check current usage and entitlements
+
+This component integrates fully with Stripe and is intended to replace Stripe's native checkout flow. Schematic components will sync any changes to the subscription to Stripe.
+
+Additionally, Schematic provides a component builder so the content and styling of the customer portal can be customized to match your use case and brand.
+
+{/* This video is a quick walkthrough of how to setup a billing portal and the end-user experience of the billing portal.
+
+!!!video example!!! */}
+
+{/* ## Examples
+I'd love to include a few screenshot or examples of the customer portal and checkout flow.
+*/}
+
+## Element Library
+
+Schematic Components are made up of a number of Elements that can be optionally added in the builder. Each Element has it's own customization options.
+
+Currently, we support the following Elements:
+
+| Element | Included by Default | Requires Stripe Integration |
+| --- | --- | --- |
+| Current Plan | Yes | Readonly without Stripe |
+| Included Features | Yes | No |
+| Next Bill Due | Yes | Yes |
+| Payment Methods | Yes | Yes |
+| Invoices | No | Yes |
+| Unsubscribe Button | No | No |
+| Metered Features | No | No |
+| Pricing Table | No | Yes |
+| Text | No | No |
+| Button | No | No |
+
+If Stripe is not connected to Schematic, some Elements will either be unavailable or fall back to a read only experience.
+
+#### Current Plan
+
+The Current Plan Element shows the Schematic Plan the Customer is currently subscribed to. 
+
+If Stripe is connected, it also optionally includes a button for users to self manage their plan (e.g. switch plans, add add-ons). This will open up the checkout flow to allow users to purchase a new plan or add-on.
+
+*Note: Customers cannot cancel their subscription through this button. See the Unsubscribe Button Element for this functionality.*
+
+![Current plan](../../assets/images/components/components-current-plan.png)
+
+**Design options**
+- Visibility of description, price, and plan add-ons 
+- Visibility of "Change Plan" Button
+
+#### Included Features
+
+The Included Features Element shows the entitlements, including usage and limits, granted to an individual customer based on their Plan. This element is available with or without Stripe connected.
+
+![Included features](../../assets/images/components/components-included-features.png)
+
+**Design options**
+- Text of title (e.g. "Included Features")
+- For Features: visibility of title, feature icons, limits, and usage
+
+#### Next Bill Due
+
+The Next Bill Due Element shows the upcoming bill associated with the Company's Stripe subscription. This element requires Stripe to be connected to be available.
+
+![Upcoming bill](../../assets/images/components/components-upcoming-bill.png)
+
+**Design options**
+- Visibility of header, price, and contract end date
+- Text of header (e.g. "Next bill due")
+
+#### Payment Methods
+
+The Payment Methods Element shows the payment methods associated with the Company's Stripe subscription. 
+
+This element requires Stripe to be connected to be available. If the "Edit" button is clicked, this will open up the Payment Method step of the checkout flow.
+
+![Payment method](../../assets/images/components/components-payment-method.png)
+
+**Design options**
+- Visibility of header
+- Visibility of "Edit" button to change payment method
+
+#### Invoices
+
+The Invoices Element shows past invoices associated with the Company's Stripe subscription. This element requires Stripe to be connected to be available.
+
+![Components invoices](../../assets/images/components/components-invoices.png)
+
+**Design options**
+- Visibility of header and link to see all invoices
+- Number of invoices visible
+
+#### Unsubscribe Button
+
+The Unsubscribe Button Element allows users to unsubscribe from the their's Stripe subscription.
+
+![Components unsubscribe button](../../assets/images/components/components-unsubscribe-button.png)
+
+#### Pricing Table
+
+The Pricing Table is typically used as a standalone component that can be embedded into your marketing site. If this is what you're looking for, see the [Pricing Table](/components/pricing-table) page.
+
+The pricing table _can_ be embedded into your customer portal, but this is not a recommended use case.
+
+## Styling Options
+
+Each element in the customer portal can be styled to match your brand. In addition to the styling options above, all font, text color, background color, button size, and button colors can be customized. 
+
+Here is an example of a customized portal from the [Schematic Weather Demo App](https://schematic-next-example.vercel.app/):
+
+![Components customized styling](../../assets/images/components/components-customization.png)
+
+## Checkout Flow Events
+
+After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. While not strictly necessary, a good practice is to perform a hard refresh of the page to ensure all flag checks and usage quotas are updated.
+
+```javascript
+window.addEventListener("plan-changed", (event) => {
+  // event.detail will contain the response data from checkout/unsubscribe
+});
+```
+
+## Stripe Integration
+
+Schematic Customer Portal handles the complete checkout flow for a new customer, upgrade, downgrade, or cancellation. This includes propogating the appropriate events to Stripe to handle payment and create/update the customer's subscription (these changes are also reflected in Schematic). If Stripe is connected, the Customer Portal will automatically interface with Stripe with no additional configuration required. To learn more about the Stripe integration, see the [Stripe Integration](/integrations/stripe) page. d
+
+{/* Advanced styling notes
+
+we've mentioned some more aggressive styling options, let's document them here*/}
+
+{/*
+i'd love to include a section about hosting react in angular and vue
+*/}
