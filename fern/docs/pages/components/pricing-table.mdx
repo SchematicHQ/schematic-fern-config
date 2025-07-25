@@ -10,15 +10,49 @@ Beyond this documentaiton, the Pricing Table source can be found [here](https://
 
 ## Functional Options
 
-Below are the options that will control the functionality of the Pricing Table.
+The Pricing Table supports customizing the behavior of the CTAs it provides. The following properties can be set on the `PricingTable` component itself (example below).
+
+| Option | Description | Default | Notes |
+| --- | --- | --- | --- |
+| callToActionUrl | URL for plans without a price but a CTA like "Contact Sales" | `undefined` | If this is unset, plans without a price won't display a CTA |
+| onCallToAction | Callback function to execute when a CTA is clicked | `undefined` | If `callToActionUrl` isn't set, this field will have no affect |
+
+```typescript
+<PricingTable
+  callToActionUrl="/contact-sales"
+  onCallToAction={() => {
+    window.location.href = "/contact-sales";
+  }}
+/>
+```
+
+## Styling Options for the Pricing Table 
+
+Below are the options that can be set on the Pricing Table to control it's functionality. These settings should all be set on the `PricingTable` component itself (example below).
+
+```typescript
+<EmbedProvider>
+  <PricingTable 
+    showPeriodToggle={true}
+    showDiscount={true}
+    header={{
+      isVisible: true,
+      fontStyle: "heading3",
+    }}
+  />
+</EmbedProvider>
+```
 
 | Option | Description | Default | Notes |
 | --- | --- | --- | --- |
 | showPeriodToggle | Show toggle between monthly/annual pricing | true | |
 | showDiscount | Display discount amount for annual plans | true | |
 | header.isVisible | Show the pricing table header | true | |
+| header.fontStyle | Font styling for the header | `heading3` | Can be any `FontStyle` option |
 | plans.isVisible | Show the plans section | true | Header text that says "Plans" |
+| plans.name.fontStyle | Font styling for plan names | `heading2` | Can be any `FontStyle` option |
 | plans.description.isVisible | Show plan descriptions | true | |
+| plans.description.fontStyle | Font styling for plan descriptions | `text` | Can be any `FontStyle` option |
 | plans.showInclusionText | Show "What's included" text | true | |
 | plans.showFeatureIcons | Show icons next to features | true | |
 | plans.showEntitlements | Show feature entitlements/limits | true | |
@@ -27,20 +61,9 @@ Below are the options that will control the functionality of the Pricing Table.
 | addOns.showFeatureIcons | Show icons next to add-on features | true | |
 | addOns.showEntitlements | Show add-on entitlements/limits | true | |
 | upgrade.isVisible | Show upgrade buttons | true | |
-| downgrade.isVisible | Show downgrade buttons | true | |
-| numberOfColumns | Number of columns to display | 1 | Options: `1`, `2`, `3` |
-
-## Styling Options for the Pricing Table 
-
-These options will control the styling of the Pricing Table and it's various components
-
-| Option | Description | Default | Notes |
-| --- | --- | --- | --- |
-| header.fontStyle | Font styling for the header | `heading3` | Can be any `FontStyle` option |
-| plans.name.fontStyle | Font styling for plan names | `heading2` | Can be any `FontStyle` option |
-| plans.description.fontStyle | Font styling for plan descriptions | `text` | Can be any `FontStyle` option |
 | upgrade.buttonSize | Size of upgrade buttons | `md` | Options: `sm`, `md`, `lg` |
 | upgrade.buttonStyle | Style of upgrade buttons | `primary` | Options: `primary`, `secondary` |
+| downgrade.isVisible | Show downgrade buttons | true | |
 | downgrade.buttonSize | Size of downgrade buttons | `md` | Options: `sm`, `md`, `lg` |
 | downgrade.buttonStyle | Style of downgrade buttons | `secondary` | Options: `primary`, `secondary` |
 
@@ -58,7 +81,9 @@ These are the general styling options that will affect the entire pricing table 
       ...
     }
   }}
-/>
+>
+  <PricingTable />
+</EmbedProvider>
 ```
 
 | Option | Description | Default | Notes |
