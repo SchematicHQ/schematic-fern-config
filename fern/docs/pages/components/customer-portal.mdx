@@ -24,11 +24,19 @@ I'd love to include a few screenshot or examples of the customer portal and chec
 
 ## Stripe Integration
 
-Schematic Customer Portal handles the complete checkout flow for a new customer, upgrade, downgrade, or cancellation. This includes propogating the appropriate events to Stripe to handle payment and create/update the customer's subscription (these changes are also reflected in Schematic). If Stripe is connected, the Customer Portal will automatically interface with Stripe with no additional configuration required. To learn more about the Stripe integration, see the [Stripe Integration](/integrations/stripe) page. d
+Schematic Customer Portal handles the complete checkout flow for a new customer, upgrade, downgrade, or cancellation. This includes propogating the appropriate events to Stripe to handle payment and create/update the customer's subscription (these changes are also reflected in Schematic). If Stripe is connected, the Customer Portal will automatically interface with Stripe with no additional configuration required. To learn more about the Stripe integration, see the [Stripe Integration](/integrations/stripe) page. 
 
-{/* Advanced styling notes
+## Checkout Flow Events
 
-we've mentioned some more aggressive styling options, let's document them here*/}
+After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. This event will include some key information, such as the `id` of the new plan. 
+
+While not strictly necessary, we recommend performing a hard refresh of the page to ensure all flag checks and usage quotas are updated.
+
+```javascript
+window.addEventListener("plan-changed", (event) => {
+  window.reload()
+});
+```
 
 {/*
 i'd love to include a section about hosting react in angular and vue

@@ -99,12 +99,4 @@ Here is an example of a customized portal from the [Schematic Weather Demo App](
 
 ![Components customized styling](../../assets/images/components/components-customization.png)
 
-## Checkout Flow Events
 
-After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. While not strictly necessary, a good practice is to perform a hard refresh of the page to ensure all flag checks and usage quotas are updated.
-
-```javascript
-window.addEventListener("plan-changed", (event) => {
-  // event.detail will contain the response data from checkout/unsubscribe
-});
-```
