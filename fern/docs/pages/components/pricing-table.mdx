@@ -4,4 +4,234 @@ title: Pricing Table
 slug: components/pricing-table
 ---
 
-hello, pricing table
+The Pricing Table is a standalone component that can be used on your marketing site or other public-facing pages. The Pricing Table will load your configured plans each time it renders, so it will stay up to date automatically without any additional configuration.
+
+Beyond this documentaiton, the Pricing Table source can be found [here](https://github.com/SchematicHQ/schematic-js/blob/main/components/src/components/elements/pricing-table/PricingTable.tsx)
+
+## Functional Options
+
+Below are the options that will control the functionality of the Pricing Table.
+
+| Option | Description | Default | Notes |
+| --- | --- | --- | --- |
+| showPeriodToggle | Show toggle between monthly/annual pricing | true | |
+| showDiscount | Display discount amount for annual plans | true | |
+| header.isVisible | Show the pricing table header | true | |
+| plans.isVisible | Show the plans section | true | Header text that says "Plans" |
+| plans.description.isVisible | Show plan descriptions | true | |
+| plans.showInclusionText | Show "What's included" text | true | |
+| plans.showFeatureIcons | Show icons next to features | true | |
+| plans.showEntitlements | Show feature entitlements/limits | true | |
+| addOns.isVisible | Show the add-ons section | true | |
+| addOns.showDescription | Show add-on descriptions | true | |
+| addOns.showFeatureIcons | Show icons next to add-on features | true | |
+| addOns.showEntitlements | Show add-on entitlements/limits | true | |
+| upgrade.isVisible | Show upgrade buttons | true | |
+| downgrade.isVisible | Show downgrade buttons | true | |
+| numberOfColumns | Number of columns to display | 1 | Options: `1`, `2`, `3` |
+
+## Styling Options for the Pricing Table 
+
+These options will control the styling of the Pricing Table and it's various components
+
+| Option | Description | Default | Notes |
+| --- | --- | --- | --- |
+| header.fontStyle | Font styling for the header | `heading3` | Can be any `FontStyle` option |
+| plans.name.fontStyle | Font styling for plan names | `heading2` | Can be any `FontStyle` option |
+| plans.description.fontStyle | Font styling for plan descriptions | `text` | Can be any `FontStyle` option |
+| upgrade.buttonSize | Size of upgrade buttons | `md` | Options: `sm`, `md`, `lg` |
+| upgrade.buttonStyle | Style of upgrade buttons | `primary` | Options: `primary`, `secondary` |
+| downgrade.buttonSize | Size of downgrade buttons | `md` | Options: `sm`, `md`, `lg` |
+| downgrade.buttonStyle | Style of downgrade buttons | `secondary` | Options: `primary`, `secondary` |
+
+## General Styling Options
+
+These are the general styling options that will affect the entire pricing table and all subcomponents. All of these options should be set on a `theme` object. Example:
+
+```typescript
+<EmbedProvider
+  settings={{
+    theme: {
+      numberOfColumns: 2,
+      sectionLayout: "merged",
+      colorMode: "light",
+      ...
+    }
+  }}
+/>
+```
+
+| Option | Description | Default | Notes |
+| --- | --- | --- | --- |
+| numberOfColumns | Number of columns to display | 2 | Options: `1`, `2`, `3` |
+| sectionLayout | Layout of the pricing table | `merged` | Options: `merged`, `separated` |
+| colorMode | Color mode of the pricing table | `light` | Options: `light`, `dark` |
+| primary | color of any element that is the primary color | `#000000` | Typically this is for buttons, links, and other interactive elements |
+| secondary | Secondary color of the pricing table | `#194BFB` | Typically this is for the background color of the pricing table |
+| danger | Danger color of the pricing table | `#D75A5C` | Typically this is for error messages |
+| card.background | Background color of any card element | `#FFFFFF` | Each plan is a card element |
+| card.borderRadius | Border radius of any card element | 10 | Each plan is a card element |
+| card.hasShadow | Whether any card element has a shadow | true | Each plan is a card element |
+| card.padding | Padding of any card element | 45 | Each plan is a card element |
+
+## Typography Options
+
+Additionally, all of the typography options are configurable. The any text element can have it's typography set to any of the following `FontStyle` options:
+
+- `heading1`
+- `heading2`
+- `heading3`
+- `heading4`
+- `heading5`
+- `heading6`
+- `text`
+- `link`
+
+These are also configured on the `theme` object. Example:
+
+```typescript
+<EmbedProvider
+  settings={{
+    theme: {
+      typography: {
+        heading1: {
+          fontFamily: "Manrope",
+          fontSize: 37,
+          fontWeight: 800,
+          color: "#000000",
+        },
+        ...
+      }
+    }
+  }}
+/>
+```
+Each of these can be configured as follows:
+
+| Option | Description | Default | Notes |
+| --- | --- | --- | --- |
+| typography.heading1.fontFamily | Font family for any `FontStyle` of `heading1` | "Manrope" | |
+| typography.heading1.fontSize | Font size for any `FontStyle` of `heading1` | 37 | |
+| typography.heading1.fontWeight | Font weight for any `FontStyle` of `heading1` | 800 | |
+| typography.heading1.color | Color for any `FontStyle` of `heading1` | "#000000" | |
+| typography.heading2.fontFamily | Font family for any `FontStyle` of `heading2` | "Manrope" | |
+| typography.heading2.fontSize | Font size for any `FontStyle` of `heading2` | 29 | |
+| typography.heading2.fontWeight | Font weight for any `FontStyle` of `heading2` | 800 | |
+| typography.heading2.color | Color for any `FontStyle` of `heading2` | "#000000" | |
+| typography.heading3.fontFamily | Font family for any `FontStyle` of `heading3` | "Manrope" | |
+| typography.heading3.fontSize | Font size for any `FontStyle` of `heading3` | 20 | |
+| typography.heading3.fontWeight | Font weight for any `FontStyle` of `heading3` | 600 | |
+| typography.heading3.color | Color for any `FontStyle` of `heading3` | "#000000" | |
+| typography.heading4.fontFamily | Font family for any `FontStyle` of `heading4` | "Manrope" | |
+| typography.heading4.fontSize | Font size for any `FontStyle` of `heading4` | 18 | |
+| typography.heading4.fontWeight | Font weight for any `FontStyle` of `heading4` | 800 | |
+| typography.heading4.color | Color for any `FontStyle` of `heading4` | "#000000" | |
+| typography.heading5.fontFamily | Font family for any `FontStyle` of `heading5` | "Public Sans" | |
+| typography.heading5.fontSize | Font size for any `FontStyle` of `heading5` | 17 | |
+| typography.heading5.fontWeight | Font weight for any `FontStyle` of `heading5` | 500 | |
+| typography.heading5.color | Color for any `FontStyle` of `heading5` | "#000000" | |
+| typography.heading6.fontFamily | Font family for any `FontStyle` of `heading6` | "Public Sans" | |
+| typography.heading6.fontSize | Font size for any `FontStyle` of `heading6` | 14 | |
+| typography.heading6.fontWeight | Font weight for any `FontStyle` of `heading6` | 400 | |
+| typography.heading6.color | Color for any `FontStyle` of `heading6` | "#8A8A8A" | |
+| typography.text.fontFamily | Font family for any `FontStyle` of `text` | "Public Sans" | |
+| typography.text.fontSize | Font size for any `FontStyle` of `text` | 16 | |
+| typography.text.fontWeight | Font weight for any `FontStyle` of `text` | 400 | |
+| typography.text.color | Color for any `FontStyle` of `text` | "#000000" | |
+| typography.link.fontFamily | Font family for any `FontStyle` of `link` | "Inter" | |
+| typography.link.fontSize | Font size for any `FontStyle` of `link` | 16 | |
+| typography.link.fontWeight | Font weight for any `FontStyle` of `link` | 400 | |
+| typography.link.color | Color for any `FontStyle` of `link` | "#194BFB" | |
+
+## Pricing Table Example
+
+An example of a standalone component in use is the Pricing Table component from the [Schematic Weather Demo App](https://schematic-next-example.vercel.app/)
+
+![Standalone Pricing Table](../../assets/images/components/components-standalone-pricing-table.png)
+
+That pricing table is reproduced below ([or see it on GitHub](https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/pricing/page.tsx)]):
+
+```tsx
+"use client";
+
+import { EmbedProvider, PricingTable } from "@schematichq/schematic-components";
+
+export default function Pricing() {
+  const apiKey = process.env.NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY;
+
+  return (
+    <EmbedProvider
+      apiKey={apiKey}
+      settings={{
+        theme: {
+          numberOfColumns: 2,
+          sectionLayout: "merged",
+          colorMode: "light",
+          primary: "#2bbde1",
+          secondary: "#2bbde1",
+          card: {
+            background: "#0e0e0e",
+            borderRadius: 10,
+            hasShadow: true,
+            padding: 45,
+          },
+          typography: {
+            heading1: {
+              fontFamily: "Inter",
+              fontSize: 37,
+              fontWeight: 400,
+              color: "#ffffff",
+            },
+            heading2: {
+              fontFamily: "Inter",
+              fontSize: 29,
+              fontWeight: 200,
+              color: "#ffffff",
+            },
+            heading3: {
+              fontFamily: "Manrope",
+              fontSize: 20,
+              fontWeight: 600,
+              color: "#ffffff",
+            },
+            heading4: {
+              fontFamily: "Manrope",
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#ffffff",
+            },
+            heading5: {
+              fontFamily: "Public Sans",
+              fontSize: 17,
+              fontWeight: 500,
+              color: "#ffffff",
+            },
+            heading6: {
+              fontFamily: "Public Sans",
+              fontSize: 14,
+              fontWeight: 400,
+              color: "#d1d1d1",
+            },
+            text: {
+              fontFamily: "Public Sans",
+              fontSize: 16,
+              fontWeight: 400,
+              color: "#ffffff",
+            },
+            link: {
+              fontFamily: "Inter",
+              fontSize: 16,
+              fontWeight: 400,
+              color: "#2bbde1",
+            },
+          },
+        },
+        badge: { alignment: "start", visibility: "visible" },
+      }}
+    >
+      <h1 className="text-2xl font-bold mb-4">Pricing</h1>
+      <PricingTable callToActionUrl="/usage" />
+    </EmbedProvider>
+  );
+}
+```
