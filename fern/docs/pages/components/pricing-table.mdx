@@ -14,8 +14,8 @@ The Pricing Table supports customizing the behavior of the CTAs it provides. The
 
 | Option | Description | Default | Notes |
 | --- | --- | --- | --- |
-| callToActionUrl | URL for plans without a price but a CTA like "Contact Sales" | `undefined` | If this is unset, plans without a price won't display a CTA |
-| onCallToAction | Callback function to execute when a CTA is clicked | `undefined` | If `callToActionUrl` isn't set, this field will have no affect |
+| callToActionUrl | URL for plans without a price or a custom plan link | `undefined` | If this is unset, plans without a price won't display a CTA |
+| onCallToAction | Callback function to execute when a CTA is clicked | `undefined` | If `callToActionUrl` isn't set, this field will have no effect |
 
 ```typescript
 <PricingTable
@@ -28,7 +28,7 @@ The Pricing Table supports customizing the behavior of the CTAs it provides. The
 
 ## Styling Options for the Pricing Table 
 
-Below are the options that can be set on the Pricing Table to control it's functionality. These settings should all be set on the `PricingTable` component itself (example below).
+Below are the options that can be set on the Pricing Table to control its functionality. These settings should all be set on the `PricingTable` component itself (example below).
 
 ```typescript
 <EmbedProvider>
@@ -101,7 +101,7 @@ These are the general styling options that will affect the entire pricing table 
 
 ## Typography Options
 
-Additionally, all of the typography options are configurable. The any text element can have it's typography set to any of the following `FontStyle` options:
+Additionally, all of the typography options are configurable. The any text element can have its typography set to any of the following `FontStyle` options:
 
 - `heading1`
 - `heading2`
