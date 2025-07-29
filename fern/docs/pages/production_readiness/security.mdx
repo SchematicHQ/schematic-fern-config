@@ -13,9 +13,35 @@ Schematic has put in place several technical and organizational measures designe
 
 Schematic is SOC 2 Type 1 and Type 2 compliant.
 
-<img
-  src="../../assets/images/soc2.png"
-/>
+![Soc2 Logo](../../assets/images/architecture/security-soc2.png)
+
+### Payment Security (PCI Compliance)
+
+Schematic leverages Stripe for all payment processing. Stripe is certified as a PCI Level 1 Service Provider, ensuring industry-standard protection for all payment data.
+
+### Application Security Measures
+
+Schematic has implemented the following security measures:
+
+- **Continuous Dependency Scanning**: Automated monitoring for vulnerabilities in third-party libraries and frameworks, with alerts surfaced in CI/CD and tracked to resolution.
+- **Static Application Security Testing (SAST)**: Regular analysis of source code to detect and remediate potential vulnerabilities before deployment.
+- **Dynamic Application Security Testing (DAST)**: Runtime scanning of deployed environments to detect vulnerabilities such as XSS, SQL injection, and other common attack vectors.
+
+### Monitoring and Logging
+
+Schematic has internal and external monitoring in place to ensure the security of our application.
+
+- **Audit Logging**: All critical user and system actions are logged for traceability and incident investigation.
+- **Intrusion and Threat Detection**: AWS GuardDuty provides continuous monitoring for malicious activity and unauthorized behavior.
+- **Cloud Security Automation**: Schematic uses AWS Security Hub and automated compliance checks via Vanta to enforce best practices and alert on misconfigurations.
+
+### SSO and 2FA
+
+For all customers, Schematic supports SSO through Google and Github. Additionally, customers can enable 2FA through 
+
+![2 Factor Authorization](../../assets/images/architecture/security-2fa.png)
+
+We can also support Custom SSO providers such as Okta, Auth0, etc for customers on the Enterprise plan. If you have any questions, please reach out to us at `support@schematichq.com`.
 
 ### Policies
 
