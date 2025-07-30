@@ -4,7 +4,7 @@ description: ""
 slug: developer_resources/sample_apps/sample_nextjs
 ---
 
-This is an example app demonstrating how to use [Schematic](https://schematichq.com) in a Next.js app with Clerk authentication. This app uses [schematic-react](https://github.com/schematichq/schematic-js/tree/main/react) for usage tracking and entitlement management via feature flags, and uses [schematic-components](https://github.com/schematichq/schematic-js/tree/main/components) for an embedded customer portal experience. The Github repo is [here](https://github.com/SchematicHQ/schematic-next-example) and can be cloned to run locally.
+This is an example app demonstrating how to use [Schematic](https://schematichq.com) in a Next.js app with Clerk authentication. This app uses [schematic-react](https://github.com/schematichq/schematic-js/tree/main/react) for usage tracking and entitlement management via feature flags, and uses [schematic-components](https://github.com/schematichq/schematic-js/tree/main/components) for an embedded Customer Portal experience. The Github repo is [here](https://github.com/SchematicHQ/schematic-next-example) and can be cloned to run locally.
 
 ## Prerequisites
 
@@ -118,7 +118,7 @@ const humidityFlag = useSchematicFlag("humidity");
 }
 ```
 
-5. To display our customer portal, we use the `SchematicEmbed` component:
+5. To display our Customer Portal, we use the `SchematicEmbed` component:
 
 ```tsx
 <SchematicEmbed accessToken={accessToken} id={componentId} />

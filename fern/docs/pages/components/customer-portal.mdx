@@ -1,0 +1,43 @@
+---
+title: Customer Portal and Checkout Flow
+
+slug: components/customer-portal
+---
+
+Schematic provides a customizable Customer Portal and checkout flow that allows your customers to easily complete common billing tasks like:
+1. Purchasing a plan or add-on
+2. Upgrading, downgrading, or canceling their subscription
+3. View upcoming and past invoices
+4. Check current usage and entitlements
+
+This component integrates fully with Stripe and is intended to replace Stripe's native checkout flow. Schematic components will sync any changes to the subscription to Stripe.
+
+Additionally, Schematic provides a component builder so the content and styling of the Customer Portal can be customized to match your use case and brand.
+
+{/* This video is a quick walkthrough of how to setup a billing portal and the end-user experience of the billing portal.
+
+!!!video example!!! */}
+
+{/* ## Examples
+I'd love to include a few screenshot or examples of the customer portal and checkout flow.
+*/}
+
+## Stripe Integration
+
+Schematic Customer Portal handles the complete checkout flow for a new customer, upgrade, downgrade, or cancellation. This includes propogating the appropriate events to Stripe to handle payment and create/update the customer's subscription (these changes are also reflected in Schematic). If Stripe is connected, the Customer Portal will automatically interface with Stripe with no additional configuration required. To learn more about the Stripe integration, see the [Stripe Integration](/integrations/stripe) page. 
+
+## Checkout Flow Events
+
+After a customer completes a checks out flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. This event will include some key information, such as the `id` of the new plan. 
+
+While not strictly necessary, we recommend performing a hard refresh of the page to ensure all flag checks and usage quotas are updated.
+
+```javascript
+window.addEventListener("plan-changed", (event) => {
+  window.location.reload();
+});
+```
+
+{/*
+i'd love to include a section about hosting react in angular and vue
+*/}
