@@ -4,7 +4,7 @@ title: Stripe Integration
 slug: integrations/stripe
 ---
 
-The Schematic Stripe integration is the most common way to implement Schematic into your application. It extends Stripe's billing platform into your application to seemlessly implement and enforce your pricing and packaging within your application. This includes: 
+The Schematic Stripe integration is the most common way to implement Schematic into your application. It extends Stripe's billing platform into your application to seemlessly implement and enforce your pricing and packaging within your application. This includes:
 
 - Enforcing entitlements and usage-based limits
 - Seemless upgrades, downgrades, cancellations, and trials
@@ -12,7 +12,7 @@ The Schematic Stripe integration is the most common way to implement Schematic i
 
 The integration is powered by a bi-direcitonal sync with Stripe. Through the integration, you can:
 
-- Import and synchronize customers and subscriptions 
+- Import and synchronize customers and subscriptions
 - Map Stripe Products to Schematic Plans to automatically provision entitlements in your application
 - Map Usage-based Features to Stripe Metered Products
 - Use Schematic Components to power checkout, subscription management (e.g. invoices, payment method), and upgrade/downgrade/cancellation that will sync directly to Stripe to update subscriptions
@@ -57,7 +57,7 @@ To create a new add-on and a corresponding Stripe product, follow the steps belo
 
 ## Usage Based Features
 
-Usage based features are core feature in most modern SaaS applications. Schematic usage based features are mapped to Stripe metered products, either existing or new. Usage is tracked in real time, and will be reflected within Schematic web app, Stripe, and any Schematic components (e.g. customer portal). 
+Usage based features are core feature in most modern SaaS applications. Schematic usage based features are mapped to Stripe metered products, either existing or new. Usage is tracked in real time, and will be reflected within Schematic web app, Stripe, and any Schematic components (e.g. customer portal).
 
 {/* This video is a quick walkthrough of how to set up a usage-based feature in Schematic and map it to Stripe metered products.
 
@@ -68,7 +68,7 @@ To add a usage-based feature to a plan and createa a new price for it, follow th
 2. Click “Add Plan Entitlement” to begin
 3. Select the plan you want to add the feature to
 4. Set a value for the feature's limit (25 in the example below)
-5. For Period, select “Montly” and have the usage reset “According to Billing Period” (this is the most common setting). This means that the user will get 25 usages per month, and that the "month" will be measured based on the day they signed up (i.e. if they signup on March 15th, then the “month” will be March 15th to April 14th).
+5. For Period, select “Monthly” and have the usage reset “According to Billing Period” (this is the most common setting). This means that the user will get 25 usages per month, and that the "month" will be measured based on the day they signed up (i.e. if they signup on March 15th, then the “month” will be March 15th to April 14th).
 
 ![Entitle Usage](../../assets/images/quickstart/quickstart-tracking-usage-4.png)
 

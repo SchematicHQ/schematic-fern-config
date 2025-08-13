@@ -4,7 +4,7 @@ subtitle: Quickly track usage to power Usage Based billing
 slug: quickstart/tracking-usage
 ---
 
-In the [quickstart app](https://github.com/schematichq/schematic-quickstart), the Tracking Usage page shows 2 buttons, one of which is disabled. Let's create an event-based feature in Schematic and entitle it to our plan so that this button will become clickable and track usage. 
+In the [quickstart app](https://github.com/schematichq/schematic-quickstart), the Tracking Usage page shows 2 buttons, one of which is disabled. Let's create an event-based feature in Schematic and entitle it to our plan so that this button will become clickable and track usage.
 
 <iframe
   width="100%"
@@ -18,7 +18,7 @@ In the [quickstart app](https://github.com/schematichq/schematic-quickstart), th
 
 ## Create an event-based feature
 
-First, we'll need to create an event-based feature in Schematic. 
+First, we'll need to create an event-based feature in Schematic.
 
 1. Select "Features" from the top navigation
 2. Click "Create" on the right side of the screen
@@ -26,7 +26,7 @@ First, we'll need to create an event-based feature in Schematic.
 4. Set the feature type to be "Event Based". This will make sure we can track events and enabled Usage Based billing when we entitle it to a plan.
 5. Click "Continue" at the bottom
 6. On the next screen, for the flag key, use "new-event-feature" -- this is the value the quickstart app is using.
-7. Click "Continue". 
+7. Click "Continue".
 8. Now, we'll need to associate an event with this feature. Call it `new-event-feature-clicked` -- this is the value the quickstart app is using.
 9. Now click "Save".
 
@@ -45,7 +45,7 @@ When you saved the feature, you should have dropped onto that feature's page. If
 1. Click "Add Plan Entitlement" to begin
 2. Select the "Demo Plan" plan
 3. Set a value for 25 -- this is how many of these events a user can use per period.
-4. For Period, select "Montly" and have the usage reset "According to Billing Period" (this is the most common setting). This means that the user will get 25 usages per month, and that the "month"" will be measured based on the day they signed up (i.e. if they signup on March 15th, then the "month" will be March 15th to April 14th).
+4. For Period, select "Monthly" and have the usage reset "According to Billing Period" (this is the most common setting). This means that the user will get 25 usages per month, and that the "month"" will be measured based on the day they signed up (i.e. if they signup on March 15th, then the "month" will be March 15th to April 14th).
 4. Click "Save".
 
 ![Entitle Usage](../../assets/images/quickstart/quickstart-tracking-usage-4.png)
@@ -65,7 +65,7 @@ const {
 
 const { track } = useSchematicEvents();
 
-<button 
+<button
   className="bg-blue-500 text-white px-4 py-2 rounded-md"
   disabled={!isFeatureEnabled}
   onClick={() => { track({ event: 'demo-event-feature-clicked' }); } }
