@@ -50,8 +50,8 @@ A few values below are numbers that represent dates (specifically, seconds since
 | createdAt | `Date` | Date when the subscription started. |
 | currency | `string` | Currency the user used for the subscription. |
 | customerExternalId | `string` | Stripe customer ID for the company. |
-| defaultPaymentMethodId | `string` | Default payment method ID for the customer. |
-| expiredAt? | `Date?` | Date when the subscription will expire. |
+| defaultPaymentMethodId | `string` | Schematic ID for the Default payment method for the customer. |
+| expiredAt? | `Date?` | Date when the subscription will be marked as expired in Stripe. |
 | id | `string` | Schematic subscription ID. |
 | interval | `string` | Interval of the subscription. Can be `month` or `year`. |
 | metadata | `object` | Stripe metadata for the customer. |
