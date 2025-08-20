@@ -4,7 +4,7 @@ title: Credit Burndown Billing Model
 slug: billing/credit-burndown
 ---
 
-Recently, credit burndown models have become a popular form of Usage-based Billing. In credit burndown models, customers receive a credit balance that decreases as they consume product features. Customers can purchase additional credits at any time to exceed their plan's default usage limits - this flexibility is the model's primary design intent.
+Recently, credit burndown models have become a popular form of usage-based billing. In credit burndown models, customers receive a credit balance that decreases as they consume product features. Customers can purchase additional credits at any time to exceed their plan's default usage limits - this flexibility is the model's primary design intent.
 
 Credit burndown models are widely adopted across the software industry, from AI platforms like ChatGPT to developer tools such as Supabase and PostHog, as well as sales enrichment services like Apollo.io and Clearbit.
 
@@ -32,18 +32,18 @@ This video tutorial demonstrates how to set up a credit burndown billing model i
 
 ## Implementing Credit Burndown in Schematic
 
-In this guide, we'll show you how to implement a credit burndown billing model in Schematic. We'll start with a scenario where you have an existing Usage-Based plan that includes two features - "AI Assists" and "AI Experiments". Our goal is to create a new plan that offers these same features but uses credits as the billing mechanism instead of direct usage tracking.
+In this guide, we'll show you how to implement a credit burndown billing model in Schematic. We'll start with a scenario where you have an existing usage-based plan that includes two features - "AI Assists" and "AI Experiments". Our goal is to create a new plan that offers these same features but uses credits as the billing mechanism instead of direct usage tracking.
 
 By the end of this guide, you'll have a fully functional credit-based plan where customers can use their credits to access both features, and purchase additional credits when needed.
 
 The steps we'll be taking are:
 
 1. Create a Credit Type that can be applied to plans.
-2. Create a new plan that will use our Credit Burndown model.
+2. Create a new plan that will use our credit burndown model.
 3. Add the Credit Type to this plan.
 4. Add features to this plan and configure how they use credits.
-5. Configure Credit Bundles that our customers can purchase to top up their balance.
-6. Add this plan and our credit bundles to our Catalog so Customers can use it. 
+5. Configure Credit Bundles that customers can purchase to top up their balance.
+6.Add this plan and credit bundles to the Catalog so Customers can use it. 
 
 
 ### 1. Create a Credit Type
@@ -54,21 +54,21 @@ Mouse over `Catalog` and select `Credits` to open the Credit Type Page.
 
 ![Credit Types](../../assets/images/billing/burndown-credit-types.png)
 
-Click the **Create Credit Type** button to begin:
+Click the "Create Credit Type" button to begin:
 
 1. Provide a name for your credit type, we'll use "AI Tokens" for this example. If you have multiple credit types, we recommend usage-based names (e.g. "Data Credits", "API Tokens") or a tier-based names (e.g. "Premium Credits").
 2. The description field (optional) is shown to users in the customer portal and checkout flow. 
-3. Provide a singular and plural name for your credits. We're using "Ai Token" and "AI Tokens" for this example.
-4. Cost Basis is to help you track the cost of credits throughout your product and finance workflows. This field doesn't directly control the costs of credits, but represents a guideline for future usage. We'll use \$0.01 for this example, but you can use fractional cents (e.g. \$0.00025) if you want
+3. Provide a singular and plural name for your credits. We're using "AI Token" and "AI Tokens" for this example.
+4. Cost Basis is to help you track the cost of credits throughout your product and finance workflows. This field doesn't directly control the costs of credits, but represents a guideline for future usage. We'll use \$0.01 for this example, but you can use fractional cents (e.g. \$0.00025) if needed.
 5. Click "Create Credit Type" to save your changes.
 
 ![Credit Type Created](../../assets/images/billing/burndown-create-credit-type.png)
 
 ### 2. Create a new plan that will use our Credit Burndown model.
 
-Now that we have a credit type, we'll create a new plan that will use it. Within Schematic, any plan can incorporate credit burndown, whether it's a new plan or an existing one. For this example, we'll create a dedicated credit-based plan to keep things simple and clear. This approach makes it easier to understand how credits work.
+Now that we have a Credit Type, we'll create a new plan that will use it. Within Schematic, any plan can incorporate credit burndown, whether it's a new plan or an existing one. For this example, we'll create a dedicated credit-based plan to keep things simple and clear. This approach makes it easier to understand how credits work.
 
-1. Navigate to the **Plans** tab and click the **Create Plan** button.
+1. Navigate to the "Plans" tab and click the "Create Plan" button.
 2. Provide a name for this plan. We'll use "Credit Based" for this example. Then click "Continue".
 3. Next, step the plan to a "Paid" plan and provide a monthly ($5) and yearly ($50) price. 
 4. Click "Save" to create the plan. 
@@ -114,21 +114,21 @@ When you're finished, your plan should look like this:
 
 ![Add Feature 5](../../assets/images/billing/burndown-add-feature-5.png)
 
-### 5. Configure Credit Bundles that our customers can purchase to top up their balance.
+### 5. Configure Credit Bundles that customers can purchase to top up their balance.
 
-Finally, let's add credit bundles that customers can purchase to top up their balance. These bundles allow customers to purchase additional credits to continue using credit-based features once their plan's default balance is exhausted. These purchased credits never expire and roll over month to month.
+Finally, let's add credit bundles that customers can purchase to top up their credit balance. These purchased credits never expire and roll over month to month, allowing continuous usage of credit-based features after the plan's default balance is exhausted.
 
 When customers consume credits, they draw from the credit grant with the nearest expiration date. This means they'll typically use their monthly plan credits first before drawing from purchased credits, since monthly credits expire at the end of each billing period.
 
 1. Navigate to the Credit Type page (Catalog > Credits > "AI Tokens").
 2. Give your bundle a name. We'll use "Small Bundle" for this example.
-3. Select the number of credits you want to include in the bundle. We'll use 5,000 for this example, which is the number of credits our plan provides by default.
-4. Next, we set a cost for this bundle. We recommend this cost is inline with the cost basis of the credit type, but a discount can be applied for larger purchases. We'll use $5 for this example.
+3. Select the number of credits you want to include in the bundle. We'll use 5,000 for this example, which is the number of credits the plan provides by default.
+4. Next, we set a cost for this bundle. We recommend this cost is in line with the cost basis of the credit type.  We'll use $5 for this example.
 5. Click "Create Bundle" to save your changes.
 
 ![Create Credit Bundle 1](../../assets/images/billing/burndown-create-credit-bundle-1.png)
 
-6. Repeat this process but add a "Medium Bundle (10% off)" with 10,000 credits and a cost of $9.
+6. Repeat this process but add a "Medium Bundle (10% off)" with 10,000 credits and a cost of $9. We recommend offering a bulk discount on larger credit purchases, to incentivize customers to purchase more credits at once.
 7. Repeat this process one more time for a "Large Bundle (20% off)" with 20,000 credits and a cost of $16.
 
 When you're finished, your credit bundles should look like this:
@@ -137,11 +137,11 @@ When you're finished, your credit bundles should look like this:
 
 <Info>The cost you set for these bundles will be the basis for Recognizing the Revenue from these credits.</Info>
 
-### 6. Add this plan and our credit bundles to our Catalog so Customers can use it. 
+### 6. Add this plan and credit bundles to the Catalog so Customers can use it. 
 
 Now that we've finished setting up our plan and credit bundles, we'll add them to our Catalog so Customers can use them.
 
-1. Navigate to the **Catalog** tab, and select "Configuration".
+1. Navigate to the "Catalog" tab, and select "Configuration".
 2. Click the "+" button on the far right side of the "Live Plans" section.
 3. Add the plan you just created to the list.
 4. Click "Save" to add the plan to the Catalog.
@@ -152,7 +152,7 @@ Now that we've finished setting up our plan and credit bundles, we'll add them t
 
 ![Add Plan to Catalog 2](../../assets/images/billing/burndown-add-plan-to-catalog-2.png)
 
-5. **IMPORTANT**: You'll need to save your changes, by clicking the "Save Changes" button in the top right of the screen.
+5. **IMPORTANT**: You'll need to save your changes by clicking the "Save Changes" button in the top right of the screen.
 
 ![Add Plan to Catalog 3](../../assets/images/billing/burndown-add-plan-to-catalog-3.png)
 
