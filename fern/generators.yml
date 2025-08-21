@@ -55,10 +55,10 @@ groups:
   ts-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
-        version: 2.6.1
-        api:
-          settings:
-            unions: v1
+        version: 0.51.7
+        # api:
+        #   settings:
+        #     unions: v1
         output:
           location: npm
           package-name: "@schematichq/schematic-typescript-node"
@@ -78,10 +78,10 @@ groups:
             dependencies:
               form-data: "^4.0.4"
           skipResponseValidation: true
-          streamType: wrapper
-          fileResponseType: stream
-          formDataSupport: Node16
-          fetchSupport: node-fetch
+          # streamType: wrapper
+          # fileResponseType: stream
+          # formDataSupport: Node16
+          # fetchSupport: node-fetch
 
   go-sdk:
     generators:
