@@ -69,9 +69,9 @@ The key difference here is that instead of rendering our component by default, w
 
 ### Additional Options
 
-There are 2 additional ways you can control the component state when programmatically launching. These are unlikely to be needed in most cases, but are documented here for completeness.
+There are additional ways you can control the component state when programmatically launching. These are unlikely to be needed in most cases, but are documented here for completeness.
 
-#### Control which checkout step is loaded
+{/* #### Control which checkout step is loaded
 
 If a `planId` is provided to `setCheckoutState`, the checkout flow will start with the provided plan selected plan and will move onto the next step. 
 
@@ -80,19 +80,17 @@ You can additionally control which step you begin by one of the following keys t
 | Value | Notes |
 | --- | --- |
 | `setCheckoutState({ usage: true})` | The step to set any pay in advance entitlements. This tab only appears if the selected plan has pay in advance entitlements. | 
-{/* | `setCheckoutState({ addons: true})` | The step to select add-ons. This tab only appears if the selected plan has add-ons. | */}
+| `setCheckoutState({ addons: true})` | The step to select add-ons. This tab only appears if the selected plan has add-ons. |
 | `setCheckoutState({ addOnUsage: true})` | The step to set any pay in advance entitlements from a selected add-on. This step only appears if an add-on with pay in advance entitlements is selected. |
 | `setCheckoutState({ credits: true})` | The step to purchase credit bundles. This step only appears if the selected plan has a credit type associated with it. |
 
 <Note>
   Because the final checkout step requires coordination with Stripe, there is currently no way to select the final checkout step as the step that should load. 
-</Note>
+</Note> */}
 
 #### Control which component is rendered
 
-In addition to the checkout flow, you can also choose to load other parts of the Schematic Components library instead. It is unlikely you will need to do this, but it is documented here for completeness.
-
-To do this, you'll want to set a different value for `layout`. The accepted values for `layout` are: 
+In addition to the checkout flow, you can also choose to load other parts of the Schematic Components library instead.To do this, you'll want to set a different value in `setLayout`. The accepted values are: 
 
 | Layout | Notes |
 | --- | --- |
