@@ -8,9 +8,9 @@ The Schematic Components library provides several advanced features for customiz
 
 ## Launch Checkout Programmatically
 
-A common billing use case is to present a user with a paywall, and then open a checkout flow to quickly allow them to upgrade their plan. 
+A common billing use case is to present a user with a paywall, and then open a checkout flow to quickly allow them to upgrade their plan.
 
-Imagine a user is trying to create their 6th AI-generated image, but their current plan only includes 5 images per month. You can present them a paywall explaining they are at their limit and providing a "Upgrade to the Pro Plan" button. When they click the upgrade button, you want to create a seamless upgrade experience by:
+Imagine a user is trying to create their 6th AI-generated image, but their current plan only includes 5 images per month. You can present them a paywall explaining they are at their limit and prove an "Upgrade to the Pro Plan" button. When they click the upgrade button, you can create a seamless upgrade experience by:
 
 1. Opening the checkout flow
 2. Pre-selecting the Pro plan they need to upgrade to
@@ -90,14 +90,14 @@ You can additionally control which step you begin by one of the following keys t
 
 #### Control which component is rendered
 
-In addition to the checkout flow, you can also choose to load other parts of the Schematic Components library instead.To do this, you'll want to set a different value in `setLayout`. The accepted values are: 
+In addition to the checkout flow, you can also load other parts of the Schematic Components library instead. To do this, you'll set a different value in `setLayout`. The accepted values are:
 
 | Layout | Notes |
 | --- | --- |
-| `portal` | The customer portal and default starting page for Schematic Components. If you want this, just load a component using the default setup.  |
-| `checkout` | The Checkout flow, and usage is documented above.  |
-| `payment` | The Payment Method configuration step of the checkout flow. |
-| `unsubscribe` | The unsubscribe flow. This is normally handled by adding an Unbuscribe button to your portal using the component builder. |
+| `portal` | The customer portal and default starting page for Schematic Components. If you want this, just load a component using the default setup. |
+| `checkout` | The checkout flow, and usage is documented above. |
+| `payment` | The payment method configuration step of the checkout flow. |
+| `unsubscribe` | The unsubscribe flow. This is normally handled by adding an Unsubscribe button to your portal using the component builder. |
 | `disabled` | Renders an error message. This is typically used internally when the access token is invalid or missing. |
 
 {/* 
