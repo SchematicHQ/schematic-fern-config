@@ -67,16 +67,40 @@ The key difference here is that instead of rendering our component by default, w
 3. Call `setLayout("checkout")`. `layout` determines which screen the checkout flow is currently on.
 4. Because `layout` now has a value, the `CheckoutDialog` component will be rendered.
 
-The accepted values for `layout` are: 
+### Additional Options
+
+There are 2 additional ways you can control the component state when programmatically launching. These are unlikely to be needed in most cases, but are documented here for completeness.
+
+#### Control which checkout step is loaded
+
+If a `planId` is provided to `setCheckoutState`, the checkout flow will start with the provided plan selected plan and will move onto the next step. 
+
+You can additionally control which step you begin by one of the following keys to true. 
+
+| Value | Notes |
+| --- | --- |
+| `setCheckoutState({ usage: true})` | The step to set any pay in advance entitlements. This tab only appears if the selected plan has pay in advance entitlements. | 
+{/* | `setCheckoutState({ addons: true})` | The step to select add-ons. This tab only appears if the selected plan has add-ons. | */}
+| `setCheckoutState({ addOnUsage: true})` | The step to set any pay in advance entitlements from a selected add-on. This step only appears if an add-on with pay in advance entitlements is selected. |
+| `setCheckoutState({ credits: true})` | The step to purchase credit bundles. This step only appears if the selected plan has a credit type associated with it. |
+
+<Note>
+  Because the final checkout step requires coordination with Stripe, there is currently no way to select the final checkout step as the step that should load. 
+</Note>
+
+#### Control which component is rendered
+
+In addition to the checkout flow, you can also choose to load other parts of the Schematic Components library instead. It is unlikely you will need to do this, but it is documented here for completeness.
+
+To do this, you'll want to set a different value for `layout`. The accepted values for `layout` are: 
 
 | Layout | Notes |
 | --- | --- |
-| `plan` | The first page of checkout, where the user can select a plan. This is the default page if none is set. |
-| `usage` | The page to set any pay in advance entitlements. This tab only appears if the selected plan has pay in advance entitlements. |
-| `addons` | The page to select add-ons. |
-| `addonsUsage` | The page to set any pay in advance entitlements from a selected add-on. This tab only appears if an add-on with pay in advance entitlements is selected. |
-| `credits` | The page to purchase credit bundles. This page only appears if the selected plan has a credit type associated with it. |
-| `checkout` | The final checkout page |
+| `portal` | The customer portal and default starting page for Schematic Components. If you want this, just load a component using the default setup.  |
+| `checkout` | The Checkout flow, and usage is documented above.  |
+| `payment` | The Payment Method configuration step of the checkout flow. |
+| `unsubscribe` | The unsubscribe flow. This is normally handled by adding an Unbuscribe button to your portal using the component builder. |
+| `disabled` | Renders an error message. This is typically used internally when the access token is invalid or missing. |
 
 {/* 
 Our example app has 2 more complete examples of how to use this, including handling errors and loading states.
