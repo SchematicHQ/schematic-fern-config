@@ -67,6 +67,14 @@ The key difference here is that instead of rendering our component by default, w
 3. Call `setLayout("checkout")`. `layout` determines which screen the checkout flow is currently on.
 4. Because `layout` now has a value, the `CheckoutDialog` component will be rendered.
 
+
+### Examples
+
+You can see a full example, including error handling and loading states in our example app. 
+
+Check it out online: https://schematic-next-example.vercel.app/custom-checkout
+See the code: https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/custom-checkout/page.tsx
+
 ### Additional Options
 
 There are additional ways you can control the component state when programmatically launching. These are unlikely to be needed in most cases, but are documented here for completeness.
@@ -99,9 +107,3 @@ In addition to the checkout flow, you can also load other parts of the Schematic
 | `payment` | The payment method configuration step of the checkout flow. |
 | `unsubscribe` | The unsubscribe flow. This is normally handled by adding an Unsubscribe button to your portal using the component builder. |
 | `disabled` | Renders an error message. This is typically used internally when the access token is invalid or missing. |
-
-{/* 
-Our example app has 2 more complete examples of how to use this, including handling errors and loading states.
-
-- Custom checkout from a button: https://github.com/schematichq/schematic-components/blob/main/examples/custom-checkout/CustomCheckout.tsx
-- Custom checkout from a "approaching usage limit" notification: https://github.com/schematichq/schematic-components/blob/main/examples/custom-checkout/ApproachingUsageLimit.tsx */}
