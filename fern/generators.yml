@@ -77,6 +77,21 @@ groups:
               timers: false
             dependencies:
               form-data: "^4.0.4"
+            devDependencies:
+              esbuild: "^0.25.9"
+            scripts:
+              build: "node build.js"
+              "build:legacy": "tsc"
+              prepack: ""
+            main: "./dist/index.js"
+            types: "./dist/index.d.ts"
+            files: 
+               - "dist/**/*.js"
+               - "dist/**/*.d.ts"
+               - "!dist/**/*.js.map"
+               - "!dist/**/*.test.*"
+               - "README.md"
+
           skipResponseValidation: true
           # streamType: wrapper
           # fileResponseType: stream
