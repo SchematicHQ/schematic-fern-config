@@ -68,6 +68,76 @@ This is ideal for scenarios where many customers will fall into the plan's quota
 
 ![Steps 5-9](../../assets/images/billing/ubp-entitlement-configuration-overage-2.png)
 
+### Volume pricing
+
+Volume pricing is a common way to provide discounts for large usage. In volume pricing, usage tiers are defined, and the final price paid is based on the usage tier the customer falls into. 
+
+Schematic allows you to define the price of each tier as a fixed amount, a per-unit price, or a combination of the two.
+
+<Note> Typically, volume pricing uses either a per-unit price or a fixed amount, but not both. </Note>
+
+For example. If pricing tiers are defined as follows:
+
+| Tier | Usage | Price |
+|------|-------|-------|
+| 1 | 0-100 | \$10 + \$1 per unit |
+| 2 | 101-200 | \$9 + \$0.90 per unit |
+| 3 | 201-300 | \$8 + \$0.80 per unit |
+| 4 | 301+ | \$7 + \$0.70 per unit |
+
+A customer who uses 150 units would be charged \$144 (\$9 + 150*\$0.90). Notice how only the final tier the customer fell into (101-200) determines the price. This can lead to sharp changes in price around usage cutoffs. 
+
+#### Configuring volume pricing
+
+1. Navigate to a plan with a metered entitlement.
+2. Click on the entitlement that you'd like to monetize.
+3. For Type, select "Tiered". 
+4. Then, a second Type option will appear below and select "Volume".
+
+![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-volume-pricing-1.png)
+
+5. You can then configure the tiers for the volume pricing. To add a new tier, click the "+ Add another tier" button below the table.
+6. The configuration for our example is shown in the screenshot below.
+7. When you're done, click "Save changes" to save your changes.
+
+![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-volume-pricing-2.png)
+
+### Graduated pricing
+
+Graduated pricing is another way to provide discounts for large usage. In graduated pricing, usage tiers are defined, and the price per unit changes as the customer moves through the tiers. In this model, units used earlier in a billing period often cost more than those used later, leading to a more gradual volume discount. The final blended per-unit price cannot be determined until the end of the billing period.
+
+Schematic allows you to define the price of each tier as a fixed amount, a per-unit price, or a combination of the two.
+
+<Note> Typically, graduated pricing typically only uses a per-unit price. The example below shows both per-unit and fixed for completeness.</Note>
+
+For example. If pricing tiers are defined as follows:
+
+| Tier | Usage | Price |
+|------|-------|-------|
+| 1 | 0-100 | \$10 + \$1 per unit |
+| 2 | 101-200 | \$9 + \$0.90 per unit |
+| 3 | 201-300 | \$8 + \$0.80 per unit |
+| 4 | 301+ | \$7 + \$0.70 per unit |
+
+A customer who uses 150 units would be charged \$164 (\$10 + 100*\$1 + \$9 + 50*\$0.90). Notice how the first 100 units are charged at \$1, while the next 50 units are charged at \$0.90. 
+
+Because the customer had usage in 2 different tiers, they paid the flat fee price for both tiers. This is typically not the desired behavior, which is why flat fee pricng is not common in graduated pricing models. If you want to include a flat fee, consider adding it to the base plan price, or only including it in the first tier.
+
+#### Configuring graduated pricing
+
+1. Navigate to a plan with a metered entitlement.
+2. Click on the entitlement that you'd like to monetize.
+3. For Type, select "Tiered". 
+4. Then, a second "Tyonpe" option will appear below and select "Graduated".
+
+![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-graduated-pricing-1.png)
+
+5. You can then configure the tiers for the graduated pricing. To add a new tier, click the "+ Add another tier" button below the table.
+6. The configuration for our example is shown in the screenshot below.
+7. When you're done, click "Save changes" to save your changes.
+
+![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-graduated-pricing-2.png)
+
 ### Credit burndown
 
 Checkout our [Credit Burndown Docs](/billing/credit-burndown). 
