@@ -449,4 +449,115 @@ redirects:
   - source: "/howto"
     destination: "/"
     permanent: true
-  
+  - source: "/feature-management/tracking-usage"
+    destination: "/feature-management/feature-analytics"
+    permanent: true
+  - source: "/events"
+    destination: "/feature-management/feature-analytics"
+    permanent: true
+  - source: "/user-traits"
+    destination: "/api-reference/companies/upsert-user-trait"
+    permanent: true
+  - source: "/availability"
+    destination: "/architecture/availability"
+    permanent: true
+  - source: /environments"
+    destination: "/developer_resources/environments"
+    permanent: true
+  - source: "/developer_resources/entity-key-management"
+    destination: "/developer_resources/key_management"
+    permanent: true
+  - source: "/quickstart/components"
+    destination: "/quickstart/create-a-component"
+    permanent: true
+  - source: "/companies"
+    destination: "/developer_resources/concepts#user-and-company-profiles"
+    permanent: true
+  - source: "/getting-started/developer-resources/sample-apps/next-js-weather-search-app"
+    destination: "/developer_resources/sample_apps/sample_nextjs"
+    permanent: true
+  - source: "/developer_resources/entity_key_management"
+    destination: "/developer_resources/erd"
+    permanent: true
+  - source: "/home/building-your-catalog"
+    destination: "/catalog/overview"
+    permanent: true
+  - source: "/flags"
+    destination: "/feature-management/overview"
+    permanent: true
+  - source: "/features"
+    destination: "/feature-management/overview"
+    permanent: true
+  - source: "/company-overrides"
+    destination: "/feature-management/overrides"
+    permanent: true
+  - source: "/environments"
+    destination: "/developer_resources/environments"
+    permanent: true
+  - source: "/users"
+    destination: "/developer_resources/concepts#user-and-company-profiles"
+    permanent: true
+  - source: "/components"
+    destination: "/components/overview"
+    permanent: true
+  - source: "/home/using-feature-flags"
+    destination: "/feature-management/overview"
+    permanent: true
+  - source: "/plans"
+    destination: "/catalog/managing-company-plans"
+    permanent: true
+    # old api references that are wrong for some reason
+  - source: "/api-reference/companies/list-company-plans"
+    destination: "/api-reference/companies/list-company-memberships"
+    permanent: true
+  - source: "/api-keys"
+    destination: "/api-reference/resources#api-keys"
+    permanent: true
+  - source: "/api-keys/api_key_id"
+    destination: "/api-reference/accounts/list-api-keys"
+    permanent: true
+  - source: "/companies/company_id"
+    destination: "/api-reference/companies/lookup-company"
+    permanent: true
+  - source: "/companies/lookup"
+    destination: "/api-reference/companies/lookup-company"
+    permanent: true
+  - source: "/company-overrides/company_override_id"
+    destination: "/api-reference/entitlements/get-company-override"
+    permanent: true
+  - source: "/environments/environment_id"
+    destination: "/api-reference/accounts/update-environment"
+    permanent: true
+  - source: "/environments/:environment_id"
+    destination: "/api-reference/accounts/update-environment"
+    permanent: true
+  - source: "/features/feature_id"
+    destination: "/api-reference/features/get-feature"
+    permanent: true
+  - source: "/flags/key/check"
+    destination: "/api-reference/features/check-flag"
+    permanent: true
+  - source: "/flags/:key/check"
+    destination: "/api-reference/features/check-flag"
+    permanent: true
+  - source: "/plans/plan_id"
+    destination: "/api-reference/plans/get-plan"
+    permanent: true
+  - source: "/plan-audiences/plan_audience_id"
+    destination: "/api-reference/entitlements/update-plan-entitlement"
+    permanent: true
+  - source: "/plan-entitlements"
+    destination: "/api-reference/entitlements/list-plan-entitlements"
+    permanent: true
+  - source: "/plan-entitlements/plan_entitlement_id"
+    destination: "/api-reference/entitlements/get-plan-entitlement"
+    permanent: true
+  - source: "/users/delete"
+    destination: "/api-reference/companies/delete-user"
+    permanent: true
+  - source: "/users/user_id"
+    destination: "/api-reference/companies/lookup-user"
+    permanent: true
+  - source: "/users/:user_id"
+    destination: "/api-reference/companies/lookup-user"
+    permanent: true
