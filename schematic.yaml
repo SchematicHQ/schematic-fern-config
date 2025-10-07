@@ -1695,6 +1695,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
         traits:
           type: object
           description: A map of trait names to trait values
@@ -1710,12 +1714,13 @@ components:
         - name
         - updated_at
         - add_ons
+        - billing_subscriptions
         - entity_traits
         - keys
         - metrics
         - payment_methods
         - plans
-        - billing_subscriptions
+        - rules
         - user_count
       title: CompanyDetailResponseData
     CompanyEventPeriodMetricsResponseData:
@@ -2176,6 +2181,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
         traits:
           type: object
           description: A map of trait names to trait values
@@ -2191,12 +2200,13 @@ components:
         - name
         - updated_at
         - add_ons
+        - billing_subscriptions
         - entity_traits
         - keys
         - metrics
         - payment_methods
         - plans
-        - billing_subscriptions
+        - rules
         - user_count
         - feature_usage
       title: CompanyViewWithFeatureUsageResponseData
@@ -2424,6 +2434,66 @@ components:
         - created_at
         - updated_at
       title: ComponentResponseData
+    Condition:
+      type: object
+      properties:
+        account_id:
+          type: string
+        comparison_trait_definition:
+          $ref: '#/components/schemas/TraitDefinition'
+        condition_type:
+          type: string
+        consumption_rate:
+          type: number
+          nullable: true
+        credit_id:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
+        metric_value:
+          type: integer
+          nullable: true
+        operator:
+          type: string
+        resource_ids:
+          type: array
+          items:
+            type: string
+        trait_definition:
+          $ref: '#/components/schemas/TraitDefinition'
+        trait_value:
+          type: string
+      required:
+        - id
+        - account_id
+        - environment_id
+        - condition_type
+        - operator
+        - resource_ids
+        - trait_value
+      title: Condition
+    ConditionGroup:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+      required:
+        - conditions
+      title: ConditionGroup
     CountResponse:
       type: object
       properties:
@@ -3856,6 +3926,8 @@ components:
           type: boolean
         show_zero_price_as_free:
           type: boolean
+        sync_customer_billing_details_for_tax:
+          type: boolean
         trial_days:
           type: integer
           nullable: true
@@ -3870,16 +3942,17 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - ordered_plans
-        - ordered_bundle_list
-        - ordered_add_ons
-        - show_period_toggle
-        - show_credits
-        - show_zero_price_as_free
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
         - enable_tax_collection
+        - ordered_add_ons
+        - ordered_bundle_list
+        - ordered_plans
+        - show_credits
+        - show_period_toggle
+        - show_zero_price_as_free
+        - sync_customer_billing_details_for_tax
       title: CreatePlanGroupRequestBody
     CreatePlanRequestBody:
       type: object
@@ -5997,6 +6070,8 @@ components:
           type: boolean
         show_zero_price_as_free:
           type: boolean
+        sync_customer_billing_details_for_tax:
+          type: boolean
         tax_collection_enabled:
           type: boolean
         trial_days:
@@ -6027,6 +6102,7 @@ components:
         - show_zero_price_as_free
         - checkout_settings
         - tax_collection_enabled
+        - sync_customer_billing_details_for_tax
       title: PlanGroupDetailResponseData
     PlanGroupPlanDetailResponseData:
       type: object
@@ -6166,6 +6242,8 @@ components:
           type: boolean
         show_zero_price_as_free:
           type: boolean
+        sync_customer_billing_details_for_tax:
+          type: boolean
         tax_collection_enabled:
           type: boolean
         trial_days:
@@ -6191,6 +6269,7 @@ components:
         - show_zero_price_as_free
         - checkout_settings
         - tax_collection_enabled
+        - sync_customer_billing_details_for_tax
       title: PlanGroupResponseData
     PlanIssueResponseData:
       type: object
@@ -6459,6 +6538,45 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
+    Rule:
+      type: object
+      properties:
+        account_id:
+          type: string
+        condition_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionGroup'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        priority:
+          type: integer
+        rule_type:
+          type: string
+        value:
+          type: boolean
+      required:
+        - id
+        - account_id
+        - environment_id
+        - rule_type
+        - name
+        - priority
+        - conditions
+        - condition_groups
+        - value
+      title: Rule
     RuleConditionDetailResponseData:
       type: object
       properties:
@@ -6818,6 +6936,20 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    TraitDefinition:
+      type: object
+      properties:
+        comparable_type:
+          type: string
+        entity_type:
+          type: string
+        id:
+          type: string
+      required:
+        - id
+        - comparable_type
+        - entity_type
+      title: TraitDefinition
     UpdateAddOnRequestBody:
       type: object
       properties:
@@ -7352,6 +7484,8 @@ components:
           type: boolean
         show_zero_price_as_free:
           type: boolean
+        sync_customer_billing_details_for_tax:
+          type: boolean
         trial_days:
           type: integer
           nullable: true
@@ -7366,16 +7500,17 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - ordered_plans
-        - ordered_bundle_list
-        - ordered_add_ons
-        - show_period_toggle
-        - show_credits
-        - show_zero_price_as_free
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
         - enable_tax_collection
+        - ordered_add_ons
+        - ordered_bundle_list
+        - ordered_plans
+        - show_credits
+        - show_period_toggle
+        - show_zero_price_as_free
+        - sync_customer_billing_details_for_tax
       title: UpdatePlanGroupRequestBody
     UpdatePlanRequestBody:
       type: object
