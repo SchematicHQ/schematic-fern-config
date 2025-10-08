@@ -3920,6 +3920,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderedPlansInGroup'
+        prevent_downgrades_when_over_limit:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -3949,6 +3951,7 @@ components:
         - ordered_add_ons
         - ordered_bundle_list
         - ordered_plans
+        - prevent_downgrades_when_over_limit
         - show_credits
         - show_period_toggle
         - show_zero_price_as_free
@@ -4918,32 +4921,96 @@ components:
             - unlimited
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
+        company_override:
+          $ref: '#/components/schemas/CompanyOverrideResponseData'
         credit_consumption_rate:
           type: number
-          description: >-
-            Rate at which credits are consumed per unit of usage for
-            credit-based features.
+          description: The rate at which credits are consumed per unit of usage
+          nullable: true
+        credit_grant_counts:
+          additionalProperties:
+            type: number
+          type: object
+        credit_grant_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditGrantDetail'
+        credit_grant_reason:
+          type: string
+          description: Reason for the credit grant
+          nullable: true
+          enum:
+            - free
+            - plan
+            - purchased
+        credit_remaining:
+          type: number
+          nullable: true
+        credit_total:
+          type: number
+          nullable: true
+        credit_type_icon:
+          type: string
+          description: Icon identifier for the credit type
           nullable: true
         credit_usage:
           $ref: '#/components/schemas/CreditUsage'
+        credit_used:
+          type: number
+          nullable: true
+        effective_limit:
+          type: integer
+          description: >-
+            Effective limit for usage calculations. For overage pricing, this is
+            the soft limit where overage charges begin. For tiered pricing, this
+            is the first tier boundary. For other pricing models, this is the
+            base allocation. Used to calculate usage percentages and determine
+            access thresholds.
+          nullable: true
+        effective_price:
+          type: number
+          description: Per-unit price for current usage scenario
+          nullable: true
         entitlement_expiration_date:
           type: string
           format: date-time
           nullable: true
         entitlement_id:
           type: string
+        entitlement_source:
+          type: string
+          description: Source of the entitlement (plan or company_override)
+          nullable: true
         entitlement_type:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        has_valid_allocation:
+          type: boolean
+          description: Whether a valid allocation exists
+          nullable: true
+        is_unlimited:
+          type: boolean
+          description: Whether this is an unlimited allocation
+          nullable: true
         metric_reset_at:
           type: string
-          description: The time at which the metric will resets.
+          description: The time at which the metric will reset.
           format: date-time
           nullable: true
         month_reset:
           type: string
           description: If the period is current_month, when the month resets.
+          nullable: true
+        monthly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        overuse:
+          type: integer
+          description: Amount of usage exceeding soft limit (overage pricing only)
+          nullable: true
+        percent_used:
+          type: number
+          description: Percentage of allocation consumed (0-100+)
           nullable: true
         period:
           type: string
@@ -4951,12 +5018,25 @@ components:
           nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
+        plan_entitlement:
+          $ref: '#/components/schemas/PlanEntitlementResponseData'
+        price_behavior:
+          type: string
+          nullable: true
+        soft_limit:
+          type: integer
+          description: >-
+            The soft limit for the feature usage. Available only for overage
+            price behavior
+          nullable: true
         usage:
           type: integer
           description: >-
             The amount of usage that has been consumed; a null value indicates
             that usage is not being measured.
           nullable: true
+        yearly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
       required:
         - access
         - allocation_type
@@ -5243,6 +5323,19 @@ components:
         credit_used:
           type: number
           nullable: true
+        effective_limit:
+          type: integer
+          description: >-
+            Effective limit for usage calculations. For overage pricing, this is
+            the soft limit where overage charges begin. For tiered pricing, this
+            is the first tier boundary. For other pricing models, this is the
+            base allocation. Used to calculate usage percentages and determine
+            access thresholds.
+          nullable: true
+        effective_price:
+          type: number
+          description: Per-unit price for current usage scenario
+          nullable: true
         entitlement_expiration_date:
           type: string
           format: date-time
@@ -5257,6 +5350,14 @@ components:
           type: string
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
+        has_valid_allocation:
+          type: boolean
+          description: Whether a valid allocation exists
+          nullable: true
+        is_unlimited:
+          type: boolean
+          description: Whether this is an unlimited allocation
+          nullable: true
         metric_reset_at:
           type: string
           description: The time at which the metric will reset.
@@ -5268,6 +5369,14 @@ components:
           nullable: true
         monthly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
+        overuse:
+          type: integer
+          description: Amount of usage exceeding soft limit (overage pricing only)
+          nullable: true
+        percent_used:
+          type: number
+          description: Percentage of allocation consumed (0-100+)
+          nullable: true
         period:
           type: string
           description: The period over which usage is measured.
@@ -6064,6 +6173,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+        prevent_downgrades_when_over_limit:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -6103,6 +6214,7 @@ components:
         - checkout_settings
         - tax_collection_enabled
         - sync_customer_billing_details_for_tax
+        - prevent_downgrades_when_over_limit
       title: PlanGroupDetailResponseData
     PlanGroupPlanDetailResponseData:
       type: object
@@ -6236,6 +6348,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderedPlansInGroup'
+        prevent_downgrades_when_over_limit:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -6270,6 +6384,7 @@ components:
         - checkout_settings
         - tax_collection_enabled
         - sync_customer_billing_details_for_tax
+        - prevent_downgrades_when_over_limit
       title: PlanGroupResponseData
     PlanIssueResponseData:
       type: object
@@ -7478,6 +7593,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderedPlansInGroup'
+        prevent_downgrades_when_over_limit:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -7507,6 +7624,7 @@ components:
         - ordered_add_ons
         - ordered_bundle_list
         - ordered_plans
+        - prevent_downgrades_when_over_limit
         - show_credits
         - show_period_toggle
         - show_zero_price_as_free
@@ -15846,8 +15964,10 @@ paths:
               type: string
         - name: q
           in: query
+          description: Search by feature name or ID
           schema:
             type: string
+            description: Search by feature name or ID
         - name: without_company_override_for
           in: query
           description: >-
@@ -15944,6 +16064,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: Search by feature name or ID
                       without_company_override_for:
                         type: string
                         description: >-
@@ -16148,8 +16269,10 @@ paths:
               type: string
         - name: q
           in: query
+          description: Search by feature name or ID
           schema:
             type: string
+            description: Search by feature name or ID
         - name: without_company_override_for
           in: query
           description: >-
@@ -16243,6 +16366,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: Search by feature name or ID
                       without_company_override_for:
                         type: string
                         description: >-
@@ -16287,8 +16411,10 @@ paths:
               type: string
         - name: q
           in: query
+          description: Search by flag name, key, or ID
           schema:
             type: string
+            description: Search by flag name, key, or ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -16336,6 +16462,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: Search by flag name, key, or ID
                     title: ListFlagsParams
                 required:
                   - data
@@ -16668,8 +16795,10 @@ paths:
               type: string
         - name: q
           in: query
+          description: Search by flag name, key, or ID
           schema:
             type: string
+            description: Search by flag name, key, or ID
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -16714,6 +16843,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        description: Search by flag name, key, or ID
                     title: CountFlagsParams
                 required:
                   - data
