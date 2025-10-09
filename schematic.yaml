@@ -532,6 +532,29 @@ components:
         - updated_at
         - grant_reason
       title: BillingCreditGrantResponseData
+    BillingCreditLedgerResponseData:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+      title: BillingCreditLedgerResponseData
     BillingCreditResponseData:
       type: object
       properties:
@@ -1765,6 +1788,20 @@ components:
         - value
         - created_at
       title: CompanyEventPeriodMetricsResponseData
+    CompanyLedgerResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        logo_url:
+          type: string
+          nullable: true
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CompanyLedgerResponseData
     CompanyMembershipDetailResponseData:
       type: object
       properties:
@@ -4189,6 +4226,74 @@ components:
         - grant_reason
         - quantity
       title: CreditGrantDetail
+    CreditLedgerEnrichedEntryResponseData:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        company:
+          $ref: '#/components/schemas/CompanyLedgerResponseData'
+        company_id:
+          type: string
+        credit:
+          $ref: '#/components/schemas/BillingCreditLedgerResponseData'
+        expired_grant_count:
+          type: integer
+        feature:
+          $ref: '#/components/schemas/FeatureLedgerResponseData'
+        feature_id:
+          type: string
+          nullable: true
+        first_transaction_at:
+          type: string
+          format: date-time
+        free_grant_count:
+          type: integer
+        grant_count:
+          type: integer
+        last_transaction_at:
+          type: string
+          format: date-time
+        manually_zeroed_count:
+          type: integer
+        net_change:
+          type: number
+        plan_grant_count:
+          type: integer
+        purchased_grant_count:
+          type: integer
+        time_bucket:
+          type: string
+          format: date-time
+        total_consumed:
+          type: number
+        total_granted:
+          type: number
+        transaction_count:
+          type: integer
+        usage_count:
+          type: integer
+        zeroed_out_count:
+          type: integer
+      required:
+        - company_id
+        - billing_credit_id
+        - time_bucket
+        - total_granted
+        - total_consumed
+        - net_change
+        - transaction_count
+        - grant_count
+        - usage_count
+        - zeroed_out_count
+        - first_transaction_at
+        - last_transaction_at
+        - expired_grant_count
+        - manually_zeroed_count
+        - plan_grant_count
+        - purchased_grant_count
+        - free_grant_count
+      title: CreditLedgerEnrichedEntryResponseData
     CreditTriggerConfig:
       type: object
       properties:
@@ -5161,6 +5266,23 @@ components:
         - flags
         - plans
       title: FeatureDetailResponseData
+    FeatureLedgerResponseData:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: FeatureLedgerResponseData
     FeatureResponseData:
       type: object
       properties:
@@ -10060,6 +10182,222 @@ paths:
                   - data
                   - params
                 title: ListGrantsForCreditResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/ledger:
+    get:
+      operationId: getEnrichedCreditLedger
+      summary: Get enriched credit ledger
+      tags:
+        - credits
+      parameters:
+        - name: CompanyID
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: BillingCreditID
+          in: query
+          schema:
+            type: string
+        - name: FeatureID
+          in: query
+          schema:
+            type: string
+        - name: Period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - daily
+              - weekly
+              - monthly
+              - raw
+        - name: StartTime
+          in: query
+          schema:
+            type: string
+        - name: EndTime
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/CreditLedgerEnrichedEntryResponseData
+                    title: GetEnrichedCreditLedgerResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      BillingCreditID:
+                        type: string
+                      CompanyID:
+                        type: string
+                      EndTime:
+                        type: string
+                      FeatureID:
+                        type: string
+                      Period:
+                        type: string
+                        enum:
+                          - daily
+                          - weekly
+                          - monthly
+                          - raw
+                      StartTime:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                    title: GetEnrichedCreditLedgerParams
+                required:
+                  - data
+                  - params
+                title: GetEnrichedCreditLedgerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/ledger/count:
+    get:
+      operationId: countCreditLedger
+      summary: Count credit ledger
+      tags:
+        - credits
+      parameters:
+        - name: CompanyID
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: BillingCreditID
+          in: query
+          schema:
+            type: string
+        - name: FeatureID
+          in: query
+          schema:
+            type: string
+        - name: Period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - daily
+              - weekly
+              - monthly
+              - raw
+        - name: StartTime
+          in: query
+          schema:
+            type: string
+        - name: EndTime
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      BillingCreditID:
+                        type: string
+                      CompanyID:
+                        type: string
+                      EndTime:
+                        type: string
+                      FeatureID:
+                        type: string
+                      Period:
+                        type: string
+                        enum:
+                          - daily
+                          - weekly
+                          - monthly
+                          - raw
+                      StartTime:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                    title: CountCreditLedgerParams
+                required:
+                  - data
+                  - params
+                title: CountCreditLedgerResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
