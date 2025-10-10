@@ -10199,20 +10199,20 @@ paths:
       tags:
         - credits
       parameters:
-        - name: CompanyID
+        - name: company_id
           in: query
           required: true
           schema:
             type: string
-        - name: BillingCreditID
+        - name: billing_credit_id
           in: query
           schema:
             type: string
-        - name: FeatureID
+        - name: feature_id
           in: query
           schema:
             type: string
-        - name: Period
+        - name: period
           in: query
           required: true
           schema:
@@ -10222,11 +10222,11 @@ paths:
               - weekly
               - monthly
               - raw
-        - name: StartTime
+        - name: start_time
           in: query
           schema:
             type: string
-        - name: EndTime
+        - name: end_time
           in: query
           schema:
             type: string
@@ -10262,22 +10262,13 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
-                      BillingCreditID:
+                      billing_credit_id:
                         type: string
-                      CompanyID:
+                      company_id:
                         type: string
-                      EndTime:
+                      end_time:
                         type: string
-                      FeatureID:
-                        type: string
-                      Period:
-                        type: string
-                        enum:
-                          - daily
-                          - weekly
-                          - monthly
-                          - raw
-                      StartTime:
+                      feature_id:
                         type: string
                       limit:
                         type: integer
@@ -10287,6 +10278,15 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      period:
+                        type: string
+                        enum:
+                          - daily
+                          - weekly
+                          - monthly
+                          - raw
+                      start_time:
+                        type: string
                     title: GetEnrichedCreditLedgerParams
                 required:
                   - data
@@ -10309,20 +10309,20 @@ paths:
       tags:
         - credits
       parameters:
-        - name: CompanyID
+        - name: company_id
           in: query
           required: true
           schema:
             type: string
-        - name: BillingCreditID
+        - name: billing_credit_id
           in: query
           schema:
             type: string
-        - name: FeatureID
+        - name: feature_id
           in: query
           schema:
             type: string
-        - name: Period
+        - name: period
           in: query
           required: true
           schema:
@@ -10332,11 +10332,11 @@ paths:
               - weekly
               - monthly
               - raw
-        - name: StartTime
+        - name: start_time
           in: query
           schema:
             type: string
-        - name: EndTime
+        - name: end_time
           in: query
           schema:
             type: string
@@ -10368,22 +10368,13 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
-                      BillingCreditID:
+                      billing_credit_id:
                         type: string
-                      CompanyID:
+                      company_id:
                         type: string
-                      EndTime:
+                      end_time:
                         type: string
-                      FeatureID:
-                        type: string
-                      Period:
-                        type: string
-                        enum:
-                          - daily
-                          - weekly
-                          - monthly
-                          - raw
-                      StartTime:
+                      feature_id:
                         type: string
                       limit:
                         type: integer
@@ -10393,6 +10384,15 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      period:
+                        type: string
+                        enum:
+                          - daily
+                          - weekly
+                          - monthly
+                          - raw
+                      start_time:
+                        type: string
                     title: CountCreditLedgerParams
                 required:
                   - data
