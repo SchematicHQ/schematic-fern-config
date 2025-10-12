@@ -1638,6 +1638,72 @@ components:
         - collect_email
         - collect_phone
       title: CheckoutSettingsResponseData
+    CheckoutSubscription:
+      type: object
+      properties:
+        cancel_at:
+          type: integer
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
+        company_id:
+          type: string
+          nullable: true
+        confirm_payment_intent_client_secret:
+          type: string
+          nullable: true
+        confirm_payment_intent_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        default_payment_method_id:
+          type: string
+          nullable: true
+        expired_at:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        interval:
+          type: string
+        metadata:
+          type: object
+        period_end:
+          type: integer
+        period_start:
+          type: integer
+        status:
+          type: string
+        subscription_external_id:
+          type: string
+        total_price:
+          type: integer
+        trial_end:
+          type: integer
+          nullable: true
+        trial_end_setting:
+          type: string
+          nullable: true
+      required:
+        - created_at
+        - currency
+        - customer_external_id
+        - period_start
+        - period_end
+        - subscription_external_id
+        - id
+        - interval
+        - total_price
+        - status
+        - cancel_at_period_end
+      title: CheckoutSubscription
     CompanyCrmDealsResponseData:
       type: object
       properties:
@@ -1991,6 +2057,7 @@ components:
           type: boolean
         is_default:
           type: boolean
+          deprecated: true
         is_free:
           type: boolean
         is_trialable:
@@ -2817,6 +2884,9 @@ components:
           type: string
         customer_external_id:
           type: string
+        default_payment_method_external_id:
+          type: string
+          nullable: true
         default_payment_method_id:
           type: string
           nullable: true
@@ -5798,6 +5868,60 @@ components:
       required:
         - keys
       title: KeysRequestBody
+    ManagePlanPreviewResponseResponseData:
+      type: object
+      properties:
+        subscription_change_preview:
+          $ref: '#/components/schemas/PreviewSubscriptionChangeResponseData'
+      title: ManagePlanPreviewResponseResponseData
+    ManagePlanRequest:
+      type: object
+      properties:
+        add_on_selections:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanSelection'
+        base_plan_id:
+          type: string
+          nullable: true
+        base_plan_price_id:
+          type: string
+          nullable: true
+        company_id:
+          type: string
+        coupon_external_id:
+          type: string
+          nullable: true
+        credit_bundles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
+        pay_in_advance_entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+        payment_method_external_id:
+          type: string
+          nullable: true
+        promo_code:
+          type: string
+          nullable: true
+      required:
+        - add_on_selections
+        - company_id
+        - credit_bundles
+        - pay_in_advance_entitlements
+      title: ManagePlanRequest
+    ManagePlanResponseResponseData:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+        success:
+          type: boolean
+      required:
+        - success
+      title: ManagePlanResponseResponseData
     MeterRequestBody:
       type: object
       properties:
@@ -6113,6 +6237,7 @@ components:
             $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
         is_default:
           type: boolean
+          deprecated: true
         is_free:
           type: boolean
         is_trialable:
@@ -6383,6 +6508,7 @@ components:
           type: boolean
         is_default:
           type: boolean
+          deprecated: true
         is_free:
           type: boolean
         is_trialable:
@@ -6554,6 +6680,17 @@ components:
         - plan_type
         - updated_at
       title: PlanResponseData
+    PlanSelection:
+      type: object
+      properties:
+        plan_id:
+          type: string
+        price_id:
+          type: string
+          nullable: true
+      required:
+        - plan_id
+      title: PlanSelection
     PlanTraitResponseData:
       type: object
       properties:
@@ -12029,7 +12166,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/BillingSubscriptionResponseData'
+                    $ref: '#/components/schemas/CheckoutSubscription'
                   params:
                     type: object
                     description: Input parameters
@@ -17187,6 +17324,86 @@ paths:
                   - data
                   - params
                 title: CountFlagsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /manage-plan:
+    post:
+      operationId: managePlan
+      summary: Manage plan
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagePlanRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ManagePlanParams
+                required:
+                  - data
+                  - params
+                title: ManagePlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /manage-plan/preview:
+    post:
+      operationId: previewManagePlan
+      summary: Preview manage plan
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagePlanRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanPreviewResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewManagePlanParams
+                required:
+                  - data
+                  - params
+                title: PreviewManagePlanResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
