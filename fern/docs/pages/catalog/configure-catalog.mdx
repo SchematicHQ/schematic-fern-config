@@ -18,27 +18,19 @@ src="../../assets/images/catalog/configure-table.png"
 ## Options
 
 ### Initial Plan
-The plan assigned to new companies upon sign ups. This plan determines how new customers begin their journey with your service.
+The plan assigned to new companies when they are created. This plan determines how new customers begin their journey with your service.
 
-**Capabilities:**
-- Can be a free plan attached to Stripe product
-- Can be a paid plan that begins with a trial
-- Can be a plan with at least one free price and no paid entitlements
-- A Stripe subscription will be provisioned for this customer
+You can select a price for this initial plan, in which case a Stripe subscription will be provisioned for this customer.
 
-**Requirements:**
-- Must not require a payment method
-- If linked to billing:
-  - Must be trialable without auto-converting, OR
-  - Must have at least one free price with no paid entitlements
-- If billing-linked and not trialable, must select a free price
+Your initial plan selections must _not_ require the customer to have a payment method on file, meaning any of the following are valid:
+* Selecting a plan that is not associated with billing
+* Selecting a plan and price that is free, with no monetized entitlements (e.g. pay-as-you-go, tiered pricing, or pay-in-advance)
+* Selecting a plan with a trialable paid plan, as long as the trial will expire at the end of the trial term
 
 ### Fallback Plan
-The plan assigned to companies that don't have an active plan. This replaces the deprecated Default Plan functionality.
+The plan assigned to any company that does not have another base plan. This replaces the deprecated Default Plan functionality, and allows you to specify a default set of entitlements.
 
-**Requirements:**
-- Cannot be linked to billing (even a free plan)
-- Must not be connected to any Stripe product
+These plans cannot be linked to a billing product (even a free plan).
 
 **When Applied:**
 Companies are automatically moved to this plan when:
@@ -63,7 +55,7 @@ Companies in Schematic may be assigned plans that are not included here, but the
 
 ### Custom Plans
 
-Often, an enterprise plan will have custom pricing that cannot easily be displayed. In these cases, you can mark a plan as "Custom" and then provide a message like "Talk to us" to display instead of a price. 
+Often, an enterprise plan will have custom pricing that cannot easily be displayed. In these cases, you can mark a plan as "Custom" and then provide a message like "Talk to us" to display instead of a price.
 
 ![custom plans](./images/custom-plans.png)
 ![custom plans 2](./images/custom-plans-2.png)
