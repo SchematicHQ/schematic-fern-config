@@ -17,9 +17,43 @@ src="../../assets/images/catalog/configure-table.png"
 
 ## Options
 
-### Default Plan
+### Initial Plan
+The plan assigned to new companies upon sign ups. This plan determines how new customers begin their journey with your service.
 
-This is the plan that will be assigned to companies that are not associated with any plans already in Schematic. For instance, this might be your freemium or trial plan that a new user is automatically assigned to prior to conversion into a paid plan.
+**Capabilities:**
+- Can be a free plan attached to Stripe product
+- Can be a paid plan that begins with a trial
+- Can be a plan with at least one free price and no paid entitlements
+- A Stripe subscription will be provisioned for this customer
+
+**Requirements:**
+- Must not require a payment method
+- If linked to billing:
+  - Must be trialable without auto-converting, OR
+  - Must have at least one free price with no paid entitlements
+- If billing-linked and not trialable, must select a free price
+
+### Fallback Plan
+The plan assigned to companies that don't have an active plan. This replaces the deprecated Default Plan functionality.
+
+**Requirements:**
+- Cannot be linked to billing (even a free plan)
+- Must not be connected to any Stripe product
+
+**When Applied:**
+Companies are automatically moved to this plan when:
+- Their subscription becomes inactive (unpaid, cancelled)
+- Their trait-based targeting becomes inactive
+
+### Trial Expiry Plan
+The plan companies are moved to when their trial period expires.
+
+**Requirements:**
+- Must not require a payment method
+- Must be either:
+  - A non-billing-linked plan, OR
+  - A plan with a free price
+- Cannot be a trialable plan (companies can't go onto a second trial)
 
 ### Live Plans
 
