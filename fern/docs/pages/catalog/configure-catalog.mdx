@@ -17,9 +17,35 @@ src="../../assets/images/catalog/configure-table.png"
 
 ## Options
 
-### Default Plan
+### Initial Plan
+The plan assigned to new companies when they are created. This plan determines how new customers begin their journey with your service.
 
-This is the plan that will be assigned to companies that are not associated with any plans already in Schematic. For instance, this might be your freemium or trial plan that a new user is automatically assigned to prior to conversion into a paid plan.
+You can select a price for this initial plan, in which case a Stripe subscription will be provisioned for this customer.
+
+Your initial plan selections must _not_ require the customer to have a payment method on file, meaning any of the following are valid:
+* Selecting a plan that is not associated with billing
+* Selecting a plan and price that is free, with no monetized entitlements (e.g. pay-as-you-go, tiered pricing, or pay-in-advance)
+* Selecting a plan with a trialable paid plan, as long as the trial will expire at the end of the trial term
+
+### Fallback Plan
+The plan assigned to any company that does not have another base plan. This replaces the deprecated Default Plan functionality, and allows you to specify a default set of entitlements.
+
+These plans cannot be linked to a billing product (even a free plan).
+
+**When Applied:**
+Companies are automatically moved to this plan when:
+- Their subscription becomes inactive (unpaid, cancelled)
+- Their trait-based targeting becomes inactive
+
+### Trial Expiry Plan
+The plan companies are moved to when their trial period expires.
+
+**Requirements:**
+- Must not require a payment method
+- Must be either:
+  - A non-billing-linked plan, OR
+  - A plan with a free price
+- Cannot be a trialable plan (companies can't go onto a second trial)
 
 ### Live Plans
 
@@ -29,7 +55,7 @@ Companies in Schematic may be assigned plans that are not included here, but the
 
 ### Custom Plans
 
-Often, an enterprise plan will have custom pricing that cannot easily be displayed. In these cases, you can mark a plan as "Custom" and then provide a message like "Talk to us" to display instead of a price. 
+Often, an enterprise plan will have custom pricing that cannot easily be displayed. In these cases, you can mark a plan as "Custom" and then provide a message like "Talk to us" to display instead of a price.
 
 ![custom plans](./images/custom-plans.png)
 ![custom plans 2](./images/custom-plans-2.png)
