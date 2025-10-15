@@ -6,7 +6,7 @@ slug: developer_resources/sdks/nextjs
 
 This guide provides recommendations for setting up Schematic in your Next.js application. This guide is intended as an extension of our React SDK guide, with specific recommendations and approaches tailored for Next.js. If you haven't already, we recommend reading our [React SDK guide](/developer_resources/sdks/react) first.
 
-These recommendations are based on our experiences building Schematic itself (which is built with Next.js), as well as our customers who use Next.js.
+These recommendations are based on our experiences working with Next.js, as well as our customers who use Next.js.
 
 ## Overview
 
@@ -17,9 +17,9 @@ This section includes suggestions on the following topics:
 
 ## SchematicProvider
 
-The `SchematicProvider` is a Provider that enables Schematic hooks and components. It provides the user/company context for all flag checks and event tracking. We recommend combining this wrapper with your Auth provider, since it will depend on the data provided by your auth provider.
+The `SchematicProvider` is a Provider that enables Schematic hooks and components. It provides the user/company context for all flag checks and event tracking. We recommend combining this wrapper with your auth provider, since it will depend on the data provided by your auth provider.
 
-In these examples, we'll use Clerk, but this should work for any Auth provider. We setup clerk as directed [here](https://clerk.com/docs/nextjs/getting-started/quickstart). 
+In these examples, we'll use Clerk, but this should work for any auth provider. We setup clerk as directed [here](https://clerk.com/docs/nextjs/getting-started/quickstart). 
 
 To start, we create a unified `ClientWrapper` ([code](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/components/ClientWrapper.tsx)), that combines the Clerk provider, Schematic provider, and additionally ensures we are operating on the client side (a requirement for the Schematic React SDK).
 
@@ -52,7 +52,7 @@ In this example, `useAuthContext` ([code](https://github.com/SchematicHQ/schemat
 
 [Schematic components](/components/overview) are React components that can be embedded in your application to provide a complete plan management UI to end users. They are pre-built and customizable, and can be embedded in your application using a Component ID from Schematic. 
 
-To embed a component, you'll need to generate an access token for the company. In Nextjs this is easy to setup using the `/api` folder as shown [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/app/api/accessToken/route.ts). This code reuses some of our authorization code to pull the correct company information. 
+To embed a component, you'll need to generate an access token for the company. In Next.js this is easy to setup using the `/api` folder as shown [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/app/api/accessToken/route.ts). This code reuses some of our authorization code to pull the correct company information. 
 
 For the component itself, we typically see users creating a dedicated page for it. A sample page, with appropriate error handling and loading states, is shown [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/app/plan/page.tsx).
 
