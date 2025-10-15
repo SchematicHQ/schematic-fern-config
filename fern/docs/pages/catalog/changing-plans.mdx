@@ -4,7 +4,7 @@ title: Changing Plans (Upgrades & Downgrades)
 slug: catalog/changing-plans
 ---
 
-When a company changes plans, whether an upgrade or a downgrade, Schematic automically updates handles the company's entitlements, usage limits, and billing status in Stripe (if applicable). Plan changes can occur from a few different sources -- in all cases, the steps Schematic takes are the same. The possible reason for a plan change are:
+When a company changes plans, whether an upgrade or a downgrade, Schematic automatically updates the company's entitlements, usage limits, and billing status in Stripe (if applicable). Plan changes can occur from a few different sources -- in all cases, the steps Schematic takes are the same. The possible reasons for a plan change are:
 
 - The customer goes through a checkout flow via the Schematic Customer Portal Component
 - You update a company's plan via the Schematic App using the "Manage Plan" button
@@ -13,7 +13,7 @@ When a company changes plans, whether an upgrade or a downgrade, Schematic autom
 
 ## Plan Change Basics
 
-Whenever a plan changes, Schematic will automatically update the company's entitlements and usage limits automatically. Accrued usage is fully preserved. All company overrides are preserved and re-applied. If a company override is less generous than the current plan entitlement, the more generous amount will be applied. 
+Whenever a plan changes, Schematic will automatically update the company's entitlements and usage limits. Accrued usage is fully preserved. All company overrides are preserved and re-applied. If a company override is less generous than the current plan entitlement, the more generous amount will be applied. 
 
 Schematic prevents companies from downgrading to a plan if they will be over the usage limits of the new plan. 
 
@@ -25,7 +25,7 @@ Using the "Manage Plan" button in the Schematic App, you are able to downgrade a
 
 ## Stripe-Linked Plans
 
-Stripe-linked plnas have additional considerations concerning how usage based charges are synced to Stripe. 
+Stripe-linked plans have additional considerations concerning how usage based charges are synced to Stripe. 
 
 ### Upgrade vs. Downgrades
 
@@ -33,7 +33,7 @@ For Stripe-linked plans, Schematic handles upgrades and downgrades differently. 
 
 ### Upgrades
 
-When a Stripe-linked plan is upgraded, Schematic will update the current subscription. All accrued usage is preserved and is reapplied to the new plan. For example, imagine the user has accrued 100 units of usage at $1/peron the current plan. Below would be the price for the current plan and the new price for hypothetical plans the user could upgrade to. 
+When a Stripe-linked plan is upgraded, Schematic will update the current subscription. All accrued usage is preserved and is reapplied to the new plan. For example, imagine the user has accrued 100 units of usage at $1/per unit on the current plan. Below would be the price for the current plan and the new price for hypothetical plans the user could upgrade to. 
 
 | Plan | Usage Charge | End of Month Usage Cost |
 | --- | --- | --- |
@@ -45,8 +45,8 @@ When a Stripe-linked plan is upgraded, Schematic will update the current subscri
 
 Additionally, when upgrading a plan, Schematic will use Stripe's proration logic to refund the remaining **base** cost of the current plan and the **base** cost of the new plan. These costs are presented to the user during the checkout flow or to you while using the "Manage Plan" button in the Schematic App.
 
-**NOTE:** If the new plan doesn't have an entitlement for a feature, the charges associated with the usage will be dropped.
+**NOTE:** For usage-based features, if the new plan doesn't have an entitlement for the feature, the charges associated with the usage will be dropped.
 
 ### Downgrades
 
-When a Stripe-linked plan is downgraded, Schematic will cancel the current subscription and create a new subscription for the new plan. In this case, all accrued usage costs are lost and will not be reapplied to the new plan. This will create a discrepenacny between the accrued usage displayed in Schematic and the usage billed in Stripe. 
+When a Stripe-linked plan is downgraded, Schematic will cancel the current subscription and create a new subscription for the new plan. In this case, all accrued usage costs are lost and will not be reapplied to the new plan. This will create a discrepancy between the accrued usage displayed in Schematic and the usage billed in Stripe. 
