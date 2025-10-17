@@ -16,6 +16,89 @@ paths:
     delete:
       x-fern-audiences:
         - public
+  /billing/credits:
+    get:
+      summary: List credits
+      x-fern-audiences:
+        - public
+    post:
+      summary: Create credit
+      x-fern-audiences:
+        - public
+  /billing/credits/:credit_id:
+    get:
+      summary: Get credit
+      x-fern-audiences:
+        - public
+    put:
+      summary: Update credit
+      x-fern-audiences:
+        - public
+    delete:
+      summary: Delete credit
+      x-fern-audiences:
+        - public
+  /billing/credits/bundles:
+    get:
+      summary: List credit bundles
+      x-fern-audiences:
+        - public
+    post:
+      summary: Create credit bundle
+      x-fern-audiences:
+        - public
+  /billing/credits/bundles/:bundle_id:
+    get:
+      summary: Get credit bundle
+      x-fern-audiences:
+        - public
+    post:
+      summary: Purchase credit bundle
+      x-fern-audiences:
+        - public
+    put:
+      summary: Update credit bundle
+      x-fern-audiences:
+        - public
+  /billing/credits/grants/company:
+    post:
+      summary: Grant credits to company
+      x-fern-audiences:
+        - public
+  /billing/credits/grants/company/list:
+    get:
+      summary: List company credit grants
+      x-fern-audiences:
+        - public
+  /billing/credits/grants/list:
+    get:
+      summary: List credit grants
+      x-fern-audiences:
+        - public
+  /billing/credits/grants/:grant_id/zero-out:
+    put:
+      summary: Zero out credit grant
+      x-fern-audiences:
+        - public
+  /billing/credits/ledger:
+    get:
+      summary: Get credit ledger
+      x-fern-audiences:
+        - public
+  /billing/credits/plan-grants:
+    get:
+      summary: List plan credit grants
+      x-fern-audiences:
+        - public
+    post:
+      summary: Create plan credit grant
+      x-fern-audiences:
+        - public
+  /billing/credits/plan-grants/:plan_grant_id:
+    delete:
+      summary: Delete plan credit grant
+      x-fern-audiences:
+        - public
   /companies:
     get:
       x-fern-audiences:
