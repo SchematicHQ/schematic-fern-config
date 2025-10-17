@@ -109,20 +109,3 @@ After setting up the integration, the Stripe Integration page in Schematic will 
 <Info>Schematic should receive updates from Stripe automatically, in real-time, via webhooks. The "Refresh data" button should only be used for troubleshooting.</Info>
 
 ![Stripe Imported Products](../../assets/images/stripe/stripe-import-view.png)
-
-### Stripe Restricted Key permissions
-
-If you are using a restricted key to connect to Schematic, make sure it has the following permissions:
-
-- Core resources
-  - Customers - Read/Write
-  - PaymentIntents - Read/Write
-  - PaymentMethods - Read/Write
-  - Products - Read
-  - SetupIntents - Read/Write
-- Billing resources
-  - Invoices - Read
-  - Prices - Read
-  - Subscriptions - Read/Write
-- Webhook resources
-  - Webhook Endpoints - Read/Write
