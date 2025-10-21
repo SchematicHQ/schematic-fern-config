@@ -160,6 +160,8 @@ components:
     ApiKeyRequestResponseData:
       type: object
       properties:
+        api_key:
+          $ref: '#/components/schemas/ApiKeyResponseData'
         api_key_id:
           type: string
         ended_at:
