@@ -363,6 +363,26 @@ navigation:
             contents:
               - GET /feature-usage
               - GET /usage-by-company
+          - section: Billing Credits
+            contents:
+              - GET /billing/credits
+              - POST /billing/credits
+              - GET /billing/credits/:credit_id
+              - PUT /billing/credits/:credit_id
+              - DELETE /billing/credits/:credit_id
+              - GET /billing/credits/bundles
+              - POST /billing/credits/bundles
+              - GET /billing/credits/bundles/:bundle_id
+              - POST /billing/credits/bundles/:bundle_id
+              - PUT /billing/credits/bundles/:bundle_id
+              - POST /billing/credits/grants/company
+              - GET /billing/credits/grants/company/list
+              - GET /billing/credits/grants/list
+              - PUT /billing/credits/grants/:grant_id/zero-out
+              - GET /billing/credits/plan-grants
+              - POST /billing/credits/plan-grants
+              - DELETE /billing/credits/plan-grants/:plan_grant_id
+              - GET /billing/credits/ledger
           - accounts:
               hidden: true
           - features:
