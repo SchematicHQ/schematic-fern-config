@@ -9447,16 +9447,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /billing/credits/{billing_id}:
+  /billing/credits/{credit_id}:
     get:
       operationId: getSingleBillingCredit
       summary: Get single billing credit
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: credit_id
           in: path
-          description: billing_id
+          description: credit_id
           required: true
           schema:
             type: string
@@ -9492,9 +9492,9 @@ paths:
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: credit_id
           in: path
-          description: billing_id
+          description: credit_id
           required: true
           schema:
             type: string
@@ -9538,9 +9538,9 @@ paths:
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: credit_id
           in: path
-          description: billing_id
+          description: credit_id
           required: true
           schema:
             type: string
@@ -9710,16 +9710,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /billing/credits/bundles/{billing_id}:
+  /billing/credits/bundles/{bundle_id}:
     get:
       operationId: getCreditBundle
       summary: Get credit bundle
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: bundle_id
           in: path
-          description: billing_id
+          description: bundle_id
           required: true
           schema:
             type: string
@@ -9755,9 +9755,9 @@ paths:
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: bundle_id
           in: path
-          description: billing_id
+          description: bundle_id
           required: true
           schema:
             type: string
@@ -9801,9 +9801,9 @@ paths:
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: bundle_id
           in: path
-          description: billing_id
+          description: bundle_id
           required: true
           schema:
             type: string
@@ -10005,16 +10005,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /billing/credits/grants/{billing_id}/zero-out:
+  /billing/credits/grants/{grant_id}/zero-out:
     put:
       operationId: zeroOutGrant
       summary: Zero out grant
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: grant_id
           in: path
-          description: billing_id
+          description: grant_id
           required: true
           schema:
             type: string
@@ -10686,16 +10686,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /billing/credits/plan-grants/{billing_id}:
+  /billing/credits/plan-grants/{plan_grant_id}:
     delete:
       operationId: deleteBillingPlanCreditGrant
       summary: Delete billing plan credit grant
       tags:
         - credits
       parameters:
-        - name: billing_id
+        - name: plan_grant_id
           in: path
-          description: billing_id
+          description: plan_grant_id
           required: true
           schema:
             type: string
