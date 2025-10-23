@@ -25,7 +25,7 @@ paths:
       summary: Create credit
       x-fern-audiences:
         - public
-  /billing/credits/:credit_id:
+  /billing/credits/{credit_id}:
     get:
       summary: Get credit
       x-fern-audiences:
@@ -47,17 +47,17 @@ paths:
       summary: Create credit bundle
       x-fern-audiences:
         - public
-  /billing/credits/bundles/:bundle_id:
+  /billing/credits/bundles/{bundle_id}:
     get:
       summary: Get credit bundle
       x-fern-audiences:
         - public
-    post:
-      summary: Purchase credit bundle
-      x-fern-audiences:
-        - public
     put:
       summary: Update credit bundle
+      x-fern-audiences:
+        - public
+    delete:
+      summary: Delete credit bundle
       x-fern-audiences:
         - public
   /billing/credits/grants/company:
@@ -75,7 +75,7 @@ paths:
       summary: List credit grants
       x-fern-audiences:
         - public
-  /billing/credits/grants/:grant_id/zero-out:
+  /billing/credits/grants/{grant_id}/zero-out:
     put:
       summary: Zero out credit grant
       x-fern-audiences:
@@ -94,7 +94,7 @@ paths:
       summary: Create plan credit grant
       x-fern-audiences:
         - public
-  /billing/credits/plan-grants/:plan_grant_id:
+  /billing/credits/plan-grants/{plan_grant_id}:
     delete:
       summary: Delete plan credit grant
       x-fern-audiences:
