@@ -257,34 +257,6 @@ components:
         - created_at
         - updated_at
       title: ApiKeyResponseData
-    AudienceRequestBody:
-      type: object
-      properties:
-        condition_groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateOrUpdateConditionGroupRequestBody'
-        conditions:
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateOrUpdateConditionRequestBody'
-        limit:
-          type: integer
-          description: Page limit (default 100)
-          nullable: true
-          example: '100'
-        offset:
-          type: integer
-          description: Page offset (default 0)
-          nullable: true
-          example: '0'
-        q:
-          type: string
-          nullable: true
-      required:
-        - conditions
-        - condition_groups
-      title: AudienceRequestBody
     BillingCouponResponseData:
       type: object
       properties:
@@ -2017,6 +1989,7 @@ components:
         audience_type:
           type: string
           nullable: true
+          deprecated: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -3664,9 +3637,6 @@ components:
         id:
           type: string
           nullable: true
-        plan_id:
-          type: string
-          nullable: true
       required:
         - conditions
       title: CreateOrUpdateConditionGroupRequestBody
@@ -3816,7 +3786,6 @@ components:
             - plan_entitlement
             - standard
             - default
-            - plan_audience
         value:
           type: boolean
       required:
@@ -4004,9 +3973,6 @@ components:
         custom_plan_config:
           $ref: '#/components/schemas/CustomPlanConfig'
         custom_plan_id:
-          type: string
-          nullable: true
-        default_plan_id:
           type: string
           nullable: true
         enable_tax_collection:
@@ -5956,20 +5922,6 @@ components:
       required:
         - plan_id
       title: OrderedPlansInGroup
-    PaginationFilter:
-      type: object
-      properties:
-        limit:
-          type: integer
-          description: Page limit (default 100)
-          nullable: true
-          example: '100'
-        offset:
-          type: integer
-          description: Page offset (default 0)
-          nullable: true
-          example: '0'
-      title: PaginationFilter
     PaymentMethodRequestBody:
       type: object
       properties:
@@ -6066,90 +6018,6 @@ components:
         - updated_at
         - payment_method_type
       title: PaymentMethodResponseData
-    PlanAudienceDetailResponseData:
-      type: object
-      properties:
-        condition_groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/RuleConditionGroupDetailResponseData'
-        conditions:
-          type: array
-          items:
-            $ref: '#/components/schemas/RuleConditionDetailResponseData'
-        created_at:
-          type: string
-          format: date-time
-        environment_id:
-          type: string
-        flag_id:
-          type: string
-          nullable: true
-        id:
-          type: string
-        name:
-          type: string
-        plan_id:
-          type: string
-          nullable: true
-        priority:
-          type: integer
-        rule_type:
-          type: string
-        updated_at:
-          type: string
-          format: date-time
-        value:
-          type: boolean
-      required:
-        - id
-        - environment_id
-        - priority
-        - name
-        - rule_type
-        - value
-        - created_at
-        - updated_at
-        - conditions
-        - condition_groups
-      title: PlanAudienceDetailResponseData
-    PlanAudienceResponseData:
-      type: object
-      properties:
-        created_at:
-          type: string
-          format: date-time
-        environment_id:
-          type: string
-        flag_id:
-          type: string
-          nullable: true
-        id:
-          type: string
-        name:
-          type: string
-        plan_id:
-          type: string
-          nullable: true
-        priority:
-          type: integer
-        rule_type:
-          type: string
-        updated_at:
-          type: string
-          format: date-time
-        value:
-          type: boolean
-      required:
-        - id
-        - environment_id
-        - priority
-        - name
-        - rule_type
-        - value
-        - created_at
-        - updated_at
-      title: PlanAudienceResponseData
     PlanCreditGrantView:
       type: object
       properties:
@@ -6217,6 +6085,7 @@ components:
         audience_type:
           type: string
           nullable: true
+          deprecated: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -6394,6 +6263,7 @@ components:
         default_plan_id:
           type: string
           nullable: true
+          deprecated: true
         fallback_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         fallback_plan_id:
@@ -6476,6 +6346,7 @@ components:
         audience_type:
           type: string
           nullable: true
+          deprecated: true
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -6584,6 +6455,7 @@ components:
         default_plan_id:
           type: string
           nullable: true
+          deprecated: true
         fallback_plan_id:
           type: string
           nullable: true
@@ -6662,6 +6534,7 @@ components:
         audience_type:
           type: string
           nullable: true
+          deprecated: true
         created_at:
           type: string
           format: date-time
@@ -6995,9 +6868,6 @@ components:
           nullable: true
         operator:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         resource_ids:
           type: array
           items:
@@ -7050,9 +6920,6 @@ components:
           nullable: true
         id:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         rule_id:
           type: string
         updated_at:
@@ -7079,9 +6946,6 @@ components:
           nullable: true
         id:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         rule_id:
           type: string
         updated_at:
@@ -7129,9 +6993,6 @@ components:
           nullable: true
         operator:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         resource_ids:
           type: array
           items:
@@ -7183,9 +7044,6 @@ components:
           type: string
         name:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         priority:
           type: integer
         rule_type:
@@ -7222,9 +7080,6 @@ components:
           type: string
         name:
           type: string
-        plan_id:
-          type: string
-          nullable: true
         priority:
           type: integer
         rule_type:
@@ -7352,21 +7207,6 @@ components:
           type: string
           nullable: true
       title: UpdateApiKeyRequestBody
-    UpdateAudienceRequestBody:
-      type: object
-      properties:
-        condition_groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateOrUpdateConditionGroupRequestBody'
-        conditions:
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateOrUpdateConditionRequestBody'
-      required:
-        - conditions
-        - condition_groups
-      title: UpdateAudienceRequestBody
     UpdateBillingCreditRequestBody:
       type: object
       properties:
@@ -7831,9 +7671,6 @@ components:
         custom_plan_config:
           $ref: '#/components/schemas/CustomPlanConfig'
         custom_plan_id:
-          type: string
-          nullable: true
-        default_plan_id:
           type: string
           nullable: true
         enable_tax_collection:
@@ -9043,172 +8880,6 @@ paths:
                   - data
                   - params
                 title: CountApiRequestsResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /audience/count-companies:
-    post:
-      operationId: countAudienceCompanies
-      summary: Count audience companies
-      tags:
-        - features
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudienceRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/CountResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CountAudienceCompaniesParams
-                required:
-                  - data
-                  - params
-                title: CountAudienceCompaniesResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /audience/count-users:
-    post:
-      operationId: countAudienceUsers
-      summary: Count audience users
-      tags:
-        - features
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudienceRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/CountResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CountAudienceUsersParams
-                required:
-                  - data
-                  - params
-                title: CountAudienceUsersResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /audience/get-companies:
-    post:
-      operationId: listAudienceCompanies
-      summary: List audience companies
-      tags:
-        - features
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudienceRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CompanyDetailResponseData'
-                    title: ListAudienceCompaniesResponseData
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: ListAudienceCompaniesParams
-                required:
-                  - data
-                  - params
-                title: ListAudienceCompaniesResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /audience/get-users:
-    post:
-      operationId: listAudienceUsers
-      summary: List audience users
-      tags:
-        - features
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudienceRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/UserDetailResponseData'
-                    title: ListAudienceUsersResponseData
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: ListAudienceUsersParams
-                required:
-                  - data
-                  - params
-                title: ListAudienceUsersResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -17413,131 +17084,6 @@ paths:
                   - data
                   - params
                 title: PreviewManagePlanResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /plan-audiences/{plan_audience_id}:
-    get:
-      operationId: getAudience
-      summary: Get audience
-      tags:
-        - plans
-      parameters:
-        - name: plan_audience_id
-          in: path
-          description: plan_audience_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/PlanAudienceDetailResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: GetAudienceParams
-                required:
-                  - data
-                  - params
-                title: GetAudienceResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    put:
-      operationId: updateAudience
-      summary: Update audience
-      tags:
-        - plans
-      parameters:
-        - name: plan_audience_id
-          in: path
-          description: plan_audience_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateAudienceRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/PlanAudienceDetailResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: UpdateAudienceParams
-                required:
-                  - data
-                  - params
-                title: UpdateAudienceResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      operationId: deleteAudience
-      summary: Delete audience
-      tags:
-        - plans
-      parameters:
-        - name: plan_audience_id
-          in: path
-          description: plan_audience_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/DeleteResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: DeleteAudienceParams
-                required:
-                  - data
-                  - params
-                title: DeleteAudienceResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
