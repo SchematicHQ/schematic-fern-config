@@ -4137,6 +4137,7 @@ components:
               - entitlement.tier_limit.reached
               - credit.limit.warning
               - credit.limit.reached
+              - company.plan_change
         url:
           type: string
       required:
@@ -6018,6 +6019,109 @@ components:
         - updated_at
         - payment_method_type
       title: PaymentMethodResponseData
+    PlanChangeResponseData:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - checkout
+            - company_upsert
+            - fallback_plan
+            - manage_plan
+            - plan_billing_product_changed
+            - plan_deleted
+            - quickstart
+            - subscription_change
+        actor_type:
+          type: string
+          enum:
+            - app_user
+            - api_key
+            - system
+            - temporary_access_token
+        add_ons_added:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanSnapshotView'
+        add_ons_removed:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanSnapshotView'
+        api_key:
+          $ref: '#/components/schemas/ApiKeyResponseData'
+        api_key_request:
+          $ref: '#/components/schemas/ApiKeyRequestListResponseData'
+        base_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        base_plan_action:
+          type: string
+          description: >-
+            Any special behavior that affected the assignment of the base plan
+            during this change.
+          nullable: true
+          enum:
+            - fallback
+            - initial
+            - trait
+            - trial_expiry
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        id:
+          type: string
+        previous_base_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        request_id:
+          type: string
+          nullable: true
+        subscription_change_action:
+          type: string
+          description: >-
+            If a subscription was changed as a part of this plan change,
+            indicates the type of change that was made.
+          nullable: true
+          enum:
+            - downgrade
+            - invalid
+            - subscribe
+            - unsubscribe
+            - upgrade
+            - upgrade_trial
+        traits_updated:
+          type: array
+          description: >-
+            Any traits were updated as part of this plan change (via
+            pay-in-advance entitlements).
+          items:
+            $ref: '#/components/schemas/SubscriptionTraitUpdate'
+        updated_at:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          nullable: true
+        user_name:
+          type: string
+          nullable: true
+      required:
+        - action
+        - actor_type
+        - add_ons_added
+        - add_ons_removed
+        - company_id
+        - created_at
+        - environment_id
+        - id
+        - traits_updated
+        - updated_at
+      title: PlanChangeResponseData
     PlanCreditGrantView:
       type: object
       properties:
@@ -6571,6 +6675,26 @@ components:
       required:
         - plan_id
       title: PlanSelection
+    PlanSnapshotView:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+        description:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - deleted
+        - description
+        - id
+        - icon
+        - name
+      title: PlanSnapshotView
     PlanTraitResponseData:
       type: object
       properties:
@@ -7143,6 +7267,34 @@ components:
       required:
         - schematic_publishable_key
       title: StripeEmbedInfo
+    SubscriptionTraitUpdate:
+      type: object
+      properties:
+        feature_id:
+          type: string
+        hierarchy:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+        trait_id:
+          type: string
+        trait_name:
+          type: string
+        trait_type:
+          type: string
+        value:
+          type: string
+      required:
+        - trait_id
+        - trait_name
+        - hierarchy
+        - trait_type
+        - value
+        - feature_id
+        - reason
+      title: SubscriptionTraitUpdate
     TemporaryAccessTokenResponseData:
       type: object
       properties:
@@ -17086,6 +17238,144 @@ paths:
                 title: PreviewManagePlanResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-changes:
+    get:
+      operationId: listPlanChanges
+      summary: List plan changes
+      tags:
+        - companies
+      parameters:
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: base_plan_action
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: company_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: plan_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlanChangeResponseData'
+                    title: ListPlanChangesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      action:
+                        type: string
+                      base_plan_action:
+                        type: string
+                      company_id:
+                        type: string
+                      company_ids:
+                        type: array
+                        items:
+                          type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      plan_ids:
+                        type: array
+                        items:
+                          type: string
+                    title: ListPlanChangesParams
+                required:
+                  - data
+                  - params
+                title: ListPlanChangesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-changes/{plan_change_id}:
+    get:
+      operationId: getPlanChange
+      summary: Get plan change
+      tags:
+        - companies
+      parameters:
+        - name: plan_change_id
+          in: path
+          description: plan_change_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanChangeResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPlanChangeParams
+                required:
+                  - data
+                  - params
+                title: GetPlanChangeResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
