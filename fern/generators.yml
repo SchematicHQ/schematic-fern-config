@@ -101,16 +101,16 @@ groups:
   go-sdk:
     generators:
       - name: fernapi/fern-go-sdk
-        version: 0.36.5
+        version: 1.13.15
         github:
           repository: schematichq/schematic-go
           mode: pull-request
         config:
           exportedClientName: SchematicClient
           module:
+            path: github.com/SchematicHQ/schematic-go
             version: "1.18"
           packageName: schematichq
-          union: v1
         smart-casing: true
 
   java-sdk:
