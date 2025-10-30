@@ -2706,6 +2706,9 @@ components:
     CreateBillingPlanCreditGrantRequestBody:
       type: object
       properties:
+        apply_to_existing:
+          type: boolean
+          nullable: true
         credit_amount:
           type: integer
         credit_id:
@@ -2749,11 +2752,11 @@ components:
             - plan_period
             - no_reset
       required:
+        - reset_cadence
+        - reset_start
         - credit_id
         - plan_id
         - credit_amount
-        - reset_cadence
-        - reset_start
       title: CreateBillingPlanCreditGrantRequestBody
     CreateBillingPriceRequestBody:
       type: object
@@ -4270,6 +4273,49 @@ components:
         - grant_reason
         - quantity
       title: CreditGrantDetail
+    CreditGrantExpiryRequestBody:
+      type: object
+      properties:
+        expiry_type:
+          type: string
+          nullable: true
+          enum:
+            - duration
+            - no_expiry
+            - end_of_trial
+            - end_of_billing_period
+            - end_of_next_billing_period
+        expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+            - billing_periods
+        expiry_unit_count:
+          type: integer
+          nullable: true
+        reset_cadence:
+          type: string
+          enum:
+            - monthly
+            - yearly
+            - daily
+            - weekly
+        reset_start:
+          type: string
+          enum:
+            - billing_period
+            - first_of_month
+        reset_type:
+          type: string
+          nullable: true
+          enum:
+            - plan_period
+            - no_reset
+      required:
+        - reset_cadence
+        - reset_start
+      title: CreditGrantExpiryRequestBody
     CreditLedgerEnrichedEntryResponseData:
       type: object
       properties:
@@ -7408,6 +7454,55 @@ components:
         - name
         - description
       title: UpdateBillingCreditRequestBody
+    UpdateBillingPlanCreditGrantRequestBody:
+      type: object
+      properties:
+        apply_to_existing:
+          type: boolean
+          nullable: true
+        credit_amount:
+          type: integer
+          nullable: true
+        expiry_type:
+          type: string
+          nullable: true
+          enum:
+            - duration
+            - no_expiry
+            - end_of_trial
+            - end_of_billing_period
+            - end_of_next_billing_period
+        expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+            - billing_periods
+        expiry_unit_count:
+          type: integer
+          nullable: true
+        reset_cadence:
+          type: string
+          enum:
+            - monthly
+            - yearly
+            - daily
+            - weekly
+        reset_start:
+          type: string
+          enum:
+            - billing_period
+            - first_of_month
+        reset_type:
+          type: string
+          nullable: true
+          enum:
+            - plan_period
+            - no_reset
+      required:
+        - reset_cadence
+        - reset_start
+      title: UpdateBillingPlanCreditGrantRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -10511,6 +10606,52 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /billing/credits/plan-grants/{plan_grant_id}:
+    put:
+      operationId: updateBillingPlanCreditGrant
+      summary: Update billing plan credit grant
+      tags:
+        - credits
+      parameters:
+        - name: plan_grant_id
+          in: path
+          description: plan_grant_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBillingPlanCreditGrantRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateBillingPlanCreditGrantParams
+                required:
+                  - data
+                  - params
+                title: UpdateBillingPlanCreditGrantResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
     delete:
       operationId: deleteBillingPlanCreditGrant
       summary: Delete billing plan credit grant
@@ -10523,6 +10664,10 @@ paths:
           required: true
           schema:
             type: string
+        - name: apply_to_existing
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -10536,6 +10681,9 @@ paths:
                   params:
                     type: object
                     description: Input parameters
+                    properties:
+                      apply_to_existing:
+                        type: boolean
                     title: DeleteBillingPlanCreditGrantParams
                 required:
                   - data
