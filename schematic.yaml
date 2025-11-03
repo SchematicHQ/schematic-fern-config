@@ -2525,6 +2525,16 @@ components:
           $ref: '#/components/schemas/TraitDefinition'
         condition_type:
           type: string
+          enum:
+            - base_plan
+            - billing_product
+            - company
+            - credit
+            - crm_product
+            - metric
+            - plan
+            - trait
+            - user
         consumption_rate:
           type: number
           nullable: true
@@ -2541,14 +2551,31 @@ components:
         metric_period:
           type: string
           nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
         metric_period_month_reset:
           type: string
           nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
         metric_value:
           type: integer
           nullable: true
         operator:
           type: string
+          enum:
+            - eq
+            - ne
+            - gt
+            - lt
+            - gte
+            - lte
+            - is_empty
+            - not_empty
         resource_ids:
           type: array
           items:
@@ -6989,6 +7016,14 @@ components:
           type: integer
         rule_type:
           type: string
+          enum:
+            - default
+            - global_override
+            - company_override
+            - company_override_usage_exceeded
+            - plan_entitlement
+            - plan_entitlement_usage_exceeded
+            - standard
         value:
           type: boolean
       required:
@@ -7376,8 +7411,16 @@ components:
       properties:
         comparable_type:
           type: string
+          enum:
+            - bool
+            - date
+            - int
+            - string
         entity_type:
           type: string
+          enum:
+            - user
+            - company
         id:
           type: string
       required:
