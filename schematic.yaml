@@ -12507,6 +12507,14 @@ paths:
           required: true
           schema:
             type: string
+        - name: cancel_subscription
+          in: query
+          schema:
+            type: boolean
+        - name: prorate
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -12520,6 +12528,11 @@ paths:
                   params:
                     type: object
                     description: Input parameters
+                    properties:
+                      cancel_subscription:
+                        type: boolean
+                      prorate:
+                        type: boolean
                     title: DeleteCompanyParams
                 required:
                   - data
