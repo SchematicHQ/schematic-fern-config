@@ -19,6 +19,9 @@ groups:
           mode: pull-request
         config:
           inline_request_params: true
+          pyproject_toml: |
+            [tool.poetry]
+            license = "MIT"
           client:
             class_name: BaseSchematic
             filename: base_client.py
@@ -72,6 +75,7 @@ groups:
           includeApiReference: true
           namespaceExport: Schematic
           packageJson:
+            license: "MIT"
             browser:
               crypto: false
               timers: false
