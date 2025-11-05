@@ -31,9 +31,11 @@ A plan can change for many reasons, the most common ones are:
 
 To determine the cause of a plan change, there are four relevant fields provided in each webhook response: 
 
-1. `PlanChangeResponseDataSubscriptionChangeAction`
+1. Subscription Change Action
 
-The `PlanChangeResponseDataSubscriptionChangeAction` indicates whether the plan change is an upgrade, downgrade, or something else. Currently, a plan change is an "upgrade" if the newer plan has a higher base price; downgrades are determined inversely. 
+The Subscription Change Action indicates whether the plan change is an upgrade, downgrade, or something else. Currently, a plan change is an "upgrade" if the newer plan has a higher base price; "downgrades" are determined inversely. 
+
+In SDKs, this field is called `PlanChangeResponseDataSubscriptionChangeAction`, whereas in the raw webhook response, it can be found at `body.subscription_change_action`. 
 
 | Value            | Explanation                                                                      |
 |------------------|----------------------------------------------------------------------------------|
@@ -45,9 +47,11 @@ The `PlanChangeResponseDataSubscriptionChangeAction` indicates whether the plan 
 | `upgrade_trial`  | The company started a trial of a higher-tier plan.                               |
 
 
-2. `PlanChangeResponseDataActorType`
+2. Actor Type
 
-The `PlanChangeResponseDataActorType` provides "who" took the action that lead to the plan change.
+The Actor Type provides "who" took the action that lead to the plan change. 
+
+In SDKs, this field is called `PlanChangeResponseDataActorType`, whereas in the raw webhook response, it can be found at `body.actor_type`.
 
 | Value                    | Explanation                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
@@ -56,9 +60,11 @@ The `PlanChangeResponseDataActorType` provides "who" took the action that lead t
 | `system`                 | Action automatically performed by Schematic system processes.               |
 | `temporary_access_token` | Action performed in a Schematic Component (typically checkout).             |
 
-3. `PlanChangeResponseDataAction`
+3. Action
 
-The `PlanChangeResponseDataAction` provides an explanation for what action changed the company's plan.
+The Action provides an explanation for what action changed the company's plan.
+
+In SDKs, this field is called `PlanChangeResponseDataAction`, whereas in the raw webhook response, it can be found at `body.action`.
 
 | Value                           | Explanation                                                                                                | Likelihood                                                     |
 |---------------------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
@@ -72,12 +78,16 @@ The `PlanChangeResponseDataAction` provides an explanation for what action chang
 | `"quickstart"`                  | The plan was set automatically via a quickstart flow (typically after onboarding).                         | Extremely rare -- only for companies created during quickstart |
 
     
-4. `PlanChangeResponseDataBasePlanAction`
+4. Base Plan Action
 
-The `PlanChangeResponseDataBasePlanAction` value indicates why the base plan was changed
+The Base Plan Action value indicates why the base plan was changed. This field is often left blank. 
+
+In SDKs, this field is called `PlanChangeResponseDataBasePlanAction`, whereas in the raw webhook response, it can be found at `body.base_plan.action`.
 
 | Value          | Explanation                                                                                  | Likelihood |
 |----------------|----------------------------------------------------------------------------------------------|------------|
+| (blank)   | This means that the company was switched to a new plan (either via checkout or manage plan)                                                        | Common     |
+
 | `"initial"`    | The company was assigned its initial base plan, typically at creation.                       | Common     |
 | `"trial_expiry"` | The company’s base plan was set because a trial expired.                                   | Common     |
 | `"trait"`      | The company’s plan changed because of a trait or segment update.                             | Uncommon   |
