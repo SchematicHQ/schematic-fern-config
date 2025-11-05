@@ -693,6 +693,26 @@ components:
     BillingPlanCreditGrantResponseData:
       type: object
       properties:
+        auto_topup_amount:
+          type: integer
+          nullable: true
+        auto_topup_amount_type:
+          type: string
+          nullable: true
+        auto_topup_enabled:
+          type: boolean
+        auto_topup_expiry_type:
+          type: string
+          nullable: true
+        auto_topup_expiry_unit:
+          type: string
+          nullable: true
+        auto_topup_expiry_unit_count:
+          type: integer
+          nullable: true
+        auto_topup_threshold_percent:
+          type: integer
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -742,6 +762,7 @@ components:
         - credit_name
         - reset_cadence
         - reset_start
+        - auto_topup_enabled
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -2736,6 +2757,38 @@ components:
         apply_to_existing:
           type: boolean
           nullable: true
+        auto_topup_amount:
+          type: integer
+          nullable: true
+        auto_topup_amount_type:
+          type: string
+          nullable: true
+          enum:
+            - credit
+        auto_topup_enabled:
+          type: boolean
+          nullable: true
+        auto_topup_expiry_type:
+          type: string
+          nullable: true
+          enum:
+            - duration
+            - no_expiry
+            - end_of_trial
+            - end_of_billing_period
+            - end_of_next_billing_period
+        auto_topup_expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+            - billing_periods
+        auto_topup_expiry_unit_count:
+          type: integer
+          nullable: true
+        auto_topup_threshold_percent:
+          type: integer
+          nullable: true
         credit_amount:
           type: integer
         credit_id:
@@ -4346,6 +4399,8 @@ components:
     CreditLedgerEnrichedEntryResponseData:
       type: object
       properties:
+        billing_credit_auto_topup_grant_count:
+          type: integer
         billing_credit_id:
           type: string
         company:
@@ -4405,11 +4460,12 @@ components:
         - zeroed_out_count
         - first_transaction_at
         - last_transaction_at
+        - billing_credit_auto_topup_grant_count
         - expired_grant_count
+        - free_grant_count
         - manually_zeroed_count
         - plan_grant_count
         - purchased_grant_count
-        - free_grant_count
       title: CreditLedgerEnrichedEntryResponseData
     CreditTriggerConfig:
       type: object
@@ -6199,6 +6255,26 @@ components:
     PlanCreditGrantView:
       type: object
       properties:
+        billing_credit_auto_topup_amount:
+          type: integer
+          nullable: true
+        billing_credit_auto_topup_amount_type:
+          type: string
+          nullable: true
+        billing_credit_auto_topup_enabled:
+          type: boolean
+        billing_credit_auto_topup_expiry_type:
+          type: string
+          nullable: true
+        billing_credit_auto_topup_expiry_unit:
+          type: string
+          nullable: true
+        billing_credit_auto_topup_expiry_unit_count:
+          type: integer
+          nullable: true
+        billing_credit_auto_topup_threshold_percent:
+          type: integer
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -6254,6 +6330,7 @@ components:
         - reset_cadence
         - reset_start
         - reset_type
+        - billing_credit_auto_topup_enabled
         - created_at
         - updated_at
       title: PlanCreditGrantView
