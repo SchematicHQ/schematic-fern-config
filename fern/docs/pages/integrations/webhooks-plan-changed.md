@@ -83,7 +83,7 @@ The `PlanChangeResponseDataBasePlanAction` value indicates why the base plan was
 | `"trait"`      | The company’s plan changed because of a trait or segment update.                             | Uncommon   |
 | `"fallback"`   | The company was moved to a fallback plan, often due to payment issues or plan deletion.      | Rare       |
 
-## Common scenarios
+<!-- ## Common scenarios
 
-Below are some common scenarios that you may want to test for and which values you should expect to see in the webhook to identify them.
+Below are some common scenarios that you may want to test for and which values you should expect to see in the webhook to identify them. -->
 
