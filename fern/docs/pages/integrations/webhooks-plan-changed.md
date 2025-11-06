@@ -31,36 +31,7 @@ A plan can change for many reasons, the most common ones are:
 
 To determine the cause of a plan change, there are four relevant fields provided in each webhook response: 
 
-1. Subscription Change Action
-
-The Subscription Change Action indicates whether the plan change is an upgrade, downgrade, or something else. Currently, a plan change is an "upgrade" if the newer plan has a higher base price; "downgrades" are determined inversely. 
-
-In SDKs, this field is called `PlanChangeResponseDataSubscriptionChangeAction`, whereas in the raw webhook response, it can be found at `body.subscription_change_action`. 
-
-| Value            | Explanation                                                                      |
-|------------------|----------------------------------------------------------------------------------|
-| `downgrade`      | The company was moved to a lower-tier plan.                                      |
-| `invalid`        | The plan change was invalid or could not be recognized.                          |
-| `subscribe`      | The company was assigned to a plan for the first time.                           |
-| `unsubscribe`    | The company was removed from a plan and is no longer assigned any plan.          |
-| `upgrade`        | The company moved to a higher-tier plan.                                         |
-| `upgrade_trial`  | The company started a trial of a higher-tier plan.                               |
-
-
-2. Actor Type
-
-The Actor Type provides "who" took the action that lead to the plan change. 
-
-In SDKs, this field is called `PlanChangeResponseDataActorType`, whereas in the raw webhook response, it can be found at `body.actor_type`.
-
-| Value                    | Explanation                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `app_user`               | Action performed by an authenticated end user of your application.          |
-| `api_key`                | Action performed by an API key or server-side integration.                  |
-| `system`                 | Action automatically performed by Schematic system processes.               |
-| `temporary_access_token` | Action performed in a Schematic Component (typically checkout).             |
-
-3. Action
+1. Action
 
 The Action provides an explanation for what action changed the company's plan.
 
@@ -77,8 +48,20 @@ In SDKs, this field is called `PlanChangeResponseDataAction`, whereas in the raw
 | `"plan_deleted"`                | The company was moved off a plan because the plan was deleted.                                             | Rare                                                           |
 | `"quickstart"`                  | The plan was set automatically via a quickstart flow (typically after onboarding).                         | Extremely rare -- only for companies created during quickstart |
 
+2. Actor Type
+
+The Actor Type provides "who" took the action that lead to the plan change. 
+
+In SDKs, this field is called `PlanChangeResponseDataActorType`, whereas in the raw webhook response, it can be found at `body.actor_type`.
+
+| Value                    | Explanation                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `app_user`               | Action performed by an authenticated end user of your application.          |
+| `api_key`                | Action performed by an API key or server-side integration.                  |
+| `system`                 | Action automatically performed by Schematic system processes.               |
+| `temporary_access_token` | Action performed in a Schematic Component (typically checkout).             |
     
-4. Base Plan Action
+3. Base Plan Action
 
 The Base Plan Action value indicates why the base plan was changed. This field is often left blank. 
 
@@ -92,6 +75,23 @@ In SDKs, this field is called `PlanChangeResponseDataBasePlanAction`, whereas in
 | `"trial_expiry"` | The company’s base plan was set because a trial expired.                                   | Common     |
 | `"trait"`      | The company’s plan changed because of a trait or segment update.                             | Uncommon   |
 | `"fallback"`   | The company was moved to a fallback plan, often due to payment issues or plan deletion.      | Rare       |
+
+4. Subscription Change Action
+
+The Subscription Change Action indicates whether the plan change is an upgrade, downgrade, or something else. Currently, a plan change is an "upgrade" if the newer plan has a higher base price; "downgrades" are determined inversely. 
+
+<Info>This field is only included when switching between Stripe-linked plans</Info>
+
+In SDKs, this field is called `PlanChangeResponseDataSubscriptionChangeAction`, whereas in the raw webhook response, it can be found at `body.subscription_change_action`. 
+
+| Value            | Explanation                                                                      |
+|------------------|----------------------------------------------------------------------------------|
+| `downgrade`      | The company was moved to a lower-tier plan.                                      |
+| `invalid`        | The plan change was invalid or could not be recognized.                          |
+| `subscribe`      | The company was assigned to a plan for the first time.                           |
+| `unsubscribe`    | The company was removed from a plan and is no longer assigned any plan.          |
+| `upgrade`        | The company moved to a higher-tier plan.                                         |
+| `upgrade_trial`  | The company started a trial of a higher-tier plan.                               |
 
 <!-- ## Common scenarios
 
