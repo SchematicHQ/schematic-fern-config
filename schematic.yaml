@@ -2138,6 +2138,10 @@ components:
         image_url:
           type: string
           nullable: true
+        included_credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCreditGrantView'
         name:
           type: string
         plan_period:
@@ -2149,6 +2153,7 @@ components:
       required:
         - id
         - name
+        - included_credit_grants
       title: CompanyPlanWithBillingSubView
     CompanyResponseData:
       type: object
