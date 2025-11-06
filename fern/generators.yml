@@ -9,11 +9,13 @@ groups:
   python-sdk:
     generators:
       - name: fernapi/fern-python-sdk
-        version: 4.21.2
+        version: 4.32.1
         output:
           location: pypi
           package-name: "schematichq"
           token: ${PYPI_API_TOKEN}
+        metadata:
+          license: MIT
         github:
           repository: schematichq/schematic-python
           mode: pull-request
@@ -72,6 +74,7 @@ groups:
           includeApiReference: true
           namespaceExport: Schematic
           packageJson:
+            license: "MIT"
             browser:
               crypto: false
               timers: false
@@ -85,12 +88,12 @@ groups:
               prepack: ""
             main: "./dist/index.js"
             types: "./dist/index.d.ts"
-            files: 
-               - "dist/**/*.js"
-               - "dist/**/*.d.ts"
-               - "!dist/**/*.js.map"
-               - "!dist/**/*.test.*"
-               - "README.md"
+            files:
+              - "dist/**/*.js"
+              - "dist/**/*.d.ts"
+              - "!dist/**/*.js.map"
+              - "!dist/**/*.test.*"
+              - "README.md"
 
           skipResponseValidation: true
           # streamType: wrapper
@@ -101,22 +104,23 @@ groups:
   go-sdk:
     generators:
       - name: fernapi/fern-go-sdk
-        version: 0.36.5
+        version: 1.13.15
         github:
           repository: schematichq/schematic-go
           mode: pull-request
         config:
+          enableWireTests: false
           exportedClientName: SchematicClient
           module:
+            path: github.com/schematichq/schematic-go
             version: "1.18"
           packageName: schematichq
-          union: v1
         smart-casing: true
 
   java-sdk:
     generators:
       - name: fernapi/fern-java-sdk
-        version: 2.28.0
+        version: 3.10.4
         output:
           location: maven
           coordinate: com.schematichq:schematic-java
@@ -132,6 +136,7 @@ groups:
         config:
           client-class-name: BaseSchematic
           generate-unknown-as-json-node: true
+          enable-wire-tests: false
           custom-dependencies:
             - "testImplementation org.mockito:mockito-core:5.3.1"
             - "testImplementation org.mockito:mockito-junit-jupiter:5.3.1"
