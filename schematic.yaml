@@ -1264,6 +1264,9 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
+        application_id:
+          type: string
+          nullable: true
         cancel_at:
           type: integer
           nullable: true
@@ -1324,6 +1327,9 @@ components:
     BillingSubscriptionView:
       type: object
       properties:
+        application_id:
+          type: string
+          nullable: true
         cancel_at:
           type: integer
           nullable: true
@@ -1639,6 +1645,9 @@ components:
     CheckoutSubscription:
       type: object
       properties:
+        application_id:
+          type: string
+          nullable: true
         cancel_at:
           type: integer
           nullable: true
@@ -2936,6 +2945,9 @@ components:
     CreateBillingSubscriptionRequestBody:
       type: object
       properties:
+        application_id:
+          type: string
+          nullable: true
         cancel_at:
           type: integer
           nullable: true
