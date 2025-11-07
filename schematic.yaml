@@ -11508,10 +11508,6 @@ paths:
             type: array
             items:
               type: string
-        - name: product_id
-          in: query
-          schema:
-            type: string
         - name: interval
           in: query
           schema:
@@ -11520,20 +11516,14 @@ paths:
           in: query
           schema:
             type: integer
+        - name: product_id
+          in: query
+          schema:
+            type: string
         - name: q
           in: query
           schema:
             type: string
-        - name: requires_payment_method
-          in: query
-          description: >-
-            Filter for prices that require a payment method (inverse of
-            ForInitialPlan)
-          schema:
-            type: boolean
-            description: >-
-              Filter for prices that require a payment method (inverse of
-              ForInitialPlan)
         - name: tiers_mode
           in: query
           schema:
@@ -11609,11 +11599,6 @@ paths:
                         type: string
                       q:
                         type: string
-                      requires_payment_method:
-                        type: boolean
-                        description: >-
-                          Filter for prices that require a payment method
-                          (inverse of ForInitialPlan)
                       tiers_mode:
                         type: string
                         enum:
@@ -18739,16 +18724,6 @@ paths:
           in: query
           schema:
             type: string
-        - name: requires_payment_method
-          in: query
-          description: >-
-            Filter for plans that require a payment method (inverse of
-            ForInitialPlan)
-          schema:
-            type: boolean
-            description: >-
-              Filter for plans that require a payment method (inverse of
-              ForInitialPlan)
         - name: without_entitlement_for
           in: query
           description: >-
@@ -18759,12 +18734,6 @@ paths:
             description: >-
               Filter out plans that already have a plan entitlement for the
               specified feature ID
-        - name: without_product_id
-          in: query
-          description: Filter out plans that have a billing product ID
-          schema:
-            type: boolean
-            description: Filter out plans that have a billing product ID
         - name: without_paid_product_id
           in: query
           description: Filter out plans that have a paid billing product ID
@@ -18842,11 +18811,6 @@ paths:
                           - add_on
                       q:
                         type: string
-                      requires_payment_method:
-                        type: boolean
-                        description: >-
-                          Filter for plans that require a payment method
-                          (inverse of ForInitialPlan)
                       without_entitlement_for:
                         type: string
                         description: >-
@@ -18855,9 +18819,6 @@ paths:
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
-                      without_product_id:
-                        type: boolean
-                        description: Filter out plans that have a billing product ID
                     title: ListPlansParams
                 required:
                   - data
@@ -19146,16 +19107,6 @@ paths:
           in: query
           schema:
             type: string
-        - name: requires_payment_method
-          in: query
-          description: >-
-            Filter for plans that require a payment method (inverse of
-            ForInitialPlan)
-          schema:
-            type: boolean
-            description: >-
-              Filter for plans that require a payment method (inverse of
-              ForInitialPlan)
         - name: without_entitlement_for
           in: query
           description: >-
@@ -19166,12 +19117,6 @@ paths:
             description: >-
               Filter out plans that already have a plan entitlement for the
               specified feature ID
-        - name: without_product_id
-          in: query
-          description: Filter out plans that have a billing product ID
-          schema:
-            type: boolean
-            description: Filter out plans that have a billing product ID
         - name: without_paid_product_id
           in: query
           description: Filter out plans that have a paid billing product ID
@@ -19246,11 +19191,6 @@ paths:
                           - add_on
                       q:
                         type: string
-                      requires_payment_method:
-                        type: boolean
-                        description: >-
-                          Filter for plans that require a payment method
-                          (inverse of ForInitialPlan)
                       without_entitlement_for:
                         type: string
                         description: >-
@@ -19259,9 +19199,6 @@ paths:
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
-                      without_product_id:
-                        type: boolean
-                        description: Filter out plans that have a billing product ID
                     title: CountPlansParams
                 required:
                   - data
