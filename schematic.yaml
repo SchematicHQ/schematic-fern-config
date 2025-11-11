@@ -15145,6 +15145,19 @@ paths:
               - number
               - string
               - url
+        - name: trait_types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - boolean
+                - currency
+                - date
+                - number
+                - string
+                - url
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15204,6 +15217,17 @@ paths:
                           - number
                           - string
                           - url
+                      trait_types:
+                        type: array
+                        items:
+                          type: string
+                          enum:
+                            - boolean
+                            - currency
+                            - date
+                            - number
+                            - string
+                            - url
                     title: ListEntityTraitDefinitionsParams
                 required:
                   - data
@@ -15378,6 +15402,19 @@ paths:
               - number
               - string
               - url
+        - name: trait_types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - boolean
+                - currency
+                - date
+                - number
+                - string
+                - url
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15434,6 +15471,17 @@ paths:
                           - number
                           - string
                           - url
+                      trait_types:
+                        type: array
+                        items:
+                          type: string
+                          enum:
+                            - boolean
+                            - currency
+                            - date
+                            - number
+                            - string
+                            - url
                     title: CountEntityTraitDefinitionsParams
                 required:
                   - data
