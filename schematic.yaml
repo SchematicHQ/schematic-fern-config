@@ -2,6 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
+  x-rules-engine-schema-version: 4bef9ac5
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -1921,6 +1922,48 @@ components:
         - created_at
         - updated_at
       title: CompanyMembershipResponseData
+    CompanyMetric:
+      type: object
+      properties:
+        account_id:
+          type: string
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+        month_reset:
+          type: string
+          enum:
+            - first_of_month
+            - billing_cycle
+        period:
+          type: string
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+        value:
+          type: integer
+      required:
+        - account_id
+        - environment_id
+        - company_id
+        - event_subtype
+        - period
+        - month_reset
+        - value
+        - created_at
+      title: CompanyMetric
     CompanyOverrideNoteResponseData:
       type: object
       properties:
@@ -7411,6 +7454,355 @@ components:
       required:
         - rules
       title: RulesDetailResponseData
+    RulesengineCheckFlagResult:
+      type: object
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        err:
+          type: string
+        feature_allocation:
+          type: integer
+          nullable: true
+        feature_usage:
+          type: integer
+          nullable: true
+        feature_usage_event:
+          type: string
+          nullable: true
+        feature_usage_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        feature_usage_reset_at:
+          type: string
+          format: date-time
+          nullable: true
+        flag_id:
+          type: string
+          nullable: true
+        flag_key:
+          type: string
+        reason:
+          type: string
+        rule_id:
+          type: string
+          nullable: true
+        rule_type:
+          type: string
+          nullable: true
+          enum:
+            - default
+            - global_override
+            - company_override
+            - company_override_usage_exceeded
+            - plan_entitlement
+            - plan_entitlement_usage_exceeded
+            - standard
+        user_id:
+          type: string
+          nullable: true
+        value:
+          type: boolean
+      required:
+        - flag_key
+        - reason
+        - value
+      title: RulesengineCheckFlagResult
+    RulesengineCompany:
+      type: object
+      properties:
+        account_id:
+          type: string
+        base_plan_id:
+          type: string
+          nullable: true
+        billing_product_ids:
+          type: array
+          items:
+            type: string
+        credit_balances:
+          additionalProperties:
+            type: number
+          type: object
+        crm_product_ids:
+          type: array
+          items:
+            type: string
+        environment_id:
+          type: string
+        id:
+          type: string
+        keys:
+          additionalProperties:
+            type: string
+          type: object
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyMetric'
+        plan_ids:
+          type: array
+          items:
+            type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trait'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - billing_product_ids
+        - crm_product_ids
+        - keys
+        - plan_ids
+        - metrics
+        - credit_balances
+        - traits
+        - rules
+      title: RulesengineCompany
+    RulesengineCompanyMetric:
+      type: object
+      properties:
+        account_id:
+          type: string
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+        month_reset:
+          type: string
+          enum:
+            - first_of_month
+            - billing_cycle
+        period:
+          type: string
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+        value:
+          type: integer
+      required:
+        - account_id
+        - environment_id
+        - company_id
+        - event_subtype
+        - period
+        - month_reset
+        - value
+        - created_at
+      title: RulesengineCompanyMetric
+    RulesengineCondition:
+      type: object
+      properties:
+        account_id:
+          type: string
+        comparison_trait_definition:
+          $ref: '#/components/schemas/TraitDefinition'
+        condition_type:
+          type: string
+          enum:
+            - base_plan
+            - billing_product
+            - company
+            - credit
+            - crm_product
+            - metric
+            - plan
+            - trait
+            - user
+        consumption_rate:
+          type: number
+          nullable: true
+        credit_id:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        metric_value:
+          type: integer
+          nullable: true
+        operator:
+          type: string
+          enum:
+            - eq
+            - ne
+            - gt
+            - lt
+            - gte
+            - lte
+            - is_empty
+            - not_empty
+        resource_ids:
+          type: array
+          items:
+            type: string
+        trait_definition:
+          $ref: '#/components/schemas/TraitDefinition'
+        trait_value:
+          type: string
+      required:
+        - id
+        - account_id
+        - environment_id
+        - condition_type
+        - operator
+        - resource_ids
+        - trait_value
+      title: RulesengineCondition
+    RulesengineConditionGroup:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+      required:
+        - conditions
+      title: RulesengineConditionGroup
+    RulesengineFlag:
+      type: object
+      properties:
+        account_id:
+          type: string
+        default_value:
+          type: boolean
+        environment_id:
+          type: string
+        id:
+          type: string
+        key:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - key
+        - rules
+        - default_value
+      title: RulesengineFlag
+    RulesengineRule:
+      type: object
+      properties:
+        account_id:
+          type: string
+        condition_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionGroup'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        priority:
+          type: integer
+        rule_type:
+          type: string
+          enum:
+            - default
+            - global_override
+            - company_override
+            - company_override_usage_exceeded
+            - plan_entitlement
+            - plan_entitlement_usage_exceeded
+            - standard
+        value:
+          type: boolean
+      required:
+        - id
+        - account_id
+        - environment_id
+        - rule_type
+        - name
+        - priority
+        - conditions
+        - condition_groups
+        - value
+      title: RulesengineRule
+    RulesengineUser:
+      type: object
+      properties:
+        account_id:
+          type: string
+        environment_id:
+          type: string
+        id:
+          type: string
+        keys:
+          additionalProperties:
+            type: string
+          type: object
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trait'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - keys
+        - traits
+        - rules
+      title: RulesengineUser
     SegmentStatusResp:
       type: object
       properties:
@@ -7443,6 +7835,22 @@ components:
       required:
         - schematic_publishable_key
       title: StripeEmbedInfo
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+      required:
+        - id
+        - period_start
+        - period_end
+      title: Subscription
     SubscriptionTraitUpdate:
       type: object
       properties:
@@ -7500,6 +7908,16 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    Trait:
+      type: object
+      properties:
+        trait_definition:
+          $ref: '#/components/schemas/TraitDefinition'
+        value:
+          type: string
+      required:
+        - value
+      title: Trait
     TraitDefinition:
       type: object
       properties:
