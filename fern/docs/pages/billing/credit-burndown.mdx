@@ -160,6 +160,29 @@ When you're finished, you can see the credit bundles in your checkout flow:
 
 ![Add Credit Bundle 4](../../assets/images/billing/burndown-add-plan-to-catalog-4.png)
 
+## Auto Top-Up
+
+In addition to manually purchasing credits, Schematic supports auto top-up for credit burndown plans to ensure that customers never run out of credits. Auto top-ups are configured at the *plan level*, and will automatically purchase the specified number of credits when the customer's balance is below a pre-set threshold.
+
+1. Navigate to the Credit Burndown plan you want to configure auto top-up for.
+2. Click "Add credit grant" to create a new credit grant. *NOTE: Auto top-ups can only be configured for new credit grants.*
+3. Select the Credit Type and Credit Amount you want to use for the auto top-up. *NOTE: only one credit type can be added to a plan. If you are trying to add auto top-ups to an existing plan, you may need to remove the existing credit grant and create a new one.*
+4. Enable "Auto Top-Up".
+
+![Auto Top-Up](../../assets/images/billing/burndown-auto-top-up.png)
+
+4. The "Remaining balance threshold" is the percentage of the credit grant that will trigger the auto top-up. We've used 10% for this example.
+5. The Top-up amount is the number of credits that will be purchased. The final cost will be calculated based on the cost basis of the credit type and the number of credits purchased (see [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type)). The final cost number will be displayed in the confirmation warning below.
+6. The "Top-up Grant Expiration" represents the expiration policy for the auto top-up grant. We recommend a 1 year duration for the auto top-up grant -- this provides customers with adequate time ot use the credits, but also simplifies revenue recognition.
+7. Finally, we provide a confirmation warning with the final cost, threshold, and expiration policy.
+8. Click "Create plan grant" to save your changes.
+
+### Triggering an Auto Top-Up
+
+Auto top-ups are triggered when processing an event that draws from a credit balance and the customer's balance is below the remaining balance threshold. Schematic ensures that if multiple events trigger in a short period of time, only one auto top-up will be purchased. 
+
+In the event that an auto top-up purchase fails, Schematic will try to purchase an auto top-up grant the next time the balance is drawn from.
+
 ### Conclusion
 
 Congratulations! You've now implemented a credit burndown model in Schematic. Credit burndown enables you to:
