@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: 4bef9ac5
+  x-rules-engine-schema-version: 3f415b91
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -1402,6 +1402,24 @@ components:
         - products
         - discounts
       title: BillingSubscriptionView
+    CancelSubscriptionRequest:
+      type: object
+      properties:
+        cancel_immediately:
+          type: boolean
+          description: If false, subscription cancels at period end. Defaults to true.
+          nullable: true
+        company_id:
+          type: string
+        prorate:
+          type: boolean
+          description: >-
+            If true and cancel_immediately is true, issue prorated credit.
+            Defaults to true.
+          nullable: true
+      required:
+        - company_id
+      title: CancelSubscriptionRequest
     ChangeSubscriptionInternalRequestBody:
       type: object
       properties:
@@ -6050,6 +6068,12 @@ components:
         base_plan_price_id:
           type: string
           nullable: true
+        cancel_immediately:
+          type: boolean
+          description: >-
+            If false, subscription cancels at period end. Only applies when
+            removing all plans. Defaults to true.
+          nullable: true
         company_id:
           type: string
         coupon_external_id:
@@ -6068,6 +6092,12 @@ components:
           nullable: true
         promo_code:
           type: string
+          nullable: true
+        prorate:
+          type: boolean
+          description: >-
+            If true and cancel_immediately is true, issue prorated credit. Only
+            applies when removing all plans. Defaults to true.
           nullable: true
       required:
         - add_on_selections
@@ -18054,6 +18084,46 @@ paths:
                   - data
                   - params
                 title: PreviewManagePlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /manage-plan/subscription/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Cancel subscription
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelSubscriptionRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CancelSubscriptionParams
+                required:
+                  - data
+                  - params
+                title: CancelSubscriptionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
