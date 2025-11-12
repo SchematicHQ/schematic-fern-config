@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: 3f415b91
+  x-rules-engine-schema-version: 457029a1
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -4829,6 +4829,32 @@ components:
         deleted:
           type: boolean
           description: Whether the delete was successful
+    DuplicatePlanEntitlementsRequestBody:
+      type: object
+      properties:
+        source_plan_id:
+          type: string
+        target_plan_id:
+          type: string
+      required:
+        - source_plan_id
+        - target_plan_id
+      title: DuplicatePlanEntitlementsRequestBody
+    DuplicatePlanEntitlementsResponseResponseData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedEntitlementResponseData'
+      required:
+        - data
+        - skipped
+      title: DuplicatePlanEntitlementsResponseResponseData
     EntitlementTriggerConfig:
       type: object
       properties:
@@ -7848,6 +7874,33 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    SkippedEntitlementErrorResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      title: SkippedEntitlementErrorResponseData
+    SkippedEntitlementResponseData:
+      type: object
+      properties:
+        entitlement_id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedEntitlementErrorResponseData'
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+      required:
+        - entitlement_id
+        - feature_id
+        - feature_name
+        - errors
+      title: SkippedEntitlementResponseData
     StripeEmbedInfo:
       type: object
       properties:
@@ -18747,6 +18800,47 @@ paths:
                   - data
                   - params
                 title: CountPlanEntitlementsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-entitlements/duplicate:
+    post:
+      operationId: duplicatePlanEntitlements
+      summary: Duplicate plan entitlements
+      tags:
+        - entitlements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicatePlanEntitlementsRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/DuplicatePlanEntitlementsResponseResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DuplicatePlanEntitlementsParams
+                required:
+                  - data
+                  - params
+                title: DuplicatePlanEntitlementsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
