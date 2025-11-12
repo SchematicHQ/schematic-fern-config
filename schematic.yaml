@@ -2850,14 +2850,11 @@ components:
             - duration
             - no_expiry
             - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         auto_topup_expiry_unit:
           type: string
           nullable: true
           enum:
             - days
-            - billing_periods
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
@@ -8098,6 +8095,35 @@ components:
       properties:
         apply_to_existing:
           type: boolean
+          nullable: true
+        auto_topup_amount:
+          type: integer
+          nullable: true
+        auto_topup_amount_type:
+          type: string
+          nullable: true
+          enum:
+            - credit
+        auto_topup_enabled:
+          type: boolean
+          nullable: true
+        auto_topup_expiry_type:
+          type: string
+          nullable: true
+          enum:
+            - duration
+            - no_expiry
+            - end_of_trial
+        auto_topup_expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+        auto_topup_expiry_unit_count:
+          type: integer
+          nullable: true
+        auto_topup_threshold_percent:
+          type: integer
           nullable: true
         credit_amount:
           type: integer
