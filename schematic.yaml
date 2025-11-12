@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: c49c82a0
+  x-rules-engine-schema-version: ca729079
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -1940,48 +1940,6 @@ components:
         - created_at
         - updated_at
       title: CompanyMembershipResponseData
-    CompanyMetric:
-      type: object
-      properties:
-        account_id:
-          type: string
-        company_id:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        environment_id:
-          type: string
-        event_subtype:
-          type: string
-        month_reset:
-          type: string
-          enum:
-            - first_of_month
-            - billing_cycle
-        period:
-          type: string
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
-        valid_until:
-          type: string
-          format: date-time
-          nullable: true
-        value:
-          type: integer
-      required:
-        - account_id
-        - environment_id
-        - company_id
-        - event_subtype
-        - period
-        - month_reset
-        - value
-        - created_at
-      title: CompanyMetric
     CompanyOverrideNoteResponseData:
       type: object
       properties:
@@ -7598,7 +7556,7 @@ components:
         metrics:
           type: array
           items:
-            $ref: '#/components/schemas/CompanyMetric'
+            $ref: '#/components/schemas/RulesengineCompanyMetric'
         plan_ids:
           type: array
           items:
@@ -7606,13 +7564,13 @@ components:
         rules:
           type: array
           items:
-            $ref: '#/components/schemas/Rule'
+            $ref: '#/components/schemas/RulesengineRule'
         subscription:
-          $ref: '#/components/schemas/Subscription'
+          $ref: '#/components/schemas/RulesengineSubscription'
         traits:
           type: array
           items:
-            $ref: '#/components/schemas/Trait'
+            $ref: '#/components/schemas/RulesengineTrait'
       required:
         - id
         - account_id
@@ -7674,7 +7632,7 @@ components:
         account_id:
           type: string
         comparison_trait_definition:
-          $ref: '#/components/schemas/TraitDefinition'
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
         condition_type:
           type: string
           enum:
@@ -7733,7 +7691,7 @@ components:
           items:
             type: string
         trait_definition:
-          $ref: '#/components/schemas/TraitDefinition'
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
         trait_value:
           type: string
       required:
@@ -7751,7 +7709,7 @@ components:
         conditions:
           type: array
           items:
-            $ref: '#/components/schemas/Condition'
+            $ref: '#/components/schemas/RulesengineCondition'
       required:
         - conditions
       title: RulesengineConditionGroup
@@ -7771,7 +7729,7 @@ components:
         rules:
           type: array
           items:
-            $ref: '#/components/schemas/Rule'
+            $ref: '#/components/schemas/RulesengineRule'
       required:
         - id
         - account_id
@@ -7788,11 +7746,11 @@ components:
         condition_groups:
           type: array
           items:
-            $ref: '#/components/schemas/ConditionGroup'
+            $ref: '#/components/schemas/RulesengineConditionGroup'
         conditions:
           type: array
           items:
-            $ref: '#/components/schemas/Condition'
+            $ref: '#/components/schemas/RulesengineCondition'
         environment_id:
           type: string
         flag_id:
@@ -7827,6 +7785,54 @@ components:
         - condition_groups
         - value
       title: RulesengineRule
+    RulesengineSubscription:
+      type: object
+      properties:
+        id:
+          type: string
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+      required:
+        - id
+        - period_start
+        - period_end
+      title: RulesengineSubscription
+    RulesengineTrait:
+      type: object
+      properties:
+        trait_definition:
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
+        value:
+          type: string
+      required:
+        - value
+      title: RulesengineTrait
+    RulesengineTraitDefinition:
+      type: object
+      properties:
+        comparable_type:
+          type: string
+          enum:
+            - bool
+            - date
+            - int
+            - string
+        entity_type:
+          type: string
+          enum:
+            - user
+            - company
+        id:
+          type: string
+      required:
+        - id
+        - comparable_type
+        - entity_type
+      title: RulesengineTraitDefinition
     RulesengineUser:
       type: object
       properties:
@@ -7843,11 +7849,11 @@ components:
         rules:
           type: array
           items:
-            $ref: '#/components/schemas/Rule'
+            $ref: '#/components/schemas/RulesengineRule'
         traits:
           type: array
           items:
-            $ref: '#/components/schemas/Trait'
+            $ref: '#/components/schemas/RulesengineTrait'
       required:
         - id
         - account_id
@@ -7915,22 +7921,6 @@ components:
       required:
         - schematic_publishable_key
       title: StripeEmbedInfo
-    Subscription:
-      type: object
-      properties:
-        id:
-          type: string
-        period_end:
-          type: string
-          format: date-time
-        period_start:
-          type: string
-          format: date-time
-      required:
-        - id
-        - period_start
-        - period_end
-      title: Subscription
     SubscriptionTraitUpdate:
       type: object
       properties:
@@ -7988,16 +7978,6 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
-    Trait:
-      type: object
-      properties:
-        trait_definition:
-          $ref: '#/components/schemas/TraitDefinition'
-        value:
-          type: string
-      required:
-        - value
-      title: Trait
     TraitDefinition:
       type: object
       properties:
