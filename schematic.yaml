@@ -6549,7 +6549,7 @@ components:
           type: string
           nullable: true
         initial_plan_price:
-          $ref: '#/components/schemas/BillingPriceResponseData'
+          $ref: '#/components/schemas/BillingPriceView'
         initial_plan_price_id:
           type: string
           nullable: true
@@ -6590,7 +6590,7 @@ components:
           type: string
           nullable: true
         trial_expiry_plan_price:
-          $ref: '#/components/schemas/BillingPriceResponseData'
+          $ref: '#/components/schemas/BillingPriceView'
         trial_expiry_plan_price_id:
           type: string
           nullable: true
@@ -11485,8 +11485,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /billing/price:
     get:
-      operationId: searchBillingPrices
-      summary: Search billing prices
+      operationId: listBillingPrices
+      summary: List billing prices
       tags:
         - billing
       parameters:
@@ -11512,6 +11512,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: is_active
+          in: query
+          description: >-
+            Filter for active prices on active products (defaults to true if not
+            specified)
+          schema:
+            type: boolean
+            description: >-
+              Filter for active prices on active products (defaults to true if
+              not specified)
         - name: price
           in: query
           schema:
@@ -11520,6 +11530,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: product_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: q
           in: query
           schema:
@@ -11538,6 +11554,12 @@ paths:
             enum:
               - licensed
               - metered
+        - name: with_meter
+          in: query
+          description: Filter for prices with a meter
+          schema:
+            type: boolean
+            description: Filter for prices with a meter
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11564,7 +11586,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/BillingPriceView'
-                    title: SearchBillingPricesResponseData
+                    title: ListBillingPricesResponseData
                   params:
                     type: object
                     description: Input parameters
@@ -11585,6 +11607,11 @@ paths:
                           type: string
                       interval:
                         type: string
+                      is_active:
+                        type: boolean
+                        description: >-
+                          Filter for active prices on active products (defaults
+                          to true if not specified)
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -11597,6 +11624,10 @@ paths:
                         type: integer
                       product_id:
                         type: string
+                      product_ids:
+                        type: array
+                        items:
+                          type: string
                       q:
                         type: string
                       tiers_mode:
@@ -11609,11 +11640,14 @@ paths:
                         enum:
                           - licensed
                           - metered
-                    title: SearchBillingPricesParams
+                      with_meter:
+                        type: boolean
+                        description: Filter for prices with a meter
+                    title: ListBillingPricesParams
                 required:
                   - data
                   - params
-                title: SearchBillingPricesResponse
+                title: ListBillingPricesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -11707,62 +11741,81 @@ paths:
           $ref: '#/components/responses/ServerError'
   /billing/product/prices:
     get:
-      operationId: listProductPrices
-      summary: List product prices
+      operationId: listBillingProductPrices
+      summary: List billing product prices
       tags:
         - billing
       parameters:
+        - name: for_initial_plan
+          in: query
+          description: Filter for prices valid for initial plans (free prices only)
+          schema:
+            type: boolean
+            description: Filter for prices valid for initial plans (free prices only)
+        - name: for_trial_expiry_plan
+          in: query
+          description: Filter for prices valid for trial expiry plans (free prices only)
+          schema:
+            type: boolean
+            description: Filter for prices valid for trial expiry plans (free prices only)
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
-        - name: name
+        - name: interval
           in: query
           schema:
             type: string
+        - name: is_active
+          in: query
+          description: >-
+            Filter for active prices on active products (defaults to true if not
+            specified)
+          schema:
+            type: boolean
+            description: >-
+              Filter for active prices on active products (defaults to true if
+              not specified)
+        - name: price
+          in: query
+          schema:
+            type: integer
+        - name: product_id
+          in: query
+          schema:
+            type: string
+        - name: product_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: q
           in: query
           schema:
             type: string
-        - name: price_usage_type
+        - name: tiers_mode
+          in: query
+          schema:
+            type: string
+            enum:
+              - volume
+              - graduated
+        - name: usage_type
           in: query
           schema:
             type: string
             enum:
               - licensed
               - metered
-        - name: without_linked_to_plan
+        - name: with_meter
           in: query
-          description: Filter products that are not linked to any plan
+          description: Filter for prices with a meter
           schema:
             type: boolean
-            description: Filter products that are not linked to any plan
-        - name: with_one_time_charges
-          in: query
-          description: Filter products that are one time charges
-          schema:
-            type: boolean
-            description: Filter products that are one time charges
-        - name: with_zero_price
-          in: query
-          description: Filter products that have zero price for free subscription type
-          schema:
-            type: boolean
-            description: Filter products that have zero price for free subscription type
-        - name: with_prices_only
-          in: query
-          description: Filter products that have prices
-          schema:
-            type: boolean
-            description: Filter products that have prices
-        - name: is_active
-          in: query
-          description: Filter products that are active
-          schema:
-            type: boolean
-            description: Filter products that are active
+            description: Filter for prices with a meter
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11788,55 +11841,69 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/BillingPriceResponseData'
-                    title: ListProductPricesResponseData
+                      $ref: '#/components/schemas/BillingPriceView'
+                    title: ListBillingProductPricesResponseData
                   params:
                     type: object
                     description: Input parameters
                     properties:
+                      for_initial_plan:
+                        type: boolean
+                        description: >-
+                          Filter for prices valid for initial plans (free prices
+                          only)
+                      for_trial_expiry_plan:
+                        type: boolean
+                        description: >-
+                          Filter for prices valid for trial expiry plans (free
+                          prices only)
                       ids:
                         type: array
                         items:
                           type: string
+                      interval:
+                        type: string
                       is_active:
                         type: boolean
-                        description: Filter products that are active
+                        description: >-
+                          Filter for active prices on active products (defaults
+                          to true if not specified)
                       limit:
                         type: integer
                         description: Page limit (default 100)
                         example: '100'
-                      name:
-                        type: string
                       offset:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
-                      price_usage_type:
+                      price:
+                        type: integer
+                      product_id:
+                        type: string
+                      product_ids:
+                        type: array
+                        items:
+                          type: string
+                      q:
+                        type: string
+                      tiers_mode:
+                        type: string
+                        enum:
+                          - volume
+                          - graduated
+                      usage_type:
                         type: string
                         enum:
                           - licensed
                           - metered
-                      q:
-                        type: string
-                      with_one_time_charges:
+                      with_meter:
                         type: boolean
-                        description: Filter products that are one time charges
-                      with_prices_only:
-                        type: boolean
-                        description: Filter products that have prices
-                      with_zero_price:
-                        type: boolean
-                        description: >-
-                          Filter products that have zero price for free
-                          subscription type
-                      without_linked_to_plan:
-                        type: boolean
-                        description: Filter products that are not linked to any plan
-                    title: ListProductPricesParams
+                        description: Filter for prices with a meter
+                    title: ListBillingProductPricesParams
                 required:
                   - data
                   - params
-                title: ListProductPricesResponse
+                title: ListBillingProductPricesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
