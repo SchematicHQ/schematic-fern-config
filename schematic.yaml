@@ -7465,6 +7465,15 @@ components:
       required:
         - rules
       title: RulesDetailResponseData
+    RulesEngineSchemaVersion:
+      type: string
+      description: >-
+        The current schema version hash for rules engine types. The first enum
+        value is always the current version.
+      title: RulesEngineSchemaVersion
+      enum:
+        - ca729079
+        - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
       properties:
