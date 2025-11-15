@@ -129,3 +129,11 @@ More on Stripe subscription statuses [here](https://docs.stripe.com/billing/subs
 | cancelled | inactive | If a subscription moves from active to cancelled, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
 | unpaid | inactive | If a subscription moves from past_due to unpaid, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
 | paused | inactive | Schematic treats paused subscriptions as inactive. |
+
+## Deleting Companies within Schematic
+
+By default, when a company is deleted within Schematic, the associated subscription in Stripe is not deleted. This is to preserve other data and workflows that may be configured within Stripe. If you would like to delete the subscription as well, you can do so by toggling "Cancel Stripe subscription upon deletion" when deleting the company.
+
+![Delete Subscription](../../assets/images/stripe/stripe-delete-subscription-with-company.png)
+
+Alternatively, if you are deleting the company from the Schematic Api, you can pass `cancel_subscription: true` in the body of your request. See the [Delete Company API docs](/api-reference/companies/delete-company) for more details.
