@@ -5,6 +5,14 @@ api:
       origin: https://openapi.schematichq.com/latest.yml
       settings:
         optional-additional-properties: false
+        title-as-schema-name: true                    ## This is the setting that altered the naming 
+        respect-nullable-schemas: false               # other settings that the default changed in 1.0.0
+        inline-path-parameters: false                 # other settings that the default changed in 1.0.0
+        idiomatic-request-names: false                # other settings that the default changed in 1.0.0
+        type-dates-as-strings: false                  # other settings that the default changed in 1.0.0
+        wrap-references-to-nullable-in-optional: true # other settings that the default changed in 1.0.0
+        coerce-optional-schemas-to-nullable: true     # other settings that the default changed in 1.0.0
+        object-query-parameters: false                # other settings that the default changed in 1.0.0
 groups:
   python-sdk:
     generators:
