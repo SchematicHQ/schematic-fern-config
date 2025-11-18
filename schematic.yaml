@@ -2080,6 +2080,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCreditGrantView'
+        invalid_reason:
+          type: string
+          nullable: true
+          enum:
+            - feature_usage_exceeded
+            - downgrade_not_permitted
         is_custom:
           type: boolean
         is_default:
@@ -2129,12 +2135,12 @@ components:
         - is_custom
         - entitlements
         - compatible_plan_ids
+        - company_can_trial
         - current
         - custom
         - included_credit_grants
-        - valid
         - usage_violations
-        - company_can_trial
+        - valid
       title: CompanyPlanDetailResponseData
     CompanyPlanWithBillingSubView:
       type: object
@@ -2441,6 +2447,14 @@ components:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         post_trial_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -2463,6 +2477,7 @@ components:
         - add_on_compatibilities
         - credit_bundles
         - credit_grants
+        - prevent_self_service_downgrade
         - show_period_toggle
         - show_credits
         - show_zero_price_as_free
@@ -2513,6 +2528,14 @@ components:
             $ref: '#/components/schemas/InvoiceResponseData'
         post_trial_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -2535,6 +2558,7 @@ components:
         - add_on_compatibilities
         - credit_bundles
         - credit_grants
+        - prevent_self_service_downgrade
         - show_period_toggle
         - show_credits
         - show_zero_price_as_free
@@ -4116,6 +4140,14 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -4141,6 +4173,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
         - ordered_bundle_list
@@ -8599,6 +8632,14 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -8624,6 +8665,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
         - ordered_bundle_list
