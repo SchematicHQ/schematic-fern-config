@@ -78,6 +78,12 @@ const { track } = useSchematicEvents();
 </div>
 ```
 
+## Setting Last Seen Timestamp
+
+Schematic tracks the most recent `track` or `identify` (see [identifying users](/quickstart/identifying-users)) event for a company and user. This is helpful while getting started to make sure your events are being sent to Schematic. Once implemented, this is also helpful for understanding usage patterns and customer health. 
+
+![Last Seen Timestamp](../../assets/images/quickstart/quickstart-last-seen.png)
+
 ## We're done!
 
 You just created a usage-based feature in Schematic and entitled it to a plan. Usage based features are a cornerstone of most modern billing plans. In this demo, we created a simple entitlement that allows user's on this plan to consume 25 events/month. There are [many more usage based billing setups](/billing/usage-based-billing) that Schematic supports.

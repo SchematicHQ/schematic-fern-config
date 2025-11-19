@@ -23,7 +23,7 @@ In these examples, we'll use Clerk, but this should work for any auth provider. 
 
 To start, we create a unified `ClientWrapper` ([code](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/components/ClientWrapper.tsx)), that combines the Clerk provider, Schematic provider, and additionally ensures we are operating on the client side (a requirement for the Schematic React SDK).
 
-The most important part is calling `identify`, which sets the user/company context for flag checks and sets the last seen timestamp in Schematic. 
+The most important part is calling `identify`, which sets the user/company context for flag checks and updates the last seen timestamp in Schematic. 
 
 ```tsx
 const { identify } = useSchematicEvents();

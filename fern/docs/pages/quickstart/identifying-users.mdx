@@ -82,6 +82,14 @@ client.companies.upsert_company(
 
 ![Identify example](../../assets/images/developer_resources/developer-resources-identify-1.png)
 
+## Setting Last Seen Timestamp
+
+Schematic tracks the most recent `identify` or `track` (see [tracking usage](/quickstart/tracking-usage)) event for a company and user. This is helpful while getting started to make sure your events are being sent to Schematic. Once implemented, this is also helpful for understanding usage patterns and customer health. 
+
+![Last Seen Timestamp](../../assets/images/quickstart/quickstart-last-seen.png)
+
+Additionally, you can manually set the last seen timestamp when hitting the [companyUpsert endpoint](/api-reference/companies/upsert-company), through the api or one of our SDKs. 
+
 ## Learn more about Keys
 
 Keys are a core concept in Schematic. Learn more about them in the [Key Management](/developer_resources/key_management) docs. 
