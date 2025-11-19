@@ -2,6 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
+  x-rules-engine-schema-version: ca729079
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -1401,6 +1402,24 @@ components:
         - products
         - discounts
       title: BillingSubscriptionView
+    CancelSubscriptionRequest:
+      type: object
+      properties:
+        cancel_immediately:
+          type: boolean
+          description: If false, subscription cancels at period end. Defaults to true.
+          nullable: true
+        company_id:
+          type: string
+        prorate:
+          type: boolean
+          description: >-
+            If true and cancel_immediately is true, issue prorated credit.
+            Defaults to true.
+          nullable: true
+      required:
+        - company_id
+      title: CancelSubscriptionRequest
     ChangeSubscriptionInternalRequestBody:
       type: object
       properties:
@@ -2061,6 +2080,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCreditGrantView'
+        invalid_reason:
+          type: string
+          nullable: true
+          enum:
+            - feature_usage_exceeded
+            - downgrade_not_permitted
         is_custom:
           type: boolean
         is_default:
@@ -2110,12 +2135,12 @@ components:
         - is_custom
         - entitlements
         - compatible_plan_ids
+        - company_can_trial
         - current
         - custom
         - included_credit_grants
-        - valid
         - usage_violations
-        - company_can_trial
+        - valid
       title: CompanyPlanDetailResponseData
     CompanyPlanWithBillingSubView:
       type: object
@@ -2422,6 +2447,14 @@ components:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         post_trial_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -2444,6 +2477,7 @@ components:
         - add_on_compatibilities
         - credit_bundles
         - credit_grants
+        - prevent_self_service_downgrade
         - show_period_toggle
         - show_credits
         - show_zero_price_as_free
@@ -2494,6 +2528,14 @@ components:
             $ref: '#/components/schemas/InvoiceResponseData'
         post_trial_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -2516,6 +2558,7 @@ components:
         - add_on_compatibilities
         - credit_bundles
         - credit_grants
+        - prevent_self_service_downgrade
         - show_period_toggle
         - show_credits
         - show_zero_price_as_free
@@ -2789,14 +2832,11 @@ components:
             - duration
             - no_expiry
             - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         auto_topup_expiry_unit:
           type: string
           nullable: true
           enum:
             - days
-            - billing_periods
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
@@ -4100,6 +4140,14 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -4125,6 +4173,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
         - ordered_bundle_list
@@ -4768,6 +4817,32 @@ components:
         deleted:
           type: boolean
           description: Whether the delete was successful
+    DuplicatePlanEntitlementsRequestBody:
+      type: object
+      properties:
+        source_plan_id:
+          type: string
+        target_plan_id:
+          type: string
+      required:
+        - source_plan_id
+        - target_plan_id
+      title: DuplicatePlanEntitlementsRequestBody
+    DuplicatePlanEntitlementsResponseResponseData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedEntitlementResponseData'
+      required:
+        - data
+        - skipped
+      title: DuplicatePlanEntitlementsResponseResponseData
     EntitlementTriggerConfig:
       type: object
       properties:
@@ -6007,6 +6082,12 @@ components:
         base_plan_price_id:
           type: string
           nullable: true
+        cancel_immediately:
+          type: boolean
+          description: >-
+            If false, subscription cancels at period end. Only applies when
+            removing all plans. Defaults to true.
+          nullable: true
         company_id:
           type: string
         coupon_external_id:
@@ -6025,6 +6106,12 @@ components:
           nullable: true
         promo_code:
           type: string
+          nullable: true
+        prorate:
+          type: boolean
+          description: >-
+            If true and cancel_immediately is true, issue prorated credit. Only
+            applies when removing all plans. Defaults to true.
           nullable: true
       required:
         - add_on_selections
@@ -6549,7 +6636,7 @@ components:
           type: string
           nullable: true
         initial_plan_price:
-          $ref: '#/components/schemas/BillingPriceResponseData'
+          $ref: '#/components/schemas/BillingPriceView'
         initial_plan_price_id:
           type: string
           nullable: true
@@ -6590,7 +6677,7 @@ components:
           type: string
           nullable: true
         trial_expiry_plan_price:
-          $ref: '#/components/schemas/BillingPriceResponseData'
+          $ref: '#/components/schemas/BillingPriceView'
         trial_expiry_plan_price_id:
           type: string
           nullable: true
@@ -7411,6 +7498,412 @@ components:
       required:
         - rules
       title: RulesDetailResponseData
+    RulesEngineSchemaVersion:
+      type: string
+      description: >-
+        The current schema version hash for rules engine types. The first enum
+        value is always the current version.
+      title: RulesEngineSchemaVersion
+      enum:
+        - ca729079
+        - placeholder-for-fern-compatibility
+    RulesengineCheckFlagResult:
+      type: object
+      properties:
+        company_id:
+          type: string
+          nullable: true
+        err:
+          type: string
+        feature_allocation:
+          type: integer
+          nullable: true
+        feature_usage:
+          type: integer
+          nullable: true
+        feature_usage_event:
+          type: string
+          nullable: true
+        feature_usage_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        feature_usage_reset_at:
+          type: string
+          format: date-time
+          nullable: true
+        flag_id:
+          type: string
+          nullable: true
+        flag_key:
+          type: string
+        reason:
+          type: string
+        rule_id:
+          type: string
+          nullable: true
+        rule_type:
+          type: string
+          nullable: true
+          enum:
+            - default
+            - global_override
+            - company_override
+            - company_override_usage_exceeded
+            - plan_entitlement
+            - plan_entitlement_usage_exceeded
+            - standard
+        user_id:
+          type: string
+          nullable: true
+        value:
+          type: boolean
+      required:
+        - flag_key
+        - reason
+        - value
+      title: RulesengineCheckFlagResult
+    RulesengineCompany:
+      type: object
+      properties:
+        account_id:
+          type: string
+        base_plan_id:
+          type: string
+          nullable: true
+        billing_product_ids:
+          type: array
+          items:
+            type: string
+        credit_balances:
+          additionalProperties:
+            type: number
+          type: object
+        crm_product_ids:
+          type: array
+          items:
+            type: string
+        environment_id:
+          type: string
+        id:
+          type: string
+        keys:
+          additionalProperties:
+            type: string
+          type: object
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineCompanyMetric'
+        plan_ids:
+          type: array
+          items:
+            type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineRule'
+        subscription:
+          $ref: '#/components/schemas/RulesengineSubscription'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineTrait'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - billing_product_ids
+        - crm_product_ids
+        - keys
+        - plan_ids
+        - metrics
+        - credit_balances
+        - traits
+        - rules
+      title: RulesengineCompany
+    RulesengineCompanyMetric:
+      type: object
+      properties:
+        account_id:
+          type: string
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+        month_reset:
+          type: string
+          enum:
+            - first_of_month
+            - billing_cycle
+        period:
+          type: string
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+        value:
+          type: integer
+      required:
+        - account_id
+        - environment_id
+        - company_id
+        - event_subtype
+        - period
+        - month_reset
+        - value
+        - created_at
+      title: RulesengineCompanyMetric
+    RulesengineCondition:
+      type: object
+      properties:
+        account_id:
+          type: string
+        comparison_trait_definition:
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
+        condition_type:
+          type: string
+          enum:
+            - base_plan
+            - billing_product
+            - company
+            - credit
+            - crm_product
+            - metric
+            - plan
+            - trait
+            - user
+        consumption_rate:
+          type: number
+          nullable: true
+        credit_id:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        metric_value:
+          type: integer
+          nullable: true
+        operator:
+          type: string
+          enum:
+            - eq
+            - ne
+            - gt
+            - lt
+            - gte
+            - lte
+            - is_empty
+            - not_empty
+        resource_ids:
+          type: array
+          items:
+            type: string
+        trait_definition:
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
+        trait_value:
+          type: string
+      required:
+        - id
+        - account_id
+        - environment_id
+        - condition_type
+        - operator
+        - resource_ids
+        - trait_value
+      title: RulesengineCondition
+    RulesengineConditionGroup:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineCondition'
+      required:
+        - conditions
+      title: RulesengineConditionGroup
+    RulesengineFlag:
+      type: object
+      properties:
+        account_id:
+          type: string
+        default_value:
+          type: boolean
+        environment_id:
+          type: string
+        id:
+          type: string
+        key:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineRule'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - key
+        - rules
+        - default_value
+      title: RulesengineFlag
+    RulesengineRule:
+      type: object
+      properties:
+        account_id:
+          type: string
+        condition_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineConditionGroup'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineCondition'
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        priority:
+          type: integer
+        rule_type:
+          type: string
+          enum:
+            - default
+            - global_override
+            - company_override
+            - company_override_usage_exceeded
+            - plan_entitlement
+            - plan_entitlement_usage_exceeded
+            - standard
+        value:
+          type: boolean
+      required:
+        - id
+        - account_id
+        - environment_id
+        - rule_type
+        - name
+        - priority
+        - conditions
+        - condition_groups
+        - value
+      title: RulesengineRule
+    RulesengineSubscription:
+      type: object
+      properties:
+        id:
+          type: string
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+      required:
+        - id
+        - period_start
+        - period_end
+      title: RulesengineSubscription
+    RulesengineTrait:
+      type: object
+      properties:
+        trait_definition:
+          $ref: '#/components/schemas/RulesengineTraitDefinition'
+        value:
+          type: string
+      required:
+        - value
+      title: RulesengineTrait
+    RulesengineTraitDefinition:
+      type: object
+      properties:
+        comparable_type:
+          type: string
+          enum:
+            - bool
+            - date
+            - int
+            - string
+        entity_type:
+          type: string
+          enum:
+            - user
+            - company
+        id:
+          type: string
+      required:
+        - id
+        - comparable_type
+        - entity_type
+      title: RulesengineTraitDefinition
+    RulesengineUser:
+      type: object
+      properties:
+        account_id:
+          type: string
+        environment_id:
+          type: string
+        id:
+          type: string
+        keys:
+          additionalProperties:
+            type: string
+          type: object
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineRule'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineTrait'
+      required:
+        - id
+        - account_id
+        - environment_id
+        - keys
+        - traits
+        - rules
+      title: RulesengineUser
     SegmentStatusResp:
       type: object
       properties:
@@ -7426,6 +7919,33 @@ components:
         - connected
         - environment_id
       title: SegmentStatusResp
+    SkippedEntitlementErrorResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      title: SkippedEntitlementErrorResponseData
+    SkippedEntitlementResponseData:
+      type: object
+      properties:
+        entitlement_id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedEntitlementErrorResponseData'
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+      required:
+        - entitlement_id
+        - feature_id
+        - feature_name
+        - errors
+      title: SkippedEntitlementResponseData
     StripeEmbedInfo:
       type: object
       properties:
@@ -7597,6 +8117,35 @@ components:
       properties:
         apply_to_existing:
           type: boolean
+          nullable: true
+        auto_topup_amount:
+          type: integer
+          nullable: true
+        auto_topup_amount_type:
+          type: string
+          nullable: true
+          enum:
+            - credit
+        auto_topup_enabled:
+          type: boolean
+          nullable: true
+        auto_topup_expiry_type:
+          type: string
+          nullable: true
+          enum:
+            - duration
+            - no_expiry
+            - end_of_trial
+        auto_topup_expiry_unit:
+          type: string
+          nullable: true
+          enum:
+            - days
+        auto_topup_expiry_unit_count:
+          type: integer
+          nullable: true
+        auto_topup_threshold_percent:
+          type: integer
           nullable: true
         credit_amount:
           type: integer
@@ -8083,6 +8632,14 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         show_credits:
           type: boolean
         show_period_toggle:
@@ -8108,6 +8665,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
         - ordered_bundle_list
@@ -11485,8 +12043,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /billing/price:
     get:
-      operationId: searchBillingPrices
-      summary: Search billing prices
+      operationId: listBillingPrices
+      summary: List billing prices
       tags:
         - billing
       parameters:
@@ -11512,6 +12070,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: is_active
+          in: query
+          description: >-
+            Filter for active prices on active products (defaults to true if not
+            specified)
+          schema:
+            type: boolean
+            description: >-
+              Filter for active prices on active products (defaults to true if
+              not specified)
         - name: price
           in: query
           schema:
@@ -11520,6 +12088,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: product_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: q
           in: query
           schema:
@@ -11538,6 +12112,12 @@ paths:
             enum:
               - licensed
               - metered
+        - name: with_meter
+          in: query
+          description: Filter for prices with a meter
+          schema:
+            type: boolean
+            description: Filter for prices with a meter
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11564,7 +12144,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/BillingPriceView'
-                    title: SearchBillingPricesResponseData
+                    title: ListBillingPricesResponseData
                   params:
                     type: object
                     description: Input parameters
@@ -11585,6 +12165,11 @@ paths:
                           type: string
                       interval:
                         type: string
+                      is_active:
+                        type: boolean
+                        description: >-
+                          Filter for active prices on active products (defaults
+                          to true if not specified)
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -11597,6 +12182,10 @@ paths:
                         type: integer
                       product_id:
                         type: string
+                      product_ids:
+                        type: array
+                        items:
+                          type: string
                       q:
                         type: string
                       tiers_mode:
@@ -11609,11 +12198,14 @@ paths:
                         enum:
                           - licensed
                           - metered
-                    title: SearchBillingPricesParams
+                      with_meter:
+                        type: boolean
+                        description: Filter for prices with a meter
+                    title: ListBillingPricesParams
                 required:
                   - data
                   - params
-                title: SearchBillingPricesResponse
+                title: ListBillingPricesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -11707,62 +12299,81 @@ paths:
           $ref: '#/components/responses/ServerError'
   /billing/product/prices:
     get:
-      operationId: listProductPrices
-      summary: List product prices
+      operationId: listBillingProductPrices
+      summary: List billing product prices
       tags:
         - billing
       parameters:
+        - name: for_initial_plan
+          in: query
+          description: Filter for prices valid for initial plans (free prices only)
+          schema:
+            type: boolean
+            description: Filter for prices valid for initial plans (free prices only)
+        - name: for_trial_expiry_plan
+          in: query
+          description: Filter for prices valid for trial expiry plans (free prices only)
+          schema:
+            type: boolean
+            description: Filter for prices valid for trial expiry plans (free prices only)
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
-        - name: name
+        - name: interval
           in: query
           schema:
             type: string
+        - name: is_active
+          in: query
+          description: >-
+            Filter for active prices on active products (defaults to true if not
+            specified)
+          schema:
+            type: boolean
+            description: >-
+              Filter for active prices on active products (defaults to true if
+              not specified)
+        - name: price
+          in: query
+          schema:
+            type: integer
+        - name: product_id
+          in: query
+          schema:
+            type: string
+        - name: product_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: q
           in: query
           schema:
             type: string
-        - name: price_usage_type
+        - name: tiers_mode
+          in: query
+          schema:
+            type: string
+            enum:
+              - volume
+              - graduated
+        - name: usage_type
           in: query
           schema:
             type: string
             enum:
               - licensed
               - metered
-        - name: without_linked_to_plan
+        - name: with_meter
           in: query
-          description: Filter products that are not linked to any plan
+          description: Filter for prices with a meter
           schema:
             type: boolean
-            description: Filter products that are not linked to any plan
-        - name: with_one_time_charges
-          in: query
-          description: Filter products that are one time charges
-          schema:
-            type: boolean
-            description: Filter products that are one time charges
-        - name: with_zero_price
-          in: query
-          description: Filter products that have zero price for free subscription type
-          schema:
-            type: boolean
-            description: Filter products that have zero price for free subscription type
-        - name: with_prices_only
-          in: query
-          description: Filter products that have prices
-          schema:
-            type: boolean
-            description: Filter products that have prices
-        - name: is_active
-          in: query
-          description: Filter products that are active
-          schema:
-            type: boolean
-            description: Filter products that are active
+            description: Filter for prices with a meter
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11788,55 +12399,69 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/BillingPriceResponseData'
-                    title: ListProductPricesResponseData
+                      $ref: '#/components/schemas/BillingPriceView'
+                    title: ListBillingProductPricesResponseData
                   params:
                     type: object
                     description: Input parameters
                     properties:
+                      for_initial_plan:
+                        type: boolean
+                        description: >-
+                          Filter for prices valid for initial plans (free prices
+                          only)
+                      for_trial_expiry_plan:
+                        type: boolean
+                        description: >-
+                          Filter for prices valid for trial expiry plans (free
+                          prices only)
                       ids:
                         type: array
                         items:
                           type: string
+                      interval:
+                        type: string
                       is_active:
                         type: boolean
-                        description: Filter products that are active
+                        description: >-
+                          Filter for active prices on active products (defaults
+                          to true if not specified)
                       limit:
                         type: integer
                         description: Page limit (default 100)
                         example: '100'
-                      name:
-                        type: string
                       offset:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
-                      price_usage_type:
+                      price:
+                        type: integer
+                      product_id:
+                        type: string
+                      product_ids:
+                        type: array
+                        items:
+                          type: string
+                      q:
+                        type: string
+                      tiers_mode:
+                        type: string
+                        enum:
+                          - volume
+                          - graduated
+                      usage_type:
                         type: string
                         enum:
                           - licensed
                           - metered
-                      q:
-                        type: string
-                      with_one_time_charges:
+                      with_meter:
                         type: boolean
-                        description: Filter products that are one time charges
-                      with_prices_only:
-                        type: boolean
-                        description: Filter products that have prices
-                      with_zero_price:
-                        type: boolean
-                        description: >-
-                          Filter products that have zero price for free
-                          subscription type
-                      without_linked_to_plan:
-                        type: boolean
-                        description: Filter products that are not linked to any plan
-                    title: ListProductPricesParams
+                        description: Filter for prices with a meter
+                    title: ListBillingProductPricesParams
                 required:
                   - data
                   - params
-                title: ListProductPricesResponse
+                title: ListBillingProductPricesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -15145,6 +15770,19 @@ paths:
               - number
               - string
               - url
+        - name: trait_types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - boolean
+                - currency
+                - date
+                - number
+                - string
+                - url
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15204,6 +15842,17 @@ paths:
                           - number
                           - string
                           - url
+                      trait_types:
+                        type: array
+                        items:
+                          type: string
+                          enum:
+                            - boolean
+                            - currency
+                            - date
+                            - number
+                            - string
+                            - url
                     title: ListEntityTraitDefinitionsParams
                 required:
                   - data
@@ -15378,6 +16027,19 @@ paths:
               - number
               - string
               - url
+        - name: trait_types
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - boolean
+                - currency
+                - date
+                - number
+                - string
+                - url
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15434,6 +16096,17 @@ paths:
                           - number
                           - string
                           - url
+                      trait_types:
+                        type: array
+                        items:
+                          type: string
+                          enum:
+                            - boolean
+                            - currency
+                            - date
+                            - number
+                            - string
+                            - url
                     title: CountEntityTraitDefinitionsParams
                 required:
                   - data
@@ -17531,6 +18204,46 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /manage-plan/subscription/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Cancel subscription
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelSubscriptionRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CancelSubscriptionParams
+                required:
+                  - data
+                  - params
+                title: CancelSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plan-changes:
     get:
       operationId: listPlanChanges
@@ -18144,6 +18857,47 @@ paths:
                   - data
                   - params
                 title: CountPlanEntitlementsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-entitlements/duplicate:
+    post:
+      operationId: duplicatePlanEntitlements
+      summary: Duplicate plan entitlements
+      tags:
+        - entitlements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicatePlanEntitlementsRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/DuplicatePlanEntitlementsResponseResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DuplicatePlanEntitlementsParams
+                required:
+                  - data
+                  - params
+                title: DuplicatePlanEntitlementsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

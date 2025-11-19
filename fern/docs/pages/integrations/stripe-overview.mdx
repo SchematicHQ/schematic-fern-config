@@ -130,6 +130,16 @@ More on Stripe subscription statuses [here](https://docs.stripe.com/billing/subs
 | unpaid | inactive | If a subscription moves from past_due to unpaid, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
 | paused | inactive | Schematic treats paused subscriptions as inactive. |
 
+### Handling Missed Stripe Payments
+
+When a customer misses a payment, they will be marked `past_due` in Stripe, but Schematic will continue to treat the subscription as active (see table above). Stripe will attempt multiple retries to collect payment, and after these have failed, will mark the subscription as `cancelled`, at which point Schematic will cancel the subscription, revoke the entitlements, and move the company to the fallback plan (if one is configured).
+
+This payment retry logic is configurable in Stripe and defaults to 3 retries over 3 weeks (see below). 
+
+![Stripe Payment Retry Configuration](../../assets/images/stripe/stripe-payment-retry-logic.png)
+
+If you wish to change this behavior, you can configure it in Stripe by navigating to `Settings > Billing > Subscriptions & Email`. 
+
 ## Deleting Companies within Schematic
 
 By default, when a company is deleted within Schematic, the associated subscription in Stripe is not deleted. This is to preserve other data and workflows that may be configured within Stripe. If you would like to delete the subscription as well, you can do so by toggling "Cancel Stripe subscription upon deletion" when deleting the company.
