@@ -24,7 +24,6 @@ Imagine a user is trying to create their 6th AI-generated image, but their curre
 
 1. Opening the checkout flow
 2. Pre-selecting the Pro plan they need to upgrade to
-3. Taking them directly to the payment step
 
 Here's a barebones implementation of this:
 
@@ -32,33 +31,25 @@ Here's a barebones implementation of this:
 "use client"
 
 import {
-  CheckoutDialog,
   EmbedProvider,
   useEmbed,
 } from "@schematichq/schematic-components";
 import { useCallback, useEffect, useState } from "react";
 
 function Checkout() {
-  const { layout, stale, hydrate, setAccessToken, setLayout, setCheckoutState } = useEmbed();
+  const { initializeWithPlan } = useEmbed();
 
   const checkout = useCallback(async () => {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    setCheckoutState({ planId: "plan_abc123" })
-    setLayout("checkout");
+    initializeWithPlan("plan_abc123");
   }, [setAccessToken, setLayout, setCheckoutState]);
-
-  useEffect(() => {
-    if (stale) {
-      hydrate();
-    }
-  }, [stale, hydrate]);
 
   return (
     <>
       <button onClick={checkout}>Upgrade to Pro</button>
-      {layout === "checkout" && <CheckoutDialog />}
+      {layout === "checkout"}
     </>
   )
 }
@@ -70,52 +61,30 @@ export default function CustomCheckout() {
     </EmbedProvider>
   );
 }
+
 ```
 
-The key difference here is that instead of rendering our component by default, we're rendering it in reaction to a user action (clicking the "Upgrade to Pro" button). When this button is clicked:
+The key element is `initializeWithPlan`, an alternate entry point to the checkout flow. Above, we pass a plan ID to the function, which will pre-select the plan in the checkout flow.
 
-1. We fetch an access token from our backend
-2. Provide it to the component
-3. Call `setLayout("checkout")`. `layout` determines which screen the checkout flow is currently on.
-4. Because `layout` now has a value, the `CheckoutDialog` component will be rendered.
+In the above example, while the plan is pre-selected, the user will still be able to navigate the full checkout flow. A common desire is to take the user directly to the payment step, and remove the options to change plan or add-on choices. To achieve this, `initializeWithPlan` can be called with an object of additional options. The full set of options are below.
 
+```ts
+const config = {
+  planId: 'plan_VBXv4bHjSf3',      // pre-select a Plan
+  addOnIds: ['plan_AWv7bPjSx2'],   // pre-select 1 or more Add-ons
+  skipped: {
+    planStage: true,               // if true, skip Plan selection
+    addOnStage: true               // if true, skip Add-on selection
+  }
+  hideSkipped:  true               // if true, hide skipped stages from breadcrumb navigation
+};
 
-### Examples
+initializeWithPlan(config);
+```
+
+{/* ### Examples
 
 You can see a full example, including error handling and loading states in our example app. 
 
 Check it out online: https://schematic-next-example.vercel.app/custom-checkout
-See the code: https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/custom-checkout/page.tsx
-
-### Additional Options
-
-There are additional ways you can control the component state when programmatically launching. These are _highly unlikely_ to be what you want in most cases, but are documented here for completeness.
-
-{/* #### Control which checkout step is loaded
-
-If a `planId` is provided to `setCheckoutState`, the checkout flow will start with the provided plan selected plan and will move onto the next step. 
-
-You can additionally control which step you begin by one of the following keys to true. 
-
-| Value | Notes |
-| --- | --- |
-| `setCheckoutState({ usage: true})` | The step to set any pay in advance entitlements. This tab only appears if the selected plan has pay in advance entitlements. | 
-| `setCheckoutState({ addons: true})` | The step to select add-ons. This tab only appears if the selected plan has add-ons. |
-| `setCheckoutState({ addOnUsage: true})` | The step to set any pay in advance entitlements from a selected add-on. This step only appears if an add-on with pay in advance entitlements is selected. |
-| `setCheckoutState({ credits: true})` | The step to purchase credit bundles. This step only appears if the selected plan has a credit type associated with it. |
-
-<Note>
-  Because the final checkout step requires coordination with Stripe, there is currently no way to select the final checkout step as the step that should load. 
-</Note> */}
-
-#### Control which component is rendered
-
-In addition to the checkout flow, you can also load other parts of the Schematic Components library instead. To do this, you'll set a different value in `setLayout`. The accepted values are:
-
-| Layout        | Notes                                                                                                                               |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `portal`      | Renders the default component state.                             |
-| `checkout`    | Renders the checkout modal flow; usage is documented above.                                                                               |
-| `payment`     | Renders the edit payment method modal.                                                                                              |
-| `unsubscribe` | Renders the unsubscribe modal. This is normally handled by adding an Unsubscribe button to your portal using the component builder. |
-| `disabled`    | Renders an error message. This is typically used internally when the access token is invalid or missing.                            |
+See the code: https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/custom-checkout/page.tsx */}
