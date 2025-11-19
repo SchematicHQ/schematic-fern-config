@@ -43,13 +43,13 @@ function Checkout() {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    await initializeWithPlan("plan_abc123");
+    initializeWithPlan("plan_abc123");
   }, [setAccessToken, setLayout, setCheckoutState]);
 
   return (
     <>
       <button onClick={checkout}>Upgrade to Pro</button>
-      {layout === "checkout">}
+      {layout === "checkout"}
     </>
   )
 }
