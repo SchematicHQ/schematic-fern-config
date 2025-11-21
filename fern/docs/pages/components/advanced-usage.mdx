@@ -88,3 +88,23 @@ You can see a full example, including error handling and loading states in our e
 
 Check it out online: https://schematic-next-example.vercel.app/custom-checkout
 See the code: https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/custom-checkout/page.tsx
+
+## Stripe Tax
+
+Schematic supports Stripe Tax (and other 3rd party tax providers). Components can be configured to collect tax information from the user (e.g. billing address) and generate the correct taxes at checkout. 
+
+To enable tax collection, head to "Plans > Configuration". Scroll down to find Checkout Settings. Here, Stripe Tax can be enabled and the relevant billing information can be set to be collected from the user inside the Schematic Checkout flow.
+
+![Stripe Tax Configuration](../../assets/images/components/components-stripe-tax-configuration.png)
+
+While checking out, the necessary tax information will be collected from the user while they are inputting their payment method. 
+
+![Checkout data collection](../../assets/images/components/components-checkout-data-collection.png)
+
+And finally, taxes will be presented on the final checkout step.
+
+![Checkout tax collection](../../assets/images/components/components-checkout-tax.png)
+
+If you choose to save tax information to Stripe, it will appear on the customer details page in Stripe.
+
+![Stripe Customer Details](../../assets/images/components/components-details-in-stripe.png)
