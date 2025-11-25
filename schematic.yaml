@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: ca729079
+  x-rules-engine-schema-version: 549e6fea
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -89,7 +89,7 @@ components:
         scopes:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/ApiKeyScope'
         secret:
           type: string
         updated_at:
@@ -247,7 +247,7 @@ components:
         scopes:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/ApiKeyScope'
         updated_at:
           type: string
           format: date-time
@@ -258,6 +258,13 @@ components:
         - created_at
         - updated_at
       title: ApiKeyResponseData
+    ApiKeyScope:
+      type: string
+      enum:
+        - admin
+        - capture
+        - read
+        - write
     BillingCouponResponseData:
       type: object
       properties:
@@ -998,9 +1005,9 @@ components:
         billing_product_id:
           type: string
         charge_type:
-          type: string
+          $ref: '#/components/schemas/ChargeType'
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/PlanControlledByType'
         environment_id:
           type: string
         is_trialable:
@@ -1499,6 +1506,12 @@ components:
         - new_price_id
         - skip_trial
       title: ChangeSubscriptionRequestBody
+    ChargeType:
+      type: string
+      enum:
+        - free
+        - one_time
+        - recurring
     CheckFlagRequestBody:
       type: object
       properties:
@@ -2021,7 +2034,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - company_id
         - created_at
@@ -2042,7 +2055,7 @@ components:
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
-          type: string
+          $ref: '#/components/schemas/ChargeType'
         company_can_trial:
           type: boolean
         company_count:
@@ -2052,7 +2065,7 @@ components:
           items:
             type: string
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/PlanControlledByType'
         created_at:
           type: string
           format: date-time
@@ -2102,7 +2115,7 @@ components:
         one_time_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
-          type: string
+          $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
           nullable: true
@@ -2406,6 +2419,11 @@ components:
         - collect_phone
         - tax_collection_enabled
       title: ComponentCheckoutSettings
+    ComponentEntityType:
+      type: string
+      enum:
+        - billing
+        - entitlement
     ComponentHydrateResponseData:
       type: object
       properties:
@@ -2580,9 +2598,9 @@ components:
         name:
           type: string
         state:
-          type: string
+          $ref: '#/components/schemas/ComponentState'
         type:
-          type: string
+          $ref: '#/components/schemas/ComponentEntityType'
         updated_at:
           type: string
           format: date-time
@@ -2594,6 +2612,11 @@ components:
         - created_at
         - updated_at
       title: ComponentResponseData
+    ComponentState:
+      type: string
+      enum:
+        - draft
+        - live
     Condition:
       type: object
       properties:
@@ -3143,13 +3166,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - company_id
         - feature_id
@@ -3163,10 +3180,7 @@ components:
             type: number
           type: object
         entity_type:
-          type: string
-          enum:
-            - entitlement
-            - billing
+          $ref: '#/components/schemas/ComponentEntityType'
         name:
           type: string
       required:
@@ -3362,15 +3376,11 @@ components:
       type: object
       properties:
         export_type:
-          type: string
-          enum:
-            - company-feature-usage
+          $ref: '#/components/schemas/DataExportType'
         metadata:
           type: string
         output_file_type:
-          type: string
-          enum:
-            - csv
+          $ref: '#/components/schemas/DataExportOutputFileType'
       required:
         - export_type
         - output_file_type
@@ -3411,13 +3421,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - feature_id
         - value_type
@@ -3429,23 +3433,13 @@ components:
           type: string
           nullable: true
         entity_type:
-          type: string
-          enum:
-            - company
-            - user
+          $ref: '#/components/schemas/EntityType'
         hierarchy:
           type: array
           items:
             type: string
         trait_type:
-          type: string
-          enum:
-            - boolean
-            - currency
-            - date
-            - number
-            - string
-            - url
+          $ref: '#/components/schemas/TraitType'
       required:
         - entity_type
         - hierarchy
@@ -3455,11 +3449,7 @@ components:
       type: object
       properties:
         environment_type:
-          type: string
-          enum:
-            - development
-            - staging
-            - production
+          $ref: '#/components/schemas/EnvironmentType'
         name:
           type: string
       required:
@@ -3610,12 +3600,9 @@ components:
               title: EventBodyIdentify
           title: EventBody
         event_type:
-          type: string
-          description: Either 'identify' or 'track'
-          enum:
-            - identify
-            - track
-            - flag_check
+          allOf:
+            - $ref: '#/components/schemas/EventType'
+            - description: Either 'identify' or 'track'
         sent_at:
           type: string
           description: >-
@@ -3635,29 +3622,16 @@ components:
           type: string
           nullable: true
         feature_type:
-          type: string
-          enum:
-            - boolean
-            - event
-            - trait
+          $ref: '#/components/schemas/FeatureType'
         flag:
           $ref: '#/components/schemas/CreateOrUpdateFlagRequestBody'
         icon:
           type: string
           nullable: true
         lifecycle_phase:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
-          enum:
-            - add_on
-            - alpha
-            - beta
-            - deprecated
-            - ga
-            - in_plan
-            - inactive
-            - internal_testing
-            - legacy
         maintainer_id:
           type: string
           nullable: true
@@ -3688,9 +3662,7 @@ components:
           type: string
           nullable: true
         flag_type:
-          type: string
-          enum:
-            - boolean
+          $ref: '#/components/schemas/FlagType'
         key:
           type: string
         maintainer_id:
@@ -3879,9 +3851,7 @@ components:
           type: string
           nullable: true
         flag_type:
-          type: string
-          enum:
-            - boolean
+          $ref: '#/components/schemas/FlagType'
         id:
           type: string
           nullable: true
@@ -4029,14 +3999,9 @@ components:
         plan_id:
           type: string
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
-          enum:
-            - pay_as_you_go
-            - pay_in_advance
-            - overage
-            - credit_burndown
-            - tier
         price_tiers:
           type: array
           description: Use MonthlyPriceTiers or YearlyPriceTiers instead
@@ -4063,13 +4028,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -4148,6 +4107,8 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        proration_behavior:
+          $ref: '#/components/schemas/ProrationBehavior'
         show_credits:
           type: boolean
         show_period_toggle:
@@ -4183,6 +4144,7 @@ components:
         - show_period_toggle
         - show_zero_price_as_free
         - sync_customer_billing_details_for_tax
+        - proration_behavior
       title: CreatePlanGroupRequestBody
     CreatePlanRequestBody:
       type: object
@@ -4195,10 +4157,7 @@ components:
         name:
           type: string
         plan_type:
-          type: string
-          enum:
-            - plan
-            - add_on
+          $ref: '#/components/schemas/PlanType'
       required:
         - description
         - name
@@ -4286,7 +4245,7 @@ components:
               - entitlement.tier_limit.reached
               - credit.limit.warning
               - credit.limit.reached
-              - company.plan_change
+              - company.plan_changed
         url:
           type: string
       required:
@@ -4408,11 +4367,7 @@ components:
           format: date-time
           nullable: true
         grant_reason:
-          type: string
-          enum:
-            - free
-            - plan
-            - purchased
+          $ref: '#/components/schemas/GrantReason'
         quantity:
           type: number
       required:
@@ -4774,6 +4729,10 @@ components:
         - cta_text
         - price_text
       title: CustomPlanViewConfigResponseData
+    DataExportOutputFileType:
+      type: string
+      enum:
+        - csv
     DataExportResponseData:
       type: object
       properties:
@@ -4785,15 +4744,15 @@ components:
         environment_id:
           type: string
         export_type:
-          type: string
+          $ref: '#/components/schemas/DataExportType'
         id:
           type: string
         metadata:
           type: string
         output_file_type:
-          type: string
+          $ref: '#/components/schemas/DataExportOutputFileType'
         status:
-          type: string
+          $ref: '#/components/schemas/DataExportStatus'
         updated_at:
           type: string
           format: date-time
@@ -4808,6 +4767,16 @@ components:
         - created_at
         - updated_at
       title: DataExportResponseData
+    DataExportStatus:
+      type: string
+      enum:
+        - failure
+        - pending
+        - success
+    DataExportType:
+      type: string
+      enum:
+        - company-feature-usage
     Decimal:
       type: object
       title: Decimal
@@ -4843,6 +4812,14 @@ components:
         - data
         - skipped
       title: DuplicatePlanEntitlementsResponseResponseData
+    EntitlementPriceBehavior:
+      type: string
+      enum:
+        - credit_burndown
+        - overage
+        - pay_as_you_go
+        - pay_in_advance
+        - tier
     EntitlementTriggerConfig:
       type: object
       properties:
@@ -4851,6 +4828,21 @@ components:
       required:
         - feature_id
       title: EntitlementTriggerConfig
+    EntitlementType:
+      type: string
+      enum:
+        - company_override
+        - plan_entitlement
+        - unknown
+    EntitlementValueType:
+      type: string
+      enum:
+        - boolean
+        - credit
+        - numeric
+        - trait
+        - unknown
+        - unlimited
     EntitlementsInPlan:
       type: object
       properties:
@@ -4869,7 +4861,7 @@ components:
           type: string
           format: date-time
         entity_type:
-          type: string
+          $ref: '#/components/schemas/EntityType'
         id:
           type: string
         key:
@@ -4897,7 +4889,7 @@ components:
         entity_id:
           type: string
         entity_type:
-          type: string
+          $ref: '#/components/schemas/EntityType'
         environment_id:
           type: string
         id:
@@ -4931,7 +4923,7 @@ components:
         entity_id:
           type: string
         entity_type:
-          type: string
+          $ref: '#/components/schemas/EntityType'
         environment_id:
           type: string
         id:
@@ -4963,7 +4955,7 @@ components:
         display_name:
           type: string
         entity_type:
-          type: string
+          $ref: '#/components/schemas/EntityType'
         hierarchy:
           type: array
           items:
@@ -4971,7 +4963,7 @@ components:
         id:
           type: string
         trait_type:
-          type: string
+          $ref: '#/components/schemas/TraitType'
         updated_at:
           type: string
           format: date-time
@@ -5047,6 +5039,11 @@ components:
         - definition_id
         - value
       title: EntityTraitValue
+    EntityType:
+      type: string
+      enum:
+        - company
+        - user
     EnvironmentDetailResponseData:
       type: object
       properties:
@@ -5058,7 +5055,7 @@ components:
           type: string
           format: date-time
         environment_type:
-          type: string
+          $ref: '#/components/schemas/EnvironmentType'
         id:
           type: string
         name:
@@ -5081,7 +5078,7 @@ components:
           type: string
           format: date-time
         environment_type:
-          type: string
+          $ref: '#/components/schemas/EnvironmentType'
         id:
           type: string
         name:
@@ -5096,6 +5093,12 @@ components:
         - created_at
         - updated_at
       title: EnvironmentResponseData
+    EnvironmentType:
+      type: string
+      enum:
+        - development
+        - production
+        - staging
     EventDetailResponseData:
       type: object
       properties:
@@ -5154,7 +5157,7 @@ components:
           type: string
           nullable: true
         type:
-          type: string
+          $ref: '#/components/schemas/EventType'
         updated_at:
           type: string
           format: date-time
@@ -5227,7 +5230,7 @@ components:
           type: string
           nullable: true
         type:
-          type: string
+          $ref: '#/components/schemas/EventType'
         updated_at:
           type: string
           format: date-time
@@ -5269,6 +5272,12 @@ components:
         - event_subtype
         - user_count
       title: EventSummaryResponseData
+    EventType:
+      type: string
+      enum:
+        - flag_check
+        - identify
+        - track
     FeatureCompanyResponseData:
       type: object
       properties:
@@ -5282,13 +5291,9 @@ components:
             indicates that unlimited usage is permitted.
           nullable: true
         allocation_type:
-          type: string
-          description: The type of allocation that is being used.
-          enum:
-            - boolean
-            - numeric
-            - trait
-            - unlimited
+          allOf:
+            - $ref: '#/components/schemas/EntitlementValueType'
+            - description: The type of allocation that is being used.
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         company_override:
@@ -5306,13 +5311,10 @@ components:
           items:
             $ref: '#/components/schemas/CreditGrantDetail'
         credit_grant_reason:
-          type: string
-          description: Reason for the credit grant
+          allOf:
+            - $ref: '#/components/schemas/GrantReason'
+            - description: Reason for the credit grant
           nullable: true
-          enum:
-            - free
-            - plan
-            - purchased
         credit_remaining:
           type: number
           nullable: true
@@ -5352,7 +5354,7 @@ components:
           description: Source of the entitlement (plan or company_override)
           nullable: true
         entitlement_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementType'
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
         has_valid_allocation:
@@ -5391,7 +5393,8 @@ components:
         plan_entitlement:
           $ref: '#/components/schemas/PlanEntitlementResponseData'
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
         soft_limit:
           type: integer
@@ -5426,20 +5429,15 @@ components:
             indicates that unlimited usage is permitted.
           nullable: true
         allocation_type:
-          type: string
-          description: The type of allocation that is being used.
-          enum:
-            - boolean
-            - numeric
-            - trait
-            - unlimited
-            - unknown
+          allOf:
+            - $ref: '#/components/schemas/EntitlementValueType'
+            - description: The type of allocation that is being used.
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
           type: string
         entitlement_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementType'
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
         metric_reset_at:
@@ -5485,7 +5483,7 @@ components:
         event_summary:
           $ref: '#/components/schemas/EventSummaryResponseData'
         feature_type:
-          type: string
+          $ref: '#/components/schemas/FeatureType'
         flags:
           type: array
           items:
@@ -5495,7 +5493,8 @@ components:
         id:
           type: string
         lifecycle_phase:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
         maintainer_id:
           type: string
@@ -5548,6 +5547,18 @@ components:
         - id
         - name
       title: FeatureLedgerResponseData
+    FeatureLifecyclePhase:
+      type: string
+      enum:
+        - add_on
+        - alpha
+        - beta
+        - deprecated
+        - ga
+        - inactive
+        - in_plan
+        - internal_testing
+        - legacy
     FeatureResponseData:
       type: object
       properties:
@@ -5560,13 +5571,14 @@ components:
           type: string
           nullable: true
         feature_type:
-          type: string
+          $ref: '#/components/schemas/FeatureType'
         icon:
           type: string
         id:
           type: string
         lifecycle_phase:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
         maintainer_id:
           type: string
@@ -5594,6 +5606,12 @@ components:
         - created_at
         - updated_at
       title: FeatureResponseData
+    FeatureType:
+      type: string
+      enum:
+        - boolean
+        - event
+        - trait
     FeatureUsageDataResponseData:
       type: object
       properties:
@@ -5611,7 +5629,7 @@ components:
         feature_name:
           type: string
         feature_type:
-          type: string
+          $ref: '#/components/schemas/FeatureType'
         hard_limit:
           type: string
         has_access:
@@ -5668,13 +5686,9 @@ components:
             indicates that unlimited usage is permitted.
           nullable: true
         allocation_type:
-          type: string
-          description: The type of allocation that is being used.
-          enum:
-            - boolean
-            - numeric
-            - trait
-            - unlimited
+          allOf:
+            - $ref: '#/components/schemas/EntitlementValueType'
+            - description: The type of allocation that is being used.
         company_override:
           $ref: '#/components/schemas/CompanyOverrideResponseData'
         credit_consumption_rate:
@@ -5690,13 +5704,10 @@ components:
           items:
             $ref: '#/components/schemas/CreditGrantDetail'
         credit_grant_reason:
-          type: string
-          description: Reason for the credit grant
+          allOf:
+            - $ref: '#/components/schemas/GrantReason'
+            - description: Reason for the credit grant
           nullable: true
-          enum:
-            - free
-            - plan
-            - purchased
         credit_remaining:
           type: number
           nullable: true
@@ -5734,7 +5745,7 @@ components:
           description: Source of the entitlement (plan or company_override)
           nullable: true
         entitlement_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementType'
         feature:
           $ref: '#/components/schemas/FeatureDetailResponseData'
         has_valid_allocation:
@@ -5773,7 +5784,8 @@ components:
         plan_entitlement:
           $ref: '#/components/schemas/PlanEntitlementResponseData'
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
         soft_limit:
           type: integer
@@ -5811,7 +5823,7 @@ components:
           type: string
           nullable: true
         flag_type:
-          type: string
+          $ref: '#/components/schemas/FlagType'
         id:
           type: string
         key:
@@ -5857,7 +5869,7 @@ components:
           type: string
           nullable: true
         flag_type:
-          type: string
+          $ref: '#/components/schemas/FlagType'
         id:
           type: string
         key:
@@ -5880,6 +5892,10 @@ components:
         - name
         - updated_at
       title: FlagResponseData
+    FlagType:
+      type: string
+      enum:
+        - boolean
     GenericPreviewObject:
       type: object
       properties:
@@ -5908,6 +5924,12 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    GrantReason:
+      type: string
+      enum:
+        - free
+        - plan
+        - purchased
     InvoiceRequestBody:
       type: object
       properties:
@@ -6014,9 +6036,7 @@ components:
             type: string
           type: object
         resource_type:
-          type: string
-          enum:
-            - company
+          $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
       required:
         - resource_type
         - lookup
@@ -6037,7 +6057,7 @@ components:
         id:
           type: string
         resource_type:
-          type: string
+          $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         token:
           type: string
         updated_at:
@@ -6356,6 +6376,11 @@ components:
         - traits_updated
         - updated_at
       title: PlanChangeResponseData
+    PlanControlledByType:
+      type: string
+      enum:
+        - schematic
+        - stripe
     PlanCreditGrantView:
       type: object
       properties:
@@ -6448,11 +6473,11 @@ components:
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
-          type: string
+          $ref: '#/components/schemas/ChargeType'
         company_count:
           type: integer
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/PlanControlledByType'
         created_at:
           type: string
           format: date-time
@@ -6484,7 +6509,7 @@ components:
         one_time_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
-          type: string
+          $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
           nullable: true
@@ -6544,7 +6569,8 @@ components:
         plan_id:
           type: string
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
         rule_id:
           type: string
@@ -6573,7 +6599,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - created_at
         - environment_id
@@ -6658,6 +6684,8 @@ components:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         prevent_downgrades_when_over_limit:
           type: boolean
+        proration_behavior:
+          type: string
         show_credits:
           type: boolean
         show_period_toggle:
@@ -6695,9 +6723,10 @@ components:
         - show_credits
         - show_zero_price_as_free
         - checkout_settings
-        - tax_collection_enabled
-        - sync_customer_billing_details_for_tax
         - prevent_downgrades_when_over_limit
+        - proration_behavior
+        - sync_customer_billing_details_for_tax
+        - tax_collection_enabled
       title: PlanGroupDetailResponseData
     PlanGroupPlanDetailResponseData:
       type: object
@@ -6709,7 +6738,7 @@ components:
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
-          type: string
+          $ref: '#/components/schemas/ChargeType'
         company_count:
           type: integer
         compatible_plan_ids:
@@ -6717,7 +6746,7 @@ components:
           items:
             type: string
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/PlanControlledByType'
         created_at:
           type: string
           format: date-time
@@ -6757,7 +6786,7 @@ components:
         one_time_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
-          type: string
+          $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
           nullable: true
@@ -6836,6 +6865,8 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        proration_behavior:
+          type: string
         show_credits:
           type: boolean
         show_period_toggle:
@@ -6868,9 +6899,10 @@ components:
         - show_credits
         - show_zero_price_as_free
         - checkout_settings
-        - tax_collection_enabled
-        - sync_customer_billing_details_for_tax
         - prevent_downgrades_when_over_limit
+        - proration_behavior
+        - sync_customer_billing_details_for_tax
+        - tax_collection_enabled
       title: PlanGroupResponseData
     PlanIssueResponseData:
       type: object
@@ -6906,7 +6938,7 @@ components:
         name:
           type: string
         plan_type:
-          type: string
+          $ref: '#/components/schemas/PlanType'
         updated_at:
           type: string
           format: date-time
@@ -6984,6 +7016,11 @@ components:
         - created_at
         - updated_at
       title: PlanTraitResponseData
+    PlanType:
+      type: string
+      enum:
+        - plan
+        - add_on
     PreviewObject:
       type: object
       properties:
@@ -7132,6 +7169,11 @@ components:
         - amount
         - description
       title: PreviewSubscriptionUpcomingInvoiceLineItems
+    ProrationBehavior:
+      type: string
+      enum:
+        - create_prorations
+        - invoice_immediately
     QuickstartResp:
       type: object
       properties:
@@ -7268,7 +7310,8 @@ components:
         trait:
           $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
         trait_entity_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntityType'
           nullable: true
         trait_id:
           type: string
@@ -7387,7 +7430,8 @@ components:
         rule_id:
           type: string
         trait_entity_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntityType'
           nullable: true
         trait_id:
           type: string
@@ -7505,7 +7549,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - ca729079
+        - 549e6fea
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -7755,6 +7799,12 @@ components:
       required:
         - conditions
       title: RulesengineConditionGroup
+    RulesengineEntityType:
+      type: string
+      title: RulesengineEntityType
+      enum:
+        - company
+        - user
     RulesengineFlag:
       type: object
       properties:
@@ -7864,10 +7914,7 @@ components:
             - int
             - string
         entity_type:
-          type: string
-          enum:
-            - user
-            - company
+          $ref: '#/components/schemas/RulesengineEntityType'
         id:
           type: string
       required:
@@ -7963,6 +8010,18 @@ components:
       required:
         - schematic_publishable_key
       title: StripeEmbedInfo
+    SubscriptionStatus:
+      type: string
+      enum:
+        - active
+        - canceled
+        - expired
+        - incomplete
+        - incomplete_expired
+        - past_due
+        - paused
+        - trialing
+        - unpaid
     SubscriptionTraitUpdate:
       type: object
       properties:
@@ -7979,7 +8038,7 @@ components:
         trait_name:
           type: string
         trait_type:
-          type: string
+          $ref: '#/components/schemas/TraitType'
         value:
           type: string
       required:
@@ -7991,6 +8050,17 @@ components:
         - feature_id
         - reason
       title: SubscriptionTraitUpdate
+    SubscriptionType:
+      type: string
+      enum:
+        - free
+        - one_time
+        - paid
+        - trial
+    TemporaryAccessTokenResourceType:
+      type: string
+      enum:
+        - company
     TemporaryAccessTokenResponseData:
       type: object
       properties:
@@ -8007,7 +8077,7 @@ components:
         id:
           type: string
         resource_type:
-          type: string
+          $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         updated_at:
           type: string
           format: date-time
@@ -8031,10 +8101,7 @@ components:
             - int
             - string
         entity_type:
-          type: string
-          enum:
-            - user
-            - company
+          $ref: '#/components/schemas/EntityType'
         id:
           type: string
       required:
@@ -8042,6 +8109,15 @@ components:
         - comparable_type
         - entity_type
       title: TraitDefinition
+    TraitType:
+      type: string
+      enum:
+        - boolean
+        - currency
+        - date
+        - number
+        - string
+        - url
     UpdateAddOnRequestBody:
       type: object
       properties:
@@ -8230,13 +8306,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - value_type
       title: UpdateCompanyOverrideRequestBody
@@ -8261,20 +8331,16 @@ components:
             type: number
           type: object
         entity_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/ComponentEntityType'
           nullable: true
-          enum:
-            - entitlement
-            - billing
         name:
           type: string
           nullable: true
         state:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/ComponentState'
           nullable: true
-          enum:
-            - draft
-            - live
       title: UpdateComponentRequestBody
     UpdateCreditBundleDetailsRequestBody:
       type: object
@@ -8361,13 +8427,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
       required:
         - value_type
       title: UpdateEntitlementReqCommon
@@ -8378,14 +8438,7 @@ components:
           type: string
           nullable: true
         trait_type:
-          type: string
-          enum:
-            - boolean
-            - currency
-            - date
-            - number
-            - string
-            - url
+          $ref: '#/components/schemas/TraitType'
       required:
         - trait_type
       title: UpdateEntityTraitDefinitionRequestBody
@@ -8393,12 +8446,9 @@ components:
       type: object
       properties:
         environment_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EnvironmentType'
           nullable: true
-          enum:
-            - development
-            - staging
-            - production
         name:
           type: string
           nullable: true
@@ -8413,30 +8463,18 @@ components:
           type: string
           nullable: true
         feature_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/FeatureType'
           nullable: true
-          enum:
-            - boolean
-            - event
-            - trait
         flag:
           $ref: '#/components/schemas/CreateOrUpdateFlagRequestBody'
         icon:
           type: string
           nullable: true
         lifecycle_phase:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
-          enum:
-            - add_on
-            - alpha
-            - beta
-            - deprecated
-            - ga
-            - in_plan
-            - inactive
-            - internal_testing
-            - legacy
         maintainer_id:
           type: string
           nullable: true
@@ -8523,14 +8561,9 @@ components:
           nullable: true
           deprecated: true
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
-          enum:
-            - pay_as_you_go
-            - pay_in_advance
-            - overage
-            - credit_burndown
-            - tier
         price_tiers:
           type: array
           description: Use MonthlyPriceTiers or YearlyPriceTiers instead
@@ -8557,13 +8590,7 @@ components:
           type: string
           nullable: true
         value_type:
-          type: string
-          enum:
-            - boolean
-            - credit
-            - numeric
-            - trait
-            - unlimited
+          $ref: '#/components/schemas/EntitlementValueType'
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -8640,6 +8667,8 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        proration_behavior:
+          $ref: '#/components/schemas/ProrationBehavior'
         show_credits:
           type: boolean
         show_period_toggle:
@@ -8675,6 +8704,7 @@ components:
         - show_period_toggle
         - show_zero_price_as_free
         - sync_customer_billing_details_for_tax
+        - proration_behavior
       title: UpdatePlanGroupRequestBody
     UpdatePlanRequestBody:
       type: object
@@ -8810,7 +8840,7 @@ components:
               - entitlement.tier_limit.reached
               - credit.limit.warning
               - credit.limit.reached
-              - company.plan_change
+              - company.plan_changed
           nullable: true
         status:
           type: string
@@ -8829,11 +8859,7 @@ components:
           type: string
           nullable: true
         charge_type:
-          type: string
-          enum:
-            - one_time
-            - recurring
-            - free
+          $ref: '#/components/schemas/ChargeType'
         currency:
           type: string
           nullable: true
@@ -9058,14 +9084,9 @@ components:
           nullable: true
           deprecated: true
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
-          enum:
-            - pay_as_you_go
-            - pay_in_advance
-            - overage
-            - credit_burndown
-            - tier
         price_tiers:
           type: array
           description: Use MonthlyPriceTiers or YearlyPriceTiers instead
@@ -9117,7 +9138,8 @@ components:
         monthly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
         price_behavior:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
         value_bool:
           type: boolean
@@ -9126,7 +9148,7 @@ components:
           type: integer
           nullable: true
         value_type:
-          type: string
+          $ref: '#/components/schemas/EntitlementValueType'
         yearly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
       required:
@@ -13438,7 +13460,7 @@ paths:
               canceled, expired, incomplete, incomplete_expired, past_due,
               paused, trialing, unpaid)
             items:
-              type: string
+              $ref: '#/components/schemas/SubscriptionStatus'
         - name: subscription_types
           in: query
           description: >-
@@ -13450,7 +13472,7 @@ paths:
               Filter companies by one or more subscription types (paid, free,
               trial)
             items:
-              type: string
+              $ref: '#/components/schemas/SubscriptionType'
         - name: monetized_subscriptions
           in: query
           description: Filter companies that have monetized subscriptions
@@ -13598,14 +13620,14 @@ paths:
                           incomplete_expired, past_due, paused, trialing,
                           unpaid)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/SubscriptionStatus'
                       subscription_types:
                         type: array
                         description: >-
                           Filter companies by one or more subscription types
                           (paid, free, trial)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/SubscriptionType'
                       without_plan:
                         type: boolean
                         description: Filter out companies that have a plan
@@ -13769,7 +13791,7 @@ paths:
               canceled, expired, incomplete, incomplete_expired, past_due,
               paused, trialing, unpaid)
             items:
-              type: string
+              $ref: '#/components/schemas/SubscriptionStatus'
         - name: subscription_types
           in: query
           description: >-
@@ -13781,7 +13803,7 @@ paths:
               Filter companies by one or more subscription types (paid, free,
               trial)
             items:
-              type: string
+              $ref: '#/components/schemas/SubscriptionType'
         - name: monetized_subscriptions
           in: query
           description: Filter companies that have monetized subscriptions
@@ -13933,14 +13955,14 @@ paths:
                           incomplete_expired, past_due, paused, trialing,
                           unpaid)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/SubscriptionStatus'
                       subscription_types:
                         type: array
                         description: >-
                           Filter companies by one or more subscription types
                           (paid, free, trial)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/SubscriptionType'
                       without_plan:
                         type: boolean
                         description: Filter out companies that have a plan
@@ -15570,10 +15592,7 @@ paths:
         - name: entity_type
           in: query
           schema:
-            type: string
-            enum:
-              - company
-              - user
+            $ref: '#/components/schemas/EntityType'
         - name: ids
           in: query
           schema:
@@ -15616,10 +15635,7 @@ paths:
                     description: Input parameters
                     properties:
                       entity_type:
-                        type: string
-                        enum:
-                          - company
-                          - user
+                        $ref: '#/components/schemas/EntityType'
                       ids:
                         type: array
                         items:
@@ -15659,10 +15675,7 @@ paths:
         - name: entity_type
           in: query
           schema:
-            type: string
-            enum:
-              - company
-              - user
+            $ref: '#/components/schemas/EntityType'
         - name: ids
           in: query
           schema:
@@ -15702,10 +15715,7 @@ paths:
                     description: Input parameters
                     properties:
                       entity_type:
-                        type: string
-                        enum:
-                          - company
-                          - user
+                        $ref: '#/components/schemas/EntityType'
                       ids:
                         type: array
                         items:
@@ -15762,27 +15772,13 @@ paths:
         - name: trait_type
           in: query
           schema:
-            type: string
-            enum:
-              - boolean
-              - currency
-              - date
-              - number
-              - string
-              - url
+            $ref: '#/components/schemas/TraitType'
         - name: trait_types
           in: query
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - boolean
-                - currency
-                - date
-                - number
-                - string
-                - url
+              $ref: '#/components/schemas/TraitType'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15834,25 +15830,11 @@ paths:
                       q:
                         type: string
                       trait_type:
-                        type: string
-                        enum:
-                          - boolean
-                          - currency
-                          - date
-                          - number
-                          - string
-                          - url
+                        $ref: '#/components/schemas/TraitType'
                       trait_types:
                         type: array
                         items:
-                          type: string
-                          enum:
-                            - boolean
-                            - currency
-                            - date
-                            - number
-                            - string
-                            - url
+                          $ref: '#/components/schemas/TraitType'
                     title: ListEntityTraitDefinitionsParams
                 required:
                   - data
@@ -16019,27 +16001,13 @@ paths:
         - name: trait_type
           in: query
           schema:
-            type: string
-            enum:
-              - boolean
-              - currency
-              - date
-              - number
-              - string
-              - url
+            $ref: '#/components/schemas/TraitType'
         - name: trait_types
           in: query
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - boolean
-                - currency
-                - date
-                - number
-                - string
-                - url
+              $ref: '#/components/schemas/TraitType'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -16088,25 +16056,11 @@ paths:
                       q:
                         type: string
                       trait_type:
-                        type: string
-                        enum:
-                          - boolean
-                          - currency
-                          - date
-                          - number
-                          - string
-                          - url
+                        $ref: '#/components/schemas/TraitType'
                       trait_types:
                         type: array
                         items:
-                          type: string
-                          enum:
-                            - boolean
-                            - currency
-                            - date
-                            - number
-                            - string
-                            - url
+                          $ref: '#/components/schemas/TraitType'
                     title: CountEntityTraitDefinitionsParams
                 required:
                   - data
@@ -16568,11 +16522,7 @@ paths:
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - identify
-                - track
-                - flag_check
+              $ref: '#/components/schemas/EventType'
         - name: flag_id
           in: query
           schema:
@@ -16619,11 +16569,7 @@ paths:
                       event_types:
                         type: array
                         items:
-                          type: string
-                          enum:
-                            - identify
-                            - track
-                            - flag_check
+                          $ref: '#/components/schemas/EventType'
                       flag_id:
                         type: string
                       limit:
@@ -17260,7 +17206,7 @@ paths:
             type: array
             description: Filter by one or more feature types (boolean, event, trait)
             items:
-              type: string
+              $ref: '#/components/schemas/FeatureType'
         - name: boolean_require_event
           in: query
           description: >-
@@ -17314,7 +17260,7 @@ paths:
                           Filter by one or more feature types (boolean, event,
                           trait)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/FeatureType'
                       ids:
                         type: array
                         items:
@@ -17565,7 +17511,7 @@ paths:
             type: array
             description: Filter by one or more feature types (boolean, event, trait)
             items:
-              type: string
+              $ref: '#/components/schemas/FeatureType'
         - name: boolean_require_event
           in: query
           description: >-
@@ -17616,7 +17562,7 @@ paths:
                           Filter by one or more feature types (boolean, event,
                           trait)
                         items:
-                          type: string
+                          $ref: '#/components/schemas/FeatureType'
                       ids:
                         type: array
                         items:
@@ -19469,11 +19415,9 @@ paths:
           in: query
           description: Filter by plan type
           schema:
-            type: string
-            description: Filter by plan type
-            enum:
-              - plan
-              - add_on
+            allOf:
+              - $ref: '#/components/schemas/PlanType'
+              - description: Filter by plan type
         - name: q
           in: query
           schema:
@@ -19558,11 +19502,9 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       plan_type:
-                        type: string
-                        description: Filter by plan type
-                        enum:
-                          - plan
-                          - add_on
+                        allOf:
+                          - $ref: '#/components/schemas/PlanType'
+                          - description: Filter by plan type
                       q:
                         type: string
                       without_entitlement_for:
@@ -19852,11 +19794,9 @@ paths:
           in: query
           description: Filter by plan type
           schema:
-            type: string
-            description: Filter by plan type
-            enum:
-              - plan
-              - add_on
+            allOf:
+              - $ref: '#/components/schemas/PlanType'
+              - description: Filter by plan type
         - name: q
           in: query
           schema:
@@ -19938,11 +19878,9 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       plan_type:
-                        type: string
-                        description: Filter by plan type
-                        enum:
-                          - plan
-                          - add_on
+                        allOf:
+                          - $ref: '#/components/schemas/PlanType'
+                          - description: Filter by plan type
                       q:
                         type: string
                       without_entitlement_for:
