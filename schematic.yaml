@@ -6684,6 +6684,14 @@ components:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         proration_behavior:
           type: string
         show_credits:
@@ -6724,6 +6732,7 @@ components:
         - show_zero_price_as_free
         - checkout_settings
         - prevent_downgrades_when_over_limit
+        - prevent_self_service_downgrade
         - proration_behavior
         - sync_customer_billing_details_for_tax
         - tax_collection_enabled
@@ -6865,6 +6874,14 @@ components:
             $ref: '#/components/schemas/OrderedPlansInGroup'
         prevent_downgrades_when_over_limit:
           type: boolean
+        prevent_self_service_downgrade:
+          type: boolean
+        prevent_self_service_downgrade_button_text:
+          type: string
+          nullable: true
+        prevent_self_service_downgrade_url:
+          type: string
+          nullable: true
         proration_behavior:
           type: string
         show_credits:
@@ -6900,6 +6917,7 @@ components:
         - show_zero_price_as_free
         - checkout_settings
         - prevent_downgrades_when_over_limit
+        - prevent_self_service_downgrade
         - proration_behavior
         - sync_customer_billing_details_for_tax
         - tax_collection_enabled
