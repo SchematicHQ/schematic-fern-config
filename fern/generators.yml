@@ -5,14 +5,15 @@ api:
       origin: https://openapi.schematichq.com/latest.yml
       settings:
         optional-additional-properties: false
-        title-as-schema-name: true                    ## This is the setting that altered the naming 
-        respect-nullable-schemas: false               # other settings that the default changed in 1.0.0
-        inline-path-parameters: false                 # other settings that the default changed in 1.0.0
-        idiomatic-request-names: false                # other settings that the default changed in 1.0.0
-        type-dates-as-strings: false                  # other settings that the default changed in 1.0.0
-        wrap-references-to-nullable-in-optional: true # other settings that the default changed in 1.0.0
-        coerce-optional-schemas-to-nullable: true     # other settings that the default changed in 1.0.0
-        object-query-parameters: false                # other settings that the default changed in 1.0.0
+        title-as-schema-name: true
+        respect-nullable-schemas: false
+        inline-path-parameters: false
+        idiomatic-request-names: false
+        type-dates-as-strings: false
+        wrap-references-to-nullable-in-optional: true
+        coerce-optional-schemas-to-nullable: true
+        object-query-parameters: false
+        coerce-enums-to-literals: true
 groups:
   python-sdk:
     generators:
@@ -20,7 +21,7 @@ groups:
         version: 4.32.1
         output:
           location: pypi
-          package-name: "schematichq"
+          package-name: schematichq
           token: ${PYPI_API_TOKEN}
         metadata:
           license: MIT
@@ -42,7 +43,6 @@ groups:
                 - LocalCache
                 - Schematic
                 - SchematicConfig
-
   csharp-sdk:
     generators:
       - name: fernapi/fern-csharp-sdk
@@ -59,9 +59,8 @@ groups:
           client-class-name: SchematicApi
           exported-client-class-name: Schematic
           extra-dependencies:
-            moq: "4.20.70"
-            "Moq.Contrib.HttpClient": "1.4.0"
-
+            moq: 4.20.70
+            Moq.Contrib.HttpClient: 1.4.0
   ts-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
@@ -71,7 +70,7 @@ groups:
             unions: v1
         output:
           location: npm
-          package-name: "@schematichq/schematic-typescript-node"
+          package-name: '@schematichq/schematic-typescript-node'
           token: ${NPM_API_TOKEN}
         github:
           repository: schematichq/schematic-node
@@ -82,33 +81,27 @@ groups:
           includeApiReference: true
           namespaceExport: Schematic
           packageJson:
-            license: "MIT"
+            license: MIT
             browser:
               crypto: false
               timers: false
             dependencies:
-              form-data: "^4.0.4"
+              form-data: ^4.0.4
             devDependencies:
-              esbuild: "^0.25.9"
+              esbuild: ^0.25.9
             scripts:
-              build: "node build.js"
-              "build:legacy": "tsc"
-              prepack: ""
-            main: "./dist/index.js"
-            types: "./dist/index.d.ts"
+              build: node build.js
+              build:legacy: tsc
+              prepack: ''
+            main: ./dist/index.js
+            types: ./dist/index.d.ts
             files:
-              - "dist/**/*.js"
-              - "dist/**/*.d.ts"
-              - "!dist/**/*.js.map"
-              - "!dist/**/*.test.*"
-              - "README.md"
-
+              - dist/**/*.js
+              - dist/**/*.d.ts
+              - '!dist/**/*.js.map'
+              - '!dist/**/*.test.*'
+              - README.md
           skipResponseValidation: true
-          # streamType: wrapper
-          # fileResponseType: stream
-          # formDataSupport: Node16
-          # fetchSupport: node-fetch
-
   go-sdk:
     generators:
       - name: fernapi/fern-go-sdk
@@ -121,10 +114,9 @@ groups:
           exportedClientName: SchematicClient
           module:
             path: github.com/schematichq/schematic-go
-            version: "1.18"
+            version: '1.18'
           packageName: schematichq
         smart-casing: true
-
   java-sdk:
     generators:
       - name: fernapi/fern-java-sdk
@@ -146,5 +138,5 @@ groups:
           generate-unknown-as-json-node: true
           enable-wire-tests: false
           custom-dependencies:
-            - "testImplementation org.mockito:mockito-core:5.3.1"
-            - "testImplementation org.mockito:mockito-junit-jupiter:5.3.1"
+            - testImplementation org.mockito:mockito-core:5.3.1
+            - testImplementation org.mockito:mockito-junit-jupiter:5.3.1
