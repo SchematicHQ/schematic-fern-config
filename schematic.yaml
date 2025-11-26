@@ -327,7 +327,7 @@ components:
           type: string
           nullable: true
         bundle_type:
-          type: string
+          $ref: '#/components/schemas/BillingCreditBundleType'
         created_at:
           type: string
           format: date-time
@@ -341,9 +341,9 @@ components:
         credit_name:
           type: string
         expiry_type:
-          type: string
+          $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
-          type: string
+          $ref: '#/components/schemas/BillingCreditExpiryUnit'
         expiry_unit_count:
           type: integer
           nullable: true
@@ -365,7 +365,7 @@ components:
           type: string
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/BillingCreditBundleStatus'
         unit_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         updated_at:
@@ -384,6 +384,15 @@ components:
         - created_at
         - updated_at
       title: BillingCreditBundleResponseData
+    BillingCreditBundleStatus:
+      type: string
+      enum:
+        - active
+        - inactive
+    BillingCreditBundleType:
+      type: string
+      enum:
+        - fixed
     BillingCreditBundleView:
       type: object
       properties:
@@ -391,7 +400,7 @@ components:
           type: string
           nullable: true
         bundle_type:
-          type: string
+          $ref: '#/components/schemas/BillingCreditBundleType'
         created_at:
           type: string
           format: date-time
@@ -405,9 +414,9 @@ components:
         credit_name:
           type: string
         expiry_type:
-          type: string
+          $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
-          type: string
+          $ref: '#/components/schemas/BillingCreditExpiryUnit'
         expiry_unit_count:
           type: integer
           nullable: true
@@ -429,7 +438,7 @@ components:
           type: string
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/BillingCreditBundleStatus'
         unit_price:
           $ref: '#/components/schemas/BillingProductPriceResponseData'
         updated_at:
@@ -448,6 +457,33 @@ components:
         - created_at
         - updated_at
       title: BillingCreditBundleView
+    BillingCreditBurnStrategy:
+      type: string
+      enum:
+        - expiration_priority
+        - first_in_first_out
+        - last_in_first_out
+        - plan_first_then_credit_bundles_first_in_first_out
+    BillingCreditExpiryType:
+      type: string
+      enum:
+        - duration
+        - end_of_billing_period
+        - end_of_next_billing_period
+        - end_of_trial
+        - no_expiry
+    BillingCreditExpiryUnit:
+      type: string
+      enum:
+        - billing_periods
+        - days
+    BillingCreditGrantReason:
+      type: string
+      enum:
+        - billing_credit_auto_topup
+        - free
+        - plan
+        - purchased
     BillingCreditGrantResponseData:
       type: object
       properties:
@@ -470,7 +506,7 @@ components:
           format: date-time
           nullable: true
         grant_reason:
-          type: string
+          $ref: '#/components/schemas/BillingCreditGrantReason'
         id:
           type: string
         plan_id:
@@ -501,7 +537,8 @@ components:
           format: date-time
           nullable: true
         zeroed_out_reason:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
           nullable: true
       required:
         - id
@@ -517,6 +554,13 @@ components:
         - updated_at
         - grant_reason
       title: BillingCreditGrantResponseData
+    BillingCreditGrantZeroedOutReason:
+      type: string
+      enum:
+        - expired
+        - manual
+        - plan_change
+        - plan_period_reset
     BillingCreditLedgerResponseData:
       type: object
       properties:
@@ -544,17 +588,17 @@ components:
       type: object
       properties:
         burn_strategy:
-          type: string
+          $ref: '#/components/schemas/BillingCreditBurnStrategy'
         created_at:
           type: string
           format: date-time
         default_expiry_unit:
-          type: string
+          $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
           type: integer
           nullable: true
         default_rollover_policy:
-          type: string
+          $ref: '#/components/schemas/BillingCreditRolloverPolicy'
         description:
           type: string
         icon:
@@ -587,6 +631,12 @@ components:
         - created_at
         - updated_at
       title: BillingCreditResponseData
+    BillingCreditRolloverPolicy:
+      type: string
+      enum:
+        - expire
+        - none
+        - rollover
     BillingCustomerResponseData:
       type: object
       properties:
@@ -698,6 +748,23 @@ components:
         - event_name
         - event_payload_key
       title: BillingMeterResponseData
+    BillingPlanCreditGrantResetCadence:
+      type: string
+      enum:
+        - daily
+        - monthly
+        - weekly
+        - yearly
+    BillingPlanCreditGrantResetStart:
+      type: string
+      enum:
+        - billing_period
+        - first_of_month
+    BillingPlanCreditGrantResetType:
+      type: string
+      enum:
+        - no_reset
+        - plan_period
     BillingPlanCreditGrantResponseData:
       type: object
       properties:
@@ -710,10 +777,12 @@ components:
         auto_topup_enabled:
           type: boolean
         auto_topup_expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
         auto_topup_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         auto_topup_expiry_unit_count:
           type: integer
@@ -737,10 +806,12 @@ components:
           type: string
           nullable: true
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         expiry_unit_count:
           type: integer
@@ -752,11 +823,12 @@ components:
         plan_name:
           type: string
         reset_cadence:
-          type: string
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
-          type: string
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
         reset_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
         updated_at:
           type: string
@@ -784,7 +856,7 @@ components:
         id:
           type: string
         interval:
-          type: string
+          $ref: '#/components/schemas/BillingProductPriceInterval'
         price:
           type: integer
         price_decimal:
@@ -800,6 +872,11 @@ components:
         - scheme
         - interval
       title: BillingPriceResponseData
+    BillingPriceUsageType:
+      type: string
+      enum:
+        - licensed
+        - metered
     BillingPriceView:
       type: object
       properties:
@@ -813,7 +890,7 @@ components:
         id:
           type: string
         interval:
-          type: string
+          $ref: '#/components/schemas/BillingProductPriceInterval'
         is_active:
           type: boolean
         meter_event_name:
@@ -847,7 +924,8 @@ components:
         product_name:
           type: string
         tiers_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
         updated_at:
           type: string
@@ -977,7 +1055,7 @@ components:
           type: string
           format: date-time
         usage_type:
-          type: string
+          $ref: '#/components/schemas/BillingPriceUsageType'
       required:
         - id
         - environment_id
@@ -1035,6 +1113,13 @@ components:
         - controlled_by
         - is_trialable
       title: BillingProductPlanResponseData
+    BillingProductPriceInterval:
+      type: string
+      enum:
+        - day
+        - month
+        - one-time
+        - year
     BillingProductPriceResponseData:
       type: object
       properties:
@@ -1048,7 +1133,7 @@ components:
         id:
           type: string
         interval:
-          type: string
+          $ref: '#/components/schemas/BillingProductPriceInterval'
         is_active:
           type: boolean
         meter_id:
@@ -1066,7 +1151,8 @@ components:
         product_external_id:
           type: string
         tiers_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
         updated_at:
           type: string
@@ -1317,7 +1403,8 @@ components:
           type: integer
           nullable: true
         trial_end_setting:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
         - created_at
@@ -1332,6 +1419,11 @@ components:
         - status
         - cancel_at_period_end
       title: BillingSubscriptionResponseData
+    BillingSubscriptionTrialEndSetting:
+      type: string
+      enum:
+        - cancel
+        - subscribe
     BillingSubscriptionView:
       type: object
       properties:
@@ -1392,7 +1484,8 @@ components:
           type: integer
           nullable: true
         trial_end_setting:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
         - created_at
@@ -1409,6 +1502,11 @@ components:
         - products
         - discounts
       title: BillingSubscriptionView
+    BillingTiersMode:
+      type: string
+      enum:
+        - graduated
+        - volume
     CancelSubscriptionRequest:
       type: object
       properties:
@@ -1728,7 +1826,8 @@ components:
           type: integer
           nullable: true
         trial_end_setting:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
         - created_at
@@ -2757,28 +2856,22 @@ components:
       type: object
       properties:
         burn_strategy:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditBurnStrategy'
           nullable: true
-          enum:
-            - plan_first_then_credit_bundles_first_in_first_out
-            - first_in_first_out
-            - last_in_first_out
-            - expiration_priority
         currency:
           type: string
         default_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         default_expiry_unit_count:
           type: integer
           nullable: true
         default_rollover_policy:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditRolloverPolicy'
           nullable: true
-          enum:
-            - none
-            - rollover
-            - expire
         description:
           type: string
         icon:
@@ -2849,17 +2942,13 @@ components:
           type: boolean
           nullable: true
         auto_topup_expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
         auto_topup_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
@@ -2871,43 +2960,26 @@ components:
         credit_id:
           type: string
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
         plan_id:
           type: string
         reset_cadence:
-          type: string
-          enum:
-            - monthly
-            - yearly
-            - daily
-            - weekly
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
-          type: string
-          enum:
-            - billing_period
-            - first_of_month
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
         reset_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
-          enum:
-            - plan_period
-            - no_reset
       required:
         - reset_cadence
         - reset_start
@@ -2951,11 +3023,9 @@ components:
         product_external_id:
           type: string
         tiers_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
-          enum:
-            - volume
-            - graduated
         usage_type:
           type: string
           enum:
@@ -3065,11 +3135,9 @@ components:
           type: integer
           nullable: true
         trial_end_setting:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
-          enum:
-            - subscribe
-            - cancel
       required:
         - customer_external_id
         - subscription_external_id
@@ -3095,27 +3163,20 @@ components:
           format: date-time
           nullable: true
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
         quantity:
           type: integer
         reason:
-          type: string
+          $ref: '#/components/schemas/BillingCreditGrantReason'
       required:
         - company_id
         - credit_id
@@ -3225,29 +3286,21 @@ components:
         bundle_name:
           type: string
         bundle_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditBundleType'
           nullable: true
-          enum:
-            - fixed
         credit_id:
           type: string
         currency:
           type: string
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
@@ -3260,11 +3313,9 @@ components:
           type: integer
           nullable: true
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditBundleStatus'
           nullable: true
-          enum:
-            - active
-            - inactive
       required:
         - credit_id
         - currency
@@ -4013,7 +4064,8 @@ components:
           type: integer
           nullable: true
         tier_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
         value_bool:
           type: boolean
@@ -4211,41 +4263,7 @@ components:
         request_types:
           type: array
           items:
-            type: string
-            enum:
-              - company.updated
-              - user.updated
-              - plan.updated
-              - plan.entitlement.updated
-              - company.override.updated
-              - feature.updated
-              - flag.updated
-              - flag_rules.updated
-              - company.created
-              - user.created
-              - plan.created
-              - plan.entitlement.created
-              - company.override.created
-              - feature.created
-              - flag.created
-              - company.deleted
-              - user.deleted
-              - plan.deleted
-              - plan.entitlement.deleted
-              - company.override.deleted
-              - feature.deleted
-              - flag.deleted
-              - test.send
-              - subscription.trial.ended
-              - entitlement.limit.warning
-              - entitlement.limit.reached
-              - entitlement.soft_limit.warning
-              - entitlement.soft_limit.reached
-              - entitlement.tier_limit.warning
-              - entitlement.tier_limit.reached
-              - credit.limit.warning
-              - credit.limit.reached
-              - company.plan_changed
+            $ref: '#/components/schemas/WebhookRequestType'
         url:
           type: string
       required:
@@ -4293,16 +4311,18 @@ components:
           format: date-time
           nullable: true
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         expiry_unit_count:
           type: integer
           nullable: true
         grant_reason:
-          type: string
+          $ref: '#/components/schemas/BillingCreditGrantReason'
         id:
           type: string
         plan_id:
@@ -4339,7 +4359,8 @@ components:
           format: date-time
           nullable: true
         zeroed_out_reason:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
           nullable: true
       required:
         - id
@@ -4367,7 +4388,7 @@ components:
           format: date-time
           nullable: true
         grant_reason:
-          $ref: '#/components/schemas/GrantReason'
+          $ref: '#/components/schemas/BillingCreditGrantReason'
         quantity:
           type: number
       required:
@@ -4378,41 +4399,24 @@ components:
       type: object
       properties:
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
         reset_cadence:
-          type: string
-          enum:
-            - monthly
-            - yearly
-            - daily
-            - weekly
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
-          type: string
-          enum:
-            - billing_period
-            - first_of_month
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
         reset_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
-          enum:
-            - plan_period
-            - no_reset
       required:
         - reset_cadence
         - reset_start
@@ -5152,7 +5156,7 @@ components:
           format: date-time
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/EventStatus'
         subtype:
           type: string
           nullable: true
@@ -5225,7 +5229,7 @@ components:
           format: date-time
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/EventStatus'
         subtype:
           type: string
           nullable: true
@@ -5248,6 +5252,14 @@ components:
         - status
         - updated_at
       title: EventResponseData
+    EventStatus:
+      type: string
+      enum:
+        - enriched
+        - failed
+        - pending
+        - processed
+        - unknown
     EventSummaryResponseData:
       type: object
       properties:
@@ -5312,7 +5324,7 @@ components:
             $ref: '#/components/schemas/CreditGrantDetail'
         credit_grant_reason:
           allOf:
-            - $ref: '#/components/schemas/GrantReason'
+            - $ref: '#/components/schemas/BillingCreditGrantReason'
             - description: Reason for the credit grant
           nullable: true
         credit_remaining:
@@ -5705,7 +5717,7 @@ components:
             $ref: '#/components/schemas/CreditGrantDetail'
         credit_grant_reason:
           allOf:
-            - $ref: '#/components/schemas/GrantReason'
+            - $ref: '#/components/schemas/BillingCreditGrantReason'
             - description: Reason for the credit grant
           nullable: true
         credit_remaining:
@@ -5924,12 +5936,6 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
-    GrantReason:
-      type: string
-      enum:
-        - free
-        - plan
-        - purchased
     InvoiceRequestBody:
       type: object
       properties:
@@ -6393,10 +6399,12 @@ components:
         billing_credit_auto_topup_enabled:
           type: boolean
         billing_credit_auto_topup_expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
         billing_credit_auto_topup_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         billing_credit_auto_topup_expiry_unit_count:
           type: integer
@@ -6419,10 +6427,12 @@ components:
         credit_name:
           type: string
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
         expiry_unit_count:
           type: integer
@@ -6437,11 +6447,11 @@ components:
           type: string
           nullable: true
         reset_cadence:
-          type: string
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
-          type: string
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
         reset_type:
-          type: string
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
         singular_name:
           type: string
           nullable: true
@@ -8161,28 +8171,20 @@ components:
       type: object
       properties:
         burn_strategy:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditBurnStrategy'
           nullable: true
-          enum:
-            - plan_first_then_credit_bundles_first_in_first_out
-            - first_in_first_out
-            - last_in_first_out
-            - expiration_priority
         default_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
         default_expiry_unit_count:
           type: integer
           nullable: true
         default_rollover_policy:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditRolloverPolicy'
           nullable: true
-          enum:
-            - none
-            - rollover
-            - expire
         description:
           type: string
         icon:
@@ -8224,17 +8226,13 @@ components:
           type: boolean
           nullable: true
         auto_topup_expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
         auto_topup_expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
@@ -8245,41 +8243,24 @@ components:
           type: integer
           nullable: true
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
         reset_cadence:
-          type: string
-          enum:
-            - monthly
-            - yearly
-            - daily
-            - weekly
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
-          type: string
-          enum:
-            - billing_period
-            - first_of_month
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
         reset_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
-          enum:
-            - plan_period
-            - no_reset
       required:
         - reset_cadence
         - reset_start
@@ -8366,20 +8347,13 @@ components:
         bundle_name:
           type: string
         expiry_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
           nullable: true
-          enum:
-            - duration
-            - no_expiry
-            - end_of_trial
-            - end_of_billing_period
-            - end_of_next_billing_period
         expiry_unit:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
           nullable: true
-          enum:
-            - days
-            - billing_periods
         expiry_unit_count:
           type: integer
           nullable: true
@@ -8392,11 +8366,9 @@ components:
           type: integer
           nullable: true
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditBundleStatus'
           nullable: true
-          enum:
-            - active
-            - inactive
       required:
         - bundle_name
         - price_per_unit
@@ -8593,7 +8565,8 @@ components:
           type: integer
           nullable: true
         tier_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
         value_bool:
           type: boolean
@@ -8824,48 +8797,12 @@ components:
         request_types:
           type: array
           items:
-            type: string
-            enum:
-              - company.updated
-              - user.updated
-              - plan.updated
-              - plan.entitlement.updated
-              - company.override.updated
-              - feature.updated
-              - flag.updated
-              - flag_rules.updated
-              - company.created
-              - user.created
-              - plan.created
-              - plan.entitlement.created
-              - company.override.created
-              - feature.created
-              - flag.created
-              - company.deleted
-              - user.deleted
-              - plan.deleted
-              - plan.entitlement.deleted
-              - company.override.deleted
-              - feature.deleted
-              - flag.deleted
-              - test.send
-              - subscription.trial.ended
-              - entitlement.limit.warning
-              - entitlement.limit.reached
-              - entitlement.soft_limit.warning
-              - entitlement.soft_limit.reached
-              - entitlement.tier_limit.warning
-              - entitlement.tier_limit.reached
-              - credit.limit.warning
-              - credit.limit.reached
-              - company.plan_changed
+            $ref: '#/components/schemas/WebhookRequestType'
           nullable: true
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/WebhookStatus'
           nullable: true
-          enum:
-            - active
-            - inactive
         url:
           type: string
           nullable: true
@@ -9116,7 +9053,8 @@ components:
           type: integer
           nullable: true
         tier_mode:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
         yearly_metered_price_id:
           type: string
@@ -9255,7 +9193,7 @@ components:
           type: string
           nullable: true
         request_type:
-          type: string
+          $ref: '#/components/schemas/WebhookRequestType'
         response_code:
           type: integer
           nullable: true
@@ -9264,7 +9202,7 @@ components:
           format: date-time
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/WebhookEventStatus'
         updated_at:
           type: string
           format: date-time
@@ -9292,7 +9230,7 @@ components:
           type: string
           nullable: true
         request_type:
-          type: string
+          $ref: '#/components/schemas/WebhookRequestType'
         response_code:
           type: integer
           nullable: true
@@ -9301,7 +9239,7 @@ components:
           format: date-time
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/WebhookEventStatus'
         updated_at:
           type: string
           format: date-time
@@ -9315,6 +9253,50 @@ components:
         - created_at
         - updated_at
       title: WebhookEventResponseData
+    WebhookEventStatus:
+      type: string
+      enum:
+        - failure
+        - pending
+        - success
+    WebhookRequestType:
+      type: string
+      enum:
+        - subscription.trial.ended
+        - company.created
+        - company.deleted
+        - company.override.created
+        - company.override.deleted
+        - company.override.expired
+        - company.override.updated
+        - company.plan_changed
+        - company.updated
+        - credit.limit.reached
+        - credit.limit.warning
+        - entitlement.limit.reached
+        - entitlement.limit.warning
+        - entitlement.soft_limit.reached
+        - entitlement.soft_limit.warning
+        - entitlement.tier_limit.reached
+        - entitlement.tier_limit.warning
+        - feature.created
+        - feature.deleted
+        - feature.updated
+        - flag.created
+        - flag.deleted
+        - flag_rules.updated
+        - flag.updated
+        - plan.created
+        - plan.deleted
+        - plan.entitlement.created
+        - plan.entitlement.deleted
+        - plan.entitlement.updated
+        - plan.updated
+        - rule.deleted
+        - test.send
+        - user.created
+        - user.deleted
+        - user.updated
     WebhookResponseData:
       type: object
       properties:
@@ -9338,11 +9320,11 @@ components:
         request_types:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/WebhookRequestType'
         secret:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/WebhookStatus'
         updated_at:
           type: string
           format: date-time
@@ -9358,17 +9340,18 @@ components:
         - url
         - updated_at
       title: WebhookResponseData
+    WebhookStatus:
+      type: string
+      enum:
+        - active
+        - inactive
     ZeroOutGrantRequestBody:
       type: object
       properties:
         reason:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
           nullable: true
-          enum:
-            - plan_change
-            - manual
-            - plan_period_reset
-            - expired
       title: ZeroOutGrantRequestBody
 paths:
   /api-keys:
@@ -10247,16 +10230,11 @@ paths:
         - name: status
           in: query
           schema:
-            type: string
-            enum:
-              - active
-              - inactive
+            $ref: '#/components/schemas/BillingCreditBundleStatus'
         - name: bundle_type
           in: query
           schema:
-            type: string
-            enum:
-              - fixed
+            $ref: '#/components/schemas/BillingCreditBundleType'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10289,9 +10267,7 @@ paths:
                     description: Input parameters
                     properties:
                       bundle_type:
-                        type: string
-                        enum:
-                          - fixed
+                        $ref: '#/components/schemas/BillingCreditBundleType'
                       credit_id:
                         type: string
                       ids:
@@ -10307,10 +10283,7 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       status:
-                        type: string
-                        enum:
-                          - active
-                          - inactive
+                        $ref: '#/components/schemas/BillingCreditBundleStatus'
                     title: ListCreditBundlesParams
                 required:
                   - data
@@ -10510,16 +10483,11 @@ paths:
         - name: status
           in: query
           schema:
-            type: string
-            enum:
-              - active
-              - inactive
+            $ref: '#/components/schemas/BillingCreditBundleStatus'
         - name: bundle_type
           in: query
           schema:
-            type: string
-            enum:
-              - fixed
+            $ref: '#/components/schemas/BillingCreditBundleType'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -10549,9 +10517,7 @@ paths:
                     description: Input parameters
                     properties:
                       bundle_type:
-                        type: string
-                        enum:
-                          - fixed
+                        $ref: '#/components/schemas/BillingCreditBundleType'
                       credit_id:
                         type: string
                       ids:
@@ -10567,10 +10533,7 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       status:
-                        type: string
-                        enum:
-                          - active
-                          - inactive
+                        $ref: '#/components/schemas/BillingCreditBundleStatus'
                     title: CountCreditBundlesParams
                 required:
                   - data
@@ -12141,17 +12104,11 @@ paths:
         - name: tiers_mode
           in: query
           schema:
-            type: string
-            enum:
-              - volume
-              - graduated
+            $ref: '#/components/schemas/BillingTiersMode'
         - name: usage_type
           in: query
           schema:
-            type: string
-            enum:
-              - licensed
-              - metered
+            $ref: '#/components/schemas/BillingPriceUsageType'
         - name: with_meter
           in: query
           description: Filter for prices with a meter
@@ -12229,15 +12186,9 @@ paths:
                       q:
                         type: string
                       tiers_mode:
-                        type: string
-                        enum:
-                          - volume
-                          - graduated
+                        $ref: '#/components/schemas/BillingTiersMode'
                       usage_type:
-                        type: string
-                        enum:
-                          - licensed
-                          - metered
+                        $ref: '#/components/schemas/BillingPriceUsageType'
                       with_meter:
                         type: boolean
                         description: Filter for prices with a meter
@@ -12397,17 +12348,11 @@ paths:
         - name: tiers_mode
           in: query
           schema:
-            type: string
-            enum:
-              - volume
-              - graduated
+            $ref: '#/components/schemas/BillingTiersMode'
         - name: usage_type
           in: query
           schema:
-            type: string
-            enum:
-              - licensed
-              - metered
+            $ref: '#/components/schemas/BillingPriceUsageType'
         - name: with_meter
           in: query
           description: Filter for prices with a meter
@@ -12485,15 +12430,9 @@ paths:
                       q:
                         type: string
                       tiers_mode:
-                        type: string
-                        enum:
-                          - volume
-                          - graduated
+                        $ref: '#/components/schemas/BillingTiersMode'
                       usage_type:
-                        type: string
-                        enum:
-                          - licensed
-                          - metered
+                        $ref: '#/components/schemas/BillingPriceUsageType'
                       with_meter:
                         type: boolean
                         description: Filter for prices with a meter
@@ -12617,10 +12556,7 @@ paths:
         - name: price_usage_type
           in: query
           schema:
-            type: string
-            enum:
-              - licensed
-              - metered
+            $ref: '#/components/schemas/BillingPriceUsageType'
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
@@ -12700,10 +12636,7 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       price_usage_type:
-                        type: string
-                        enum:
-                          - licensed
-                          - metered
+                        $ref: '#/components/schemas/BillingPriceUsageType'
                       q:
                         type: string
                       with_one_time_charges:
@@ -12759,10 +12692,7 @@ paths:
         - name: price_usage_type
           in: query
           schema:
-            type: string
-            enum:
-              - licensed
-              - metered
+            $ref: '#/components/schemas/BillingPriceUsageType'
         - name: without_linked_to_plan
           in: query
           description: Filter products that are not linked to any plan
@@ -12839,10 +12769,7 @@ paths:
                         description: Page offset (default 0)
                         example: '0'
                       price_usage_type:
-                        type: string
-                        enum:
-                          - licensed
-                          - metered
+                        $ref: '#/components/schemas/BillingPriceUsageType'
                       q:
                         type: string
                       with_one_time_charges:
