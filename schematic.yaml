@@ -2523,6 +2523,23 @@ components:
         - collect_phone
         - tax_collection_enabled
       title: ComponentCheckoutSettings
+    ComponentDisplaySettings:
+      type: object
+      properties:
+        show_as_monthly_prices:
+          type: boolean
+        show_credits:
+          type: boolean
+        show_period_toggle:
+          type: boolean
+        show_zero_price_as_free:
+          type: boolean
+      required:
+        - show_as_monthly_prices
+        - show_credits
+        - show_period_toggle
+        - show_zero_price_as_free
+      title: ComponentDisplaySettings
     ComponentEntityType:
       type: string
       enum:
@@ -2565,6 +2582,8 @@ components:
             $ref: '#/components/schemas/CreditCompanyGrantView'
         default_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        display_settings:
+          $ref: '#/components/schemas/ComponentDisplaySettings'
         feature_usage:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         post_trial_plan:
@@ -2577,12 +2596,18 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        show_as_monthly_prices:
+          type: boolean
+          deprecated: true
         show_credits:
           type: boolean
+          deprecated: true
         show_period_toggle:
           type: boolean
+          deprecated: true
         show_zero_price_as_free:
           type: boolean
+          deprecated: true
         stripe_embed:
           $ref: '#/components/schemas/StripeEmbedInfo'
         subscription:
@@ -2600,10 +2625,12 @@ components:
         - credit_bundles
         - credit_grants
         - prevent_self_service_downgrade
-        - show_period_toggle
+        - show_as_monthly_prices
         - show_credits
+        - show_period_toggle
         - show_zero_price_as_free
         - checkout_settings
+        - display_settings
       title: ComponentHydrateResponseData
     ComponentPreviewResponseData:
       type: object
@@ -2642,6 +2669,8 @@ components:
             $ref: '#/components/schemas/CreditCompanyGrantView'
         default_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        display_settings:
+          $ref: '#/components/schemas/ComponentDisplaySettings'
         feature_usage:
           $ref: '#/components/schemas/FeatureUsageDetailResponseData'
         invoices:
@@ -2658,12 +2687,18 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        show_as_monthly_prices:
+          type: boolean
+          deprecated: true
         show_credits:
           type: boolean
+          deprecated: true
         show_period_toggle:
           type: boolean
+          deprecated: true
         show_zero_price_as_free:
           type: boolean
+          deprecated: true
         stripe_embed:
           $ref: '#/components/schemas/StripeEmbedInfo'
         subscription:
@@ -2681,10 +2716,12 @@ components:
         - credit_bundles
         - credit_grants
         - prevent_self_service_downgrade
-        - show_period_toggle
+        - show_as_monthly_prices
         - show_credits
+        - show_period_toggle
         - show_zero_price_as_free
         - checkout_settings
+        - display_settings
         - invoices
       title: ComponentPreviewResponseData
     ComponentResponseData:
@@ -2716,6 +2753,23 @@ components:
         - created_at
         - updated_at
       title: ComponentResponseData
+    ComponentSettingsResponseData:
+      type: object
+      properties:
+        show_as_monthly_prices:
+          type: boolean
+        show_credits:
+          type: boolean
+        show_period_toggle:
+          type: boolean
+        show_zero_price_as_free:
+          type: boolean
+      required:
+        - show_as_monthly_prices
+        - show_credits
+        - show_period_toggle
+        - show_zero_price_as_free
+      title: ComponentSettingsResponseData
     ComponentState:
       type: string
       enum:
@@ -4159,6 +4213,8 @@ components:
           nullable: true
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
+        show_as_monthly_prices:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -4190,6 +4246,7 @@ components:
         - ordered_bundle_list
         - ordered_plans
         - prevent_downgrades_when_over_limit
+        - show_as_monthly_prices
         - show_credits
         - show_period_toggle
         - show_zero_price_as_free
@@ -6675,6 +6732,8 @@ components:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         checkout_settings:
           $ref: '#/components/schemas/CheckoutSettingsResponseData'
+        component_settings:
+          $ref: '#/components/schemas/ComponentSettingsResponseData'
         custom_plan_config:
           $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
         custom_plan_id:
@@ -6731,12 +6790,18 @@ components:
           nullable: true
         proration_behavior:
           type: string
+        show_as_monthly_prices:
+          type: boolean
+          deprecated: true
         show_credits:
           type: boolean
+          deprecated: true
         show_period_toggle:
           type: boolean
+          deprecated: true
         show_zero_price_as_free:
           type: boolean
+          deprecated: true
         sync_customer_billing_details:
           type: boolean
         tax_collection_enabled:
@@ -6764,10 +6829,12 @@ components:
         - ordered_plan_list
         - ordered_bundle_list
         - ordered_add_on_list
-        - show_period_toggle
+        - show_as_monthly_prices
         - show_credits
+        - show_period_toggle
         - show_zero_price_as_free
         - checkout_settings
+        - component_settings
         - prevent_downgrades_when_over_limit
         - prevent_self_service_downgrade
         - proration_behavior
@@ -6886,6 +6953,8 @@ components:
             type: string
         checkout_settings:
           $ref: '#/components/schemas/CheckoutSettingsResponseData'
+        component_settings:
+          $ref: '#/components/schemas/ComponentSettingsResponseData'
         default_plan_id:
           type: string
           nullable: true
@@ -6921,12 +6990,18 @@ components:
           nullable: true
         proration_behavior:
           type: string
+        show_as_monthly_prices:
+          type: boolean
+          deprecated: true
         show_credits:
           type: boolean
+          deprecated: true
         show_period_toggle:
           type: boolean
+          deprecated: true
         show_zero_price_as_free:
           type: boolean
+          deprecated: true
         sync_customer_billing_details:
           type: boolean
         tax_collection_enabled:
@@ -6949,10 +7024,12 @@ components:
         - plan_ids
         - ordered_add_on_ids
         - add_on_compatibilities
-        - show_period_toggle
+        - show_as_monthly_prices
         - show_credits
+        - show_period_toggle
         - show_zero_price_as_free
         - checkout_settings
+        - component_settings
         - prevent_downgrades_when_over_limit
         - prevent_self_service_downgrade
         - proration_behavior
@@ -8691,6 +8768,8 @@ components:
           nullable: true
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
+        show_as_monthly_prices:
+          type: boolean
         show_credits:
           type: boolean
         show_period_toggle:
@@ -8722,6 +8801,7 @@ components:
         - ordered_bundle_list
         - ordered_plans
         - prevent_downgrades_when_over_limit
+        - show_as_monthly_prices
         - show_credits
         - show_period_toggle
         - show_zero_price_as_free
