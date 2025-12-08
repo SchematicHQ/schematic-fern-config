@@ -29,17 +29,25 @@ Here's a barebones implementation of this:
 
 ```tsx
 "use client"
-import { useEmbed } from "@schematichq/schematic-components";
+
+import { 
+  CheckoutDialog,
+  EmbedProvider,
+  useEmbed,
+} from "@schematichq/schematic-components";
 import { useEffect, useState } from "react";
 
-export default function Checkout() {
+
+const PLAN_ID = ""; // plan to be preselected
+
+function Checkout() {
   const { initializeWithPlan, layout, CheckoutDialog } = useEmbed();
 
   const checkout = () => {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    initializeWithPlan("plan_abc123");
+    initializeWithPlan(PLAN_ID);
   };
 
   // this is necessary when launching straight to checkout
@@ -55,6 +63,14 @@ export default function Checkout() {
       {layout === "checkout" && <CheckoutDialog />}
     </>
   )
+}
+
+export default function CustomCheckout() {
+  return (
+    <EmbedProvider>
+      <Checkout />
+    </EmbedProvider>
+  );
 }
 ```
 
