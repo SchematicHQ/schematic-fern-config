@@ -7269,6 +7269,8 @@ components:
           nullable: true
         tax_require_billing_details:
           type: boolean
+        total_per_billing_period:
+          type: integer
         trial_end:
           type: string
           format: date-time
@@ -7278,15 +7280,16 @@ components:
           items:
             $ref: '#/components/schemas/PreviewSubscriptionUpcomingInvoiceLineItems'
       required:
+        - amount_off
         - due_now
+        - upcoming_invoice_line_items
         - new_charges
-        - proration
+        - percent_off
         - period_start
         - promo_code_applied
-        - upcoming_invoice_line_items
-        - percent_off
-        - amount_off
+        - proration
         - tax_require_billing_details
+        - total_per_billing_period
       title: PreviewSubscriptionFinanceResponseData
     PreviewSubscriptionUpcomingInvoiceLineItems:
       type: object
