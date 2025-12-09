@@ -3229,6 +3229,13 @@ components:
           type: integer
         reason:
           $ref: '#/components/schemas/BillingCreditGrantReason'
+        renewal_enabled:
+          type: boolean
+          nullable: true
+        renewal_period:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          nullable: true
       required:
         - company_id
         - credit_id
