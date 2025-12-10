@@ -30,21 +30,32 @@ Here's a barebones implementation of this:
 ```tsx
 "use client"
 
-import {
+import { 
+  CheckoutDialog,
   EmbedProvider,
   useEmbed,
 } from "@schematichq/schematic-components";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+
+const PLAN_ID = ""; // plan to be preselected
 
 function Checkout() {
   const { initializeWithPlan, layout, CheckoutDialog } = useEmbed();
 
-  const checkout = useCallback(async () => {
+  const checkout = () => {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    initializeWithPlan("plan_abc123");
-  }, [setAccessToken, setLayout, setCheckoutState]);
+    initializeWithPlan(PLAN_ID);
+  };
+
+  // this is necessary when launching straight to checkout
+  useEffect(() => {
+    if (stale) {
+      hydrate();
+    }
+  }, [stale, hydrate]);
 
   return (
     <>
@@ -61,7 +72,6 @@ export default function CustomCheckout() {
     </EmbedProvider>
   );
 }
-
 ```
 
 The key element is `initializeWithPlan`, an alternate entry point to the checkout flow. Above, we pass a plan ID to the function, which will pre-select the plan in the checkout flow.
@@ -70,8 +80,8 @@ In the above example, while the plan is pre-selected, the user will still be abl
 
 ```ts
 const config = {
-  planId: 'plan_VBXv4bHjSf3',      // pre-select a Plan
-  addOnIds: ['plan_AWv7bPjSx2'],   // pre-select 1 or more Add-ons
+  planId: 'plan_abc123',      // pre-select a Plan
+  addOnIds: ['plan_addon123'],   // pre-select 1 or more Add-ons
   skipped: {
     planStage: true,               // if true, skip Plan selection
     addOnStage: true               // if true, skip Add-on selection
