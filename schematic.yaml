@@ -1699,6 +1699,26 @@ components:
         - reason
         - value
       title: CheckFlagResponseData
+    CheckFlagsBulkRequestBody:
+      type: object
+      properties:
+        contexts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckFlagRequestBody'
+      required:
+        - contexts
+      title: CheckFlagsBulkRequestBody
+    CheckFlagsBulkResponseData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckFlagsResponseData'
+      required:
+        - data
+      title: CheckFlagsBulkResponseData
     CheckFlagsResponseData:
       type: object
       properties:
@@ -17994,6 +18014,46 @@ paths:
                   - data
                   - params
                 title: CheckFlagsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /flags/check-bulk:
+    post:
+      operationId: checkFlagsBulk
+      summary: Check flags bulk
+      tags:
+        - features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckFlagsBulkRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckFlagsBulkResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CheckFlagsBulkParams
+                required:
+                  - data
+                  - params
+                title: CheckFlagsBulkResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
