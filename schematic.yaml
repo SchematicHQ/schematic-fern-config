@@ -525,6 +525,10 @@ components:
           type: number
         source_label:
           type: string
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditTransferResponseData'
         updated_at:
           type: string
           format: date-time
@@ -4437,6 +4441,10 @@ components:
           nullable: true
         source_label:
           type: string
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditTransferView'
         updated_at:
           type: string
           format: date-time
@@ -4596,6 +4604,54 @@ components:
         - monthly
         - raw
         - weekly
+    CreditTransferResponseData:
+      type: object
+      properties:
+        amount:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        direction:
+          type: string
+        id:
+          type: string
+        reason:
+          type: string
+        related_grant_id:
+          type: string
+      required:
+        - amount
+        - created_at
+        - direction
+        - id
+        - reason
+        - related_grant_id
+      title: CreditTransferResponseData
+    CreditTransferView:
+      type: object
+      properties:
+        amount:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        direction:
+          type: string
+        id:
+          type: string
+        reason:
+          type: string
+        related_grant_id:
+          type: string
+      required:
+        - id
+        - amount
+        - created_at
+        - direction
+        - related_grant_id
+        - reason
+      title: CreditTransferView
     CreditTriggerConfig:
       type: object
       properties:
