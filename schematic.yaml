@@ -4553,6 +4553,9 @@ components:
         credit_remaining:
           type: number
           nullable: true
+        credit_total:
+          type: number
+          nullable: true
         credit_type_icon:
           type: string
           nullable: true
@@ -4562,29 +4565,7 @@ components:
         credit_used:
           type: number
           nullable: true
-        usage_aggregation:
-          $ref: '#/components/schemas/CreditUsageAggregation'
       title: CreditUsage
-    CreditUsageAggregation:
-      type: object
-      properties:
-        usage_this_billing_period:
-          type: number
-          description: Credit usage within the current billing period
-          nullable: true
-        usage_this_calendar_month:
-          type: number
-          description: Credit usage within the current calendar month
-          nullable: true
-        usage_this_week:
-          type: number
-          description: Credit usage within the current calendar week (Monday to Sunday)
-          nullable: true
-        usage_today:
-          type: number
-          description: Credit usage for the current day
-          nullable: true
-      title: CreditUsageAggregation
     CreditUsageResponseData:
       type: object
       properties:
@@ -4604,11 +4585,7 @@ components:
           nullable: true
         credit_total:
           type: number
-          description: >-
-            Deprecated: Use credit_remaining instead. This field is no longer
-            populated.
           nullable: true
-          deprecated: true
         credit_type_icon:
           type: string
           nullable: true
@@ -5213,8 +5190,7 @@ components:
           type: integer
           description: >-
             The maximum amount of usage that is permitted; a null value
-            indicates that unlimited usage is permitted or that this is a
-            credit-based entitlement (use credit_remaining instead).
+            indicates that unlimited usage is permitted.
           nullable: true
         allocation_type:
           allOf:
@@ -5246,23 +5222,13 @@ components:
           nullable: true
         credit_total:
           type: number
-          description: >-
-            Deprecated: Use credit_remaining instead. This field is no longer
-            populated.
           nullable: true
-          deprecated: true
         credit_type_icon:
           type: string
           description: Icon identifier for the credit type
           nullable: true
         credit_usage:
           $ref: '#/components/schemas/CreditUsage'
-        credit_usage_aggregation:
-          allOf:
-            - $ref: '#/components/schemas/CreditUsageAggregation'
-            - description: >-
-                Aggregated credit usage by time period (day, week, month,
-                billing period)
         credit_used:
           type: number
           nullable: true
@@ -5342,8 +5308,7 @@ components:
           type: integer
           description: >-
             The amount of usage that has been consumed; a null value indicates
-            that usage is not being measured or that this is a credit-based
-            entitlement (use credit_used instead).
+            that usage is not being measured.
           nullable: true
         yearly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -5620,8 +5585,7 @@ components:
           type: integer
           description: >-
             The maximum amount of usage that is permitted; a null value
-            indicates that unlimited usage is permitted or that this is a
-            credit-based entitlement (use credit_remaining instead).
+            indicates that unlimited usage is permitted.
           nullable: true
         allocation_type:
           allOf:
@@ -5651,21 +5615,11 @@ components:
           nullable: true
         credit_total:
           type: number
-          description: >-
-            Deprecated: Use credit_remaining instead. This field is no longer
-            populated.
           nullable: true
-          deprecated: true
         credit_type_icon:
           type: string
           description: Icon identifier for the credit type
           nullable: true
-        credit_usage_aggregation:
-          allOf:
-            - $ref: '#/components/schemas/CreditUsageAggregation'
-            - description: >-
-                Aggregated credit usage by time period (day, week, month,
-                billing period)
         credit_used:
           type: number
           nullable: true
@@ -5745,8 +5699,7 @@ components:
           type: integer
           description: >-
             The amount of usage that has been consumed; a null value indicates
-            that usage is not being measured or that this is a credit-based
-            entitlement (use credit_used instead).
+            that usage is not being measured.
           nullable: true
         yearly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -16405,18 +16358,6 @@ paths:
             type: array
             items:
               type: string
-        - name: include_usage_aggregation
-          in: query
-          description: >-
-            Include time-bucketed usage aggregation (today, this week, this
-            month, billing period) for credit-based entitlements. Defaults to
-            false for performance.
-          schema:
-            type: boolean
-            description: >-
-              Include time-bucketed usage aggregation (today, this week, this
-              month, billing period) for credit-based entitlements. Defaults to
-              false for performance.
         - name: q
           in: query
           schema:
@@ -16466,12 +16407,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      include_usage_aggregation:
-                        type: boolean
-                        description: >-
-                          Include time-bucketed usage aggregation (today, this
-                          week, this month, billing period) for credit-based
-                          entitlements. Defaults to false for performance.
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -16522,18 +16457,6 @@ paths:
             type: array
             items:
               type: string
-        - name: include_usage_aggregation
-          in: query
-          description: >-
-            Include time-bucketed usage aggregation (today, this week, this
-            month, billing period) for credit-based entitlements. Defaults to
-            false for performance.
-          schema:
-            type: boolean
-            description: >-
-              Include time-bucketed usage aggregation (today, this week, this
-              month, billing period) for credit-based entitlements. Defaults to
-              false for performance.
         - name: q
           in: query
           schema:
@@ -16580,12 +16503,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      include_usage_aggregation:
-                        type: boolean
-                        description: >-
-                          Include time-bucketed usage aggregation (today, this
-                          week, this month, billing period) for credit-based
-                          entitlements. Defaults to false for performance.
                       limit:
                         type: integer
                         description: Page limit (default 100)
