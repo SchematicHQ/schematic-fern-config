@@ -43,6 +43,7 @@ groups:
                 - LocalCache
                 - Schematic
                 - SchematicConfig
+        smart-casing: false
   csharp-sdk:
     generators:
       - name: fernapi/fern-csharp-sdk
@@ -61,13 +62,14 @@ groups:
           extra-dependencies:
             moq: 4.20.70
             Moq.Contrib.HttpClient: 1.4.0
+        smart-casing: false
   ts-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
         version: 0.51.7
         api:
           settings:
-            unions: v1
+            prefer-undiscriminated-unions-with-literals: true
         output:
           location: npm
           package-name: '@schematichq/schematic-typescript-node'
@@ -140,3 +142,4 @@ groups:
           custom-dependencies:
             - testImplementation org.mockito:mockito-core:5.3.1
             - testImplementation org.mockito:mockito-junit-jupiter:5.3.1
+        smart-casing: false
