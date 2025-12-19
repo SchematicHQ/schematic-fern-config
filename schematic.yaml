@@ -300,6 +300,8 @@ components:
         percent_off:
           type: number
           nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         times_redeemed:
           type: integer
         valid_from:
@@ -315,10 +317,11 @@ components:
         - account_id
         - environment_id
         - external_id
-        - name
-        - times_redeemed
         - is_active
         - metadata
+        - name
+        - provider_type
+        - times_redeemed
       title: BillingCouponResponseData
     BillingCreditBundleResponseData:
       type: object
@@ -661,15 +664,18 @@ components:
           type: string
         name:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         updated_at:
           type: string
           format: date-time
       required:
-        - id
-        - external_id
-        - name
-        - failed_to_import
         - email
+        - external_id
+        - failed_to_import
+        - id
+        - name
+        - provider_type
         - updated_at
       title: BillingCustomerResponseData
     BillingCustomerSubscription:
@@ -716,6 +722,8 @@ components:
           type: string
         name:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         subscriptions:
           type: array
           items:
@@ -724,11 +732,12 @@ components:
           type: string
           format: date-time
       required:
-        - id
-        - external_id
-        - name
-        - failed_to_import
         - email
+        - external_id
+        - failed_to_import
+        - id
+        - name
+        - provider_type
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
@@ -745,12 +754,15 @@ components:
           type: string
         id:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
       required:
-        - id
-        - external_price_id
         - dispaly_name
         - event_name
         - event_payload_key
+        - external_price_id
+        - id
+        - provider_type
       title: BillingMeterResponseData
     BillingPlanCreditGrantResetCadence:
       type: string
@@ -866,15 +878,18 @@ components:
         price_decimal:
           type: string
           nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         scheme:
           $ref: '#/components/schemas/BillingPriceScheme'
       required:
-        - id
-        - external_price_id
-        - price
         - currency
-        - scheme
+        - external_price_id
+        - id
         - interval
+        - price
+        - provider_type
+        - scheme
       title: BillingPriceResponseData
     BillingPriceScheme:
       type: string
@@ -932,6 +947,8 @@ components:
           type: string
         product_name:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         tiers_mode:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
@@ -943,17 +960,18 @@ components:
           $ref: '#/components/schemas/BillingPriceUsageType'
       required:
         - id
+        - billing_scheme
+        - created_at
+        - currency
+        - interval
+        - is_active
+        - package_size
+        - price
         - price_external_id
         - product_external_id
-        - interval
-        - billing_scheme
-        - usage_type
-        - price
-        - package_size
-        - is_active
-        - currency
-        - created_at
+        - provider_type
         - updated_at
+        - usage_type
         - price_id
         - product_id
         - product_name
@@ -991,6 +1009,8 @@ components:
             $ref: '#/components/schemas/BillingPriceResponseData'
         product_id:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
         subscription_count:
@@ -999,15 +1019,16 @@ components:
           type: string
           format: date-time
       required:
-        - product_id
-        - external_id
         - account_id
+        - created_at
         - environment_id
+        - external_id
+        - is_active
         - name
         - price
+        - product_id
+        - provider_type
         - quantity
-        - is_active
-        - created_at
         - updated_at
         - prices
         - subscription_count
@@ -1053,6 +1074,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductPriceTierResponseData'
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
         subscription_id:
@@ -1067,22 +1090,23 @@ components:
           $ref: '#/components/schemas/BillingPriceUsageType'
       required:
         - id
+        - created_at
+        - currency
         - environment_id
         - external_id
-        - name
-        - quantity
-        - currency
-        - price
-        - package_size
-        - price_id
-        - price_external_id
         - interval
-        - subscription_id
-        - usage_type
-        - billing_scheme
+        - name
+        - package_size
+        - price
+        - price_external_id
+        - price_id
         - price_tier
-        - created_at
+        - provider_type
+        - quantity
+        - billing_scheme
+        - subscription_id
         - updated_at
+        - usage_type
       title: BillingProductForSubscriptionResponseData
     BillingProductPlanResponseData:
       type: object
@@ -1159,6 +1183,8 @@ components:
           type: string
         product_external_id:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         tiers_mode:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
@@ -1170,17 +1196,18 @@ components:
           $ref: '#/components/schemas/BillingPriceUsageType'
       required:
         - id
+        - billing_scheme
+        - created_at
+        - currency
+        - interval
+        - is_active
+        - package_size
+        - price
         - price_external_id
         - product_external_id
-        - interval
-        - billing_scheme
-        - usage_type
-        - price
-        - package_size
-        - is_active
-        - currency
-        - created_at
+        - provider_type
         - updated_at
+        - usage_type
       title: BillingProductPriceResponseData
     BillingProductPriceTierResponseData:
       type: object
@@ -1267,23 +1294,31 @@ components:
           nullable: true
         product_id:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
         updated_at:
           type: string
           format: date-time
       required:
-        - product_id
-        - external_id
         - account_id
+        - created_at
         - environment_id
+        - external_id
+        - is_active
         - name
         - price
+        - product_id
+        - provider_type
         - quantity
-        - is_active
-        - created_at
         - updated_at
       title: BillingProductResponseData
+    BillingProviderType:
+      type: string
+      enum:
+        - schematic
+        - stripe
     BillingSubscriptionDiscount:
       type: object
       properties:
@@ -1399,6 +1434,8 @@ components:
           type: integer
         period_start:
           type: integer
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         status:
           type: string
         subscription_external_id:
@@ -1413,17 +1450,18 @@ components:
             - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
+        - cancel_at_period_end
         - created_at
         - currency
         - customer_external_id
-        - period_start
-        - period_end
         - subscription_external_id
         - id
         - interval
+        - period_end
+        - period_start
         - total_price
+        - provider_type
         - status
-        - cancel_at_period_end
       title: BillingSubscriptionResponseData
     BillingSubscriptionTrialEndSetting:
       type: string
@@ -1480,6 +1518,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         status:
           type: string
         subscription_external_id:
@@ -1494,17 +1534,18 @@ components:
             - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
+        - cancel_at_period_end
         - created_at
         - currency
         - customer_external_id
-        - period_start
-        - period_end
         - subscription_external_id
         - id
         - interval
+        - period_end
+        - period_start
         - total_price
+        - provider_type
         - status
-        - cancel_at_period_end
         - products
         - discounts
       title: BillingSubscriptionView
@@ -1842,6 +1883,8 @@ components:
           type: integer
         period_start:
           type: integer
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         status:
           type: string
         subscription_external_id:
@@ -1856,17 +1899,18 @@ components:
             - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
           nullable: true
       required:
+        - cancel_at_period_end
         - created_at
         - currency
         - customer_external_id
-        - period_start
-        - period_end
         - subscription_external_id
         - id
         - interval
+        - period_end
+        - period_start
         - total_price
+        - provider_type
         - status
-        - cancel_at_period_end
       title: CheckoutSubscription
     CompanyDetailResponseData:
       type: object
@@ -2978,12 +3022,16 @@ components:
           type: object
         name:
           type: string
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
       required:
-        - external_id
-        - name
         - email
+        - external_id
         - failed_to_import
         - meta
+        - name
       title: CreateBillingCustomerRequestBody
     CreateBillingPlanCreditGrantRequestBody:
       type: object
@@ -3079,6 +3127,10 @@ components:
             $ref: '#/components/schemas/CreateBillingPriceTierRequestBody'
         product_external_id:
           type: string
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
         tiers_mode:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
@@ -3086,16 +3138,16 @@ components:
         usage_type:
           $ref: '#/components/schemas/BillingPriceUsageType'
       required:
+        - billing_scheme
+        - currency
         - external_account_id
-        - product_external_id
-        - price_external_id
         - interval
         - is_active
         - price
-        - billing_scheme
-        - currency
-        - usage_type
+        - price_external_id
         - price_tiers
+        - product_external_id
+        - usage_type
       title: CreateBillingPriceRequestBody
     CreateBillingPriceTierRequestBody:
       type: object
@@ -3111,6 +3163,10 @@ components:
           nullable: true
         price_external_id:
           type: string
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
         up_to:
           type: integer
           nullable: true
@@ -3129,10 +3185,14 @@ components:
           type: string
         price:
           type: number
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
       required:
-        - external_id
         - name
         - price
+        - external_id
       title: CreateBillingProductRequestBody
     CreateBillingSubscriptionRequestBody:
       type: object
@@ -5944,6 +6004,8 @@ components:
         payment_method_external_id:
           type: string
           nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         subscription_external_id:
           type: string
           nullable: true
@@ -5957,16 +6019,17 @@ components:
           nullable: true
       required:
         - id
-        - environment_id
-        - customer_external_id
-        - created_at
-        - updated_at
         - amount_due
         - amount_paid
         - amount_remaining
         - collection_method
+        - created_at
         - currency
+        - customer_external_id
+        - environment_id
+        - provider_type
         - subtotal
+        - updated_at
       title: InvoiceResponseData
     IssueTemporaryAccessTokenRequestBody:
       type: object
@@ -6204,17 +6267,20 @@ components:
           type: string
         payment_method_type:
           type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         updated_at:
           type: string
           format: date-time
       required:
         - id
-        - environment_id
-        - customer_external_id
-        - external_id
         - created_at
-        - updated_at
+        - customer_external_id
+        - environment_id
+        - external_id
         - payment_method_type
+        - provider_type
+        - updated_at
       title: PaymentMethodResponseData
     PlanChangeAction:
       type: string
@@ -11487,14 +11553,18 @@ paths:
             type: array
             items:
               type: string
-        - name: name
-          in: query
-          schema:
-            type: string
         - name: failed_to_import
           in: query
           schema:
             type: boolean
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: provider_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BillingProviderType'
         - name: q
           in: query
           schema:
@@ -11547,6 +11617,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                     title: ListCustomersWithSubscriptionsParams
@@ -11577,14 +11649,18 @@ paths:
             type: array
             items:
               type: string
-        - name: name
-          in: query
-          schema:
-            type: string
         - name: failed_to_import
           in: query
           schema:
             type: boolean
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: provider_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BillingProviderType'
         - name: q
           in: query
           schema:
@@ -11633,6 +11709,8 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                     title: CountCustomersParams
@@ -12043,6 +12121,10 @@ paths:
             type: array
             items:
               type: string
+        - name: provider_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BillingProviderType'
         - name: q
           in: query
           schema:
@@ -12129,6 +12211,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                       tiers_mode:
@@ -12287,6 +12371,10 @@ paths:
             type: array
             items:
               type: string
+        - name: provider_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BillingProviderType'
         - name: q
           in: query
           schema:
@@ -12373,6 +12461,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                       tiers_mode:
@@ -12491,11 +12581,13 @@ paths:
             type: array
             items:
               type: string
-        - name: name
+        - name: is_active
           in: query
+          description: Filter products that are active
           schema:
-            type: string
-        - name: q
+            type: boolean
+            description: Filter products that are active
+        - name: name
           in: query
           schema:
             type: string
@@ -12503,36 +12595,38 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/BillingPriceUsageType'
-        - name: without_linked_to_plan
+        - name: provider_type
           in: query
-          description: Filter products that are not linked to any plan
           schema:
-            type: boolean
-            description: Filter products that are not linked to any plan
+            $ref: '#/components/schemas/BillingProviderType'
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: with_one_time_charges
           in: query
           description: Filter products that are one time charges
           schema:
             type: boolean
             description: Filter products that are one time charges
-        - name: with_zero_price
-          in: query
-          description: Filter products that have zero price for free subscription type
-          schema:
-            type: boolean
-            description: Filter products that have zero price for free subscription type
         - name: with_prices_only
           in: query
           description: Filter products that have prices
           schema:
             type: boolean
             description: Filter products that have prices
-        - name: is_active
+        - name: with_zero_price
           in: query
-          description: Filter products that are active
+          description: Filter products that have zero price for free subscription type
           schema:
             type: boolean
-            description: Filter products that are active
+            description: Filter products that have zero price for free subscription type
+        - name: without_linked_to_plan
+          in: query
+          description: Filter products that are not linked to any plan
+          schema:
+            type: boolean
+            description: Filter products that are not linked to any plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12583,6 +12677,8 @@ paths:
                         example: '0'
                       price_usage_type:
                         $ref: '#/components/schemas/BillingPriceUsageType'
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                       with_one_time_charges:
@@ -12627,11 +12723,13 @@ paths:
             type: array
             items:
               type: string
-        - name: name
+        - name: is_active
           in: query
+          description: Filter products that are active
           schema:
-            type: string
-        - name: q
+            type: boolean
+            description: Filter products that are active
+        - name: name
           in: query
           schema:
             type: string
@@ -12639,36 +12737,38 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/BillingPriceUsageType'
-        - name: without_linked_to_plan
+        - name: provider_type
           in: query
-          description: Filter products that are not linked to any plan
           schema:
-            type: boolean
-            description: Filter products that are not linked to any plan
+            $ref: '#/components/schemas/BillingProviderType'
+        - name: q
+          in: query
+          schema:
+            type: string
         - name: with_one_time_charges
           in: query
           description: Filter products that are one time charges
           schema:
             type: boolean
             description: Filter products that are one time charges
-        - name: with_zero_price
-          in: query
-          description: Filter products that have zero price for free subscription type
-          schema:
-            type: boolean
-            description: Filter products that have zero price for free subscription type
         - name: with_prices_only
           in: query
           description: Filter products that have prices
           schema:
             type: boolean
             description: Filter products that have prices
-        - name: is_active
+        - name: with_zero_price
           in: query
-          description: Filter products that are active
+          description: Filter products that have zero price for free subscription type
           schema:
             type: boolean
-            description: Filter products that are active
+            description: Filter products that have zero price for free subscription type
+        - name: without_linked_to_plan
+          in: query
+          description: Filter products that are not linked to any plan
+          schema:
+            type: boolean
+            description: Filter products that are not linked to any plan
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12716,6 +12816,8 @@ paths:
                         example: '0'
                       price_usage_type:
                         $ref: '#/components/schemas/BillingPriceUsageType'
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
                       with_one_time_charges:
