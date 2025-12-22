@@ -7,7 +7,7 @@ openapi: 3.0.0
 security:
   - ApiKeyAuth: []
 servers:
-  - url: https://api.schematichq.dev
+  - url: https://api.schematichq.com
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -12583,10 +12583,10 @@ paths:
               type: string
         - name: is_active
           in: query
-          description: Filter products that are active
+          description: Filter products that are active. Defaults to true if not specified
           schema:
             type: boolean
-            description: Filter products that are active
+            description: Filter products that are active. Defaults to true if not specified
         - name: name
           in: query
           schema:
@@ -12664,7 +12664,9 @@ paths:
                           type: string
                       is_active:
                         type: boolean
-                        description: Filter products that are active
+                        description: >-
+                          Filter products that are active. Defaults to true if
+                          not specified
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -12725,10 +12727,10 @@ paths:
               type: string
         - name: is_active
           in: query
-          description: Filter products that are active
+          description: Filter products that are active. Defaults to true if not specified
           schema:
             type: boolean
-            description: Filter products that are active
+            description: Filter products that are active. Defaults to true if not specified
         - name: name
           in: query
           schema:
@@ -12803,7 +12805,9 @@ paths:
                           type: string
                       is_active:
                         type: boolean
-                        description: Filter products that are active
+                        description: >-
+                          Filter products that are active. Defaults to true if
+                          not specified
                       limit:
                         type: integer
                         description: Page limit (default 100)
