@@ -526,6 +526,12 @@ components:
           type: number
         quantity_used:
           type: number
+        renewal_enabled:
+          type: boolean
+        renewal_period:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
         source_label:
           type: string
         transfers:
@@ -560,6 +566,7 @@ components:
         - created_at
         - updated_at
         - grant_reason
+        - renewal_enabled
       title: BillingCreditGrantResponseData
     BillingCreditGrantZeroedOutReason:
       type: string
@@ -4372,6 +4379,12 @@ components:
           type: number
         quantity_used:
           type: number
+        renewal_enabled:
+          type: boolean
+        renewal_period:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
         singular_name:
           type: string
           nullable: true
@@ -4410,6 +4423,7 @@ components:
         - created_at
         - updated_at
         - grant_reason
+        - renewal_enabled
       title: CreditCompanyGrantView
     CreditGrantDetail:
       type: object
