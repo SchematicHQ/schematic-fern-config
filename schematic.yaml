@@ -5113,6 +5113,7 @@ components:
           type: string
           format: date-time
           nullable: true
+          deprecated: true
         environment_id:
           type: string
           nullable: true
@@ -5137,6 +5138,7 @@ components:
           type: string
           format: date-time
           nullable: true
+          deprecated: true
         quantity:
           type: integer
         sent_at:
@@ -5153,6 +5155,8 @@ components:
         updated_at:
           type: string
           format: date-time
+          nullable: true
+          deprecated: true
         user:
           $ref: '#/components/schemas/PreviewObject'
         user_id:
@@ -5167,7 +5171,6 @@ components:
         - id
         - quantity
         - status
-        - updated_at
         - features
       title: EventDetailResponseData
     EventResponseData:
@@ -5190,6 +5193,7 @@ components:
           type: string
           format: date-time
           nullable: true
+          deprecated: true
         environment_id:
           type: string
           nullable: true
@@ -5210,6 +5214,7 @@ components:
           type: string
           format: date-time
           nullable: true
+          deprecated: true
         quantity:
           type: integer
         sent_at:
@@ -5226,6 +5231,8 @@ components:
         updated_at:
           type: string
           format: date-time
+          nullable: true
+          deprecated: true
         user_id:
           type: string
           nullable: true
@@ -5238,7 +5245,6 @@ components:
         - id
         - quantity
         - status
-        - updated_at
       title: EventResponseData
     EventStatus:
       type: string
@@ -7283,13 +7289,13 @@ components:
           nullable: true
         remote_addr:
           type: string
+          nullable: true
         remote_ip:
           type: string
         user_agent:
           type: string
       required:
         - captured_at
-        - remote_addr
         - remote_ip
         - user_agent
       title: RawEventResponseData
