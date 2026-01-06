@@ -665,8 +665,6 @@ components:
           type: string
         external_id:
           type: string
-        failed_to_import:
-          type: boolean
         id:
           type: string
         name:
@@ -679,7 +677,6 @@ components:
       required:
         - email
         - external_id
-        - failed_to_import
         - id
         - name
         - provider_type
@@ -723,8 +720,6 @@ components:
           type: string
         external_id:
           type: string
-        failed_to_import:
-          type: boolean
         id:
           type: string
         name:
@@ -741,7 +736,6 @@ components:
       required:
         - email
         - external_id
-        - failed_to_import
         - id
         - name
         - provider_type
@@ -3021,8 +3015,6 @@ components:
           type: string
         external_id:
           type: string
-        failed_to_import:
-          type: boolean
         meta:
           additionalProperties:
             type: string
@@ -3036,7 +3028,6 @@ components:
       required:
         - email
         - external_id
-        - failed_to_import
         - meta
         - name
       title: CreateBillingCustomerRequestBody
@@ -11575,10 +11566,6 @@ paths:
             type: array
             items:
               type: string
-        - name: failed_to_import
-          in: query
-          schema:
-            type: boolean
         - name: name
           in: query
           schema:
@@ -11627,8 +11614,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      failed_to_import:
-                        type: boolean
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -11671,10 +11656,6 @@ paths:
             type: array
             items:
               type: string
-        - name: failed_to_import
-          in: query
-          schema:
-            type: boolean
         - name: name
           in: query
           schema:
@@ -11719,8 +11700,6 @@ paths:
                         type: array
                         items:
                           type: string
-                      failed_to_import:
-                        type: boolean
                       limit:
                         type: integer
                         description: Page limit (default 100)
