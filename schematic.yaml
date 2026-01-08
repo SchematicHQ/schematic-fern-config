@@ -3455,6 +3455,107 @@ components:
         - output_file_type
         - metadata
       title: CreateDataExportRequestBody
+    CreateEntitlementInBundleRequestBody:
+      type: object
+      properties:
+        billing_product_id:
+          type: string
+          nullable: true
+        billing_threshold:
+          type: integer
+          nullable: true
+        credit_consumption_rate:
+          type: number
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        feature_id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_month
+            - current_week
+            - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        monthly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        monthly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        monthly_unit_price:
+          type: integer
+          nullable: true
+        monthly_unit_price_decimal:
+          type: string
+          nullable: true
+        overage_billing_product_id:
+          type: string
+          nullable: true
+          deprecated: true
+        price_behavior:
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
+          nullable: true
+        price_tiers:
+          type: array
+          description: Use MonthlyPriceTiers or YearlyPriceTiers instead
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          deprecated: true
+        soft_limit:
+          type: integer
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          nullable: true
+        value_bool:
+          type: boolean
+          nullable: true
+        value_credit_id:
+          type: string
+          nullable: true
+        value_numeric:
+          type: integer
+          nullable: true
+        value_trait_id:
+          type: string
+          nullable: true
+        value_type:
+          $ref: '#/components/schemas/EntitlementValueType'
+        yearly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        yearly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        yearly_unit_price:
+          type: integer
+          nullable: true
+        yearly_unit_price_decimal:
+          type: string
+          nullable: true
+      required:
+        - feature_id
+        - value_type
+      title: CreateEntitlementInBundleRequestBody
     CreateEntitlementReqCommon:
       type: object
       properties:
@@ -4014,6 +4115,28 @@ components:
         - customer_external_id
         - payment_method_type
       title: CreatePaymentMethodRequestBody
+    CreatePlanBundleRequestBody:
+      type: object
+      properties:
+        billing_product:
+          $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleEntitlementRequestBody'
+        plan:
+          $ref: '#/components/schemas/CreatePlanRequestBody'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
+      required:
+        - entitlements
+      title: CreatePlanBundleRequestBody
     CreatePlanEntitlementRequestBody:
       type: object
       properties:
@@ -4763,6 +4886,13 @@ components:
       type: string
       enum:
         - company-feature-usage
+    DeleteBillingPlanCreditGrantRequestBody:
+      type: object
+      properties:
+        apply_to_existing:
+          type: boolean
+          nullable: true
+      title: DeleteBillingPlanCreditGrantRequestBody
     DeleteResponse:
       type: object
       properties:
@@ -6293,6 +6423,62 @@ components:
         - provider_type
         - updated_at
       title: PaymentMethodResponseData
+    PlanBundleAction:
+      type: string
+      enum:
+        - create
+        - update
+        - delete
+    PlanBundleCreditGrantRequestBody:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/PlanBundleAction'
+        create_req:
+          $ref: '#/components/schemas/CreateBillingPlanCreditGrantRequestBody'
+        credit_grant_id:
+          type: string
+          nullable: true
+        delete_req:
+          $ref: '#/components/schemas/DeleteBillingPlanCreditGrantRequestBody'
+        update_req:
+          $ref: '#/components/schemas/UpdateBillingPlanCreditGrantRequestBody'
+      required:
+        - action
+      title: PlanBundleCreditGrantRequestBody
+    PlanBundleEntitlementRequestBody:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/PlanBundleAction'
+        entitlement_id:
+          type: string
+          nullable: true
+        req:
+          $ref: '#/components/schemas/CreateEntitlementInBundleRequestBody'
+      required:
+        - action
+      title: PlanBundleEntitlementRequestBody
+    PlanBundleResponseData:
+      type: object
+      properties:
+        billing_product:
+          $ref: '#/components/schemas/BillingProductPlanResponseData'
+        credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        plan:
+          $ref: '#/components/schemas/PlanResponseData'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanTraitResponseData'
+      title: PlanBundleResponseData
     PlanChangeAction:
       type: string
       enum:
@@ -8555,6 +8741,28 @@ components:
         - price_id
         - quantity
       title: UpdatePayInAdvanceRequestBody
+    UpdatePlanBundleRequestBody:
+      type: object
+      properties:
+        billing_product:
+          $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleEntitlementRequestBody'
+        plan:
+          $ref: '#/components/schemas/UpdatePlanRequestBody'
+        traits:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
+      required:
+        - entitlements
+      title: UpdatePlanBundleRequestBody
     UpdatePlanEntitlementRequestBody:
       type: object
       properties:
@@ -18008,6 +18216,93 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plan-bundles:
+    post:
+      operationId: createPlanBundle
+      summary: Create plan bundle
+      tags:
+        - planbundle
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanBundleRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanBundleResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreatePlanBundleParams
+                required:
+                  - data
+                  - params
+                title: CreatePlanBundleResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-bundles/{plan_bundle_id}:
+    put:
+      operationId: updatePlanBundle
+      summary: Update plan bundle
+      tags:
+        - planbundle
+      parameters:
+        - name: plan_bundle_id
+          in: path
+          description: plan_bundle_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanBundleRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanBundleResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdatePlanBundleParams
+                required:
+                  - data
+                  - params
+                title: UpdatePlanBundleResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plan-changes:
     get:
       operationId: listPlanChanges
@@ -20958,6 +21253,7 @@ tags:
   - name: events
   - name: features
   - name: plans
+  - name: planbundle
   - name: entitlements
   - name: billing
   - name: webhooks
