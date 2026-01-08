@@ -2274,6 +2274,10 @@ components:
             $ref: '#/components/schemas/FeatureUsageResponseData'
         valid:
           type: boolean
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanVersionResponseData'
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -2286,11 +2290,12 @@ components:
         - updated_at
         - charge_type
         - company_count
+        - controlled_by
         - features
         - is_default
-        - is_trialable
-        - controlled_by
         - is_free
+        - is_trialable
+        - versions
         - is_custom
         - entitlements
         - compatible_plan_ids
@@ -6738,6 +6743,10 @@ components:
         updated_at:
           type: string
           format: date-time
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanVersionResponseData'
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -6750,11 +6759,12 @@ components:
         - updated_at
         - charge_type
         - company_count
+        - controlled_by
         - features
         - is_default
-        - is_trialable
-        - controlled_by
         - is_free
+        - is_trialable
+        - versions
       title: PlanDetailResponseData
     PlanEntitlementResponseData:
       type: object
@@ -7034,6 +7044,10 @@ components:
         updated_at:
           type: string
           format: date-time
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanVersionResponseData'
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -7046,11 +7060,12 @@ components:
         - updated_at
         - charge_type
         - company_count
+        - controlled_by
         - features
         - is_default
-        - is_trialable
-        - controlled_by
         - is_free
+        - is_trialable
+        - versions
         - is_custom
         - entitlements
         - compatible_plan_ids
@@ -7281,6 +7296,52 @@ components:
       enum:
         - plan
         - add_on
+    PlanVersionResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        description:
+          type: string
+        environment_id:
+          type: string
+        icon:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        original_plan_id:
+          type: string
+          nullable: true
+        plan_type:
+          $ref: '#/components/schemas/PlanType'
+        status:
+          $ref: '#/components/schemas/PlanVersionStatus'
+        updated_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+      required:
+        - created_at
+        - description
+        - environment_id
+        - icon
+        - id
+        - name
+        - plan_type
+        - status
+        - updated_at
+        - version
+      title: PlanVersionResponseData
+    PlanVersionStatus:
+      type: string
+      enum:
+        - published
+        - draft
+        - archived
     PreviewObject:
       type: object
       properties:
