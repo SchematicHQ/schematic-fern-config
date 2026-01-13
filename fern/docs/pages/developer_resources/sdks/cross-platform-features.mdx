@@ -33,11 +33,7 @@ Our SDKs implement intelligent event buffering to batch multiple events together
 
 Local caching is built into our SDKs to reduce redundant API calls and improve response times. When enabled, the SDK caches flag checks for a short amount of time to improve performance in request handling. See the specific SDK documentation for more information on adjust or disable caching.
 
-Locally cached data is 
-
-You can configure cache size and time-to-live (TTL) settings, or disable caching entirely if you prefer to implement your own caching strategy. Local caching is supported in Go, Node.js, Python, C#, and Java SDKs. 
-
-<Info>Local caching will not work for serverless architectures. See [Data Replication](#data-replication) for a better solution for these scenarios.</Info>
+Additionally, SDKs can be configured 
 
 TODO: anyone can use local caching
 
