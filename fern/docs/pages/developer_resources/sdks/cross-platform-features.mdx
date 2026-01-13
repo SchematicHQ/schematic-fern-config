@@ -1,0 +1,106 @@
+---
+title: Cross-platform Features
+
+slug: developer_resources/sdks/cross-platform-features
+---
+
+We highly recommend using our SDKs over calling our REST API directly. Our SDKs implement multiple performance enhancements that significantly improve reliability, reduce latency, and minimize network overhead. These optimizations are built into each SDK, so you get the benefits automatically without any additional configuration.
+
+backend raw (non-data stream/replicator) SDK improvements
+- better typing, easier ergonomics
+- event buffering, flushing, retries
+- local caching
+
+frontend SDK improvements
+- better typing, easier ergonomics
+- event buffering, flushing, retries
+- local caching
+- real-time updates
+
+## WebSocket Connections for Speed
+
+Our SDKs support persistent WebSocket connections that deliver ultra-fast request handling. Unlike traditional HTTP requests that require establishing a new connection for each API call, WebSocket connections minimize connection overhead, provide quicker flag evaluation times, and eliminate the need to re-establish connections for every API call.
+
+The SDKs automatically handle network outages and connection drops by detecting disconnections and seamlessly re-establishing the WebSocket connection in the background. This ensures your application continues to operate reliably even when network conditions are unstable, with automatic reconnection happening transparently without any action required from your application code.
+
+**This persistent connection architecture significantly reduces latency and improves the overall performance of flag checks and other SDK operations.**
+
+## Event Buffering
+
+Our SDKs implement intelligent event buffering to batch multiple events together before sending them to the Schematic service. This reduces the number of network requests, and allows for event tracking to be asynchronous from the standpoint of your application. All SDKs implement automatic retries on failure, flush events when the application is closed, and handle network interruptions gracefully.
+
+## Local Caching
+
+Local caching is built into our SDKs to reduce redundant API calls and improve response times. When enabled, the SDK caches flag checks for a short amount of time to improve performance in request handling. See the specific SDK documentation for more information on adjust or disable caching.
+
+Locally cached data is 
+
+You can configure cache size and time-to-live (TTL) settings, or disable caching entirely if you prefer to implement your own caching strategy. Local caching is supported in Go, Node.js, Python, C#, and Java SDKs. 
+
+<Info>Local caching will not work for serverless architectures. See [Data Replication](#data-replication) for a better solution for these scenarios.</Info>
+
+TODO: anyone can use local caching
+
+## Automatic Real-Time Updates
+
+go, c#, node (beta)
+
+DataStream
+- opens websocket on load
+- on load, pre fetches flags logic (flags and rules)
+- when you do a flag check, pulls down company data (traits, usage)
+  - subscribes to updates
+
+
+With WebSocket connections, updates can be pushed instantly from Schematic to your application as Schematic processes plan changes and feature usage. **This allows your product to reflect changes in entitlement state in real time.**
+
+- For **frontend SDKs** (JavaScript, React, Vue), the SDK automatically subscribes to *all company flags relevant to the currently identified user or company*, your client stays seamlessly up to date on all flags for that context, without you needing to re-fetch them.
+- For **backend SDKs** (e.g. Go, C#), the SDK keeps track of every company-flag pair you've recently checked and subscribes to any updates for that company-flag pair.
+
+This real-time synchronization ensures your application always has the most accurate state with no extra integration work required.
+
+
+### SDK Support
+
+| SDK | Status |
+|-----|--------|
+| JavaScript (Client-side) | ✅ |
+| React (Next.js)| ✅ |
+| Vue | ✅ |
+| Go | ✅ |
+| Node.js | ??? |
+| Python | ??? |
+| C# | ??? |
+| Java | ??? |
+
+## Data Replication
+
+replicator
+- loads all flag data, company, user
+  - similar to datastream, but for all companies at once
+- requests should _always_ hit local cache
+  - unless datastream isn't connected
+
+
+Some SDKs support replicating flag check data to a local data store, enabling:
+
+- **Ultra-low latency** by eliminating network calls entirely for flag checks
+- **High availability** by continuing to operate even during service interruptions
+- **Real-time updates** by pushing updates to the local data store when flag definitions, company data, or user data change
+
+This setup provides the highest level of performance and availability for your application, but requires you to run a Schematic provided container in your infrastructure.
+
+TODO write more here
+
+The setup requires a local datastore (currently Redis), and a Schematic provided container to be run in your infrastructure which manages the connection to Schematic and the local data store. 
+
+| SDK | Status |
+|-----|--------|
+| JavaScript (Client-side) | N/A |
+| React (Next.js)| N/A |
+| Vue | N/A |
+| Go | Beta |
+| Node.js | Coming Soon |
+| Python | Coming Soon |
+| C# | ✅ |
+| Java | Coming Soon |
