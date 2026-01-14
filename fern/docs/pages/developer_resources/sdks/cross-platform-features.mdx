@@ -31,30 +31,25 @@ Our SDKs implement intelligent event buffering to batch multiple events together
 
 ## Local Caching
 
-Local caching is built into our SDKs to reduce redundant API calls and improve response times. When enabled, the SDK caches flag checks for a short amount of time to improve performance in request handling. See the specific SDK documentation for more information on adjust or disable caching.
+Our backend SDKs cache data locally for a short time to improve performance in request handling. See the specific SDK for information on how to configure or disable this caching. 
 
-Additionally, SDKs can be configured 
-
-TODO: anyone can use local caching
+Additionally, local caching can be configured to use an external cache provider, such as Redis or Cloudflare KV (depending on the specific SDK). This is useful for distributed environments where you may want to share the cache across multiple instances of your application, especially for serverless architectures. See the specific SDK for information on how to configure this.
 
 ## Automatic Real-Time Updates
 
-go, c#, node (beta)
-
-DataStream
-- opens websocket on load
-- on load, pre fetches flags logic (flags and rules)
-- when you do a flag check, pulls down company data (traits, usage)
-  - subscribes to updates
-
-
 With WebSocket connections, updates can be pushed instantly from Schematic to your application as Schematic processes plan changes and feature usage. **This allows your product to reflect changes in entitlement state in real time.**
 
-- For **frontend SDKs** (JavaScript, React, Vue), the SDK automatically subscribes to *all company flags relevant to the currently identified user or company*, your client stays seamlessly up to date on all flags for that context, without you needing to re-fetch them.
-- For **backend SDKs** (e.g. Go, C#), the SDK keeps track of every company-flag pair you've recently checked and subscribes to any updates for that company-flag pair.
+Automatic real-time updates are avaiable for all Schematic users, regardless of which tier they are on (including Free tier). 
 
-This real-time synchronization ensures your application always has the most accurate state with no extra integration work required.
+### Frontend SDKs
 
+Schematic's Frontend SDKs already implement this functionality, and you don't need to do anything to enable it. When you call `identify` the user, the SDK automatically setups a listener to flag changes for the company and user over the WebSocket connection. For our Vue and React SDKs, this will propogate the change into your applciation state anutomatically through the appropriate mechanisms. 
+
+### Backend SDKs 
+
+Schematic's backend SDKs implement a similar system (called DataStream) that allows for real-time updates to be pushed from Schematic to your SDK. On load, the SDK will setup a WebSocket connection to improve performance and handle pushing updates to your SDK. Whenever a flag check is made, the SDK will pull the necessary company data from the Schematic API _and_ subscribe to future updates for that company-flag pair. Going forward, this allows subsequent flag checks to be performed locally without an API call to Schematic. 
+
+This can be further enhanced by adding local caching so that multiple SDK instances can share cached data and avoid redundant API calls. 
 
 ### SDK Support
 
@@ -64,39 +59,34 @@ This real-time synchronization ensures your application always has the most accu
 | React (Next.js)| ✅ |
 | Vue | ✅ |
 | Go | ✅ |
-| Node.js | ??? |
-| Python | ??? |
-| C# | ??? |
-| Java | ??? |
+| C# | ✅ |
+| Node.js | Coming Soon |
+| Python | Roadmapped |
+| Java | Roadmapped |
 
-## Data Replication
+## Replicator
 
-replicator
-- loads all flag data, company, user
-  - similar to datastream, but for all companies at once
-- requests should _always_ hit local cache
-  - unless datastream isn't connected
+Schematic also supports Replicator, a service that will automatically replicate flag data into your infrastructure. This provides 3 key benefits:
 
+1. Schematic can make flag checks highly performant since no external API calls are needed. 
+2. Updates to any company's flag data is automatically propagated to your application in real time, ensuring that even the first access will be performant. 
+3. Should Schematic experience an interruption of service, your application can continue to operate using the complete local cache of flag data.
 
-Some SDKs support replicating flag check data to a local data store, enabling:
+Replicator is only available for Enterprise customers.
 
-- **Ultra-low latency** by eliminating network calls entirely for flag checks
-- **High availability** by continuing to operate even during service interruptions
-- **Real-time updates** by pushing updates to the local data store when flag definitions, company data, or user data change
+To use Replicator, you will need to host a [Schematic provided container](https://hub.docker.com/r/getschematic/schematic-replicator) in your infrastructure and supply a compatible local data store (currently Redis is supported). This container will manage the connection to Schematic and the local data store. You will then enable Replicator mode on your SDK and point it to your local data store. For documentation:
+- Technical documentation for Replicator is [on GitHub](https://github.com/schematicHQ/schematic-replicator).
+- You will also need to check the docs for the specific SDK you are using to see how to enable Replicator mode.
 
-This setup provides the highest level of performance and availability for your application, but requires you to run a Schematic provided container in your infrastructure.
-
-TODO write more here
-
-The setup requires a local datastore (currently Redis), and a Schematic provided container to be run in your infrastructure which manages the connection to Schematic and the local data store. 
+### SDK Support
 
 | SDK | Status |
 |-----|--------|
 | JavaScript (Client-side) | N/A |
 | React (Next.js)| N/A |
 | Vue | N/A |
-| Go | Beta |
-| Node.js | Coming Soon |
-| Python | Coming Soon |
+| Go | ✅ |
 | C# | ✅ |
-| Java | Coming Soon |
+| Python | Roadmapped |
+| Node.js | Roadmapped |
+| Java | Roadmapped |
