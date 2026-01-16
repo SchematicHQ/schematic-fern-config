@@ -7,20 +7,113 @@ slug: architecture/availability
 
 As a business implementing Schematic, we understand you are trusting the solution to be highly available and reliable. Given the nature of the transactions that Schematic supports for businesses, we're committed to both. 
 
-Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks/go). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
+Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks/overview). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
 
-## Hot Path Optimization
+# High Availability Strategies
 
-Schematic's infrastructure is optimized for application hot paths -- primarily feature flag evaluations and event reporting. These routes are designed for high performance and rely heavily on caching, especially for flag checks. Our architecture ensures these critical paths remain low latency and highly available.
+Schematic is designed to be safe, fast, and reliable by default. Flag checks sit directly in the critical path of your application, so we treat availability and performance as first-order concerns.
 
-<Info>
-For optimal performance, we strongly recommend using our SDKs, particularly our frontend SDKs which implement these optimizations automatically including caching, bulk operations, and WebSocket connections.
-</Info>
+Out of the box, Schematic is built to:
 
-For more information on API avaliability and rate limiting, please see our [API documentation](/api-reference/rate_limiting).
+- Serve flag checks from cache, not live computation
+- Preemptively warm and maintain those caches
+- Remain operational through most classes of service disruptions
+- Fail gracefully when parts of the system are unavailable
 
-### Local caching
+For most teams, these guarantees are enough. But some applications require even stronger assurances around freshness, latency, or independence from external services.
 
-You can synchronously retrieve flag values from Schematic using our [flag check](https://docs.schematichq.com/api-reference/features/check-flag) endpoint.
+This guide outlines the three main ways you can run Schematic in a highly available configuration, ranging from fully managed to fully self-hosted.
 
-Schematic also supports local caching natively in our Go, Node, Python, and C# SDKs (with more coverage for other SDKs in the future). Upon initialization of the SDK, you have the option to specify the max size of the cache and the max age of the cache (or disable it entirely if you choose to build your own).
+---
+
+## 1. Built-in High Availability (Default)
+
+By default, Schematic is designed so that flag checks are **always served from cache**. This ensures they are:
+
+- **Fast** - no expensive recomputation on read
+- **Reliable** - resilient to most backend disruptions
+- **Predictable** - consistent latency under load
+
+Flag values are also **preemptively cached**, meaning they are warmed ahead of time rather than computed on first access. This avoids cold-start behavior and helps ensure that even the first request is fast.
+
+In the event of *most* service disruptions:
+
+- Flag checks will continue to function
+- Values may become temporarily stale
+- Normal operation resumes automatically once service is restored
+
+This model prioritizes simplicity and operational safety. If your application can tolerate brief periods of staleness, this is typically the best option—and requires no additional configuration.
+
+---
+
+## 2. Replicator (Fully Local, Always Fresh)
+
+For teams that need stronger guarantees around freshness, latency, and fault tolerance, Schematic provides **Replicator**.
+
+[Replicator](/developer_resources/sdks/cross-platform-features#replicator) maintains a fully up-to-date local copy of your flag data inside your own infrastructure. Your application reads directly from this local store, removing Schematic's API from the critical path.
+
+### Benefits
+
+Replicator provides three key benefits:
+
+1. **Lower latency** - Flag checks do not require external API calls.
+2. **Always warm data** - Updates are pushed in real time, so the first read is fast.
+3. **Full outage resilience** - If Schematic experiences an interruption, your application continues operating using your complete local cache.
+
+This is the strongest availability and performance model we offer.
+
+### Availability
+
+Replicator is available for **Enterprise** customers.
+
+### How it works
+
+To use Replicator, you will:
+
+1. Host a [Schematic-provided container](https://hub.docker.com/r/getschematic/schematic-replicator) in your infrastructure.
+2. Provide a compatible local data store (e.g. Redis).
+
+That's it. The Replicator container handles:
+
+- Synchronization with Schematic
+- Real-time updates
+- Persistence into your local store
+- Retry and reconnect behavior
+
+## 3. Self-Hosted Cache (DIY Replication)
+
+Some customers choose to build their own local caching or replication layer using Schematic's APIs and webhooks.
+
+This approach can work, and we have customers running production systems this way. However, it comes with additional engineering and operational complexity.
+
+### How it typically works
+
+A DIY setup usually involves:
+
+1. Fetching all relevant company and flag data via Schematic's APIs
+2. Storing that data in a local cache (e.g. Redis, Postgres)
+3. Subscribing to Schematic webhooks for updates
+4. Applying those updates to your local store
+5. Using that local store as a fallback when live calls fail
+
+This gives you a local source of truth that your application can rely on during outages.
+
+### Our recommendation
+
+If you're thinking about building this yourself, we strongly recommend using **Replicator** instead.
+
+Replicator provides the same core architecture—local reads, real-time updates, full cache coverage—but does so in a more robust, battle-tested, and operationally simple way.
+
+DIY replication makes sense when you need highly custom behavior. For most teams, Replicator is the safer and more maintainable solution.
+
+## Choosing the Right Strategy
+
+| Strategy          | Freshness        | Latency  | Complexity | Outage Resilience |
+|-------------------|------------------|----------|------------|-------------------|
+| Built-in caching  | Eventually fresh | Low      | Minimal    | High              |
+| Replicator        | Real-time        | Lowest   | Moderate   | Highest           |
+| Self-hosted cache | Configurable     | Low      | Highest    | High              |
+
+For most teams, Schematic's default high-availability behavior is sufficient. If you need stronger freshness guarantees, lower latency, or full independence from Schematic's runtime availability, Replicator is usually the right next step.
+
+If you're unsure which approach fits your use case, reach out—we're happy to help you think through the tradeoffs.
