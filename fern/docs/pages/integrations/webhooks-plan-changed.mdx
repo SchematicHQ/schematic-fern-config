@@ -87,10 +87,23 @@ In SDKs, this field is called `PlanChangeResponseDataSubscriptionChangeAction`, 
 |------------------|----------------------------------------------------------------------------------|
 | `downgrade`      | The company was moved to a lower-tier plan.                                      |
 | `invalid`        | The plan change was invalid or could not be recognized.                          |
-| `subscribe`      | The company was assigned to a plan for the first time.                           |
-| `unsubscribe`    | The company was removed from a plan and is no longer assigned any plan.          |
+| `subscribe`      | The company was moved from a free plan to a paid plan. This includes moving from a trial to a paid plan.                          |
+| `unsubscribe`    | The company was moved from a paid plan to a free plan. This includes payment failure.                          |
 | `upgrade`        | The company moved to a higher-tier plan.                                         |
 | `upgrade_trial`  | The company started a trial of a higher-tier plan.                               |
+
+<Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
+
+### Upgrade/Downgrade logic
+
+When determining if a checkout event is an upgrade or downgrade, the following logic is used. These steps represent upgrades, and downgrades are the inverse.
+
+1. Both plans need to be paid (otherwise it's a sunbscribe/unsubscribe)
+2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
+3. If the new plan has a higher base price, it's an upgrade.
+4. If the new plan includes a new add-on, it's an upgrade.
+5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
+6. If the new plan includes the purchase of a credit bundle, it's an upgrade.
 
 ## Common scenarios
 
