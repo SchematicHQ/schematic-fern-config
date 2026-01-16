@@ -1,0 +1,42 @@
+---
+title: React Native
+
+slug: developer_resources/sdks/react-native
+---
+
+Schematic's React SDK also works for React Native apps. See the [React SDK documentation](/developer_resources/sdks/react) for more details about how to use the React SDK. 
+
+### Handling Application Backgrounding
+
+When your application is brought back to the foreground, Schematic will automatically reconnect to the WebSocket to resume flag checks and event tracking. This will ensure that your application is always up to date with the latest flag data and event tracking.
+
+However, the SDK implements reconnects with an expontial backoff timer, which may cause a delay before fresh flag values are available. For cases where you need immediate flag updates when returning to the foreground (e.g., after an in-app purchase), you can use one of these methods to re-establish the connection:
+
+- `forceReconnect()`: Always closes and re-establishes the WebSocket connection, guaranteeing fresh values
+- `reconnectIfNeeded()`: Only reconnects if the current connection is unhealthy (more efficient for frequent foreground events)
+
+An example of using these when the application is brought back to the foreground looks like:
+
+```tsx
+import { useSchematic } from "@schematichq/schematic-react";
+import { useEffect } from "react";
+import { AppState } from "react-native";
+
+const SchematicAppStateHandler = () => {
+    const { client } = useSchematic();
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener("change", (state) => {
+            if (state === "active") {
+                // Use forceReconnect() for guaranteed fresh values
+                client.forceReconnect();
+                // Or use reconnectIfNeeded() to skip if connection is healthy
+                // client.reconnectIfNeeded();
+            }
+        });
+        return () => subscription.remove();
+    }, [client]);
+
+    return null;
+};
+```
