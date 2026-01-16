@@ -7,7 +7,7 @@ slug: architecture/availability
 
 As a business implementing Schematic, we understand you are trusting the solution to be highly available and reliable. Given the nature of the transactions that Schematic supports for businesses, we're committed to both. 
 
-Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks/go). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
+Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
 
 # High Availability Strategies
 
@@ -50,7 +50,7 @@ This model prioritizes simplicity and operational safety. If your application ca
 
 For teams that need stronger guarantees around freshness, latency, and fault tolerance, Schematic provides **Replicator**.
 
-Replicator maintains a fully up-to-date local copy of your flag data inside your own infrastructure. Your application reads directly from this local store, removing Schematic's API from the critical path.
+[Replicator](/developer_resources/sdks/cross-platform-features#replicator) maintains a fully up-to-date local copy of your flag data inside your own infrastructure. Your application reads directly from this local store, removing Schematic's API from the critical path.
 
 ### Benefits
 
