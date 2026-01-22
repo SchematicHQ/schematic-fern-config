@@ -100,3 +100,16 @@ Currently, Plan Change Rules cannot be modified; however, we will be introducing
 <img
 src="../../assets/images/catalog/catalog-rules.png"
 />
+
+### Good, Better, Best Pricing
+
+A common pattern for standard pricing tables is to layout your pricing table where each plan includes the features of the previous plan, plus some additional features. It commonly looks like this:
+
+| Good       | Better                       | Best                          |
+|------------|------------------------------|-------------------------------|
+|            | Everything in Good, plus:    | Everything in Better, plus:   |
+| Feature A  | Feature D                    | Feature F                     |
+| Feature B  | Feature E                    | Feature G                     |
+| Feature C  | Feature F                    | Feature H                     |
+
+This can be configured in the pricing table component by enabling the `plans.showInclusionText` option. For more details, see the [Pricing Table documentation](/components/pricing-table#styling-options-for-the-pricing-table).

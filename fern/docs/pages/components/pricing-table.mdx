@@ -53,7 +53,7 @@ Below are the options that can be set on the Pricing Table to control its functi
 | plans.name.fontStyle | Font styling for plan names | `heading2` | Can be any `FontStyle` option |
 | plans.description.isVisible | Show plan descriptions | true | |
 | plans.description.fontStyle | Font styling for plan descriptions | `text` | Can be any `FontStyle` option |
-| plans.showInclusionText | Show "What's included" text | true | |
+| plans.showInclusionText | Each plan will show that everything in the previous plan (the one on it's left) is included, plus... | true | |
 | plans.showFeatureIcons | Show icons next to features | true | |
 | plans.showEntitlements | Show feature entitlements/limits | true | |
 | addOns.isVisible | Show the add-ons section | true | |
@@ -66,6 +66,10 @@ Below are the options that can be set on the Pricing Table to control its functi
 | downgrade.isVisible | Show downgrade buttons | true | |
 | downgrade.buttonSize | Size of downgrade buttons | `md` | Options: `sm`, `md`, `lg` |
 | downgrade.buttonStyle | Style of downgrade buttons | `secondary` | Options: `primary`, `secondary` |
+
+<Note>
+`plans.showInclusionText` is a common option for pricing tables. See [Good, Better, Best Pricing](/catalog/configuration#good-better-best-pricing) a better understanding of how this works.
+</Note>
 
 ## General Styling Options
 
