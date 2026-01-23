@@ -5967,6 +5967,8 @@ components:
       properties:
         feature_id:
           type: string
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
         limits:
           type: array
           items:
@@ -5980,6 +5982,7 @@ components:
             $ref: '#/components/schemas/UsageTimeSeriesPointResponseData'
       required:
         - feature_id
+        - feature_type
         - limits
         - usage_points
       title: FeatureUsageTimeSeriesResponseData
@@ -17027,8 +17030,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /feature-usage-timeseries:
     get:
-      operationId: listFeatureUsageTimeSeries
-      summary: List feature usage time series
+      operationId: getFeatureUsageTimeSeries
+      summary: Get feature usage time series
       tags:
         - entitlements
       parameters:
@@ -17043,13 +17046,11 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: feature_ids
+        - name: feature_id
           in: query
           required: true
           schema:
-            type: array
-            items:
-              type: string
+            type: string
         - name: granularity
           in: query
           schema:
@@ -17069,10 +17070,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/FeatureUsageTimeSeriesResponseData'
-                    title: ListFeatureUsageTimeSeriesResponseData
+                    $ref: '#/components/schemas/FeatureUsageTimeSeriesResponseData'
                   params:
                     type: object
                     description: Input parameters
@@ -17082,22 +17080,18 @@ paths:
                       end_time:
                         type: string
                         format: date-time
-                      feature_ids:
-                        type: array
-                        items:
-                          type: string
+                      feature_id:
+                        type: string
                       granularity:
                         $ref: '#/components/schemas/TimeSeriesGranularity'
                       start_time:
                         type: string
                         format: date-time
-                    title: ListFeatureUsageTimeSeriesParams
+                    title: GetFeatureUsageTimeSeriesParams
                 required:
                   - data
                   - params
-                title: ListFeatureUsageTimeSeriesResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                title: GetFeatureUsageTimeSeriesResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
