@@ -5962,6 +5962,27 @@ components:
         - entitlement_id
         - entitlement_type
       title: FeatureUsageResponseData
+    FeatureUsageTimeSeriesResponseData:
+      type: object
+      properties:
+        feature_id:
+          type: string
+        limits:
+          type: array
+          items:
+            $ref: '#/components/schemas/LimitTimeSeriesPointResponseData'
+        period_type:
+          type: string
+          nullable: true
+        usage_points:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageTimeSeriesPointResponseData'
+      required:
+        - feature_id
+        - limits
+        - usage_points
+      title: FeatureUsageTimeSeriesResponseData
     FlagDetailResponseData:
       type: object
       properties:
@@ -6235,6 +6256,31 @@ components:
       required:
         - keys
       title: KeysRequestBody
+    LimitTimeSeriesPointResponseData:
+      type: object
+      properties:
+        effective_at:
+          type: string
+          format: date-time
+        is_soft_limit:
+          type: boolean
+        limit_source:
+          $ref: '#/components/schemas/EntitlementType'
+        limit_value:
+          type: integer
+          nullable: true
+        plan_id:
+          type: string
+          nullable: true
+        price_behavior:
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
+          nullable: true
+      required:
+        - effective_at
+        - is_soft_limit
+        - limit_source
+      title: LimitTimeSeriesPointResponseData
     ManagePlanPreviewResponseResponseData:
       type: object
       properties:
@@ -8423,6 +8469,13 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    TimeSeriesGranularity:
+      type: string
+      enum:
+        - daily
+        - hourly
+        - monthly
+        - weekly
     TraitDefinition:
       type: object
       properties:
@@ -9443,6 +9496,26 @@ components:
         - feature_id
         - value_type
       title: UsageBasedEntitlementResponseData
+    UsageTimeSeriesPointResponseData:
+      type: object
+      properties:
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        usage:
+          type: integer
+      required:
+        - timestamp
+        - usage
+      title: UsageTimeSeriesPointResponseData
     UserDetailResponseData:
       type: object
       properties:
@@ -16942,6 +17015,87 @@ paths:
                   - data
                   - params
                 title: ListFeatureUsageResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /feature-usage-timeseries:
+    get:
+      operationId: listFeatureUsageTimeSeries
+      summary: List feature usage time series
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: feature_ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: granularity
+          in: query
+          schema:
+            $ref: '#/components/schemas/TimeSeriesGranularity'
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeatureUsageTimeSeriesResponseData'
+                    title: ListFeatureUsageTimeSeriesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      end_time:
+                        type: string
+                        format: date-time
+                      feature_ids:
+                        type: array
+                        items:
+                          type: string
+                      granularity:
+                        $ref: '#/components/schemas/TimeSeriesGranularity'
+                      start_time:
+                        type: string
+                        format: date-time
+                    title: ListFeatureUsageTimeSeriesParams
+                required:
+                  - data
+                  - params
+                title: ListFeatureUsageTimeSeriesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
