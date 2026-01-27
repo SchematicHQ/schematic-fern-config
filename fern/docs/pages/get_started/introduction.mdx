@@ -4,96 +4,74 @@ title: What is Schematic?
 slug: what-is-schematic
 ---
 
-## What is Schematic?
+Schematic is the entitlement layer for B2B SaaS applications. We sit between your product and your billing system, giving you a single source of truth for who has access to what—and automating the enforcement of plans, limits, and usage across your application.
 
-Schematic combines feature management and subscription management into one platform, allowing product and engineering teams to quickly integrate pricing and packaging into their applications with a few lines of code. This enables teams to launch new pricing and packaging models with low overhead, to take the burden off of R&D teams, and to flexibly adjust pricing and packaging to individual customer preferences.
+## Why teams use Schematic
 
-With Schematic, teams can ship features faster, delight customers, and get out of billing projects forever.
+**For GTM teams:** Launch plans, change limits, manage trials, and grant customer exceptions—all without engineering tickets. If you can imagine a pricing change, you can ship it yourself.
 
-## What can I do with Schematic?
+**For Engineering teams:** Stop maintaining entitlement infrastructure. No syncing billing state across systems, no feature flag sprawl for plan logic, no building usage metering systems, no manual database overrides when Sales needs an exception.
 
-Our platform integrates bi-directionally with Stripe to facilitate billing while adding powerful capabilities on top of it such as embeddable UI components, internal admin dashboards, feature flags to power entitlements, and usage-based metering. This means you can manage your entire pricing and packaging surface area — from how you charge your customers to how they experience your product — without the need for brittle, homegrown solutions that tightly couple pricing and packaging logic into application code.
+With Schematic, teams ship pricing changes faster, reduce engineering overhead, and get out of billing projects forever.
 
-<img
-  src="../../assets/images/iso-with-background.png"
-/>
+## How Schematic works with Stripe
+**Stripe handles billing and payments. Schematic handles entitlements and plan enforcement.**
 
-With Schematic, you can:
+We keep the two in sync automatically, so Stripe remains your source of truth for subscriptions while your application gets a clean API for access control and usage tracking.
+What this means in practice:
 
-- **Embed Powerful UI Components**: Add drop-in purchasing components beyond basic checkout, such as upgrade/downgrade, Customer Portals, pricing tables, and usage meters. Power internal workflows for sales and account management.
-- **Control Access with Feature Flags**: Manage which customers have access to which features without needing to touch your application code.
-- **Usage-Based Metering**: Easily track customer usage and bill accordingly, supporting modern, flexible pricing models.
-- **Manage Plans with Ease**: Update plans, bundle & unbundle features, offer add-ons, support custom configuration, and handle exceptions — all with minimal code changes.
-- **Get a 360-Degree View of Your Customers**: Combine account, usage, and billing data into a single, easy-to-access profile, giving your team the insights they need.
+- **Stripe stays your payment processor** - All subscription and payment data lives in Stripe
+- **Schematic adds the entitlement layer** - Plan limits, feature access, usage metering, and customer overrides
+- **Automatic sync** - No webhook handlers to maintain, no billing state to reconcile
+- **Clean separation** - GTM can modify packaging in Schematic without touching Stripe configuration
 
-## Does Schematic Replace Stripe?
+This architecture lets you adopt sophisticated pricing models (usage-based, hybrid, seat-based, feature-gated) without rebuilding your billing infrastructure or tightly coupling pricing logic into your application code.
 
-No, Schematic doesn't replace Stripe. Instead, Schematic extends Stripe into your product so you can enforce plan features and usage limits automatically. Schematic fully manages its Stripe integration on your behalf, bi-directionally syncing company and usage data to Stripe (no more painful Stripe webhooks!). You don't need to build or operate your own Stripe webhook handlers to keep billing state, entitlements, and usage in sync. 
+[Learn more about Schematic's Stripe Integration.](/integrations/stripe)
 
-Most users will never need to interact with Stripe directly, instead using Schematic's Checkout and Customer Portal components in their product and Schematic app for their customer management needs. However, for advanced use cases, like 3rd party tax providers or custom invoices, you can always fall back to Stripe.
+## What you can do with Schematic
 
-## Major concepts
+### Enforce entitlements with Feature Flags
 
-There are several major concepts built into Schematic that you can read about in more depth in other sections of our documentation.
+[Control which customers access which features](/feature-management/overview) based on their plan, usage, or custom rules—without touching application code. Update limits, bundle features, or create custom configurations from the Schematic dashboard.
 
-### **Catalog**
+### Track usage with Metering
 
-<img
-  src="../../assets/images/get-started/get-started-product-catalog-1.png"
-/>
+[Automatically track customer usage](/feature-management/tracking-usage) for billing, enforcing limits, or telemetry. Usage events can be attributed to companies, users, or features, forming the basis for usage-based pricing and customer insights.
 
-The Catalog describes a company's Plans and Add-ons and associated Entitlements. The definition of an Entitlement within a Plan or Add-on includes default values for allocations or limits, and pricing.
+### Embed UI Components
 
-<img
-  src="../../assets/images/get-started/get-started-product-catalog-2.png"
-/>
+[Add pre-built components](/components/overview) for checkout, upgrade/downgrade flows, customer portals, pricing tables, and usage meters. Give customers self-service control while maintaining consistent branding
+### Manage the entire customer lifecycle
 
-If a Company is a part of a Plan, access can be gated in your application based on associated Entitlements with Flags.
+Get a 360-degree view combining account data, usage patterns, and billing status. Power internal workflows for sales, support, and account management with complete customer context.
 
-### **Company Profiles**
+### Handle exceptions gracefully
 
-The Company Profile is a centralized record of company information, aggregating all relevant company keys, traits, subscription details, and usage data into a single profile that can be leveraged across tools.
+Grant temporary access, apply credits, create custom plans, or [override limits](/feature-management/overrides) for individual customers—all through the dashboard or API, no code changes required.
 
-<img
-  src="../../assets/images/get-started/get-started-profiles-1.png"
-/>
+## Core concepts
 
-The profile is `key`-based and `key` uniqueness is enforced across profiles to prevent duplicates. Profiles can have multiple keys so any one `key` does not need to be persisted across systems.
+### Plans and Add-ons (Catalog)
 
-Profiles and profile traits can be referenced in flag targeting and plan audiences.
+[Define your pricing structure](/catalog/overview) with Plans and Add-ons. Each includes entitlements (features, limits, usage allowances) and pricing. Plans map to Stripe subscriptions automatically.
 
-### **Metering**
+### Company Profiles
 
-Metering is crucial for supporting usage-based models. Metered properties can be monetized or un-monetized (tracked for telemetry or enforcing a packaged limit).
+A centralized record aggregating company information, subscription details, and usage data. Profiles are key-based (preventing duplicates) and can reference multiple identifiers across systems.
 
-<img
-  src="../../assets/images/get-started/get-started-metering-1.png"
-/>
+### Feature Flags
 
-A usage event can be attributed to companies, users, and features within Schematic, forming the basis for enforcement and insights into customer behavior.
+[Control access to features](/feature-management/overview) based on company context, subscription status, or custom attributes. Flags reference entitlements from Plans to enforce access rules automatically.
 
-### **Subscriptions**
+### Subscriptions
 
-Subscriptions from Stripe are automatically linked to Company Profiles.
+[Stripe subscriptions](/integrations/stripe) automatically link to Company Profiles. Companies can have membership in multiple Plans or Add-ons simultaneously, with the most permissive entitlements applying.
 
-<img
-  src="../../assets/images/get-started/get-started-subscriptions-1.png"
-/>
+### Metering
 
-Companies can then be assigned membership in Schematic Plans based on those Subscriptions, or by creating explicit audiences based on Company attributes.
+[Track usage events](/feature-management/tracking-usage) for monetization or enforcement. Events can be attributed to companies, users, or features, supporting flexible usage-based models or packaged limits.
 
-<img
-  src="../../assets/images/get-started/get-started-subscriptions-2.png"
-/>
+### Getting started
 
-A company may have membership in more than one Plan or Add-on in the Catalog at any given time, which would result in the most permissive entitlements among them.
-
-### **Feature Flags**
-
-<img
-  src="../../assets/images/get-started/get-started-flags-1.png"
-/>
-
-Flags dictate who gets access to what features or services based on their context, and how much of a particular feature they get. This ensures companies can access only the features they should have access to, which is important for trials, tiered services, and premium offerings.
-
-Company access is informed by the parameters of a company’s subscription and other policies set up in Schematic.
+Ready to decouple your pricing logic from your application code? Check out our [Quick Start Guide](/quickstart/overview) or book a demo to see Schematic in action.
