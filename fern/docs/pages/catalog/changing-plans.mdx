@@ -31,22 +31,31 @@ Stripe-linked plans have additional considerations concerning how usage based ch
 
 For Stripe-linked plans, Schematic handles upgrades and downgrades differently. A plan change is considered an upgrade if the new plan has a higher base price (or the same base price) as the current plan. A downgrade is considered a plan change to a plan with a lower base price.
 
-### Upgrades
+### Upgrade/Downgrade logic
 
-When a Stripe-linked plan is upgraded, Schematic will update the current subscription. All accrued usage is preserved and is reapplied to the new plan. For example, imagine the user has accrued 100 units of usage at $1/per unit on the current plan. Below would be the price for the current plan and the new price for hypothetical plans the user could upgrade to. 
+When determining if a plan change is an upgrade or downgrade, the following logic is used. Below are the steps for determining if a change is an upgrade, whereas the inverse is considered a downgrade.
 
-| Plan | Usage Charge | End of Month Usage Cost |
-| --- | --- | --- |
-| Current Plan | \$1/per | \$100 |
-| Lower usage cost PAYG Plan | \$0.50/per | \$50 |
-| Overage Plan | 50 included, then \$0.50/per | \$25 |
-| Tiered Plan | 1-50 = \$10<br/>51-200 = \$20<br/>201+ = \$30 | \$20 |
-| Unlimited Use Plan | - | \$0 |
+1. Both plans need to be paid (otherwise it's a sunbscribe/unsubscribe)
+2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
+3. If the new plan has a higher base price, it's an upgrade.
+4. If the new plan includes a new add-on, it's an upgrade.
+5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
+6. If the new plan includes the purchase of a credit bundle, it's an upgrade.
 
-Additionally, when upgrading a plan, Schematic will use Stripe's proration logic to refund the remaining **base** cost of the current plan and the **base** cost of the new plan. These costs are presented to the user during the checkout flow or to you while using the "Manage Plan" button in the Schematic App.
+### Period Changes 
 
-**NOTE:** For usage-based features, if the new plan doesn't have an entitlement for the feature, the charges associated with the usage will be dropped.
+When a company upgrades to a new plan, Schematic will maintain the current billing period (e.g. if you are 15 days into your billing period, you will remain on day 15 after the upgrade). 
 
-### Downgrades
+However,if the plan change is a downgrade, Schematic will reset the billing period (e.g. the new plan will start on day 1 of the new billing period). 
 
-When a Stripe-linked plan is downgraded, Schematic will cancel the current subscription and create a new subscription for the new plan. In this case, all accrued usage costs are lost and will not be reapplied to the new plan. This will create a discrepancy between the accrued usage displayed in Schematic and the usage billed in Stripe. 
+### Proration
+
+Additionally, when changing plans, Schematic will use Stripe's proration logic to refund the remaining **base** cost of the current plan and the **base** cost of the new plan. These costs are presented to the user during the checkout flow or to you while using the "Manage Plan" button in the Schematic App.
+
+For usage-based features, Schematic will carry over usage from the current plan to the new plan.
+
+### Preventing Downgrades
+
+Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is configured in the Catalog configuration tab and is turned on by default.
+
+Additionally, you can require customers reach out to you before they can downgrade to a plan (preventing self-service downgrades). This is configured in the Catalog configuration tab and is turned off by default.

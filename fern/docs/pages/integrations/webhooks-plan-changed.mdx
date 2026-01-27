@@ -94,30 +94,21 @@ In SDKs, this field is called `PlanChangeResponseDataSubscriptionChangeAction`, 
 
 <Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
 
-### Upgrade/Downgrade logic
-
-When determining if a checkout event is an upgrade or downgrade, the following logic is used. These steps represent upgrades, and downgrades are the inverse.
-
-1. Both plans need to be paid (otherwise it's a sunbscribe/unsubscribe)
-2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
-3. If the new plan has a higher base price, it's an upgrade.
-4. If the new plan includes a new add-on, it's an upgrade.
-5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
-6. If the new plan includes the purchase of a credit bundle, it's an upgrade.
-
+<Note>See [Upgrade/Downgrade Logic](/catalog/changing-plans#upgradedowngrade-logic) for more details about how Schematic determines if a plan change is an upgrade, downgrade, subscribe, or unsubscribe.</Note>
 ## Common scenarios
 
 Below are some common scenarios that you may want to test for and which values you should expect to see in the webhook to identify them.
 
-<Note>For any of the `action = "checkout"` scenarios below, the same thing could be done via the Manage Plan modal in the Schematic App, at which point the `action` will be `manage_plan` instead of `checkout`.</Note>
+<Info>For any of the `action = "checkout"` scenarios below, the same thing could be done via the Manage Plan modal in the Schematic App, at which point the `action` will be `manage_plan` instead of `checkout`.</Info>
 
 | Scenario | Action | Subscription Change Action | Base Plan Action |
-|----------|--------|---------------------------|------------------|
+|----------|--------|----------------------------|------------------|
 | Customer upgrades their Subscription (Stripe-linked plan -> higher base price Stripe-linked plan) | `checkout` | `upgrade` | |
 | Customer downgrades their Subscription (Stripe-linked plan -> lower base price Stripe-linked plan) | `checkout` | `downgrade` | |
-| Customer switches from a non-Stripe-linked plan to a Stripe-linked plan | `checkout` | `subscribe` | |
-| Customer switches from a Stripe-linked plan to a non-Stripe-linked plan | `checkout` | `unsubscribe` | |
+| Customer switches from a free plan to a paid | `checkout` | `subscribe` | |
+| Customer switches from a paid to a free plan | `checkout` | `unsubscribe` | |
 | Customer clicks the "Unsubscribe" button in the Schematic Customer Portal Component | `checkout` | `unsubscribe` | |
 | Customer's trial ends and is moved to the trial expiry plan | `subscription_change` |  | `trial_expiry` |
-| Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `trial_upgrade` |  |
+| Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `trial_upgrade` | |
 
+<Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
