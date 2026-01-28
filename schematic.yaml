@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: 549e6fea
+  x-rules-engine-schema-version: 7836bf53
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -2844,7 +2844,6 @@ components:
             - billing_product
             - company
             - credit
-            - crm_product
             - metric
             - plan
             - trait
@@ -7926,7 +7925,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - 549e6fea
+        - 7836bf53
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -8004,10 +8003,10 @@ components:
           additionalProperties:
             type: number
           type: object
-        crm_product_ids:
+        entitlements:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/RulesengineFeatureEntitlement'
         environment_id:
           type: string
         id:
@@ -8039,7 +8038,6 @@ components:
         - account_id
         - environment_id
         - billing_product_ids
-        - crm_product_ids
         - keys
         - plan_ids
         - metrics
@@ -8103,7 +8101,6 @@ components:
             - billing_product
             - company
             - credit
-            - crm_product
             - metric
             - plan
             - trait
@@ -8176,12 +8173,108 @@ components:
       required:
         - conditions
       title: RulesengineConditionGroup
+    RulesengineEntitlementValueType:
+      type: string
+      title: RulesengineEntitlementValueType
+      enum:
+        - boolean
+        - credit
+        - numeric
+        - trait
+        - unknown
+        - unlimited
     RulesengineEntityType:
       type: string
       title: RulesengineEntityType
       enum:
         - company
         - user
+    RulesengineFeatureEntitlement:
+      type: object
+      properties:
+        allocation:
+          type: integer
+          description: If a numeric feature entitlement rule was matched, its allocation
+          nullable: true
+        credit_id:
+          type: string
+          description: >-
+            If a credit-based feature entitlement rule was matched, the ID of
+            the credit
+          nullable: true
+        credit_remaining:
+          type: number
+          description: >-
+            If a credit-based feature entitlement rule was matched, the
+            remaining credit amount
+          nullable: true
+        credit_total:
+          type: number
+          description: >-
+            If a credit-based feature entitlement rule was matched, the total
+            credit amount
+          nullable: true
+        credit_used:
+          type: number
+          description: >-
+            If a credit-based feature entitlement rule was matched, the amount
+            of credit used
+          nullable: true
+        event_name:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, the name of the event
+            being tracked
+          nullable: true
+        feature_id:
+          type: string
+          description: The ID of the feature
+        feature_key:
+          type: string
+          description: The key of the feature
+        metric_period:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, the period over which
+            usage is tracked (current_month, current_day, current_week,
+            all_time)
+          nullable: true
+          enum:
+            - all_time
+            - current_day
+            - current_month
+            - current_week
+        metric_reset_at:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, when the usage period
+            will reset
+          format: date-time
+          nullable: true
+        month_reset:
+          type: string
+          description: >-
+            For event-based feature entitlement rules, when the usage period
+            resets (first_of_month or billing_cycle)
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        usage:
+          type: integer
+          description: >-
+            If a numeric feature entitlement rule was matched, the company's
+            usage
+          nullable: true
+        value_type:
+          allOf:
+            - $ref: '#/components/schemas/RulesengineEntitlementValueType'
+            - description: The type of the entitlement value
+      required:
+        - feature_id
+        - feature_key
+        - value_type
+      title: RulesengineFeatureEntitlement
     RulesengineFlag:
       type: object
       properties:
