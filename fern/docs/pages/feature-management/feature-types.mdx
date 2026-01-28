@@ -23,17 +23,16 @@ You can read more about tracking usage [here](/feature-management/feature-analyt
 
 ## Trait-based Features
 
-Trait-based features are features based off of information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size). Traits can be updated via the `POST /companies` in [the API](/api-reference/companies/upsert-company) or via the `upsertCompany` or `identify` functions provided by each SDK.
+Trait-based features are features based off of information reported to Schematic. Common examples includes seats, projects, or devices. In each case, the value is something you track outside of Schematic, and then report to Schematic when it changes. 
 
-### Usage-based Traits
+Traits can be updated via the `POST /companies` in [the API](/api-reference/companies/upsert-company) or via the `upsertCompany` or `identify` functions provided by each SDK.
 
-Traits can be used to supply usage information that is more easily managed in your application:  user seats are a common example. Whenever a company adds or removes a seat, the updateed value should be provided to Schematic. Unlike event tracking, the current value should be passed each time: this means usage of a trait based feature can increase or decrease (unlike event-based features). 
+### Why Report Usage to Schematic?
 
-While not necessary, there are a few advantages of tracking and managing these features in Schematic:
+Instead of reporting usage to Schematic, you could pull the limit set in Schematic and enforce access in your application directly. However, usage reported to Schematic has a few advantages:
 
 1. Centralize customer usage data as it pertains to monetization
 2. Seamlessly leverage customer overrides for these features in your application
+3. Use Schematic's usage analytics to understand usage patterns and customer health
 
-### Metadata-based Traits
-
-Metadata can be provided to Schematic for use in pricing and plan management. The most common example is to apply a plan to customers based off of a trait. This is commonly used when migrating from a legacy system of plan management. 
+For these reasons, we recommend reporting usage to Schematic whenever possible.
