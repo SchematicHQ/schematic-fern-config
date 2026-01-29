@@ -76,15 +76,15 @@ export default function CustomCheckout() {
 
 The key element is `initializeWithPlan`, an alternate entry point to the checkout flow. Above, we pass a plan ID to the function, which will pre-select the plan in the checkout flow.
 
-In the above example, while the plan is pre-selected, the user will still be able to navigate the full checkout flow. A common desire is to take the user directly to the payment step, and remove the options to change plan or add-on choices. To achieve this, `initializeWithPlan` can be called with an object of additional options. The full set of options are below.
+In the above example, while the plan is pre-selected, the user will still be able to navigate the full checkout flow. A common desire is to take the user directly to the payment step, and remove the options to change plan or add on choices. To achieve this, `initializeWithPlan` can be called with an object of additional options. The full set of options are below.
 
 ```ts
 const config = {
   planId: 'plan_abc123',      // pre-select a Plan
-  addOnIds: ['plan_addon123'],   // pre-select 1 or more Add-ons
+  addOnIds: ['plan_addon123'],   // pre-select 1 or more add ons
   skipped: {
-    planStage: true,               // if true, skip Plan selection
-    addOnStage: true               // if true, skip Add-on selection
+    planStage: true,               // if true, skip plan selection
+    addOnStage: true               // if true, skip add on selection
   }
   hideSkipped:  true               // if true, hide skipped stages from breadcrumb navigation
 };
