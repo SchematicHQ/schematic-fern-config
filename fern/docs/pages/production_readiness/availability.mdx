@@ -58,7 +58,7 @@ Replicator provides three key benefits:
 
 1. **Lower latency** - Flag checks do not require external API calls.
 2. **Always warm data** - Updates are pushed in real time, so the first read is fast.
-3. **Full outage resilience** - If Schematic experiences an interruption, your application continues operating using your complete local cache.
+3. **Full incident resilience** - If Schematic experiences an interruption, your application continues operating using your complete local cache.
 
 This is the strongest availability and performance model we offer.
 
@@ -80,9 +80,24 @@ That's it. The Replicator container handles:
 - Persistence into your local store
 - Retry and reconnect behavior
 
-## 3. Self-Hosted Cache (DIY Replication)
+## 3. SDK Fallbacks (Simple Offline Resilience)
 
-Some customers choose to build their own local caching or replication layer using Schematic's APIs and webhooks.
+For teams that want a simple way to ensure their application continues to function when the SDK cannot connect to Schematic, the SDKs include built-in fallback behavior. These fallbacks allow you to set what values Schematic uses should the SDK not be able to connect, whether due to network issues, service disruptions, or other connectivity problems.
+
+SDKs provide multiple ways to supply fallback values and configure the call timeouts used to determine when a fallback should be used.
+
+By configuring fallback values at initialization or at the callsite, you can ensure your application gracefully degrades to safe defaults rather than breaking should Schematic be unreachable. This is especially useful for:
+
+- Offline scenarios where users may not have internet connectivity
+- Service disruptions where Schematic may be temporarily unavailable
+- Network timeouts or connection failures
+- Initial page loads where flag values haven't been fetched yet
+
+This approach provides a lightweight way to handle connectivity issues without requiring additional infrastructure or complex setup.
+
+## 4. Self-Hosted Cache (DIY Replication)
+
+Some customers combine Schematic's SDK fallbacks and their own local caching layer using Schematic's APIs and to build a DIY replication setup. 
 
 This approach can work, and we have customers running production systems this way. However, it comes with additional engineering and operational complexity.
 
@@ -90,13 +105,11 @@ This approach can work, and we have customers running production systems this wa
 
 A DIY setup usually involves:
 
-1. Fetching all relevant company and flag data via Schematic's APIs
+1. Fetching all relevant company and flag data via Schematic's APIs nightly
 2. Storing that data in a local cache (e.g. Redis, Postgres)
-3. Subscribing to Schematic webhooks for updates
-4. Applying those updates to your local store
-5. Using that local store as a fallback when live calls fail
+3. Using that local store as a fallback when live calls fail
 
-This gives you a local source of truth that your application can rely on during outages.
+This gives you a local source of truth that your application can rely on when Schematic is unreachable.
 
 ### Our recommendation
 
@@ -108,11 +121,12 @@ DIY replication makes sense when you need highly custom behavior. For most teams
 
 ## Choosing the Right Strategy
 
-| Strategy          | Freshness        | Latency  | Complexity | Outage Resilience |
+| Strategy          | Freshness        | Latency  | Complexity | Incident Resilience |
 |-------------------|------------------|----------|------------|-------------------|
 | Built-in caching  | Eventually fresh | Low      | Minimal    | High              |
-| Replicator        | Real-time        | Lowest   | Moderate   | Highest           |
+| SDK Fallbacks     | Static defaults  | Low      | Minimal    | Moderate          |
 | Self-hosted cache | Configurable     | Low      | Highest    | High              |
+| Replicator        | Real-time        | Lowest   | Moderate   | Highest           |
 
 For most teams, Schematic's default high-availability behavior is sufficient. If you need stronger freshness guarantees, lower latency, or full independence from Schematic's runtime availability, Replicator is usually the right next step.
 
