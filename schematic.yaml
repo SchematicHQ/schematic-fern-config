@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: '58203303'
+  x-rules-engine-schema-version: db7512f5
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -2927,6 +2927,269 @@ components:
       required:
         - conditions
       title: ConditionGroup
+    ConditionGroupResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        rule_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - created_at
+        - environment_id
+        - id
+        - rule_id
+        - updated_at
+      title: ConditionGroupResponseData
+    ConditionGroupView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionView'
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        rule_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - created_at
+        - environment_id
+        - id
+        - rule_id
+        - updated_at
+        - conditions
+      title: ConditionGroupView
+    ConditionResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        comparison_trait_id:
+          type: string
+          nullable: true
+        condition_group_id:
+          type: string
+          nullable: true
+        condition_type:
+          type: string
+        consumption_rate:
+          type: number
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        credit_id:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
+        metric_value:
+          type: integer
+          nullable: true
+        operator:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        resource_unspecified_ids:
+          type: array
+          items:
+            type: string
+        rule_id:
+          type: string
+        trait_entity_type:
+          allOf:
+            - $ref: '#/components/schemas/EntityType'
+          nullable: true
+        trait_id:
+          type: string
+          nullable: true
+        trait_value:
+          type: string
+        trait_value_bool:
+          type: boolean
+        trait_value_date:
+          type: string
+          format: date-time
+          nullable: true
+        trait_value_int:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - condition_type
+        - created_at
+        - environment_id
+        - id
+        - operator
+        - rule_id
+        - updated_at
+        - resource_unspecified_ids
+        - trait_value
+        - trait_value_bool
+        - trait_value_int
+      title: ConditionResponseData
+    ConditionView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        billing_products:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericPreviewObject'
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericPreviewObject'
+        comparison_trait:
+          $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
+        comparison_trait_id:
+          type: string
+          nullable: true
+        condition_group_id:
+          type: string
+          nullable: true
+        condition_type:
+          type: string
+        consumption_rate:
+          type: number
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        credit_id:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+        metric_period_month_reset:
+          type: string
+          nullable: true
+        metric_value:
+          type: integer
+          nullable: true
+        operator:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericPreviewObject'
+        resource_unspecified_ids:
+          type: array
+          items:
+            type: string
+        rule_id:
+          type: string
+        trait:
+          $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
+        trait_entity_type:
+          allOf:
+            - $ref: '#/components/schemas/EntityType'
+          nullable: true
+        trait_id:
+          type: string
+          nullable: true
+        trait_value:
+          type: string
+        trait_value_bool:
+          type: boolean
+        trait_value_date:
+          type: string
+          format: date-time
+          nullable: true
+        trait_value_int:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericPreviewObject'
+      required:
+        - account_id
+        - condition_type
+        - created_at
+        - environment_id
+        - id
+        - operator
+        - rule_id
+        - updated_at
+        - resource_unspecified_ids
+        - trait_value
+        - trait_value_bool
+        - trait_value_int
+        - billing_products
+        - companies
+        - plans
+        - users
+      title: ConditionView
     CountResponse:
       type: object
       properties:
@@ -4828,6 +5091,60 @@ components:
       required:
         - credit_grant_details
       title: CreditUsageResponseData
+    CreditsAutoTopupCompanySummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CreditsAutoTopupCompanySummary
+    CreditsAutoTopupCreditSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CreditsAutoTopupCreditSummary
+    CreditsAutoTopupHardFailure:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CreditsAutoTopupCompanySummary'
+        credit:
+          $ref: '#/components/schemas/CreditsAutoTopupCreditSummary'
+        error_message:
+          type: string
+          nullable: true
+        stripe_error_code:
+          type: string
+          nullable: true
+      title: CreditsAutoTopupHardFailure
+    CreditsAutoTopupRetryFailure:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CreditsAutoTopupCompanySummary'
+        consecutive_failures:
+          type: integer
+        credit:
+          $ref: '#/components/schemas/CreditsAutoTopupCreditSummary'
+        last_error_message:
+          type: string
+          nullable: true
+        stripe_error_code:
+          type: string
+          nullable: true
+      required:
+        - consecutive_failures
+      title: CreditsAutoTopupRetryFailure
     CustomPlanConfig:
       type: object
       properties:
@@ -5914,6 +6231,28 @@ components:
       required:
         - features
       title: FeatureUsageDetailResponseData
+    FeatureUsageLegacyResponseData:
+      type: object
+      properties:
+        Allocation:
+          type: integer
+          nullable: true
+        CreditUsage:
+          $ref: '#/components/schemas/CreditUsage'
+        Entitlement:
+          type: string
+        Feature:
+          $ref: '#/components/schemas/FeatureView'
+        MetricResetAt:
+          type: string
+          format: date-time
+          nullable: true
+        Usage:
+          type: integer
+          nullable: true
+      required:
+        - Entitlement
+      title: FeatureUsageLegacyResponseData
     FeatureUsageResponseData:
       type: object
       properties:
@@ -6082,6 +6421,94 @@ components:
         - limits
         - usage_points
       title: FeatureUsageTimeSeriesResponseData
+    FeatureUsageWebhookResponseData:
+      type: object
+      properties:
+        Allocation:
+          type: integer
+          nullable: true
+        CreditUsage:
+          $ref: '#/components/schemas/CreditUsage'
+        Entitlement:
+          type: string
+        Feature:
+          $ref: '#/components/schemas/FeatureView'
+        MetricResetAt:
+          type: string
+          format: date-time
+          nullable: true
+        Usage:
+          type: integer
+          nullable: true
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+      required:
+        - Entitlement
+      title: WebFeatureUsageWebhookOutput
+    FeatureView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        description:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        event_summary:
+          $ref: '#/components/schemas/EventSummaryResponseData'
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
+        flags:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlagView'
+        icon:
+          type: string
+        id:
+          type: string
+        lifecycle_phase:
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
+          nullable: true
+        maintainer_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewObject'
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
+        trait:
+          $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
+        trait_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - name
+        - description
+        - feature_type
+        - icon
+        - created_at
+        - updated_at
+        - flags
+        - plans
+      title: FeatureView
     FlagDetailResponseData:
       type: object
       properties:
@@ -6171,6 +6598,57 @@ components:
       type: string
       enum:
         - boolean
+    FlagView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        default_value:
+          type: boolean
+        description:
+          type: string
+        feature:
+          $ref: '#/components/schemas/FeatureResponseData'
+        feature_id:
+          type: string
+          nullable: true
+        flag_type:
+          $ref: '#/components/schemas/FlagType'
+        id:
+          type: string
+        key:
+          type: string
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
+        maintainer_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleView'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - key
+        - name
+        - description
+        - flag_type
+        - default_value
+        - created_at
+        - updated_at
+        - rules
+      title: FlagView
     GenericPreviewObject:
       type: object
       properties:
@@ -8003,6 +8481,56 @@ components:
         - created_at
         - updated_at
       title: RuleResponseData
+    RuleView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        condition_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionGroupView'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionView'
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        flag_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        priority:
+          type: integer
+        rule_type:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        value:
+          type: boolean
+      required:
+        - account_id
+        - created_at
+        - environment_id
+        - id
+        - name
+        - priority
+        - rule_type
+        - updated_at
+        - value
+        - conditions
+        - condition_groups
+      title: RuleView
     RulesDetailResponseData:
       type: object
       properties:
@@ -8022,7 +8550,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - '58203303'
+        - db7512f5
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -9785,6 +10313,30 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WebFeatureUsageWebhookOutput:
+      type: object
+      properties:
+        Allocation:
+          type: integer
+          nullable: true
+        CreditUsage:
+          $ref: '#/components/schemas/CreditUsage'
+        Entitlement:
+          type: string
+        Feature:
+          $ref: '#/components/schemas/FeatureView'
+        MetricResetAt:
+          type: string
+          format: date-time
+          nullable: true
+        Usage:
+          type: integer
+          nullable: true
+        company:
+          $ref: '#/components/schemas/CompanyDetailResponseData'
+      required:
+        - Entitlement
+      title: WebFeatureUsageWebhookOutput
     WebhookEventDetailResponseData:
       type: object
       properties:
