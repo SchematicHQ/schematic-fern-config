@@ -4582,6 +4582,13 @@ components:
           nullable: true
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
+        scheduled_downgrade_behavior:
+          allOf:
+            - $ref: '#/components/schemas/ScheduledDowngradeConfigBehavior'
+          nullable: true
+        scheduled_downgrade_prevent_when_over_limit:
+          type: boolean
+          nullable: true
         show_as_monthly_prices:
           type: boolean
         show_credits:
@@ -7555,6 +7562,12 @@ components:
           nullable: true
         proration_behavior:
           type: string
+        scheduled_downgrade_behavior:
+          type: string
+          nullable: true
+        scheduled_downgrade_prevent_when_over_limit:
+          type: boolean
+          nullable: true
         show_as_monthly_prices:
           type: boolean
           deprecated: true
@@ -7760,6 +7773,12 @@ components:
           nullable: true
         proration_behavior:
           type: string
+        scheduled_downgrade_behavior:
+          type: string
+          nullable: true
+        scheduled_downgrade_prevent_when_over_limit:
+          type: boolean
+          nullable: true
         show_as_monthly_prices:
           type: boolean
           deprecated: true
@@ -9052,6 +9071,11 @@ components:
         - traits
         - rules
       title: RulesengineUser
+    ScheduledDowngradeConfigBehavior:
+      type: string
+      enum:
+        - end_of_billing_period
+        - none
     SegmentStatusResp:
       type: object
       properties:
@@ -9766,6 +9790,13 @@ components:
           nullable: true
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
+        scheduled_downgrade_behavior:
+          allOf:
+            - $ref: '#/components/schemas/ScheduledDowngradeConfigBehavior'
+          nullable: true
+        scheduled_downgrade_prevent_when_over_limit:
+          type: boolean
+          nullable: true
         show_as_monthly_prices:
           type: boolean
         show_credits:
