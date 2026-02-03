@@ -183,6 +183,33 @@ Auto top-ups are triggered when processing an event that draws from a credit bal
 
 In the event that an auto top-up purchase fails, Schematic will try to purchase an auto top-up grant the next time the balance is drawn from.
 
+## Accessing Credit Information via API
+
+When working with credit burndown models, you can retrieve credit balance and usage information through several API endpoints, the most commonly used ones are listed below.
+
+### List Company Credit Grants
+
+To see all credit grants associated with a specific company, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-credit-grants) endpoint. This endpoint returns detailed information about each credit grant, including grant type (plan, purchased, promotional), quantity, remaining balance, and expiration dates, helping you understand the composition of a customer's credit balance.
+
+### Grant Billing Credits to Company
+
+To manually grant credits to a company (for promotional credits, refunds, or other administrative purposes), use the [Grant Billing Credits to Company](/api-reference/billing-credits/grant-billing-credits-to-company) endpoint. This allows you to add credits to a company's balance outside of the normal plan or purchase flow.
+
+### Zero Out Grant
+
+To zero out a specific credit grant (set its remaining balance to zero), use the [Zero Out Grant](/api-reference/billing-credits/zero-out-grant) endpoint. This is useful for administrative purposes when you need to cancel a credit grant.
+
+### List Feature Usage
+
+Additionally, credit usage information can be found in the [List Feature Usage](/api-reference/entitlements/list-feature-usage) endpoint. This endpoint supports filtering and pagination, and when you include the `include_usage_aggregation` parameter, it returns a `credit_usage_aggregation` object with time-bucketed usage data:
+
+- `usage_this_billing_period`: Total credits used in the current billing period
+- `usage_this_calendar_month`: Total credits used in the current calendar month
+- `usage_this_week`: Total credits used in the current week
+- `usage_today`: Total credits used today
+
+This aggregation data allows you to provide customers with detailed insights into their credit consumption patterns and help them understand their usage trends over time.
+
 ### Conclusion
 
 Congratulations! You've now implemented a credit burndown model in Schematic. Credit burndown enables you to:
