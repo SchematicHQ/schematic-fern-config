@@ -3136,6 +3136,10 @@ components:
         plan_version_id:
           type: string
           nullable: true
+        plan_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericPreviewObject'
         plans:
           type: array
           items:
@@ -3188,6 +3192,7 @@ components:
         - billing_products
         - companies
         - plans
+        - plan_versions
         - users
       title: ConditionView
     CountResponse:
@@ -19490,6 +19495,28 @@ paths:
               plan_)
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter plan entitlements by a single plan version ID (starting with
+            plvr_)
+          schema:
+            type: string
+            description: >-
+              Filter plan entitlements by a single plan version ID (starting
+              with plvr_)
+        - name: plan_version_ids
+          in: query
+          description: >-
+            Filter plan entitlements by multiple plan version IDs (starting with
+            plvr_)
+          schema:
+            type: array
+            description: >-
+              Filter plan entitlements by multiple plan version IDs (starting
+              with plvr_)
+            items:
+              type: string
         - name: q
           in: query
           description: Search for plan entitlements by feature or company name
@@ -19570,6 +19597,18 @@ paths:
                         description: >-
                           Filter plan entitlements by multiple plan IDs
                           (starting with plan_)
+                        items:
+                          type: string
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter plan entitlements by a single plan version ID
+                          (starting with plvr_)
+                      plan_version_ids:
+                        type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan version IDs
+                          (starting with plvr_)
                         items:
                           type: string
                       q:
@@ -19816,6 +19855,28 @@ paths:
               plan_)
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter plan entitlements by a single plan version ID (starting with
+            plvr_)
+          schema:
+            type: string
+            description: >-
+              Filter plan entitlements by a single plan version ID (starting
+              with plvr_)
+        - name: plan_version_ids
+          in: query
+          description: >-
+            Filter plan entitlements by multiple plan version IDs (starting with
+            plvr_)
+          schema:
+            type: array
+            description: >-
+              Filter plan entitlements by multiple plan version IDs (starting
+              with plvr_)
+            items:
+              type: string
         - name: q
           in: query
           description: Search for plan entitlements by feature or company name
@@ -19893,6 +19954,18 @@ paths:
                         description: >-
                           Filter plan entitlements by multiple plan IDs
                           (starting with plan_)
+                        items:
+                          type: string
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter plan entitlements by a single plan version ID
+                          (starting with plvr_)
+                      plan_version_ids:
+                        type: array
+                        description: >-
+                          Filter plan entitlements by multiple plan version IDs
+                          (starting with plvr_)
                         items:
                           type: string
                       q:
