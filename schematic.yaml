@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: vd8b3554b
+  x-rules-engine-schema-version: v0f048dd3
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -1707,40 +1707,42 @@ components:
           type: string
           description: If company keys were provided and matched a company, its ID
           nullable: true
+        entitlement:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEntitlement'
+            - description: >-
+                If a feature entitlement rule was matched, its entitlement
+                details
         error:
           type: string
           description: If an error occurred while checking the flag, the error message
           nullable: true
         feature_allocation:
           type: integer
-          description: If a numeric feature entitlement rule was matched, its allocation
+          description: 'Deprecated: Use Entitlement.Allocation instead.'
           nullable: true
+          deprecated: true
         feature_usage:
           type: integer
-          description: >-
-            If a numeric feature entitlement rule was matched, the company's
-            usage
+          description: 'Deprecated: Use Entitlement.CurrentUsage instead.'
           nullable: true
+          deprecated: true
         feature_usage_event:
           type: string
-          description: >-
-            If an event-based numeric feature entitlement rule was matched, the
-            event used to track its usage
+          description: 'Deprecated: Use Entitlement.MetricEventSubtype instead.'
           nullable: true
+          deprecated: true
         feature_usage_period:
           type: string
-          description: >-
-            For event-based feature entitlement rules, the period over which
-            usage is tracked (current_month, current_day, current_week,
-            all_time)
+          description: 'Deprecated: Use Entitlement.MetricPeriod instead.'
           nullable: true
+          deprecated: true
         feature_usage_reset_at:
           type: string
-          description: >-
-            For event-based feature entitlement rules, when the usage period
-            will reset
+          description: 'Deprecated: Use Entitlement.ResetDate instead.'
           format: date-time
           nullable: true
+          deprecated: true
         flag:
           type: string
           description: The key used to check the flag
@@ -8750,7 +8752,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - vd8b3554b
+        - v0f048dd3
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -8758,6 +8760,8 @@ components:
         company_id:
           type: string
           nullable: true
+        entitlement:
+          $ref: '#/components/schemas/RulesengineFeatureEntitlement'
         err:
           type: string
         feature_allocation:
