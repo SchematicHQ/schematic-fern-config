@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v58203303
+  x-rules-engine-schema-version: vd8b3554b
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -90,6 +90,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ApiKeyScope'
+          maxItems: 50
         secret:
           type: string
         updated_at:
@@ -248,6 +249,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ApiKeyScope'
+          maxItems: 50
         updated_at:
           type: string
           format: date-time
@@ -942,6 +944,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductPriceTierResponseData'
+          maxItems: 100
         product_external_id:
           type: string
         product_id:
@@ -1075,6 +1078,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductPriceTierResponseData'
+          maxItems: 100
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
         quantity:
@@ -1232,13 +1236,18 @@ components:
         billing_threshold:
           type: integer
           nullable: true
+          maximum: 9999999999999
+          minimum: 50
         currency:
           type: string
+          maxLength: 3
         interval:
           type: string
+          maxLength: 255
         meter_id:
           type: string
           nullable: true
+          maxLength: 255
         package_size:
           type: integer
           nullable: true
@@ -1249,13 +1258,16 @@ components:
           nullable: true
         price_external_id:
           type: string
+          maxLength: 255
         product_external_id:
           type: string
+          maxLength: 255
         quantity:
           type: integer
         subscription_item_external_id:
           type: string
           nullable: true
+          maxLength: 255
         usage_type:
           $ref: '#/components/schemas/BillingPriceUsageType'
       required:
@@ -1325,20 +1337,24 @@ components:
       properties:
         coupon_external_id:
           type: string
+          maxLength: 255
         customer_facing_code:
           type: string
           nullable: true
+          maxLength: 255
         ended_at:
           type: string
           format: date-time
           nullable: true
         external_id:
           type: string
+          maxLength: 255
         is_active:
           type: boolean
         promo_code_external_id:
           type: string
           nullable: true
+          maxLength: 255
         started_at:
           type: string
           format: date-time
@@ -1580,15 +1596,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
+          maxItems: 100
         company_id:
           type: string
         coupon_external_id:
           type: string
           nullable: true
+          maxLength: 255
         credit_bundles:
           type: array
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
+          maxItems: 100
         new_plan_id:
           type: string
         new_price_id:
@@ -1597,12 +1616,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          maxItems: 100
         payment_method_id:
           type: string
           nullable: true
+          maxLength: 255
         promo_code:
           type: string
           nullable: true
+          maxLength: 255
         skip_trial:
           type: boolean
       required:
@@ -1621,13 +1643,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
+          maxItems: 100
         coupon_external_id:
           type: string
           nullable: true
+          maxLength: 255
         credit_bundles:
           type: array
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
+          maxItems: 100
         new_plan_id:
           type: string
         new_price_id:
@@ -1636,12 +1661,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          maxItems: 100
         payment_method_id:
           type: string
           nullable: true
+          maxLength: 255
         promo_code:
           type: string
           nullable: true
+          maxLength: 255
         skip_trial:
           type: boolean
       required:
@@ -1752,6 +1780,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckFlagRequestBody'
+          maxItems: 100
+          minItems: 1
       required:
         - contexts
       title: CheckFlagsBulkRequestBody
@@ -3209,14 +3239,17 @@ components:
         currency:
           type: string
           nullable: true
+          maxLength: 3
         duration:
           type: string
+          maxLength: 50
         duration_in_months:
           type: integer
         max_redemptions:
           type: integer
         name:
           type: string
+          maxLength: 255
         percent_off:
           type: number
         times_redeemed:
@@ -3236,11 +3269,14 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 256
         environment_id:
           type: string
           nullable: true
         name:
           type: string
+          maxLength: 256
+          minLength: 1
       required:
         - name
       title: CreateApiKeyRequestBody
@@ -3260,17 +3296,21 @@ components:
         default_expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         default_rollover_policy:
           allOf:
             - $ref: '#/components/schemas/BillingCreditRolloverPolicy'
           nullable: true
         description:
           type: string
+          maxLength: 1024
         icon:
           type: string
           nullable: true
+          maxLength: 64
         name:
           type: string
+          maxLength: 255
         per_unit_price:
           type: integer
           nullable: true
@@ -3280,9 +3320,11 @@ components:
         plural_name:
           type: string
           nullable: true
+          maxLength: 512
         singular_name:
           type: string
           nullable: true
+          maxLength: 512
       required:
         - name
         - description
@@ -3299,14 +3341,17 @@ components:
           nullable: true
         email:
           type: string
+          maxLength: 255
         external_id:
           type: string
+          maxLength: 255
         meta:
           additionalProperties:
             type: string
           type: object
         name:
           type: string
+          maxLength: 255
         provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
@@ -3326,6 +3371,7 @@ components:
         auto_topup_amount:
           type: integer
           nullable: true
+          minimum: 1
         auto_topup_amount_type:
           allOf:
             - $ref: '#/components/schemas/CreditAutoTopupAmountType'
@@ -3344,11 +3390,16 @@ components:
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         auto_topup_threshold_percent:
           type: integer
           nullable: true
+          maximum: 100
+          minimum: 1
         credit_amount:
           type: integer
+          maximum: 9999999999
+          minimum: 0
         credit_id:
           type: string
         expiry_type:
@@ -3362,6 +3413,7 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         plan_id:
           type: string
         reset_cadence:
@@ -3386,15 +3438,19 @@ components:
           $ref: '#/components/schemas/BillingPriceScheme'
         currency:
           type: string
+          maxLength: 3
         external_account_id:
           type: string
+          maxLength: 255
         interval:
           type: string
+          maxLength: 255
         is_active:
           type: boolean
         meter_id:
           type: string
           nullable: true
+          maxLength: 255
         package_size:
           type: integer
           nullable: true
@@ -3405,12 +3461,15 @@ components:
           nullable: true
         price_external_id:
           type: string
+          maxLength: 255
         price_tiers:
           type: array
           items:
             $ref: '#/components/schemas/CreateBillingPriceTierRequestBody'
+          maxItems: 100
         product_external_id:
           type: string
+          maxLength: 255
         provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
@@ -3447,6 +3506,7 @@ components:
           nullable: true
         price_external_id:
           type: string
+          maxLength: 255
         provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
@@ -3462,11 +3522,13 @@ components:
       properties:
         external_id:
           type: string
+          maxLength: 255
         is_active:
           type: boolean
           nullable: true
         name:
           type: string
+          maxLength: 255
         price:
           type: number
         provider_type:
@@ -3484,6 +3546,7 @@ components:
         application_id:
           type: string
           nullable: true
+          maxLength: 255
         cancel_at:
           type: integer
           nullable: true
@@ -3491,11 +3554,14 @@ components:
           type: boolean
         currency:
           type: string
+          maxLength: 3
         customer_external_id:
           type: string
+          maxLength: 255
         default_payment_method_external_id:
           type: string
           nullable: true
+          maxLength: 255
         default_payment_method_id:
           type: string
           nullable: true
@@ -3503,12 +3569,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingSubscriptionDiscount'
+          maxItems: 100
         expired_at:
           type: string
           format: date-time
         interval:
           type: string
           nullable: true
+          maxLength: 255
         metadata:
           type: object
           nullable: true
@@ -3522,11 +3590,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductPricing'
+          maxItems: 100
         status:
           type: string
           nullable: true
+          maxLength: 255
         subscription_external_id:
           type: string
+          maxLength: 255
         total_price:
           type: integer
         trial_end:
@@ -3552,6 +3623,7 @@ components:
         billing_periods_count:
           type: integer
           nullable: true
+          minimum: 1
         company_id:
           type: string
         credit_id:
@@ -3571,8 +3643,10 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         quantity:
           type: integer
+          minimum: 1
         reason:
           $ref: '#/components/schemas/BillingCreditGrantReason'
         renewal_enabled:
@@ -3649,6 +3723,8 @@ components:
           $ref: '#/components/schemas/ComponentEntityType'
         name:
           type: string
+          maxLength: 256
+          minLength: 1
       required:
         - name
         - entity_type
@@ -3661,16 +3737,20 @@ components:
         currency:
           type: string
           nullable: true
+          maxLength: 3
         duration:
           type: string
+          maxLength: 50
         duration_in_months:
           type: integer
         external_id:
           type: string
+          maxLength: 255
         max_redemptions:
           type: integer
         name:
           type: string
+          maxLength: 255
         percent_off:
           type: number
         times_redeemed:
@@ -3690,6 +3770,7 @@ components:
       properties:
         bundle_name:
           type: string
+          maxLength: 256
         bundle_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBundleType'
@@ -3709,14 +3790,17 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         price_per_unit:
           type: integer
+          minimum: 0
         price_per_unit_decimal:
           type: string
           nullable: true
         quantity:
           type: integer
           nullable: true
+          minimum: 1
         status:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBundleStatus'
@@ -3734,6 +3818,7 @@ components:
           $ref: '#/components/schemas/DataExportType'
         metadata:
           type: string
+          maxLength: 10240
         output_file_type:
           $ref: '#/components/schemas/DataExportOutputFileType'
       required:
@@ -3750,6 +3835,8 @@ components:
         billing_threshold:
           type: integer
           nullable: true
+          maximum: 9999999999999
+          minimum: 50
         credit_consumption_rate:
           type: number
           nullable: true
@@ -3888,6 +3975,7 @@ components:
         display_name:
           type: string
           nullable: true
+          maxLength: 255
         entity_type:
           $ref: '#/components/schemas/EntityType'
         hierarchy:
@@ -3908,6 +3996,8 @@ components:
           $ref: '#/components/schemas/EnvironmentType'
         name:
           type: string
+          maxLength: 256
+          minLength: 1
       required:
         - name
         - environment_type
@@ -3919,6 +4009,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateEventRequestBody'
+          maxItems: 1000
       required:
         - events
       title: CreateEventBatchRequestBody
@@ -4074,6 +4165,7 @@ components:
       properties:
         description:
           type: string
+          maxLength: 1024
         event_subtype:
           type: string
           nullable: true
@@ -4093,6 +4185,7 @@ components:
           nullable: true
         name:
           type: string
+          maxLength: 512
         plural_name:
           type: string
           nullable: true
@@ -4114,6 +4207,7 @@ components:
           type: boolean
         description:
           type: string
+          maxLength: 1024
         feature_id:
           type: string
           nullable: true
@@ -4121,11 +4215,13 @@ components:
           $ref: '#/components/schemas/FlagType'
         key:
           type: string
+          maxLength: 512
         maintainer_id:
           type: string
           nullable: true
         name:
           type: string
+          maxLength: 512
       required:
         - default_value
         - description
@@ -4144,10 +4240,13 @@ components:
           type: integer
         collection_method:
           type: string
+          maxLength: 32
         currency:
           type: string
+          maxLength: 16
         customer_external_id:
           type: string
+          maxLength: 255
         due_date:
           type: string
           format: date-time
@@ -4155,17 +4254,21 @@ components:
         external_id:
           type: string
           nullable: true
+          maxLength: 255
         payment_method_external_id:
           type: string
           nullable: true
+          maxLength: 255
         subscription_external_id:
           type: string
           nullable: true
+          maxLength: 255
         subtotal:
           type: integer
         url:
           type: string
           nullable: true
+          maxLength: 512
       required:
         - amount_due
         - amount_paid
@@ -4180,12 +4283,16 @@ components:
       properties:
         display_name:
           type: string
+          maxLength: 255
         event_name:
           type: string
+          maxLength: 255
         event_payload_key:
           type: string
+          maxLength: 255
         external_id:
           type: string
+          maxLength: 255
       required:
         - external_id
         - display_name
@@ -4199,6 +4306,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateConditionRequestBody'
+          maxItems: 100
         flag_id:
           type: string
           nullable: true
@@ -4282,6 +4390,7 @@ components:
             condition
           items:
             type: string
+          maxItems: 1000
         trait_id:
           type: string
           description: ID of trait to use to measure this condition
@@ -4302,6 +4411,7 @@ components:
           type: boolean
         description:
           type: string
+          maxLength: 1024
         feature_id:
           type: string
           nullable: true
@@ -4312,11 +4422,13 @@ components:
           nullable: true
         key:
           type: string
+          maxLength: 512
         maintainer_id:
           type: string
           nullable: true
         name:
           type: string
+          maxLength: 512
       required:
         - default_value
         - description
@@ -4331,15 +4443,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateConditionGroupRequestBody'
+          maxItems: 100
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateConditionRequestBody'
+          maxItems: 100
         id:
           type: string
           nullable: true
         name:
           type: string
+          maxLength: 512
         priority:
           type: integer
         rule_type:
@@ -4366,21 +4481,27 @@ components:
         account_last4:
           type: string
           nullable: true
+          maxLength: 4
         account_name:
           type: string
           nullable: true
+          maxLength: 255
         bank_name:
           type: string
           nullable: true
+          maxLength: 255
         billing_email:
           type: string
           nullable: true
+          maxLength: 255
         billing_name:
           type: string
           nullable: true
+          maxLength: 255
         card_brand:
           type: string
           nullable: true
+          maxLength: 32
         card_exp_month:
           type: integer
           nullable: true
@@ -4390,12 +4511,16 @@ components:
         card_last4:
           type: string
           nullable: true
+          maxLength: 4
         customer_external_id:
           type: string
+          maxLength: 255
         external_id:
           type: string
+          maxLength: 255
         payment_method_type:
           type: string
+          maxLength: 32
       required:
         - external_id
         - customer_external_id
@@ -4410,16 +4535,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
+          maxItems: 100
         entitlements:
           type: array
           items:
             $ref: '#/components/schemas/PlanBundleEntitlementRequestBody'
+          maxItems: 100
         plan:
           $ref: '#/components/schemas/CreatePlanRequestBody'
         traits:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
+          maxItems: 100
       required:
         - entitlements
       title: CreatePlanBundleRequestBody
@@ -4432,6 +4560,8 @@ components:
         billing_threshold:
           type: integer
           nullable: true
+          maximum: 9999999999999
+          minimum: 50
         credit_consumption_rate:
           type: number
           nullable: true
@@ -4582,9 +4712,11 @@ components:
         prevent_self_service_downgrade_button_text:
           type: string
           nullable: true
+          maxLength: 255
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+          maxLength: 512
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
         scheduled_downgrade_behavior:
@@ -4639,11 +4771,16 @@ components:
       properties:
         description:
           type: string
+          maxLength: 1024
+          minLength: 0
         icon:
           type: string
           nullable: true
+          maxLength: 64
         name:
           type: string
+          maxLength: 256
+          minLength: 1
         plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
@@ -4689,19 +4826,26 @@ components:
           items:
             $ref: '#/components/schemas/CreditTriggerConfig'
           nullable: true
+          maxItems: 100
         entitlement_trigger_configs:
           type: array
           items:
             $ref: '#/components/schemas/EntitlementTriggerConfig'
           nullable: true
+          maxItems: 100
         name:
           type: string
+          maxLength: 256
+          minLength: 1
         request_types:
           type: array
           items:
             $ref: '#/components/schemas/WebhookRequestType'
+          maxItems: 50
         url:
           type: string
+          maxLength: 2048
+          minLength: 1
       required:
         - name
         - url
@@ -4864,6 +5008,7 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -6700,10 +6845,13 @@ components:
           type: integer
         collection_method:
           type: string
+          maxLength: 32
         currency:
           type: string
+          maxLength: 16
         customer_external_id:
           type: string
+          maxLength: 255
         due_date:
           type: string
           format: date-time
@@ -6711,14 +6859,17 @@ components:
         payment_method_external_id:
           type: string
           nullable: true
+          maxLength: 255
         subscription_external_id:
           type: string
           nullable: true
+          maxLength: 255
         subtotal:
           type: integer
         url:
           type: string
           nullable: true
+          maxLength: 512
       required:
         - amount_due
         - amount_paid
@@ -6883,6 +7034,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanSelection'
+          maxItems: 100
         base_plan_id:
           type: string
           nullable: true
@@ -6904,13 +7056,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
+          maxItems: 100
         pay_in_advance_entitlements:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          maxItems: 100
         payment_method_external_id:
           type: string
           nullable: true
+          maxLength: 255
         promo_code:
           type: string
           nullable: true
@@ -6945,10 +7100,13 @@ components:
       properties:
         display_name:
           type: string
+          maxLength: 255
         event_name:
           type: string
+          maxLength: 255
         event_payload_key:
           type: string
+          maxLength: 255
       required:
         - display_name
         - event_name
@@ -6973,21 +7131,27 @@ components:
         account_last4:
           type: string
           nullable: true
+          maxLength: 4
         account_name:
           type: string
           nullable: true
+          maxLength: 255
         bank_name:
           type: string
           nullable: true
+          maxLength: 255
         billing_email:
           type: string
           nullable: true
+          maxLength: 255
         billing_name:
           type: string
           nullable: true
+          maxLength: 255
         card_brand:
           type: string
           nullable: true
+          maxLength: 32
         card_exp_month:
           type: integer
           nullable: true
@@ -6997,10 +7161,13 @@ components:
         card_last4:
           type: string
           nullable: true
+          maxLength: 4
         customer_external_id:
           type: string
+          maxLength: 255
         payment_method_type:
           type: string
+          maxLength: 32
       required:
         - customer_external_id
         - payment_method_type
@@ -8574,7 +8741,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v58203303
+        - vd8b3554b
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -9277,9 +9444,12 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 256
         name:
           type: string
           nullable: true
+          maxLength: 256
+          minLength: 1
       title: UpdateApiKeyRequestBody
     UpdateBillingCreditRequestBody:
       type: object
@@ -9295,29 +9465,36 @@ components:
         default_expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         default_rollover_policy:
           allOf:
             - $ref: '#/components/schemas/BillingCreditRolloverPolicy'
           nullable: true
         description:
           type: string
+          maxLength: 1024
         icon:
           type: string
           nullable: true
+          maxLength: 64
         name:
           type: string
+          maxLength: 255
         per_unit_price:
           type: integer
           nullable: true
+          minimum: 1
         per_unit_price_decimal:
           type: string
           nullable: true
         plural_name:
           type: string
           nullable: true
+          maxLength: 512
         singular_name:
           type: string
           nullable: true
+          maxLength: 512
       required:
         - name
         - description
@@ -9331,6 +9508,7 @@ components:
         auto_topup_amount:
           type: integer
           nullable: true
+          minimum: 1
         auto_topup_amount_type:
           allOf:
             - $ref: '#/components/schemas/CreditAutoTopupAmountType'
@@ -9349,12 +9527,17 @@ components:
         auto_topup_expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         auto_topup_threshold_percent:
           type: integer
           nullable: true
+          maximum: 100
+          minimum: 1
         credit_amount:
           type: integer
           nullable: true
+          maximum: 9999999999
+          minimum: 0
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -9366,6 +9549,7 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -9449,6 +9633,8 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 256
+          minLength: 1
         state:
           allOf:
             - $ref: '#/components/schemas/ComponentState'
@@ -9459,6 +9645,7 @@ components:
       properties:
         bundle_name:
           type: string
+          maxLength: 256
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -9470,14 +9657,17 @@ components:
         expiry_unit_count:
           type: integer
           nullable: true
+          minimum: 1
         price_per_unit:
           type: integer
+          minimum: 0
         price_per_unit_decimal:
           type: string
           nullable: true
         quantity:
           type: integer
           nullable: true
+          minimum: 1
         status:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBundleStatus'
@@ -9493,6 +9683,7 @@ components:
           type: string
         quantity:
           type: integer
+          minimum: 1
       required:
         - bundle_id
         - quantity
@@ -9540,6 +9731,7 @@ components:
         display_name:
           type: string
           nullable: true
+          maxLength: 255
         trait_type:
           $ref: '#/components/schemas/TraitType'
       required:
@@ -9555,6 +9747,8 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 256
+          minLength: 1
       title: UpdateEnvironmentRequestBody
     UpdateFeatureRequestBody:
       type: object
@@ -9562,6 +9756,7 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 1024
         event_subtype:
           type: string
           nullable: true
@@ -9584,6 +9779,7 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 512
         plural_name:
           type: string
           nullable: true
@@ -9601,6 +9797,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateRuleRequestBody'
+          maxItems: 100
       required:
         - rules
       title: UpdateFlagRulesRequestBody
@@ -9624,16 +9821,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
+          maxItems: 100
         entitlements:
           type: array
           items:
             $ref: '#/components/schemas/PlanBundleEntitlementRequestBody'
+          maxItems: 100
         plan:
           $ref: '#/components/schemas/UpdatePlanRequestBody'
         traits:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
+          maxItems: 100
       required:
         - entitlements
       title: UpdatePlanBundleRequestBody
@@ -9646,6 +9846,8 @@ components:
         billing_threshold:
           type: integer
           nullable: true
+          maximum: 9999999999999
+          minimum: 50
         credit_consumption_rate:
           type: number
           nullable: true
@@ -9790,9 +9992,11 @@ components:
         prevent_self_service_downgrade_button_text:
           type: string
           nullable: true
+          maxLength: 255
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+          maxLength: 512
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
         scheduled_downgrade_behavior:
@@ -9848,11 +10052,16 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 1024
+          minLength: 0
         icon:
           type: string
           nullable: true
+          maxLength: 64
         name:
           type: string
+          maxLength: 256
+          minLength: 1
       required:
         - name
       title: UpdatePlanRequestBody
@@ -9901,12 +10110,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateConditionGroupRequestBody'
+          maxItems: 100
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/CreateOrUpdateConditionRequestBody'
+          maxItems: 100
         name:
           type: string
+          maxLength: 512
         priority:
           type: integer
         value:
@@ -9934,19 +10146,24 @@ components:
           items:
             $ref: '#/components/schemas/CreditTriggerConfig'
           nullable: true
+          maxItems: 100
         entitlement_trigger_configs:
           type: array
           items:
             $ref: '#/components/schemas/EntitlementTriggerConfig'
           nullable: true
+          maxItems: 100
         name:
           type: string
           nullable: true
+          maxLength: 256
+          minLength: 1
         request_types:
           type: array
           items:
             $ref: '#/components/schemas/WebhookRequestType'
           nullable: true
+          maxItems: 50
         status:
           allOf:
             - $ref: '#/components/schemas/WebhookStatus'
@@ -9954,6 +10171,8 @@ components:
         url:
           type: string
           nullable: true
+          maxLength: 2048
+          minLength: 1
       title: UpdateWebhookRequestBody
     UpsertBillingProductRequestBody:
       type: object
@@ -10015,6 +10234,7 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 256
         traits:
           type: object
           description: A map of trait names to trait values
@@ -10040,9 +10260,11 @@ components:
           type: string
           description: Value to set the trait to
           nullable: true
+          maxLength: 1024
         trait:
           type: string
           description: Name of the trait to update
+          maxLength: 255
         update_only:
           type: boolean
           description: >-
@@ -10064,6 +10286,7 @@ components:
               type: string
             type: object
           nullable: true
+          maxItems: 100
         company:
           additionalProperties:
             type: string
@@ -10084,6 +10307,7 @@ components:
           items:
             type: string
           nullable: true
+          maxItems: 100
         id:
           type: string
           description: If you know the Schematic ID, you can use that here instead of keys
@@ -10103,6 +10327,7 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 256
         traits:
           type: object
           description: A map of trait names to trait values
@@ -10127,6 +10352,7 @@ components:
           items:
             type: string
           nullable: true
+          maxItems: 100
         id:
           type: string
           description: If you know the Schematic ID, you can use that here instead of keys
@@ -10146,6 +10372,7 @@ components:
         name:
           type: string
           nullable: true
+          maxLength: 256
         traits:
           type: object
           description: A map of trait names to trait values
@@ -10164,6 +10391,8 @@ components:
         billing_threshold:
           type: integer
           nullable: true
+          maximum: 9999999999999
+          minimum: 50
         currency:
           type: string
           nullable: true
@@ -11180,6 +11409,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11221,6 +11451,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -11760,6 +11991,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11798,6 +12030,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -12779,6 +13012,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: provider_type
           in: query
           schema:
@@ -12787,6 +13021,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12829,6 +13064,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -12837,6 +13073,7 @@ paths:
                         $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
+                        maxLength: 512
                     title: ListCustomersWithSubscriptionsParams
                 required:
                   - data
@@ -12869,6 +13106,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: provider_type
           in: query
           schema:
@@ -12877,6 +13115,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12915,6 +13154,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -12923,6 +13163,7 @@ paths:
                         $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
+                        maxLength: 512
                     title: CountCustomersParams
                 required:
                   - data
@@ -12954,11 +13195,13 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 255
         - name: subscription_external_id
           in: query
           required: true
           schema:
             type: string
+            maxLength: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -12994,6 +13237,7 @@ paths:
                         type: string
                       customer_external_id:
                         type: string
+                        maxLength: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -13004,6 +13248,7 @@ paths:
                         example: '0'
                       subscription_external_id:
                         type: string
+                        maxLength: 255
                     title: ListInvoicesParams
                 required:
                   - data
@@ -13069,6 +13314,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -13102,6 +13348,7 @@ paths:
                     properties:
                       display_name:
                         type: string
+                        maxLength: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -13181,6 +13428,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -13216,6 +13464,7 @@ paths:
                         type: string
                       customer_external_id:
                         type: string
+                        maxLength: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -13307,6 +13556,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: is_active
           in: query
           description: >-
@@ -13400,6 +13650,7 @@ paths:
                           type: string
                       interval:
                         type: string
+                        maxLength: 255
                       is_active:
                         type: boolean
                         description: >-
@@ -13557,6 +13808,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: is_active
           in: query
           description: >-
@@ -13650,6 +13902,7 @@ paths:
                           type: string
                       interval:
                         type: string
+                        maxLength: 255
                       is_active:
                         type: boolean
                         description: >-
@@ -13801,6 +14054,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: price_usage_type
           in: query
           schema:
@@ -13813,6 +14067,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: with_one_time_charges
           in: query
           description: Filter products that are one time charges
@@ -13883,6 +14138,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -13893,6 +14149,7 @@ paths:
                         $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
+                        maxLength: 512
                       with_one_time_charges:
                         type: boolean
                         description: Filter products that are one time charges
@@ -13945,6 +14202,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: price_usage_type
           in: query
           schema:
@@ -13957,6 +14215,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: with_one_time_charges
           in: query
           description: Filter products that are one time charges
@@ -14024,6 +14283,7 @@ paths:
                         example: '100'
                       name:
                         type: string
+                        maxLength: 255
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -14034,6 +14294,7 @@ paths:
                         $ref: '#/components/schemas/BillingProviderType'
                       q:
                         type: string
+                        maxLength: 512
                       with_one_time_charges:
                         type: boolean
                         description: Filter products that are one time charges
@@ -14250,6 +14511,7 @@ paths:
           schema:
             type: string
             description: Search for companies by name, keys or string traits
+            maxLength: 512
         - name: without_feature_override_for
           in: query
           description: >-
@@ -14324,6 +14586,7 @@ paths:
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
+                        maxLength: 512
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
@@ -14508,6 +14771,7 @@ paths:
           schema:
             type: string
             description: Search for companies by name, keys or string traits
+            maxLength: 512
         - name: without_feature_override_for
           in: query
           description: >-
@@ -14579,6 +14843,7 @@ paths:
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
+                        maxLength: 512
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
@@ -14710,6 +14975,7 @@ paths:
           schema:
             type: string
             description: Column to sort by (e.g. name, created_at, last_seen_at)
+            maxLength: 255
         - name: sort_order_direction
           in: query
           description: Direction to sort by (asc or desc)
@@ -14811,6 +15077,7 @@ paths:
                         description: >-
                           Column to sort by (e.g. name, created_at,
                           last_seen_at)
+                        maxLength: 255
                       sort_order_direction:
                         allOf:
                           - $ref: '#/components/schemas/SortDirection'
@@ -15037,6 +15304,7 @@ paths:
           schema:
             type: string
             description: Column to sort by (e.g. name, created_at, last_seen_at)
+            maxLength: 255
         - name: sort_order_direction
           in: query
           description: Direction to sort by (asc or desc)
@@ -15142,6 +15410,7 @@ paths:
                         description: >-
                           Column to sort by (e.g. name, created_at,
                           last_seen_at)
+                        maxLength: 255
                       sort_order_direction:
                         allOf:
                           - $ref: '#/components/schemas/SortDirection'
@@ -16058,6 +16327,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -16099,6 +16369,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        maxLength: 512
                     title: ListComponentsParams
                 required:
                   - data
@@ -16289,6 +16560,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -16327,6 +16599,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        maxLength: 512
                     title: CountComponentsParams
                 required:
                   - data
@@ -17311,12 +17584,14 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: event_subtypes
           in: query
           schema:
             type: array
             items:
               type: string
+            maxItems: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -17352,6 +17627,7 @@ paths:
                         type: array
                         items:
                           type: string
+                        maxItems: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -17362,6 +17638,7 @@ paths:
                         example: '0'
                       q:
                         type: string
+                        maxLength: 512
                     title: GetEventSummariesParams
                 required:
                   - data
@@ -17392,6 +17669,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: event_types
           in: query
           schema:
@@ -17441,6 +17719,7 @@ paths:
                         type: string
                       event_subtype:
                         type: string
+                        maxLength: 255
                       event_types:
                         type: array
                         items:
@@ -18162,6 +18441,7 @@ paths:
           schema:
             type: string
             description: Search by feature name or ID
+            maxLength: 512
         - name: without_company_override_for
           in: query
           description: >-
@@ -18259,6 +18539,7 @@ paths:
                       q:
                         type: string
                         description: Search by feature name or ID
+                        maxLength: 512
                       without_company_override_for:
                         type: string
                         description: >-
@@ -18467,6 +18748,7 @@ paths:
           schema:
             type: string
             description: Search by feature name or ID
+            maxLength: 512
         - name: without_company_override_for
           in: query
           description: >-
@@ -18561,6 +18843,7 @@ paths:
                       q:
                         type: string
                         description: Search by feature name or ID
+                        maxLength: 512
                       without_company_override_for:
                         type: string
                         description: >-
@@ -18609,6 +18892,7 @@ paths:
           schema:
             type: string
             description: Search by flag name, key, or ID
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -18657,6 +18941,7 @@ paths:
                       q:
                         type: string
                         description: Search by flag name, key, or ID
+                        maxLength: 512
                     title: ListFlagsParams
                 required:
                   - data
@@ -19033,6 +19318,7 @@ paths:
           schema:
             type: string
             description: Search by flag name, key, or ID
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -19078,6 +19364,7 @@ paths:
                       q:
                         type: string
                         description: Search by flag name, key, or ID
+                        maxLength: 512
                     title: CountFlagsParams
                 required:
                   - data
@@ -19311,10 +19598,12 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: base_plan_action
           in: query
           schema:
             type: string
+            maxLength: 255
         - name: company_id
           in: query
           schema:
@@ -19364,8 +19653,10 @@ paths:
                     properties:
                       action:
                         type: string
+                        maxLength: 255
                       base_plan_action:
                         type: string
+                        maxLength: 255
                       company_id:
                         type: string
                       company_ids:
@@ -21402,6 +21693,7 @@ paths:
           schema:
             type: string
             description: Search for users by name, keys or string traits
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -21455,6 +21747,7 @@ paths:
                       q:
                         type: string
                         description: Search for users by name, keys or string traits
+                        maxLength: 512
                     title: ListUsersParams
                 required:
                   - data
@@ -21621,6 +21914,7 @@ paths:
           schema:
             type: string
             description: Search for users by name, keys or string traits
+            maxLength: 512
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -21671,6 +21965,7 @@ paths:
                       q:
                         type: string
                         description: Search for users by name, keys or string traits
+                        maxLength: 512
                     title: CountUsersParams
                 required:
                   - data
