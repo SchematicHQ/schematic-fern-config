@@ -58,6 +58,13 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    ActorType:
+      type: string
+      enum:
+        - api_key
+        - app_user
+        - system
+        - temporary_access_token
     ApiError:
       type: object
       properties:
@@ -267,6 +274,146 @@ components:
         - capture
         - read
         - write
+    AuditLogListResponseData:
+      type: object
+      properties:
+        actor_type:
+          $ref: '#/components/schemas/ActorType'
+        api_key_id:
+          type: string
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+          maxLength: 36
+          minLength: 36
+        method:
+          type: string
+          maxLength: 10
+          minLength: 1
+        resource_id:
+          type: integer
+          nullable: true
+        resource_id_string:
+          type: string
+          nullable: true
+          maxLength: 256
+        resource_name:
+          type: string
+          nullable: true
+          maxLength: 256
+        resource_type:
+          type: string
+          nullable: true
+          maxLength: 64
+        resp_code:
+          type: integer
+          nullable: true
+          maximum: 599
+          minimum: 100
+        secondary_resource:
+          type: string
+          nullable: true
+          maxLength: 256
+        started_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+          maxLength: 2048
+          minLength: 1
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 256
+      required:
+        - actor_type
+        - method
+        - id
+        - started_at
+        - url
+      title: AuditLogListResponseData
+    AuditLogResponseData:
+      type: object
+      properties:
+        actor_type:
+          $ref: '#/components/schemas/ActorType'
+        api_key_id:
+          type: string
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        environment_id:
+          type: string
+          nullable: true
+        id:
+          type: string
+          maxLength: 36
+          minLength: 36
+        method:
+          type: string
+          maxLength: 10
+          minLength: 1
+        req_body:
+          type: string
+          nullable: true
+        resource_id:
+          type: integer
+          nullable: true
+        resource_id_string:
+          type: string
+          nullable: true
+          maxLength: 256
+        resource_name:
+          type: string
+          nullable: true
+          maxLength: 256
+        resource_type:
+          type: string
+          nullable: true
+          maxLength: 64
+        resp_body:
+          type: string
+          nullable: true
+        resp_code:
+          type: integer
+          nullable: true
+          maximum: 599
+          minimum: 100
+        secondary_resource:
+          type: string
+          nullable: true
+          maxLength: 256
+        started_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+          maxLength: 2048
+          minLength: 1
+        user_id:
+          type: string
+          nullable: true
+          maxLength: 256
+        user_name:
+          type: string
+          nullable: true
+          maxLength: 256
+      required:
+        - actor_type
+        - method
+        - id
+        - started_at
+        - url
+      title: AuditLogResponseData
     BillingCouponResponseData:
       type: object
       properties:
@@ -7311,13 +7458,6 @@ components:
         - plan_trait_change
         - quickstart
         - subscription_change
-    PlanChangeActorType:
-      type: string
-      enum:
-        - api_key
-        - app_user
-        - system
-        - temporary_access_token
     PlanChangeBasePlanAction:
       type: string
       enum:
@@ -7331,7 +7471,7 @@ components:
         action:
           $ref: '#/components/schemas/PlanChangeAction'
         actor_type:
-          $ref: '#/components/schemas/PlanChangeActorType'
+          $ref: '#/components/schemas/ActorType'
         add_ons_added:
           type: array
           items:
@@ -11282,6 +11422,204 @@ paths:
                   - data
                   - params
                 title: CountApiRequestsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /audit-log:
+    get:
+      operationId: listAuditLogs
+      summary: List audit logs
+      tags:
+        - accounts
+      parameters:
+        - name: actor_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/ActorType'
+        - name: environment_id
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLogListResponseData'
+                    title: ListAuditLogsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      actor_type:
+                        $ref: '#/components/schemas/ActorType'
+                      environment_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                        maxLength: 512
+                    title: ListAuditLogsParams
+                required:
+                  - data
+                  - params
+                title: ListAuditLogsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /audit-log/{audit_log_id}:
+    get:
+      operationId: getAuditLog
+      summary: Get audit log
+      tags:
+        - accounts
+      parameters:
+        - name: audit_log_id
+          in: path
+          description: audit_log_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AuditLogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetAuditLogParams
+                required:
+                  - data
+                  - params
+                title: GetAuditLogResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /audit-log/count:
+    get:
+      operationId: countAuditLogs
+      summary: Count audit logs
+      tags:
+        - accounts
+      parameters:
+        - name: actor_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/ActorType'
+        - name: environment_id
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      actor_type:
+                        $ref: '#/components/schemas/ActorType'
+                      environment_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                        maxLength: 512
+                    title: CountAuditLogsParams
+                required:
+                  - data
+                  - params
+                title: CountAuditLogsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
