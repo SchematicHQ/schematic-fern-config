@@ -14841,6 +14841,18 @@ paths:
       tags:
         - companies
       parameters:
+        - name: credit_type_ids
+          in: query
+          description: >-
+            Filter companies by one or more credit type IDs (each ID starts with
+            bcrd_)
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more credit type IDs (each ID starts
+              with bcrd_)
+            items:
+              type: string
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -14849,12 +14861,28 @@ paths:
             description: Filter companies by multiple company IDs (starts with comp_)
             items:
               type: string
+        - name: monetized_subscriptions
+          in: query
+          description: Filter companies that have monetized subscriptions
+          schema:
+            type: boolean
+            description: Filter companies that have monetized subscriptions
         - name: plan_id
           in: query
           description: Filter companies by plan ID (starts with plan_)
           schema:
             type: string
             description: Filter companies by plan ID (starts with plan_)
+        - name: plan_ids
+          in: query
+          description: Filter companies by one or more plan IDs (each ID starts with plan_)
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more plan IDs (each ID starts with
+              plan_)
+            items:
+              type: string
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -14862,6 +14890,36 @@ paths:
             type: string
             description: Search for companies by name, keys or string traits
             maxLength: 512
+        - name: sort_order_column
+          in: query
+          description: Column to sort by (e.g. name, created_at, last_seen_at)
+          schema:
+            type: string
+            description: Column to sort by (e.g. name, created_at, last_seen_at)
+            maxLength: 255
+        - name: sort_order_direction
+          in: query
+          description: Direction to sort by (asc or desc)
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
+              - description: Direction to sort by (asc or desc)
+        - name: subscription_statuses
+          in: query
+          description: Filter companies by one or more subscription statuses
+          schema:
+            type: array
+            description: Filter companies by one or more subscription statuses
+            items:
+              $ref: '#/components/schemas/SubscriptionStatus'
+        - name: subscription_types
+          in: query
+          description: Filter companies by one or more subscription types
+          schema:
+            type: array
+            description: Filter companies by one or more subscription types
+            items:
+              $ref: '#/components/schemas/SubscriptionType'
         - name: without_feature_override_for
           in: query
           description: >-
@@ -14878,6 +14936,12 @@ paths:
           schema:
             type: boolean
             description: Filter out companies that have a plan
+        - name: without_subscription
+          in: query
+          description: Filter out companies that have a subscription
+          schema:
+            type: boolean
+            description: Filter out companies that have a subscription
         - name: with_subscription
           in: query
           description: Filter companies that have a subscription
@@ -14915,6 +14979,13 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      credit_type_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more credit type IDs (each
+                          ID starts with bcrd_)
+                        items:
+                          type: string
                       ids:
                         type: array
                         description: >-
@@ -14926,6 +14997,9 @@ paths:
                         type: integer
                         description: Page limit (default 100)
                         example: '100'
+                      monetized_subscriptions:
+                        type: boolean
+                        description: Filter companies that have monetized subscriptions
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -14933,10 +15007,37 @@ paths:
                       plan_id:
                         type: string
                         description: Filter companies by plan ID (starts with plan_)
+                      plan_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more plan IDs (each ID
+                          starts with plan_)
+                        items:
+                          type: string
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
                         maxLength: 512
+                      sort_order_column:
+                        type: string
+                        description: >-
+                          Column to sort by (e.g. name, created_at,
+                          last_seen_at)
+                        maxLength: 255
+                      sort_order_direction:
+                        allOf:
+                          - $ref: '#/components/schemas/SortDirection'
+                          - description: Direction to sort by (asc or desc)
+                      subscription_statuses:
+                        type: array
+                        description: Filter companies by one or more subscription statuses
+                        items:
+                          $ref: '#/components/schemas/SubscriptionStatus'
+                      subscription_types:
+                        type: array
+                        description: Filter companies by one or more subscription types
+                        items:
+                          $ref: '#/components/schemas/SubscriptionType'
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
@@ -14948,6 +15049,9 @@ paths:
                       without_plan:
                         type: boolean
                         description: Filter out companies that have a plan
+                      without_subscription:
+                        type: boolean
+                        description: Filter out companies that have a subscription
                     title: ListCompaniesParams
                 required:
                   - data
@@ -15101,6 +15205,18 @@ paths:
       tags:
         - companies
       parameters:
+        - name: credit_type_ids
+          in: query
+          description: >-
+            Filter companies by one or more credit type IDs (each ID starts with
+            bcrd_)
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more credit type IDs (each ID starts
+              with bcrd_)
+            items:
+              type: string
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -15109,12 +15225,28 @@ paths:
             description: Filter companies by multiple company IDs (starts with comp_)
             items:
               type: string
+        - name: monetized_subscriptions
+          in: query
+          description: Filter companies that have monetized subscriptions
+          schema:
+            type: boolean
+            description: Filter companies that have monetized subscriptions
         - name: plan_id
           in: query
           description: Filter companies by plan ID (starts with plan_)
           schema:
             type: string
             description: Filter companies by plan ID (starts with plan_)
+        - name: plan_ids
+          in: query
+          description: Filter companies by one or more plan IDs (each ID starts with plan_)
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more plan IDs (each ID starts with
+              plan_)
+            items:
+              type: string
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -15122,6 +15254,36 @@ paths:
             type: string
             description: Search for companies by name, keys or string traits
             maxLength: 512
+        - name: sort_order_column
+          in: query
+          description: Column to sort by (e.g. name, created_at, last_seen_at)
+          schema:
+            type: string
+            description: Column to sort by (e.g. name, created_at, last_seen_at)
+            maxLength: 255
+        - name: sort_order_direction
+          in: query
+          description: Direction to sort by (asc or desc)
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
+              - description: Direction to sort by (asc or desc)
+        - name: subscription_statuses
+          in: query
+          description: Filter companies by one or more subscription statuses
+          schema:
+            type: array
+            description: Filter companies by one or more subscription statuses
+            items:
+              $ref: '#/components/schemas/SubscriptionStatus'
+        - name: subscription_types
+          in: query
+          description: Filter companies by one or more subscription types
+          schema:
+            type: array
+            description: Filter companies by one or more subscription types
+            items:
+              $ref: '#/components/schemas/SubscriptionType'
         - name: without_feature_override_for
           in: query
           description: >-
@@ -15138,6 +15300,12 @@ paths:
           schema:
             type: boolean
             description: Filter out companies that have a plan
+        - name: without_subscription
+          in: query
+          description: Filter out companies that have a subscription
+          schema:
+            type: boolean
+            description: Filter out companies that have a subscription
         - name: with_subscription
           in: query
           description: Filter companies that have a subscription
@@ -15172,6 +15340,13 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      credit_type_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more credit type IDs (each
+                          ID starts with bcrd_)
+                        items:
+                          type: string
                       ids:
                         type: array
                         description: >-
@@ -15183,6 +15358,9 @@ paths:
                         type: integer
                         description: Page limit (default 100)
                         example: '100'
+                      monetized_subscriptions:
+                        type: boolean
+                        description: Filter companies that have monetized subscriptions
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -15190,10 +15368,37 @@ paths:
                       plan_id:
                         type: string
                         description: Filter companies by plan ID (starts with plan_)
+                      plan_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more plan IDs (each ID
+                          starts with plan_)
+                        items:
+                          type: string
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
                         maxLength: 512
+                      sort_order_column:
+                        type: string
+                        description: >-
+                          Column to sort by (e.g. name, created_at,
+                          last_seen_at)
+                        maxLength: 255
+                      sort_order_direction:
+                        allOf:
+                          - $ref: '#/components/schemas/SortDirection'
+                          - description: Direction to sort by (asc or desc)
+                      subscription_statuses:
+                        type: array
+                        description: Filter companies by one or more subscription statuses
+                        items:
+                          $ref: '#/components/schemas/SubscriptionStatus'
+                      subscription_types:
+                        type: array
+                        description: Filter companies by one or more subscription types
+                        items:
+                          $ref: '#/components/schemas/SubscriptionType'
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
@@ -15205,6 +15410,9 @@ paths:
                       without_plan:
                         type: boolean
                         description: Filter out companies that have a plan
+                      without_subscription:
+                        type: boolean
+                        description: Filter out companies that have a subscription
                     title: CountCompaniesParams
                 required:
                   - data
