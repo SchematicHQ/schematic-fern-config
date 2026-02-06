@@ -984,10 +984,14 @@ components:
           nullable: true
         id:
           type: string
+        plan:
+          $ref: '#/components/schemas/PreviewObjectResponseData'
         plan_id:
           type: string
         plan_name:
           type: string
+          description: Use plan.name from the nested plan object instead
+          deprecated: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -7619,9 +7623,9 @@ components:
           nullable: true
         id:
           type: string
+        plan:
+          $ref: '#/components/schemas/PreviewObject'
         plan_id:
-          type: string
-        plan_name:
           type: string
         plural_name:
           type: string
@@ -7642,7 +7646,6 @@ components:
         - id
         - credit_id
         - plan_id
-        - plan_name
         - credit_amount
         - credit_name
         - credit_description
