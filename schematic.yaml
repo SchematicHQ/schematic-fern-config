@@ -752,6 +752,8 @@ components:
       properties:
         burn_strategy:
           $ref: '#/components/schemas/BillingCreditBurnStrategy'
+        cost_editable:
+          type: boolean
         created_at:
           type: string
           format: date-time
@@ -791,6 +793,7 @@ components:
         - default_expiry_unit
         - default_rollover_policy
         - burn_strategy
+        - cost_editable
         - created_at
         - updated_at
       title: BillingCreditResponseData
