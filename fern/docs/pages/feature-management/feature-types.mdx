@@ -25,14 +25,17 @@ You can read more about tracking usage [here](/feature-management/feature-analyt
 
 Trait-based features are features based off of information reported to Schematic. Common examples includes seats, projects, or devices. In each case, the value is something you track outside of Schematic, and then report to Schematic when it changes. 
 
-Traits can be updated via the `POST /companies` in [the API](/api-reference/companies/upsert-company) or via the `upsertCompany` or `identify` functions provided by each SDK.
+Traits can be updated in 3 ways:
+1. The [upsert trait endpoint](/api-reference/companies/upsert-company-trait) or the `upsertCompanyTrait` function in the SDKs. 
+2. The [upsert company endpoint](/api-reference/companies/upsert-company) or the `upsertCompany` function in the SDKs. 
+3. Calling `identify` to identify a company in the SDKs (or manually creating an identify event via the [events endpoint](/api-reference/events/create-event)). 
 
-### Why Report Usage to Schematic?
+### Why Report Trait Usage to Schematic?
 
-Instead of reporting usage to Schematic, you could pull the limit set in Schematic and enforce access in your application directly. However, usage reported to Schematic has a few advantages:
+We strongly recommend reporting trait usage to Schematic and leveraging Schematic to enforce limits for trait based features. Doing so provides you:
 
-1. Centralize customer usage data as it pertains to monetization
-2. Seamlessly leverage customer overrides for these features in your application
-3. Use Schematic's usage analytics to understand usage patterns and customer health
+1. Centralized customer usage data as it pertains to monetization
+2. The ability to set per-customer overrides for these features in your application
+3. Integration with Schematic's usage analytics to understand usage patterns and customer health
 
 For these reasons, we recommend reporting usage to Schematic whenever possible.
