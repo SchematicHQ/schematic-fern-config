@@ -8324,6 +8324,101 @@ components:
         - published
         - draft
         - archived
+    PlanViewPublicResponseData:
+      type: object
+      properties:
+        audience_type:
+          type: string
+          nullable: true
+          deprecated: true
+        billing_product:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        charge_type:
+          $ref: '#/components/schemas/ChargeType'
+        company_count:
+          type: integer
+        compatible_plan_ids:
+          type: array
+          items:
+            type: string
+        controlled_by:
+          $ref: '#/components/schemas/PlanControlledByType'
+        created_at:
+          type: string
+          format: date-time
+        custom:
+          type: boolean
+        custom_plan_config:
+          $ref: '#/components/schemas/CustomPlanConfig'
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDetailResponseData'
+        icon:
+          type: string
+        id:
+          type: string
+        included_credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCreditGrantView'
+        is_custom:
+          type: boolean
+        is_default:
+          type: boolean
+          deprecated: true
+        is_free:
+          type: boolean
+        is_trialable:
+          type: boolean
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        name:
+          type: string
+        one_time_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        plan_type:
+          $ref: '#/components/schemas/PlanType'
+        trial_days:
+          type: integer
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanVersionResponseData'
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - created_at
+        - description
+        - id
+        - icon
+        - name
+        - plan_type
+        - updated_at
+        - charge_type
+        - company_count
+        - controlled_by
+        - features
+        - is_default
+        - is_free
+        - is_trialable
+        - versions
+        - is_custom
+        - entitlements
+        - compatible_plan_ids
+        - custom
+        - included_credit_grants
+      title: PlanViewPublicResponseData
     PreviewObject:
       type: object
       properties:
@@ -8480,6 +8575,47 @@ components:
       enum:
         - create_prorations
         - invoice_immediately
+    PublicPlansResponseData:
+      type: object
+      properties:
+        active_add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanViewPublicResponseData'
+        active_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanViewPublicResponseData'
+        add_on_compatibilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompatiblePlans'
+        capabilities:
+          $ref: '#/components/schemas/ComponentCapabilities'
+        display_settings:
+          $ref: '#/components/schemas/ComponentDisplaySettings'
+        show_as_monthly_prices:
+          type: boolean
+          deprecated: true
+        show_credits:
+          type: boolean
+          deprecated: true
+        show_period_toggle:
+          type: boolean
+          deprecated: true
+        show_zero_price_as_free:
+          type: boolean
+          deprecated: true
+      required:
+        - active_add_ons
+        - active_plans
+        - add_on_compatibilities
+        - show_as_monthly_prices
+        - show_credits
+        - show_period_toggle
+        - show_zero_price_as_free
+        - display_settings
+      title: PublicPlansResponseData
     QuickstartResp:
       type: object
       properties:
@@ -10945,6 +11081,35 @@ components:
       enum:
         - active
         - inactive
+    WhoAmIResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        account_name:
+          type: string
+        actor_type:
+          type: string
+        api_key_id:
+          type: string
+        environment_id:
+          type: string
+        environments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentResponseData'
+        stripe_user_id:
+          type: string
+        user_id:
+          type: string
+        user_name:
+          type: string
+      required:
+        - account_id
+        - account_name
+        - actor_type
+        - environments
+      title: WhoAmIResponseData
     ZeroOutGrantRequestBody:
       type: object
       properties:
@@ -22004,6 +22169,38 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /public/plans:
+    get:
+      operationId: getPublicPlans
+      summary: Get public plans
+      tags:
+        - componentspublic
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PublicPlansResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPublicPlansParams
+                required:
+                  - data
+                  - params
+                title: GetPublicPlansResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /quickstart:
     post:
       operationId: quickstart
@@ -23187,19 +23384,52 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /whoami:
+    get:
+      operationId: getWhoAmI
+      summary: Get who am i
+      tags:
+        - accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/WhoAmIResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetWhoAmIParams
+                required:
+                  - data
+                  - params
+                title: GetWhoAmIResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
 tags:
   - name: accesstokens
   - name: accounts
+  - name: billing
+  - name: checkout
   - name: companies
-  - name: plangroups
+  - name: components
+  - name: componentspublic
   - name: credits
+  - name: dataexports
+  - name: entitlements
   - name: events
   - name: features
-  - name: plans
   - name: planbundle
-  - name: entitlements
-  - name: billing
+  - name: plangroups
+  - name: plans
   - name: webhooks
-  - name: components
-  - name: checkout
-  - name: dataexports
