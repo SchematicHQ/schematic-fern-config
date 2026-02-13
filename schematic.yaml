@@ -2164,6 +2164,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Rule'
+        scheduled_downgrade:
+          $ref: '#/components/schemas/ScheduledDowngradeResponseData'
         traits:
           type: object
           description: A map of trait names to trait values
@@ -2693,6 +2695,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Rule'
+        scheduled_downgrade:
+          $ref: '#/components/schemas/ScheduledDowngradeResponseData'
         traits:
           type: object
           description: A map of trait names to trait values
@@ -2849,6 +2853,8 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        scheduled_downgrade:
+          $ref: '#/components/schemas/ScheduledDowngradeResponseData'
         show_as_monthly_prices:
           type: boolean
           deprecated: true
@@ -2940,6 +2946,8 @@ components:
         prevent_self_service_downgrade_url:
           type: string
           nullable: true
+        scheduled_downgrade:
+          $ref: '#/components/schemas/ScheduledDowngradeResponseData'
         show_as_monthly_prices:
           type: boolean
           deprecated: true
@@ -9558,6 +9566,45 @@ components:
       enum:
         - end_of_billing_period
         - none
+    ScheduledDowngradeResponseData:
+      type: object
+      properties:
+        currency:
+          type: string
+        effective_after:
+          type: string
+          format: date-time
+        from_plan_id:
+          type: string
+        from_plan_name:
+          type: string
+        from_subscription_price:
+          type: integer
+        id:
+          type: string
+        interval:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          nullable: true
+        to_plan_id:
+          type: string
+        to_plan_name:
+          type: string
+      required:
+        - currency
+        - effective_after
+        - from_plan_id
+        - from_plan_name
+        - from_subscription_price
+        - id
+        - interval
+        - to_plan_id
+        - to_plan_name
+      title: ScheduledDowngradeResponseData
     SegmentStatusResp:
       type: object
       properties:
