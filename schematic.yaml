@@ -8472,6 +8472,8 @@ components:
           deprecated: true
         finance:
           $ref: '#/components/schemas/PreviewSubscriptionFinanceResponseData'
+        is_scheduled_downgrade:
+          type: boolean
         new_charges:
           type: integer
           deprecated: true
@@ -8490,6 +8492,10 @@ components:
         proration:
           type: integer
           deprecated: true
+        scheduled_change_time:
+          type: string
+          format: date-time
+          nullable: true
         trial_end:
           type: string
           format: date-time
@@ -8507,6 +8513,7 @@ components:
         - promo_code_applied
         - percent_off
         - amount_off
+        - is_scheduled_downgrade
         - payment_method_required
         - usage_violations
       title: PreviewSubscriptionChangeResponseData
