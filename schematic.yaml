@@ -22405,8 +22405,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /plans/{plan_id}:
     get:
-      operationId: getPlanWithOptions
-      summary: Get plan with options
+      operationId: getPlan
+      summary: Get plan
       tags:
         - plans
       parameters:
@@ -22439,11 +22439,11 @@ paths:
                       plan_version_id:
                         type: string
                         description: Fetch billing settings for a specific plan version
-                    title: GetPlanWithOptionsParams
+                    title: GetPlanParams
                 required:
                   - data
                   - params
-                title: GetPlanWithOptionsResponse
+                title: GetPlanResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
