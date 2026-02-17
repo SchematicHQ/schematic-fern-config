@@ -996,6 +996,9 @@ components:
           type: string
           description: Use plan.name from the nested plan object instead
           deprecated: true
+        plan_version_id:
+          type: string
+          nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -3585,6 +3588,9 @@ components:
           minimum: 1
         plan_id:
           type: string
+        plan_version_id:
+          type: string
+          nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -4047,6 +4053,11 @@ components:
           type: string
           nullable: true
           deprecated: true
+        plan_id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -4095,6 +4106,7 @@ components:
           type: string
           nullable: true
       required:
+        - plan_id
         - feature_id
         - value_type
       title: CreateEntitlementInBundleRequestBody
@@ -4774,6 +4786,9 @@ components:
           deprecated: true
         plan_id:
           type: string
+        plan_version_id:
+          type: string
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -7480,6 +7495,7 @@ components:
         - plan_billing_product_changed
         - plan_deleted
         - plan_trait_change
+        - plan_version_migration
         - quickstart
         - subscription_change
     PlanChangeBasePlanAction:
@@ -7639,6 +7655,9 @@ components:
           $ref: '#/components/schemas/GenericPreviewObject'
         plan_id:
           type: string
+        plan_version_id:
+          type: string
+          nullable: true
         plural_name:
           type: string
           nullable: true
@@ -8286,6 +8305,122 @@ components:
       enum:
         - plan
         - add_on
+    PlanVersionCompanyMigrationResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        company_name:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+          nullable: true
+        id:
+          type: string
+        migration_id:
+          type: string
+        plan_version_id_from:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/PlanVersionCompanyMigrationStatus'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - company_id
+        - company_name
+        - created_at
+        - id
+        - migration_id
+        - status
+        - updated_at
+      title: PlanVersionCompanyMigrationResponseData
+    PlanVersionCompanyMigrationStatus:
+      type: string
+      enum:
+        - completed
+        - failed
+        - in_progress
+        - pending
+        - skipped
+    PlanVersionMigrationResponseData:
+      type: object
+      properties:
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_companies:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+          nullable: true
+        failed_companies:
+          type: integer
+        id:
+          type: string
+        plan_id:
+          type: string
+        plan_version_id_from:
+          type: string
+          nullable: true
+        plan_version_id_to:
+          type: string
+        skipped_companies:
+          type: integer
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/PlanVersionMigrationStatus'
+        strategy:
+          $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+        total_companies:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - completed_companies
+        - created_at
+        - failed_companies
+        - id
+        - plan_id
+        - plan_version_id_to
+        - skipped_companies
+        - status
+        - strategy
+        - total_companies
+        - updated_at
+      title: PlanVersionMigrationResponseData
+    PlanVersionMigrationStatus:
+      type: string
+      enum:
+        - completed
+        - failed
+        - in_progress
+        - pending
+    PlanVersionMigrationStrategy:
+      type: string
+      enum:
+        - immediate
+        - leave
     PlanVersionResponseData:
       type: object
       properties:
@@ -8631,6 +8766,20 @@ components:
         - show_zero_price_as_free
         - display_settings
       title: PublicPlansResponseData
+    PublishPlanVersionRequestBody:
+      type: object
+      properties:
+        excluded_company_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+        migration_strategy:
+          $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+      required:
+        - excluded_company_ids
+        - migration_strategy
+      title: PublishPlanVersionRequestBody
     QuickstartResp:
       type: object
       properties:
@@ -10185,7 +10334,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
-          maxItems: 100
         entitlements:
           type: array
           items:
@@ -10193,6 +10341,9 @@ components:
           maxItems: 100
         plan:
           $ref: '#/components/schemas/UpdatePlanRequestBody'
+        plan_version_id:
+          type: string
+          nullable: true
         traits:
           type: array
           items:
@@ -13244,6 +13395,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: plan_id
           in: query
           schema:
@@ -13254,12 +13411,10 @@ paths:
             type: array
             items:
               type: string
-        - name: ids
+        - name: plan_version_id
           in: query
           schema:
-            type: array
-            items:
-              type: string
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -13311,6 +13466,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      plan_version_id:
+                        type: string
                     title: ListBillingPlanCreditGrantsParams
                 required:
                   - data
@@ -13470,6 +13627,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
         - name: plan_id
           in: query
           schema:
@@ -13480,12 +13643,10 @@ paths:
             type: array
             items:
               type: string
-        - name: ids
+        - name: plan_version_id
           in: query
           schema:
-            type: array
-            items:
-              type: string
+            type: string
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -13534,6 +13695,8 @@ paths:
                         type: array
                         items:
                           type: string
+                      plan_version_id:
+                        type: string
                     title: CountBillingPlanCreditGrantsParams
                 required:
                   - data
@@ -15127,6 +15290,12 @@ paths:
               plan_)
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: Filter companies by plan version ID (starts with plvr_)
+          schema:
+            type: string
+            description: Filter companies by plan version ID (starts with plvr_)
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -15258,6 +15427,11 @@ paths:
                           starts with plan_)
                         items:
                           type: string
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter companies by plan version ID (starts with
+                          plvr_)
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -15491,6 +15665,12 @@ paths:
               plan_)
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: Filter companies by plan version ID (starts with plvr_)
+          schema:
+            type: string
+            description: Filter companies by plan version ID (starts with plvr_)
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -15619,6 +15799,11 @@ paths:
                           starts with plan_)
                         items:
                           type: string
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter companies by plan version ID (starts with
+                          plvr_)
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -19254,6 +19439,18 @@ paths:
             description: >-
               Filter out features that already have a company override for the
               specified company ID
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter by plan version ID when used with
+            without_plan_entitlement_for; if not provided, the latest published
+            version is used
+          schema:
+            type: string
+            description: >-
+              Filter by plan version ID when used with
+              without_plan_entitlement_for; if not provided, the latest
+              published version is used
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -19338,6 +19535,12 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter by plan version ID when used with
+                          without_plan_entitlement_for; if not provided, the
+                          latest published version is used
                       q:
                         type: string
                         description: Search by feature name or ID
@@ -19561,6 +19764,18 @@ paths:
             description: >-
               Filter out features that already have a company override for the
               specified company ID
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter by plan version ID when used with
+            without_plan_entitlement_for; if not provided, the latest published
+            version is used
+          schema:
+            type: string
+            description: >-
+              Filter by plan version ID when used with
+              without_plan_entitlement_for; if not provided, the latest
+              published version is used
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -19642,6 +19857,12 @@ paths:
                         type: integer
                         description: Page offset (default 0)
                         example: '0'
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter by plan version ID when used with
+                          without_plan_entitlement_for; if not provided, the
+                          latest published version is used
                       q:
                         type: string
                         description: Search by feature name or ID
@@ -21633,6 +21854,348 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plan-version-company-migrations:
+    get:
+      operationId: listCompanyMigrations
+      summary: List company migrations
+      tags:
+        - planmigrations
+      parameters:
+        - name: migration_id
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 512
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlanVersionCompanyMigrationStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/PlanVersionCompanyMigrationResponseData
+                    title: ListCompanyMigrationsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      migration_id:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                        maxLength: 512
+                      status:
+                        $ref: '#/components/schemas/PlanVersionCompanyMigrationStatus'
+                    title: ListCompanyMigrationsParams
+                required:
+                  - data
+                  - params
+                title: ListCompanyMigrationsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-company-migrations/count:
+    get:
+      operationId: countCompanyMigrations
+      summary: Count company migrations
+      tags:
+        - planmigrations
+      parameters:
+        - name: migration_id
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 512
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlanVersionCompanyMigrationStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      migration_id:
+                        type: string
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      q:
+                        type: string
+                        maxLength: 512
+                      status:
+                        $ref: '#/components/schemas/PlanVersionCompanyMigrationStatus'
+                    title: CountCompanyMigrationsParams
+                required:
+                  - data
+                  - params
+                title: CountCompanyMigrationsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations:
+    get:
+      operationId: listMigrations
+      summary: List migrations
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlanVersionMigrationStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                    title: ListMigrationsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      plan_version_id:
+                        type: string
+                      status:
+                        $ref: '#/components/schemas/PlanVersionMigrationStatus'
+                    title: ListMigrationsParams
+                required:
+                  - data
+                  - params
+                title: ListMigrationsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/{plan_version_migration_id}:
+    get:
+      operationId: getMigration
+      summary: Get migration
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_migration_id
+          in: path
+          description: plan_version_migration_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetMigrationParams
+                required:
+                  - data
+                  - params
+                title: GetMigrationResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/count:
+    get:
+      operationId: countMigrations
+      summary: Count migrations
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlanVersionMigrationStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      plan_version_id:
+                        type: string
+                      status:
+                        $ref: '#/components/schemas/PlanVersionMigrationStatus'
+                    title: CountMigrationsParams
+                required:
+                  - data
+                  - params
+                title: CountMigrationsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plans:
     get:
       operationId: listPlans
@@ -21842,8 +22405,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /plans/{plan_id}:
     get:
-      operationId: getPlan
-      summary: Get plan
+      operationId: getPlanWithOptions
+      summary: Get plan with options
       tags:
         - plans
       parameters:
@@ -21853,6 +22416,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: plan_version_id
+          in: query
+          description: Fetch billing settings for a specific plan version
+          schema:
+            type: string
+            description: Fetch billing settings for a specific plan version
       responses:
         '200':
           description: OK
@@ -21866,11 +22435,15 @@ paths:
                   params:
                     type: object
                     description: Input parameters
-                    title: GetPlanParams
+                    properties:
+                      plan_version_id:
+                        type: string
+                        description: Fetch billing settings for a specific plan version
+                    title: GetPlanWithOptionsParams
                 required:
                   - data
                   - params
-                title: GetPlanResponse
+                title: GetPlanWithOptionsResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -22189,6 +22762,10 @@ paths:
           required: true
           schema:
             type: string
+        - name: plan_version_id
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -22208,11 +22785,60 @@ paths:
                     properties:
                       plan_id:
                         type: string
+                      plan_version_id:
+                        type: string
                     title: ListPlanIssuesParams
                 required:
                   - data
                   - params
                 title: ListPlanIssuesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/version/{plan_id}/publish:
+    put:
+      operationId: publishPlanVersion
+      summary: Publish plan version
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishPlanVersionRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PublishPlanVersionParams
+                required:
+                  - data
+                  - params
+                title: PublishPlanVersionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -23485,5 +24111,6 @@ tags:
   - name: features
   - name: planbundle
   - name: plangroups
+  - name: planmigrations
   - name: plans
   - name: webhooks
