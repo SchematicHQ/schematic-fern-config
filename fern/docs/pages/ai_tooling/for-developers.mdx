@@ -1,0 +1,108 @@
+---
+title: For Developers
+slug: for-developers
+---
+
+Learn how to use Schematic with AI development tools and assistants to accelerate your integration and development workflow.
+
+## Overview
+
+Schematic provides several AI tooling options to help developers integrate Schematic faster and work more efficiently with AI coding assistants. These tools enable AI assistants to understand Schematic's API, generate integration code, and interact with your Schematic account directly.
+
+## Schematic AI Skills
+
+Schematic AI Skills provide context and capabilities for AI coding assistants to help you integrate Schematic into your codebase. These skills are available for different parts of your application. All skills can be found in the [Schematic AI Tools GitHub Repository](https://github.com/schematicHQ/schematic-ai-tools).
+
+### Frontend Repository
+
+AI skills for frontend development help you integrate Schematic's React, Vue, and other frontend SDKs. Use these skills to:
+
+- Generate code for feature flag checks in your UI components
+- Create usage tracking implementations
+- Build customer portal integrations
+- Implement plan-based UI rendering
+
+### Backend Repository
+
+AI skills for backend development assist with server-side Schematic integrations. Use these skills to:
+
+- Generate API integration code for your backend services
+- Create middleware for entitlement enforcement
+- Implement usage tracking endpoints
+- Build admin interfaces for plan management
+
+### Components
+
+AI skills for Schematic Components help you integrate and customize UI components like:
+
+- Customer Portal
+- Pricing Tables
+- Checkout flows
+- Usage meters
+
+## Model Context Protocol (MCP)
+
+Schematic's MCP server allows AI assistants to directly interact with your Schematic account through the Model Context Protocol. This enables AI tools to:
+
+- Query company information and plans
+- Check feature usage and entitlements
+- Manage company overrides
+- Create and update features and plans
+- Analyze usage patterns
+
+The MCP server is part of the [official MCP Registry](https://registry.modelcontextprotocol.io/?q=schematichq). Download and install insctructions can be found at [our MCP GitHub repository](https://github.com/schematicHQ/schematic-mcp). 
+
+### Common Use Cases
+
+The MCP integration is particularly useful for:
+
+- **Code generation** - AI assistants can query your actual Schematic data to generate accurate integration code
+- **Troubleshooting** - Ask AI assistants about specific companies, plans, or features in your account
+- **Data analysis** - Use natural language queries to analyze usage patterns and customer data
+- **Plan management** - Let AI assistants help you create and modify plans based on your requirements
+
+### Getting Started with MCP
+
+To use Schematic's MCP integration:
+
+1. Install the Schematic MCP server from the [schematic-mcp repository](https://github.com/schematicHQ/schematic-mcp)
+2. Configure your MCP server with Schematic API credentials
+3. Connect your AI assistant to the MCP server
+4. Start using natural language queries to interact with Schematic
+
+**Example MCP queries:**
+- "What plan is company Acme Corp on?"
+- "Show me feature usage for the 'api_calls' feature across all companies"
+- "Create a company override to enable 'beta_features' for company comp_123"
+
+{/* 
+## Claude Plugin
+
+Schematic offers a Claude plugin that allows you to interact with Schematic directly from Claude. This plugin enables you to:
+
+- Query Schematic data through natural language
+- Generate integration code with full context of your Schematic setup
+- Get recommendations for plan configurations and feature entitlements
+
+### Installation
+
+Installation directions for the Claude plugin are coming soon. Once available, you'll be able to install the plugin directly from Claude's plugin directory.
+
+## Best Practices
+
+### Using AI Skills
+
+When using Schematic AI Skills with your coding assistant:
+
+- **Provide context** - Share information about your tech stack, framework, and specific use case
+- **Reference your setup** - Mention your Schematic environment, API keys, and existing integrations
+- **Review generated code** - Always review AI-generated code to ensure it matches your patterns and requirements
+
+### Using MCP
+
+When working with the MCP integration:
+
+- **Secure your credentials** - Store API keys securely and never commit them to version control
+- **Use appropriate permissions** - Grant only the permissions needed for your use case
+- **Validate responses** - Verify that MCP queries return accurate data before using it in production
+*/}
