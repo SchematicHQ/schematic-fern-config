@@ -15333,6 +15333,16 @@ paths:
             description: Filter companies by one or more subscription types
             items:
               $ref: '#/components/schemas/SubscriptionType'
+        - name: with_entitlement_for
+          in: query
+          description: >-
+            Filter companies that have an entitlement (plan entitlement or
+            company override) for the specified feature ID
+          schema:
+            type: string
+            description: >-
+              Filter companies that have an entitlement (plan entitlement or
+              company override) for the specified feature ID
         - name: without_feature_override_for
           in: query
           description: >-
@@ -15456,6 +15466,12 @@ paths:
                         description: Filter companies by one or more subscription types
                         items:
                           $ref: '#/components/schemas/SubscriptionType'
+                      with_entitlement_for:
+                        type: string
+                        description: >-
+                          Filter companies that have an entitlement (plan
+                          entitlement or company override) for the specified
+                          feature ID
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
@@ -15708,6 +15724,16 @@ paths:
             description: Filter companies by one or more subscription types
             items:
               $ref: '#/components/schemas/SubscriptionType'
+        - name: with_entitlement_for
+          in: query
+          description: >-
+            Filter companies that have an entitlement (plan entitlement or
+            company override) for the specified feature ID
+          schema:
+            type: string
+            description: >-
+              Filter companies that have an entitlement (plan entitlement or
+              company override) for the specified feature ID
         - name: without_feature_override_for
           in: query
           description: >-
@@ -15828,6 +15854,12 @@ paths:
                         description: Filter companies by one or more subscription types
                         items:
                           $ref: '#/components/schemas/SubscriptionType'
+                      with_entitlement_for:
+                        type: string
+                        description: >-
+                          Filter companies that have an entitlement (plan
+                          entitlement or company override) for the specified
+                          feature ID
                       with_subscription:
                         type: boolean
                         description: Filter companies that have a subscription
