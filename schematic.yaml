@@ -2391,6 +2391,8 @@ components:
     CompanyPlanDetailResponseData:
       type: object
       properties:
+        active_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         audience_type:
           type: string
           nullable: true
@@ -2420,6 +2422,8 @@ components:
           $ref: '#/components/schemas/CustomPlanConfig'
         description:
           type: string
+        draft_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         entitlements:
           type: array
           items:
@@ -7690,6 +7694,8 @@ components:
     PlanDetailResponseData:
       type: object
       properties:
+        active_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         audience_type:
           type: string
           nullable: true
@@ -7707,6 +7713,8 @@ components:
           format: date-time
         description:
           type: string
+        draft_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         features:
           type: array
           items:
@@ -7985,6 +7993,8 @@ components:
     PlanGroupPlanDetailResponseData:
       type: object
       properties:
+        active_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         audience_type:
           type: string
           nullable: true
@@ -8008,6 +8018,8 @@ components:
           $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
         description:
           type: string
+        draft_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         entitlements:
           type: array
           items:
@@ -8470,6 +8482,8 @@ components:
     PlanViewPublicResponseData:
       type: object
       properties:
+        active_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         audience_type:
           type: string
           nullable: true
@@ -8495,6 +8509,8 @@ components:
           $ref: '#/components/schemas/CustomPlanConfig'
         description:
           type: string
+        draft_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
         entitlements:
           type: array
           items:
