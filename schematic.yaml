@@ -5009,6 +5009,24 @@ components:
           type: integer
           nullable: true
       title: CreatePriceTierRequestBody
+    CreateScheduledCheckoutRequest:
+      type: object
+      properties:
+        company_id:
+          type: string
+        execute_after:
+          type: string
+          format: date-time
+        from_plan_id:
+          type: string
+        to_plan_id:
+          type: string
+      required:
+        - company_id
+        - execute_after
+        - from_plan_id
+        - to_plan_id
+      title: CreateScheduledCheckoutRequest
     CreateWebhookRequestBody:
       type: object
       properties:
@@ -9733,6 +9751,66 @@ components:
         - traits
         - rules
       title: RulesengineUser
+    ScheduledCheckoutResponseData:
+      type: object
+      properties:
+        actor_type:
+          type: string
+        company_id:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        error_message:
+          type: string
+          nullable: true
+        execute_after:
+          type: string
+          format: date-time
+        from_plan_id:
+          type: string
+        id:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ScheduledCheckoutStatus'
+        to_plan_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - actor_type
+        - company_id
+        - created_at
+        - execute_after
+        - from_plan_id
+        - id
+        - status
+        - to_plan_id
+        - updated_at
+      title: ScheduledCheckoutResponseData
+    ScheduledCheckoutStatus:
+      type: string
+      enum:
+        - cancelled
+        - error
+        - executing
+        - pending
+        - success
     ScheduledDowngradeConfigBehavior:
       type: string
       enum:
@@ -10664,6 +10742,18 @@ components:
         - priority
         - value
       title: UpdateRuleRequestBody
+    UpdateScheduledCheckoutRequest:
+      type: object
+      properties:
+        execute_after:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+            - $ref: '#/components/schemas/ScheduledCheckoutStatus'
+          nullable: true
+      title: UpdateScheduledCheckoutRequest
     UpdateTrialEndRequestBody:
       type: object
       properties:
@@ -22966,6 +23056,203 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /scheduled-checkout:
+    get:
+      operationId: listScheduledCheckouts
+      summary: List scheduled checkouts
+      tags:
+        - scheduledcheckout
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ScheduledCheckoutStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScheduledCheckoutResponseData'
+                    title: ListScheduledCheckoutsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      status:
+                        $ref: '#/components/schemas/ScheduledCheckoutStatus'
+                    title: ListScheduledCheckoutsParams
+                required:
+                  - data
+                  - params
+                title: ListScheduledCheckoutsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createScheduledCheckout
+      summary: Create scheduled checkout
+      tags:
+        - scheduledcheckout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduledCheckoutRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ScheduledCheckoutResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateScheduledCheckoutParams
+                required:
+                  - data
+                  - params
+                title: CreateScheduledCheckoutResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /scheduled-checkout/{scheduled_checkout_id}:
+    get:
+      operationId: getScheduledCheckout
+      summary: Get scheduled checkout
+      tags:
+        - scheduledcheckout
+      parameters:
+        - name: scheduled_checkout_id
+          in: path
+          description: scheduled_checkout_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ScheduledCheckoutResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetScheduledCheckoutParams
+                required:
+                  - data
+                  - params
+                title: GetScheduledCheckoutResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateScheduledCheckout
+      summary: Update scheduled checkout
+      tags:
+        - scheduledcheckout
+      parameters:
+        - name: scheduled_checkout_id
+          in: path
+          description: scheduled_checkout_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduledCheckoutRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ScheduledCheckoutResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateScheduledCheckoutParams
+                required:
+                  - data
+                  - params
+                title: UpdateScheduledCheckoutResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /segment-integration:
     get:
       operationId: getSegmentIntegrationStatus
@@ -24118,7 +24405,7 @@ paths:
   /whoami:
     get:
       operationId: getWhoAmI
-      summary: Get who am i
+      summary: Get who am I
       tags:
         - accounts
       responses:
@@ -24164,4 +24451,5 @@ tags:
   - name: plangroups
   - name: planmigrations
   - name: plans
+  - name: scheduledcheckout
   - name: webhooks
