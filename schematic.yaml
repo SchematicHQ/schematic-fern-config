@@ -11453,6 +11453,11 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/ActorType'
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
         - name: environment_id
           in: query
           schema:
@@ -11462,6 +11467,11 @@ paths:
           schema:
             type: string
             maxLength: 512
+        - name: start_time
+          in: query
+          schema:
+            type: string
+            format: date-time
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11495,6 +11505,9 @@ paths:
                     properties:
                       actor_type:
                         $ref: '#/components/schemas/ActorType'
+                      end_time:
+                        type: string
+                        format: date-time
                       environment_id:
                         type: string
                       limit:
@@ -11508,6 +11521,9 @@ paths:
                       q:
                         type: string
                         maxLength: 512
+                      start_time:
+                        type: string
+                        format: date-time
                     title: ListAuditLogsParams
                 required:
                   - data
@@ -11573,6 +11589,11 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/ActorType'
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
         - name: environment_id
           in: query
           schema:
@@ -11582,6 +11603,11 @@ paths:
           schema:
             type: string
             maxLength: 512
+        - name: start_time
+          in: query
+          schema:
+            type: string
+            format: date-time
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -11612,6 +11638,9 @@ paths:
                     properties:
                       actor_type:
                         $ref: '#/components/schemas/ActorType'
+                      end_time:
+                        type: string
+                        format: date-time
                       environment_id:
                         type: string
                       limit:
@@ -11625,6 +11654,9 @@ paths:
                       q:
                         type: string
                         maxLength: 512
+                      start_time:
+                        type: string
+                        format: date-time
                     title: CountAuditLogsParams
                 required:
                   - data
