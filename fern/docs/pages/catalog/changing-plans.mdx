@@ -4,7 +4,7 @@ title: Changing Plans (Upgrades & Downgrades)
 slug: catalog/changing-plans
 ---
 
-When a company changes plans, whether an upgrade or a downgrade, Schematic automatically updates the company's entitlements, usage limits, and billing status in Stripe (if applicable). Plan changes can occur from a few different sources -- in all cases, the steps Schematic takes are the same. The possible reasons for a plan change are:
+When a company changes plans, whether an upgrade or a downgrade, Schematic automatically updates the company's entitlements, usage limits, and billing status in Stripe (if applicable). Downgrades can be applied immediately or [scheduled for the end of the billing period](#scheduled-downgrades). Plan changes can occur from a few different sources -- in all cases, the steps Schematic takes are the same. The possible reasons for a plan change are:
 
 - The customer goes through a checkout flow via the Schematic Customer Portal Component
 - You update a company's plan via the Schematic App using the "Manage Plan" button
@@ -46,7 +46,7 @@ When determining if a plan change is an upgrade or downgrade, the following logi
 
 When a company upgrades to a new plan, Schematic will maintain the current billing period (e.g. if you are 15 days into your billing period, you will remain on day 15 after the upgrade). 
 
-However,if the plan change is a downgrade, Schematic will reset the billing period (e.g. the new plan will start on day 1 of the new billing period). 
+However, if the plan change is a downgrade, Schematic will reset the billing period (e.g. the new plan will start on day 1 of the new billing period). If [scheduled downgrades](#scheduled-downgrades) are enabled, the downgrade is deferred to the end of the current billing period and the customer retains access to their current plan until then.
 
 ### Proration
 
@@ -59,3 +59,30 @@ For usage-based features, Schematic will carry over usage from the current plan 
 Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is configured in the Catalog configuration tab and is turned on by default.
 
 Additionally, you can require customers reach out to you before they can downgrade to a plan (preventing self-service downgrades). This is configured in the Catalog configuration tab and is turned off by default.
+
+### Scheduled Downgrades
+
+If this setting is selected, when a customer downgrades their plan, the downgrade is scheduled for the end of the current billing period rather than applied immediately. The customer retains full access to their current plan until the billing period ends, and no proration or credits are applied.
+
+This behavior is controlled by the setting under the **On downgrade** section of the Catalog configuration tab. The available options are:
+
+- **Schedule downgrade for end of billing period, no credits applied**  — The downgrade takes effect at the end of the current billing period. The customer keeps their current entitlements until then.
+- **Downgrade immediately, apply credit for next period** (default) — The downgrade is applied immediately and the customer receives a prorated credit for the remainder of their billing period.
+
+![Scheduled downgrade billing rule setting](../../assets/images/catalog/catalog-scheduled-downgrade-setting.png)
+
+Under the hood, scheduled downgrades use Stripe's [subscription schedule](https://docs.stripe.com/billing/subscriptions/subscription-schedules) phases to ensure the plan transition happens precisely at the billing period boundary.
+
+#### Behavior while a downgrade is scheduled
+
+While a downgrade is scheduled, the customer continues to use their current plan with full access to all entitlements. However, certain actions are blocked until the downgrade takes effect or is canceled:
+
+- **Add-on purchases** are blocked
+- **Pay-in-advance purchases** (e.g. seats) are blocked
+- **Credit purchases** are blocked
+
+These restrictions ensure the customer's subscription remains in a consistent state leading into the scheduled plan change. However, the customer can always cancel the downgrade at any time via the component and then do any action.
+
+#### Canceling a scheduled downgrade
+
+A scheduled downgrade can be canceled if the customer resubscribes to a paid plan or upgrades before the billing period ends. When this happens, the scheduled downgrade is removed and the customer's subscription continues as normal.
