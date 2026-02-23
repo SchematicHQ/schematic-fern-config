@@ -94,6 +94,8 @@ components:
           nullable: true
         name:
           type: string
+        readonly:
+          type: boolean
         scopes:
           type: array
           items:
@@ -106,9 +108,10 @@ components:
           format: date-time
       required:
         - id
-        - name
-        - scopes
         - created_at
+        - name
+        - readonly
+        - scopes
         - updated_at
         - secret
       title: ApiKeyCreateResponseData
@@ -132,6 +135,8 @@ components:
           nullable: true
         name:
           type: string
+        readonly:
+          type: boolean
         scopes:
           type: array
           items:
@@ -142,9 +147,10 @@ components:
           format: date-time
       required:
         - id
-        - name
-        - scopes
         - created_at
+        - name
+        - readonly
+        - scopes
         - updated_at
       title: ApiKeyResponseData
     ApiKeyScope:
@@ -3234,6 +3240,9 @@ components:
           type: string
           maxLength: 256
           minLength: 1
+        readonly:
+          type: boolean
+          nullable: true
       required:
         - name
       title: CreateApiKeyRequestBody
