@@ -4,7 +4,6 @@ title: Authentication
 slug: api-reference/authentication
 ---
 
-
 The Schematic API uses API keys to authenticate requests. You can view and manage all of your API keys within your Settings page.
 
 *Secret Keys* are used only for server-side integrations. These keys are meant to be confidential, so they should not be used on clients.
@@ -17,3 +16,10 @@ API keys are environment scoped and Secret Keys are namespaced accordingly:
 * Development environments will have the prefix sch_dev
 
 All API requests must be made over HTTPS. API requests without authentication will also fail.
+
+### Readonly API Keys
+
+API keys can optionally be created as **readonly**. Readonly keys can access any non-mutative part of the API, including flag checks and GET requests, but cannot perform write operations. Readonly keys cannot submit events; while the event collector will accept events from readonly keys, those events will appear in your instance in an error state indicating that a readonly key was used.
+
+Readonly is set at creation time via the "Read-only" toggle in the Create API Key dialog and cannot be changed after the key is created.
+
