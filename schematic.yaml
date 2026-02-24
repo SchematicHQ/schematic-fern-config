@@ -11045,6 +11045,7 @@ components:
         - plan.entitlement.deleted
         - plan.entitlement.updated
         - plan.updated
+        - plan_version.deleted
         - rule.deleted
         - test.send
         - user.created
@@ -21974,6 +21975,47 @@ paths:
                   - data
                   - params
                 title: ListPlanIssuesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/version/{plan_id}:
+    delete:
+      operationId: deletePlanVersion
+      summary: Delete plan version
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeletePlanVersionParams
+                required:
+                  - data
+                  - params
+                title: DeletePlanVersionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
