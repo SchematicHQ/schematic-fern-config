@@ -1753,9 +1753,7 @@ components:
         entitlement:
           allOf:
             - $ref: '#/components/schemas/FeatureEntitlement'
-            - description: >-
-                If a feature entitlement rule was matched, its entitlement
-                details
+          description: If a feature entitlement rule was matched, its entitlement details
         error:
           type: string
           description: If an error occurred while checking the flag, the error message
@@ -4126,7 +4124,7 @@ components:
         event_type:
           allOf:
             - $ref: '#/components/schemas/EventType'
-            - description: Either 'identify' or 'track'
+          description: Either 'identify' or 'track'
         sent_at:
           type: string
           description: >-
@@ -5880,7 +5878,7 @@ components:
         allocation_type:
           allOf:
             - $ref: '#/components/schemas/EntitlementValueType'
-            - description: The type of allocation that is being used.
+          description: The type of allocation that is being used.
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         company_override:
@@ -5900,7 +5898,7 @@ components:
         credit_grant_reason:
           allOf:
             - $ref: '#/components/schemas/BillingCreditGrantReason'
-            - description: Reason for the credit grant
+          description: Reason for the credit grant
           nullable: true
         credit_remaining:
           type: number
@@ -5919,9 +5917,9 @@ components:
         credit_usage_aggregation:
           allOf:
             - $ref: '#/components/schemas/CreditUsageAggregation'
-            - description: >-
-                Aggregated credit usage by time period (day, week, month,
-                billing period)
+          description: >-
+            Aggregated credit usage by time period (day, week, month, billing
+            period)
         credit_used:
           type: number
           nullable: true
@@ -6027,7 +6025,7 @@ components:
         allocation_type:
           allOf:
             - $ref: '#/components/schemas/EntitlementValueType'
-            - description: The type of allocation that is being used.
+          description: The type of allocation that is being used.
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         entitlement_id:
@@ -6214,7 +6212,7 @@ components:
         value_type:
           allOf:
             - $ref: '#/components/schemas/EntitlementValueType'
-            - description: The type of the entitlement value
+          description: The type of the entitlement value
       required:
         - feature_id
         - feature_key
@@ -6350,7 +6348,7 @@ components:
         allocation_type:
           allOf:
             - $ref: '#/components/schemas/EntitlementValueType'
-            - description: The type of allocation that is being used.
+          description: The type of allocation that is being used.
         company_override:
           $ref: '#/components/schemas/CompanyOverrideResponseData'
         credit_consumption_rate:
@@ -6368,7 +6366,7 @@ components:
         credit_grant_reason:
           allOf:
             - $ref: '#/components/schemas/BillingCreditGrantReason'
-            - description: Reason for the credit grant
+          description: Reason for the credit grant
           nullable: true
         credit_remaining:
           type: number
@@ -6385,9 +6383,9 @@ components:
         credit_usage_aggregation:
           allOf:
             - $ref: '#/components/schemas/CreditUsageAggregation'
-            - description: >-
-                Aggregated credit usage by time period (day, week, month,
-                billing period)
+          description: >-
+            Aggregated credit usage by time period (day, week, month, billing
+            period)
         credit_used:
           type: number
           nullable: true
@@ -7258,9 +7256,9 @@ components:
         base_plan_action:
           allOf:
             - $ref: '#/components/schemas/PlanChangeBasePlanAction'
-            - description: >-
-                Any special behavior that affected the assignment of the base
-                plan during this change.
+          description: >-
+            Any special behavior that affected the assignment of the base plan
+            during this change.
           nullable: true
         company:
           $ref: '#/components/schemas/CompanyResponseData'
@@ -7281,9 +7279,9 @@ components:
         subscription_change_action:
           allOf:
             - $ref: '#/components/schemas/PlanChangeSubscriptionAction'
-            - description: >-
-                If a subscription was changed as a part of this plan change,
-                indicates the type of change that was made.
+          description: >-
+            If a subscription was changed as a part of this plan change,
+            indicates the type of change that was made.
           nullable: true
         traits_updated:
           type: array
@@ -9306,7 +9304,7 @@ components:
         value_type:
           allOf:
             - $ref: '#/components/schemas/RulesengineEntitlementValueType'
-            - description: The type of the entitlement value
+          description: The type of the entitlement value
       required:
         - feature_id
         - feature_key
@@ -14971,7 +14969,7 @@ paths:
           schema:
             allOf:
               - $ref: '#/components/schemas/SortDirection'
-              - description: Direction to sort by (asc or desc)
+            description: Direction to sort by (asc or desc)
         - name: subscription_statuses
           in: query
           description: Filter companies by one or more subscription statuses
@@ -15110,7 +15108,7 @@ paths:
                       sort_order_direction:
                         allOf:
                           - $ref: '#/components/schemas/SortDirection'
-                          - description: Direction to sort by (asc or desc)
+                        description: Direction to sort by (asc or desc)
                       subscription_statuses:
                         type: array
                         description: Filter companies by one or more subscription statuses
@@ -15362,7 +15360,7 @@ paths:
           schema:
             allOf:
               - $ref: '#/components/schemas/SortDirection'
-              - description: Direction to sort by (asc or desc)
+            description: Direction to sort by (asc or desc)
         - name: subscription_statuses
           in: query
           description: Filter companies by one or more subscription statuses
@@ -15498,7 +15496,7 @@ paths:
                       sort_order_direction:
                         allOf:
                           - $ref: '#/components/schemas/SortDirection'
-                          - description: Direction to sort by (asc or desc)
+                        description: Direction to sort by (asc or desc)
                       subscription_statuses:
                         type: array
                         description: Filter companies by one or more subscription statuses
@@ -21436,7 +21434,7 @@ paths:
           schema:
             allOf:
               - $ref: '#/components/schemas/PlanType'
-              - description: Filter by plan type
+            description: Filter by plan type
         - name: q
           in: query
           schema:
@@ -21523,7 +21521,7 @@ paths:
                       plan_type:
                         allOf:
                           - $ref: '#/components/schemas/PlanType'
-                          - description: Filter by plan type
+                        description: Filter by plan type
                       q:
                         type: string
                       without_entitlement_for:
@@ -21825,7 +21823,7 @@ paths:
           schema:
             allOf:
               - $ref: '#/components/schemas/PlanType'
-              - description: Filter by plan type
+            description: Filter by plan type
         - name: q
           in: query
           schema:
@@ -21909,7 +21907,7 @@ paths:
                       plan_type:
                         allOf:
                           - $ref: '#/components/schemas/PlanType'
-                          - description: Filter by plan type
+                        description: Filter by plan type
                       q:
                         type: string
                       without_entitlement_for:
