@@ -955,9 +955,13 @@ components:
           type: string
           nullable: true
         reset_cadence:
-          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
         reset_start:
-          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          nullable: true
         reset_type:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
@@ -972,8 +976,6 @@ components:
         - plan_name
         - credit_amount
         - credit_name
-        - reset_cadence
-        - reset_start
         - auto_topup_enabled
         - created_at
         - updated_at
@@ -7477,9 +7479,13 @@ components:
           nullable: true
           deprecated: true
         reset_cadence:
-          $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
         reset_start:
-          $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          nullable: true
         reset_type:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
         singular_name:
@@ -7499,8 +7505,6 @@ components:
         - credit_amount
         - credit_name
         - credit_description
-        - reset_cadence
-        - reset_start
         - reset_type
         - billing_credit_auto_topup_enabled
         - created_at
