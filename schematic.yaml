@@ -689,6 +689,68 @@ components:
         - expire
         - none
         - rollover
+    BillingCreditView:
+      type: object
+      properties:
+        account_id:
+          type: string
+        burn_strategy:
+          $ref: '#/components/schemas/BillingCreditBurnStrategy'
+        cost_editable:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        default_expiry_unit:
+          $ref: '#/components/schemas/BillingCreditExpiryUnit'
+        default_expiry_unit_count:
+          type: integer
+          nullable: true
+        default_rollover_policy:
+          $ref: '#/components/schemas/BillingCreditRolloverPolicy'
+        description:
+          type: string
+        environment_id:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        plural_name:
+          type: string
+          nullable: true
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
+        price_per_unit:
+          type: integer
+          nullable: true
+        price_per_unit_decimal:
+          type: string
+          nullable: true
+        product:
+          $ref: '#/components/schemas/BillingProductResponseData'
+        singular_name:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - name
+        - description
+        - default_expiry_unit
+        - default_rollover_policy
+        - burn_strategy
+        - cost_editable
+        - created_at
+        - updated_at
+      title: BillingCreditView
     BillingCustomerResponseData:
       type: object
       properties:
@@ -848,18 +910,26 @@ components:
         created_at:
           type: string
           format: date-time
+        credit:
+          $ref: '#/components/schemas/BillingCreditResponseData'
         credit_amount:
           type: integer
         credit_id:
           type: string
         credit_name:
           type: string
+          description: Use credit.name from the nested credit object instead
+          deprecated: true
         credit_plural_name:
           type: string
+          description: Use plural_name from the nested credit object instead
           nullable: true
+          deprecated: true
         credit_singular_name:
           type: string
+          description: Use singular_name from the nested credit object instead
           nullable: true
+          deprecated: true
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -7354,17 +7424,31 @@ components:
         created_at:
           type: string
           format: date-time
+        credit:
+          $ref: '#/components/schemas/BillingCreditView'
         credit_amount:
           type: integer
         credit_description:
           type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.Description instead.
+          deprecated: true
         credit_icon:
           type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use Credit.Icon
+            instead.
           nullable: true
+          deprecated: true
         credit_id:
           type: string
         credit_name:
           type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use Credit.Name
+            instead.
+          deprecated: true
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -7387,7 +7471,11 @@ components:
           nullable: true
         plural_name:
           type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.PluralName instead.
           nullable: true
+          deprecated: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -7396,7 +7484,11 @@ components:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
         singular_name:
           type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.SingularName instead.
           nullable: true
+          deprecated: true
         updated_at:
           type: string
           format: date-time
