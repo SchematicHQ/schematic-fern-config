@@ -4306,6 +4306,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        status:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceStatus'
+          nullable: true
         subscription_external_id:
           type: string
           nullable: true
@@ -6854,6 +6858,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        status:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceStatus'
+          nullable: true
         subscription_external_id:
           type: string
           nullable: true
@@ -6910,6 +6918,10 @@ components:
           nullable: true
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
+        status:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceStatus'
+          nullable: true
         subscription_external_id:
           type: string
           nullable: true
@@ -6935,6 +6947,14 @@ components:
         - subtotal
         - updated_at
       title: InvoiceResponseData
+    InvoiceStatus:
+      type: string
+      enum:
+        - draft
+        - open
+        - paid
+        - uncollectible
+        - void
     IssueTemporaryAccessTokenRequestBody:
       type: object
       properties:
