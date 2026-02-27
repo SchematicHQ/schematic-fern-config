@@ -5060,6 +5060,115 @@ components:
         - grant_reason
         - renewal_enabled
       title: CreditCompanyGrantView
+    CreditEventLedgerResponseData:
+      type: object
+      properties:
+        amount:
+          type: number
+        auto_topup_log_id:
+          type: string
+          nullable: true
+        billing_credit_bundle_id:
+          type: string
+          nullable: true
+        billing_credit_id:
+          type: string
+        company:
+          $ref: '#/components/schemas/CompanyLedgerResponseData'
+        company_id:
+          type: string
+        credit:
+          $ref: '#/components/schemas/BillingCreditLedgerResponseData'
+        credit_name:
+          type: string
+        environment_id:
+          type: string
+        event_at:
+          type: string
+          format: date-time
+        event_id:
+          type: string
+        event_type:
+          $ref: '#/components/schemas/CreditEventType'
+        expiry_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
+          nullable: true
+        expiry_unit:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
+          nullable: true
+        expiry_unit_count:
+          type: integer
+          nullable: true
+        feature:
+          $ref: '#/components/schemas/FeatureLedgerResponseData'
+        feature_id:
+          type: string
+          nullable: true
+        from_grant_id:
+          type: string
+          nullable: true
+        grant_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        grant_id:
+          type: string
+          nullable: true
+        grant_quantity:
+          type: integer
+          nullable: true
+        grant_quantity_remaining:
+          type: number
+          nullable: true
+        grant_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantReason'
+          nullable: true
+        grant_valid_from:
+          type: string
+          format: date-time
+          nullable: true
+        plan_id:
+          type: string
+          nullable: true
+        quantity_consumed:
+          type: number
+          nullable: true
+        quantity_remaining_at_zero_out:
+          type: number
+          nullable: true
+        source_id:
+          type: integer
+        to_grant_id:
+          type: string
+          nullable: true
+        usage_event_id:
+          type: string
+          nullable: true
+        zeroed_out_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
+          nullable: true
+      required:
+        - amount
+        - credit_name
+        - event_at
+        - event_id
+        - event_type
+        - source_id
+        - billing_credit_id
+        - company_id
+        - environment_id
+      title: CreditEventLedgerResponseData
+    CreditEventType:
+      type: string
+      enum:
+        - grant
+        - transfer
+        - usage
+        - zero_out
     CreditGrantDetail:
       type: object
       properties:
@@ -23108,6 +23217,199 @@ paths:
                   - data
                   - params
                 title: LookupUserResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v2/billing/credits/ledger:
+    get:
+      operationId: listCreditEventLedger
+      summary: List credit event ledger
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          schema:
+            type: string
+        - name: event_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CreditEventType'
+        - name: feature_id
+          in: query
+          schema:
+            type: string
+        - name: start_time
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditEventLedgerResponseData'
+                    title: ListCreditEventLedgerResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      end_time:
+                        type: string
+                      event_type:
+                        $ref: '#/components/schemas/CreditEventType'
+                      feature_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      start_time:
+                        type: string
+                    title: ListCreditEventLedgerParams
+                required:
+                  - data
+                  - params
+                title: ListCreditEventLedgerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v2/billing/credits/ledger/count:
+    get:
+      operationId: countCreditEventLedger
+      summary: Count credit event ledger
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          schema:
+            type: string
+        - name: event_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CreditEventType'
+        - name: feature_id
+          in: query
+          schema:
+            type: string
+        - name: start_time
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      end_time:
+                        type: string
+                      event_type:
+                        $ref: '#/components/schemas/CreditEventType'
+                      feature_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        example: '0'
+                      start_time:
+                        type: string
+                    title: CountCreditEventLedgerParams
+                required:
+                  - data
+                  - params
+                title: CountCreditEventLedgerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
