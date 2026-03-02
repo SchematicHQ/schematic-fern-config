@@ -3575,6 +3575,7 @@ components:
           nullable: true
         name:
           type: string
+          nullable: true
           maxLength: 255
         price:
           type: number
@@ -3583,7 +3584,6 @@ components:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
       required:
-        - name
         - price
         - external_id
       title: CreateBillingProductRequestBody
