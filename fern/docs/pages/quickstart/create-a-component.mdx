@@ -56,7 +56,6 @@ import { SchematicClient } from "@schematichq/schematic-typescript-node";
 const schematicClient = new SchematicClient({ apiKey });
 
 const resp = await schematicClient.accesstokens.issueTemporaryAccessToken({
-  resourceType: "company",
   lookup: {
     'demo-id': 'demo-company',
   },
