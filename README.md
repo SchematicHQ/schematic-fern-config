@@ -2,8 +2,9 @@
 
 This repository contains your Fern Configuration:
 
-- [OpenAPI spec](./openapi/openapi.yml)
+- [OpenAPI spec](./schematic.yml)
 - [Generators config](./fern/generators.yml)
+- [Public documentation](./fern/docs/)
 
 ## Validating your API Definition
 
@@ -16,8 +17,8 @@ fern check
 
 ## Generating your SDK
 
-To upgrade your SDK, click on `Actions` and then hit `Release Python SDK`. Under the 
-hood, our CLI powers this action: 
+To upgrade your SDK, click on `Actions` and then hit `Release Python SDK`. Under the
+hood, our CLI powers this action:
 
 ```sh
 npm install -g fern-api # only required once
