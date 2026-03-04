@@ -20772,6 +20772,11 @@ paths:
       summary: Get plan group
       tags:
         - plangroups
+      parameters:
+        - name: include_company_counts
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -20785,6 +20790,9 @@ paths:
                   params:
                     type: object
                     description: Input parameters
+                    properties:
+                      include_company_counts:
+                        type: boolean
                     title: GetPlanGroupParams
                 required:
                   - data
