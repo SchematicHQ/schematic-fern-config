@@ -314,6 +314,56 @@ func main() {
 }
 ```
 
+### Checking flags with entitlement details
+
+If you need more detail about how a flag check was resolved, including any entitlement associated with the check, use `CheckFlagWithEntitlement`. This returns a response object with the flag value, the reason for the evaluation result, and entitlement details such as usage, allocation, and credit balances when applicable.
+
+```go
+import (
+  "context"
+  "fmt"
+  "os"
+
+  option "github.com/schematichq/schematic-go/option"
+  schematicclient "github.com/schematichq/schematic-go/client"
+  schematicgo "github.com/schematichq/schematic-go"
+)
+
+func main() {
+  apiKey := os.Getenv("SCHEMATIC_API_KEY")
+  client := schematicclient.NewSchematicClient(option.WithAPIKey(apiKey))
+  defer client.Close()
+
+  evaluationCtx := &schematicgo.CheckFlagRequestBody{
+    Company: map[string]string{
+      "id": "your-company-id",
+    },
+    User: map[string]string{
+      "email":   "wcoyote@acme.net",
+      "user-id": "your-user-id",
+    },
+  }
+
+  resp, err := client.CheckFlagWithEntitlement(context.Background(), evaluationCtx, "some-flag-key")
+  if err != nil {
+    fmt.Printf("Error: %v\n", err)
+    return
+  }
+
+  fmt.Printf("Flag: %s, Value: %v, Reason: %s\n", resp.FlagKey, resp.Value, resp.Reason)
+
+  if resp.Entitlement != nil {
+    fmt.Printf("Entitlement type: %s\n", resp.Entitlement.ValueType)
+    if resp.Entitlement.Usage != nil && resp.Entitlement.Allocation != nil {
+      fmt.Printf("Usage: %d\n", *resp.Entitlement.Usage)
+    }
+    if resp.Entitlement.CreditRemaining != nil {
+      fmt.Printf("Credit remaining: %.2f\n", *resp.Entitlement.CreditRemaining)
+    }
+  }
+}
+```
+
 ### Other API operations
 
 The Schematic API supports many operations beyond these, accessible via `client.API()`. See the [API submodule readme](https://github.com/SchematicHQ/schematic-go/tree/main/api#readme) for a full list and documentation of supported operations.
