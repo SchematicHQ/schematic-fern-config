@@ -338,6 +338,29 @@ var options = new ClientOptions
 Schematic schematic = new Schematic("YOUR_API_KEY", options);
 ```
 
+### Checking flags with entitlement details
+
+If you need more detail about how a flag check was resolved, including any entitlement associated with the check, use `CheckFlagWithEntitlement`. This returns a response object with the flag value, the reason for the evaluation result, and entitlement details such as usage, allocation, and credit balances when applicable.
+
+```csharp
+Schematic schematic = new Schematic("YOUR_API_KEY");
+
+var resp = await schematic.CheckFlagWithEntitlement(
+    "some-flag-key",
+    company: new Dictionary<string, string> { { "id", "your-company-id" } },
+    user: new Dictionary<string, string> { { "user_id", "your-user-id" } }
+);
+
+Console.WriteLine($"Flag: {resp.FlagKey}, Value: {resp.Value}, Reason: {resp.Reason}");
+
+if (resp.Entitlement != null)
+{
+    Console.WriteLine($"Entitlement type: {resp.Entitlement.ValueType}");
+    Console.WriteLine($"Usage: {resp.Entitlement.Usage}");
+    Console.WriteLine($"Credit remaining: {resp.Entitlement.CreditRemaining}");
+}
+```
+
 ### Offline Mode
 
 In development or testing environments, you may want to avoid making network requests to the Schematic API. You can run Schematic in offline mode by specifying the `Offline` option; in this case, it does not matter what API key you specify:
