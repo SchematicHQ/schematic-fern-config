@@ -39,29 +39,32 @@ To set up an event-based metered feature, do the following:
   allowFullScreen
 ></iframe>
 
-Here's an example of sending in utilization events for a company.
+Here's an example of sending in utilization events for a company and then using the entitlement details to show usage vs. limit and whether more usage is allowed.
 
-```python
-from schematic import Schematic
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
 
-client = Schematic(
-    api_key = "your-api-key"
-)
+const apiKey = process.env.SCHEMATIC_API_KEY;
+const client = new SchematicClient({ apiKey });
 
-user = {
-    "your-user-key" : "value"
-}
+const user = { "your-user-key": "value" };
+const company = { "your-company-key": "value" };
 
-company = {
-    "your-company-key" : "value"
-}
+// Send track event to record utilization
+await client.track({
+  event: "new-event",
+  user,
+  company,
+});
 
-# send track event
-response  = client.track(
-    event="new-event",
-    user=user,
-    company=company
-)
+// Check the feature flag with entitlement details (usage, allocation)
+const resp = await client.checkFlagWithEntitlement(
+  { company, user },
+  "new-event-based-feature"
+);
+
+console.log(`Usage: ${resp.entitlement.usage} of ${resp.entitlement.allocation}`);
+console.log(resp.value ? "More usage allowed" : "Limit hit");
 ```
 
 ## Setting up a Trait-based metered feature
