@@ -361,9 +361,6 @@ components:
     BillingCreditBundleResponseData:
       type: object
       properties:
-        billing_invoice_id:
-          type: string
-          nullable: true
         bundle_type:
           $ref: '#/components/schemas/BillingCreditBundleType'
         created_at:
@@ -434,9 +431,6 @@ components:
     BillingCreditBundleView:
       type: object
       properties:
-        billing_invoice_id:
-          type: string
-          nullable: true
         bundle_type:
           $ref: '#/components/schemas/BillingCreditBundleType'
         created_at:
