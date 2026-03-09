@@ -1911,6 +1911,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckFlagResponseData'
+        plan:
+          $ref: '#/components/schemas/DatastreamCompanyPlan'
       required:
         - flags
       title: CheckFlagsResponseData
@@ -5531,6 +5533,21 @@ components:
       type: string
       enum:
         - company-feature-usage
+    DatastreamCompanyPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        trial_end_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+      title: DatastreamCompanyPlan
     DeleteBillingPlanCreditGrantRequestBody:
       type: object
       properties:
