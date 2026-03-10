@@ -7481,6 +7481,10 @@ components:
             Any special behavior that affected the assignment of the base plan
             during this change.
           nullable: true
+        base_plan_version:
+          allOf:
+            - $ref: '#/components/schemas/PlanVersionSnapshotView'
+          description: The plan version that was assigned during this change.
         company:
           $ref: '#/components/schemas/CompanyResponseData'
         company_id:
@@ -7494,6 +7498,10 @@ components:
           type: string
         previous_base_plan:
           $ref: '#/components/schemas/PlanSnapshotView'
+        previous_base_plan_version:
+          allOf:
+            - $ref: '#/components/schemas/PlanVersionSnapshotView'
+          description: The plan version of the previous base plan before this change.
         request_id:
           type: string
           nullable: true
@@ -8441,6 +8449,20 @@ components:
         - updated_at
         - version
       title: PlanVersionResponseData
+    PlanVersionSnapshotView:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: integer
+      required:
+        - id
+        - name
+        - version
+      title: PlanVersionSnapshotView
     PlanVersionStatus:
       type: string
       enum:
