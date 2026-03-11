@@ -1698,6 +1698,39 @@ components:
       required:
         - company_id
       title: CancelSubscriptionRequest
+    CaptureRawEvent:
+      type: object
+      properties:
+        captured_at:
+          type: string
+          format: date-time
+        event_id:
+          type: string
+          nullable: true
+        raw_bytes:
+          type: array
+          items:
+            type: integer
+        remote_ip:
+          type: string
+        user_agent:
+          type: string
+      required:
+        - captured_at
+        - raw_bytes
+        - remote_ip
+        - user_agent
+      title: CaptureRawEvent
+    CaptureRawEventBatch:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaptureRawEvent'
+      required:
+        - events
+      title: CaptureRawEventBatch
     ChangeSubscriptionInternalRequestBody:
       type: object
       properties:
