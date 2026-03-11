@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 495" width="820" height="495" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9090B8"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="495" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="370" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#14002D">How an entitlement check works</text>
+
+  <!-- ═══ ENTRY ═══ -->
+  <rect x="235" y="46" width="270" height="44" rx="22" fill="#14002D"/>
+  <text x="370" y="68" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="600" fill="#FFFFFF">check(company, feature)</text>
+
+  <!-- ═══ SPLIT to parallel boxes ═══ -->
+  <!-- stem down then branch -->
+  <line x1="370" y1="90" x2="370" y2="120" stroke="#9090B8" stroke-width="1.5"/>
+  <!-- left branch -->
+  <line x1="370" y1="120" x2="258" y2="120" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="258" y1="120" x2="258" y2="140" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- right branch -->
+  <line x1="370" y1="120" x2="486" y2="120" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="486" y1="120" x2="486" y2="140" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══ PARALLEL: Plan Entitlement + Company Override ═══ -->
+  <rect x="165" y="140" width="185" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="258" y="162" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Plan Entitlement</text>
+
+  <rect x="393" y="140" width="185" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="486" y="162" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Company Override</text>
+
+  <!-- ═══ MERGE arrows ═══ -->
+  <line x1="258" y1="184" x2="258" y2="202" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="258" y1="202" x2="370" y2="202" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="486" y1="184" x2="486" y2="202" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="486" y1="202" x2="370" y2="202" stroke="#9090B8" stroke-width="1.5"/>
+  <line x1="370" y1="202" x2="370" y2="222" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══ STEP 1: Either applies? ═══ -->
+  <!-- diamond: cx=370, cy=264, hw=150, hh=42 -->
+  <polygon points="370,222 520,264 370,306 220,264" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="370" y="259" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Either applies?</text>
+  <text x="370" y="275" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#7C3AED">Return More Generous Value</text>
+
+  <!-- yes → right -->
+  <line x1="520" y1="264" x2="578" y2="264" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="546" y="256" text-anchor="middle" font-size="10" fill="#6B7280">yes</text>
+  <rect x="578" y="242" width="200" height="44" rx="7" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="678" y="264" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" fill="#166534">Return Entitlement Value</text>
+
+  <!-- no → down -->
+  <line x1="370" y1="306" x2="370" y2="338" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="382" y="326" font-size="10" fill="#6B7280">no</text>
+
+  <!-- ═══ STEP 2: Global Rule ═══ -->
+  <!-- diamond: cx=370, cy=380, hw=150, hh=42 -->
+  <polygon points="370,338 520,380 370,422 220,380" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="370" y="375" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Global Rule matches?</text>
+  <text x="370" y="391" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#7C3AED">Trait or Segment-Based Rule</text>
+
+  <!-- yes → right -->
+  <line x1="520" y1="380" x2="578" y2="380" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="546" y="372" text-anchor="middle" font-size="10" fill="#6B7280">yes</text>
+  <rect x="578" y="358" width="200" height="44" rx="7" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="678" y="380" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" fill="#166534">Return Entitlement Value</text>
+
+  <!-- no → down -->
+  <line x1="370" y1="422" x2="370" y2="450" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="382" y="440" font-size="10" fill="#6B7280">no</text>
+
+  <!-- ═══ DEFAULT ═══ -->
+  <rect x="255" y="450" width="230" height="44" rx="7" fill="#FEF2F2" stroke="#DC2626" stroke-width="1.5"/>
+  <text x="370" y="468" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#991B1B">Return False</text>
+  <text x="370" y="484" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#B91C1C">(Feature Disabled by Default)</text>
+
+
+</svg>

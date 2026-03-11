@@ -6,11 +6,15 @@ slug: feature-management/overview
 
 Feature Management in Schematic enables you to control how product features are rolled out, accessed by end customers, and monetized. Unlike traditional feature management tools, Schematic is purpose-built with billing in mind, so feature access can be tied directly to a company’s plan and any other policy set up in Schematic (e.g. add ons, overrides, or individual targeting).
 
-Flags and Features are technically different concepts in Schematic:
-- **Flags** - represent the gate that you implement in your codebase to control whether or not a resource is accessible to the end user.
-- **Features** - represent an abstraction on top of flags that the business may market or sell.
+An **entitlement** is the right to use a feature—defined by the relationship between a plan (or add-on) and that feature. When you check whether a company has access to a feature, you’re evaluating their entitlements (and any overrides or targeting rules). Entitlements can be boolean (on/off), limited by traits, or metered by usage.
 
 ![Feature Management Overview](../../assets/images/features/features-homepage.png)
+
+## How entitlement checks work
+
+When your app calls `check(company, feature)` (via the API or an SDK), Schematic combines the company’s plan entitlement with any company-specific overrides and takes the most generous of those values. If that doesn’t resolve to a result, it falls back to global rules (e.g. trait or segment-based). If nothing matches, the feature is disabled by default. The diagram below shows this flow.
+
+![How an entitlement check works](../../assets/images/developer_resources/entitlement-check-flow.svg)
 
 ## Use cases
 - **Rollout new features**: Rollout gradually to a small cohort to mitigate risk or to gather feedback.
