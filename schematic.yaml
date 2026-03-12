@@ -1708,9 +1708,8 @@ components:
           type: string
           nullable: true
         raw_bytes:
-          type: array
-          items:
-            type: integer
+          type: string
+          format: byte
         remote_ip:
           type: string
         user_agent:
@@ -5518,6 +5517,23 @@ components:
         - cta_text
         - price_text
       title: CustomPlanViewConfigResponseData
+    DataEventPayload:
+      type: object
+      properties:
+        api_key:
+          type: string
+        body:
+          type: object
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        type:
+          $ref: '#/components/schemas/EventType'
+      required:
+        - api_key
+        - type
+      title: DataEventPayload
     DataExportOutputFileType:
       type: string
       enum:
