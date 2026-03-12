@@ -20,13 +20,21 @@ To read more about the ideal way to manage `keys` with Schematic, click [here](/
 
 SDKs can reference companies or users by their Schematic ID using the `id` key or by any `key` you have defined and passed to Schematic previously.
 
-### Flags vs. Features
+### Flags vs. Features vs. Entitlements
 
-Flags let you control logic in your codebase. They can be evaluated against a set of prioritized rules defined within each flag. Flags can only be boolean, or on/off.
+**Flags** are the gate you implement in your codebase—they control whether a resource is accessible to the end user. Flags are evaluated against a set of prioritized rules and are always boolean (on/off).
 
-In addition to explicit targeting, flags can be associated with Features that represent a high-level set of functionality that the business may market or sell. You may create entitlements at the feature level that are boolean (on/off), trait-based (limited), or event-based (metered). Those entitlements may be associated with plans that reflect groups of functionality companies are assigned to.
+**Features** are the abstraction on top of flags that the business may market or sell. At this time, flags and features are one-to-one in Schematic and share a common `key`. Features are what you create in the UI and tie to plans; when you evaluate access, you typically check at the feature level.
 
-At this time, flags and features are one-to-one and share a common `key`. Using the [check flag endpoint](/api-reference/features/check-flag), you may evaluate features and flags using a company and/or user `key`.
+**Entitlements** are the link between a plan (or add-on) and a feature—they define whether and how a company has access. Entitlements can be boolean, trait-based (based on usage you report to Schematic), or event-based (metered based on events you send to Schematic). When you call the [check flag endpoint](/api-reference/features/check-flag) (or use an SDK to check a feature), Schematic evaluates the company's entitlements plus any overrides or global rules to return a result.
+
+Together: you define **features** (and their **entitlements** on plans), implement **flags** in code that map to those features, and at runtime the check resolves entitlements to allow or deny access.
+
+### How entitlement checks are evaluated
+
+When you evaluate a feature for a company, Schematic combines plan entitlements with company overrides and takes the most generous of those values. If that doesn’t resolve to a result, it falls back to global rules (e.g. trait or segment-based). If nothing matches, the check returns false and the feature is treated as disabled.
+
+![How an entitlement check works](../../assets/images/developer_resources/entitlement-check-flow.svg)
 
 ### Plans vs. Add Ons
 
