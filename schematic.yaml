@@ -21755,6 +21755,16 @@ paths:
             type: array
             items:
               type: string
+        - name: include_draft_versions
+          in: query
+          description: >-
+            Include billing settings from draft versions for plans which have
+            draft version
+          schema:
+            type: boolean
+            description: >-
+              Include billing settings from draft versions for plans which have
+              draft version
         - name: plan_type
           in: query
           description: Filter by plan type
@@ -21837,6 +21847,11 @@ paths:
                         type: array
                         items:
                           type: string
+                      include_draft_versions:
+                        type: boolean
+                        description: >-
+                          Include billing settings from draft versions for plans
+                          which have draft version
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -22144,6 +22159,16 @@ paths:
             type: array
             items:
               type: string
+        - name: include_draft_versions
+          in: query
+          description: >-
+            Include billing settings from draft versions for plans which have
+            draft version
+          schema:
+            type: boolean
+            description: >-
+              Include billing settings from draft versions for plans which have
+              draft version
         - name: plan_type
           in: query
           description: Filter by plan type
@@ -22223,6 +22248,11 @@ paths:
                         type: array
                         items:
                           type: string
+                      include_draft_versions:
+                        type: boolean
+                        description: >-
+                          Include billing settings from draft versions for plans
+                          which have draft version
                       limit:
                         type: integer
                         description: Page limit (default 100)
