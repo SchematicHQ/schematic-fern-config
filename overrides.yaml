@@ -120,8 +120,8 @@ paths:
         Company lookup is determined to resolve a company from it's keys, similar to how many of our other apis work. 
         The following approaches will all work to resolve a company and any of them are appropriate:
         1. `/companies/lookup?keys={"foo": "bar", "fizz": "buzz"}`
-        2. `/comapnies/lookup?keys[foo]=bar&keys[fizz]=buzz`
-        2. `/comapnies/lookup?foo=bar&fizz=buzz`
+        2. `/companies/lookup?keys[foo]=bar&keys[fizz]=buzz`
+        2. `/companies/lookup?foo=bar&fizz=buzz`
 
       x-fern-audiences:
         - public
