@@ -35,20 +35,20 @@ import {
   EmbedProvider,
   useEmbed,
 } from "@schematichq/schematic-components";
-import { useEffect, useState } from "react";
-
+import { useEffect, useCallback } from "react";
 
 const PLAN_ID = ""; // plan to be preselected
 
 function Checkout() {
-  const { initializeWithPlan, layout, CheckoutDialog } = useEmbed();
-
-  const checkout = () => {
+  const { initializeWithPlan, layout, setAccessToken, stale, hydrate } = useEmbed();
+  const checkout = useCallback(async () => {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    initializeWithPlan(PLAN_ID);
-  };
+    initializeWithPlan({
+      planId: PLAN_ID
+    });
+  }, [setAccessToken, initializeWithPlan]);
 
   // this is necessary when launching straight to checkout
   useEffect(() => {
