@@ -45,9 +45,7 @@ function Checkout() {
     const response = await fetch("/api/accessToken");
     const result = await response.json();
     setAccessToken(result.accessToken);
-    initializeWithPlan({
-      planId: PLAN_ID
-    });
+    initializeWithPlan({ planId: PLAN_ID });
   }, [setAccessToken, initializeWithPlan]);
 
   // this is necessary when launching straight to checkout
@@ -60,7 +58,7 @@ function Checkout() {
   return (
     <>
       <button onClick={checkout}>Upgrade to Pro</button>
-      {layout === "checkout" && <CheckoutDialog />}
+      {layout === "checkout" && createPortal(<CheckoutDialog />, document.body)}    
     </>
   )
 }
