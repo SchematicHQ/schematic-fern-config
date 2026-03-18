@@ -34,6 +34,14 @@ Flags support plan-based rules (automatically on for companies on a given plan),
 
 ---
 
+## Entitlements
+
+An **entitlement** is what a plan (or add on) grants for a specific feature. It's the link between "what a customer is paying for" and "what they can do."
+
+Entitlements can grant simple on/off access, limit a feature to a stored value (like seat count), or meter it against tracked usage (like API calls per month). When a company is on multiple plans or add ons, the most permissive entitlement across all of them applies.
+
+---
+
 ## Plans
 
 A **plan** is the bundle of features and limits you assign to a company. Plans typically correspond to the tiers you sell—Free, Starter, Pro, Enterprise, and so on.
@@ -47,14 +55,6 @@ Each company has exactly one plan at a time. Plans are often linked to a billing
 An **add on** is a bundle of additional features and limits that sits on top of a company's base plan. Unlike plans, a company can have any number of add ons.
 
 Add ons are used to sell incremental capabilities—for example, a "Premium Analytics" add on that unlocks additional features regardless of which base plan a company is on.
-
----
-
-## Entitlements
-
-An **entitlement** is what a plan (or add on) grants for a specific feature. It's the link between "what a customer is paying for" and "what they can do."
-
-Entitlements can grant simple on/off access, limit a feature to a stored value (like seat count), or meter it against tracked usage (like API calls per month). When a company is on multiple plans or add ons, the most permissive entitlement across all of them applies.
 
 ---
 
@@ -72,33 +72,14 @@ A **user** is a person associated with a company in Schematic. Users inherit ent
 
 ---
 
-## Usage
+## Events
 
-**Usage** is the consumption of a metered feature over time. Schematic tracks usage to enforce limits, power usage-based billing, and give you visibility into how customers are using your product.
+**Events** are the signals your application sends to Schematic to create profiles and track usage. There are two types:
 
-Usage is attributed to a company, a user, and a feature, and can be viewed at any of those levels.
+- **Identify** – creates or updates a company or user profile with their name, traits, and keys
+- **Track** – records a usage event for a company, user, and feature
 
----
-
-## Subscription
-
-A **subscription** is a company's active billing relationship—their current plan (and add ons), typically synced from Stripe.
-
-When a Stripe subscription changes (upgrade, downgrade, cancellation), Schematic automatically updates the company's plan assignment. No webhook handlers or manual reconciliation required.
-
----
-
-## Credits
-
-**Credits** are prepaid or granted units of usage—for example, API call packs, seat licenses, or time blocks. Credits are decremented as usage occurs, and companies can hold a balance that rolls over or expires.
-
-Credits are typically used for pay-in-advance pricing models or to grant promotional access outside of a regular plan.
-
----
-
-## Catalog Configuration
-
-**Configuration** is where you define the rules that govern how plans and add ons behave across your product—things like which plan new companies start on, what happens when a subscription lapses, how trials work, and which plans are available for self-serve checkout.
+Events are the primary way data flows into Schematic from your application.
 
 ---
 
@@ -118,37 +99,8 @@ Traits serve two purposes: they can be used as conditions in flag targeting rule
 
 ---
 
-## Events
-
-**Events** are the signals your application sends to Schematic to create profiles and track usage. There are two types:
-
-- **Identify** – creates or updates a company or user profile with their name, traits, and keys
-- **Track** – records a usage event for a company, user, and feature
-
-Events are the primary way data flows into Schematic from your application.
-
----
-
-## Checks
-
-A **check** is a log entry created every time Schematic evaluates a flag for a company or user. Checks record the result (granted or denied) and which rule caused it—useful for understanding why a customer does or doesn't have access to a feature.
-
----
-
 ## Components
 
 **Components** are prebuilt UI elements you can embed in your application to give customers self-service control over their plan—pricing tables, upgrade/downgrade flows, customer portals, and usage meters.
 
 Components stay in sync with Schematic automatically, reflecting each company's current entitlements and subscription in real time.
-
----
-
-## Settings
-
-**Team** — Manage who has access to the Schematic app and at what permission level.
-
-**API Keys** — The credentials your application and backend use to call the Schematic API.
-
-**Audit Log** — A history of every API request made to Schematic, including whether it succeeded and what was sent and received. Useful for debugging.
-
-**Usage & Billing** — Configuration for your own Schematic account subscription, separate from the per-customer subscription tracking described above.
