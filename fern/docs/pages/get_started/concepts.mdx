@@ -4,9 +4,7 @@ description: "Plain-language definitions of Schematic's core concepts."
 slug: concepts
 ---
 
-This page explains the core concepts in Schematic—what each one is and why it exists. It's written for anyone using or evaluating Schematic, regardless of technical background.
-
----
+This page explains the core concepts in Schematic. 
 
 ## Features
 
@@ -47,6 +45,12 @@ Entitlements can grant simple on/off access, limit a feature to a stored value (
 A **plan** is the bundle of features and limits you assign to a company. Plans typically correspond to the tiers you sell—Free, Starter, Pro, Enterprise, and so on.
 
 Each company has exactly one plan at a time. Plans are often linked to a billing product in Stripe so that plan assignment updates automatically when a subscription changes.
+
+### Plan Versions
+
+In Schematic, plans are versioned automatically, and updating an existing plan with subscribers will create a new version instead. Only the newest version of a plan is available to be subscribed to customers. This allows plans to be iterated on without effecting existing subscribers. This can be used for pricing changes and experiments. 
+
+When a new plan version is created, you can migrate all, some, or none of the current subscribers to the new version.
 
 ---
 

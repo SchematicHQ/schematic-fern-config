@@ -7,13 +7,11 @@ A plan in Schematic represents the base billing and entitlement configuration fo
 
 Schematic limits companies to only 1 plan at a time. For a step-by-step guide about creating a plan in Schematic, click [here](/catalog/create-catalog). To learn how to assign companies to plans, click [here](/catalog/managing-company-plans)
 
-<img
-src="../../assets/images/catalog/catalog-plans-addons-example.png"
-/>
+![Example showing Schematic plans and add ons](../../assets/images/catalog/catalog-plans-addons-example.png)
 
 There are two options that can be defined with each plan - billing and the trial period:
 
-#### **Billing**
+### Billing
 
 Defining billing in Schematic functionally maps Stripe products to Schematic plans.
 
@@ -21,14 +19,62 @@ If you do define billing, those that have a Stripe subscription with the mapped 
 
 Defining billing is optional -- you can define a plan in Schematic that is not linked to Stripe billing at all. In that case, you can indepedently manage plan membership and how companies are charged.
 
-<img
-src="../../assets/images/catalog/catalog-plans-billing.png"
-/>
+![Schematic plans mapped to Stripe billing](../../assets/images/catalog/catalog-plans-billing.png)
 
-#### **Trial**
+### Trial
 
 When a trial period is defined for a plan, Schematic will ensure that the company receives the corresponding entitlements for that period the first time they are assigned that plan. You can configure whether payment is required up front or not -- if it is required, the company will convert into the corresponding paid plan automatically; if not, they will downgrade to your default plan.
 
-<img
-src="../../assets/images/catalog/catalog-plans-trial.png"
-/>
+![Schematic plan trial configuration example](../../assets/images/catalog/catalog-plans-trial.png)
+
+### Plan Versions
+
+Plans in Schematic are versioned to better support a range of common monetization scenarios. Plan versions make it easy to support both larger plan iterations (e.g. annual pricing changes) as well as short term pricing experiments. 
+
+![Schematic plan version example](../../assets/images/catalog/catalog-plans-versions.png)
+
+More details can be found in 
+
+#### Plan Version Migrations
+
+When migrating to a new plan version, you will be able to determine what happens to customers on the old verison. You can:
+- Migrate all customers to the new plan version
+- Leave all customers on the legacy plan version
+- Migrate some customers, while leaving others on the legacy plan version
+
+## Create a plan
+
+1. Navigate to the Plans page and click "Create Plan" in the upper right corner
+2. Add name and a description
+3. In the Billing step, choose whether the plan is Free or Paid
+4. Set the billing integration to be "Integrated with Stripe"
+
+<Warning>Plans that are not integrated with Stripe are limited in many ways, such as no access to trials, limited access to usage based entitlements, and aren't supported in our checkout flow.</Warning>
+
+5. If integrated with Stripe, you can choose to Sync with an existing Stripe product.
+
+<Info>This is optional, but can be helpful if you have a well built plan setup in Stripe already. Companies imported from Stripe subscribed to this product will automatically be assigned this plan in Schematic.</Info>
+
+6. Optionally, configure trial information if you choose.
+7. Click "Done" in the lower righthand corner
+
+![Schematic plan creation](../../assets/images/catalog/catalog-plans-create.png)
+
+### Adding Entitlements
+
+Before we save our plan, let's add an entitlement. 
+
+<Note>If you have a similar existing plan, you could instead duplicate those entitlements into this plan. You can still add new entitlements as well as edit/delete the duplicated ones to finish setting up your plan</Note>
+
+![Schematic plan - add entitlements](../../assets/images/catalog/catalog-plans-add-entitlements.png)
+
+To setup, an entitlement, you'll need to
+1. Select which feature you want to use
+2. Determine how you'll monetize the feature. 
+3. Configure the monetization details
+
+<Note>This will be different for each monetization type</Note>
+
+4. Save the Entitlement. 
+
+When you're done adding entitlements, click "Save" in the top right to finalize the plan.
