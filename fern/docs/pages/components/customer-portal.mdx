@@ -73,10 +73,6 @@ Schematic checkout is configurable at several levels:
 
 **Tax collection.** Schematic supports Stripe Tax to collect billing address information and calculate taxes at checkout. This is configured under Plans > Configuration. See [Advanced Usage](/components/advanced-usage) for details.
 
-## Stripe Integration
-
-Schematic Customer Portal handles the complete checkout flow for a new customer, upgrade, downgrade, or cancellation. This includes propogating the appropriate events to Stripe to handle payment and create/update the customer's subscription (these changes are also reflected in Schematic). If Stripe is connected, the Customer Portal will automatically interface with Stripe with no additional configuration required. To learn more about the Stripe integration, see the [Stripe Integration](/integrations/stripe) page.
-
 ## Checkout Flow Events
 
 After a customer completes a checkout flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. This event will include some key information, such as the `id` of the new plan.

@@ -4,51 +4,35 @@ title: Components Overview
 slug: components/overview
 ---
 
-Schematic’s embeddable UI components are designed to deliver a consumer-grade purchasing experience to all of your end users. That includes the ability to manage subscriptions, view feature-level usage, and customize plans in your app — all without requiring heavy lifting to build from scratch or maintain.
+Schematic's embeddable UI components are designed to deliver a consumer-grade purchasing experience to all of your end users. That includes the ability to manage subscriptions, view feature-level usage, and customize plans in your app — all without requiring heavy lifting to build from scratch or maintain.
 
 Components are drop-in components for React that can be easily configured and designed within Schematic, and quickly integrated natively into your application.
 
-## Creating a Component
+## Component Types
 
-### **Configuring the Catalog**
+### Customer Portal
 
-1. Navigate to **Catalog > Configuration**
-2. Choose a default plan that all companies will be assigned if there is no formal subscription (optional)
-3. Choose “live plans” (those that your end users can choose to downgrade from or upgrade to)
-4. Save changes
+The Customer Portal is an authenticated, in-app component that gives your customers a self-service billing hub. It handles the full subscription lifecycle:
 
-<Info>Plans must be associated with Stripe Products to be added to Live Plans. If you don’t use Stripe, skip this section.</Info>
+- Purchasing a plan or add on for the first time
+- Upgrading, downgrading, or canceling a subscription
+- Managing payment methods
+- Viewing upcoming and past invoices
+- Checking current usage and entitlements
 
-<img
-  src="../../assets/images/components/components-plan-configuration.png"
-/>
+The Customer Portal integrates fully with Stripe and is scoped to a specific company, so each customer sees their own data. See the [Customer Portal](/components/customer-portal) page for details.
 
-### **Creating a new UI component**
+### Standalone Pricing Table
 
-Once you’ve configured your Catalog, Components will be populated with your data rather than sample data (if you skip to this section, you can simply use the sample data).
-
-1. Navigate to **Components** in the navigation bar
-2. Click **New Component** and choose “Customer Portal” as an example
-3. Click into the new Component you created and you should see a rendered Customer Portal in the Schematic Component Builder
-4. Press **Save & Publish** and follow the [steps to drop into your application](/components/set-up)
-
-<img
-  src="../../assets/images/components/components-builder.png"
-/>
-
-Components are fully customizable both in the elements they are made up of (e.g. Current Plan, Included Features, Invoices, etc.) and in how they look and feel (so it appears native to your product).
-
-Additionally, you may preview as any company in your account using the dropdown at the top of the builder.
-
-<img
-  src="../../assets/images/components/components-builder-preview.png"
-/>
-
+The Standalone Pricing Table is a public-facing component that can be embedded on a marketing or pricing page. It requires no authentication and shows your available plans and pricing to prospective customers. See the [Standalone Components](/components/standalone-components) page for details.
 
 ## Component Builder
 
-Components are inherently flexible, made up of [elements](/components/element-library) that can be mixed and matched based on the experience you’d like to give your end user.
+Components are fully customizable using Schematic's no-code Component Builder. You can choose which [elements](/components/element-library) appear (e.g. Current Plan, Invoices, Payment Methods, Usage Meters), control colors, fonts, and card styles, and preview how the component looks for any company in your account — all without touching code. Changes publish immediately without a deploy.
 
-Within Schematic, you have access to a Component Builder which allows for full customization both in the elements that are a part of any given Component (e.g. Current Plan, Included Features, Invoices, etc.) and in how the Component looks and feels (so it appears native to your product).
+## Getting Started
 
-Once you design a Component to your liking, you can drop it directly into your application.
+To build and embed a component:
+
+1. [Create a Component](/components/create-component) — configure your catalog and build the component in Schematic
+2. [Add to Your App](/components/set-up) — install the library and embed it in your React application
