@@ -31,13 +31,13 @@ To read more about managing `keys`, see [Key Management](/developer_resources/ke
 
 **Features** are the abstraction on top of flags that the business may market or sell. At this time, flags and features are one-to-one in Schematic and share a common `key`. Features are what you create in the UI and tie to plans; when you evaluate access, you typically check at the feature level.
 
-**Entitlements** are the link between a plan (or add-on) and a feature—they define whether and how a company has access. When you call the [check flag endpoint](/api-reference/features/check-flag) (or use an SDK to check a feature), Schematic evaluates the company's entitlements plus any overrides or global rules to return a result.
+**Entitlements** are the link between a plan (or add on) and a feature—they define whether and how a company has access. When you call the [check flag endpoint](/api-reference/features/check-flag) (or use an SDK to check a feature), Schematic evaluates the company's entitlements plus any overrides or global rules to return a result.
 
 Together: you define **features** (and their **entitlements** on plans), implement **flags** in code that map to those features, and at runtime the check resolves entitlements to allow or deny access.
 
 ### Entitlements in depth
 
-An entitlement defines what a plan or add-on grants for a specific feature. Schematic supports 3 types of entitlements that cover the vast variety of use cases for B2B and B2C Saas and AI applications. Those are:
+An entitlement defines what a plan or add on grants for a specific feature. Schematic supports 3 types of entitlements that cover the vast variety of use cases for B2B and B2C Saas and AI applications. Those are:
 
 - **Boolean** - boolean entitlements control access to a feature, such as whether a company has access to SSO, advanced reporting, or a specific AI model. 
 - **Event-based** - Usage-based billing is most often implemented through events, in which each time a user takes an action, the usage is reported to Schematic and Schematic handles aggregating the usage to determine if limits have been hit. Events can represent different quantities of usage and be used to track credit burndown models (both common for AI Applications). Common examples include granting 1,000 API calls a month and burning credits against a pre-paid credit balance.
