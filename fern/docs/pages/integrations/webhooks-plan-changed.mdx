@@ -4,7 +4,9 @@ title: Plan Changed Webhook
 slug: integrations/webhooks/plan-changed
 ---
 
-The `company.plan_change` webhook is one of the most important triggers for building sales and customer success workflows. It fires whenever a company's plan changes, whether an upgrade, downgrade, or the end of a trial period.
+<Info>This page covers the `company.plan_changed` event in depth. For a full list of all webhook events, see [Webhooks](/integrations/webhooks).</Info>
+
+The `company.plan_changed` webhook is one of the most important triggers for building sales and customer success workflows. It fires whenever a company's plan changes, whether an upgrade, downgrade, or the end of a trial period.
 
 Some common use cases for `company.plan_changed` webhook include:
 - **Identifying PLG upgrades:** Automatically notify your team or trigger automations when a self-serve customer upgrades their plan, so you can reach out to nurture and support the account.
@@ -15,19 +17,19 @@ By listening for the `plan_changed` webhook, you can automate account lifecycle 
 
 ## Setup
 
-The `company.plan_change` webhook is set up like all other webhooks in Schematic. Please follow the [general webhook setup instructions](/integrations/webhooks) to create an endpoint and select the `company.plan_changed` trigger.
+The `company.plan_changed` webhook is set up like all other webhooks in Schematic. Please follow the [general webhook setup instructions](/integrations/webhooks) to create an endpoint and select the `company.plan_changed` trigger.
 
 ## Fields
 
 All Schematic webhooks are strongly typed in each of our [SDKs](/developer_resources/sdks/overview). 
 
-[Here](https://github.com/SchematicHQ/schematic-node/blob/764cceb36a4869565c3594692c771100545d320e/src/api/types/PlanChangeResponseData.ts#L7) is that type for our node.js SDK for reference. 
+[Here](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/PlanChangeResponseData.ts) is that type for our node.js SDK for reference. 
 
 A plan can change for many reasons, the most common ones are:
-1. A company proactively changes it's plan (either an upgrade or downgrade)
+1. A company proactively changes its plan (either an upgrade or downgrade)
 2. A company is on a trial that ends, and is moved to the trial expiry plan
 3. A company is newly created and is put on the Initial Plan
-4. A company fails to pay it's bills, and is moved to the fallback plan
+4. A company fails to pay its bills, and is moved to the fallback plan
 
 To determine the cause of a plan change, there are four relevant fields provided in each webhook response: 
 
@@ -42,7 +44,7 @@ In SDKs, this field is called `PlanChangeResponseDataAction`, whereas in the raw
 | `"checkout"`                    | The company changed plans via a checkout flow.                                                             | Common                                                         |
 | `"company_upsert"`              | A plan change occurred as a result of a company being created or updated (often upon company creation).    | Common                                                         |
 | `"manage_plan"`                 | A plan was changed using the "Manage Plan" interface in the Schematic dashboard.                           | Common, and driven by you                                      |
-| `"subscription_change"`         | The plan change resulted from a change in Stripe (e.g. non-payment, trail expiration)                      | Common                                                         |
+| `"subscription_change"`         | The plan change resulted from a change in Stripe (e.g. non-payment, trial expiration)                      | Common                                                         |
 | `"fallback_plan"`               | The company was moved to a fallback plan.                                                                  | Rare                                                    |
 | `"plan_billing_product_changed"`| A plan's underlying billing product was changed, forcing a plan update for the company.                    | Rare                                                           |
 | `"plan_deleted"`                | The company was moved off a plan because the plan was deleted.                                             | Rare                                                           |
@@ -109,6 +111,6 @@ Below are some common scenarios that you may want to test for and which values y
 | Customer switches from a paid to a free plan | `checkout` | `unsubscribe` | |
 | Customer clicks the "Unsubscribe" button in the Schematic Customer Portal Component | `checkout` | `unsubscribe` | |
 | Customer's trial ends and is moved to the trial expiry plan | `subscription_change` |  | `trial_expiry` |
-| Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `trial_upgrade` | |
+| Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `upgrade_trial` | |
 
 <Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
