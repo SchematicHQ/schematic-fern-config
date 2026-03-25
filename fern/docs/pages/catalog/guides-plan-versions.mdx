@@ -1,0 +1,49 @@
+---
+title: Rolling Out New Plan Versions
+slug: catalog/guides/plan-versions
+---
+
+When you edit a plan in Schematic — whether changing its entitlements, pricing, or other details — those changes are saved as a new draft plan version. This lets you review and control exactly when changes take effect and how existing subscribers are handled.
+
+This guide walks through rolling out a new plan version, using the plans set up in [Setting up your First Plans](/catalog/guides/first-plans) as a starting point. We'll add a new feature to both plans and publish the updated versions.
+
+## Making Changes to a Plan
+
+Any edit to a plan creates a new draft version. For this example, we'll add a new "Advanced Analytics" feature to both the Starter and Pro plans.
+
+First, create the feature in the **Features** tab, then go to each plan and click **Add Feature** to entitle it.
+
+Once you've made your changes, you'll see a banner indicating that the plan has unpublished changes. Click the **Publish** button in the top right corner to begin the publishing flow.
+
+## Publishing a New Plan Version
+
+### Review Changes
+
+The first step lets you review a summary of what changed in this version — including which entitlements were added, removed, or modified.
+
+![Plan version change - review](../../assets/images/catalog/catalog-plan-version-change-1.png)
+
+### Subscriber Migration
+
+The next step determines what happens to companies currently on this plan. You have two options:
+
+- **Migrate all (or some) companies** to the new plan version — their entitlement limits and pricing will be updated automatically (with prorations applied for price changes).
+- **Keep companies on the current version** — they stay on their existing entitlements and pricing until you migrate them later (or not at all).
+
+![Plan version - migration 1](../../assets/images/catalog/catalog-plan-versions-migration-1.png)
+
+If you choose to migrate companies, the next screen lets you select which companies to migrate. Any companies not selected will remain on the prior version.
+
+![Plan version - migration 2](../../assets/images/catalog/catalog-plan-versions-migration-2.png)
+
+<Info>Once published, the new plan version is the one shown in Schematic Components for new checkouts. Customers on a prior version stay on that version until migrated.</Info>
+
+### Monitoring Migration Progress
+
+After publishing, you can track migration progress on the **Migrations** tab of the plan page.
+
+![Plan version - migrations tab](../../assets/images/catalog/catalog-plan-versions-migrations-tab.png)
+
+Repeat this publish flow for each plan you've updated.
+
+For more details on plan versioning, see the [Plans](/catalog/plans#plan-versions) documentation.

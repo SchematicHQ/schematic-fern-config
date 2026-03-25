@@ -1,29 +1,13 @@
 ---
-title: Pricing Table
-
+title: Setting up your First Plans
 slug: catalog/guides/first-plans
 ---
-{/* 
-video tutorial:
-0. have stripe setup
-1. create 2 plans
-2. Add 2 features
-- both boolean
-3. Entitle those features to the plans
-4. create component
-5. show it not working
-6. show company w/o plan
-7. Add default plan
-8. show company w/ default plan
-9. show component working
-10. add live plans
-11. show component has "change plan" button and show checkout flow works */}
 
-Schematic is able to support many different types of pricing models. This guide will walk through the process of setting up a basic pricing model with 2 plans (free and paid) and a few features. The goal is to walk through the process of setting up a basic pricing model in Schematic ending with a working checkout flow that your users can use. 
+Schematic is able to support many different types of pricing models. This guide will walk through the process of setting up a basic pricing model with 2 plans (free and paid) and a few features. The goal is to walk through the process of setting up a basic pricing model in Schematic ending with a working checkout flow that your users can use.
 
 ## Getting Started: Stripe
 
-Before we get started, you should link your Stripe account to the Schematic environment. We recommend starting with a Sandbox Stripe account connected to your Dev Schematic environment for testing. 
+Before we get started, you should link your Stripe account to the Schematic environment. We recommend starting with a Sandbox Stripe account connected to your Dev Schematic environment for testing.
 
 For more details, see our [Stripe Integration Guide](/integrations/stripe-integration-guide).
 
@@ -31,18 +15,19 @@ For more details, see our [Stripe Integration Guide](/integrations/stripe-integr
 
 Let's first setup 2 plans:
 
-1. A free plan we'll call "Starter" which all new customers will start on. This will have access to some, but not all of the features we'll be creating. 
+1. A free plan we'll call "Starter" which all new customers will start on. This will have access to some, but not all of the features we'll be creating.
 2. A paid plan we'll call "Pro" which will have access to all of the features we'll be creating.
 
 ### Creating the Starter Plan
 
 To create a plan, navigate to the **Plans** tab in the Catalog and click the **Create Plan** button.
 
-Set the name of the plan to "Starter", and click Continue.
+Set the name of the plan to "Starter". We'll leave this as a "Free" plan that is not integrated with Stripe. Click 
+"Done" to create the plan. 
 
 ![Starter Plan 1](../../assets/images/catalog/guides-starter-plan-1.png)
 
-Next, we'll leave this as a "Free" plan that is not integrated with Stripe. Click save to create the plan.
+Now click "Save" in the top right to save this version, and then "Publish" to publish this. We now have created our Starter Plan.
 
 ![Starter Plan 2](../../assets/images/catalog/guides-starter-plan-2.png)
 
@@ -50,21 +35,21 @@ Next, we'll leave this as a "Free" plan that is not integrated with Stripe. Clic
 
 To create a plan, navigate to the **Plans** tab in the Catalog and click the **Create Plan** button.
 
-Set the name of the plan to "Pro", and click Continue.
+Set the name of the plan to "Pro", we'll make this a "Paid" plan and link this it to Stripe. 
 
-![Pro Plan 1](../../assets/images/catalog/guides-pro-plan-1.png)
+![Pro Plan](../../assets/images/catalog/guides-pro-plan-1.png)
 
-Next, we'll make this a "Paid" plan and link this it to Stripe. For this example, we'll create a new product in Stripe and new prices for monthly and yearly. 
+For this example, we'll create a new product in Stripe and new prices for monthly and yearly.
 
 <Info>You can also link this plan to an existing product and price in Stripe. For more info see our [Stripe Integration Guide](/integrations/stripe-integration-guide).</Info>
 
 ![Pro Plan 2](../../assets/images/catalog/guides-pro-plan-2.png)
 
-We'll skip setuping up a Trial for now. Click save to create the plan.
+We'll skip setuping up a Trial for now. Click "Done" to create the plan draft. Then Save and publish the draft as before.
 
 ### Creating Features and Adding them to your plans
 
-We'll create 2 features: 
+We'll create 2 features:
 
 1. A "Boolean" feature that we'll call "Reporting" which will allow our users to access reporting features. Both plans will have access to this feature.
 2. A "Boolean" feature that we'll call "AI Suggestions" which will allow our users to access AI suggestions. Only the Pro plan will have access to this feature.
@@ -75,27 +60,27 @@ Set the name of the feature to "Reporting", and leave the feature type as "Boole
 
 ![Feature 1](../../assets/images/catalog/guides-feature-1.png)
 
-Next, we'll set the flag key to "reporting" and then click "Continue". This is the key that will be used to reference this feature in your code. This value is prefilled using the name of the feature.
+Next, we'll set the flag key to "reporting" (this will autofill based on the feature name). This feature won't need an event, so we'll leave that blank. Finally, we'll click "Create" to finish creating the feature. 
 
 ![Feature 2](../../assets/images/catalog/guides-feature-2.png)
 
-Finally, we don't need an event, so click "Save" to create the feature.
+<Info>The flag name, `reporting`, is what you'll use in your codebase to access this feature</Info>
 
 Now make a second feature called "AI Suggestions" and set the flag key to "ai-suggestions".
 
 ### Entitle Features to Plans
 
-Next, we'll "entitle" these features to our plans. An "Entitlement" is the billing term for the features that a plan allows it's customers access to. 
+Next, we'll "entitle" these features to our plans. An "Entitlement" is the billing term for the features that a plan allows it's customers access to.
 
 First, go to the Starter plan and click the "Add Feature" button.
 
-![Entitlement 1](../../assets/images/catalog/guides-entitlement-1.png)
+![Entitlement 1](../../assets/images/catalog/guides-entitlements-1.png)
 
 In the modal, select the "Reporting" feature and click "Continue". This will add the feature to the plan.
 
-![Entitlement 2](../../assets/images/catalog/guides-entitlement-2.png)
+![Entitlement 2](../../assets/images/catalog/guides-entitlements-2.png)
 
-You're plan should now should the "Reporting" entitlement. 
+Your plan should now show the "Reporting" entitlement.
 
 ![Starter Entitlements](../../assets/images/catalog/guides-starter-entitlements.png)
 
@@ -105,7 +90,7 @@ Next, go to the "Pro" plan page and follow the same steps to add the "Reporting"
 
 ### Configuring our Catalog
 
-There are 2 step we want to take to make these plans available to our customers.
+There are a few steps we want to take to make these plans available to our customers.
 
 1. Set the "Starter" plan as the Initial Plan for new sign-ups
 2. Configure a Fallback Plan for companies without an active subscription
@@ -122,7 +107,7 @@ If you have the customer portal setup in your application, you can confirm that 
 
 ![Customer Portal](../../assets/images/catalog/guides-component.png)
 
-If you haven't set components yet, you can also see this in the compoennt builder. Make sure to select one of your Starter plan companies from the dropdown at the top. 
+If you haven't set components yet, you can also see this in the component builder. Make sure to select one of your Starter plan companies from the dropdown at the top.
 
 ![Component Builder](../../assets/images/catalog/guides-component-builder.png)
 
