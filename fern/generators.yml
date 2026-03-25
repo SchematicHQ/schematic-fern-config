@@ -167,3 +167,17 @@ groups:
             - testImplementation org.mockito:mockito-core:5.3.1
             - testImplementation org.mockito:mockito-junit-jupiter:5.3.1
         smart-casing: false
+  ruby-sdk:
+    generators:
+      - name: fernapi/fern-ruby-sdk
+        version: 1.1.2
+        output:
+          location: rubygems
+          package-name: schematichq
+          api-key: ${RUBYGEMS_API_KEY}
+        github:
+          repository: schematichq/schematic-ruby
+          mode: pull-request
+        config:
+          module: SchematicHQ
+        smart-casing: false
