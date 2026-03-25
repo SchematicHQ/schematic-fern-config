@@ -10100,6 +10100,31 @@ components:
         - to_plan_id
         - to_plan_name
       title: ScheduledDowngradeResponseData
+    ScheduledDowngradeWebhookResponseData:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        execute_after:
+          type: string
+          format: date-time
+        from_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        id:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          format: int64
+          nullable: true
+        to_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+      required:
+        - execute_after
+        - id
+      title: WebScheduledDowngradeWebhookOutput
     SegmentStatusResp:
       type: object
       properties:
@@ -11512,6 +11537,31 @@ components:
       required:
         - Entitlement
       title: WebFeatureUsageWebhookOutput
+    WebScheduledDowngradeWebhookOutput:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        execute_after:
+          type: string
+          format: date-time
+        from_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        id:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          format: int64
+          nullable: true
+        to_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+      required:
+        - execute_after
+        - id
+      title: WebScheduledDowngradeWebhookOutput
     WebhookEventDetailResponseData:
       type: object
       properties:
@@ -11603,6 +11653,7 @@ components:
         - company.override.expired
         - company.override.updated
         - company.plan_changed
+        - company.scheduled_downgrade
         - company.updated
         - credit.limit.reached
         - credit.limit.warning
