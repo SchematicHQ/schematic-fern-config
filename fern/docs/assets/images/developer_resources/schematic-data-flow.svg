@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 870 1420" width="870" height="1420" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif">
+  <defs>
+    <marker id="arr-dark" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#374151"/>
+    </marker>
+    <marker id="arr-gray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9090B8"/>
+    </marker>
+  </defs>
+
+  <rect width="870" height="1420" fill="#FFFFFF"/>
+
+  <!-- ====== TITLE ====== -->
+  <text x="435" y="26" text-anchor="middle" font-size="18" font-weight="700" fill="#111827">Schematic Data Flows</text>
+
+  <!-- ====== ACTOR HEADERS ====== -->
+  <rect x="20" y="38" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="95" y="59" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Frontend</text>
+
+  <rect x="210" y="38" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="285" y="59" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Your Backend</text>
+
+  <rect x="435" y="38" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="510" y="59" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Schematic</text>
+
+  <rect x="665" y="38" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="740" y="59" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Stripe</text>
+
+  <!-- ====== LIFELINES ====== -->
+  <line x1="95"  y1="80" x2="95"  y2="1373" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="5,5"/>
+  <line x1="285" y1="80" x2="285" y2="1373" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="5,5"/>
+  <line x1="510" y1="80" x2="510" y2="1373" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="5,5"/>
+  <line x1="740" y1="80" x2="740" y2="1373" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="5,5"/>
+
+  <!-- ====== SECTION 1: COMPANY CREATION ====== -->
+  <line x1="20" y1="90" x2="850" y2="90" stroke="#374151" stroke-width="1"/>
+  <text x="435" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">1. Company creation</text>
+
+  <!-- FE → BE: User sign up -->
+  <line x1="95" y1="133" x2="285" y2="133" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="190" y="126" text-anchor="middle" font-size="11" fill="#374151">User sign up</text>
+
+  <!-- BE → SC: upsertCompany({ keys, traits }) -->
+  <line x1="285" y1="158" x2="510" y2="158" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="397" y="151" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">upsertCompany(&#123; keys, traits &#125;)</text>
+
+  <!-- Note 1 -->
+  <rect x="442" y="172" width="280" height="68" rx="4" fill="#FEFCE8" stroke="#CA8A04" stroke-width="1"/>
+  <text x="452" y="189" font-size="10" fill="#374151">Company created in Schematic. Assigned to</text>
+  <text x="452" y="203" font-size="10" fill="#374151">Initial Plan (e.g. Free). No Stripe</text>
+  <text x="452" y="217" font-size="10" fill="#374151">customer created yet.</text>
+
+  <!-- SC → BE: Return company (dashed) -->
+  <line x1="510" y1="255" x2="285" y2="255" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="397" y="248" text-anchor="middle" font-size="11" fill="#374151">Return company</text>
+
+  <!-- BE → FE: Sign up complete (dashed) -->
+  <line x1="285" y1="277" x2="95" y2="277" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="190" y="270" text-anchor="middle" font-size="11" fill="#374151">Sign up complete</text>
+
+  <!-- ====== SECTION 2: RENDERING THE CHECKOUT COMPONENT ====== -->
+  <line x1="20" y1="295" x2="850" y2="295" stroke="#374151" stroke-width="1"/>
+  <text x="435" y="315" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">2. Rendering the checkout component</text>
+
+  <!-- FE → BE: User initiates checkout -->
+  <line x1="95" y1="344" x2="285" y2="344" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="190" y="337" text-anchor="middle" font-size="11" fill="#374151">User initiates checkout</text>
+
+  <!-- BE → SC: createTemporaryAccessToken() -->
+  <line x1="285" y1="370" x2="510" y2="370" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="397" y="363" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">createTemporaryAccessToken()</text>
+
+  <!-- SC → BE: Return JWT token (dashed) -->
+  <line x1="510" y1="393" x2="285" y2="393" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="397" y="386" text-anchor="middle" font-size="11" fill="#374151">Return JWT token</text>
+
+  <!-- BE → FE: Pass token to frontend (dashed) -->
+  <line x1="285" y1="416" x2="95" y2="416" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="190" y="409" text-anchor="middle" font-size="11" fill="#374151">Pass token to frontend</text>
+
+  <!-- FE → SC: render <SchematicEmbed> -->
+  <line x1="95" y1="441" x2="510" y2="441" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="302" y="434" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">render &lt;SchematicEmbed&gt;</text>
+
+  <!-- SC → FE: plans, entitlements, payment form (dashed) -->
+  <line x1="510" y1="464" x2="95" y2="464" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="302" y="457" text-anchor="middle" font-size="11" fill="#374151">plans, entitlements, payment form</text>
+
+  <!-- ====== SECTION 3: COMPLETING CHECKOUT ====== -->
+  <line x1="20" y1="480" x2="850" y2="480" stroke="#374151" stroke-width="1"/>
+  <text x="435" y="499" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">3. Completing checkout</text>
+
+  <!-- FE self: User selects plan, enters payment -->
+  <path d="M95,523 H132 V537 H95" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="138" y="534" font-size="11" fill="#374151">User selects plan, add ons, and credits; enters payment</text>
+
+  <!-- FE → SC: Submit checkout (plan + payment) -->
+  <line x1="95" y1="556" x2="510" y2="556" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="302" y="549" text-anchor="middle" font-size="11" fill="#374151">Submit checkout (plan + payment)</text>
+
+  <!-- SC → ST: customers.create(...) -->
+  <line x1="510" y1="579" x2="740" y2="579" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="625" y="572" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">customers.create(...)</text>
+
+  <!-- ST → SC: Return customer_id (dashed) -->
+  <line x1="740" y1="601" x2="510" y2="601" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="625" y="594" text-anchor="middle" font-size="11" fill="#374151">Return customer_id</text>
+
+  <!-- SC → ST: subscriptions.create(...) -->
+  <line x1="510" y1="624" x2="740" y2="624" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="625" y="617" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">subscriptions.create(...)</text>
+
+  <!-- ST → SC: Return subscription (dashed) -->
+  <line x1="740" y1="645" x2="510" y2="645" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="625" y="638" text-anchor="middle" font-size="11" fill="#374151">Return subscription</text>
+
+  <!-- Note 3 -->
+  <rect x="442" y="658" width="285" height="68" rx="4" fill="#FEFCE8" stroke="#CA8A04" stroke-width="1"/>
+  <text x="452" y="675" font-size="10" fill="#374151">Sets stripe_customer_id on company. Maps</text>
+  <text x="452" y="689" font-size="10" fill="#374151">subscription to plan. Grants entitlements</text>
+  <text x="452" y="703" font-size="10" fill="#374151">automatically.</text>
+
+  <!-- SC → FE: Emit plan-changed event (dashed) -->
+  <line x1="510" y1="739" x2="95" y2="739" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="302" y="732" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">company.plan_changed</text>
+
+  <!-- ====== SECTION 4: ENTITLEMENTS ENFORCED ====== -->
+  <line x1="20" y1="757" x2="850" y2="757" stroke="#374151" stroke-width="1"/>
+  <text x="435" y="776" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">4. Entitlements enforced</text>
+
+  <!-- FE self: User loads page -->
+  <path d="M95,800 H132 V814 H95" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="138" y="811" font-size="11" fill="#374151">User loads page</text>
+
+  <!-- FE → SC: checkEntitlement() via SDK -->
+  <line x1="95" y1="833" x2="510" y2="833" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="302" y="826" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">checkEntitlement() via SDK</text>
+
+  <!-- SC → FE: entitlement value (dashed) -->
+  <line x1="510" y1="856" x2="95" y2="856" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="302" y="849" text-anchor="middle" font-size="11" fill="#374151">entitlement value</text>
+
+  <!-- FE → BE: User takes action -->
+  <line x1="95" y1="886" x2="285" y2="886" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="190" y="879" text-anchor="middle" font-size="11" fill="#374151">User takes action</text>
+
+  <!-- BE → SC: checkEntitlement() via SDK -->
+  <line x1="285" y1="912" x2="510" y2="912" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="397" y="905" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">checkEntitlement() via SDK</text>
+
+  <!-- SC → BE: entitlement value (dashed) -->
+  <line x1="510" y1="935" x2="285" y2="935" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="397" y="928" text-anchor="middle" font-size="11" fill="#374151">entitlement value</text>
+
+  <!-- Note 4 -->
+  <rect x="15" y="950" width="265" height="68" rx="4" fill="#FEFCE8" stroke="#CA8A04" stroke-width="1"/>
+  <text x="25" y="967" font-size="10" fill="#374151">Frontend checks gate the UI.</text>
+  <text x="25" y="981" font-size="10" fill="#374151">Backend checks enforce security — always</text>
+  <text x="25" y="995" font-size="10" fill="#374151">validate server-side for sensitive operations.</text>
+
+  <!-- ====== SECTION 5: USAGE TRACKING ====== -->
+  <line x1="20" y1="1030" x2="850" y2="1030" stroke="#374151" stroke-width="1"/>
+  <text x="435" y="1049" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">5. Usage tracking</text>
+
+  <!-- FE self: User loads page -->
+  <path d="M95,1072 H132 V1086 H95" fill="none" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="138" y="1083" font-size="11" fill="#374151">User loads page</text>
+
+  <!-- FE → SC: checkEntitlement() via SDK -->
+  <line x1="95" y1="1105" x2="510" y2="1105" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="302" y="1098" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">checkEntitlement() via SDK</text>
+
+  <!-- SC → FE: entitlement value (dashed) -->
+  <line x1="510" y1="1125" x2="95" y2="1125" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="302" y="1118" text-anchor="middle" font-size="11" fill="#374151">entitlement value</text>
+
+  <!-- FE → BE: User takes action -->
+  <line x1="95" y1="1145" x2="285" y2="1145" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="190" y="1138" text-anchor="middle" font-size="11" fill="#374151">User takes action</text>
+
+  <!-- BE → SC: checkEntitlement() via SDK -->
+  <line x1="285" y1="1165" x2="510" y2="1165" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="397" y="1158" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">checkEntitlement() via SDK</text>
+
+  <!-- SC → BE: entitlement value (dashed) -->
+  <line x1="510" y1="1185" x2="285" y2="1185" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="397" y="1178" text-anchor="middle" font-size="11" fill="#374151">entitlement value</text>
+
+  <!-- BE → SC: track(event) -->
+  <line x1="285" y1="1208" x2="510" y2="1208" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="397" y="1201" text-anchor="middle" font-size="11" fill="#2563EB" font-family="'Courier New', Courier, monospace">track(event)</text>
+
+  <!-- SC → ST: usage record -->
+  <line x1="510" y1="1231" x2="740" y2="1231" stroke="#374151" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+  <text x="625" y="1224" text-anchor="middle" font-size="10" fill="#2563EB" font-family="'Courier New', Courier, monospace">subscriptionItems.createUsageRecord(...)</text>
+
+  <!-- SC → BE: entitlements updated (dashed) -->
+  <line x1="510" y1="1257" x2="285" y2="1257" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="397" y="1250" text-anchor="middle" font-size="11" fill="#374151">entitlements updated</text>
+
+  <!-- SC → FE: entitlements updated (dashed) -->
+  <line x1="510" y1="1277" x2="95" y2="1277" stroke="#9090B8" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-gray)"/>
+  <text x="302" y="1270" text-anchor="middle" font-size="11" fill="#374151">entitlements updated</text>
+
+  <!-- Note 5 -->
+  <rect x="442" y="1292" width="310" height="42" rx="4" fill="#FEFCE8" stroke="#CA8A04" stroke-width="1"/>
+  <text x="452" y="1309" font-size="10" fill="#374151">Schematic tracks usage against entitlement limits</text>
+  <text x="452" y="1323" font-size="10" fill="#374151">and reports to Stripe for metered billing.</text>
+
+  <!-- ====== ACTOR FOOTERS ====== -->
+  <rect x="20" y="1378" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="95" y="1399" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Frontend</text>
+
+  <rect x="210" y="1378" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="285" y="1399" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Your Backend</text>
+
+  <rect x="435" y="1378" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="510" y="1399" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Schematic</text>
+
+  <rect x="665" y="1378" width="150" height="42" rx="4" fill="#FFFFFF" stroke="#374151" stroke-width="1.5"/>
+  <text x="740" y="1399" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="600" fill="#374151">Stripe</text>
+
+</svg>

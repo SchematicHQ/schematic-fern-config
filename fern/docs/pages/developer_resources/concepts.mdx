@@ -13,8 +13,6 @@ Schematic centralizes all traits and events submitted via the API or client libr
 
 Because Schematic creates and updates profiles by storing context and usage data from your application and business tools, it is not necessary to pass additional context at runtime when evaluating a flag.
 
-
-
 ### Keys vs. traits
 
 Schematic uses `keys` as a unique identifier for companies and users. You can store any number of `keys`; however, keys must be unique between each user and each company respectively. For example, you may have a Stripe Customer ID, a Salesforce Account ID, and an internal application ID that all correspond to a single company—each can be stored as a separate key and referenced by any system interacting with Schematic.
@@ -68,6 +66,12 @@ A subscription represents a company's current plan (and add ons), typically sync
 Usage is event-based or trait-based consumption tracked against a feature. It powers metered entitlements and usage-based billing, and is the basis for enforcement (e.g., blocking access after a limit is reached).
 
 Usage events are sent via `track` calls and attributed to companies, users, and features.
+
+### Data flows
+
+The diagram below shows how the key flows — subscribing to a plan, checking entitlements, and tracking usage — work end to end across your app, Schematic, and Stripe.
+
+![Schematic data flows](../../assets/images/developer_resources/schematic-data-flow.svg)
 
 ### Components
 
