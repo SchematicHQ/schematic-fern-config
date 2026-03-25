@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v0f048dd3
+  x-rules-engine-schema-version: v5f633cc3
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -185,6 +185,7 @@ components:
           minLength: 1
         resource_id:
           type: integer
+          format: int64
           nullable: true
         resource_id_string:
           type: string
@@ -200,6 +201,7 @@ components:
           maxLength: 64
         resp_code:
           type: integer
+          format: int64
           nullable: true
           maximum: 599
           minimum: 100
@@ -253,6 +255,7 @@ components:
           nullable: true
         resource_id:
           type: integer
+          format: int64
           nullable: true
         resource_id_string:
           type: string
@@ -271,6 +274,7 @@ components:
           nullable: true
         resp_code:
           type: integer
+          format: int64
           nullable: true
           maximum: 599
           minimum: 100
@@ -307,6 +311,7 @@ components:
           type: string
         amount_off:
           type: integer
+          format: int64
           nullable: true
         currency:
           type: string
@@ -316,6 +321,7 @@ components:
           nullable: true
         duration_in_months:
           type: integer
+          format: int64
           nullable: true
         environment_id:
           type: string
@@ -327,6 +333,7 @@ components:
           type: boolean
         max_redemptions:
           type: integer
+          format: int64
           nullable: true
         metadata:
           type: object
@@ -339,6 +346,7 @@ components:
           $ref: '#/components/schemas/BillingProviderType'
         times_redeemed:
           type: integer
+          format: int64
         valid_from:
           type: string
           format: date-time
@@ -381,6 +389,7 @@ components:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         has_grants:
           type: boolean
@@ -395,6 +404,7 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         quantity:
           type: integer
+          format: int64
           nullable: true
         singular_name:
           type: string
@@ -451,6 +461,7 @@ components:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         has_grants:
           type: boolean
@@ -465,6 +476,7 @@ components:
           $ref: '#/components/schemas/BillingProductPriceResponseData'
         quantity:
           type: integer
+          format: int64
           nullable: true
         singular_name:
           type: string
@@ -551,6 +563,7 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         quantity:
           type: integer
+          format: int64
         quantity_remaining:
           type: number
         quantity_used:
@@ -641,6 +654,7 @@ components:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         default_rollover_policy:
           $ref: '#/components/schemas/BillingCreditRolloverPolicy'
@@ -699,6 +713,7 @@ components:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         default_rollover_policy:
           $ref: '#/components/schemas/BillingCreditRolloverPolicy'
@@ -720,6 +735,7 @@ components:
           $ref: '#/components/schemas/BillingPriceView'
         price_per_unit:
           type: integer
+          format: int64
           nullable: true
         price_per_unit_decimal:
           type: string
@@ -791,8 +807,10 @@ components:
           type: boolean
         per_unit_price:
           type: integer
+          format: int64
         total_price:
           type: integer
+          format: int64
       required:
         - total_price
         - interval
@@ -881,6 +899,7 @@ components:
       properties:
         auto_topup_amount:
           type: integer
+          format: int64
           nullable: true
         auto_topup_amount_type:
           type: string
@@ -897,9 +916,11 @@ components:
           nullable: true
         auto_topup_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         auto_topup_threshold_percent:
           type: integer
+          format: int64
           nullable: true
         created_at:
           type: string
@@ -908,6 +929,7 @@ components:
           $ref: '#/components/schemas/BillingCreditResponseData'
         credit_amount:
           type: integer
+          format: int64
         credit_id:
           type: string
         credit_name:
@@ -934,6 +956,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         id:
           type: string
@@ -987,6 +1010,7 @@ components:
           $ref: '#/components/schemas/BillingProductPriceInterval'
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -1040,8 +1064,10 @@ components:
           nullable: true
         package_size:
           type: integer
+          format: int64
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -1128,6 +1154,7 @@ components:
           type: number
         subscription_count:
           type: integer
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -1153,6 +1180,7 @@ components:
           $ref: '#/components/schemas/BillingPriceScheme'
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
         created_at:
           type: string
@@ -1174,8 +1202,10 @@ components:
           type: string
         package_size:
           type: integer
+          format: int64
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -1247,6 +1277,7 @@ components:
           type: string
         trial_days:
           type: integer
+          format: int64
           nullable: true
         yearly_price_id:
           type: string
@@ -1288,8 +1319,10 @@ components:
           nullable: true
         package_size:
           type: integer
+          format: int64
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -1328,15 +1361,18 @@ components:
       properties:
         flat_amount:
           type: integer
+          format: int64
           nullable: true
         per_unit_price:
           type: integer
+          format: int64
           nullable: true
         per_unit_price_decimal:
           type: string
           nullable: true
         up_to:
           type: integer
+          format: int64
           nullable: true
       title: BillingProductPriceTierResponseData
     BillingProductPricing:
@@ -1344,6 +1380,7 @@ components:
       properties:
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999999
           minimum: 50
@@ -1359,9 +1396,11 @@ components:
           maxLength: 255
         package_size:
           type: integer
+          format: int64
           nullable: true
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -1373,6 +1412,7 @@ components:
           maxLength: 255
         quantity:
           type: integer
+          format: int64
         subscription_item_external_id:
           type: string
           nullable: true
@@ -1478,6 +1518,7 @@ components:
       properties:
         amount_off:
           type: integer
+          format: int64
           nullable: true
         coupon_id:
           type: string
@@ -1495,6 +1536,7 @@ components:
           type: string
         duration_in_months:
           type: integer
+          format: int64
           nullable: true
         ended_at:
           type: string
@@ -1530,6 +1572,7 @@ components:
           nullable: true
         cancel_at:
           type: integer
+          format: int64
           nullable: true
         cancel_at_period_end:
           type: boolean
@@ -1558,8 +1601,10 @@ components:
           type: object
         period_end:
           type: integer
+          format: int64
         period_start:
           type: integer
+          format: int64
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
         status:
@@ -1568,8 +1613,10 @@ components:
           type: string
         total_price:
           type: integer
+          format: int64
         trial_end:
           type: integer
+          format: int64
           nullable: true
         trial_end_setting:
           allOf:
@@ -1602,6 +1649,7 @@ components:
           nullable: true
         cancel_at:
           type: integer
+          format: int64
           nullable: true
         cancel_at_period_end:
           type: boolean
@@ -1638,8 +1686,10 @@ components:
           $ref: '#/components/schemas/PaymentMethodResponseData'
         period_end:
           type: integer
+          format: int64
         period_start:
           type: integer
+          format: int64
         products:
           type: array
           items:
@@ -1652,8 +1702,10 @@ components:
           type: string
         total_price:
           type: integer
+          format: int64
         trial_end:
           type: integer
+          format: int64
           nullable: true
         trial_end_setting:
           allOf:
@@ -1859,11 +1911,13 @@ components:
         feature_allocation:
           type: integer
           description: 'Deprecated: Use Entitlement.Allocation instead.'
+          format: int64
           nullable: true
           deprecated: true
         feature_usage:
           type: integer
           description: 'Deprecated: Use Entitlement.Usage instead.'
+          format: int64
           nullable: true
           deprecated: true
         feature_usage_event:
@@ -2021,6 +2075,7 @@ components:
           nullable: true
         cancel_at:
           type: integer
+          format: int64
           nullable: true
         cancel_at_period_end:
           type: boolean
@@ -2055,8 +2110,10 @@ components:
           type: object
         period_end:
           type: integer
+          format: int64
         period_start:
           type: integer
+          format: int64
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
         status:
@@ -2065,8 +2122,10 @@ components:
           type: string
         total_price:
           type: integer
+          format: int64
         trial_end:
           type: integer
+          format: int64
           nullable: true
         trial_end_setting:
           allOf:
@@ -2162,6 +2221,7 @@ components:
           format: date-time
         user_count:
           type: integer
+          format: int64
       required:
         - created_at
         - environment_id
@@ -2209,6 +2269,7 @@ components:
           nullable: true
         value:
           type: integer
+          format: int64
       required:
         - account_id
         - captured_at_max
@@ -2355,6 +2416,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait:
           $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
@@ -2390,6 +2452,7 @@ components:
           type: boolean
         company_count:
           type: integer
+          format: int64
         compatible_plan_ids:
           type: array
           items:
@@ -2448,6 +2511,7 @@ components:
           $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
+          format: int64
           nullable: true
         updated_at:
           type: string
@@ -2527,6 +2591,7 @@ components:
           nullable: true
         plan_price:
           type: integer
+          format: int64
           nullable: true
         plan_version_id:
           type: string
@@ -2602,6 +2667,7 @@ components:
           type: string
         total_price:
           type: integer
+          format: int64
         trial_end:
           type: string
           format: date-time
@@ -2987,6 +3053,7 @@ components:
             - billing_cycle
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
@@ -3041,9 +3108,6 @@ components:
           nullable: true
         id:
           type: string
-        plan_version_id:
-          type: string
-          nullable: true
         rule_id:
           type: string
         updated_at:
@@ -3076,9 +3140,6 @@ components:
           nullable: true
         id:
           type: string
-        plan_version_id:
-          type: string
-          nullable: true
         rule_id:
           type: string
         updated_at:
@@ -3133,12 +3194,10 @@ components:
           nullable: true
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
-        plan_version_id:
-          type: string
-          nullable: true
         resource_unspecified_ids:
           type: array
           items:
@@ -3162,6 +3221,7 @@ components:
           nullable: true
         trait_value_int:
           type: integer
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -3229,12 +3289,10 @@ components:
           nullable: true
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
-        plan_version_id:
-          type: string
-          nullable: true
         plan_versions:
           type: array
           items:
@@ -3268,6 +3326,7 @@ components:
           nullable: true
         trait_value_int:
           type: integer
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -3305,6 +3364,7 @@ components:
       properties:
         amount_off:
           type: integer
+          format: int64
         currency:
           type: string
           nullable: true
@@ -3314,8 +3374,10 @@ components:
           maxLength: 50
         duration_in_months:
           type: integer
+          format: int64
         max_redemptions:
           type: integer
+          format: int64
         name:
           type: string
           maxLength: 255
@@ -3323,6 +3385,7 @@ components:
           type: number
         times_redeemed:
           type: integer
+          format: int64
       required:
         - name
         - percent_off
@@ -3367,6 +3430,7 @@ components:
           nullable: true
         default_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         default_rollover_policy:
@@ -3385,6 +3449,7 @@ components:
           maxLength: 255
         per_unit_price:
           type: integer
+          format: int64
           nullable: true
         per_unit_price_decimal:
           type: string
@@ -3442,6 +3507,7 @@ components:
           nullable: true
         auto_topup_amount:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         auto_topup_amount_type:
@@ -3461,15 +3527,18 @@ components:
           nullable: true
         auto_topup_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         auto_topup_threshold_percent:
           type: integer
+          format: int64
           nullable: true
           maximum: 100
           minimum: 1
         credit_amount:
           type: integer
+          format: int64
           maximum: 9999999999
           minimum: 0
         credit_id:
@@ -3484,6 +3553,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         plan_id:
@@ -3528,9 +3598,11 @@ components:
           maxLength: 255
         package_size:
           type: integer
+          format: int64
           nullable: true
         price:
           type: integer
+          format: int64
         price_decimal:
           type: string
           nullable: true
@@ -3572,12 +3644,14 @@ components:
       properties:
         flat_amount:
           type: integer
+          format: int64
           nullable: true
         per_unit_decimal:
           type: string
           nullable: true
         per_unit_price:
           type: integer
+          format: int64
           nullable: true
         price_external_id:
           type: string
@@ -3588,6 +3662,7 @@ components:
           nullable: true
         up_to:
           type: integer
+          format: int64
           nullable: true
       required:
         - price_external_id
@@ -3624,6 +3699,7 @@ components:
           maxLength: 255
         cancel_at:
           type: integer
+          format: int64
           nullable: true
         cancel_at_period_end:
           type: boolean
@@ -3657,9 +3733,11 @@ components:
           nullable: true
         period_end:
           type: integer
+          format: int64
           nullable: true
         period_start:
           type: integer
+          format: int64
           nullable: true
         product_external_ids:
           type: array
@@ -3675,8 +3753,10 @@ components:
           maxLength: 255
         total_price:
           type: integer
+          format: int64
         trial_end:
           type: integer
+          format: int64
           nullable: true
         trial_end_setting:
           allOf:
@@ -3697,6 +3777,7 @@ components:
       properties:
         billing_periods_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         company_id:
@@ -3717,10 +3798,12 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         quantity:
           type: integer
+          format: int64
           minimum: 1
         reason:
           $ref: '#/components/schemas/BillingCreditGrantReason'
@@ -3776,6 +3859,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -3809,6 +3893,7 @@ components:
       properties:
         amount_off:
           type: integer
+          format: int64
         currency:
           type: string
           nullable: true
@@ -3818,11 +3903,13 @@ components:
           maxLength: 50
         duration_in_months:
           type: integer
+          format: int64
         external_id:
           type: string
           maxLength: 255
         max_redemptions:
           type: integer
+          format: int64
         name:
           type: string
           maxLength: 255
@@ -3830,6 +3917,7 @@ components:
           type: number
         times_redeemed:
           type: integer
+          format: int64
       required:
         - external_id
         - name
@@ -3864,16 +3952,19 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         price_per_unit:
           type: integer
+          format: int64
           minimum: 0
         price_per_unit_decimal:
           type: string
           nullable: true
         quantity:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         status:
@@ -3909,6 +4000,7 @@ components:
           nullable: true
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999999
           minimum: 50
@@ -3945,6 +4037,7 @@ components:
           nullable: true
         monthly_unit_price:
           type: integer
+          format: int64
           nullable: true
         monthly_unit_price_decimal:
           type: string
@@ -3971,6 +4064,7 @@ components:
           deprecated: true
         soft_limit:
           type: integer
+          format: int64
           nullable: true
         tier_mode:
           allOf:
@@ -3984,6 +4078,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -4001,6 +4096,7 @@ components:
           nullable: true
         yearly_unit_price:
           type: integer
+          format: int64
           nullable: true
         yearly_unit_price_decimal:
           type: string
@@ -4040,6 +4136,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -4315,10 +4412,13 @@ components:
       properties:
         amount_due:
           type: integer
+          format: int64
         amount_paid:
           type: integer
+          format: int64
         amount_remaining:
           type: integer
+          format: int64
         collection_method:
           type: string
           maxLength: 32
@@ -4350,6 +4450,7 @@ components:
           maxLength: 255
         subtotal:
           type: integer
+          format: int64
         url:
           type: string
           nullable: true
@@ -4456,6 +4557,7 @@ components:
         metric_value:
           type: integer
           description: Value to compare the track event metric against
+          format: int64
           nullable: true
         operator:
           type: string
@@ -4542,6 +4644,7 @@ components:
           maxLength: 512
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
           nullable: true
@@ -4589,9 +4692,11 @@ components:
           maxLength: 32
         card_exp_month:
           type: integer
+          format: int64
           nullable: true
         card_exp_year:
           type: integer
+          format: int64
           nullable: true
         card_last4:
           type: string
@@ -4644,6 +4749,7 @@ components:
           nullable: true
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999999
           minimum: 50
@@ -4680,6 +4786,7 @@ components:
           nullable: true
         monthly_unit_price:
           type: integer
+          format: int64
           nullable: true
         monthly_unit_price_decimal:
           type: string
@@ -4706,6 +4813,7 @@ components:
           deprecated: true
         soft_limit:
           type: integer
+          format: int64
           nullable: true
         tier_mode:
           allOf:
@@ -4719,6 +4827,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -4736,6 +4845,7 @@ components:
           nullable: true
         yearly_unit_price:
           type: integer
+          format: int64
           nullable: true
         yearly_unit_price_decimal:
           type: string
@@ -4830,6 +4940,7 @@ components:
           type: boolean
         trial_days:
           type: integer
+          format: int64
           nullable: true
         trial_expiry_plan_id:
           type: string
@@ -4901,15 +5012,18 @@ components:
       properties:
         flat_amount:
           type: integer
+          format: int64
           nullable: true
         per_unit_price:
           type: integer
+          format: int64
           nullable: true
         per_unit_price_decimal:
           type: string
           nullable: true
         up_to:
           type: integer
+          format: int64
           nullable: true
       title: CreatePriceTierRequestBody
     CreateScheduledCheckoutRequest:
@@ -4974,8 +5088,10 @@ components:
           $ref: '#/components/schemas/BillingCreditBundleResponseData'
         quantity:
           type: integer
+          format: int64
         total:
           type: integer
+          format: int64
       required:
         - quantity
         - total
@@ -5020,6 +5136,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         grant_reason:
           $ref: '#/components/schemas/BillingCreditGrantReason'
@@ -5038,6 +5155,7 @@ components:
           $ref: '#/components/schemas/BillingProductPriceResponseData'
         quantity:
           type: integer
+          format: int64
         quantity_remaining:
           type: number
         quantity_used:
@@ -5128,6 +5246,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         feature:
           $ref: '#/components/schemas/FeatureLedgerResponseData'
@@ -5146,6 +5265,7 @@ components:
           nullable: true
         grant_quantity:
           type: integer
+          format: int64
           nullable: true
         grant_quantity_remaining:
           type: number
@@ -5169,6 +5289,7 @@ components:
           nullable: true
         source_id:
           type: integer
+          format: int64
         to_grant_id:
           type: string
           nullable: true
@@ -5228,6 +5349,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         reset_cadence:
@@ -5254,6 +5376,7 @@ components:
       properties:
         billing_credit_auto_topup_grant_count:
           type: integer
+          format: int64
         billing_credit_id:
           type: string
         company:
@@ -5264,6 +5387,7 @@ components:
           $ref: '#/components/schemas/BillingCreditLedgerResponseData'
         expired_grant_count:
           type: integer
+          format: int64
         feature:
           $ref: '#/components/schemas/FeatureLedgerResponseData'
         feature_id:
@@ -5274,19 +5398,24 @@ components:
           format: date-time
         free_grant_count:
           type: integer
+          format: int64
         grant_count:
           type: integer
+          format: int64
         last_transaction_at:
           type: string
           format: date-time
         manually_zeroed_count:
           type: integer
+          format: int64
         net_change:
           type: number
         plan_grant_count:
           type: integer
+          format: int64
         purchased_grant_count:
           type: integer
+          format: int64
         time_bucket:
           type: string
           format: date-time
@@ -5296,10 +5425,13 @@ components:
           type: number
         transaction_count:
           type: integer
+          format: int64
         usage_count:
           type: integer
+          format: int64
         zeroed_out_count:
           type: integer
+          format: int64
       required:
         - company_id
         - billing_credit_id
@@ -5478,6 +5610,7 @@ components:
           $ref: '#/components/schemas/CreditsAutoTopupCompanySummary'
         consecutive_failures:
           type: integer
+          format: int64
         credit:
           $ref: '#/components/schemas/CreditsAutoTopupCreditSummary'
         last_error_message:
@@ -5973,6 +6106,7 @@ components:
           deprecated: true
         quantity:
           type: integer
+          format: int64
         sent_at:
           type: string
           format: date-time
@@ -6049,6 +6183,7 @@ components:
           deprecated: true
         quantity:
           type: integer
+          format: int64
         sent_at:
           type: string
           format: date-time
@@ -6091,10 +6226,12 @@ components:
       properties:
         company_count:
           type: integer
+          format: int64
         environment_id:
           type: string
         event_count:
           type: integer
+          format: int64
         event_subtype:
           type: string
         last_seen_at:
@@ -6103,6 +6240,7 @@ components:
           nullable: true
         user_count:
           type: integer
+          format: int64
       required:
         - company_count
         - environment_id
@@ -6128,6 +6266,7 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted or that this is a
             credit-based entitlement (use credit_remaining instead).
+          format: int64
           nullable: true
         allocation_type:
           allOf:
@@ -6185,6 +6324,7 @@ components:
             is the first tier boundary. For other pricing models, this is the
             base allocation. Used to calculate usage percentages and determine
             access thresholds.
+          format: int64
           nullable: true
         effective_price:
           type: number
@@ -6226,6 +6366,7 @@ components:
         overuse:
           type: integer
           description: Amount of usage exceeding soft limit (overage pricing only)
+          format: int64
           nullable: true
         percent_used:
           type: number
@@ -6248,6 +6389,7 @@ components:
           description: >-
             The soft limit for the feature usage. Available only for overage
             price behavior
+          format: int64
           nullable: true
         usage:
           type: integer
@@ -6255,6 +6397,7 @@ components:
             The amount of usage that has been consumed; a null value indicates
             that usage is not being measured or that this is a credit-based
             entitlement (use credit_used instead).
+          format: int64
           nullable: true
         yearly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -6275,6 +6418,7 @@ components:
           description: >-
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted.
+          format: int64
           nullable: true
         allocation_type:
           allOf:
@@ -6308,6 +6452,7 @@ components:
           description: >-
             The amount of usage that has been consumed; a null value indicates
             that usage is not being measured.
+          format: int64
           nullable: true
         user:
           $ref: '#/components/schemas/UserResponseData'
@@ -6386,6 +6531,7 @@ components:
           description: >-
             If the company has a numeric entitlement for this feature, the
             allocated amount
+          format: int64
           nullable: true
         credit_id:
           type: string
@@ -6456,12 +6602,14 @@ components:
           description: >-
             For usage-based pricing, the soft limit for overage charges or the
             next tier boundary
+          format: int64
           nullable: true
         usage:
           type: integer
           description: >-
             If the company has a numeric entitlement for this feature, the
             current usage amount
+          format: int64
           nullable: true
         value_type:
           allOf:
@@ -6569,6 +6717,7 @@ components:
       properties:
         Allocation:
           type: integer
+          format: int64
           nullable: true
         CreditUsage:
           $ref: '#/components/schemas/CreditUsage'
@@ -6582,6 +6731,7 @@ components:
           nullable: true
         Usage:
           type: integer
+          format: int64
           nullable: true
       required:
         - Entitlement
@@ -6598,6 +6748,7 @@ components:
             The maximum amount of usage that is permitted; a null value
             indicates that unlimited usage is permitted or that this is a
             credit-based entitlement (use credit_remaining instead).
+          format: int64
           nullable: true
         allocation_type:
           allOf:
@@ -6651,6 +6802,7 @@ components:
             is the first tier boundary. For other pricing models, this is the
             base allocation. Used to calculate usage percentages and determine
             access thresholds.
+          format: int64
           nullable: true
         effective_price:
           type: number
@@ -6692,6 +6844,7 @@ components:
         overuse:
           type: integer
           description: Amount of usage exceeding soft limit (overage pricing only)
+          format: int64
           nullable: true
         percent_used:
           type: number
@@ -6714,6 +6867,7 @@ components:
           description: >-
             The soft limit for the feature usage. Available only for overage
             price behavior
+          format: int64
           nullable: true
         usage:
           type: integer
@@ -6721,6 +6875,7 @@ components:
             The amount of usage that has been consumed; a null value indicates
             that usage is not being measured or that this is a credit-based
             entitlement (use credit_used instead).
+          format: int64
           nullable: true
         yearly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -6759,6 +6914,7 @@ components:
       properties:
         Allocation:
           type: integer
+          format: int64
           nullable: true
         CreditUsage:
           $ref: '#/components/schemas/CreditUsage'
@@ -6772,6 +6928,7 @@ components:
           nullable: true
         Usage:
           type: integer
+          format: int64
           nullable: true
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
@@ -7015,10 +7172,13 @@ components:
       properties:
         amount_due:
           type: integer
+          format: int64
         amount_paid:
           type: integer
+          format: int64
         amount_remaining:
           type: integer
+          format: int64
         collection_method:
           type: string
           maxLength: 32
@@ -7046,6 +7206,7 @@ components:
           maxLength: 255
         subtotal:
           type: integer
+          format: int64
         url:
           type: string
           nullable: true
@@ -7064,10 +7225,13 @@ components:
       properties:
         amount_due:
           type: integer
+          format: int64
         amount_paid:
           type: integer
+          format: int64
         amount_remaining:
           type: integer
+          format: int64
         collection_method:
           type: string
         company_id:
@@ -7105,6 +7269,7 @@ components:
           nullable: true
         subtotal:
           type: integer
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -7200,6 +7365,7 @@ components:
           $ref: '#/components/schemas/EntitlementType'
         limit_value:
           type: integer
+          format: int64
           nullable: true
         plan_id:
           type: string
@@ -7231,6 +7397,9 @@ components:
           type: string
           nullable: true
         base_plan_price_id:
+          type: string
+          nullable: true
+        base_plan_version_id:
           type: string
           nullable: true
         cancel_immediately:
@@ -7346,9 +7515,11 @@ components:
           maxLength: 32
         card_exp_month:
           type: integer
+          format: int64
           nullable: true
         card_exp_year:
           type: integer
+          format: int64
           nullable: true
         card_last4:
           type: string
@@ -7387,9 +7558,11 @@ components:
           nullable: true
         card_exp_month:
           type: integer
+          format: int64
           nullable: true
         card_exp_year:
           type: integer
+          format: int64
           nullable: true
         card_last4:
           type: string
@@ -7609,6 +7782,7 @@ components:
       properties:
         billing_credit_auto_topup_amount:
           type: integer
+          format: int64
           nullable: true
         billing_credit_auto_topup_amount_type:
           type: string
@@ -7625,9 +7799,11 @@ components:
           nullable: true
         billing_credit_auto_topup_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         billing_credit_auto_topup_threshold_percent:
           type: integer
+          format: int64
           nullable: true
         created_at:
           type: string
@@ -7636,6 +7812,7 @@ components:
           $ref: '#/components/schemas/BillingCreditView'
         credit_amount:
           type: integer
+          format: int64
         credit_description:
           type: string
           description: >-
@@ -7667,6 +7844,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
         id:
           type: string
@@ -7731,6 +7909,7 @@ components:
           $ref: '#/components/schemas/ChargeType'
         company_count:
           type: integer
+          format: int64
         controlled_by:
           $ref: '#/components/schemas/PlanControlledByType'
         created_at:
@@ -7769,6 +7948,7 @@ components:
           $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
+          format: int64
           nullable: true
         updated_at:
           type: string
@@ -7801,6 +7981,7 @@ components:
       properties:
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
         consumption_rate:
           type: number
@@ -7841,6 +8022,7 @@ components:
           nullable: true
         soft_limit:
           type: integer
+          format: int64
           nullable: true
         updated_at:
           type: string
@@ -7854,6 +8036,7 @@ components:
           $ref: '#/components/schemas/BillingCreditResponseData'
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait:
           $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
@@ -7982,6 +8165,7 @@ components:
           type: boolean
         trial_days:
           type: integer
+          format: int64
           nullable: true
         trial_expiry_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
@@ -8030,6 +8214,7 @@ components:
           $ref: '#/components/schemas/ChargeType'
         company_count:
           type: integer
+          format: int64
         compatible_plan_ids:
           type: array
           items:
@@ -8080,6 +8265,7 @@ components:
           $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
+          format: int64
           nullable: true
         updated_at:
           type: string
@@ -8197,6 +8383,7 @@ components:
           type: boolean
         trial_days:
           type: integer
+          format: int64
           nullable: true
         trial_expiry_plan_id:
           type: string
@@ -8278,6 +8465,9 @@ components:
         plan_id:
           type: string
         price_id:
+          type: string
+          nullable: true
+        version_id:
           type: string
           nullable: true
       required:
@@ -8401,6 +8591,7 @@ components:
           nullable: true
         completed_companies:
           type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -8409,6 +8600,7 @@ components:
           nullable: true
         failed_companies:
           type: integer
+          format: int64
         id:
           type: string
         plan_id:
@@ -8420,6 +8612,7 @@ components:
           type: string
         skipped_companies:
           type: integer
+          format: int64
         started_at:
           type: string
           format: date-time
@@ -8430,6 +8623,7 @@ components:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
         total_companies:
           type: integer
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -8486,6 +8680,7 @@ components:
           format: date-time
         version:
           type: integer
+          format: int64
       required:
         - created_at
         - description
@@ -8507,6 +8702,7 @@ components:
           type: string
         version:
           type: integer
+          format: int64
       required:
         - id
         - name
@@ -8533,6 +8729,7 @@ components:
           $ref: '#/components/schemas/ChargeType'
         company_count:
           type: integer
+          format: int64
         compatible_plan_ids:
           type: array
           items:
@@ -8585,6 +8782,7 @@ components:
           $ref: '#/components/schemas/PlanType'
         trial_days:
           type: integer
+          format: int64
           nullable: true
         updated_at:
           type: string
@@ -8656,9 +8854,11 @@ components:
       properties:
         amount_off:
           type: integer
+          format: int64
           deprecated: true
         due_now:
           type: integer
+          format: int64
           deprecated: true
         finance:
           $ref: '#/components/schemas/PreviewSubscriptionFinanceResponseData'
@@ -8666,6 +8866,7 @@ components:
           type: boolean
         new_charges:
           type: integer
+          format: int64
           deprecated: true
         payment_method_required:
           type: boolean
@@ -8681,6 +8882,7 @@ components:
           deprecated: true
         proration:
           type: integer
+          format: int64
           deprecated: true
         scheduled_change_time:
           type: string
@@ -8712,10 +8914,13 @@ components:
       properties:
         amount_off:
           type: integer
+          format: int64
         due_now:
           type: integer
+          format: int64
         new_charges:
           type: integer
+          format: int64
         percent_off:
           type: number
         period_start:
@@ -8725,8 +8930,10 @@ components:
           type: boolean
         proration:
           type: integer
+          format: int64
         tax_amount:
           type: integer
+          format: int64
           nullable: true
         tax_display_name:
           type: string
@@ -8735,6 +8942,7 @@ components:
           type: boolean
         total_per_billing_period:
           type: integer
+          format: int64
         trial_end:
           type: string
           format: date-time
@@ -8760,6 +8968,7 @@ components:
       properties:
         amount:
           type: integer
+          format: int64
         description:
           type: string
         price_id:
@@ -8768,6 +8977,7 @@ components:
           type: boolean
         quantity:
           type: integer
+          format: int64
       required:
         - price_id
         - quantity
@@ -8898,6 +9108,7 @@ components:
           type: string
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
           enum:
@@ -8955,6 +9166,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
@@ -9081,6 +9293,7 @@ components:
           nullable: true
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
@@ -9138,6 +9351,7 @@ components:
           type: string
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
         updated_at:
@@ -9174,6 +9388,7 @@ components:
           type: string
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
         updated_at:
@@ -9216,11 +9431,9 @@ components:
           type: string
         name:
           type: string
-        plan_version_id:
-          type: string
-          nullable: true
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
         updated_at:
@@ -9260,7 +9473,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v0f048dd3
+        - v5f633cc3
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -9274,9 +9487,11 @@ components:
           type: string
         feature_allocation:
           type: integer
+          format: int64
           nullable: true
         feature_usage:
           type: integer
+          format: int64
           nullable: true
         feature_usage_event:
           type: string
@@ -9419,6 +9634,7 @@ components:
           nullable: true
         value:
           type: integer
+          format: int64
       required:
         - account_id
         - environment_id
@@ -9477,6 +9693,7 @@ components:
             - billing_cycle
         metric_value:
           type: integer
+          format: int64
           nullable: true
         operator:
           type: string
@@ -9540,6 +9757,7 @@ components:
           description: >-
             If the company has a numeric entitlement for this feature, the
             allocated amount
+          format: int64
           nullable: true
         credit_id:
           type: string
@@ -9610,12 +9828,14 @@ components:
           description: >-
             For usage-based pricing, the soft limit for overage charges or the
             next tier boundary
+          format: int64
           nullable: true
         usage:
           type: integer
           description: >-
             If the company has a numeric entitlement for this feature, the
             current usage amount
+          format: int64
           nullable: true
         value_type:
           allOf:
@@ -9675,6 +9895,7 @@ components:
           type: string
         priority:
           type: integer
+          format: int64
         rule_type:
           type: string
           enum:
@@ -9801,6 +10022,7 @@ components:
           nullable: true
         scheduled_price:
           type: integer
+          format: int64
           nullable: true
         started_at:
           type: string
@@ -9851,6 +10073,7 @@ components:
           type: string
         from_subscription_price:
           type: integer
+          format: int64
         id:
           type: string
         interval:
@@ -9860,6 +10083,7 @@ components:
           nullable: true
         scheduled_price:
           type: integer
+          format: int64
           nullable: true
         to_plan_id:
           type: string
@@ -9876,6 +10100,31 @@ components:
         - to_plan_id
         - to_plan_name
       title: ScheduledDowngradeResponseData
+    ScheduledDowngradeWebhookResponseData:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        execute_after:
+          type: string
+          format: date-time
+        from_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        id:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          format: int64
+          nullable: true
+        to_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+      required:
+        - execute_after
+        - id
+      title: WebScheduledDowngradeWebhookOutput
     SegmentStatusResp:
       type: object
       properties:
@@ -10092,6 +10341,7 @@ components:
           nullable: true
         default_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         default_rollover_policy:
@@ -10110,6 +10360,7 @@ components:
           maxLength: 255
         per_unit_price:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         per_unit_price_decimal:
@@ -10135,6 +10386,7 @@ components:
           nullable: true
         auto_topup_amount:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         auto_topup_amount_type:
@@ -10154,15 +10406,18 @@ components:
           nullable: true
         auto_topup_expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         auto_topup_threshold_percent:
           type: integer
+          format: int64
           nullable: true
           maximum: 100
           minimum: 1
         credit_amount:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999
           minimum: 0
@@ -10176,6 +10431,7 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         reset_cadence:
@@ -10225,6 +10481,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -10284,16 +10541,19 @@ components:
           nullable: true
         expiry_unit_count:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         price_per_unit:
           type: integer
+          format: int64
           minimum: 0
         price_per_unit_decimal:
           type: string
           nullable: true
         quantity:
           type: integer
+          format: int64
           nullable: true
           minimum: 1
         status:
@@ -10311,6 +10571,7 @@ components:
           type: string
         quantity:
           type: integer
+          format: int64
           minimum: 1
       required:
         - bundle_id
@@ -10344,6 +10605,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -10436,6 +10698,7 @@ components:
           type: string
         quantity:
           type: integer
+          format: int64
       required:
         - price_id
         - quantity
@@ -10475,6 +10738,7 @@ components:
           nullable: true
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999999
           minimum: 50
@@ -10509,6 +10773,7 @@ components:
           nullable: true
         monthly_unit_price:
           type: integer
+          format: int64
           nullable: true
         monthly_unit_price_decimal:
           type: string
@@ -10530,6 +10795,7 @@ components:
           deprecated: true
         soft_limit:
           type: integer
+          format: int64
           nullable: true
         tier_mode:
           allOf:
@@ -10543,6 +10809,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_trait_id:
           type: string
@@ -10560,6 +10827,7 @@ components:
           nullable: true
         yearly_unit_price:
           type: integer
+          format: int64
           nullable: true
         yearly_unit_price_decimal:
           type: string
@@ -10652,6 +10920,7 @@ components:
           type: boolean
         trial_days:
           type: integer
+          format: int64
           nullable: true
         trial_expiry_plan_id:
           type: string
@@ -10757,6 +11026,7 @@ components:
           maxLength: 512
         priority:
           type: integer
+          format: int64
         value:
           type: boolean
       required:
@@ -10837,21 +11107,25 @@ components:
           type: boolean
         monthly_price:
           type: integer
+          format: int64
           nullable: true
         monthly_price_id:
           type: string
           nullable: true
         one_time_price:
           type: integer
+          format: int64
           nullable: true
         one_time_price_id:
           type: string
           nullable: true
         trial_days:
           type: integer
+          format: int64
           nullable: true
         yearly_price:
           type: integer
+          format: int64
           nullable: true
         yearly_price_id:
           type: string
@@ -10901,6 +11175,7 @@ components:
         incr:
           type: integer
           description: Amount to increment the trait by (positive or negative)
+          format: int64
           nullable: true
         keys:
           additionalProperties:
@@ -11041,6 +11316,7 @@ components:
           nullable: true
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
           maximum: 9999999999999
           minimum: 50
@@ -11058,6 +11334,7 @@ components:
           nullable: true
         monthly_unit_price:
           type: integer
+          format: int64
           nullable: true
         monthly_unit_price_decimal:
           type: string
@@ -11079,6 +11356,7 @@ components:
           deprecated: true
         soft_limit:
           type: integer
+          format: int64
           nullable: true
         tier_mode:
           allOf:
@@ -11095,6 +11373,7 @@ components:
           nullable: true
         yearly_unit_price:
           type: integer
+          format: int64
           nullable: true
         yearly_unit_price_decimal:
           type: string
@@ -11105,6 +11384,7 @@ components:
       properties:
         billing_threshold:
           type: integer
+          format: int64
           nullable: true
         consumption_rate:
           type: number
@@ -11130,6 +11410,7 @@ components:
           nullable: true
         value_numeric:
           type: integer
+          format: int64
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
@@ -11155,6 +11436,7 @@ components:
           format: date-time
         usage:
           type: integer
+          format: int64
       required:
         - timestamp
         - usage
@@ -11234,6 +11516,7 @@ components:
       properties:
         Allocation:
           type: integer
+          format: int64
           nullable: true
         CreditUsage:
           $ref: '#/components/schemas/CreditUsage'
@@ -11247,12 +11530,38 @@ components:
           nullable: true
         Usage:
           type: integer
+          format: int64
           nullable: true
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
       required:
         - Entitlement
       title: WebFeatureUsageWebhookOutput
+    WebScheduledDowngradeWebhookOutput:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        execute_after:
+          type: string
+          format: date-time
+        from_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+        id:
+          type: string
+        scheduled_interval:
+          type: string
+          nullable: true
+        scheduled_price:
+          type: integer
+          format: int64
+          nullable: true
+        to_plan:
+          $ref: '#/components/schemas/PlanSnapshotView'
+      required:
+        - execute_after
+        - id
+      title: WebScheduledDowngradeWebhookOutput
     WebhookEventDetailResponseData:
       type: object
       properties:
@@ -11268,6 +11577,7 @@ components:
           $ref: '#/components/schemas/WebhookRequestType'
         response_code:
           type: integer
+          format: int64
           nullable: true
         sent_at:
           type: string
@@ -11305,6 +11615,7 @@ components:
           $ref: '#/components/schemas/WebhookRequestType'
         response_code:
           type: integer
+          format: int64
           nullable: true
         sent_at:
           type: string
@@ -11342,6 +11653,7 @@ components:
         - company.override.expired
         - company.override.updated
         - company.plan_changed
+        - company.scheduled_downgrade
         - company.updated
         - credit.limit.reached
         - credit.limit.warning
@@ -11480,6 +11792,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -11487,6 +11800,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -11510,10 +11824,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       require_environment:
                         type: boolean
@@ -11718,6 +12034,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -11725,6 +12042,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -11745,10 +12063,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       require_environment:
                         type: boolean
@@ -11803,6 +12123,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -11810,6 +12131,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -11838,10 +12160,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -11939,6 +12263,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -11946,6 +12271,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -11971,10 +12297,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -12018,6 +12346,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12025,6 +12354,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12048,10 +12378,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -12133,6 +12465,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12140,6 +12473,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12165,6 +12499,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -12172,6 +12507,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: ListBillingCreditsParams
                 required:
@@ -12383,6 +12719,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12390,6 +12727,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12419,10 +12757,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       status:
                         $ref: '#/components/schemas/BillingCreditBundleStatus'
@@ -12636,6 +12976,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12643,6 +12984,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12669,10 +13011,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       status:
                         $ref: '#/components/schemas/BillingCreditBundleStatus'
@@ -12715,6 +13059,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12722,6 +13067,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12744,6 +13090,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -12751,6 +13098,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: CountBillingCreditsParams
                 required:
@@ -12879,6 +13227,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12886,6 +13235,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12908,10 +13258,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       order:
                         $ref: '#/components/schemas/CreditGrantSortOrder'
@@ -12955,6 +13307,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -12962,6 +13315,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -12987,10 +13341,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       order:
                         $ref: '#/components/schemas/CreditGrantSortOrder'
@@ -13032,6 +13388,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13039,6 +13396,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13063,10 +13421,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: CountBillingCreditsGrantsParams
                 required:
@@ -13106,6 +13466,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13113,6 +13474,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13140,10 +13502,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: ListGrantsForCreditParams
                 required:
@@ -13199,6 +13563,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13206,6 +13571,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13236,10 +13602,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       period:
                         $ref: '#/components/schemas/CreditLedgerPeriod'
@@ -13299,6 +13667,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13306,6 +13675,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13332,10 +13702,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       period:
                         $ref: '#/components/schemas/CreditLedgerPeriod'
@@ -13393,6 +13765,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13400,6 +13773,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13427,10 +13801,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -13625,6 +14001,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13632,6 +14009,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13656,10 +14034,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -13757,6 +14137,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13764,6 +14145,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13790,6 +14172,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -13797,6 +14180,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       provider_type:
                         $ref: '#/components/schemas/BillingProviderType'
@@ -13851,6 +14235,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13858,6 +14243,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13880,6 +14266,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -13887,6 +14274,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       provider_type:
                         $ref: '#/components/schemas/BillingProviderType'
@@ -13937,6 +14325,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -13944,6 +14333,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -13970,10 +14360,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       subscription_external_id:
                         type: string
@@ -14050,6 +14442,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14057,6 +14450,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -14081,10 +14475,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: ListMetersParams
                 required:
@@ -14164,6 +14560,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14171,6 +14568,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -14197,10 +14595,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: ListPaymentMethodsParams
                 required:
@@ -14300,6 +14700,7 @@ paths:
           in: query
           schema:
             type: integer
+            format: int64
         - name: product_id
           in: query
           schema:
@@ -14338,6 +14739,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14345,6 +14747,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -14388,13 +14791,16 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       price:
                         type: integer
+                        format: int64
                       product_id:
                         type: string
                       product_ids:
@@ -14552,6 +14958,7 @@ paths:
           in: query
           schema:
             type: integer
+            format: int64
         - name: product_id
           in: query
           schema:
@@ -14590,6 +14997,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14597,6 +15005,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -14640,13 +15049,16 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       price:
                         type: integer
+                        format: int64
                       product_id:
                         type: string
                       product_ids:
@@ -14827,6 +15239,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14834,6 +15247,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -14864,6 +15278,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -14871,6 +15286,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       price_usage_type:
                         $ref: '#/components/schemas/BillingPriceUsageType'
@@ -14975,6 +15391,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -14982,6 +15399,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -15009,6 +15427,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       name:
                         type: string
@@ -15016,6 +15435,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       price_usage_type:
                         $ref: '#/components/schemas/BillingPriceUsageType'
@@ -15349,6 +15769,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -15356,6 +15777,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -15391,6 +15813,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       monetized_subscriptions:
                         type: boolean
@@ -15398,6 +15821,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -15740,6 +16164,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -15747,6 +16172,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -15779,6 +16205,7 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       monetized_subscriptions:
                         type: boolean
@@ -15786,6 +16213,7 @@ paths:
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -16008,6 +16436,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -16015,6 +16444,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -16038,10 +16468,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       user_id:
                         type: string
@@ -16221,6 +16653,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -16228,6 +16661,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -16280,10 +16714,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -16555,6 +16991,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -16562,6 +16999,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -16611,10 +17049,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -16711,6 +17151,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -16718,6 +17159,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -16745,10 +17187,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: GetActiveCompanySubscriptionParams
                 required:
@@ -16823,6 +17267,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -16830,6 +17275,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -16851,10 +17297,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17056,6 +17504,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17063,6 +17512,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17081,10 +17531,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17258,6 +17710,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17265,6 +17718,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17292,10 +17746,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17341,6 +17797,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17348,6 +17805,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17372,10 +17830,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17431,6 +17891,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17438,6 +17899,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17465,10 +17927,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17654,6 +18118,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17661,6 +18126,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17685,10 +18151,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17735,6 +18203,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17742,6 +18211,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17765,10 +18235,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -17806,6 +18278,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -17813,6 +18286,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -17838,10 +18312,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                     title: ListEnvironmentsParams
                 required:
@@ -18087,6 +18563,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18094,6 +18571,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18120,10 +18598,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18179,6 +18659,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18186,6 +18667,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18218,10 +18700,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       user_id:
                         type: string
@@ -18340,6 +18824,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18347,6 +18832,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18370,10 +18856,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18414,6 +18902,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18421,6 +18910,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18441,10 +18931,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18512,6 +19004,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18519,6 +19012,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18556,10 +19050,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18701,6 +19197,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18708,6 +19205,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18742,10 +19240,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18788,6 +19288,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18795,6 +19296,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18818,10 +19320,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18862,6 +19366,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18869,6 +19374,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -18889,10 +19395,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -18987,6 +19495,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -18994,6 +19503,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -19032,10 +19542,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_version_id:
                         type: string
@@ -19312,6 +19824,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -19319,6 +19832,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -19354,10 +19868,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_version_id:
                         type: string
@@ -19424,6 +19940,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -19431,6 +19948,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -19458,10 +19976,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -19850,6 +20370,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -19857,6 +20378,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -19881,10 +20403,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -20151,6 +20675,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -20158,6 +20683,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -20191,10 +20717,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_ids:
                         type: array
@@ -20351,6 +20879,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -20358,6 +20887,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -20398,10 +20928,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -20711,6 +21243,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -20718,6 +21251,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -20755,10 +21289,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -21007,6 +21543,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21014,6 +21551,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21039,10 +21577,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -21307,6 +21847,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21314,6 +21855,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21336,10 +21878,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -21390,6 +21934,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21397,6 +21942,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21419,12 +21965,14 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       migration_id:
                         type: string
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -21472,6 +22020,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21479,6 +22028,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21497,12 +22047,14 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       migration_id:
                         type: string
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -21545,6 +22097,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21552,6 +22105,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21573,10 +22127,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_version_id:
                         type: string
@@ -21657,6 +22213,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21664,6 +22221,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21682,10 +22240,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_version_id:
                         type: string
@@ -21798,6 +22358,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -21805,6 +22366,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -21855,10 +22417,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_type:
                         allOf:
@@ -22202,6 +22766,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -22209,6 +22774,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -22256,10 +22822,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_type:
                         allOf:
@@ -22517,6 +23085,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -22524,6 +23093,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -22547,10 +23117,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       status:
                         $ref: '#/components/schemas/ScheduledCheckoutStatus'
@@ -22938,6 +23510,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -22945,6 +23518,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -22974,10 +23548,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -23159,6 +23735,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23166,6 +23743,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23192,10 +23770,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       plan_id:
                         type: string
@@ -23383,6 +23963,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23390,6 +23971,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23421,10 +24003,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       start_time:
                         type: string
@@ -23481,6 +24065,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23488,6 +24073,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23516,10 +24102,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       start_time:
                         type: string
@@ -23565,6 +24153,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23572,6 +24161,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23597,10 +24187,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -23687,6 +24279,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23694,6 +24287,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23716,10 +24310,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -23757,6 +24353,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23764,6 +24361,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -23785,10 +24383,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string
@@ -23988,6 +24588,7 @@ paths:
           schema:
             type: integer
             description: Page limit (default 100)
+            format: int64
             example: '100'
         - name: offset
           in: query
@@ -23995,6 +24596,7 @@ paths:
           schema:
             type: integer
             description: Page offset (default 0)
+            format: int64
             example: '0'
       responses:
         '200':
@@ -24013,10 +24615,12 @@ paths:
                       limit:
                         type: integer
                         description: Page limit (default 100)
+                        format: int64
                         example: '100'
                       offset:
                         type: integer
                         description: Page offset (default 0)
+                        format: int64
                         example: '0'
                       q:
                         type: string

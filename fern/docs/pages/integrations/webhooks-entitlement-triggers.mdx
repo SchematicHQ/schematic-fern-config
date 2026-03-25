@@ -1,0 +1,96 @@
+---
+title: Entitlement & Credit Trigger Webhooks
+
+slug: integrations/webhooks/entitlement-triggers
+---
+
+Entitlement and credit trigger webhooks fire based on your customers' feature usage, not on data changes. They're useful for notifying your team when customers are approaching or have hit a limit, and for surfacing in-app notifications to customers about their usage.
+
+<Info>This page covers usage-based trigger events. For a full list of all webhook events, see [Webhooks](/integrations/webhooks).</Info>
+
+## Entitlement trigger events
+
+Entitlement triggers fire when a company's usage for a specific feature crosses a threshold:
+
+| Event | When it fires |
+| --- | --- |
+| `entitlement.limit.reached` | A company hits the hard limit for a feature (usage == allocation) |
+| `entitlement.limit.warning` | A company approaches the hard limit for a feature |
+| `entitlement.soft_limit.reached` | A company hits a soft limit threshold for a feature |
+| `entitlement.soft_limit.warning` | A company approaches a soft limit threshold for a feature |
+| `entitlement.tier_limit.reached` | A company hits the limit for the current tier of a tiered feature |
+| `entitlement.tier_limit.warning` | A company approaches the limit for the current tier of a tiered feature |
+
+**Limit types explained:**
+
+- **Hard limit** (`limit`) — the point at which access is restricted. For usage included with a plan, this represents that full usage amount. For [pay as you go](/billing/usage-based-billing#pay-as-you-go) and [overage pricing](/billing/usage-based-billing#fixed-fee-with-overage), this represents a (normally hidden) upper bound of usage you can configure, typically to prevent abuse or runaway spend. 
+- **Soft limit** (`soft_limit`) — For [overage pricing](/billing/usage-based-billing#fixed-fee-with-overage), represents the point at which users will start being billed for usage. This is configurable and shown to the user in Schematic components.
+- **Tier limit** (`tier_limit`) — For [tiered pricing](/billing/usage-based-billing#volume-pricing), fires as a company crosses into each successive pricing tier, letting you notify them of cost changes or prompt an upgrade.
+
+### Setup
+
+Entitlement triggers must be configured per feature. When creating or updating a webhook endpoint in Schematic, add one or more entitlement trigger configs — each specifying the `feature_id` you want to monitor.
+
+### Payload
+
+The `body` of each entitlement trigger webhook is typed as [`WebFeatureUsageWebhookOutput`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/WebFeatureUsageWebhookOutput.ts) in the Node.js SDK:
+
+| Field | Description |
+| --- | --- |
+| `entitlement` | The entitlement ID that triggered the event |
+| `feature` | Details about the feature being tracked |
+| `company` | Details about the company whose usage triggered the event |
+| `usage` | The company's current usage count |
+| `allocation` | The feature's allocation (limit) for this company |
+| `metricResetAt` | When the usage metric resets, if applicable |
+
+### Common use cases
+
+- **Internal alerts:** Notify your team in Slack or your CRM when a customer hits a limit, so you can proactively reach out.
+- **Customer-facing notifications:** Trigger an in-app banner or email to customers when they're nearing or over their limit.
+
+## Credit trigger events
+
+Credit triggers fire based on credit usage:
+
+| Event | When it fires |
+| --- | --- |
+| `credit.limit.reached` | A company's credit balance reaches the configured limit |
+| `credit.limit.warning` | A company's credit balance approaches the configured limit |
+
+Credit triggers are configured per credit type, using a `credit_id` in the trigger config when creating or updating a webhook endpoint.
+
+## Auto-topup failure events
+
+These events fire when a scheduled credit auto-topup fails:
+
+| Event | When it fires |
+| --- | --- |
+| `auto.topup.hard.failure` | An auto-topup attempt fails and will not be retried |
+| `auto.topup.retry.exceeded` | An auto-topup has failed too many consecutive times |
+
+### Payload
+
+**`auto.topup.hard.failure`** — typed as [`CreditsAutoTopupHardFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupHardFailure.ts):
+
+| Field | Description |
+| --- | --- |
+| `company` | Summary of the affected company |
+| `credit` | Summary of the credit that failed to top up |
+| `errorMessage` | Human-readable error description |
+| `stripeErrorCode` | Stripe error code, if the failure originated in Stripe |
+
+**`auto.topup.retry.exceeded`** — typed as [`CreditsAutoTopupRetryFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupRetryFailure.ts):
+
+| Field | Description |
+| --- | --- |
+| `company` | Summary of the affected company |
+| `credit` | Summary of the credit that failed to top up |
+| `consecutiveFailures` | Number of consecutive failed attempts |
+| `lastErrorMessage` | Human-readable description of the most recent error |
+| `stripeErrorCode` | Stripe error code from the most recent attempt, if applicable |
+
+### Common use cases
+
+- **Internal alerts:** Page your payments or ops team when a customer's auto-topup is failing so you can reach out to update the payment method or remove access if you suspect abuse.
+- **Customer-facing notifications:** Send a billing failure email to the customer so they can update their payment method.

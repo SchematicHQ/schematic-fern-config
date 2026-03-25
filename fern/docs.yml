@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
+
 instances:
   - url: https://schematic.docs.buildwithfern.com
     custom-domain: https://docs.schematichq.com
@@ -132,7 +134,9 @@ navigation:
             contents:
               - page: Overview
                 path: ./docs/pages/components/customer-portal.mdx
-              - page: Set Up Components
+              - page: Create a Component
+                path: ./docs/pages/components/create-component.mdx
+              - page: Add to Your App
                 path: ./docs/pages/components/set-up.mdx
               - page: Element Library
                 path: ./docs/pages/components/element-library.mdx
@@ -178,6 +182,9 @@ navigation:
               - page: Nextjs
                 path: ./docs/pages/developer_resources/sdks/nextjs.mdx
                 icon: "fa-regular fa-circle-n"
+              - page: Javascript (Client-side)
+                path: ./docs/pages/developer_resources/sdks/javascript.mdx
+                icon: "fa-brands fa-js"
               - page: Go
                 path: ./docs/pages/developer_resources/sdks/go.mdx
                 icon: "fa-brands fa-golang"
@@ -193,9 +200,6 @@ navigation:
               - page: Java
                 path: ./docs/pages/developer_resources/sdks/java.mdx
                 icon: "fa-brands fa-java"
-              - page: Javascript (Client-side)
-                path: ./docs/pages/developer_resources/sdks/javascript.mdx
-                icon: "fa-brands fa-js"
               - page: PHP
                 path: ./docs/pages/developer_resources/sdks/php.mdx
                 icon: "fa-brands fa-php"
@@ -244,6 +248,8 @@ navigation:
                 path: ./docs/pages/integrations/webhooks.mdx
               - page: Plan Changed Webhook
                 path: ./docs/pages/integrations/webhooks-plan-changed.mdx
+              - page: Entitlement & Credit Trigger Webhooks
+                path: ./docs/pages/integrations/webhooks-entitlement-triggers.mdx
       - section: Playbooks
         contents:
           - page: Overview
@@ -472,6 +478,8 @@ js:
 #   - ./docs/assets/segment.js
 
 analytics:
+  gtm:
+    container-id: GTM-T9HDDC54
   segment:
     write-key: VPVpz27CAfDdx3roQGhSIXZhcra4dyRi
   fullstory:
