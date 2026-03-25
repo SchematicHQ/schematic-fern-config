@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 610" width="1000" height="610" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9090B8"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="610" fill="#FFFFFF"/>
+
+  <!-- Flow band backgrounds (alternating) -->
+  <rect x="0" y="75" width="1000" height="195" fill="#F9FAFB"/>
+  <rect x="0" y="270" width="1000" height="160" fill="#FFFFFF"/>
+  <rect x="0" y="430" width="1000" height="155" fill="#F9FAFB"/>
+
+  <!-- Column dividers -->
+  <line x1="290" y1="75" x2="290" y2="590" stroke="#E5E7EB" stroke-width="1"/>
+  <line x1="718" y1="75" x2="718" y2="590" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Flow band separators -->
+  <line x1="0" y1="270" x2="1000" y2="270" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="0" y1="430" x2="1000" y2="430" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- ====== COLUMN HEADERS ====== -->
+  <rect x="20" y="15" width="250" height="46" rx="8" fill="#1F2937"/>
+  <text x="145" y="38" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="700" fill="#FFFFFF">Your App</text>
+
+  <rect x="300" y="15" width="408" height="46" rx="8" fill="#14002D"/>
+  <text x="504" y="38" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="700" fill="#FFFFFF">Schematic</text>
+
+  <rect x="728" y="15" width="252" height="46" rx="8" fill="#635BFF"/>
+  <text x="854" y="38" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="700" fill="#FFFFFF">Stripe</text>
+
+  <!-- ====== FLOW 1: SUBSCRIBE TO A PLAN ====== -->
+  <text x="20" y="95" font-size="12" font-weight="700" fill="#14002D">1 · Subscribe to a plan</text>
+
+  <!-- Schematic Checkout Component (rendered in Your App, provided by Schematic) -->
+  <rect x="22" y="108" width="220" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="2"/>
+  <text x="132" y="126" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Schematic Checkout</text>
+  <text x="132" y="142" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#7C3AED">embedded component</text>
+
+  <!-- Schematic: Create checkout session -->
+  <rect x="374" y="108" width="260" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="504" y="130" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Create checkout session</text>
+
+  <!-- Stripe: Process payment -->
+  <rect x="734" y="160" width="234" height="44" rx="7" fill="#EEF2FF" stroke="#635BFF" stroke-width="1.5"/>
+  <text x="851" y="182" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#3730A3">Process payment</text>
+
+  <!-- Schematic: Provision entitlements -->
+  <rect x="374" y="220" width="260" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="504" y="242" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Provision entitlements</text>
+
+  <!-- Arrow: Schematic Checkout → Schematic (open checkout) -->
+  <line x1="242" y1="128" x2="374" y2="128" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="308" y="120" text-anchor="middle" font-size="10" fill="#6B7280">open checkout</text>
+
+  <!-- Arrow: Schematic → Stripe (redirect to checkout, stepped) -->
+  <path d="M634,128 H692 V182 H734" fill="none" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="663" y="119" text-anchor="middle" font-size="10" fill="#6B7280">redirect to checkout</text>
+
+  <!-- Arrow: Stripe → Schematic (subscription.created, down then left) -->
+  <path d="M851,204 V242 H634" fill="none" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="762" y="236" text-anchor="middle" font-size="10" fill="#6B7280">subscription.created</text>
+
+  <!-- ====== FLOW 2: CHECK AN ENTITLEMENT ====== -->
+  <text x="20" y="290" font-size="12" font-weight="700" fill="#14002D">2 · Check an entitlement</text>
+
+  <!-- Your App: Gate feature -->
+  <rect x="22" y="305" width="220" height="44" rx="7" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="132" y="327" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#0C4A6E">Gate feature</text>
+
+  <!-- Schematic: Evaluate entitlement -->
+  <rect x="374" y="305" width="260" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="504" y="327" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Evaluate entitlement</text>
+
+  <!-- Arrow: Your App → Schematic (check call) -->
+  <line x1="242" y1="320" x2="374" y2="320" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="308" y="312" text-anchor="middle" font-size="10" fill="#6B7280">check(company, feature)</text>
+
+  <!-- Arrow: Schematic → Your App (return value) -->
+  <line x1="374" y1="337" x2="242" y2="337" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="308" y="355" text-anchor="middle" font-size="10" fill="#6B7280">true / false / value</text>
+
+  <!-- Note: check on both layers -->
+  <rect x="20" y="366" width="265" height="42" rx="4" fill="#FEFCE8" stroke="#CA8A04" stroke-width="1"/>
+  <text x="30" y="383" font-size="10" fill="#374151">Check entitlements on both layers: frontend</text>
+  <text x="30" y="397" font-size="10" fill="#374151">for UI gating, backend for security enforcement.</text>
+
+  <!-- ====== FLOW 3: TRACK USAGE ====== -->
+  <text x="20" y="450" font-size="12" font-weight="700" fill="#14002D">3 · Track usage</text>
+
+  <!-- Your App: User action -->
+  <rect x="22" y="465" width="220" height="44" rx="7" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="132" y="487" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#0C4A6E">User action</text>
+
+  <!-- Schematic: Record usage -->
+  <rect x="374" y="465" width="260" height="44" rx="7" fill="#EDE9FE" stroke="#9563FF" stroke-width="1.5"/>
+  <text x="504" y="487" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#4C1D95">Record usage</text>
+
+  <!-- Stripe: Metered billing sync -->
+  <rect x="734" y="515" width="234" height="44" rx="7" fill="#EEF2FF" stroke="#635BFF" stroke-width="1.5"/>
+  <text x="851" y="537" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#3730A3">Metered billing sync</text>
+
+  <!-- Arrow: Your App → Schematic (track event) -->
+  <line x1="242" y1="487" x2="374" y2="487" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="308" y="479" text-anchor="middle" font-size="10" fill="#6B7280">track(event)</text>
+
+  <!-- Arrow: Schematic → Stripe (usage records, right then down) -->
+  <path d="M634,487 H851 V515" fill="none" stroke="#9090B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="762" y="480" text-anchor="middle" font-size="10" fill="#6B7280">usage records</text>
+
+</svg>
