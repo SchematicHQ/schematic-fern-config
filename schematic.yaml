@@ -6909,32 +6909,6 @@ components:
         - limits
         - usage_points
       title: FeatureUsageTimeSeriesResponseData
-    FeatureUsageWebhookResponseData:
-      type: object
-      properties:
-        Allocation:
-          type: integer
-          format: int64
-          nullable: true
-        CreditUsage:
-          $ref: '#/components/schemas/CreditUsage'
-        Entitlement:
-          type: string
-        Feature:
-          $ref: '#/components/schemas/FeatureView'
-        MetricResetAt:
-          type: string
-          format: date-time
-          nullable: true
-        Usage:
-          type: integer
-          format: int64
-          nullable: true
-        company:
-          $ref: '#/components/schemas/CompanyDetailResponseData'
-      required:
-        - Entitlement
-      title: WebFeatureUsageWebhookOutput
     FeatureView:
       type: object
       properties:
@@ -10100,31 +10074,6 @@ components:
         - to_plan_id
         - to_plan_name
       title: ScheduledDowngradeResponseData
-    ScheduledDowngradeWebhookResponseData:
-      type: object
-      properties:
-        company:
-          $ref: '#/components/schemas/CompanyResponseData'
-        execute_after:
-          type: string
-          format: date-time
-        from_plan:
-          $ref: '#/components/schemas/PlanSnapshotView'
-        id:
-          type: string
-        scheduled_interval:
-          type: string
-          nullable: true
-        scheduled_price:
-          type: integer
-          format: int64
-          nullable: true
-        to_plan:
-          $ref: '#/components/schemas/PlanSnapshotView'
-      required:
-        - execute_after
-        - id
-      title: WebScheduledDowngradeWebhookOutput
     SegmentStatusResp:
       type: object
       properties:
