@@ -369,6 +369,9 @@ components:
     BillingCreditBundleResponseData:
       type: object
       properties:
+        billing_invoice_id:
+          type: string
+          nullable: true
         bundle_type:
           $ref: '#/components/schemas/BillingCreditBundleType'
         created_at:
@@ -383,6 +386,10 @@ components:
           type: string
         credit_name:
           type: string
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBundleCurrencyPriceResponseData'
         expiry_type:
           $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
@@ -425,6 +432,7 @@ components:
         - expiry_unit
         - expiry_type
         - credit_name
+        - currency_prices
         - has_grants
         - created_at
         - updated_at
@@ -455,6 +463,10 @@ components:
           type: string
         credit_name:
           type: string
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBundleCurrencyPrice'
         expiry_type:
           $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
@@ -650,6 +662,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditCurrencyPriceResponseData'
         default_expiry_unit:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
@@ -688,6 +704,7 @@ components:
         - default_rollover_policy
         - burn_strategy
         - cost_editable
+        - currency_prices
         - created_at
         - updated_at
       title: BillingCreditResponseData
@@ -2462,6 +2479,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
         current:
           type: boolean
         custom:
@@ -2539,6 +2560,7 @@ components:
         - charge_type
         - company_count
         - controlled_by
+        - currency_prices
         - features
         - is_default
         - is_free
@@ -3424,6 +3446,12 @@ components:
           nullable: true
         currency:
           type: string
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditCurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         default_expiry_unit:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryUnit'
@@ -3784,6 +3812,10 @@ components:
           type: string
         credit_id:
           type: string
+        currency:
+          type: string
+          nullable: true
+          maxLength: 3
         expires_at:
           type: string
           format: date-time
@@ -5081,6 +5113,26 @@ components:
       type: string
       enum:
         - credit
+    CreditBundleCurrencyPrice:
+      type: object
+      properties:
+        currency:
+          type: string
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
+      required:
+        - currency
+      title: CreditBundleCurrencyPrice
+    CreditBundleCurrencyPriceResponseData:
+      type: object
+      properties:
+        currency:
+          type: string
+        price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - currency
+      title: CreditBundleCurrencyPriceResponseData
     CreditBundlePurchaseResponseData:
       type: object
       properties:
@@ -5206,6 +5258,33 @@ components:
         - grant_reason
         - renewal_enabled
       title: CreditCompanyGrantView
+    CreditCurrencyPriceRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+          maxLength: 3
+        price_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 0
+        price_per_unit_decimal:
+          type: string
+          nullable: true
+      required:
+        - currency
+      title: CreditCurrencyPriceRequestBody
+    CreditCurrencyPriceResponseData:
+      type: object
+      properties:
+        currency:
+          type: string
+        price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - currency
+      title: CreditCurrencyPriceResponseData
     CreditEventLedgerResponseData:
       type: object
       properties:
@@ -5769,6 +5848,18 @@ components:
         - data
         - skipped
       title: DuplicatePlanEntitlementsResponseResponseData
+    EntitlementCurrencyPricesResponseData:
+      type: object
+      properties:
+        currency:
+          type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceView'
+      required:
+        - currency
+      title: EntitlementCurrencyPricesResponseData
     EntitlementPriceBehavior:
       type: string
       enum:
@@ -7868,6 +7959,20 @@ components:
         - created_at
         - updated_at
       title: PlanCreditGrantView
+    PlanCurrencyPricesResponseData:
+      type: object
+      properties:
+        currency:
+          type: string
+        monthly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        one_time_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        yearly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - currency
+      title: PlanCurrencyPricesResponseData
     PlanDetailResponseData:
       type: object
       properties:
@@ -7889,6 +7994,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
         description:
           type: string
         draft_version:
@@ -7944,6 +8053,7 @@ components:
         - charge_type
         - company_count
         - controlled_by
+        - currency_prices
         - features
         - is_default
         - is_free
@@ -7963,6 +8073,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementCurrencyPricesResponseData'
         environment_id:
           type: string
         feature:
@@ -8021,6 +8135,7 @@ components:
           $ref: '#/components/schemas/EntitlementValueType'
       required:
         - created_at
+        - currency_prices
         - environment_id
         - feature_id
         - id
@@ -8198,6 +8313,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
         custom_plan_config:
           $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
         description:
@@ -8261,6 +8380,7 @@ components:
         - charge_type
         - company_count
         - controlled_by
+        - currency_prices
         - features
         - is_default
         - is_free
@@ -8713,6 +8833,10 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
         custom:
           type: boolean
         custom_plan_config:
@@ -8778,6 +8902,7 @@ components:
         - charge_type
         - company_count
         - controlled_by
+        - currency_prices
         - features
         - is_default
         - is_free
@@ -10284,6 +10409,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBurnStrategy'
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditCurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         default_expiry_unit:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryUnit'
@@ -14612,6 +14743,13 @@ paths:
       tags:
         - billing
       parameters:
+        - name: currency
+          in: query
+          description: Filter for prices in a specific currency (e.g. usd, eur)
+          schema:
+            type: string
+            description: Filter for prices in a specific currency (e.g. usd, eur)
+            maxLength: 3
         - name: for_initial_plan
           in: query
           description: Filter for prices valid for initial plans (free prices only)
@@ -14715,6 +14853,12 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      currency:
+                        type: string
+                        description: >-
+                          Filter for prices in a specific currency (e.g. usd,
+                          eur)
+                        maxLength: 3
                       for_initial_plan:
                         type: boolean
                         description: >-
@@ -14870,6 +15014,13 @@ paths:
       tags:
         - billing
       parameters:
+        - name: currency
+          in: query
+          description: Filter for prices in a specific currency (e.g. usd, eur)
+          schema:
+            type: string
+            description: Filter for prices in a specific currency (e.g. usd, eur)
+            maxLength: 3
         - name: for_initial_plan
           in: query
           description: Filter for prices valid for initial plans (free prices only)
@@ -14973,6 +15124,12 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      currency:
+                        type: string
+                        description: >-
+                          Filter for prices in a specific currency (e.g. usd,
+                          eur)
+                        maxLength: 3
                       for_initial_plan:
                         type: boolean
                         description: >-
