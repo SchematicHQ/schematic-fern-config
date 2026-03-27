@@ -557,6 +557,9 @@ components:
           type: string
         credit_name:
           type: string
+        currency:
+          type: string
+          nullable: true
         expires_at:
           type: string
           format: date-time
@@ -3974,6 +3977,12 @@ components:
           type: string
         currency:
           type: string
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBundleCurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -5123,6 +5132,23 @@ components:
       required:
         - currency
       title: CreditBundleCurrencyPrice
+    CreditBundleCurrencyPriceRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+          maxLength: 3
+        price_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 0
+        price_per_unit_decimal:
+          type: string
+          nullable: true
+      required:
+        - currency
+      title: CreditBundleCurrencyPriceRequestBody
     CreditBundleCurrencyPriceResponseData:
       type: object
       properties:
@@ -5170,6 +5196,9 @@ components:
           nullable: true
         credit_name:
           type: string
+        currency:
+          type: string
+          nullable: true
         exhausted_at:
           type: string
           format: date-time
@@ -7959,6 +7988,27 @@ components:
         - created_at
         - updated_at
       title: PlanCreditGrantView
+    PlanCurrencyPriceRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+          maxLength: 3
+        monthly_price:
+          type: integer
+          format: int64
+          nullable: true
+        one_time_price:
+          type: integer
+          format: int64
+          nullable: true
+        yearly_price:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - currency
+      title: PlanCurrencyPriceRequestBody
     PlanCurrencyPricesResponseData:
       type: object
       properties:
@@ -10611,6 +10661,12 @@ components:
         bundle_name:
           type: string
           maxLength: 256
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBundleCurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -11183,6 +11239,12 @@ components:
         currency:
           type: string
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         is_trialable:
           type: boolean
         monthly_price:
