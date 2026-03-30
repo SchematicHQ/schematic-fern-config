@@ -9,11 +9,15 @@ on:
 jobs:
   upgrade:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for branches
+          token: ${{ github.token }}
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -26,5 +30,5 @@ jobs:
 
       - name: Upgrade generators
         env:
-          GITHUB_TOKEN: ${{ secrets.SCHEMATIC_BOT_GH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/upgrade_generators.sh
