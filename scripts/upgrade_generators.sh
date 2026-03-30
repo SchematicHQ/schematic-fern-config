@@ -16,6 +16,13 @@ ensure_git_identity() {
   fi
 }
 
+# Function to set GitHub Actions output
+set_output() {
+  if [[ ! -z "$GITHUB_OUTPUT" ]]; then
+    echo "$1=$2" >> "$GITHUB_OUTPUT"
+  fi
+}
+
 # Set git identity
 ensure_git_identity
 
@@ -54,41 +61,32 @@ yq '.groups | keys | .[]' fern/generators.yml | xargs -I {} fern generator upgra
 # Check if there are changes
 if [[ -n $(git status --porcelain) ]]; then
   echo "Changes detected, committing..."
+  set_output "has_changes" "true"
+
   git add .
   git commit -m "$UPGRADE_COMMIT_MESSAGE"
   git push origin "$BRANCH_NAME" --force-with-lease
 
   # Check if PR already exists
-  existing_pr=$(gh pr list --state open --head "$BRANCH_NAME" --json number,url --jq '.[0].url' 2>/dev/null || echo "")
+  existing_pr=$(gh pr list --state open --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null || echo "")
 
   if [ -n "$existing_pr" ]; then
-    echo "PR already exists: $existing_pr"
-    echo "Updating existing PR..."
-
-    # Update PR description
-    gh pr edit "$existing_pr" \
-      --body "This PR updates Fern generators to their latest versions.
-
-**Updated generators:**
-$(yq '.groups | keys | .[]' fern/generators.yml)
-
-Generated automatically by scheduled workflow."
+    echo "PR already exists: #$existing_pr"
+    set_output "pr_number" "$existing_pr"
   else
     echo "Creating new PR..."
     pr_url=$(gh pr create \
       --title "chore: upgrade fern generators" \
-      --body "This PR updates Fern generators to their latest versions.
-
-**Updated generators:**
-$(yq '.groups | keys | .[]' fern/generators.yml)
-
-Generated automatically by scheduled workflow." \
+      --body "This PR updates Fern generators to their latest versions. Validation in progress..." \
       --base main)
 
+    pr_number=$(gh pr list --state open --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null || echo "")
     echo "Created PR: $pr_url"
+    set_output "pr_number" "$pr_number"
   fi
 else
   echo "No changes detected"
+  set_output "has_changes" "false"
 
   # Check if there's an existing PR we should close
   existing_pr=$(gh pr list --state open --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null || echo "")
