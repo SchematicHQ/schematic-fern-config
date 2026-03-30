@@ -12,15 +12,18 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      has_changes: ${{ steps.upgrade.outputs.has_changes }}
+      pr_number: ${{ steps.upgrade.outputs.pr_number }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for branches
+          fetch-depth: 0
           token: ${{ github.token }}
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
 
       - name: Install Fern
         run: npm install -g fern-api
@@ -29,6 +32,182 @@ jobs:
         uses: mikefarah/yq@master
 
       - name: Upgrade generators
+        id: upgrade
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/upgrade_generators.sh
+
+  validate:
+    needs: upgrade
+    if: needs.upgrade.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: python-sdk
+            repo: schematichq/schematic-python
+            language: python
+          - group: ts-sdk
+            repo: schematichq/schematic-node
+            language: node
+          - group: go-sdk
+            repo: schematichq/schematic-go
+            language: go
+          - group: java-sdk
+            repo: schematichq/schematic-java
+            language: java
+          - group: csharp-sdk
+            repo: schematichq/schematic-csharp
+            language: csharp
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: update-generators
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+
+      - name: Install Fern
+        run: npm install -g fern-api
+
+      # Language-specific setup
+      - name: Setup Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install Poetry
+        if: matrix.language == 'python'
+        run: curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+
+      - name: Setup Go
+        if: matrix.language == 'go'
+        uses: actions/setup-go@v5
+
+      - name: Setup Java
+        if: matrix.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Setup .NET
+        if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      # Generate preview
+      - name: Generate preview
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+        run: fern generate --group ${{ matrix.group }} --preview
+
+      # Clone downstream repo and overlay
+      - name: Clone downstream repo
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh repo clone ${{ matrix.repo }} /tmp/sdk-repo -- --depth 1
+
+      - name: Overlay preview output
+        run: |
+          PREVIEW_SUBDIR=$(ls -d fern/.preview/*/ 2>/dev/null | head -1)
+          if [ -z "$PREVIEW_SUBDIR" ]; then
+            echo "No preview output found in fern/.preview/"
+            exit 1
+          fi
+          echo "Overlaying $PREVIEW_SUBDIR onto /tmp/sdk-repo/"
+          rsync -a --exclude='.git' "$PREVIEW_SUBDIR" /tmp/sdk-repo/
+
+      # Language-specific compile checks
+      - name: Compile check (Python)
+        if: matrix.language == 'python'
+        working-directory: /tmp/sdk-repo
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry install
+          poetry run mypy .
+
+      - name: Compile check (TypeScript)
+        if: matrix.language == 'node'
+        working-directory: /tmp/sdk-repo
+        run: |
+          yarn install
+          yarn build
+
+      - name: Compile check (Go)
+        if: matrix.language == 'go'
+        working-directory: /tmp/sdk-repo
+        run: go build ./...
+
+      - name: Compile check (Java)
+        if: matrix.language == 'java'
+        working-directory: /tmp/sdk-repo
+        run: ./gradlew compileJava
+
+      - name: Compile check (C#)
+        if: matrix.language == 'csharp'
+        working-directory: /tmp/sdk-repo
+        run: |
+          dotnet tool restore
+          dotnet build src -c Release
+
+  report:
+    needs: [upgrade, validate]
+    if: always() && needs.upgrade.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Update PR description
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.upgrade.outputs.pr_number }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Fetching validation results for run $RUN_ID..."
+
+          # Build results table from validate job conclusions
+          TABLE_ROWS=""
+          ALL_PASSED=true
+
+          while IFS=$'\t' read -r name conclusion; do
+            sdk_name=$(echo "$name" | sed 's/^validate (\(.*\))$/\1/')
+            if [ "$conclusion" = "success" ]; then
+              TABLE_ROWS="${TABLE_ROWS}| ${sdk_name} | :white_check_mark: Passed |"$'\n'
+            else
+              TABLE_ROWS="${TABLE_ROWS}| ${sdk_name} | :x: Failed |"$'\n'
+              ALL_PASSED=false
+            fi
+          done < <(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
+            --jq '.jobs[] | select(.name | startswith("validate")) | [.name, .conclusion] | @tsv')
+
+          if [ "$ALL_PASSED" = true ]; then
+            STATUS=":white_check_mark: All SDK compile checks passed."
+          else
+            STATUS=":warning: Some SDK compile checks failed. Review the [workflow run](https://github.com/$REPO/actions/runs/$RUN_ID) for details."
+          fi
+
+          cat > /tmp/pr-body.md <<EOF
+          This PR updates Fern generators to their latest versions.
+
+          ## Validation Results
+
+          ${STATUS}
+
+          | SDK | Status |
+          |-----|--------|
+          ${TABLE_ROWS}
+          [View full workflow run](https://github.com/$REPO/actions/runs/$RUN_ID)
+
+          Generated automatically by scheduled workflow.
+          EOF
+
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --body-file /tmp/pr-body.md
+          echo "Updated PR #$PR_NUMBER with validation results"
