@@ -23091,6 +23091,10 @@ paths:
           required: true
           schema:
             type: string
+        - name: promote_archived_version
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -23104,6 +23108,9 @@ paths:
                   params:
                     type: object
                     description: Input parameters
+                    properties:
+                      promote_archived_version:
+                        type: boolean
                     title: DeletePlanVersionParams
                 required:
                   - data
