@@ -1,0 +1,31 @@
+---
+title: Who Uses Schematic
+slug: using-schematic/who-uses-schematic
+---
+
+For most teams, Schematic is the primary UI for day-to-day product, engineering, and customer success operations. The billing platform (Stripe) is used primarily by finance for invoicing and revenue reporting.
+
+A useful way to think about the two systems:
+
+- **Schematic** handles feature flags, entitlements, plan definitions, usage tracking, and customer state. It is the runtime enforcement layer for engineering and the operational control plane for product to manage packaging and monetization policy
+- **The billing platform** (Stripe) is the financial system of record for invoicing, revenue recognition, dunning, and related finance workflows
+
+## Product and Engineering
+
+Engineers instrument the product by wrapping features in Schematic checks and reporting usage events. Once instrumented, the product behaves according to whatever rules are configured in Schematic, without requiring further code changes.
+
+Product owns that configuration. From Schematic, product teams manage pricing and packaging, iterate on plan structures, run experiments, and make customer exceptions, all without engineering involvement.
+
+## Customer Success
+
+Customer success operates in Schematic to manage individual customer accounts, grant overrides, track usage, and handle exceptions.
+
+Customer success teams can also interact with Schematic via the [MCP server](/ai-tooling/for-developers#model-context-protocol-mcp), which enables AI-assisted workflows on top of entitlement data directly from Claude. For example: "pull Acme Corp's usage over the last quarter and integrate into their QBR."
+
+## Finance
+
+Finance works primarily in the billing platform (Stripe Billing) for invoicing, revenue recognition, and financial reporting. Schematic syncs commercial state to the billing system automatically, so finance sees accurate subscription and usage data without needing to operate in Schematic.
+
+## Using Schematic with Stripe the Stripe App
+
+Schematic offers a Stripe App that allows users to access Schematic's entitlement management functionality from directly within Stripe's dashboard. This is relevant if your team prefers that product and customer success personas perform entitlement and packaging operations from within Stripe Billing rather than from within Schematic.
