@@ -17,6 +17,14 @@ The integration is powered by a bi-direcitonal sync with Stripe. Through the int
 - Map Usage-based Features to Stripe Metered Products
 - Use Schematic Components to power checkout, subscription management (e.g. invoices, payment method), and upgrade/downgrade/cancellation that will sync directly to Stripe to update subscriptions
 
+## When are Stripe customers created?
+
+Schematic creates a Stripe customer record for a company only when that company is subscribed to a Stripe-enabled plan (a plan with a price configured, even $0). Companies on free plans that have no Stripe price will exist in Schematic but will not have a corresponding record in Stripe.
+
+This means companies do not need to exist in Stripe in order to check out — they just need to have a company record in Schematic. When they complete checkout for the first time, Schematic automatically provisions a Stripe customer and subscription for them.
+
+If you want all companies to be synced to Stripe from the moment they are created, you can configure the [Initial Plan](/catalog/configuration#initial-plan) to use a plan with a $0 price.
+
 # Setting up Product Catalog and features
 
 ## Plans
