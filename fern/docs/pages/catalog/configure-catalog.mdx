@@ -27,6 +27,10 @@ Your initial plan selections must _not_ require the customer to have a payment m
 * Selecting a plan and price that is free, with no monetized entitlements (e.g. pay-as-you-go, tiered pricing, or pay-in-advance)
 * Selecting a plan with a trialable paid plan, as long as the trial will expire at the end of the trial term
 
+<Info>
+If you want every new company to have a corresponding Stripe customer record from the start, configure the Initial Plan to use a plan with a **$0 price**. This causes Schematic to provision a Stripe customer and a $0 subscription for each new company automatically. Without this, Stripe customers are only created when a company subscribes to a Stripe-enabled plan — companies on free plans with no Stripe price will not appear in Stripe.
+</Info>
+
 ### Fallback Plan
 The plan assigned to any company that does not have another base plan. This replaces the deprecated Default Plan functionality, and allows you to specify a default set of entitlements.
 
