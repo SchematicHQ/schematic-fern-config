@@ -148,7 +148,9 @@ jobs:
       - name: Compile check (Java)
         if: matrix.language == 'java'
         working-directory: /tmp/sdk-repo
-        run: ./gradlew compileJava
+        run: |
+          chmod +x ./gradlew
+          ./gradlew compileJava
 
       - name: Compile check (C#)
         if: matrix.language == 'csharp'
@@ -178,7 +180,7 @@ jobs:
           ALL_PASSED=true
 
           while IFS=$'\t' read -r name conclusion; do
-            sdk_name=$(echo "$name" | sed 's/^validate (\(.*\))$/\1/')
+            sdk_name=$(echo "$name" | sed 's/^validate (\([^,]*\).*)$/\1/')
             if [ "$conclusion" = "success" ]; then
               TABLE_ROWS="${TABLE_ROWS}| ${sdk_name} | :white_check_mark: Passed |"$'\n'
             else
