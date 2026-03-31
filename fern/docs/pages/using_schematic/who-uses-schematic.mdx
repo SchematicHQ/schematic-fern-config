@@ -7,12 +7,14 @@ For most teams, Schematic is the primary UI for day-to-day product, engineering,
 
 A useful way to think about the two systems:
 
-- **Schematic** handles feature flags, entitlements, plan definitions, usage tracking, and customer state. It is the runtime enforcement layer for engineering and the operational control plane for product to manage packaging and monetization policy
-- **The billing platform** (Stripe) is the financial system of record for invoicing, revenue recognition, dunning, and related finance workflows
+- **Schematic** is the runtime enforcement layer. It evaluates in real time whether a user or company is allowed to take an action, consume a credit, or access a feature, based on their plan, usage, and any overrides. This enforcement happens in your product, in real time. It is also the operational control plane for product teams to manage packaging and monetization policy without engineering involvement.
+- **The billing platform** (Stripe) is the financial system of record for invoicing, revenue recognition, dunning, and related finance workflows.
+
+Schematic supports entitlement enforcement at three levels of granularity: the plan level, the company level, and the individual user level. Company-level overrides can be applied with expiration dates and audit notes.
 
 ## Product and Engineering
 
-Engineers instrument the product by wrapping features in Schematic checks and reporting usage events. Once instrumented, the product behaves according to whatever rules are configured in Schematic, without requiring further code changes.
+Engineers instrument the product by wrapping features in Schematic checks and reporting usage events to Stripe. Stripe handles billing from those events; Schematic receives them and uses them to enforce entitlements at runtime. This means engineering reports events once and neither system requires teams to build or maintain their own enforcement logic. Once instrumented, the product behaves according to whatever rules are configured in Schematic, without requiring further code changes.
 
 Product owns that configuration. From Schematic, product teams manage pricing and packaging, iterate on plan structures, run experiments, and make customer exceptions, all without engineering involvement.
 
