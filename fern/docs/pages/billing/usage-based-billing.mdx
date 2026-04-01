@@ -62,15 +62,15 @@ This is ideal for scenarios where many customers will fall into the plan's quota
 
 5. The Soft Limit represents the amount of usage included in the plan. Below this is set to 500, which means the first 500 fast requests are included.
 6. Next, select the duration of the period to track usage. Monthly is by far the most common, and Schematic also supports daily and yearly.
-7. If monthly is selected (as is done here), you will need to determine if the period should reset at the beginning of the month or based off of the billing period of the subscription (e.g. if the customer signed up on the 15th, the period would be measured 15th-14th of next month). Basing it off of the billing period is the most common choice. 
+7. If monthly is selected (as is done here), you will need to determine if the period should reset at the beginning of the month or based off of the billing period of the subscription (e.g. if the customer signed up on the 15th, the period would be measured 15th-14th of next month). Basing it off of the billing period is the most common choice.
 8. The Overage price is the amount to charge for each unit of usage over the soft limit. Here, we set that to $.01 (1 cent) per usage.
-9. Finally, you can optionally configure a Hard Limit (here 5,000) -- this represents the maximum amount of usage, at which Schematic will always turn off the flag. Hard Limits can be helpful if there are global resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold. 
+9. Finally, you can optionally configure a Hard Limit (here 5,000) -- this represents the maximum amount of usage, at which Schematic will always turn off the flag. Hard Limits can be helpful if there are global resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold.
 
 ![Steps 5-9](../../assets/images/billing/ubp-entitlement-configuration-overage-2.png)
 
 ### Volume pricing
 
-Volume pricing is a common way to provide discounts for large usage. In volume pricing, usage tiers are defined, and the final price paid is based on the usage tier the customer falls into. 
+Volume pricing is a common way to provide discounts for large usage. In volume pricing, usage tiers are defined, and the final price paid is based on the usage tier the customer falls into.
 
 Schematic allows you to define the price of each tier as a fixed amount, a per-unit price, or a combination of the two.
 
@@ -85,13 +85,13 @@ For example. If pricing tiers are defined as follows:
 | 3 | 201-300 | \$8 + \$0.80 per unit |
 | 4 | 301+ | \$7 + \$0.70 per unit |
 
-A customer who uses 150 units would be charged \$144 (\$9 + 150*\$0.90). Notice how only the final tier the customer fell into (101-200) determines the price. This can lead to sharp changes in price around usage cutoffs. 
+A customer who uses 150 units would be charged \$144 (\$9 + 150*\$0.90). Notice how only the final tier the customer fell into (101-200) determines the price. This can lead to sharp changes in price around usage cutoffs.
 
 #### Configuring volume pricing
 
 1. Navigate to a plan with a metered entitlement.
 2. Click on the entitlement that you'd like to monetize.
-3. For Type, select "Tiered". 
+3. For Type, select "Tiered".
 4. Then, a second Type option will appear below and select "Volume".
 
 ![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-volume-pricing-1.png)
@@ -119,7 +119,7 @@ For example. If pricing tiers are defined as follows:
 | 3 | 201-300 | \$8 + \$0.80 per unit |
 | 4 | 301+ | \$7 + \$0.70 per unit |
 
-A customer who uses 150 units would be charged \$164 (\$10 + 100*\$1 + \$9 + 50*\$0.90). Notice how the first 100 units are charged at \$1, while the next 50 units are charged at \$0.90. 
+A customer who uses 150 units would be charged \$164 (\$10 + 100*\$1 + \$9 + 50*\$0.90). Notice how the first 100 units are charged at \$1, while the next 50 units are charged at \$0.90.
 
 Because the customer had usage in 2 different tiers, they paid the flat fee price for both tiers. This is typically not the desired behavior, which is why flat fee pricng is not common in graduated pricing models. If you want to include a flat fee, consider adding it to the base plan price, or only including it in the first tier.
 
@@ -127,7 +127,7 @@ Because the customer had usage in 2 different tiers, they paid the flat fee pric
 
 1. Navigate to a plan with a metered entitlement.
 2. Click on the entitlement that you'd like to monetize.
-3. For Type, select "Tiered". 
+3. For Type, select "Tiered".
 4. Then, a second "Tyonpe" option will appear below and select "Graduated".
 
 ![Volume pricing](../../assets/images/billing/ubp-entitlement-configuration-graduated-pricing-1.png)
@@ -140,4 +140,41 @@ Because the customer had usage in 2 different tiers, they paid the flat fee pric
 
 ### Credit burndown
 
-Checkout our [Credit Burndown Docs](/billing/credit-burndown). 
+Checkout our [Credit Burndown Docs](/billing/credit-burndown).
+
+## Negative Quantities (Usage Adjustments)
+
+Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key** — publishable API keys will reject them.
+
+### How to submit a negative quantity event
+
+Include a negative integer for the `quantity` field in your track event. The `quantity` must be a non-zero integer (fractional values are not supported).
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+await client.track({
+  event: "api-call",
+  company: { "company-key": "value" },
+  user: { "user-key": "value" },
+  quantity: -5,
+});
+```
+
+### Behavior by billing model
+
+Negative quantities affect billing differently depending on the pricing model configured for the feature's entitlement:
+
+| Billing model | Effect of negative quantities |
+|---|---|
+| **Pay as you go** | Negative usage is reported to Stripe. Stripe meters accept negative values, but the total usage for a billing period [cannot go below zero](https://docs.stripe.com/billing/subscriptions/usage-based/meters/configure#fix-incorrect-usage). |
+| **Volume pricing** | Negative usage reduces the total quantity reported to Stripe, potentially moving the customer into a lower pricing tier. Period usage cannot go below zero. |
+| **Graduated pricing** | Negative usage reduces the total quantity reported to Stripe. Period usage cannot go below zero. |
+| **Fixed fee with overage** | Negative usage reduces the total quantity reported to Stripe, which may reduce overage charges. Period usage cannot go below zero. |
+| **Credit burndown** | Negative usage triggers a **credit refund** — credits are returned to the company's balance via an adjustment grant. See [Credit Refunds via Negative Quantities](/billing/credit-burndown#credit-refunds-via-negative-quantities) for details. |
+
+<Note>
+For Stripe-integrated billing models (pay as you go, tiered, overage), Stripe enforces that the net usage for a billing period cannot be negative. If negative events would push the period total below zero, the excess adjustment is effectively ignored by Stripe. Plan accordingly when issuing refund events.
+</Note>
