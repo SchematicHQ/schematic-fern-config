@@ -4051,6 +4051,12 @@ components:
         currency:
           type: string
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         feature_id:
           type: string
         metric_period:
@@ -4800,6 +4806,12 @@ components:
         currency:
           type: string
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         feature_id:
           type: string
         metric_period:
@@ -5730,6 +5742,39 @@ components:
       required:
         - consecutive_failures
       title: CreditsAutoTopupRetryFailure
+    CurrencyPriceRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+          maxLength: 3
+        monthly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        monthly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        monthly_unit_price_decimal:
+          type: string
+          nullable: true
+        yearly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        yearly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        yearly_unit_price_decimal:
+          type: string
+          nullable: true
+      required:
+        - currency
+      title: CurrencyPriceRequestBody
     CustomPlanConfig:
       type: object
       properties:
@@ -10884,6 +10929,12 @@ components:
         currency:
           type: string
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         metric_period:
           type: string
           nullable: true
@@ -11465,6 +11516,12 @@ components:
         currency:
           type: string
           nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
         monthly_metered_price_id:
           type: string
           nullable: true
