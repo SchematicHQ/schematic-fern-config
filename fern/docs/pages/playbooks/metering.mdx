@@ -16,7 +16,9 @@ There are two types of metered features in Schematic - trait-based and event-bas
 **Trait-based** features are best suited for resource utilization that could increase or decrease. Some examples of features that fit this criteria are seats, projects, devices, etc. Traits should be upserted on company profiles to specify utilization against a pre-defined limit at the feature level.
 
 ### Event-based features
-**Event-based** features are best suited for resource utilization that simply goes up, and/or is metered on a perodic basis (e.g. per day, per week, per month). Some examples of features that fit this criteria are API requests, queries, etc. Individual events should be sent into Schematic, which will be automatically aggregated to calculate utilization against a pre-defined limit at the feature level.
+**Event-based** features are best suited for resource utilization that is metered on a periodic basis (e.g. per day, per week, per month). Some examples of features that fit this criteria are API requests, queries, etc. Individual events should be sent into Schematic, which will be automatically aggregated to calculate utilization against a pre-defined limit at the feature level.
+
+Event-based features also support **negative quantities** for adjustments such as refunds or corrections. Negative quantity events must be submitted using a secret API key. See [Negative Quantities](/billing/usage-based-billing#negative-quantities-usage-adjustments) for details.
 
 <Info>
 You can read more about feature types [here](/feature-management/feature-types).

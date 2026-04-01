@@ -160,6 +160,38 @@ When you're finished, you can see the credit bundles in your checkout flow:
 
 ![Add Credit Bundle 4](../../assets/images/billing/burndown-add-plan-to-catalog-4.png)
 
+## Credit Refunds via Negative Quantities
+
+When a track event with a **negative quantity** is submitted for a feature that uses credit burndown billing, Schematic reverses the credit consumption — credits are returned to the company's balance. This is useful for refunding usage when, for example, a request failed, was retried, or needs to be corrected.
+
+### How it works
+
+1. A negative quantity event is submitted using a **secret API key** (publishable keys cannot submit negative quantities).
+2. Schematic multiplies the negative quantity by the feature's credit consumption rate to determine the number of credits to refund.
+3. The refunded credits are added to an **adjustment grant** — a special credit grant that is automatically created per company per credit type.
+4. When credits are consumed in the future, adjustment grant credits are always burned first, before plan grants or purchased credits.
+
+### Example
+
+Suppose "AI Assists" costs 5 credits per use, and a company has used 10 AI Assists (50 credits consumed). If 2 of those uses need to be reversed:
+
+```ts
+await client.track({
+  event: "ai-assist",
+  company: { "company-key": "acme-corp" },
+  quantity: -2,
+});
+```
+
+This returns 10 credits (2 x 5 credits per use) to the company's balance via an adjustment grant. The next time the company uses any credit-consuming feature, those 10 adjustment credits will be consumed first.
+
+### Key details
+
+- **Adjustment grants accumulate**: Multiple refund events for the same company and credit type add credits to the same adjustment grant, rather than creating new grants each time.
+- **Adjustment grants are consumed first**: Regardless of the configured burn strategy, adjustment grant credits are always consumed before other grant types (plan grants, purchased credits, promotional credits).
+- **Adjustment grants do not expire quickly**: Adjustment grants are given a rolling 1-year expiration that extends with each refund, so they will not expire while actively being used.
+- **Negative events create negative usage records**: For auditing purposes, a negative usage record is created in the credit usage ledger corresponding to each refund.
+
 ## Auto Top-Up
 
 In addition to manually purchasing credits, Schematic supports auto top-up for credit burndown plans to ensure that customers never run out of credits. Auto top-ups are configured at the *plan level*, and will automatically purchase the specified number of credits when the customer's balance is below a pre-set threshold.

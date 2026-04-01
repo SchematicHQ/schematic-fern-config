@@ -67,6 +67,8 @@ To create a new add on and a corresponding Stripe product, follow the steps belo
 
 Usage based features are core feature in most modern SaaS applications. Schematic usage based features are mapped to Stripe metered products, either existing or new. Usage is tracked in real time, and will be reflected within Schematic web app, Stripe, and any Schematic components (e.g. customer portal).
 
+Schematic supports negative quantity events for usage adjustments and refunds. When negative events are submitted, the reduced usage is reported to Stripe. Note that Stripe enforces that [total usage for a billing period cannot go below zero](https://docs.stripe.com/billing/subscriptions/usage-based/meters/configure#fix-incorrect-usage). Negative quantity events require a secret API key. See [Negative Quantities](/billing/usage-based-billing#negative-quantities-usage-adjustments) for more details.
+
 {/* This video is a quick walkthrough of how to set up a usage-based feature in Schematic and map it to Stripe metered products.
 
 !!!video example!!! */}
