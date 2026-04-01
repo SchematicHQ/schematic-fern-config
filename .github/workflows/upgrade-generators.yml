@@ -157,7 +157,7 @@ jobs:
         working-directory: /tmp/sdk-repo
         run: |
           dotnet tool restore
-          dotnet build src -c Release
+          dotnet build src/SchematicHQ.Client -c Release
 
   report:
     needs: [upgrade, validate]
