@@ -175,11 +175,16 @@ groups:
           location: rubygems
           package-name: schematichq
           api-key: ${RUBYGEMS_API_KEY}
+        metadata:
+          license: MIT
         github:
           repository: schematichq/schematic-ruby
           mode: pull-request
         config:
           module: SchematicHQ
           rubocopVariableNumberStyle: disabled
-
+          extraDependencies:
+            wasmtime: ">= 19.0"
+          extraDevDependencies:
+            webrick: ">= 1.0"
         smart-casing: false
