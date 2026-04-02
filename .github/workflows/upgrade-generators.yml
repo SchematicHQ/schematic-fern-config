@@ -15,6 +15,7 @@ jobs:
     outputs:
       has_changes: ${{ steps.upgrade.outputs.has_changes }}
       pr_number: ${{ steps.upgrade.outputs.pr_number }}
+      changed_groups: ${{ steps.upgrade.outputs.changed_groups }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -37,31 +38,50 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/upgrade_generators.sh
 
-  validate:
+  prepare-matrix:
     needs: upgrade
     if: needs.upgrade.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_validations: ${{ steps.set-matrix.outputs.has_validations }}
+    steps:
+      - name: Build validation matrix from changed groups
+        id: set-matrix
+        env:
+          CHANGED_GROUPS: ${{ needs.upgrade.outputs.changed_groups }}
+        run: |
+          ALL_MATRIX='[
+            {"group":"python-sdk","repo":"schematichq/schematic-python","language":"python"},
+            {"group":"ts-sdk","repo":"schematichq/schematic-node","language":"node"},
+            {"group":"go-sdk","repo":"schematichq/schematic-go","language":"go"},
+            {"group":"java-sdk","repo":"schematichq/schematic-java","language":"java"},
+            {"group":"csharp-sdk","repo":"schematichq/schematic-csharp","language":"csharp"}
+          ]'
+
+          MATRIX=$(echo "$ALL_MATRIX" | jq -c --argjson changed "$CHANGED_GROUPS" \
+            '[.[] | select(.group as $g | $changed | index($g))]')
+
+          echo "Filtered matrix: $MATRIX"
+
+          if [ "$MATRIX" = "[]" ] || [ "$MATRIX" = "null" ]; then
+            echo "No SDK groups to validate"
+            echo "has_validations=false" >> "$GITHUB_OUTPUT"
+            echo "matrix={\"include\":[]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_validations=true" >> "$GITHUB_OUTPUT"
+            echo "matrix={\"include\":$MATRIX}" >> "$GITHUB_OUTPUT"
+          fi
+
+  validate:
+    needs: [upgrade, prepare-matrix]
+    if: needs.prepare-matrix.outputs.has_validations == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - group: python-sdk
-            repo: schematichq/schematic-python
-            language: python
-          - group: ts-sdk
-            repo: schematichq/schematic-node
-            language: node
-          - group: go-sdk
-            repo: schematichq/schematic-go
-            language: go
-          - group: java-sdk
-            repo: schematichq/schematic-java
-            language: java
-          - group: csharp-sdk
-            repo: schematichq/schematic-csharp
-            language: csharp
+      matrix: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -160,7 +180,7 @@ jobs:
           dotnet build src/SchematicHQ.Client -c Release
 
   report:
-    needs: [upgrade, validate]
+    needs: [upgrade, prepare-matrix, validate]
     if: always() && needs.upgrade.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -172,7 +192,25 @@ jobs:
           PR_NUMBER: ${{ needs.upgrade.outputs.pr_number }}
           RUN_ID: ${{ github.run_id }}
           REPO: ${{ github.repository }}
+          HAS_VALIDATIONS: ${{ needs.prepare-matrix.outputs.has_validations }}
         run: |
+          if [ "$HAS_VALIDATIONS" != "true" ]; then
+            cat > /tmp/pr-body.md <<EOF
+          This PR updates Fern generators to their latest versions.
+
+          ## Validation Results
+
+          No SDK generator versions changed — validation skipped.
+
+          [View full workflow run](https://github.com/$REPO/actions/runs/$RUN_ID)
+
+          Generated automatically by scheduled workflow.
+          EOF
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --body-file /tmp/pr-body.md
+            echo "Updated PR #$PR_NUMBER — no validations needed"
+            exit 0
+          fi
+
           echo "Fetching validation results for run $RUN_ID..."
 
           # Build results table from validate job conclusions
@@ -191,7 +229,7 @@ jobs:
             --jq '.jobs[] | select(.name | startswith("validate")) | [.name, .conclusion] | @tsv')
 
           if [ "$ALL_PASSED" = true ]; then
-            STATUS=":white_check_mark: All SDK compile checks passed."
+            STATUS=":white_check_mark: All changed SDK compile checks passed."
           else
             STATUS=":warning: Some SDK compile checks failed. Review the [workflow run](https://github.com/$REPO/actions/runs/$RUN_ID) for details."
           fi
@@ -203,9 +241,11 @@ jobs:
 
           ${STATUS}
 
-          | SDK | Status |
-          |-----|--------|
+          | Changed SDK | Status |
+          |-------------|--------|
           ${TABLE_ROWS}
+          Only SDKs with generator version changes were validated.
+
           [View full workflow run](https://github.com/$REPO/actions/runs/$RUN_ID)
 
           Generated automatically by scheduled workflow.
