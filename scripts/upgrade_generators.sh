@@ -54,9 +54,38 @@ else
   git checkout -b "$BRANCH_NAME"
 fi
 
+# Capture current versions before upgrading
+VERSIONS_BEFORE=$(mktemp)
+for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
+  version=$(yq ".groups.\"$group\".generators[0].version" fern/generators.yml)
+  echo "$group=$version" >> "$VERSIONS_BEFORE"
+done
+
 # Upgrade all generators
 echo "Upgrading generators..."
 yq '.groups | keys | .[]' fern/generators.yml | xargs -I {} fern generator upgrade --group {}
+
+# Detect which groups had version changes
+CHANGED_GROUPS="["
+first=true
+for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
+  new_version=$(yq ".groups.\"$group\".generators[0].version" fern/generators.yml)
+  old_version=$(grep "^$group=" "$VERSIONS_BEFORE" | cut -d= -f2)
+  if [ "$old_version" != "$new_version" ]; then
+    echo "Generator $group changed: $old_version -> $new_version"
+    if [ "$first" = true ]; then
+      first=false
+    else
+      CHANGED_GROUPS+=","
+    fi
+    CHANGED_GROUPS+="\"$group\""
+  fi
+done
+CHANGED_GROUPS+="]"
+rm -f "$VERSIONS_BEFORE"
+
+echo "Changed groups: $CHANGED_GROUPS"
+set_output "changed_groups" "$CHANGED_GROUPS"
 
 # Check if there are changes
 if [[ -n $(git status --porcelain) ]]; then
