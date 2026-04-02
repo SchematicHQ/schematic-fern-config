@@ -112,5 +112,6 @@ Below are some common scenarios that you may want to test for and which values y
 | Customer clicks the "Unsubscribe" button in the Schematic Customer Portal Component | `checkout` | `unsubscribe` | |
 | Customer's trial ends and is moved to the trial expiry plan | `subscription_change` |  | `trial_expiry` |
 | Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `upgrade_trial` | |
+| Customer missed payments and Stripe cancels subscription | `subscription_change` | | |
 
 <Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
