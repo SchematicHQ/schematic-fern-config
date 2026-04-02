@@ -14071,6 +14071,44 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /billing/credits/plan-grants/{plan_grant_id}:
+    get:
+      operationId: getSingleBillingPlanCreditGrant
+      summary: Get single billing plan credit grant
+      tags:
+        - credits
+      parameters:
+        - name: plan_grant_id
+          in: path
+          description: plan_grant_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetSingleBillingPlanCreditGrantParams
+                required:
+                  - data
+                  - params
+                title: GetSingleBillingPlanCreditGrantResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
     put:
       operationId: updateBillingPlanCreditGrant
       summary: Update billing plan credit grant
