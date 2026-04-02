@@ -2510,7 +2510,7 @@ components:
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         included_credit_grants:
@@ -5042,9 +5042,9 @@ components:
           maxLength: 1024
           minLength: 0
         icon:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/PlanIcon'
           nullable: true
-          maxLength: 64
         name:
           type: string
           maxLength: 256
@@ -8116,7 +8116,7 @@ components:
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         included_credit_grants:
@@ -8441,7 +8441,7 @@ components:
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         included_credit_grants:
@@ -8615,6 +8615,34 @@ components:
         - sync_customer_billing_details
         - tax_collection_enabled
       title: PlanGroupResponseData
+    PlanIcon:
+      type: string
+      enum:
+        - amber
+        - blue
+        - blueGray
+        - blueGreen
+        - cyan
+        - emerald
+        - fuchsia
+        - gray
+        - green
+        - indigo
+        - lightBlue
+        - lime
+        - orange
+        - pink
+        - purple
+        - red
+        - redOrange
+        - rose
+        - sky
+        - slate
+        - teal
+        - trueGray
+        - violet
+        - warmGray
+        - yellow
     PlanIssueResponseData:
       type: object
       properties:
@@ -8643,7 +8671,7 @@ components:
         description:
           type: string
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         name:
@@ -8866,7 +8894,7 @@ components:
         environment_id:
           type: string
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         name:
@@ -8963,7 +8991,7 @@ components:
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
         icon:
-          type: string
+          $ref: '#/components/schemas/PlanIcon'
         id:
           type: string
         included_credit_grants:
@@ -11166,9 +11194,9 @@ components:
           maxLength: 1024
           minLength: 0
         icon:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/PlanIcon'
           nullable: true
-          maxLength: 64
         name:
           type: string
           maxLength: 256
