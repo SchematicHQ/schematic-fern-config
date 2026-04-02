@@ -939,6 +939,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
         auto_topup_threshold_percent:
           type: integer
           format: int64
@@ -3562,6 +3566,11 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 0
         auto_topup_threshold_percent:
           type: integer
           format: int64
@@ -7941,6 +7950,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_credit_auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
         billing_credit_auto_topup_threshold_percent:
           type: integer
           format: int64
@@ -10585,6 +10598,11 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 0
         auto_topup_threshold_percent:
           type: integer
           format: int64
