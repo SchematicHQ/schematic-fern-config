@@ -3,49 +3,626 @@ title: Ruby
 
 slug: developer_resources/sdks/ruby
 ---
+## Installation and Setup
 
+1. Install the Ruby gem:
 
-### Installation
-
-Using bundler add the following line to your project’s `Gemfile`:
-
-```ruby
-gem 'schematic', :git => "https://github.com/SchematicHQ/schematic-ruby.git", ref: '11f1b324cf74ac56a4e3acb6cf6c0ad465111557'
+```bash
+gem install schematichq
 ```
 
-### Initialization
-
-You can initialize the gem with your [Schematic Secret Key](/quickstart#create-an-api-key):
+Or add it to your Gemfile:
 
 ```ruby
-require 'schematic-rails'
+gem "schematichq"
+```
 
-Schematic.configure do |config|
-  config.api_key['ApiKeyAuth'] = ENV['SCHEMATIC_SECRET_KEY']
+Then run:
+
+```bash
+bundle install
+```
+
+2. [Issue an API key](https://docs.schematichq.com/quickstart#create-an-api-key) for the appropriate environment using the [Schematic app](https://app.schematichq.com/settings/api-keys). Be sure to capture the secret key when you issue the API key; you'll only see this key once, and this is what you'll use with schematic-ruby.
+
+3. Using this secret key, initialize a client in your application:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+# interactions with the client
+
+client.close
+```
+
+By default, the client will do some local caching for flag checks. If you would like to change this behavior, you can do so using an initialization option to specify the max size of the cache (in terms of number of records) and the max age of the cache (in seconds):
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+cache_size = 100
+cache_ttl = 1.0 # in seconds
+client = Schematic::SchematicClient.new(
+  api_key: api_key,
+  cache_providers: [
+    Schematic::LocalCache.new(max_size: cache_size, ttl: cache_ttl)
+  ]
+)
+
+# interactions with the client
+
+client.close
+```
+
+You can also disable local caching entirely with an initialization option; bear in mind that, in this case, every flag check will result in a network request:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(
+  api_key: api_key,
+  cache_providers: []
+)
+
+# interactions with the client
+
+client.close
+```
+
+You may want to specify default flag values for your application, which will be used if there is a service interruption or if the client is running in offline mode (see below). You can do this using an initialization option:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(
+  api_key: api_key,
+  flag_defaults: {
+    "some-flag-key" => true
+  }
+)
+
+# interactions with the client
+
+client.close
+```
+
+### Custom Logging
+
+You can provide your own logger implementation to control how the Schematic client logs messages. The logger must implement the `Schematic::Logger` module with `error`, `warn`, `info`, and `debug` methods:
+
+```ruby
+require "schematichq"
+
+class CustomLogger
+  include Schematic::Logger
+
+  def error(message, *args)
+    # Your custom error logging logic
+  end
+
+  def warn(message, *args)
+    # Your custom warning logging logic
+  end
+
+  def info(message, *args)
+    # Your custom info logging logic
+  end
+
+  def debug(message, *args)
+    # Your custom debug logging logic
+  end
+end
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(
+  api_key: api_key,
+  logger: CustomLogger.new
+)
+
+# interactions with the client
+
+client.close
+```
+
+You can also adjust the log level of the built-in console logger:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(
+  api_key: api_key,
+  logger: Schematic::ConsoleLogger.new(level: :debug)
+)
+```
+
+If no logger is provided, the client will use a default console logger at the `:info` level that outputs to stderr.
+
+## Usage Examples
+
+A number of these examples use `keys` to identify companies and users. Learn more about keys [here](https://docs.schematichq.com/developer_resources/key_management).
+
+### Sending identify events
+
+Create or update users and companies using identify events.
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+client.identify({
+  company: {
+    keys: { "id" => "your-company-id" },
+    name: "Acme, Inc.",
+    traits: { "city" => "Atlanta" }
+  },
+  keys: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  },
+  name: "Wile E. Coyote",
+  traits: {
+    "enemy" => "Bugs Bunny",
+    "login_count" => 24,
+    "is_staff" => false
+  }
+})
+
+client.close
+```
+
+This call is non-blocking and there is no response to check.
+
+### Sending track events
+
+Track activity in your application using track events; these events can later be used to produce metrics for targeting.
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+client.track({
+  event: "some-action",
+  company: { "id" => "your-company-id" },
+  user: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  }
+})
+
+client.close
+```
+
+This call is non-blocking and there is no response to check.
+
+If you want to record large numbers of the same event at once, or perhaps measure usage in terms of a unit like tokens or memory, you can optionally specify a quantity for your event:
+
+```ruby
+client.track({
+  event: "query-tokens",
+  company: { "id" => "your-company-id" },
+  user: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  },
+  quantity: 1500
+})
+```
+
+### Creating and updating companies
+
+Although it is faster to create companies and users via identify events, if you need to handle a response, you can use the companies API to upsert companies. Because you use your own identifiers to identify companies, rather than a Schematic company ID, creating and updating companies are both done via the same upsert operation:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+response = client.companies.upsert_company(
+  keys: { "id" => "your-company-id" },
+  name: "Acme Widgets, Inc.",
+  traits: {
+    "city" => "Atlanta",
+    "high_score" => 25,
+    "is_active" => true
+  }
+)
+puts response.data
+
+client.close
+```
+
+You can define any number of company keys; these are used to address the company in the future, for example by updating the company's traits or checking a flag for the company.
+
+You can also define any number of company traits; these can then be used as targeting parameters.
+
+### Creating and updating users
+
+Similarly, you can upsert users using the Schematic API, as an alternative to using identify events. Because you use your own identifiers to identify users, rather than a Schematic user ID, creating and updating users are both done via the same upsert operation:
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+response = client.companies.upsert_user(
+  keys: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  },
+  company: { "id" => "your-company-id" },
+  name: "Wile E. Coyote",
+  traits: {
+    "city" => "Atlanta",
+    "login_count" => 24,
+    "is_staff" => false
+  }
+)
+puts response.data
+
+client.close
+```
+
+You can define any number of user keys; these are used to address the user in the future, for example by updating the user's traits or checking a flag for the user.
+
+You can also define any number of user traits; these can then be used as targeting parameters.
+
+### Checking flags
+
+When checking a flag, you'll provide keys for a company and/or keys for a user. You can also provide no keys at all, in which case you'll get the default value for the flag.
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+is_flag_on = client.check_flag(
+  "some-flag-key",
+  company: { "id" => "your-company-id" },
+  user: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  }
+)
+
+if is_flag_on
+  # Flag is on
+else
+  # Flag is off
+end
+
+client.close
+```
+
+### Checking flags with entitlement details
+
+If you need more detail about how a flag check was resolved, including any entitlement associated with the check, use `check_flag_with_entitlement`. This returns a response object with the flag value, the reason for the evaluation result, and entitlement details such as usage, allocation, and credit balances when applicable.
+
+```ruby
+require "schematichq"
+
+api_key = ENV["SCHEMATIC_API_KEY"]
+client = Schematic::SchematicClient.new(api_key: api_key)
+
+resp = client.check_flag_with_entitlement(
+  "some-flag-key",
+  company: { "id" => "your-company-id" },
+  user: {
+    "email" => "wcoyote@acme.net",
+    "user_id" => "your-user-id"
+  }
+)
+
+puts "Flag: #{resp.flag_key}, Value: #{resp.value}, Reason: #{resp.reason}"
+
+if resp.entitlement
+  puts "Feature allocation: #{resp.feature_allocation}"
+  puts "Feature usage: #{resp.feature_usage}"
+end
+
+client.close
+```
+
+### Other API operations
+
+The Schematic API supports many operations beyond these, accessible via the API modules on the client: `accounts`, `billing`, `companies`, `credits`, `entitlements`, `events`, `features`, and `plans`.
+
+## Webhook Verification
+
+Schematic can send webhooks to notify your application of events. To ensure the security of these webhooks, Schematic signs each request using HMAC-SHA256. The SDK provides utility functions to verify these signatures.
+
+### Verifying Webhook Signatures
+
+When your application receives a webhook request from Schematic, you should verify its signature to ensure it's authentic:
+
+```ruby
+require "schematichq"
+
+webhook_secret = "your-webhook-secret" # Get this from the Schematic app
+
+# Verify a signature directly
+Schematic::Webhooks.verify_signature(payload, signature, timestamp, webhook_secret)
+# Raises Schematic::Webhooks::InvalidSignatureError if the signature is invalid
+# Raises Schematic::Webhooks::MissingSignatureError if the signature is missing
+# Raises Schematic::Webhooks::MissingTimestampError if the timestamp is missing
+```
+
+### Computing Signatures
+
+You can compute a hex-encoded signature for a given payload:
+
+```ruby
+hex_sig = Schematic::Webhooks.compute_hex_signature(body, timestamp, secret)
+```
+
+### Rack / Rails Integration
+
+The SDK can verify webhook signatures from Rack-compatible request objects (including Rails controllers):
+
+```ruby
+# In a Rails controller
+class WebhooksController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
+  def create
+    webhook_secret = ENV["SCHEMATIC_WEBHOOK_SECRET"]
+
+    begin
+      Schematic::Webhooks.verify_webhook_request(request, webhook_secret)
+
+      # Signature is valid, process the webhook
+      payload = JSON.parse(request.raw_post)
+      # ... handle the event ...
+
+      head :ok
+    rescue Schematic::Webhooks::WebhookSignatureError => e
+      render json: { error: e.message }, status: :bad_request
+    end
+  end
 end
 ```
 
-That will create an instance of `Schematic` that you can use to interact with Schematic. If you’re using Rails, you can place that initialization logic in `config/initializers/schematic_ruby.rb`.
-
-### Usage example
-
-Once the SDK is initialized, you may submit requests. Below is an example.
+For a Sinatra application:
 
 ```ruby
-schematic_keys = {}
-schematic_keys["account_id"] = @user.account_id.to_s
+require "sinatra"
+require "schematichq"
 
-schematic_request = Schematic::CompaniesApi.new
-schematic_create_company_request = Schematic::UpsertCompanyRequestBody.new(
-        keys: schematic_keys,
-        name: @user.company.to_s,
-        traits: nil)
+post "/webhooks/schematic" do
+  webhook_secret = ENV["SCHEMATIC_WEBHOOK_SECRET"]
+
+  begin
+    Schematic::Webhooks.verify_webhook_request(request, webhook_secret)
+
+    payload = JSON.parse(request.body.read)
+    request.body.rewind
+    # ... handle the event ...
+
+    status 200
+    json status: "ok"
+  rescue Schematic::Webhooks::WebhookSignatureError => e
+    status 400
+    json error: e.message
+  end
+end
+```
+
+### Webhook Test Server
+
+The SDK includes a standalone webhook test server for local development:
+
+```bash
+ruby scripts/webhook_test_server.rb <webhook_secret>
+# or
+SCHEMATIC_WEBHOOK_SECRET=your-secret ruby scripts/webhook_test_server.rb
+```
+
+This starts a WEBrick server on port 8080 (configurable via `PORT` env var) that listens for POST requests at `/webhook`, verifies signatures, and prints the payload.
+
+## DataStream
+
+DataStream enables local flag evaluation by maintaining a WebSocket connection to Schematic and caching flag rules, company, and user data locally. Flag checks are evaluated using a local WASM rules engine, significantly reducing latency and network calls.
+
+### Setup
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  use_data_stream: true
+)
+
+# Flag checks are now evaluated locally
+is_flag_on = client.check_flag(
+  "some-flag-key",
+  company: { "id" => "your-company-id" }
+)
+
+client.close
+```
+
+### Configuration Options
+
+You can customize DataStream behavior via the `datastream_options` hash:
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `cache_ttl` | `Integer` | 86400 (24 hours) | Cache TTL in seconds |
+| `replicator_mode` | `Boolean` | `false` | Enable replicator mode (see below) |
+| `replicator_health_url` | `String` | `http://localhost:8090/ready` | URL to poll for replicator health |
+| `replicator_health_interval` | `Integer` | 30 | Health check interval in seconds |
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  use_data_stream: true,
+  datastream_options: {
+    cache_ttl: 3600 # 1 hour
+  }
+)
+```
+
+## Replicator Mode
+
+When running the `schematic-datastream-replicator` service, you can configure the Schematic client to operate in Replicator Mode. In this mode, the client reads from a shared cache populated by the external replicator rather than establishing its own WebSocket connection.
+
+### Setup
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  use_data_stream: true,
+  datastream_options: {
+    replicator_mode: true,
+    replicator_health_url: "http://localhost:8090/ready",
+    replicator_health_interval: 30
+  }
+)
+
+# Flag checks use the shared cache
+is_flag_on = client.check_flag(
+  "some-flag-key",
+  company: { "id" => "your-company-id" }
+)
+
+client.close
+```
+
+When running in Replicator Mode, the client will:
+- Skip establishing WebSocket connections
+- Periodically check if the replicator service is ready
+- Use cached data populated by the external replicator service
+- Fall back to direct API calls if the replicator is not available
+
+## Testing
+
+### Offline Mode
+
+In development or testing environments, you may want to avoid making network requests to the Schematic API. You can run Schematic in offline mode by specifying the `offline` option; in this case, it does not matter what API key you specify:
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(offline: true)
+
+client.close
+```
+
+You can also enable offline mode by not providing an API key:
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new
+# Logs a warning and automatically enables offline mode
+
+client.close
+```
+
+Offline mode works well with flag defaults:
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(
+  offline: true,
+  flag_defaults: { "some-flag-key" => true }
+)
+
+# interactions with the client
+
+client.close
+```
+
+In an automated testing context, you may also want to use offline mode and specify single flag responses for test cases:
+
+```ruby
+require "schematichq"
+
+# In your test setup
+client = Schematic::SchematicClient.new(offline: true)
+client.set_flag_default("some-flag-key", true)
+
+# test code that expects the flag to be on
+assert client.check_flag("some-flag-key")
+
+client.close
+```
+
+## Errors
+
+Failed API calls will raise errors that can be rescued from granularly:
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(api_key: ENV["SCHEMATIC_API_KEY"])
 
 begin
-  result = schematic_request.create_company(schematic_create_company_request)
-rescue Schematic::ApiError => e
-  puts "Exception when calling CompaniesApi->create_company: #{e}"
+  result = client.accounts.create_api_key(name: "name")
+rescue Schematic::Errors::TimeoutError
+  puts "API didn't respond before our timeout elapsed"
+rescue Schematic::Errors::ServiceUnavailableError
+  puts "API returned status 503, is probably overloaded, try again later"
+rescue Schematic::Errors::ServerError
+  puts "API returned some other 5xx status, this is probably a bug"
+rescue Schematic::Errors::ResponseError => e
+  puts "API returned an unexpected status other than 5xx: #{e.code} #{e.message}"
+rescue Schematic::Errors::ApiError => e
+  puts "Some other error occurred when calling the API: #{e.message}"
 end
 ```
 
-The Ruby SDK references companies or users by their Schematic ID using the `id` key or by any key you have defined and passed to Schematic previously.
+Note that `check_flag` and `check_flag_with_entitlement` never raise exceptions -- errors are logged and default values are returned.
+
+## Advanced
+
+### Retries
+
+The SDK is instrumented with automatic retries. A request will be retried as long as the request is deemed retryable and the number of retry attempts has not grown larger than the configured retry limit (default: 2).
+
+A request is deemed retryable when any of the following HTTP status codes is returned:
+
+- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
+- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
+- [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
+
+Use the `max_retries` option to configure this behavior:
+
+```ruby
+require "schematichq"
+
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  max_retries: 3 # Configure max retries (default is 2)
+)
+```
+
+### Timeouts
+
+The SDK defaults to a 60 second timeout. Use the `timeout` option to configure this behavior:
+
+```ruby
+response = client.accounts.create_api_key(
+  name: "name",
+  timeout: 30 # 30 second timeout
+)
+```
