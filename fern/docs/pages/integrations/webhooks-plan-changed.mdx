@@ -67,14 +67,14 @@ In SDKs, this field is called `PlanChangeResponseDataActorType`, whereas in the 
 
 The Base Plan Action value indicates why the base plan was changed. This field is often left blank. 
 
-In SDKs, this field is called `PlanChangeResponseDataBasePlanAction`, whereas in the raw webhook response, it can be found at `body.base_plan.action`.
+In SDKs, this field is called `PlanChangeResponseDataBasePlanAction`, whereas in the raw webhook response, it can be found at `body.base_plan_action`.
 
 | Value          | Explanation                                                                                  | Likelihood |
 |----------------|----------------------------------------------------------------------------------------------|------------|
 | (blank)   | This means that the company was switched to a new plan (either via checkout or manage plan)       | Common     |
 | `"initial"`    | The company was assigned its initial base plan, typically at creation.                       | Common     |
-| `"trial_expiry"` | The company’s base plan was set because a trial expired.                                   | Common     |
-| `"trait"`      | The company’s plan changed because of a trait or segment update.                             | Uncommon   |
+| `"trial_expiry"` | The company's base plan was set because a trial expired.                                   | Common     |
+| `"trait"`      | The company's plan changed because of a trait or segment update.                             | Uncommon   |
 | `"fallback"`   | The company was moved to a fallback plan, often due to payment issues or plan deletion.      | Rare       |
 
 4. Subscription Change Action
@@ -112,5 +112,6 @@ Below are some common scenarios that you may want to test for and which values y
 | Customer clicks the "Unsubscribe" button in the Schematic Customer Portal Component | `checkout` | `unsubscribe` | |
 | Customer's trial ends and is moved to the trial expiry plan | `subscription_change` |  | `trial_expiry` |
 | Customer is on trial and checkouts onto *any plan (even free!)* | `checkout` | `upgrade_trial` | |
+| Customer missed payments and Stripe cancels subscription | `subscription_change` | | |
 
 <Warning>When a company unsubscribes through the Schematic Checkout component, the customer will keep access to their plan until the end of the billing period. The webhook will be fired when plan access is lost at the end of the billing period.</Warning>
