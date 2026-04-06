@@ -5889,6 +5889,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        trial_status:
+          allOf:
+            - $ref: '#/components/schemas/TrialStatus'
+          nullable: true
       required:
         - id
         - name
@@ -10515,6 +10519,12 @@ components:
         - number
         - string
         - url
+    TrialStatus:
+      type: string
+      enum:
+        - active
+        - converted
+        - expired
     UpdateAddOnRequestBody:
       type: object
       properties:
@@ -20956,13 +20966,11 @@ paths:
         - name: action
           in: query
           schema:
-            type: string
-            maxLength: 255
+            $ref: '#/components/schemas/PlanChangeAction'
         - name: base_plan_action
           in: query
           schema:
-            type: string
-            maxLength: 255
+            $ref: '#/components/schemas/PlanChangeBasePlanAction'
         - name: company_id
           in: query
           schema:
@@ -21013,11 +21021,9 @@ paths:
                     description: Input parameters
                     properties:
                       action:
-                        type: string
-                        maxLength: 255
+                        $ref: '#/components/schemas/PlanChangeAction'
                       base_plan_action:
-                        type: string
-                        maxLength: 255
+                        $ref: '#/components/schemas/PlanChangeBasePlanAction'
                       company_id:
                         type: string
                       company_ids:
@@ -22974,6 +22980,179 @@ paths:
                   - data
                   - params
                 title: UpsertBillingProductPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/billing-product-match-companies:
+    get:
+      operationId: listBillingProductMatchCompanies
+      summary: List billing product match companies
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: query
+          description: The plan ID to find billing product match companies for
+          required: true
+          schema:
+            type: string
+            description: The plan ID to find billing product match companies for
+        - name: q
+          in: query
+          description: Search for companies by name, keys or string traits
+          schema:
+            type: string
+            description: Search for companies by name, keys or string traits
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyDetailResponseData'
+                    title: ListBillingProductMatchCompaniesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      plan_id:
+                        type: string
+                        description: >-
+                          The plan ID to find billing product match companies
+                          for
+                      q:
+                        type: string
+                        description: Search for companies by name, keys or string traits
+                        maxLength: 512
+                    title: ListBillingProductMatchCompaniesParams
+                required:
+                  - data
+                  - params
+                title: ListBillingProductMatchCompaniesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/billing-product-match-companies/count:
+    get:
+      operationId: countBillingProductMatchCompanies
+      summary: Count billing product match companies
+      tags:
+        - plans
+      parameters:
+        - name: plan_id
+          in: query
+          description: The plan ID to find billing product match companies for
+          required: true
+          schema:
+            type: string
+            description: The plan ID to find billing product match companies for
+        - name: q
+          in: query
+          description: Search for companies by name, keys or string traits
+          schema:
+            type: string
+            description: Search for companies by name, keys or string traits
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      plan_id:
+                        type: string
+                        description: >-
+                          The plan ID to find billing product match companies
+                          for
+                      q:
+                        type: string
+                        description: Search for companies by name, keys or string traits
+                        maxLength: 512
+                    title: CountBillingProductMatchCompaniesParams
+                required:
+                  - data
+                  - params
+                title: CountBillingProductMatchCompaniesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
