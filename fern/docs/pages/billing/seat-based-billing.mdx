@@ -20,4 +20,88 @@ Traditionally, pay in advance models have been the most common pricing model for
 
 ### Overage
 
-Recently, overage models have become more common for seat-based billing. In overage models, customers are charged a per-seat price for each seat they use beyond the base number of seats included in the plan. Instead of requiring a checkout flow to purchase additional seats, customers simply use as many seats as they need, and are charged accordingly at the end of the billing period. The lower friction to add seats has made this popular for products like Figma. 
+Recently, overage models have become more common for seat-based billing. In overage models, customers are charged a per-seat price for each seat they use beyond the base number of seats included in the plan. Instead of requiring a checkout flow to purchase additional seats, customers simply use as many seats as they need, and are charged accordingly at the end of the billing period. The lower friction to add seats has made this popular for products like Figma.
+
+## Implementing Seat Based Billing
+
+Seat-based billing in Schematic is implemented using **trait-based entitlements**. A trait tracks the current number of seats in use for each company, and Schematic compares that value against the entitlement limit to determine whether to enable or disable the corresponding feature flag.
+
+### Setting up the entitlement
+
+1. Create a feature and choose "Trait-based" in the control dropdown.
+2. Follow the wizard to specify the trait key that will represent seat usage (e.g. `seats_used`).
+3. Entitle the feature to a plan and set the limit. You have a few options:
+   - **Numerical limit** -- every company on the plan gets the same seat limit.
+   - **No limit** -- unlimited seats, useful for enterprise or internal plans.
+   - **Trait** -- each company's limit is read from a trait on their profile (e.g. `seats_allocated`), which is useful when seat counts are negotiated per customer.
+
+<Note>Under most common situations, you'll want to choose **Numerical limit** (e.g. "Pro plan grants 5 seats") or **No limit** (e.g. "Pro plan grants unilimited seats").</Note>
+
+### Reporting seat usage
+
+To let Schematic know how many seats a company is currently using, upsert the trait value on the company profile whenever a seat is added or removed:
+
+```typescript
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+// Called when a user is added or removed — update the current seat count
+await client.companies.upsertCompany({
+  keys: { "your-company-key": "value" },
+  traits: { seats_used: 5 },
+});
+```
+
+```python
+from schematic import Schematic
+
+client = Schematic(api_key="your-api-key")
+
+# Called when a user is added or removed — update the current seat count
+client.companies.upsert_company(
+    keys={"your-company-key": "value"},
+    traits={"seats_used": 5},
+)
+```
+
+<Info>
+You don't have to report seat usage to Schematic to use entitlements. If you manage seat counts in your own system, you can check the entitlement limit directly and enforce access without sending usage to Schematic. However, reporting usage to Schematic enables usage visibility in the Schematic UI and powers usage reporting features.
+</Info>
+
+### Checking the entitlement in your application
+
+Checking whether a company has available seats works the same as any other feature flag check. Schematic evaluates the current trait value against the entitlement limit automatically. The flag returns `true` when seat usage is below the limit and `false` when usage meets or exceeds it.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const evaluationCtx = {
+    company: { id: "your-company-id" },
+    user: { userId: "your-user-id" },
+};
+
+client
+    .checkFlagWithEntitlement(evaluationCtx, "your-seats-feature-flag")
+    .then((resp) => {
+        console.log(`Seat available: ${resp.value}`); // false when at or above limit
+
+        if (resp.entitlement) {
+            console.log(`Entitlement type: ${resp.entitlement.valueType}`);
+            console.log(`Usage: ${resp.entitlement.usage}`);
+        }
+    })
+    .catch(console.error);
+
+client.close();
+```
+
+### Supporting multiple seat types
+
+Because seat types are modeled as individual trait-based features, you can support multiple seat types within the same plan. For example, a plan could have separate entitlements for `editor_seats` and `viewer_seats`, each with its own limit and usage trait. Each seat type gets its own feature flag, and you report usage separately for each trait.
+
+### Overrides
+
+[Overrides](/feature-management/overrides) work on seat-based entitlements. If a specific company needs a different seat limit than their plan provides (for example, a customer negotiated extra seats mid-cycle), you can set a company-level override without changing the plan.
