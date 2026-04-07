@@ -1,0 +1,176 @@
+org: schematic
+api:
+  specs:
+    - openapi: ../schematic.yaml
+      origin: https://openapi.schematichq.com/prod/api/apikeysecret.yml
+      overrides: ../overrides.yaml
+      settings:
+        optionalAdditionalProperties: false
+        title-as-schema-name: true
+        respectNullableSchemas: false
+        inlinePathParameters: false
+        idiomaticRequestNames: false
+        typeDatesAsStrings: false
+        wrapReferencesToNullableInOptional: true
+        coerceOptionalSchemasToNullable: true
+        objectQueryParameters: false
+        coerceEnumsToLiterals: true
+docs:
+  $ref: ./docs.yml
+sdks:
+  targets:
+    python:
+      output:
+        git:
+          repository: schematichq/schematic-python
+          mode: pr
+      lang: python
+      version: 4.64.1
+      config:
+        inline_request_params: true
+        client:
+          class_name: BaseSchematic
+          filename: base_client.py
+          exported_class_name: Schematic
+          exported_filename: client.py
+        additional_init_exports:
+          - from: client
+            imports:
+              - AsyncSchematic
+              - AsyncSchematicConfig
+              - LocalCache
+              - Schematic
+              - SchematicConfig
+      publish:
+        pypi:
+          packageName: schematichq
+          token: ${PYPI_API_TOKEN}
+    csharp:
+      output:
+        git:
+          repository: schematichq/schematic-csharp
+          mode: pr
+      lang: csharp
+      version: 2.56.5
+      config:
+        namespace: SchematicHQ.Client
+        client-class-name: SchematicApi
+        exported-client-class-name: Schematic
+        extra-dependencies:
+          moq: 4.20.70
+          Moq.Contrib.HttpClient: 1.4.0
+      publish:
+        nuget:
+          packageName: SchematicHQ.Client
+          apiKey: ${NUGET_API_TOKEN}
+    typescript:
+      output:
+        git:
+          repository: schematichq/schematic-node
+          mode: pr
+      lang: typescript
+      version: 3.60.9
+      config:
+        allowCustomFetcher: true
+        includeApiReference: true
+        namespaceExport: Schematic
+        inlineFileProperties: false
+        inlinePathParameters: false
+        enableInlineTypes: false
+        noSerdeLayer: false
+        omitUndefined: false
+        useLegacyExports: true
+        skipResponseValidation: true
+        streamType: wrapper
+        fileResponseType: stream
+        formDataSupport: Node16
+        fetchSupport: node-fetch
+        packageManager: yarn
+        testFramework: jest
+        packageJson:
+          license: MIT
+          browser:
+            crypto: false
+            timers: false
+          dependencies:
+            form-data: ^4.0.4
+            ws: ^8.18.1
+            "@types/ws": ^8.18.1
+          devDependencies:
+            esbuild: ^0.25.9
+            miniflare: ^4.20260305.0
+          scripts:
+            build: node build.js
+            build:legacy: tsc
+            prepack: ""
+            pretest: node scripts/generate-wasm-base64.js
+            test:cloudflare: node scripts/test-cloudflare.mjs
+          main: ./dist/index.js
+          types: ./dist/index.d.ts
+          files:
+            - dist/**/*.js
+            - dist/**/*.d.ts
+            - "!dist/**/*.js.map"
+            - "!dist/**/*.test.*"
+            - README.md
+      publish:
+        npm:
+          packageName: "@schematichq/schematic-typescript-node"
+          token: ${NPM_API_TOKEN}
+    go:
+      output:
+        git:
+          repository: schematichq/schematic-go
+          mode: pr
+      lang: go
+      version: 1.33.0
+      config:
+        enableWireTests: false
+        exportedClientName: SchematicClient
+        module:
+          path: github.com/schematichq/schematic-go
+          version: "1.18"
+        packageName: schematichq
+    java:
+      output:
+        git:
+          repository: schematichq/schematic-java
+          mode: pr
+      lang: java
+      version: 3.44.6
+      config:
+        client-class-name: BaseSchematic
+        generate-unknown-as-json-node: true
+        enable-wire-tests: false
+        custom-dependencies:
+          - testImplementation org.mockito:mockito-core:5.3.1
+          - testImplementation org.mockito:mockito-junit-jupiter:5.3.1
+      publish:
+        maven:
+          coordinate: com.schematichq:schematic-java
+          username: ${MAVEN_USERNAME}
+          password: ${MAVEN_PASSWORD}
+          signature:
+            keyId: ${MAVEN_CENTRAL_SECRET_KEY_KEY_ID}
+            password: ${MAVEN_CENTRAL_SECRET_KEY_PASSWORD}
+            secretKey: ${MAVEN_CENTRAL_SECRET_KEY}
+    ruby:
+      output:
+        git:
+          repository: schematichq/schematic-ruby
+          mode: pr
+      lang: ruby
+      version: 1.1.13
+      config:
+        module: SchematicHQ
+        rubocopVariableNumberStyle: disabled
+        extraDependencies:
+          wasmtime: ">= 19.0"
+          websocket: ">= 1.2"
+        extraDevDependencies:
+          webrick: ">= 1.0"
+      publish:
+        rubygems:
+          packageName: schematichq
+          apiKey: ${RUBYGEMS_API_KEY}
+  autorelease: false
