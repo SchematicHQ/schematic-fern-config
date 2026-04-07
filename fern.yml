@@ -24,6 +24,7 @@ sdks:
         git:
           repository: schematichq/schematic-python
           mode: pr
+          license: MIT
       lang: python
       version: 4.64.1
       config:
@@ -136,6 +137,7 @@ sdks:
         git:
           repository: schematichq/schematic-java
           mode: pr
+          license: MIT
       lang: java
       version: 3.44.6
       config:
@@ -154,11 +156,17 @@ sdks:
             keyId: ${MAVEN_CENTRAL_SECRET_KEY_KEY_ID}
             password: ${MAVEN_CENTRAL_SECRET_KEY_PASSWORD}
             secretKey: ${MAVEN_CENTRAL_SECRET_KEY}
+      metadata:
+        description: Official Java SDK for Schematic
+        authors:
+          - name: Schematic
+            email: support@schematichq.com
     ruby:
       output:
         git:
           repository: schematichq/schematic-ruby
           mode: pr
+          license: MIT
       lang: ruby
       version: 1.1.13
       config:
