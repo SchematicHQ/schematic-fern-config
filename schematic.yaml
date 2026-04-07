@@ -875,6 +875,20 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingLinkedResourceResponseData:
+      type: object
+      properties:
+        billing_provider:
+          $ref: '#/components/schemas/BillingProviderType'
+        external_resource_id:
+          type: string
+        originator:
+          $ref: '#/components/schemas/BillingProviderType'
+      required:
+        - billing_provider
+        - external_resource_id
+        - originator
+      title: BillingLinkedResourceResponseData
     BillingMeterResponseData:
       type: object
       properties:
@@ -2469,6 +2483,8 @@ components:
           type: string
           nullable: true
           deprecated: true
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -3535,6 +3551,209 @@ components:
         - meta
         - name
       title: CreateBillingCustomerRequestBody
+    CreateBillingLinkedFeatureRequestBody:
+      type: object
+      properties:
+        billing_provider:
+          $ref: '#/components/schemas/BillingProviderType'
+        description:
+          type: string
+          maxLength: 1024
+        event_subtype:
+          type: string
+          nullable: true
+        external_resource_id:
+          type: string
+          maxLength: 255
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
+        flag:
+          $ref: '#/components/schemas/CreateOrUpdateFlagRequestBody'
+        icon:
+          type: string
+          nullable: true
+        lifecycle_phase:
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
+          nullable: true
+        maintainer_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          maxLength: 512
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
+        trait_id:
+          type: string
+          nullable: true
+      required:
+        - description
+        - feature_type
+        - name
+        - billing_provider
+        - external_resource_id
+      title: CreateBillingLinkedFeatureRequestBody
+    CreateBillingLinkedPlanEntitlementRequestBody:
+      type: object
+      properties:
+        billing_product_id:
+          type: string
+          nullable: true
+        billing_provider:
+          $ref: '#/components/schemas/BillingProviderType'
+        billing_threshold:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 9999999999999
+          minimum: 50
+        credit_consumption_rate:
+          type: number
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyPriceRequestBody'
+          nullable: true
+          maxItems: 50
+        external_resource_id:
+          type: string
+          maxLength: 255
+        feature_id:
+          type: string
+        metric_period:
+          type: string
+          nullable: true
+          enum:
+            - all_time
+            - current_month
+            - current_week
+            - current_day
+        metric_period_month_reset:
+          type: string
+          nullable: true
+          enum:
+            - first_of_month
+            - billing_cycle
+        monthly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        monthly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        monthly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        monthly_unit_price_decimal:
+          type: string
+          nullable: true
+        overage_billing_product_id:
+          type: string
+          nullable: true
+          deprecated: true
+        plan_id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        price_behavior:
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
+          nullable: true
+        price_tiers:
+          type: array
+          description: Use MonthlyPriceTiers or YearlyPriceTiers instead
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          deprecated: true
+        soft_limit:
+          type: integer
+          format: int64
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          nullable: true
+        value_bool:
+          type: boolean
+          nullable: true
+        value_credit_id:
+          type: string
+          nullable: true
+        value_numeric:
+          type: integer
+          format: int64
+          nullable: true
+        value_trait_id:
+          type: string
+          nullable: true
+        value_type:
+          $ref: '#/components/schemas/EntitlementValueType'
+        yearly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        yearly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+        yearly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        yearly_unit_price_decimal:
+          type: string
+          nullable: true
+      required:
+        - plan_id
+        - feature_id
+        - value_type
+        - billing_provider
+        - external_resource_id
+      title: CreateBillingLinkedPlanEntitlementRequestBody
+    CreateBillingLinkedPlanRequestBody:
+      type: object
+      properties:
+        billing_provider:
+          $ref: '#/components/schemas/BillingProviderType'
+        description:
+          type: string
+          maxLength: 1024
+          minLength: 0
+        external_resource_id:
+          type: string
+          maxLength: 255
+        icon:
+          allOf:
+            - $ref: '#/components/schemas/PlanIcon'
+          nullable: true
+        name:
+          type: string
+          maxLength: 256
+          minLength: 1
+        plan_type:
+          $ref: '#/components/schemas/PlanType'
+      required:
+        - description
+        - name
+        - plan_type
+        - billing_provider
+        - external_resource_id
+      title: CreateBillingLinkedPlanRequestBody
     CreateBillingPlanCreditGrantRequestBody:
       type: object
       properties:
@@ -6644,6 +6863,8 @@ components:
     FeatureDetailResponseData:
       type: object
       properties:
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         created_at:
           type: string
           format: date-time
@@ -7093,6 +7314,8 @@ components:
       properties:
         account_id:
           type: string
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         created_at:
           type: string
           format: date-time
@@ -8095,6 +8318,8 @@ components:
           type: string
           nullable: true
           deprecated: true
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -8176,6 +8401,8 @@ components:
     PlanEntitlementResponseData:
       type: object
       properties:
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_threshold:
           type: integer
           format: int64
@@ -8410,6 +8637,8 @@ components:
           type: string
           nullable: true
           deprecated: true
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -8958,6 +9187,8 @@ components:
           type: string
           nullable: true
           deprecated: true
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         charge_type:
@@ -19746,12 +19977,42 @@ paths:
       tags:
         - features
       parameters:
+        - name: boolean_require_event
+          in: query
+          description: >-
+            Only return boolean features if there is an associated event.
+            Automatically includes boolean in the feature types filter.
+          schema:
+            type: boolean
+            description: >-
+              Only return boolean features if there is an associated event.
+              Automatically includes boolean in the feature types filter.
+        - name: feature_type
+          in: query
+          description: Filter by one or more feature types (boolean, event, trait)
+          schema:
+            type: array
+            description: Filter by one or more feature types (boolean, event, trait)
+            items:
+              $ref: '#/components/schemas/FeatureType'
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter by plan version ID when used with
+            without_plan_entitlement_for; if not provided, the latest published
+            version is used
+          schema:
+            type: string
+            description: >-
+              Filter by plan version ID when used with
+              without_plan_entitlement_for; if not provided, the latest
+              published version is used
         - name: q
           in: query
           description: Search by feature name or ID
@@ -19769,18 +20030,6 @@ paths:
             description: >-
               Filter out features that already have a company override for the
               specified company ID
-        - name: plan_version_id
-          in: query
-          description: >-
-            Filter by plan version ID when used with
-            without_plan_entitlement_for; if not provided, the latest published
-            version is used
-          schema:
-            type: string
-            description: >-
-              Filter by plan version ID when used with
-              without_plan_entitlement_for; if not provided, the latest
-              published version is used
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -19791,24 +20040,6 @@ paths:
             description: >-
               Filter out features that already have a plan entitlement for the
               specified plan ID
-        - name: feature_type
-          in: query
-          description: Filter by one or more feature types (boolean, event, trait)
-          schema:
-            type: array
-            description: Filter by one or more feature types (boolean, event, trait)
-            items:
-              $ref: '#/components/schemas/FeatureType'
-        - name: boolean_require_event
-          in: query
-          description: >-
-            Only return boolean features if there is an associated event.
-            Automatically includes boolean in the feature types filter.
-          schema:
-            type: boolean
-            description: >-
-              Only return boolean features if there is an associated event.
-              Automatically includes boolean in the feature types filter.
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -20068,6 +20299,46 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /features/billing-linked:
+    post:
+      operationId: upsertFeatureForBillingProduct
+      summary: Upsert feature for billing product
+      tags:
+        - features
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingLinkedFeatureRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FeatureDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertFeatureForBillingProductParams
+                required:
+                  - data
+                  - params
+                title: UpsertFeatureForBillingProductResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /features/count:
     get:
       operationId: countFeatures
@@ -20075,12 +20346,42 @@ paths:
       tags:
         - features
       parameters:
+        - name: boolean_require_event
+          in: query
+          description: >-
+            Only return boolean features if there is an associated event.
+            Automatically includes boolean in the feature types filter.
+          schema:
+            type: boolean
+            description: >-
+              Only return boolean features if there is an associated event.
+              Automatically includes boolean in the feature types filter.
+        - name: feature_type
+          in: query
+          description: Filter by one or more feature types (boolean, event, trait)
+          schema:
+            type: array
+            description: Filter by one or more feature types (boolean, event, trait)
+            items:
+              $ref: '#/components/schemas/FeatureType'
         - name: ids
           in: query
           schema:
             type: array
             items:
               type: string
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter by plan version ID when used with
+            without_plan_entitlement_for; if not provided, the latest published
+            version is used
+          schema:
+            type: string
+            description: >-
+              Filter by plan version ID when used with
+              without_plan_entitlement_for; if not provided, the latest
+              published version is used
         - name: q
           in: query
           description: Search by feature name or ID
@@ -20098,18 +20399,6 @@ paths:
             description: >-
               Filter out features that already have a company override for the
               specified company ID
-        - name: plan_version_id
-          in: query
-          description: >-
-            Filter by plan version ID when used with
-            without_plan_entitlement_for; if not provided, the latest published
-            version is used
-          schema:
-            type: string
-            description: >-
-              Filter by plan version ID when used with
-              without_plan_entitlement_for; if not provided, the latest
-              published version is used
         - name: without_plan_entitlement_for
           in: query
           description: >-
@@ -20120,24 +20409,6 @@ paths:
             description: >-
               Filter out features that already have a plan entitlement for the
               specified plan ID
-        - name: feature_type
-          in: query
-          description: Filter by one or more feature types (boolean, event, trait)
-          schema:
-            type: array
-            description: Filter by one or more feature types (boolean, event, trait)
-            items:
-              $ref: '#/components/schemas/FeatureType'
-        - name: boolean_require_event
-          in: query
-          description: >-
-            Only return boolean features if there is an associated event.
-            Automatically includes boolean in the feature types filter.
-          schema:
-            type: boolean
-            description: >-
-              Only return boolean features if there is an associated event.
-              Automatically includes boolean in the feature types filter.
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -21452,6 +21723,47 @@ paths:
                   - data
                   - params
                 title: DeletePlanEntitlementResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-entitlements/billing-linked:
+    post:
+      operationId: upsertPlanEntitlementForBillingProduct
+      summary: Upsert plan entitlement for billing product
+      tags:
+        - entitlements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: >-
+                #/components/schemas/CreateBillingLinkedPlanEntitlementRequestBody
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanEntitlementResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertPlanEntitlementForBillingProductParams
+                required:
+                  - data
+                  - params
+                title: UpsertPlanEntitlementForBillingProductResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -22980,6 +23292,46 @@ paths:
                   - data
                   - params
                 title: UpsertBillingProductPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/billing-linked:
+    post:
+      operationId: upsertPlanForBillingProduct
+      summary: Upsert plan for billing product
+      tags:
+        - plans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBillingLinkedPlanRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertPlanForBillingProductParams
+                required:
+                  - data
+                  - params
+                title: UpsertPlanForBillingProductResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
