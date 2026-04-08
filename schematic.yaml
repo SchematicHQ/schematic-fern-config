@@ -1360,7 +1360,7 @@ components:
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         controlled_by:
-          $ref: '#/components/schemas/PlanControlledByType'
+          $ref: '#/components/schemas/BillingProviderType'
         environment_id:
           type: string
         is_trialable:
@@ -1577,6 +1577,7 @@ components:
     BillingProviderType:
       type: string
       enum:
+        - orb
         - schematic
         - stripe
     BillingSubscriptionDiscount:
@@ -2558,7 +2559,7 @@ components:
           items:
             type: string
         controlled_by:
-          $ref: '#/components/schemas/PlanControlledByType'
+          $ref: '#/components/schemas/BillingProviderType'
         created_at:
           type: string
           format: date-time
@@ -8207,11 +8208,6 @@ components:
         - unsubscribe
         - upgrade
         - upgrade_trial
-    PlanControlledByType:
-      type: string
-      enum:
-        - schematic
-        - stripe
     PlanCreditGrantView:
       type: object
       properties:
@@ -8387,7 +8383,7 @@ components:
           type: integer
           format: int64
         controlled_by:
-          $ref: '#/components/schemas/PlanControlledByType'
+          $ref: '#/components/schemas/BillingProviderType'
         created_at:
           type: string
           format: date-time
@@ -8710,7 +8706,7 @@ components:
           items:
             type: string
         controlled_by:
-          $ref: '#/components/schemas/PlanControlledByType'
+          $ref: '#/components/schemas/BillingProviderType'
         created_at:
           type: string
           format: date-time
@@ -9260,7 +9256,7 @@ components:
           items:
             type: string
         controlled_by:
-          $ref: '#/components/schemas/PlanControlledByType'
+          $ref: '#/components/schemas/BillingProviderType'
         created_at:
           type: string
           format: date-time
