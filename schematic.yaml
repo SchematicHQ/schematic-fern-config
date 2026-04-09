@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v5f633cc3
+  x-rules-engine-schema-version: v313fa646
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -927,6 +927,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingCustomerSubscription'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -1249,6 +1250,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingPriceResponseData'
+          maxItems: 1000
         product_id:
           type: string
         provider_type:
@@ -1774,6 +1776,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingSubscriptionDiscountView'
+          maxItems: 1000
         expired_at:
           type: string
           format: date-time
@@ -1798,6 +1801,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+          maxItems: 1000
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
         status:
@@ -1883,6 +1887,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CaptureRawEvent'
+          maxItems: 1000
       required:
         - events
       title: CaptureRawEventBatch
@@ -2093,6 +2098,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckFlagsResponseData'
+          maxItems: 1000
       required:
         - data
       title: CheckFlagsBulkResponseData
@@ -2103,6 +2109,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckFlagResponseData'
+          maxItems: 1000
         plan:
           $ref: '#/components/schemas/DatastreamCompanyPlan'
       required:
@@ -2126,16 +2133,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanDetailResponseData'
+          maxItems: 1000
         active_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         active_usage_based_entitlements:
           type: array
           items:
             $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
+          maxItems: 1000
         available_credit_bundles:
           type: array
           items:
             $ref: '#/components/schemas/BillingCreditBundleResponseData'
+          maxItems: 1000
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
         feature_usage:
@@ -2144,12 +2154,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditBundlePurchaseResponseData'
+          maxItems: 1000
         selected_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         selected_usage_based_entitlements:
           type: array
           items:
             $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
+          maxItems: 1000
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
       required:
@@ -2258,6 +2270,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
+          maxItems: 1000
         billing_credit_balances:
           additionalProperties:
             type: number
@@ -2269,6 +2282,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingSubscriptionView'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -2278,10 +2292,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureEntitlement'
+          maxItems: 1000
         entity_traits:
           type: array
           items:
             $ref: '#/components/schemas/EntityTraitDetailResponseData'
+          maxItems: 1000
         environment_id:
           type: string
         id:
@@ -2290,6 +2306,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EntityKeyDetailResponseData'
+          maxItems: 1000
         last_seen_at:
           type: string
           format: date-time
@@ -2301,22 +2318,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyEventPeriodMetricsResponseData'
+          maxItems: 1000
         name:
           type: string
         payment_methods:
           type: array
           items:
             $ref: '#/components/schemas/PaymentMethodResponseData'
+          maxItems: 1000
         plan:
           $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
         plans:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
         rules:
           type: array
           items:
             $ref: '#/components/schemas/Rule'
+          maxItems: 1000
         scheduled_downgrade:
           $ref: '#/components/schemas/ScheduledDowngradeResponseData'
         traits:
@@ -2508,6 +2529,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyOverrideNoteResponseData'
+          maxItems: 1000
         rule_id:
           type: string
           nullable: true
@@ -2565,6 +2587,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         controlled_by:
           $ref: '#/components/schemas/BillingProviderType'
         created_at:
@@ -2574,6 +2597,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
+          maxItems: 1000
         current:
           type: boolean
         custom:
@@ -2588,10 +2612,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          maxItems: 1000
         features:
           type: array
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
+          maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
         id:
@@ -2600,6 +2626,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCreditGrantView'
+          maxItems: 1000
         invalid_reason:
           allOf:
             - $ref: '#/components/schemas/CompanyPlanInvalidReason'
@@ -2632,12 +2659,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureUsageResponseData'
+          maxItems: 1000
         valid:
           type: boolean
         versions:
           type: array
           items:
             $ref: '#/components/schemas/PlanVersionResponseData'
+          maxItems: 1000
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -2697,6 +2726,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCreditGrantView'
+          maxItems: 1000
         name:
           type: string
         plan_period:
@@ -2760,6 +2790,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingSubscriptionDiscountView'
+          maxItems: 1000
         expired_at:
           type: string
           format: date-time
@@ -2774,6 +2805,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+          maxItems: 1000
         status:
           type: string
         subscription_external_id:
@@ -2803,6 +2835,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         source_plan_id:
           type: string
       required:
@@ -2816,6 +2849,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         source_plan_id:
           type: string
       required:
@@ -2885,18 +2919,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+          maxItems: 1000
         active_plans:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+          maxItems: 1000
         active_usage_based_entitlements:
           type: array
           items:
             $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
+          maxItems: 1000
         add_on_compatibilities:
           type: array
           items:
             $ref: '#/components/schemas/CompatiblePlans'
+          maxItems: 1000
         capabilities:
           $ref: '#/components/schemas/ComponentCapabilities'
         checkout_settings:
@@ -2909,10 +2947,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingCreditBundleView'
+          maxItems: 1000
         credit_grants:
           type: array
           items:
             $ref: '#/components/schemas/CreditCompanyGrantView'
+          maxItems: 1000
         default_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         display_settings:
@@ -2974,18 +3014,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+          maxItems: 1000
         active_plans:
           type: array
           items:
             $ref: '#/components/schemas/CompanyPlanDetailResponseData'
+          maxItems: 1000
         active_usage_based_entitlements:
           type: array
           items:
             $ref: '#/components/schemas/UsageBasedEntitlementResponseData'
+          maxItems: 1000
         add_on_compatibilities:
           type: array
           items:
             $ref: '#/components/schemas/CompatiblePlans'
+          maxItems: 1000
         capabilities:
           $ref: '#/components/schemas/ComponentCapabilities'
         checkout_settings:
@@ -2998,10 +3042,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingCreditBundleView'
+          maxItems: 1000
         credit_grants:
           type: array
           items:
             $ref: '#/components/schemas/CreditCompanyGrantView'
+          maxItems: 1000
         default_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         display_settings:
@@ -3012,6 +3058,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvoiceResponseData'
+          maxItems: 1000
         post_trial_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         prevent_self_service_downgrade:
@@ -3183,6 +3230,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         trait_definition:
           $ref: '#/components/schemas/TraitDefinition'
         trait_value:
@@ -3203,6 +3251,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Condition'
+          maxItems: 1000
       required:
         - conditions
       title: ConditionGroup
@@ -3243,6 +3292,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConditionView'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -3315,6 +3365,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         rule_id:
           type: string
         trait_entity_type:
@@ -3361,10 +3412,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
         companies:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
         comparison_trait:
           $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
         comparison_trait_id:
@@ -3410,14 +3463,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
         plans:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
         resource_unspecified_ids:
           type: array
           items:
             type: string
+          maxItems: 1000
         rule_id:
           type: string
         trait:
@@ -3447,6 +3503,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
+          maxItems: 1000
       required:
         - account_id
         - condition_type
@@ -5564,6 +5621,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditTransferView'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -5945,6 +6003,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditGrantDetail'
+          maxItems: 1000
         credit_remaining:
           type: number
           nullable: true
@@ -6214,10 +6273,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          maxItems: 1000
         skipped:
           type: array
           items:
             $ref: '#/components/schemas/SkippedEntitlementResponseData'
+          maxItems: 1000
       required:
         - data
         - skipped
@@ -6382,6 +6443,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         id:
           type: string
         trait_type:
@@ -6473,6 +6535,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ApiKeyResponseData'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -6554,10 +6617,12 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         features:
           type: array
           items:
             $ref: '#/components/schemas/PreviewObject'
+          maxItems: 1000
         id:
           type: string
         loaded_at:
@@ -6635,6 +6700,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         id:
           type: string
         loaded_at:
@@ -6753,6 +6819,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditGrantDetail'
+          maxItems: 1000
         credit_grant_reason:
           allOf:
             - $ref: '#/components/schemas/BillingCreditGrantReason'
@@ -6948,6 +7015,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FlagDetailResponseData'
+          maxItems: 1000
         icon:
           type: string
         id:
@@ -6965,6 +7033,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PreviewObject'
+          maxItems: 1000
         plural_name:
           type: string
           nullable: true
@@ -7176,6 +7245,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureUsageResponseData'
+          maxItems: 1000
       required:
         - features
       title: FeatureUsageDetailResponseData
@@ -7235,6 +7305,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditGrantDetail'
+          maxItems: 1000
         credit_grant_reason:
           allOf:
             - $ref: '#/components/schemas/BillingCreditGrantReason'
@@ -7363,6 +7434,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LimitTimeSeriesPointResponseData'
+          maxItems: 1000
         period_type:
           type: string
           nullable: true
@@ -7370,6 +7442,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UsageTimeSeriesPointResponseData'
+          maxItems: 1000
       required:
         - feature_id
         - feature_type
@@ -7399,6 +7472,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FlagView'
+          maxItems: 1000
         icon:
           type: string
         id:
@@ -7416,6 +7490,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PreviewObject'
+          maxItems: 1000
         plural_name:
           type: string
           nullable: true
@@ -7476,6 +7551,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RuleDetailResponseData'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -7567,6 +7643,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RuleView'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -8086,16 +8163,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+          maxItems: 1000
         entitlements:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          maxItems: 1000
         plan:
           $ref: '#/components/schemas/PlanResponseData'
         traits:
           type: array
           items:
             $ref: '#/components/schemas/PlanTraitResponseData'
+          maxItems: 1000
       title: PlanBundleResponseData
     PlanChangeAction:
       type: string
@@ -8129,10 +8209,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanSnapshotView'
+          maxItems: 1000
         add_ons_removed:
           type: array
           items:
             $ref: '#/components/schemas/PlanSnapshotView'
+          maxItems: 1000
         api_key:
           $ref: '#/components/schemas/ApiKeyResponseData'
         audit_log:
@@ -8184,6 +8266,7 @@ components:
             pay-in-advance entitlements).
           items:
             $ref: '#/components/schemas/SubscriptionTraitUpdate'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -8398,6 +8481,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
+          maxItems: 1000
         description:
           type: string
         draft_version:
@@ -8406,6 +8490,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
+          maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
         id:
@@ -8414,6 +8499,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+          maxItems: 1000
         is_default:
           type: boolean
           deprecated: true
@@ -8440,6 +8526,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanVersionResponseData'
+          maxItems: 1000
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -8479,6 +8566,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EntitlementCurrencyPricesResponseData'
+          maxItems: 1000
         environment_id:
           type: string
         feature:
@@ -8572,6 +8660,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+          maxItems: 1000
         checkout_settings:
           $ref: '#/components/schemas/CheckoutSettingsResponseData'
         component_settings:
@@ -8608,18 +8697,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanEntitlementsOrder'
+          maxItems: 1000
         ordered_bundle_list:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupBundleOrder'
+          maxItems: 1000
         ordered_plan_list:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanEntitlementsOrder'
+          maxItems: 1000
         plans:
           type: array
           items:
             $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+          maxItems: 1000
         prevent_downgrades_when_over_limit:
           type: boolean
         prevent_self_service_downgrade:
@@ -8712,6 +8805,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         controlled_by:
           $ref: '#/components/schemas/BillingProviderType'
         created_at:
@@ -8721,6 +8815,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
+          maxItems: 1000
         custom_plan_config:
           $ref: '#/components/schemas/CustomPlanViewConfigResponseData'
         description:
@@ -8731,10 +8826,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          maxItems: 1000
         features:
           type: array
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
+          maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
         id:
@@ -8743,6 +8840,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+          maxItems: 1000
         is_custom:
           type: boolean
         is_default:
@@ -8771,6 +8869,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanVersionResponseData'
+          maxItems: 1000
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -8802,6 +8901,7 @@ components:
           items:
             $ref: '#/components/schemas/PlanEntitlementsOrder'
           nullable: true
+          maxItems: 1000
         plan_id:
           type: string
       required:
@@ -8814,10 +8914,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompatiblePlansResponseData'
+          maxItems: 1000
         add_on_ids:
           type: array
           items:
             type: string
+          maxItems: 1000
         checkout_settings:
           $ref: '#/components/schemas/CheckoutSettingsResponseData'
         component_settings:
@@ -8841,10 +8943,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderedPlansInGroup'
+          maxItems: 1000
         plan_ids:
           type: array
           items:
             $ref: '#/components/schemas/OrderedPlansInGroup'
+          maxItems: 1000
         prevent_downgrades_when_over_limit:
           type: boolean
         prevent_self_service_downgrade:
@@ -9262,6 +9366,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         controlled_by:
           $ref: '#/components/schemas/BillingProviderType'
         created_at:
@@ -9271,6 +9376,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCurrencyPricesResponseData'
+          maxItems: 1000
         custom:
           type: boolean
         custom_plan_config:
@@ -9283,10 +9389,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          maxItems: 1000
         features:
           type: array
           items:
             $ref: '#/components/schemas/FeatureDetailResponseData'
+          maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
         id:
@@ -9295,6 +9403,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanCreditGrantView'
+          maxItems: 1000
         is_custom:
           type: boolean
         is_default:
@@ -9323,6 +9432,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanVersionResponseData'
+          maxItems: 1000
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -9430,6 +9540,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeatureUsageResponseData'
+          maxItems: 1000
       required:
         - due_now
         - new_charges
@@ -9484,6 +9595,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PreviewSubscriptionUpcomingInvoiceLineItems'
+          maxItems: 1000
       required:
         - amount_off
         - due_now
@@ -9530,14 +9642,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanViewPublicResponseData'
+          maxItems: 1000
         active_plans:
           type: array
           items:
             $ref: '#/components/schemas/PlanViewPublicResponseData'
+          maxItems: 1000
         add_on_compatibilities:
           type: array
           items:
             $ref: '#/components/schemas/CompatiblePlans'
+          maxItems: 1000
         capabilities:
           $ref: '#/components/schemas/ComponentCapabilities'
         display_settings:
@@ -9593,6 +9708,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RawEventResponseData'
+          maxItems: 1000
       required:
         - events
       title: RawEventBatchResponseData
@@ -9626,10 +9742,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConditionGroup'
+          maxItems: 1000
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/Condition'
+          maxItems: 1000
         environment_id:
           type: string
         flag_id:
@@ -9707,10 +9825,12 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         resources:
           type: array
           items:
             $ref: '#/components/schemas/PreviewObjectResponseData'
+          maxItems: 1000
         rule_id:
           type: string
         trait:
@@ -9746,6 +9866,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RuleConditionDetailResponseData'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -9834,6 +9955,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         rule_id:
           type: string
         trait_entity_type:
@@ -9866,10 +9988,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RuleConditionGroupDetailResponseData'
+          maxItems: 1000
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/RuleConditionDetailResponseData'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -9948,10 +10072,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConditionGroupView'
+          maxItems: 1000
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/ConditionView'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -9996,6 +10122,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RuleDetailResponseData'
+          maxItems: 1000
       required:
         - rules
       title: RulesDetailResponseData
@@ -10006,7 +10133,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v5f633cc3
+        - v313fa646
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -10084,6 +10211,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         credit_balances:
           additionalProperties:
             type: number
@@ -10092,6 +10220,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineFeatureEntitlement'
+          maxItems: 1000
         environment_id:
           type: string
         id:
@@ -10104,24 +10233,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineCompanyMetric'
+          maxItems: 1000
         plan_ids:
           type: array
           items:
             type: string
+          maxItems: 1000
         plan_version_ids:
           type: array
           items:
             type: string
+          maxItems: 1000
         rules:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineRule'
+          maxItems: 1000
         subscription:
           $ref: '#/components/schemas/RulesengineSubscription'
         traits:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineTrait'
+          maxItems: 1000
       required:
         - id
         - account_id
@@ -10243,6 +10377,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         trait_definition:
           $ref: '#/components/schemas/RulesengineTraitDefinition'
         trait_value:
@@ -10263,6 +10398,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineCondition'
+          maxItems: 1000
       required:
         - conditions
       title: RulesengineConditionGroup
@@ -10396,6 +10532,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineRule'
+          maxItems: 1000
       required:
         - id
         - account_id
@@ -10413,10 +10550,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineConditionGroup'
+          maxItems: 1000
         conditions:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineCondition'
+          maxItems: 1000
         environment_id:
           type: string
         flag_id:
@@ -10514,10 +10653,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineRule'
+          maxItems: 1000
         traits:
           type: array
           items:
             $ref: '#/components/schemas/RulesengineTrait'
+          maxItems: 1000
       required:
         - id
         - account_id
@@ -10665,6 +10806,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SkippedEntitlementErrorResponseData'
+          maxItems: 1000
         feature_id:
           type: string
         feature_name:
@@ -10718,6 +10860,7 @@ components:
           type: array
           items:
             type: string
+          maxItems: 1000
         reason:
           type: string
         trait_id:
@@ -11997,6 +12140,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyMembershipDetailResponseData'
+          maxItems: 1000
         created_at:
           type: string
           format: date-time
@@ -12004,6 +12148,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EntityTraitDetailResponseData'
+          maxItems: 1000
         environment_id:
           type: string
         id:
@@ -12012,6 +12157,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EntityKeyDetailResponseData'
+          maxItems: 1000
         last_seen_at:
           type: string
           format: date-time
@@ -12244,11 +12390,13 @@ components:
           items:
             $ref: '#/components/schemas/CreditTriggerConfig'
           nullable: true
+          maxItems: 1000
         entitlement_trigger_configs:
           type: array
           items:
             $ref: '#/components/schemas/EntitlementTriggerConfig'
           nullable: true
+          maxItems: 1000
         id:
           type: string
         name:
@@ -12257,6 +12405,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WebhookRequestType'
+          maxItems: 1000
         secret:
           type: string
         status:
@@ -12298,6 +12447,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EnvironmentResponseData'
+          maxItems: 1000
         stripe_user_id:
           type: string
         user_id:
