@@ -98,6 +98,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/AccountMemberPermission'
+            maxItems: 64
           type: object
         role:
           allOf:
@@ -449,6 +450,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditBundleCurrencyPriceResponseData'
+          maxItems: 256
         expiry_type:
           $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
@@ -526,6 +528,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditBundleCurrencyPrice'
+          maxItems: 256
         expiry_type:
           $ref: '#/components/schemas/BillingCreditExpiryType'
         expiry_unit:
@@ -655,6 +658,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditTransferResponseData'
+          maxItems: 1000
         updated_at:
           type: string
           format: date-time
@@ -729,6 +733,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreditCurrencyPriceResponseData'
+          maxItems: 256
         default_expiry_unit:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
@@ -1984,11 +1989,13 @@ components:
         company:
           additionalProperties:
             type: string
+            maxLength: 255
           type: object
           nullable: true
         user:
           additionalProperties:
             type: string
+            maxLength: 255
           type: object
           nullable: true
       title: CheckFlagRequestBody
@@ -12361,6 +12368,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/AccountMemberResponseData'
                     title: ListAccountMembersResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -12482,6 +12490,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/ApiKeyResponseData'
                     title: ListApiKeysResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -12813,6 +12822,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/AuditLogListResponseData'
                     title: ListAuditLogsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -13036,6 +13046,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingCouponResponseData'
                     title: ListCouponsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -13155,6 +13166,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingCreditResponseData'
                     title: ListBillingCreditsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -13409,6 +13421,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingCreditBundleResponseData'
                     title: ListCreditBundlesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -13997,6 +14010,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingCreditGrantResponseData'
                     title: ListCompanyGrantsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -14156,6 +14170,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingCreditGrantResponseData'
                     title: ListGrantsForCreditResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -14254,6 +14269,7 @@ paths:
                       $ref: >-
                         #/components/schemas/CreditLedgerEnrichedEntryResponseData
                     title: GetEnrichedCreditLedgerResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -14455,6 +14471,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
                     title: ListBillingPlanCreditGrantsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -14866,6 +14883,7 @@ paths:
                       $ref: >-
                         #/components/schemas/BillingCustomerWithSubscriptionsResponseData
                     title: ListCustomersWithSubscriptionsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15053,6 +15071,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/InvoiceResponseData'
                     title: ListInvoicesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15170,6 +15189,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingMeterResponseData'
                     title: ListMetersResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15288,6 +15308,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PaymentMethodResponseData'
                     title: ListPaymentMethodsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15474,6 +15495,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingPriceView'
                     title: ListBillingPricesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15745,6 +15767,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingPriceView'
                     title: ListBillingProductPricesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -15993,6 +16016,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/BillingProductDetailResponseData'
                     title: ListBillingProductsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -16523,6 +16547,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CompanyDetailResponseData'
                     title: ListCompaniesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -17190,6 +17215,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CompanyMembershipDetailResponseData'
                     title: ListCompanyMembershipsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -17407,6 +17433,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CompanyOverrideResponseData'
                     title: ListCompanyOverridesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -17905,6 +17932,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CompanySubscriptionResponseData'
                     title: GetActiveCompanySubscriptionResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -18021,6 +18049,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/ComponentResponseData'
                     title: ListComponentsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -18464,6 +18493,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EntityKeyDefinitionResponseData'
                     title: ListEntityKeyDefinitionsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -18645,6 +18675,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
                     title: ListEntityTraitDefinitionsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -18957,6 +18988,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EntityTraitValue'
                     title: GetEntityTraitValuesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -19032,6 +19064,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EnvironmentResponseData'
                     title: ListEnvironmentsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -19287,7 +19320,6 @@ paths:
             type: array
             items:
               type: string
-            maxItems: 255
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -19317,6 +19349,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EventSummaryResponseData'
                     title: GetEventSummariesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -19325,7 +19358,6 @@ paths:
                         type: array
                         items:
                           type: string
-                        maxItems: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -19413,6 +19445,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/EventDetailResponseData'
                     title: ListEventsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -19578,6 +19611,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/FeatureCompanyResponseData'
                     title: ListFeatureCompaniesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -19758,6 +19792,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/FeatureUsageResponseData'
                     title: ListFeatureUsageResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -20042,6 +20077,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/FeatureCompanyUserResponseData'
                     title: ListFeatureUsersResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -20249,6 +20285,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/FeatureDetailResponseData'
                     title: ListFeaturesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -20734,6 +20771,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/FlagDetailResponseData'
                     title: ListFlagsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -21467,6 +21505,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanChangeResponseData'
                     title: ListPlanChangesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -21669,6 +21708,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanEntitlementResponseData'
                     title: ListPlanEntitlementsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -22374,6 +22414,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanTraitResponseData'
                     title: ListPlanTraitsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -22604,6 +22645,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanTraitResponseData'
                     title: UpdatePlanTraitsBulkResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -22766,6 +22808,7 @@ paths:
                       $ref: >-
                         #/components/schemas/PlanVersionCompanyMigrationResponseData
                     title: ListCompanyMigrationsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -22928,6 +22971,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanVersionMigrationResponseData'
                     title: ListMigrationsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -23189,6 +23233,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanDetailResponseData'
                     title: ListPlansResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -23572,6 +23617,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CompanyDetailResponseData'
                     title: ListBillingProductMatchCompaniesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -23908,6 +23954,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/PlanIssueResponseData'
                     title: ListPlanIssuesResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -24136,6 +24183,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/ScheduledCheckoutResponseData'
                     title: ListScheduledCheckoutsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -24561,6 +24609,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/UserDetailResponseData'
                     title: ListUsersResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -25014,6 +25063,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/CreditEventLedgerResponseData'
                     title: ListCreditEventLedgerResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -25204,6 +25254,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/WebhookEventDetailResponseData'
                     title: ListWebhookEventsResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
@@ -25404,6 +25455,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/WebhookResponseData'
                     title: ListWebhooksResponseData
+                    maxItems: 250
                   params:
                     type: object
                     description: Input parameters
