@@ -112,13 +112,13 @@ groups:
               build: node build.js
               build:legacy: tsc
               prepack: ''
-              pretest: "node scripts/generate-wasm-base64.js"
               test:cloudflare: "node scripts/test-cloudflare.mjs"
             main: ./dist/index.js
             types: ./dist/index.d.ts
             files:
               - dist/**/*.js
               - dist/**/*.d.ts
+              - dist/**/*.wasm
               - '!dist/**/*.js.map'
               - '!dist/**/*.test.*'
               - README.md
