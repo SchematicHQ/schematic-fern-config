@@ -16407,6 +16407,12 @@ paths:
               with bcrd_)
             items:
               type: string
+        - name: has_scheduled_downgrade
+          in: query
+          description: Filter companies that have a pending scheduled downgrade
+          schema:
+            type: boolean
+            description: Filter companies that have a pending scheduled downgrade
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -16559,6 +16565,11 @@ paths:
                           ID starts with bcrd_)
                         items:
                           type: string
+                      has_scheduled_downgrade:
+                        type: boolean
+                        description: >-
+                          Filter companies that have a pending scheduled
+                          downgrade
                       ids:
                         type: array
                         description: >-
@@ -16803,6 +16814,12 @@ paths:
               with bcrd_)
             items:
               type: string
+        - name: has_scheduled_downgrade
+          in: query
+          description: Filter companies that have a pending scheduled downgrade
+          schema:
+            type: boolean
+            description: Filter companies that have a pending scheduled downgrade
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -16951,6 +16968,11 @@ paths:
                           ID starts with bcrd_)
                         items:
                           type: string
+                      has_scheduled_downgrade:
+                        type: boolean
+                        description: >-
+                          Filter companies that have a pending scheduled
+                          downgrade
                       ids:
                         type: array
                         description: >-
