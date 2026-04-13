@@ -2224,6 +2224,9 @@ components:
           type: string
         interval:
           type: string
+        invoice_url:
+          type: string
+          nullable: true
         metadata:
           type: object
         period_end:
@@ -2286,6 +2289,11 @@ components:
         created_at:
           type: string
           format: date-time
+        custom_plan_billings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomPlanBillingResponseData'
+          maxItems: 1000
         default_payment_method:
           $ref: '#/components/schemas/PaymentMethodResponseData'
         entitlements:
@@ -2357,6 +2365,7 @@ components:
         - updated_at
         - add_ons
         - billing_subscriptions
+        - custom_plan_billings
         - entitlements
         - entity_traits
         - keys
@@ -2583,13 +2592,22 @@ components:
         company_count:
           type: integer
           format: int64
+        company_id:
+          type: string
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
         compatible_plan_ids:
           type: array
           items:
             type: string
           maxItems: 1000
         controlled_by:
-          $ref: '#/components/schemas/BillingProviderType'
+          type: string
+        copied_from_plan_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -2672,8 +2690,8 @@ components:
       required:
         - created_at
         - description
-        - id
         - icon
+        - id
         - name
         - plan_type
         - updated_at
@@ -4374,6 +4392,31 @@ components:
         - bundle_name
         - price_per_unit
       title: CreateCreditBundleRequestBody
+    CreateCustomPlanRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+        copied_from_plan_id:
+          type: string
+          nullable: true
+        description:
+          type: string
+          maxLength: 1024
+          minLength: 0
+        icon:
+          allOf:
+            - $ref: '#/components/schemas/PlanIcon'
+          nullable: true
+        name:
+          type: string
+          maxLength: 256
+          minLength: 1
+      required:
+        - company_id
+        - description
+        - name
+      title: CreateCustomPlanRequestBody
     CreateDataExportRequestBody:
       type: object
       properties:
@@ -6147,6 +6190,60 @@ components:
       required:
         - currency
       title: CurrencyPriceRequestBody
+    CustomPlanActivationStrategy:
+      type: string
+      enum:
+        - on_payment
+        - on_publish
+    CustomPlanBillingResponseData:
+      type: object
+      properties:
+        activation_strategy:
+          $ref: '#/components/schemas/CustomPlanActivationStrategy'
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        days_until_due:
+          type: integer
+          format: int64
+        id:
+          type: string
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        plan_id:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/CustomPlanBillingStatus'
+        stripe_invoice_url:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - activation_strategy
+        - company_id
+        - created_at
+        - days_until_due
+        - id
+        - plan_id
+        - status
+        - updated_at
+      title: CustomPlanBillingResponseData
+    CustomPlanBillingStatus:
+      type: string
+      enum:
+        - active
+        - paid
+        - pending
     CustomPlanConfig:
       type: object
       properties:
@@ -8490,8 +8587,17 @@ components:
         company_count:
           type: integer
           format: int64
+        company_id:
+          type: string
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
         controlled_by:
-          $ref: '#/components/schemas/BillingProviderType'
+          type: string
+        copied_from_plan_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -8550,8 +8656,8 @@ components:
       required:
         - created_at
         - description
-        - id
         - icon
+        - id
         - name
         - plan_type
         - updated_at
@@ -8819,13 +8925,22 @@ components:
         company_count:
           type: integer
           format: int64
+        company_id:
+          type: string
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
         compatible_plan_ids:
           type: array
           items:
             type: string
           maxItems: 1000
         controlled_by:
-          $ref: '#/components/schemas/BillingProviderType'
+          type: string
+        copied_from_plan_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -8893,8 +9008,8 @@ components:
       required:
         - created_at
         - description
-        - id
         - icon
+        - id
         - name
         - plan_type
         - updated_at
@@ -9082,6 +9197,12 @@ components:
           type: string
           nullable: true
           deprecated: true
+        company_id:
+          type: string
+          nullable: true
+        copied_from_plan_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -9101,8 +9222,8 @@ components:
       required:
         - created_at
         - description
-        - id
         - icon
+        - id
         - name
         - plan_type
         - updated_at
@@ -9380,13 +9501,22 @@ components:
         company_count:
           type: integer
           format: int64
+        company_id:
+          type: string
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
         compatible_plan_ids:
           type: array
           items:
             type: string
           maxItems: 1000
         controlled_by:
-          $ref: '#/components/schemas/BillingProviderType'
+          type: string
+        copied_from_plan_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -9456,8 +9586,8 @@ components:
       required:
         - created_at
         - description
-        - id
         - icon
+        - id
         - name
         - plan_type
         - updated_at
@@ -9700,6 +9830,19 @@ components:
     PublishPlanVersionRequestBody:
       type: object
       properties:
+        activation_strategy:
+          allOf:
+            - $ref: '#/components/schemas/CustomPlanActivationStrategy'
+          nullable: true
+        customer_email:
+          type: string
+          nullable: true
+          maxLength: 255
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 365
         excluded_company_ids:
           type: array
           items:
@@ -9707,9 +9850,15 @@ components:
           maxItems: 1000
         migration_strategy:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          maxItems: 100
       required:
         - excluded_company_ids
         - migration_strategy
+        - pay_in_advance
       title: PublishPlanVersionRequestBody
     QuickstartResp:
       type: object
@@ -18638,6 +18787,46 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /custom-plans:
+    post:
+      operationId: createCustomPlan
+      summary: Create custom plan
+      tags:
+        - plans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomPlanRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateCustomPlanParams
+                required:
+                  - data
+                  - params
+                title: CreateCustomPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /data-exports:
     post:
       operationId: createDataExport
@@ -23527,6 +23716,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: scoped_to_company_id
+          in: query
+          description: Filter plans scoped to a specific company (custom plans)
+          schema:
+            type: string
+            description: Filter plans scoped to a specific company (custom plans)
         - name: without_entitlement_for
           in: query
           description: >-
@@ -23623,6 +23818,11 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                      scoped_to_company_id:
+                        type: string
+                        description: >-
+                          Filter plans scoped to a specific company (custom
+                          plans)
                       without_entitlement_for:
                         type: string
                         description: >-
@@ -24152,6 +24352,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: scoped_to_company_id
+          in: query
+          description: Filter plans scoped to a specific company (custom plans)
+          schema:
+            type: string
+            description: Filter plans scoped to a specific company (custom plans)
         - name: without_entitlement_for
           in: query
           description: >-
@@ -24244,6 +24450,11 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                      scoped_to_company_id:
+                        type: string
+                        description: >-
+                          Filter plans scoped to a specific company (custom
+                          plans)
                       without_entitlement_for:
                         type: string
                         description: >-
