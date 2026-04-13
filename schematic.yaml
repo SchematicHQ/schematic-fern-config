@@ -4149,6 +4149,10 @@ components:
           items:
             $ref: '#/components/schemas/BillingProductPricing'
           maxItems: 100
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
         status:
           type: string
           nullable: true
@@ -4929,6 +4933,10 @@ components:
         external_id:
           type: string
           maxLength: 255
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
       required:
         - external_id
         - display_name
@@ -7801,6 +7809,24 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    IntegrationType:
+      type: string
+      enum:
+        - clerk
+        - orb
+        - stripe
+        - unknown
+    IntegrationWebhookUrlResponseData:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/IntegrationType'
+        url:
+          type: string
+      required:
+        - url
+        - type
+      title: IntegrationWebhookUrlResponseData
     InvoiceRequestBody:
       type: object
       properties:
@@ -12611,6 +12637,17 @@ components:
       enum:
         - active
         - inactive
+    WebhookUrl:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/IntegrationType'
+        url:
+          type: string
+      required:
+        - url
+        - type
+      title: WebhookUrl
     WhoAmIResponseData:
       type: object
       properties:
@@ -21737,6 +21774,45 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /integrations/{type}/webhook-url:
+    get:
+      operationId: getIntegrationWebhookUrl
+      summary: Get integration webhook url
+      tags:
+        - integrationsapi
+      parameters:
+        - name: type
+          in: path
+          description: type
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/IntegrationWebhookUrlResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetIntegrationWebhookUrlParams
+                required:
+                  - data
+                  - params
+                title: GetIntegrationWebhookUrlResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /manage-plan:
     post:
       operationId: managePlan
@@ -26325,6 +26401,7 @@ tags:
   - name: entitlements
   - name: events
   - name: features
+  - name: integrationsapi
   - name: planbundle
   - name: plangroups
   - name: planmigrations
