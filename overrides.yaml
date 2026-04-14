@@ -1,4 +1,12 @@
 paths:
+  /account-members:
+    get:
+      x-fern-audiences:
+        - public
+  /account-members/{account_member_id}:
+    get:
+      x-fern-audiences:
+        - public
   /api-keys:
     get:
       x-fern-audiences:

@@ -1,4 +1,14 @@
 paths:
+  /account-members:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: listAccountMembers
+  /account-members/{account_member_id}:
+    get:
+      x-fern-sdk-group-name:
+        - accounts
+      x-fern-sdk-method-name: getAccountMember
   /api-keys:
     get:
       x-fern-sdk-group-name:
