@@ -1,0 +1,78 @@
+name: Regenerate SDKs
+
+on:
+  schedule:
+    # Run weekly on Monday at 10 AM UTC
+    - cron: '0 10 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        uses: mikefarah/yq@master
+
+      - name: Regenerate all SDKs
+        env:
+          GH_TOKEN: ${{ secrets.SDK_RELEASE_PAT }}
+        run: |
+          # Map fern group names to release workflow filenames
+          workflow_file() {
+            case "$1" in
+              ts-sdk) echo "typescript-sdk.yml" ;;
+              *) echo "$1.yml" ;;
+            esac
+          }
+
+          for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
+            # Get the downstream repo from generators.yml
+            repo=$(yq ".groups.\"$group\".generators[0].github.repository" fern/generators.yml)
+            if [ -z "$repo" ] || [ "$repo" = "null" ]; then
+              echo "Skipping $group: no github.repository configured"
+              continue
+            fi
+
+            # Get the latest release from the downstream repo
+            release=$(gh release view --repo "$repo" --json tagName,publishedAt 2>/dev/null || echo "")
+            if [ -z "$release" ]; then
+              echo "Skipping $group: no releases found in $repo"
+              continue
+            fi
+            tag=$(echo "$release" | jq -r '.tagName')
+            published=$(echo "$release" | jq -r '.publishedAt')
+
+            # Strip leading 'v' if present
+            version="${tag#v}"
+
+            # Skip if no input changes since that release: neither the shared spec
+            # files nor this group's block in generators.yml have moved.
+            last_commit=$(git rev-list -1 --before="$published" HEAD || echo "")
+            if [ -n "$last_commit" ]; then
+              spec_changed=$(git log "$last_commit..HEAD" --oneline -- \
+                schematic.yaml overrides.yaml openapi-overrides.yml)
+              current_block=$(yq ".groups.\"$group\"" fern/generators.yml)
+              prior_block=$(git show "$last_commit:fern/generators.yml" 2>/dev/null \
+                | yq ".groups.\"$group\"" 2>/dev/null || echo "")
+              if [ -z "$spec_changed" ] && [ "$current_block" = "$prior_block" ]; then
+                echo "Skipping $group: no input changes since $tag ($published)"
+                continue
+              fi
+            fi
+
+            # Trigger the release workflow
+            wf=$(workflow_file "$group")
+            echo "Triggering $wf for $group with version $version (from $repo $tag)..."
+            if gh workflow run "$wf" -f "version=$version"; then
+              echo "  Done: dispatched $wf v$version"
+            else
+              echo "  Failed: could not dispatch $wf v$version"
+            fi
+          done
