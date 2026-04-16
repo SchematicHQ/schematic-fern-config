@@ -12,3 +12,11 @@ src="../../assets/images/catalog/catalog-plans-trial.png"
 />
 
 <Info>If you change trial configuration (e.g. whether a trial is a part of a plan, credit card requirement), any companies currently in a trial will be unaffected, and the new setting will apply going forward.</Info>
+
+## Rendering trial state in your app
+
+Once trials are configured, you can surface trial state directly in your UI. Schematic's React and Vue SDKs expose the current company's plan name, trial status, and trial end date, so you can build things like plan badges, trial countdown banners, and post-trial conversion flows without any additional API calls.
+
+For example, you can show a "Trial" chip with a countdown, prompt expired trial users to upgrade, or render a different experience for companies that converted from a trial versus those that never trialed at all.
+
+See the [React SDK docs](/developer_resources/sdks/react#company-plan-information) or [Vue SDK docs](/developer_resources/sdks/vue#company-plan-information) for usage details.
