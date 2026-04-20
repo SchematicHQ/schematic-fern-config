@@ -309,3 +309,19 @@ paths:
     get:
       x-fern-audiences:
         - public
+  /whoami:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                x-fern-type-name: GetWhoAmI_Response
+                properties:
+                  params:
+                    x-fern-type-name: GetWhoAmI_Params
+components:
+  schemas:
+    WhoAmIResponseData:
+      x-fern-type-name: WhoAmI_ResponseData
+
