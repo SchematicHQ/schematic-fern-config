@@ -1112,6 +1112,9 @@ components:
           type: string
         interval:
           $ref: '#/components/schemas/BillingProductPriceInterval'
+        nickname:
+          type: string
+          nullable: true
         price:
           type: integer
           format: int64
@@ -1164,6 +1167,9 @@ components:
           type: string
           nullable: true
         meter_id:
+          type: string
+          nullable: true
+        nickname:
           type: string
           nullable: true
         package_size:
@@ -1420,6 +1426,9 @@ components:
         is_active:
           type: boolean
         meter_id:
+          type: string
+          nullable: true
+        nickname:
           type: string
           nullable: true
         package_size:
@@ -4001,6 +4010,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        nickname:
+          type: string
+          nullable: true
+          maxLength: 512
         package_size:
           type: integer
           format: int64
