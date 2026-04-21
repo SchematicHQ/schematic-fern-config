@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v313fa646
+  x-rules-engine-schema-version: vf05bf5da
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -2046,7 +2046,8 @@ components:
           nullable: true
           deprecated: true
         feature_usage_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: 'Deprecated: Use Entitlement.MetricPeriod instead.'
           nullable: true
           deprecated: true
@@ -2071,7 +2072,8 @@ components:
           description: If a rule was found, its ID
           nullable: true
         rule_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RuleType'
           description: If a rule was found, its type
           nullable: true
         user_id:
@@ -2405,9 +2407,9 @@ components:
         event_subtype:
           type: string
         month_reset:
-          type: string
+          $ref: '#/components/schemas/MetricPeriodMonthReset'
         period:
-          type: string
+          $ref: '#/components/schemas/MetricPeriod'
         valid_until:
           type: string
           format: date-time
@@ -2538,10 +2540,12 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         notes:
           type: array
@@ -2855,6 +2859,17 @@ components:
         - currency
         - cancel_at_period_end
       title: CompanySubscriptionResponseData
+    ComparableOperator:
+      type: string
+      enum:
+        - eq
+        - gt
+        - gte
+        - is_empty
+        - lt
+        - lte
+        - not_empty
+        - ne
     CompatiblePlans:
       type: object
       properties:
@@ -3200,17 +3215,7 @@ components:
         comparison_trait_definition:
           $ref: '#/components/schemas/TraitDefinition'
         condition_type:
-          type: string
-          enum:
-            - base_plan
-            - billing_product
-            - company
-            - credit
-            - metric
-            - plan
-            - plan_version
-            - trait
-            - user
+          $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
           nullable: true
@@ -3225,34 +3230,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
-          enum:
-            - eq
-            - ne
-            - gt
-            - lt
-            - gte
-            - lte
-            - is_empty
-            - not_empty
+          $ref: '#/components/schemas/ComparableOperator'
         resource_ids:
           type: array
           items:
@@ -3356,7 +3346,7 @@ components:
           type: string
           nullable: true
         condition_type:
-          type: string
+          $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
           nullable: true
@@ -3377,17 +3367,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
+          $ref: '#/components/schemas/ComparableOperator'
         resource_unspecified_ids:
           type: array
           items:
@@ -3430,6 +3422,18 @@ components:
         - trait_value_bool
         - trait_value_int
       title: ConditionResponseData
+    ConditionType:
+      type: string
+      enum:
+        - base_plan
+        - billing_product
+        - company
+        - credit
+        - metric
+        - plan
+        - plan_version
+        - trait
+        - user
     ConditionView:
       type: object
       properties:
@@ -3454,7 +3458,7 @@ components:
           type: string
           nullable: true
         condition_type:
-          type: string
+          $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
           nullable: true
@@ -3475,17 +3479,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
+          $ref: '#/components/schemas/ComparableOperator'
         plan_versions:
           type: array
           items:
@@ -3781,19 +3787,13 @@ components:
         feature_id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -4261,19 +4261,13 @@ components:
         feature_id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         note:
           type: string
           nullable: true
@@ -4476,19 +4470,13 @@ components:
         feature_id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -4581,19 +4569,13 @@ components:
         feature_id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         value_bool:
           type: boolean
           nullable: true
@@ -4983,16 +4965,7 @@ components:
             against instead of a value
           nullable: true
         condition_type:
-          type: string
-          enum:
-            - company
-            - metric
-            - trait
-            - user
-            - plan
-            - plan_version
-            - billing_product
-            - base_plan
+          $ref: '#/components/schemas/ConditionType'
         credit_cost:
           type: number
           description: Cost of credit to use to measure this condition
@@ -5009,39 +4982,24 @@ components:
           type: string
           nullable: true
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: Period of time over which to measure the track event metric
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           description: >-
             When metric_period=current_month, specify whether the month restarts
             based on the calendar month or the billing period
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         metric_value:
           type: integer
           description: Value to compare the track event metric against
           format: int64
           nullable: true
         operator:
-          type: string
-          enum:
-            - eq
-            - ne
-            - gt
-            - gte
-            - lt
-            - lte
-            - is_empty
-            - not_empty
+          $ref: '#/components/schemas/ComparableOperator'
         resource_ids:
           type: array
           description: >-
@@ -5118,14 +5076,9 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RuleType'
           nullable: true
-          enum:
-            - global_override
-            - company_override
-            - plan_entitlement
-            - standard
-            - default
         value:
           type: boolean
       required:
@@ -5240,19 +5193,13 @@ components:
         feature_id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -5479,20 +5426,6 @@ components:
         - name
         - plan_type
       title: CreatePlanRequestBody
-    CreatePlanTraitRequestBody:
-      type: object
-      properties:
-        plan_id:
-          type: string
-        trait_id:
-          type: string
-        trait_value:
-          type: string
-      required:
-        - plan_id
-        - trait_id
-        - trait_value
-      title: CreatePlanTraitRequestBody
     CreatePriceTierRequestBody:
       type: object
       properties:
@@ -7027,7 +6960,8 @@ components:
           format: date-time
           nullable: true
         month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           description: If the period is current_month, when the month resets.
           nullable: true
         monthly_usage_based_price:
@@ -7042,7 +6976,8 @@ components:
           description: Percentage of allocation consumed (0-100+)
           nullable: true
         period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: The period over which usage is measured.
           nullable: true
         plan:
@@ -7107,11 +7042,13 @@ components:
           format: date-time
           nullable: true
         month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           description: If the period is current_month, when the month resets.
           nullable: true
         period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: The period over which usage is measured.
           nullable: true
         plan:
@@ -7243,16 +7180,12 @@ components:
           type: string
           description: The key of the flag associated with the feature
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: >-
             For event-based feature entitlements, the period over which usage is
             tracked
           nullable: true
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
         metric_reset_at:
           type: string
           description: >-
@@ -7261,15 +7194,13 @@ components:
           format: date-time
           nullable: true
         month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           description: >-
             For event-based feature entitlements that have a monthly period,
             whether that monthly reset is based on the calendar month or a
             billing cycle
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         soft_limit:
           type: integer
           description: >-
@@ -7511,7 +7442,8 @@ components:
           format: date-time
           nullable: true
         month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           description: If the period is current_month, when the month resets.
           nullable: true
         monthly_usage_based_price:
@@ -7526,7 +7458,8 @@ components:
           description: Percentage of allocation consumed (0-100+)
           nullable: true
         period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           description: The period over which usage is measured.
           nullable: true
         plan:
@@ -8148,6 +8081,18 @@ components:
         - event_name
         - event_payload_key
       title: MeterRequestBody
+    MetricPeriod:
+      type: string
+      enum:
+        - all_time
+        - current_day
+        - current_month
+        - current_week
+    MetricPeriodMonthReset:
+      type: string
+      enum:
+        - billing_cycle
+        - first_of_month
     OrderedPlansInGroup:
       type: object
       properties:
@@ -8745,10 +8690,12 @@ components:
         metered_yearly_price:
           $ref: '#/components/schemas/BillingPriceView'
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
@@ -9969,15 +9916,7 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
-          enum:
-            - default
-            - global_override
-            - company_override
-            - company_override_usage_exceeded
-            - plan_entitlement
-            - plan_entitlement_usage_exceeded
-            - standard
+          $ref: '#/components/schemas/RuleType'
         value:
           type: boolean
       required:
@@ -10003,7 +9942,7 @@ components:
           type: string
           nullable: true
         condition_type:
-          type: string
+          $ref: '#/components/schemas/ConditionType'
         created_at:
           type: string
           format: date-time
@@ -10018,17 +9957,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
+          $ref: '#/components/schemas/ComparableOperator'
         resource_ids:
           type: array
           items:
@@ -10133,7 +10074,7 @@ components:
           type: string
           nullable: true
         condition_type:
-          type: string
+          $ref: '#/components/schemas/ConditionType'
         created_at:
           type: string
           format: date-time
@@ -10148,17 +10089,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
+          $ref: '#/components/schemas/ComparableOperator'
         resource_ids:
           type: array
           items:
@@ -10218,7 +10161,7 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
+          $ref: '#/components/schemas/RuleType'
         updated_at:
           type: string
           format: date-time
@@ -10255,7 +10198,7 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
+          $ref: '#/components/schemas/RuleType'
         updated_at:
           type: string
           format: date-time
@@ -10271,6 +10214,16 @@ components:
         - created_at
         - updated_at
       title: RuleResponseData
+    RuleType:
+      type: string
+      enum:
+        - company_override
+        - company_override_usage_exceeded
+        - default
+        - global_override
+        - plan_entitlement
+        - plan_entitlement_usage_exceeded
+        - standard
     RuleView:
       type: object
       properties:
@@ -10302,7 +10255,7 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
+          $ref: '#/components/schemas/RuleType'
         updated_at:
           type: string
           format: date-time
@@ -10341,7 +10294,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v313fa646
+        - vf05bf5da
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -10365,13 +10318,9 @@ components:
           type: string
           nullable: true
         feature_usage_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineMetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
         feature_usage_reset_at:
           type: string
           format: date-time
@@ -10387,16 +10336,9 @@ components:
           type: string
           nullable: true
         rule_type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineRuleType'
           nullable: true
-          enum:
-            - default
-            - global_override
-            - company_override
-            - company_override_usage_exceeded
-            - plan_entitlement
-            - plan_entitlement_usage_exceeded
-            - standard
         user_id:
           type: string
           nullable: true
@@ -10492,17 +10434,9 @@ components:
         event_subtype:
           type: string
         month_reset:
-          type: string
-          enum:
-            - first_of_month
-            - billing_cycle
+          $ref: '#/components/schemas/RulesengineMetricPeriodMonthReset'
         period:
-          type: string
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
+          $ref: '#/components/schemas/RulesengineMetricPeriod'
         valid_until:
           type: string
           format: date-time
@@ -10528,17 +10462,7 @@ components:
         comparison_trait_definition:
           $ref: '#/components/schemas/RulesengineTraitDefinition'
         condition_type:
-          type: string
-          enum:
-            - base_plan
-            - billing_product
-            - company
-            - credit
-            - metric
-            - plan
-            - plan_version
-            - trait
-            - user
+          $ref: '#/components/schemas/RulesengineConditionType'
         consumption_rate:
           type: number
           nullable: true
@@ -10553,34 +10477,19 @@ components:
         id:
           type: string
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineMetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineMetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         metric_value:
           type: integer
           format: int64
           nullable: true
         operator:
-          type: string
-          enum:
-            - eq
-            - ne
-            - gt
-            - lt
-            - gte
-            - lte
-            - is_empty
-            - not_empty
+          $ref: '#/components/schemas/ComparableOperator'
         resource_ids:
           type: array
           items:
@@ -10610,6 +10519,19 @@ components:
       required:
         - conditions
       title: RulesengineConditionGroup
+    RulesengineConditionType:
+      type: string
+      title: RulesengineConditionType
+      enum:
+        - base_plan
+        - billing_product
+        - company
+        - credit
+        - metric
+        - plan
+        - plan_version
+        - trait
+        - user
     RulesengineEntitlementValueType:
       type: string
       title: RulesengineEntitlementValueType
@@ -10673,16 +10595,12 @@ components:
           type: string
           description: The key of the flag associated with the feature
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineMetricPeriod'
           description: >-
             For event-based feature entitlements, the period over which usage is
             tracked
           nullable: true
-          enum:
-            - all_time
-            - current_day
-            - current_month
-            - current_week
         metric_reset_at:
           type: string
           description: >-
@@ -10691,15 +10609,13 @@ components:
           format: date-time
           nullable: true
         month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/RulesengineMetricPeriodMonthReset'
           description: >-
             For event-based feature entitlements that have a monthly period,
             whether that monthly reset is based on the calendar month or a
             billing cycle
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         soft_limit:
           type: integer
           description: >-
@@ -10749,6 +10665,20 @@ components:
         - rules
         - default_value
       title: RulesengineFlag
+    RulesengineMetricPeriod:
+      type: string
+      title: RulesengineMetricPeriod
+      enum:
+        - all_time
+        - current_day
+        - current_month
+        - current_week
+    RulesengineMetricPeriodMonthReset:
+      type: string
+      title: RulesengineMetricPeriodMonthReset
+      enum:
+        - billing_cycle
+        - first_of_month
     RulesengineRule:
       type: object
       properties:
@@ -10777,15 +10707,7 @@ components:
           type: integer
           format: int64
         rule_type:
-          type: string
-          enum:
-            - default
-            - global_override
-            - company_override
-            - company_override_usage_exceeded
-            - plan_entitlement
-            - plan_entitlement_usage_exceeded
-            - standard
+          $ref: '#/components/schemas/RulesengineRuleType'
         value:
           type: boolean
       required:
@@ -10799,6 +10721,17 @@ components:
         - condition_groups
         - value
       title: RulesengineRule
+    RulesengineRuleType:
+      type: string
+      title: RulesengineRuleType
+      enum:
+        - company_override
+        - company_override_usage_exceeded
+        - default
+        - global_override
+        - plan_entitlement
+        - plan_entitlement_usage_exceeded
+        - standard
     RulesengineSubscription:
       type: object
       properties:
@@ -11333,19 +11266,13 @@ components:
           format: date-time
           nullable: true
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         note:
           type: string
           nullable: true
@@ -11467,19 +11394,13 @@ components:
           type: number
           nullable: true
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         value_bool:
           type: boolean
           nullable: true
@@ -11639,19 +11560,13 @@ components:
           nullable: true
           maxItems: 50
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
-          enum:
-            - all_time
-            - current_month
-            - current_week
-            - current_day
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
-          enum:
-            - first_of_month
-            - billing_cycle
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -11885,17 +11800,6 @@ components:
         - plan_id
         - traits
       title: UpdatePlanTraitBulkRequestBody
-    UpdatePlanTraitRequestBody:
-      type: object
-      properties:
-        plan_id:
-          type: string
-        trait_value:
-          type: string
-      required:
-        - plan_id
-        - trait_value
-      title: UpdatePlanTraitRequestBody
     UpdatePlanTraitTraitRequestBody:
       type: object
       properties:
@@ -12308,10 +12212,12 @@ components:
         metered_price:
           $ref: '#/components/schemas/BillingPriceView'
         metric_period:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
           nullable: true
         metric_period_month_reset:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
         monthly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -23070,45 +22976,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    post:
-      operationId: createPlanTrait
-      summary: Create plan trait
-      tags:
-        - companies
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreatePlanTraitRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/PlanTraitResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CreatePlanTraitParams
-                required:
-                  - data
-                  - params
-                title: CreatePlanTraitResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /plan-traits/{plan_trait_id}:
     get:
       operationId: getPlanTrait
@@ -23140,92 +23007,6 @@ paths:
                   - data
                   - params
                 title: GetPlanTraitResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    put:
-      operationId: updatePlanTrait
-      summary: Update plan trait
-      tags:
-        - companies
-      parameters:
-        - name: plan_trait_id
-          in: path
-          description: plan_trait_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdatePlanTraitRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/PlanTraitResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: UpdatePlanTraitParams
-                required:
-                  - data
-                  - params
-                title: UpdatePlanTraitResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      operationId: deletePlanTrait
-      summary: Delete plan trait
-      tags:
-        - companies
-      parameters:
-        - name: plan_trait_id
-          in: path
-          description: plan_trait_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/DeleteResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: DeletePlanTraitParams
-                required:
-                  - data
-                  - params
-                title: DeletePlanTraitResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
