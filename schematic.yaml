@@ -9888,6 +9888,30 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
+    RetryCustomPlanBillingRequestBody:
+      type: object
+      properties:
+        activation_strategy:
+          allOf:
+            - $ref: '#/components/schemas/CustomPlanActivationStrategy'
+          nullable: true
+        customer_email:
+          type: string
+          maxLength: 255
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 365
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          maxItems: 100
+      required:
+        - customer_email
+        - pay_in_advance
+      title: RetryCustomPlanBillingRequestBody
     Rule:
       type: object
       properties:
@@ -18745,6 +18769,163 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /custom-plan-billings:
+    get:
+      operationId: listCustomPlanBillings
+      summary: List custom plan billings
+      tags:
+        - plans
+      parameters:
+        - name: company_id
+          in: query
+          description: Filter by company ID
+          schema:
+            type: string
+            description: Filter by company ID
+        - name: plan_id
+          in: query
+          description: Filter by plan ID
+          schema:
+            type: string
+            description: Filter by plan ID
+        - name: status
+          in: query
+          description: Filter by billing status
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/CustomPlanBillingStatus'
+            description: Filter by billing status
+        - name: statuses
+          in: query
+          description: Filter by multiple billing statuses
+          schema:
+            type: array
+            description: Filter by multiple billing statuses
+            items:
+              $ref: '#/components/schemas/CustomPlanBillingStatus'
+            maxItems: 10
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomPlanBillingResponseData'
+                    title: ListCustomPlanBillingsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Filter by company ID
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      plan_id:
+                        type: string
+                        description: Filter by plan ID
+                      status:
+                        allOf:
+                          - $ref: '#/components/schemas/CustomPlanBillingStatus'
+                        description: Filter by billing status
+                      statuses:
+                        type: array
+                        description: Filter by multiple billing statuses
+                        items:
+                          $ref: '#/components/schemas/CustomPlanBillingStatus'
+                        maxItems: 10
+                    title: ListCustomPlanBillingsParams
+                required:
+                  - data
+                  - params
+                title: ListCustomPlanBillingsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plan-billings/{custom_plan_billing_id}/retry:
+    put:
+      operationId: retryCustomPlanBilling
+      summary: Retry custom plan billing
+      tags:
+        - plans
+      parameters:
+        - name: custom_plan_billing_id
+          in: path
+          description: custom_plan_billing_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetryCustomPlanBillingRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CustomPlanBillingResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: RetryCustomPlanBillingParams
+                required:
+                  - data
+                  - params
+                title: RetryCustomPlanBillingResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /custom-plans:
     post:
       operationId: createCustomPlan
@@ -23528,6 +23709,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: exclude_company_scoped
+          in: query
+          description: >-
+            Exclude plans that are scoped to a company (custom plans assigned to
+            a company)
+          schema:
+            type: boolean
+            description: >-
+              Exclude plans that are scoped to a company (custom plans assigned
+              to a company)
         - name: for_fallback_plan
           in: query
           description: Filter for plans valid as fallback plans (not linked to billing)
@@ -23646,6 +23837,11 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      exclude_company_scoped:
+                        type: boolean
+                        description: >-
+                          Exclude plans that are scoped to a company (custom
+                          plans assigned to a company)
                       for_fallback_plan:
                         type: boolean
                         description: >-
@@ -24164,6 +24360,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: exclude_company_scoped
+          in: query
+          description: >-
+            Exclude plans that are scoped to a company (custom plans assigned to
+            a company)
+          schema:
+            type: boolean
+            description: >-
+              Exclude plans that are scoped to a company (custom plans assigned
+              to a company)
         - name: for_fallback_plan
           in: query
           description: Filter for plans valid as fallback plans (not linked to billing)
@@ -24278,6 +24484,11 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      exclude_company_scoped:
+                        type: boolean
+                        description: >-
+                          Exclude plans that are scoped to a company (custom
+                          plans assigned to a company)
                       for_fallback_plan:
                         type: boolean
                         description: >-
