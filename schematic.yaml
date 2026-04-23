@@ -2647,7 +2647,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureDetailResponseData'
+            $ref: '#/components/schemas/FeatureInPlanResponseData'
           maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
@@ -3733,6 +3733,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -4807,6 +4810,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -4843,6 +4849,9 @@ components:
         key:
           type: string
           maxLength: 512
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -5040,6 +5049,9 @@ components:
         key:
           type: string
           maxLength: 512
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -6945,7 +6957,7 @@ components:
         entitlement_type:
           $ref: '#/components/schemas/EntitlementType'
         feature:
-          $ref: '#/components/schemas/FeatureDetailResponseData'
+          $ref: '#/components/schemas/FeatureInPlanResponseData'
         has_valid_allocation:
           type: boolean
           description: Whether a valid allocation exists
@@ -7098,6 +7110,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
+        maintainer:
+          $ref: '#/components/schemas/AccountMemberResponseData'
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -7224,6 +7241,74 @@ components:
         - feature_key
         - value_type
       title: FeatureEntitlement
+    FeatureInPlanResponseData:
+      type: object
+      properties:
+        billing_linked_resource:
+          $ref: '#/components/schemas/BillingLinkedResourceResponseData'
+        created_at:
+          type: string
+          format: date-time
+        description:
+          type: string
+        event_subtype:
+          type: string
+          nullable: true
+        event_summary:
+          $ref: '#/components/schemas/EventSummaryResponseData'
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
+        flags:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlagInPlanResponseData'
+          maxItems: 1000
+        icon:
+          type: string
+        id:
+          type: string
+        lifecycle_phase:
+          allOf:
+            - $ref: '#/components/schemas/FeatureLifecyclePhase'
+          nullable: true
+        maintainer_account_member_id:
+          type: string
+          nullable: true
+        maintainer_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewObject'
+          maxItems: 1000
+        plural_name:
+          type: string
+          nullable: true
+        singular_name:
+          type: string
+          nullable: true
+        trait:
+          $ref: '#/components/schemas/EntityTraitDefinitionResponseData'
+        trait_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - description
+        - feature_type
+        - icon
+        - created_at
+        - updated_at
+        - flags
+        - plans
+      title: FeatureInPlanResponseData
     FeatureLedgerResponseData:
       type: object
       properties:
@@ -7273,6 +7358,9 @@ components:
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
+          nullable: true
+        maintainer_account_member_id:
+          type: string
           nullable: true
         maintainer_id:
           type: string
@@ -7427,7 +7515,7 @@ components:
         entitlement_type:
           $ref: '#/components/schemas/EntitlementType'
         feature:
-          $ref: '#/components/schemas/FeatureDetailResponseData'
+          $ref: '#/components/schemas/FeatureInPlanResponseData'
         has_valid_allocation:
           type: boolean
           description: Whether a valid allocation exists
@@ -7612,6 +7700,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        maintainer:
+          $ref: '#/components/schemas/AccountMemberResponseData'
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -7636,6 +7729,58 @@ components:
         - updated_at
         - rules
       title: FlagDetailResponseData
+    FlagInPlanResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        default_value:
+          type: boolean
+        description:
+          type: string
+        feature:
+          $ref: '#/components/schemas/FeatureResponseData'
+        feature_id:
+          type: string
+          nullable: true
+        flag_type:
+          $ref: '#/components/schemas/FlagType'
+        id:
+          type: string
+        key:
+          type: string
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
+        maintainer_account_member_id:
+          type: string
+          nullable: true
+        maintainer_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleDetailResponseData'
+          maxItems: 1000
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - created_at
+        - default_value
+        - description
+        - flag_type
+        - id
+        - key
+        - name
+        - updated_at
+        - rules
+      title: FlagInPlanResponseData
     FlagResponseData:
       type: object
       properties:
@@ -7655,6 +7800,9 @@ components:
           type: string
         key:
           type: string
+        maintainer_account_member_id:
+          type: string
+          nullable: true
         maintainer_id:
           type: string
           nullable: true
@@ -8599,7 +8747,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureDetailResponseData'
+            $ref: '#/components/schemas/FeatureInPlanResponseData'
           maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
@@ -8951,7 +9099,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureDetailResponseData'
+            $ref: '#/components/schemas/FeatureInPlanResponseData'
           maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
@@ -9529,7 +9677,7 @@ components:
         features:
           type: array
           items:
-            $ref: '#/components/schemas/FeatureDetailResponseData'
+            $ref: '#/components/schemas/FeatureInPlanResponseData'
           maxItems: 1000
         icon:
           $ref: '#/components/schemas/PlanIcon'
@@ -11490,6 +11638,9 @@ components:
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
+          nullable: true
+        maintainer_account_member_id:
+          type: string
           nullable: true
         maintainer_id:
           type: string
