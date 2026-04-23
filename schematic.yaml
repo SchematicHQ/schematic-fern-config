@@ -143,6 +143,8 @@ components:
         description:
           type: string
           nullable: true
+        environment:
+          $ref: '#/components/schemas/EnvironmentResponseData'
         environment_id:
           type: string
           nullable: true
@@ -184,6 +186,8 @@ components:
         description:
           type: string
           nullable: true
+        environment:
+          $ref: '#/components/schemas/EnvironmentResponseData'
         environment_id:
           type: string
           nullable: true
@@ -232,6 +236,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        environment:
+          $ref: '#/components/schemas/EnvironmentResponseData'
         environment_id:
           type: string
           nullable: true
@@ -299,6 +305,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        environment:
+          $ref: '#/components/schemas/EnvironmentResponseData'
         environment_id:
           type: string
           nullable: true
@@ -2617,7 +2625,7 @@ components:
             type: string
           maxItems: 1000
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/BillingProviderType'
         copied_from_plan_id:
           type: string
           nullable: true
@@ -2837,6 +2845,8 @@ components:
           items:
             $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
           maxItems: 1000
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         status:
           type: string
         subscription_external_id:
@@ -2853,6 +2863,7 @@ components:
         - interval
         - products
         - discounts
+        - provider_type
         - subscription_external_id
         - total_price
         - status
@@ -3734,9 +3745,6 @@ components:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
@@ -4813,9 +4821,6 @@ components:
         maintainer_account_member_id:
           type: string
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
           maxLength: 512
@@ -4850,9 +4855,6 @@ components:
           type: string
           maxLength: 512
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
@@ -5050,9 +5052,6 @@ components:
           type: string
           maxLength: 512
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
@@ -7115,9 +7114,6 @@ components:
         maintainer_account_member_id:
           type: string
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
         plans:
@@ -7274,9 +7270,6 @@ components:
         maintainer_account_member_id:
           type: string
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
         plans:
@@ -7360,9 +7353,6 @@ components:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
@@ -7639,9 +7629,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
         plans:
@@ -7705,9 +7692,6 @@ components:
         maintainer_account_member_id:
           type: string
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
         rules:
@@ -7757,9 +7741,6 @@ components:
         maintainer_account_member_id:
           type: string
           nullable: true
-        maintainer_id:
-          type: string
-          nullable: true
         name:
           type: string
         rules:
@@ -7801,9 +7782,6 @@ components:
         key:
           type: string
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
@@ -7851,9 +7829,6 @@ components:
         last_checked_at:
           type: string
           format: date-time
-          nullable: true
-        maintainer_id:
-          type: string
           nullable: true
         name:
           type: string
@@ -8728,7 +8703,7 @@ components:
           type: string
           nullable: true
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/BillingProviderType'
         copied_from_plan_id:
           type: string
           nullable: true
@@ -9073,7 +9048,7 @@ components:
             type: string
           maxItems: 1000
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/BillingProviderType'
         copied_from_plan_id:
           type: string
           nullable: true
@@ -9649,7 +9624,7 @@ components:
             type: string
           maxItems: 1000
         controlled_by:
-          type: string
+          $ref: '#/components/schemas/BillingProviderType'
         copied_from_plan_id:
           type: string
           nullable: true
@@ -11640,9 +11615,6 @@ components:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
           nullable: true
         maintainer_account_member_id:
-          type: string
-          nullable: true
-        maintainer_id:
           type: string
           nullable: true
         name:
