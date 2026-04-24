@@ -44,6 +44,12 @@ groups:
                 - LocalCache
                 - Schematic
                 - SchematicConfig
+          extras:
+            datastream:
+              - "websockets>=10.0"
+              - "wasmtime>=19.0.0"
+            rulesengine:
+              - "wasmtime>=19.0.0"
         smart-casing: false
   csharp-sdk:
     generators:
@@ -63,6 +69,7 @@ groups:
           extra-dependencies:
             moq: 4.20.70
             Moq.Contrib.HttpClient: 1.4.0
+          generate-mock-server-tests: false
         smart-casing: false
   ts-sdk:
     generators:
