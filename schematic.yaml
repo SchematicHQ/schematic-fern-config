@@ -2285,6 +2285,23 @@ components:
         - provider_type
         - status
       title: CheckoutSubscription
+    CompanyCreditBalanceResponseData:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        remaining:
+          type: number
+        source:
+          $ref: '#/components/schemas/BillingProviderType'
+        total:
+          type: number
+          nullable: true
+      required:
+        - credit_id
+        - remaining
+        - source
+      title: CompanyCreditBalanceResponseData
     CompanyDetailResponseData:
       type: object
       properties:
@@ -13797,6 +13814,53 @@ paths:
                   - data
                   - params
                 title: SoftDeleteBillingCreditResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/balance:
+    get:
+      operationId: listCompanyCreditBalances
+      summary: List company credit balances
+      tags:
+        - credits
+      parameters:
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyCreditBalanceResponseData'
+                    title: ListCompanyCreditBalancesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                    title: ListCompanyCreditBalancesParams
+                required:
+                  - data
+                  - params
+                title: ListCompanyCreditBalancesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
