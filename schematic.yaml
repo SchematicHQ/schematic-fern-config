@@ -118,6 +118,41 @@ components:
       enum:
         - admin
         - member
+    ActivityEntryResponseData:
+      type: object
+      properties:
+        actor_name:
+          type: string
+        method:
+          type: string
+        resource_name:
+          type: string
+        resource_type:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        title:
+          type: string
+      required:
+        - actor_name
+        - method
+        - resource_name
+        - resource_type
+        - timestamp
+        - title
+      title: ActivityEntryResponseData
+    ActivityResponseResponseData:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityEntryResponseData'
+          maxItems: 1000
+      required:
+        - entries
+      title: ActivityResponseResponseData
     ActorType:
       type: string
       enum:
@@ -6654,6 +6689,23 @@ components:
         - updated_at
         - api_keys
       title: EnvironmentDetailResponseData
+    EnvironmentFeatureUsageTimeSeriesResponseData:
+      type: object
+      properties:
+        event_subtype:
+          type: string
+        feature_id:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentUsagePointResponseData'
+          maxItems: 1000
+      required:
+        - event_subtype
+        - feature_id
+        - points
+      title: EnvironmentFeatureUsageTimeSeriesResponseData
     EnvironmentResponseData:
       type: object
       properties:
@@ -6676,12 +6728,42 @@ components:
         - created_at
         - updated_at
       title: EnvironmentResponseData
+    EnvironmentTraitUsageTimeSeriesResponseData:
+      type: object
+      properties:
+        feature_id:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentUsagePointResponseData'
+          maxItems: 1000
+        trait_definition_id:
+          type: string
+      required:
+        - feature_id
+        - points
+        - trait_definition_id
+      title: EnvironmentTraitUsageTimeSeriesResponseData
     EnvironmentType:
       type: string
       enum:
         - development
         - production
         - staging
+    EnvironmentUsagePointResponseData:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        usage:
+          type: integer
+          format: int64
+      required:
+        - timestamp
+        - usage
+      title: EnvironmentUsagePointResponseData
     EventDetailResponseData:
       type: object
       properties:
@@ -7897,6 +7979,30 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    InsightsSummaryResponseData:
+      type: object
+      properties:
+        active_credits:
+          type: number
+        paid_companies:
+          type: integer
+          format: int64
+        total_companies:
+          type: integer
+          format: int64
+        total_features:
+          type: integer
+          format: int64
+        total_plans:
+          type: integer
+          format: int64
+      required:
+        - active_credits
+        - paid_companies
+        - total_companies
+        - total_features
+        - total_plans
+      title: InsightsSummaryResponseData
     IntegrationType:
       type: string
       enum:
@@ -9275,6 +9381,36 @@ components:
         - sync_customer_billing_details
         - tax_collection_enabled
       title: PlanGroupResponseData
+    PlanGrowthPointResponseData:
+      type: object
+      properties:
+        month:
+          type: string
+          format: date-time
+        plan_id:
+          type: string
+        plan_name:
+          type: string
+        subscribers:
+          type: integer
+          format: int64
+      required:
+        - month
+        - plan_id
+        - plan_name
+        - subscribers
+      title: PlanGrowthPointResponseData
+    PlanGrowthResponseData:
+      type: object
+      properties:
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGrowthPointResponseData'
+          maxItems: 1000
+      required:
+        - points
+      title: PlanGrowthResponseData
     PlanIcon:
       type: string
       enum:
@@ -11232,6 +11368,42 @@ components:
         - hourly
         - monthly
         - weekly
+    TopFeatureByUsageResponseData:
+      type: object
+      properties:
+        change_pct:
+          type: number
+          nullable: true
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+        plural_name:
+          type: string
+          nullable: true
+        prior_usage:
+          type: integer
+          format: int64
+        usage:
+          type: integer
+          format: int64
+      required:
+        - feature_id
+        - feature_name
+        - prior_usage
+        - usage
+      title: TopFeatureByUsageResponseData
+    TopFeaturesByUsageResponseData:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopFeatureByUsageResponseData'
+          maxItems: 1000
+      required:
+        - features
+      title: TopFeaturesByUsageResponseData
     TraitDefinition:
       type: object
       properties:
@@ -22063,6 +22235,326 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /insights/activity:
+    get:
+      operationId: getActivity
+      summary: Get activity
+      tags:
+        - insights
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int64
+            maximum: 50
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ActivityResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        format: int64
+                        maximum: 50
+                        minimum: 1
+                    title: GetActivityParams
+                required:
+                  - data
+                  - params
+                title: GetActivityResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /insights/feature-usage-timeseries:
+    get:
+      operationId: getEnvironmentFeatureUsageTimeSeries
+      summary: Get environment feature usage time series
+      tags:
+        - insights
+      parameters:
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: feature_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: granularity
+          in: query
+          schema:
+            $ref: '#/components/schemas/TimeSeriesGranularity'
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/EnvironmentFeatureUsageTimeSeriesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        format: date-time
+                      feature_id:
+                        type: string
+                      granularity:
+                        $ref: '#/components/schemas/TimeSeriesGranularity'
+                      start_time:
+                        type: string
+                        format: date-time
+                    title: GetEnvironmentFeatureUsageTimeSeriesParams
+                required:
+                  - data
+                  - params
+                title: GetEnvironmentFeatureUsageTimeSeriesResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /insights/plan-growth:
+    get:
+      operationId: getPlanGrowth
+      summary: Get plan growth
+      tags:
+        - insights
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+            format: int64
+            maximum: 24
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanGrowthResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      months:
+                        type: integer
+                        format: int64
+                        maximum: 24
+                        minimum: 1
+                    title: GetPlanGrowthParams
+                required:
+                  - data
+                  - params
+                title: GetPlanGrowthResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /insights/summary:
+    get:
+      operationId: getSummary
+      summary: Get summary
+      tags:
+        - insights
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/InsightsSummaryResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetSummaryParams
+                required:
+                  - data
+                  - params
+                title: GetSummaryResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /insights/top-features:
+    get:
+      operationId: getTopFeaturesByUsage
+      summary: Get top features by usage
+      tags:
+        - insights
+      parameters:
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int64
+            maximum: 20
+            minimum: 1
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TopFeaturesByUsageResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        format: date-time
+                      limit:
+                        type: integer
+                        format: int64
+                        maximum: 20
+                        minimum: 1
+                      start_time:
+                        type: string
+                        format: date-time
+                    title: GetTopFeaturesByUsageParams
+                required:
+                  - data
+                  - params
+                title: GetTopFeaturesByUsageResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /insights/trait-usage-timeseries:
+    get:
+      operationId: getEnvironmentTraitUsageTimeSeries
+      summary: Get environment trait usage time series
+      tags:
+        - insights
+      parameters:
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: feature_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: granularity
+          in: query
+          schema:
+            $ref: '#/components/schemas/TimeSeriesGranularity'
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/EnvironmentTraitUsageTimeSeriesResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        format: date-time
+                      feature_id:
+                        type: string
+                      granularity:
+                        $ref: '#/components/schemas/TimeSeriesGranularity'
+                      start_time:
+                        type: string
+                        format: date-time
+                    title: GetEnvironmentTraitUsageTimeSeriesParams
+                required:
+                  - data
+                  - params
+                title: GetEnvironmentTraitUsageTimeSeriesResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /integrations/{type}/webhook-url:
     get:
       operationId: getIntegrationWebhookUrl
@@ -26595,6 +27087,7 @@ tags:
   - name: entitlements
   - name: events
   - name: features
+  - name: insights
   - name: integrationsapi
   - name: planbundle
   - name: plangroups
