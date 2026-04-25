@@ -7984,6 +7984,11 @@ components:
       properties:
         active_credits:
           type: number
+        mrr:
+          type: array
+          items:
+            $ref: '#/components/schemas/MrrResponseData'
+          maxItems: 1000
         paid_companies:
           type: integer
           format: int64
@@ -7998,6 +8003,7 @@ components:
           format: int64
       required:
         - active_credits
+        - mrr
         - paid_companies
         - total_companies
         - total_features
@@ -8339,6 +8345,18 @@ components:
       enum:
         - billing_cycle
         - first_of_month
+    MrrResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        currency:
+          type: string
+      required:
+        - amount
+        - currency
+      title: MrrResponseData
     OrderedPlansInGroup:
       type: object
       properties:
