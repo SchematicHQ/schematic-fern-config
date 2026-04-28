@@ -4840,6 +4840,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/EventType'
           description: Either 'identify' or 'track'
+        idempotency_key:
+          type: string
+          description: >-
+            Optional client-supplied key. Duplicate events with the same key
+            (scoped to the environment) are dropped for 24h.
+          nullable: true
+          maxLength: 255
         sent_at:
           type: string
           description: >-
@@ -6298,6 +6305,10 @@ components:
           type: string
         body:
           type: object
+        idempotency_key:
+          type: string
+          nullable: true
+          maxLength: 255
         sent_at:
           type: string
           format: date-time
@@ -6805,6 +6816,9 @@ components:
           maxItems: 1000
         id:
           type: string
+        idempotency_key:
+          type: string
+          nullable: true
         loaded_at:
           type: string
           format: date-time
@@ -6883,6 +6897,9 @@ components:
           maxItems: 1000
         id:
           type: string
+        idempotency_key:
+          type: string
+          nullable: true
         loaded_at:
           type: string
           format: date-time
@@ -20410,6 +20427,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: idempotency_key
+          in: query
+          schema:
+            type: string
+            maxLength: 255
         - name: user_id
           in: query
           schema:
@@ -20460,6 +20482,9 @@ paths:
                         maxItems: 100
                       flag_id:
                         type: string
+                      idempotency_key:
+                        type: string
+                        maxLength: 255
                       limit:
                         type: integer
                         description: Page limit (default 100)
