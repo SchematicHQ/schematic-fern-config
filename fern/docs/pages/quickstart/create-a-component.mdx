@@ -48,7 +48,7 @@ To add our component to the quickstart app, we'll need to get it's component id 
 
 Because components enable users to take sensitive actions like changing their billing status, Schematic requires an additional security step to render a component. This step is the creation of a temporary access token that is scoped to the current company. These tokens require a Schematic Secret Key, so they must be generated on your server (it is important to never expose a Schematic Secret Key to the client.)
 
-All of our SDKs support creating temporary access tokens. The value for `lookup` is just the keys you'd use to lookup the comapany (learn more [here](/developer_resources/key_management)). Below is a typescript example.
+All of our SDKs support creating temporary access tokens. The value for `lookup` is just the keys you'd use to lookup the company (learn more [here](/developer_resources/key_management)). Below is a typescript example.
 
 ```
 import { SchematicClient } from "@schematichq/schematic-typescript-node";
