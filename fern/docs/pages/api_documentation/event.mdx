@@ -2,7 +2,7 @@
 title: The Event object
 ---
 
-The `Event` object describes events from your application that can be associated with `Users` , `Companies`, and `Features`. A new `Event` is created when it is submitted via the API. 
+The `Event` object describes events from your application that can be associated with `Users` , `Companies`, and `Features`. A new `Event` is created when it is submitted via the API.
 
 Events are typically sent to Schematic to create or update `Users` or `Companies` (identify events), or to log usage events (track events) for usage analytics or metering.
 
@@ -66,6 +66,10 @@ Current status of event in Schematic data pipeline (pending, success, failed, un
 `Event` payload sent to Schematic (either an identify or track payload).
 </ParamField>
 
+<ParamField path="idempotency_key" type="string">
+Optional client-supplied key used to deduplicate events. If a second event is submitted with the same `idempotency_key` within 24 hours, scoped to the same environment and event type, it is dropped before processing.
+</ParamField>
+
 <Aside>
 
 ```json Response
@@ -85,6 +89,7 @@ Current status of event in Schematic data pipeline (pending, success, failed, un
     "subtype" : "search_query",
     "api_key" : "api_key",
     "processing_status" : "enriched",
+    "idempotency_key" : "order-9f3b2c-attempt-1",
 	"body" : {
 		    "company": {
 		      "id": "comp_8414zCTfoJ4"
