@@ -20,6 +20,8 @@ There are two types of metered features in Schematic - trait-based and event-bas
 
 Event-based features also support **negative quantities** for adjustments such as refunds or corrections. Negative quantity events must be submitted using a secret API key. See [Negative Quantities](/billing/usage-based-billing#negative-quantities-usage-adjustments) for details.
 
+To safely retry network calls without double-counting usage, you can submit an optional `idempotency_key` with each event. Duplicate events with the same key — scoped to the same environment and event type — are dropped for 24 hours. See the [Event object](/api-documentation/event#idempotency_key) for details.
+
 <Info>
 You can read more about feature types [here](/feature-management/feature-types).
 </Info>
