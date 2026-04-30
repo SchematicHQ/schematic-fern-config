@@ -3954,6 +3954,10 @@ components:
         external_resource_id:
           type: string
           maxLength: 255
+        external_resource_version:
+          type: string
+          nullable: true
+          maxLength: 64
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
