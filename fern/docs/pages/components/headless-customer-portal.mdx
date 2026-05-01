@@ -1,0 +1,294 @@
+---
+title: Building Your Own Customer Portal
+
+slug: components/headless-customer-portal
+---
+
+Schematic's [customer portal component](/components/set-up) is built to handle the full range of billing and entitlement scenarios that Schematic supports, from simple flat-rate plans to complex tiered pricing with usage-based billing, credits, and multi-currency support. The component is designed to be customized visually and dropped in to save your team time immediately, while automatically adapting as your pricing and packaging evolves.
+
+That said, if you'd rather build your own portal to fully control the experience, this guide covers the APIs you'll need and the functionality you'll need to build to fully replace Schematic's customer portal component.
+
+<Note>This guide only covers building your own customer portal. You will still need to use Schematic's Checkout Component to handle checkout. See our [launching checkout programatically guide](/components/advanced-usage#launch-checkout-programmatically) for more info</Note>
+
+## Authentication
+
+Every endpoint requires a **temporary access token**, which your backend creates via the Schematic API (`POST /temporary-access-tokens`). The token is scoped to a specific company and is short-lived. Pass it to your frontend and include it on every request:
+
+```
+X-Schematic-Api-Key: token_abc12345678901234567890123456
+```
+
+## Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/components/hydrate` | GET | Get full billing state for a company |
+| `/components/invoices` | GET | List invoices (paginated) |
+| `/checkout/balance` | GET | Customer credit/debit balance |
+| `/checkout/unsubscribe` | DELETE | Cancel a subscription |
+| `/components/setup-intent` | POST | Create a Stripe SetupIntent for payment method updates |
+| `/checkout/paymentmethod/update` | POST | Update the default payment method |
+| `/checkout/paymentmethod/{id}` | DELETE | Remove a payment method |
+
+## Fetching portal data
+
+```
+GET /components/hydrate
+```
+
+This returns the full billing state for the authenticated company in a single call. Key fields in the response:
+
+<ParamField path="active_plans" type="array">
+Plans the company is currently on. Each includes name, description, pricing, entitlements, and features. The entry with `current: true` is their primary plan.
+</ParamField>
+
+<ParamField path="active_add_ons" type="array">
+Active add-ons (same shape as plans).
+</ParamField>
+
+<ParamField path="feature_usage.features" type="array">
+Per-feature usage data: access status, current usage, allocation limits, pricing, credit info, and metric reset dates.
+</ParamField>
+
+<ParamField path="subscription" type="object">
+Current subscription: billing interval (`month` or `year`), currency, status, total price, trial end date, cancellation status, payment method, and active discounts.
+</ParamField>
+
+<ParamField path="company" type="object">
+Company info: name, all payment methods on file, default payment method, billing credit balances.
+</ParamField>
+
+<ParamField path="credit_grants" type="array">
+Active Schematic credit grants (usage-based units defined in your plan, not Stripe account balance) with quantities (total, used, remaining), source, renewal info, and expiration dates.
+</ParamField>
+
+<ParamField path="credit_bundles" type="array">
+Credit bundles available for purchase.
+</ParamField>
+
+<ParamField path="scheduled_downgrade" type="object">
+If a downgrade is pending: from/to plan names, effective date, and price change.
+</ParamField>
+
+<ParamField path="upcoming_invoice" type="object">
+Preview of the next invoice (amount due, due date).
+</ParamField>
+
+<ParamField path="default_plan" type="object">
+The free/default plan for companies without a subscription.
+</ParamField>
+
+<ParamField path="post_trial_plan" type="object">
+Which plan the company will land on after their trial ends.
+</ParamField>
+
+<ParamField path="trial_payment_method_required" type="boolean">
+Whether a payment method is needed to start a trial.
+</ParamField>
+
+<ParamField path="prevent_self_service_downgrade" type="boolean">
+If `true`, block self-service downgrade. Show `prevent_self_service_downgrade_url` to direct users to contact sales.
+</ParamField>
+
+You can ignore the `component`, `display_settings`, `checkout_settings`, and deprecated `show_*` fields. Those control the behavior of Schematic's hosted components and aren't relevant when building your own UI.
+
+## Displaying the current plan
+
+Find the entry in `active_plans` where `current` is `true`:
+
+```
+Plan name:      active_plans[].name
+Description:    active_plans[].description
+Billing period: subscription.interval  ("month" or "year")
+Currency:       subscription.currency
+```
+
+To display the price, resolve it by period and currency (see [Resolving prices](#resolving-prices) below).
+
+If `subscription.trial_end` is set and in the future, the company is on a trial. Show the trial end date and reference `post_trial_plan` for what happens next.
+
+If `scheduled_downgrade` is present, show a notice: "Your plan will change from {from_plan_name} to {to_plan_name} on {effective_after}."
+
+## Displaying feature entitlements
+
+The `feature_usage.features` array contains every feature the company has access to. Each entry includes:
+
+- `feature.name` (and `feature.plural_name` for plural context)
+- `access` (boolean, whether the feature is currently available)
+- `entitlement_type` (`"boolean"` for on/off flags, `"numeric"` for metered features)
+
+**Boolean features** just need a checkmark when `access` is `true`.
+
+**Numeric/metered features** vary based on `price_behavior`:
+
+| `price_behavior` | How to display |
+|-------------------|---------------|
+| (none) | Standard allocation. Show `usage` / `allocation` as a progress bar. Null `allocation` means unlimited. |
+| `pay_in_advance` | Pre-purchased quantity. Show `usage` / `allocation`. |
+| `pay_as_you_go` | No allocation. Show current `usage` and per-unit cost. |
+| `overage` | Included usage up to `soft_limit`, then per-unit overage charges. Show `usage` / `soft_limit`. Overage = `max(0, usage - soft_limit)`. |
+| `tier` | Price varies by usage bracket. Show current usage and which tier it falls in. See [Tiered pricing](#tiered-pricing) for cost calculation. |
+| `credit_burndown` | Usage measured in credits. Show `credit_used` / (`credit_remaining` + `credit_used`). Effective limit = `credit_total / credit_consumption_rate`. |
+
+**Pre-computed helpers.** The API returns several fields that simplify display: `effective_limit` (the resolved cap), `effective_price` (per-unit price for the current scenario), `percent_used` (0-100+), `overuse` (amount above soft limit), `is_unlimited`, and `has_valid_allocation`. These cover most display needs, though tiered pricing breakdowns require additional calculation on your end.
+
+**Reset periods.** If `period` is set (`current_day`, `current_week`, `current_month`, `current_year`, or `billing`), usage resets on that cadence. `metric_reset_at` is the next reset timestamp.
+
+## Displaying add-ons
+
+Active add-ons are in `active_add_ons`. Each has a `name`, `description`, and `charge_type` (`"recurring"` or `"one_time"`). Resolve the price the same way as plans (see [Resolving prices](#resolving-prices)).
+
+## Displaying credits
+
+The `credit_grants` array represents Schematic-managed credits (usage-based units defined in your plan), not the customer's Stripe account balance. For the Stripe account balance, see [Customer balance](#customer-balance).
+
+Each entry includes:
+
+- `credit_name`, `singular_name`, `plural_name` for display
+- `quantity` (total granted), `quantity_used`, `quantity_remaining`
+- `source_label` (e.g. "Pro Plan", "Purchased")
+- `grant_reason` (`"plan_grant"`, `"purchase"`, `"promotion"`, etc.)
+- `renewal_enabled` and `renewal_period` for auto-renewing grants
+- `expires_at` (null if no expiry)
+
+Group credit grants by `billing_credit_id` to show per-credit-type balances.
+
+## Displaying payment methods
+
+The `company.default_payment_method` object (and `company.payment_methods` array for all methods) includes:
+
+- `card_brand` (`"visa"`, `"mastercard"`, etc.), `card_last4`, `card_exp_month`, `card_exp_year` for cards
+- `bank_name`, `account_last4`, `account_name` for bank accounts
+- `payment_method_type` (`"card"`, `"us_bank_account"`, etc.)
+
+## Listing invoices
+
+```
+GET /components/invoices?limit=20&offset=0
+```
+
+Returns an array of invoices, paginated with `limit` and `offset`. Each invoice includes `amount_due`, `amount_paid`, `amount_remaining`, `currency`, `status`, `due_date`, `created_at`, `url` (link to the Stripe hosted invoice page), and `subtotal`.
+
+**You'll need to filter the results.** Exclude invoices where:
+- `status` is `void`, `draft`, or `uncollectible`
+- `amount_due` is 0
+- `external_id` starts with `upcoming_`
+- The invoice is unpaid and `due_date` is in the future
+
+Sort by `due_date` (falling back to `created_at`) descending. Negative `amount_due` values represent credits.
+
+## Customer balance
+
+```
+GET /checkout/balance
+```
+
+Returns the customer's Stripe account balance as a monetary amount in their billing currency (e.g. dollars for USD), representing balance adjustments from prorations, refunds, or other Stripe-level credits. 
+
+<Note>
+This is separate from credit grants used in credit based billing/entitlements, which are usage-based units defined in Schematic.
+</Note>
+
+## Updating payment methods
+
+Your portal may need to let users update their payment method. This requires Stripe components to handle custom card data. Schematic never directly handles PCI data, relying instead on Stripe's Payment Method ids:
+
+1. Call `POST /components/setup-intent` to get a Stripe SetupIntent. The response includes `setup_intent_client_secret`, `publishable_key`, and optionally `account_id`.
+
+2. Load Stripe.js with the publishable key. **If `account_id` is present**, you must pass it as `stripeAccount` when initializing Stripe. This is required when your Schematic account uses Stripe Connect.
+
+```js
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripeOptions = {};
+if (setupIntent.account_id) {
+  stripeOptions.stripeAccount = setupIntent.account_id;
+}
+const stripe = await loadStripe(setupIntent.publishable_key, stripeOptions);
+```
+
+3. Mount a Stripe `PaymentElement` and confirm the setup:
+
+```js
+const { setupIntent, error } = await stripe.confirmSetup({
+  elements,
+  confirmParams: {
+    payment_method_data: {
+      billing_details: { email: customerEmail }
+    },
+    return_url: window.location.href,
+  },
+  redirect: "if_required",
+});
+```
+
+4. Save the payment method:
+
+```
+POST /checkout/paymentmethod/update
+Body: { "payment_method_id": "<setupIntent.payment_method>" }
+```
+
+## Cancelling a subscription
+
+```
+DELETE /checkout/unsubscribe
+```
+
+No request body. The cancellation timing (immediate vs. end of period) is determined by your account's configuration in Schematic.
+
+## Resolving prices
+
+Plans and add-ons can have prices in multiple currencies and for multiple billing periods (monthly, yearly). To resolve the correct price:
+
+1. Determine the billing period (`"month"` or `"year"`) and currency
+2. Check the item's `currency_prices` array for a matching currency (case-insensitive)
+3. From that currency entry, pick `monthly_price` or `yearly_price` based on the period
+4. If no currency match, fall back to the top-level `monthly_price` or `yearly_price`
+
+For add-ons, also check `charge_type`: use `one_time_price` for one-time charges instead of the period-based prices.
+
+**Price formatting:** The `price` field is in smallest currency units (e.g. cents). Use `price_decimal` (a string) when available for fractional precision. Use `Intl.NumberFormat` with the `currency` code for proper locale formatting:
+
+```js
+new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "usd",
+}).format(amountInCents / 100);
+```
+
+### Tiered pricing
+
+Some usage-based features use tiered pricing. The `price_tier` array on the price object defines the brackets. There are two modes:
+
+**Volume** (`tiers_mode` is `"volume"`): find the tier the total quantity falls into, then multiply the full quantity by that tier's `per_unit_price`, plus the tier's `flat_amount`.
+
+```
+quantity = 150
+tiers = [{up_to: 100, per_unit_price: 10}, {up_to: null, per_unit_price: 5}]
+result: 150 * 5 = 750  (all units priced at the tier they land in)
+```
+
+**Graduated** (default): accumulate cost across each tier bracket.
+
+```
+quantity = 150
+tiers = [{up_to: 100, per_unit_price: 10}, {up_to: null, per_unit_price: 5}]
+result: (100 * 10) + (50 * 5) = 1250  (each bracket priced independently)
+```
+
+Each tier can also include a `flat_amount` that's added once when that tier is entered. Use `per_unit_price_decimal` over `per_unit_price` when available.
+
+## Things to watch out for
+
+**Currency is locked to the subscription.** Once a company has an active subscription, they can't change currencies without cancelling and re-subscribing.
+
+**Invoice filtering is client-side.** The invoices endpoint returns all invoices including drafts, voids, and zero-amount entries. You need to filter these yourself (see the invoices section above).
+
+**Price fields have two formats.** `price` is an integer in the smallest currency unit (cents). `price_decimal` is a string with full decimal precision. Prefer `price_decimal` when available.
+
+**Credit grants can have multiple sources.** A company might have plan-included credits, purchased credits, and promotional credits all at the same time. Group by `billing_credit_id` to show per-credit-type balances.
+
+**Stripe Connect requires `stripeAccount`.** If the setup intent response includes an `account_id`, you must pass it as `stripeAccount` when loading Stripe.js. Without it, Stripe operations will fail.
+
+**Use `active_plans` for plan data, not `company.plan`.** Both exist in the hydrate response, but `active_plans` is the richer version with full pricing and entitlement data.
