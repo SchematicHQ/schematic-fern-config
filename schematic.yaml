@@ -5649,6 +5649,13 @@ components:
       title: CreditCompanyGrantView
     CreditCurrencyPrice:
       type: object
+      properties:
+        currency:
+          type: string
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
+      required:
+        - currency
       title: CreditCurrencyPrice
     CreditCurrencyPriceRequestBody:
       type: object
