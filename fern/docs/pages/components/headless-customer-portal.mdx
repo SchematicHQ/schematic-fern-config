@@ -12,8 +12,6 @@ That said, if you'd rather build your own portal to fully control the experience
 
 ## Authentication
 
-All API requests go to `https://api.schematichq.com`.
-
 Every endpoint requires a **temporary access token**, which your backend creates via the Schematic API (`POST /temporary-access-tokens`). The token is scoped to a specific company and is short-lived. Pass it to your frontend and include it on every request:
 
 ```
@@ -40,21 +38,57 @@ GET /components/hydrate
 
 This returns the full billing state for the authenticated company in a single call. Key fields in the response:
 
-| Field | Description |
-|-------|-------------|
-| `active_plans` | Plans the company is currently on. Each includes name, description, pricing, entitlements, and features. The entry with `current: true` is their primary plan. |
-| `active_add_ons` | Active add-ons (same shape as plans). |
-| `feature_usage.features` | Per-feature usage data: access status, current usage, allocation limits, pricing, credit info, and metric reset dates. |
-| `subscription` | Current subscription: billing interval (`month` or `year`), currency, status, total price, trial end date, cancellation status, payment method, and active discounts. |
-| `company` | Company info: name, all payment methods on file, default payment method, billing credit balances. |
-| `credit_grants` | Active credit grants with quantities (total, used, remaining), source, renewal info, and expiration dates. |
-| `credit_bundles` | Credit bundles available for purchase. |
-| `scheduled_downgrade` | If a downgrade is pending: from/to plan names, effective date, and price change. |
-| `upcoming_invoice` | Preview of the next invoice (amount due, due date). |
-| `default_plan` | The free/default plan for companies without a subscription. |
-| `post_trial_plan` | Which plan the company will land on after their trial ends. |
-| `trial_payment_method_required` | Whether a payment method is needed to start a trial. |
-| `prevent_self_service_downgrade` | If `true`, block self-service downgrade. Show `prevent_self_service_downgrade_url` to direct users to contact sales. |
+<ParamField path="active_plans" type="array">
+Plans the company is currently on. Each includes name, description, pricing, entitlements, and features. The entry with `current: true` is their primary plan.
+</ParamField>
+
+<ParamField path="active_add_ons" type="array">
+Active add-ons (same shape as plans).
+</ParamField>
+
+<ParamField path="feature_usage.features" type="array">
+Per-feature usage data: access status, current usage, allocation limits, pricing, credit info, and metric reset dates.
+</ParamField>
+
+<ParamField path="subscription" type="object">
+Current subscription: billing interval (`month` or `year`), currency, status, total price, trial end date, cancellation status, payment method, and active discounts.
+</ParamField>
+
+<ParamField path="company" type="object">
+Company info: name, all payment methods on file, default payment method, billing credit balances.
+</ParamField>
+
+<ParamField path="credit_grants" type="array">
+Active Schematic credit grants (usage-based units defined in your plan, not Stripe account balance) with quantities (total, used, remaining), source, renewal info, and expiration dates.
+</ParamField>
+
+<ParamField path="credit_bundles" type="array">
+Credit bundles available for purchase.
+</ParamField>
+
+<ParamField path="scheduled_downgrade" type="object">
+If a downgrade is pending: from/to plan names, effective date, and price change.
+</ParamField>
+
+<ParamField path="upcoming_invoice" type="object">
+Preview of the next invoice (amount due, due date).
+</ParamField>
+
+<ParamField path="default_plan" type="object">
+The free/default plan for companies without a subscription.
+</ParamField>
+
+<ParamField path="post_trial_plan" type="object">
+Which plan the company will land on after their trial ends.
+</ParamField>
+
+<ParamField path="trial_payment_method_required" type="boolean">
+Whether a payment method is needed to start a trial.
+</ParamField>
+
+<ParamField path="prevent_self_service_downgrade" type="boolean">
+If `true`, block self-service downgrade. Show `prevent_self_service_downgrade_url` to direct users to contact sales.
+</ParamField>
 
 You can ignore the `component`, `display_settings`, `checkout_settings`, and deprecated `show_*` fields. Those control the behavior of Schematic's hosted components and aren't relevant when building your own UI.
 
@@ -106,7 +140,9 @@ Active add-ons are in `active_add_ons`. Each has a `name`, `description`, and `c
 
 ## Displaying credits
 
-The `credit_grants` array contains one entry per credit grant. Each includes:
+The `credit_grants` array represents Schematic-managed credits (usage-based units defined in your plan), not the customer's Stripe account balance. For the Stripe account balance, see [Customer balance](#customer-balance).
+
+Each entry includes:
 
 - `credit_name`, `singular_name`, `plural_name` for display
 - `quantity` (total granted), `quantity_used`, `quantity_remaining`
@@ -147,11 +183,15 @@ Sort by `due_date` (falling back to `created_at`) descending. Negative `amount_d
 GET /checkout/balance
 ```
 
-Returns the customer's Stripe credit/debit balance. This is separate from credit grants. It represents balance adjustments from prorations, refunds, or other Stripe-level credits.
+Returns the customer's Stripe account balance as a monetary amount in their billing currency (e.g. dollars for USD), representing balance adjustments from prorations, refunds, or other Stripe-level credits. 
+
+<Note>
+This is separate from credit grants used in credit based billing/entitlements, which are usage-based units defined in Schematic.
+</Note>
 
 ## Updating payment methods
 
-Your portal may need to let users update their payment method. This requires Stripe integration:
+Your portal may need to let users update their payment method. This requires Stripe components to handle custom card data. Schematic never directly handles PCI data, relying instead on Stripe's Payment Method ids:
 
 1. Call `POST /components/setup-intent` to get a Stripe SetupIntent. The response includes `setup_intent_client_secret`, `publishable_key`, and optionally `account_id`.
 
