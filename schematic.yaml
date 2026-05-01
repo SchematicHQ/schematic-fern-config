@@ -614,6 +614,7 @@ components:
         - expiry_unit
         - expiry_type
         - credit_name
+        - currency_prices
         - has_grants
         - created_at
         - updated_at
@@ -837,6 +838,11 @@ components:
         created_at:
           type: string
           format: date-time
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditCurrencyPrice'
+          maxItems: 1000
         default_expiry_unit:
           $ref: '#/components/schemas/BillingCreditExpiryUnit'
         default_expiry_unit_count:
@@ -886,6 +892,7 @@ components:
         - default_rollover_policy
         - burn_strategy
         - cost_editable
+        - currency_prices
         - created_at
         - updated_at
       title: BillingCreditView
@@ -5640,6 +5647,9 @@ components:
         - grant_reason
         - renewal_enabled
       title: CreditCompanyGrantView
+    CreditCurrencyPrice:
+      type: object
+      title: CreditCurrencyPrice
     CreditCurrencyPriceRequestBody:
       type: object
       properties:
