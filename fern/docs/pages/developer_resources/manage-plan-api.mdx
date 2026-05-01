@@ -1,0 +1,336 @@
+---
+title: Manage Plan API
+subtitle: Programmatically manage a company via the Manage Plan API.
+slug: developer_resources/manage-plan-api
+---
+
+The Manage Plan API lets you programmatically set a company's full plan state, including the base plan, add-ons, credit bundles, and pay-in-advance entitlements. It handles both Stripe-linked and non-billing plans in a single call.
+
+This is a **replace-style (PUT-like) API**, not a patch. The request body represents the desired end state of the company's plan configuration.
+
+**Anything you don't include will be removed.** That means:
+
+- An add-on omitted from `add_on_selections` will be **removed** from the company.
+- A pay-in-advance entitlement (e.g. user seats) omitted from `pay_in_advance_entitlements` will be **removed**, dropping the company's quantity to zero.
+- A base plan omitted (or set to `null`) will be **cleared**, falling back to the [default plan](/catalog/configuration#fallback-plan) if one is configured.
+
+When upgrading or making any change, you almost always want to **read the company's current state first** and re-send the existing add-ons and pay-in-advance entitlements alongside whatever you're changing. See [Common patterns](#common-patterns) for examples.
+
+**Credit bundles are the exception.** Unlike the other fields, `credit_bundles` is **not** part of the replace-style behavior. Any bundles you include are purchased immediately, added to the company's credit ledger, and persist through future plan changes. Omitting them in a later request does **not** remove previously purchased credits. To send a request that doesn't purchase any new credits, pass an empty array.
+
+## Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /manage-plan` | Apply a plan change |
+| `POST /manage-plan/preview` | Preview the financial impact of a plan change without applying it. Useful for custom checkout scenarios. |
+| `POST /manage-plan/subscription/cancel` | Cancel a company's active subscription |
+
+All endpoints require API key authentication.
+
+## How it works
+
+When you call `POST /manage-plan`, you provide the complete desired plan state for a company. Schematic then:
+
+1. Determines which plans are billing-linked (connected to Stripe) and which are not
+2. For billing-linked plans, updates the Stripe subscription accordingly
+3. For non-billing plans, applies the assignment directly
+4. Returns the updated company object
+
+Because this is a replace-style API, you must always include the full desired state. The two fields most commonly missed:
+
+- **`add_on_selections`** — if a company currently has add-ons A and B, and you want to add C, you must include all three. Sending only C will remove A and B.
+- **`pay_in_advance_entitlements`** — if a company has 10 seats today and you make any plan change, you must include `{ price_id, quantity: 10 }` in this array, or their seat count will be set to zero.
+
+The safest pattern is: **fetch the company's current state, build the request from it, then mutate only what you intend to change.**
+
+### Plan version behavior
+
+When specifying a base plan or add-on:
+
+- If you provide an explicit `version_id`, that version is used
+- If the company is already on that plan and you omit the version, the company's current version is preserved
+- If it's a new plan and you omit the version, the latest published version is used
+
+### Default (fallback) plan
+
+If you clear all plans from a company (by omitting `base_plan_id`), Schematic will assign the configured [default/fallback plan](/catalog/configuration#fallback-plan) if one exists.
+
+### Proration
+
+When changing plans on a billing-linked subscription, Schematic uses Stripe's proration logic to refund the unused portion of the current plan's base cost and charge the prorated cost of the new plan. The same applies to add-on changes, credit bundles, and pay-in-advance quantity changes.
+
+Upgrade vs. downgrade behavior differs:
+
+- **Upgrades** keep the current billing period (e.g. if you're 15 days in, you stay on day 15 after the upgrade), and accrued usage on usage-based features carries over to the new plan
+- **Downgrades** reset the billing period (the new plan starts on day 1), which also resets usage counters for usage-based features
+
+If your Schematic catalog has [scheduled downgrades](/catalog/managing-company-plans#scheduled-downgrades) enabled, downgrades are deferred to the end of the current billing period instead of being applied immediately, and no proration is applied.
+
+Use [`POST /manage-plan/preview`](#preview-manage-plan) to see the exact prorated charges and credits before applying a change.
+
+## Manage Plan
+
+`POST /manage-plan`
+
+### Request body
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_xyz789",
+  "base_plan_price_id": "bprice_def456",
+  "base_plan_version_id": "planv_ghi012",
+  "add_on_selections": [
+    {
+      "plan_id": "plan_addon1",
+      "price_id": "bprice_jkl345",
+      "version_id": "planv_mno678"
+    }
+  ],
+  "credit_bundles": [
+    {
+      "bundle_id": "bundle_pqr901",
+      "quantity": 5
+    }
+  ],
+  "pay_in_advance_entitlements": [
+    {
+      "price_id": "bprice_stu234",
+      "quantity": 10
+    }
+  ],
+  "coupon_external_id": "DISCOUNT20",
+  "promo_code": "LAUNCH2024",
+  "payment_method_external_id": "pm_stripe_abc",
+  "trial_end": "2024-12-31T23:59:59Z"
+}
+```
+
+### Field reference
+
+<ParamField path="company_id" type="string" required>
+The ID of the company whose plan you want to manage.
+</ParamField>
+
+<ParamField path="base_plan_id" type="string">
+The plan to assign as the company's base plan. Omit or set to `null` to clear the base plan (the company will fall back to the [default plan](/catalog/configuration#fallback-plan) if one is configured).
+</ParamField>
+
+<ParamField path="base_plan_price_id" type="string">
+The specific price to use for the base plan. Required for billing-linked plans with multiple price options (e.g. monthly vs. yearly).
+</ParamField>
+
+<ParamField path="base_plan_version_id" type="string">
+A specific version of the base plan. If omitted, the company's current version is preserved (same plan) or the latest published version is used (new plan).
+</ParamField>
+
+<ParamField path="add_on_selections" type="array">
+The complete list of add-ons the company should have. Each entry requires a `plan_id`. Billing-linked add-ons also require a `price_id`. An optional `version_id` can pin a specific version.
+
+**This is replace-style.** Any add-on the company currently has that is not included in this array will be removed. To preserve existing add-ons across a plan change, you must re-send them here.
+</ParamField>
+
+<ParamField path="credit_bundles" type="array">
+Credit bundles to **purchase** as part of this request. Each entry requires a `bundle_id` and `quantity`.
+
+Unlike the other fields, this is not replace-style: bundles listed here are charged immediately and added to the company's credit ledger. Previously purchased credits are not removed if you omit them. Pass an empty array to make a request that doesn't purchase new credits.
+</ParamField>
+
+<ParamField path="pay_in_advance_entitlements" type="array">
+Pay-in-advance quantities (e.g. user seats). Each entry requires a `price_id` and `quantity`.
+
+**This is replace-style.** Any pay-in-advance entitlement not included in this array will be set to zero. If a company currently has 10 seats and you want to keep them, you must re-send `{ price_id, quantity: 10 }` on every request, even if you're only changing something else (like the base plan or an add-on).
+</ParamField>
+
+<ParamField path="coupon_external_id" type="string">
+A Stripe coupon ID to apply to the subscription.
+</ParamField>
+
+<ParamField path="promo_code" type="string">
+A promotional code to apply.
+</ParamField>
+
+<ParamField path="payment_method_external_id" type="string">
+A Stripe payment method ID to use for this subscription.
+</ParamField>
+
+<ParamField path="trial_end" type="datetime">
+An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain usage-based entitlements. Additionally, new add ons cannot be added when putting a company onto a trial.
+</ParamField>
+
+### Finding price IDs
+
+The `base_plan_price_id` and add-on `price_id` fields are Schematic billing product price IDs (prefixed `bprice_`), not Stripe price IDs.
+
+To find them, fetch a plan via [`GET /plans/:id`](/api-reference/plans/get-plan) (or list plans via [`GET /plans`](/api-reference/plans/list-plans)). The response includes a `billing_product` object with a `prices` array. Each entry has an `id` along with metadata like `interval` (`month`, `year`, `one_time`) and `currency`, so you can pick the right one.
+
+```json
+{
+  "id": "plan_xyz789",
+  "name": "Pro",
+  "billing_product": {
+    "prices": [
+      {
+        "id": "bprice_def456",
+        "interval": "month",
+        "currency": "usd",
+        "price": 4900
+      },
+      {
+        "id": "bprice_ghi789",
+        "interval": "year",
+        "currency": "usd",
+        "price": 49000
+      }
+    ]
+  }
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "company": { ... },
+    "success": true
+  }
+}
+```
+
+The response includes the full updated company object reflecting the new plan state.
+
+## Preview Manage Plan
+
+`POST /manage-plan/preview`
+
+Use this endpoint to preview the financial impact of a plan change before applying it, most commonly while implementing your own custom checkout. The request body is identical to `POST /manage-plan`.
+
+### Response
+
+```json
+{
+  "data": {
+    "subscription_change_preview": {
+      ...
+    }
+  }
+}
+```
+
+The preview includes details like prorated charges, credits, and the new subscription amount. This is useful for showing users what a plan change will cost before they confirm.
+
+## Cancel Subscription
+
+`POST /manage-plan/subscription/cancel`
+
+Cancels a company's active Stripe subscription. This only applies to companies with billing-linked plans.
+
+### Request body
+
+```json
+{
+  "company_id": "comp_abc123",
+  "cancel_immediately": true,
+  "prorate": true
+}
+```
+
+<ParamField path="company_id" type="string" required>
+The ID of the company whose subscription you want to cancel.
+</ParamField>
+
+<ParamField path="cancel_immediately" type="boolean">
+If `false`, the subscription cancels at the end of the current billing period instead of immediately. Defaults to `true`.
+</ParamField>
+
+<ParamField path="prorate" type="boolean">
+If `true` and `cancel_immediately` is `true`, a prorated credit is issued for the unused portion of the billing period. Defaults to `true`.
+</ParamField>
+
+### Response
+
+Same format as `POST /manage-plan`, returning the updated company object.
+
+## Common patterns
+
+### Upgrading a plan
+
+To upgrade a company from one plan to another, send the new plan ID along with all existing add-ons and pay-in-advance entitlements you want to preserve. Schematic handles proration and Stripe subscription updates automatically.
+
+In the example below, the company already has the `team-collab` add-on and 10 user seats. Both are re-sent on the request so they carry through the upgrade.
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_pro",
+  "base_plan_price_id": "bprice_pro_monthly",
+  "add_on_selections": [
+    { "plan_id": "plan_team_collab", "price_id": "bprice_team_collab" }
+  ],
+  "pay_in_advance_entitlements": [
+    { "price_id": "bprice_seats", "quantity": 10 }
+  ]
+}
+```
+
+<Warning>
+If you omit `add_on_selections` or `pay_in_advance_entitlements` (or send them empty), the company's existing add-ons will be removed and their pay-in-advance quantities will drop to zero. Always re-send existing values when upgrading.
+</Warning>
+
+### Adding an add-on while preserving existing state
+
+To add an add-on without changing anything else, you must re-send the current base plan, **all existing add-ons**, and **all existing pay-in-advance entitlements** alongside the new add-on.
+
+In the example below, the company is on the `pro` plan, has the `team-collab` add-on, and 10 user seats. We're adding the `priority-support` add-on. The existing `pro` plan, `team-collab` add on, and 10 seats are re-sent so they aren't removed.
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_pro",
+  "base_plan_price_id": "bprice_pro_monthly",
+  "add_on_selections": [
+    { "plan_id": "plan_team_collab", "price_id": "bprice_team_collab" },
+    { "plan_id": "plan_priority_support", "price_id": "bprice_priority_support" }
+  ],
+  "pay_in_advance_entitlements": [
+    { "price_id": "bprice_seats", "quantity": 10 }
+  ]
+}
+```
+
+<Warning>
+Forgetting any of `base_plan_id`, the existing `add_on_selections`, or `pay_in_advance_entitlements` here would silently change the company's state. Omitting `base_plan_id` clears the plan (falling back to the default), omitting an existing add-on removes it, and omitting `pay_in_advance_entitlements` drops the seat count to zero. Always re-send everything you want to preserve.
+</Warning>
+
+### Changing a pay-in-advance quantity (e.g. adding a seat)
+
+To change just one pay-in-advance quantity, you still need to re-send the full plan state alongside it. Below, the company is going from 10 seats to 11.
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_pro",
+  "base_plan_price_id": "bprice_pro_monthly",
+  "add_on_selections": [
+    { "plan_id": "plan_existing_addon", "price_id": "bprice_existing" }
+  ],
+  "pay_in_advance_entitlements": [
+    { "price_id": "bprice_seats", "quantity": 11 }
+  ]
+}
+```
+
+## Error cases
+
+The Manage Plan API validates the full request before applying any changes. If validation fails, the entire request is rejected and the company's state is left untouched. Common error cases include:
+
+- **Externally managed subscription**: If the company's subscription is managed outside of Schematic (e.g. directly in Stripe without the Schematic integration), the API will return an error. You must manage the subscription through whichever system owns it.
+- **Invalid trial configuration**: Trials require a trialable plan with no add-ons and no usage-based entitlements. If the plan is not marked as trialable, or you include add-ons or usage-based entitlements while setting `trial_end`, the request will be rejected. The `trial_end` timestamp must also be in the future.
+- **Missing price for billing-linked add-on**: Billing-linked add-ons require a `price_id`. Look up the available prices via [`GET /plans/:id`](/api-reference/plans/get-plan).
+- **Price specified for non-billing add-on**: You cannot specify a `price_id` for an add-on that is not linked to a billing product. Omit the `price_id` for these add-ons.
+- **Plan not found or not available to company**: The base plan or an add-on does not exist, or the company is not eligible for it (e.g. it's restricted by a [plan audience](/catalog/managing-company-plans#plan-audiences-advanced)).
+- **Stripe errors**: Any error returned by Stripe during the subscription update (e.g. payment method declined, customer not found, currency mismatch) will be surfaced back to you. The Schematic state is rolled back if the Stripe call fails.
+
+For all errors, the response will include a descriptive message indicating what went wrong. We recommend using [`POST /manage-plan/preview`](#preview-manage-plan) before applying changes in production flows so users can be shown the financial impact and any validation issues up front.
