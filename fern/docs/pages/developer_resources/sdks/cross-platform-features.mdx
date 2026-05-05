@@ -60,9 +60,9 @@ This can be further enhanced by adding local caching so that multiple SDK instan
 | Vue | ✅ |
 | Go | ✅ |
 | C# | ✅ |
-| Node.js | Coming Soon |
-| Python | Roadmapped |
-| Java | Roadmapped |
+| Node.js | ✅ |
+| Python | ✅ |
+| Java | ✅ |
 
 ## Replicator
 
@@ -72,8 +72,6 @@ Schematic also supports Replicator, a service that will automatically replicate 
 2. Updates to any company's flag data is automatically propagated to your application in real time, ensuring that even the first access will be performant. 
 3. Should Schematic experience an interruption of service, your application can continue to operate using the complete local cache of flag data.
 
-Replicator is only available for Enterprise customers.
-
 To use Replicator, you will need to host a [Schematic provided container](https://hub.docker.com/r/getschematic/schematic-replicator) in your infrastructure and supply a compatible local data store (currently Redis is supported). This container will manage the connection to Schematic and the local data store. You will then enable Replicator mode on your SDK and point it to your local data store. For documentation:
 - Technical documentation for Replicator is [on GitHub](https://github.com/schematicHQ/schematic-replicator).
 - You will also need to check the docs for the specific SDK you are using to see how to enable Replicator mode.
@@ -82,11 +80,13 @@ To use Replicator, you will need to host a [Schematic provided container](https:
 
 | SDK | Status |
 |-----|--------|
-| JavaScript (Client-side) | N/A |
-| React (Next.js)| N/A |
-| Vue | N/A |
 | Go | ✅ |
 | C# | ✅ |
-| Node.js | Coming Soon |
-| Python | Roadmapped |
-| Java | Roadmapped |
+| Node.js | ✅ |
+| Python | ✅ |
+| Java | ✅ |
+| JavaScript (Client-side) | In development |
+| React (Next.js)| In development |
+| Vue | In development |
+| Angular | In development |
+
