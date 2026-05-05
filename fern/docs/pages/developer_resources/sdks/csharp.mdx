@@ -193,6 +193,129 @@ bool flagValue = await schematic.CheckFlag(
 );
 ```
 
+### Checking flags with entitlement details
+
+If you need more detail about how a flag check was resolved, including any entitlement associated with the check, use `CheckFlagWithEntitlement`. This returns a response object with the flag value, the reason for the evaluation result, and entitlement details such as usage, allocation, and credit balances when applicable.
+
+```csharp
+Schematic schematic = new Schematic("YOUR_API_KEY");
+
+var resp = await schematic.CheckFlagWithEntitlement(
+    "some-flag-key",
+    company: new Dictionary<string, string> { { "id", "your-company-id" } },
+    user: new Dictionary<string, string> { { "user_id", "your-user-id" } }
+);
+
+Console.WriteLine($"Flag: {resp.FlagKey}, Value: {resp.Value}, Reason: {resp.Reason}");
+
+if (resp.Entitlement != null)
+{
+    Console.WriteLine($"Entitlement type: {resp.Entitlement.ValueType}");
+    Console.WriteLine($"Usage: {resp.Entitlement.Usage}, Allocation: {resp.Entitlement.Allocation}");
+    Console.WriteLine($"Credit remaining: {resp.Entitlement.CreditRemaining}");
+}
+```
+
+### Checking multiple flags
+
+The `CheckFlags` method allows you to efficiently check multiple feature flags in a single operation. When you provide specific flag keys, it will only return the flag values for those flags, leveraging intelligent caching to minimize API calls.
+
+```csharp
+Schematic schematic = new Schematic("YOUR_API_KEY");
+
+var company = new Dictionary<string, string> { { "id", "your-company-id" } };
+
+// Check specific flags by providing an array of flag keys
+var results = await schematic.CheckFlags(
+    company: company,
+    keys: new[] { "feature-flag-1", "feature-flag-2", "feature-flag-3" }
+);
+
+foreach (var result in results)
+{
+    Console.WriteLine($"Flag {result.Flag}: {result.Value} ({result.Reason})");
+    if (result.Value)
+    {
+        // This flag is enabled
+    }
+    else
+    {
+        // This flag is disabled
+    }
+}
+
+// Or check all available flags by omitting the keys parameter
+var allResults = await schematic.CheckFlags(company: company);
+
+foreach (var result in allResults)
+{
+    Console.WriteLine($"Flag {result.Flag}: {result.Value}");
+}
+```
+
+### OpenFeature Integration
+
+The Schematic .NET SDK includes built-in support for [OpenFeature](https://openfeature.dev/), allowing you to use Schematic's feature flags through the OpenFeature standard API.
+
+#### Using Schematic with OpenFeature
+
+```csharp
+using OpenFeature;
+using SchematicHQ.Client.OpenFeature;
+
+// Create and set the Schematic provider
+var provider = new SchematicProvider("YOUR_API_KEY");
+await Api.Instance.SetProviderAsync(provider);
+
+// Get the OpenFeature client
+var client = Api.Instance.GetClient();
+
+// Evaluate a boolean feature flag
+var isEnabled = await client.GetBooleanValue("your-flag-key", false);
+```
+
+#### OpenFeature Context
+
+The Schematic provider supports company and user context through OpenFeature's evaluation context:
+
+```csharp
+var context = EvaluationContext.Builder()
+    .Set("company", new Structure(new Dictionary<string, Value>
+    {
+        ["id"] = new Value("company-123"),
+        ["name"] = new Value("Acme Corp"),
+        ["plan"] = new Value("enterprise")
+    }))
+    .Set("user", new Structure(new Dictionary<string, Value>
+    {
+        ["id"] = new Value("user-456"),
+        ["email"] = new Value("user@example.com"),
+        ["role"] = new Value("admin")
+    }))
+    .Build();
+
+// Evaluate with context
+var isEnabled = await client.GetBooleanValue("your-flag-key", false, context);
+```
+
+#### Event Tracking with OpenFeature
+
+The provider includes a method to track events:
+
+```csharp
+var provider = (SchematicProvider)Api.Instance.GetProvider();
+
+await provider.TrackEventAsync(
+    "button_clicked",
+    context,
+    new Dictionary<string, object>
+    {
+        ["button_name"] = "submit",
+        ["page"] = "checkout"
+    }
+);
+```
+
 ## Webhook Verification
 
 Schematic can send webhooks to notify your application of events. To ensure the security of these webhooks, Schematic signs each request using HMAC-SHA256. The .NET SDK provides utility functions to verify these signatures.
@@ -307,6 +430,93 @@ Schematic schematic = new Schematic("YOUR_API_KEY", options);
 ```
 ***Note about LocalCache:*** LocalCache implementation returns default value the type it is initiated with when it is a cache miss. Hence, when using with Schematic it is initiated with type (bool?) so that cache returns null when it is a miss
 
+### Redis Cache Configuration
+
+For distributed applications or when you need persistent caching across application restarts, you can use Redis as your cache provider:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+using SchematicHQ.Client.Datastream;
+
+var options = new ClientOptions
+{
+    CacheConfiguration = new CacheConfiguration
+    {
+        ProviderType = CacheProviderType.Redis,
+        RedisConfig = new RedisCacheConfig
+        {
+            // Required: Redis server endpoints
+            Endpoints = new List<string> { "redis.example.com:6379" },
+
+            // Optional: Authentication
+            Password = "your-redis-password",
+            Username = "default",  // For Redis 6.0+ ACL
+
+            // Optional: Connection settings
+            Ssl = true,
+            ConnectTimeout = 5000,  // milliseconds
+            ConnectRetry = 3,
+            AbortOnConnectFail = false,  // Continue if Redis is unavailable
+
+            // Optional: Cache settings
+            KeyPrefix = "schematic:",
+            Database = 0,
+            CacheTTL = TimeSpan.FromMinutes(5)
+        }
+    }
+};
+
+Schematic schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+You can also use the fluent API for simpler Redis configuration:
+
+```csharp
+var options = new ClientOptions()
+    .WithRedisCache(new RedisCacheConfig
+    {
+        Endpoints = new List<string> { "redis.example.com:6379" },
+        Password = "secret",
+        Username = "default"  // For Redis 6.0+ ACL
+    });
+```
+
+#### Redis Cluster Configuration
+
+For Redis Cluster deployments, use the `RedisCacheClusterConfig` class:
+
+```csharp
+var options = new ClientOptions
+{
+    CacheConfiguration = new CacheConfiguration
+    {
+        ProviderType = CacheProviderType.Redis,
+        RedisConfig = new RedisCacheClusterConfig
+        {
+            // Multiple cluster nodes
+            Endpoints = new List<string>
+            {
+                "cluster1.example.com:6379",
+                "cluster2.example.com:6379",
+                "cluster3.example.com:6379"
+            },
+
+            // Authentication
+            Password = "cluster-password",
+            Username = "default",  // For Redis 6.0+ ACL
+
+            // Cluster optimization
+            RouteByLatency = true,  // Enable latency-based routing
+
+            // Other settings
+            ConnectTimeout = 10000,
+            AbortOnConnectFail = false
+        }
+    }
+};
+```
+
 You can also disable local caching entirely; bear in mind that, in this case, every flag check will result in a network request:
 
 ```csharp
@@ -336,29 +546,6 @@ var options = new ClientOptions
 };
 
 Schematic schematic = new Schematic("YOUR_API_KEY", options);
-```
-
-### Checking flags with entitlement details
-
-If you need more detail about how a flag check was resolved, including any entitlement associated with the check, use `CheckFlagWithEntitlement`. This returns a response object with the flag value, the reason for the evaluation result, and entitlement details such as usage, allocation, and credit balances when applicable.
-
-```csharp
-Schematic schematic = new Schematic("YOUR_API_KEY");
-
-var resp = await schematic.CheckFlagWithEntitlement(
-    "some-flag-key",
-    company: new Dictionary<string, string> { { "id", "your-company-id" } },
-    user: new Dictionary<string, string> { { "user_id", "your-user-id" } }
-);
-
-Console.WriteLine($"Flag: {resp.FlagKey}, Value: {resp.Value}, Reason: {resp.Reason}");
-
-if (resp.Entitlement != null)
-{
-    Console.WriteLine($"Entitlement type: {resp.Entitlement.ValueType}");
-    Console.WriteLine($"Usage: {resp.Entitlement.Usage}");
-    Console.WriteLine($"Credit remaining: {resp.Entitlement.CreditRemaining}");
-}
 ```
 
 ### Offline Mode
@@ -392,6 +579,28 @@ var options = new ClientOptions
 };
 
 Schematic schematic = new Schematic("", options);
+
+bool flagValue = await schematic.CheckFlag("some-flag-key"); // Returns true
+```
+
+You can also set flag defaults dynamically after the client has been constructed using `SetFlagDefault` and `SetFlagDefaults`. This is useful in automated testing contexts, where you may want to specify per-test flag values:
+
+```csharp
+using SchematicHQ.Client;
+using System.Collections.Generic;
+
+var options = new ClientOptions { Offline = true };
+Schematic schematic = new Schematic("", options);
+
+// Set a single flag default
+schematic.SetFlagDefault("some-flag-key", true);
+
+// Or set multiple flag defaults at once
+schematic.SetFlagDefaults(new Dictionary<string, bool>
+{
+    { "some-flag-key", true },
+    { "another-flag-key", false }
+});
 
 bool flagValue = await schematic.CheckFlag("some-flag-key"); // Returns true
 ```
@@ -505,20 +714,24 @@ var options = new ClientOptions
 {
     // Enable Datastream (required)
     UseDatastream = true,
-    
+
     // Configure Datastream-specific options
     DatastreamOptions = new DatastreamOptions()
         // Use Redis cache for better performance in distributed environments
-        .WithRedisCache(
-            connectionStrings: new List<string> 
-            { 
+        .WithRedisCache(new RedisCacheConfig
+        {
+            Endpoints = new List<string>
+            {
                 "redis-primary.example.com:6379",
                 "redis-replica.example.com:6379"
             },
-            keyPrefix: "my-app:",
-            cacheTtl: TimeSpan.FromMinutes(10),
-            database: 0
-        )
+            Password = "your-redis-password",  // Optional
+            Username = "default",  // Optional (Redis 6.0+ ACL)
+            KeyPrefix = "my-app:",
+            CacheTTL = TimeSpan.FromMinutes(10),
+            Database = 0,
+            Ssl = true  // Enable SSL if needed
+        })
         // Or use local cache for single-instance applications
         //.WithLocalCache(capacity: 10000, ttl: TimeSpan.FromMinutes(5))
 };
@@ -540,19 +753,27 @@ var options = new ClientOptions
 {
     // Enable Datastream
     UseDatastream = true,
-    
+
     // Create cache configuration with Redis settings (used by both main client and Datastream)
     CacheConfiguration = new CacheConfiguration
     {
         ProviderType = CacheProviderType.Redis,
-        RedisConnectionStrings = new List<string> 
-        { 
-            "redis-1.example.com:6379",
-            "redis-2.example.com:6379",
-            "redis-3.example.com:6379" 
-        },
-        RedisKeyPrefix = "prod:",
-        CacheTtl = TimeSpan.FromMinutes(10)
+        RedisConfig = new RedisCacheConfig
+        {
+            Endpoints = new List<string>
+            {
+                "redis-1.example.com:6379",
+                "redis-2.example.com:6379",
+                "redis-3.example.com:6379"
+            },
+            Password = "your-redis-password",  // Optional
+            Username = "default",              // Optional (Redis 6.0+)
+            KeyPrefix = "prod:",
+            CacheTTL = TimeSpan.FromMinutes(10),
+            Ssl = true,                       // Enable SSL if needed
+            ConnectTimeout = 5000,            // Connection timeout in ms
+            AbortOnConnectFail = false        // Continue if Redis is unavailable
+        }
     }
 };
 
@@ -582,3 +803,67 @@ if (flagValue) {
 ```
 
 The difference is that with Datastream enabled, after the initial data load, subsequent flag checks for the same company and user will be nearly instantaneous and won't require additional network requests.
+
+### Replicator Mode
+
+Replicator mode is an advanced Datastream configuration that maintains a local replica of your Schematic data using a persistent cache layer. This mode provides enhanced performance and reliability for high-throughput applications.
+
+#### Enabling Replicator Mode
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+using SchematicHQ.Client.Datastream;
+
+var options = new ClientOptions
+{
+    UseDatastream = true,
+    
+    DatastreamOptions = new DatastreamOptions()
+        .WithRedisCache(new RedisCacheConfig
+        {
+            Endpoints = new List<string> { "redis://localhost:6379" },
+            KeyPrefix = "schematic-replica:",
+            CacheTTL = TimeSpan.FromHours(24)
+        })
+};
+
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+#### Advanced Replicator Configuration
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+using SchematicHQ.Client.Datastream;
+
+var options = new ClientOptions
+{
+    UseDatastream = true,
+    
+    DatastreamOptions = new DatastreamOptions()
+        .WithHealthCheckUrl("https://health.your-app.com/schematic-replicator")
+        .WithRedisCache(new RedisCacheConfig
+        {
+            Endpoints = new List<string>
+            {
+                "redis-primary.example.com:6379",
+                "redis-replica.example.com:6379"
+            },
+            KeyPrefix = "schematic-replica:",
+            CacheTTL = TimeSpan.FromHours(24),
+            ConnectTimeout = 10000,
+            AbortOnConnectFail = false
+        })
+};
+
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+#### Replicator Mode Configuration Options
+
+| Configuration Method | Description | Example |
+|---------------------|-------------|---------|
+| `.WithHealthCheckUrl(url)` | Sets a custom health check endpoint URL for monitoring replicator status | `"https://health.example.com/replicator"` |
+| `.WithRedisCache(config)` | Configures Redis as the cache provider for replicator data | Required for replicator mode |
