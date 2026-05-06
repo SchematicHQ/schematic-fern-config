@@ -6339,6 +6339,11 @@ components:
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
           maxItems: 1000
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanIssueResponseData'
+          maxItems: 1000
         skipped:
           type: array
           items:
@@ -6346,6 +6351,7 @@ components:
           maxItems: 1000
       required:
         - data
+        - issues
         - skipped
       title: DuplicatePlanEntitlementsResponseResponseData
     EntitlementCurrencyPricesResponseData:
