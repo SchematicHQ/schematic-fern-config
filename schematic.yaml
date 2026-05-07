@@ -1068,6 +1068,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        auto_topup_self_service:
+          type: boolean
         auto_topup_threshold_credits:
           type: integer
           format: int64
@@ -1148,6 +1150,7 @@ components:
         - credit_amount
         - credit_name
         - auto_topup_enabled
+        - auto_topup_self_service
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -1958,6 +1961,11 @@ components:
           items:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
           maxItems: 100
+        auto_topup_overrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAutoTopupOverrideRequestBody'
+          maxItems: 100
         company_id:
           type: string
         coupon_external_id:
@@ -1990,6 +1998,7 @@ components:
           type: boolean
       required:
         - add_on_ids
+        - auto_topup_overrides
         - pay_in_advance
         - credit_bundles
         - new_plan_id
@@ -2004,6 +2013,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdateAddOnRequestBody'
+          maxItems: 100
+        auto_topup_overrides:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateAutoTopupOverrideRequestBody'
           maxItems: 100
         coupon_external_id:
           type: string
@@ -2035,6 +2049,7 @@ components:
           type: boolean
       required:
         - add_on_ids
+        - auto_topup_overrides
         - pay_in_advance
         - credit_bundles
         - new_plan_id
@@ -2680,6 +2695,141 @@ components:
         - value_type
         - notes
       title: CompanyOverrideResponseData
+    CompanyPlanCreditGrantView:
+      type: object
+      properties:
+        billing_credit_auto_topup_amount:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_auto_topup_amount_type:
+          type: string
+          nullable: true
+        billing_credit_auto_topup_enabled:
+          type: boolean
+        billing_credit_auto_topup_expiry_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
+          nullable: true
+        billing_credit_auto_topup_expiry_unit:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
+          nullable: true
+        billing_credit_auto_topup_expiry_unit_count:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_auto_topup_self_service:
+          type: boolean
+        billing_credit_auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_auto_topup_threshold_percent:
+          type: integer
+          format: int64
+          nullable: true
+        company_auto_topup_amount:
+          type: integer
+          format: int64
+          nullable: true
+        company_auto_topup_enabled:
+          type: boolean
+          nullable: true
+        company_auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        credit:
+          $ref: '#/components/schemas/BillingCreditView'
+        credit_amount:
+          type: integer
+          format: int64
+        credit_description:
+          type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.Description instead.
+          deprecated: true
+        credit_icon:
+          type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use Credit.Icon
+            instead.
+          nullable: true
+          deprecated: true
+        credit_id:
+          type: string
+        credit_name:
+          type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use Credit.Name
+            instead.
+          deprecated: true
+        expiry_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryType'
+          nullable: true
+        expiry_unit:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
+          nullable: true
+        expiry_unit_count:
+          type: integer
+          format: int64
+          nullable: true
+        id:
+          type: string
+        plan:
+          $ref: '#/components/schemas/GenericPreviewObject'
+        plan_id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        plural_name:
+          type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.PluralName instead.
+          nullable: true
+          deprecated: true
+        reset_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
+        reset_start:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetStart'
+          nullable: true
+        reset_type:
+          $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
+        singular_name:
+          type: string
+          description: >-
+            Deprecated field, will be removed in the future. Use
+            Credit.SingularName instead.
+          nullable: true
+          deprecated: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - credit_id
+        - plan_id
+        - credit_amount
+        - credit_name
+        - credit_description
+        - reset_type
+        - billing_credit_auto_topup_enabled
+        - billing_credit_auto_topup_self_service
+        - created_at
+        - updated_at
+      title: CompanyPlanCreditGrantView
     CompanyPlanDetailResponseData:
       type: object
       properties:
@@ -2851,7 +3001,7 @@ components:
         included_credit_grants:
           type: array
           items:
-            $ref: '#/components/schemas/PlanCreditGrantView'
+            $ref: '#/components/schemas/CompanyPlanCreditGrantView'
           maxItems: 1000
         name:
           type: string
@@ -4041,6 +4191,9 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        auto_topup_self_service:
+          type: boolean
+          nullable: true
         auto_topup_threshold_credits:
           type: integer
           format: int64
@@ -8895,6 +9048,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_credit_auto_topup_self_service:
+          type: boolean
         billing_credit_auto_topup_threshold_credits:
           type: integer
           format: int64
@@ -8989,6 +9144,7 @@ components:
         - credit_description
         - reset_type
         - billing_credit_auto_topup_enabled
+        - billing_credit_auto_topup_self_service
         - created_at
         - updated_at
       title: PlanCreditGrantView
@@ -11747,6 +11903,27 @@ components:
           maxLength: 256
           minLength: 1
       title: UpdateApiKeyRequestBody
+    UpdateAutoTopupOverrideRequestBody:
+      type: object
+      properties:
+        auto_topup_amount:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
+        auto_topup_enabled:
+          type: boolean
+          nullable: true
+        auto_topup_threshold_credits:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 0
+        plan_credit_grant_id:
+          type: string
+      required:
+        - plan_credit_grant_id
+      title: UpdateAutoTopupOverrideRequestBody
     UpdateBillingCreditRequestBody:
       type: object
       properties:
@@ -11834,6 +12011,9 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        auto_topup_self_service:
+          type: boolean
+          nullable: true
         auto_topup_threshold_credits:
           type: integer
           format: int64
@@ -15415,6 +15595,13 @@ paths:
           in: query
           schema:
             type: string
+        - name: plan_version_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15475,6 +15662,11 @@ paths:
                         maxItems: 100
                       plan_version_id:
                         type: string
+                      plan_version_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
                     title: ListBillingPlanCreditGrantsParams
                 required:
                   - data
@@ -15694,6 +15886,13 @@ paths:
           in: query
           schema:
             type: string
+        - name: plan_version_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15750,6 +15949,11 @@ paths:
                         maxItems: 100
                       plan_version_id:
                         type: string
+                      plan_version_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
                     title: CountBillingPlanCreditGrantsParams
                 required:
                   - data
