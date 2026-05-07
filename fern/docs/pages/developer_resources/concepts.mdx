@@ -6,6 +6,7 @@ slug: developer_resources/concepts
 
 This page covers Schematic's core concepts and how you interact with them via the API and SDKs.
 
+
 ### User and company profiles
 
 Schematic centralizes all traits and events submitted via the API or client libraries, as well as data synced from third-party tools such as Stripe. You can use this data to construct rules for feature targeting within Schematic or as variables for metered features.
@@ -44,7 +45,7 @@ An entitlement defines what a plan or add on grants for a specific feature. Sche
 
 ### How entitlement checks are evaluated
 
-When you evaluate a feature for a company, Schematic combines plan entitlements with company overrides and takes the most generous of those values. If that doesn't resolve to a result, it falls back to global rules (e.g. trait or segment-based). If nothing matches, the check returns false and the feature is treated as disabled.
+When you evaluate a feature for a company, Schematic combines plan entitlements with company overrides and takes the most generous of those values. If that doesn’t resolve to a result, it falls back to global rules (e.g. trait or segment-based). If nothing matches, the check returns false and the feature is treated as disabled.
 
 ![How an entitlement check works](../../assets/images/developer_resources/entitlement-check-flow.svg)
 
@@ -66,11 +67,11 @@ Usage is event-based or trait-based consumption tracked against a feature. It po
 
 Usage events are sent via `track` calls and attributed to companies, users, and features.
 
-### Key Product Flows
+### Data flows
 
-The diagram below shows how the key flows (subscribing to a plan, checking entitlements, and tracking usage) work end to end across your app, Schematic, and Stripe.
+The diagram below shows how the key flows — subscribing to a plan, checking entitlements, and tracking usage — work end to end across your app, Schematic, and Stripe.
 
-![Schematic key product flows](../../assets/images/developer_resources/schematic-key-product-flow.svg)
+![Schematic data flows](../../assets/images/developer_resources/schematic-data-flow.svg)
 
 ### Components
 
