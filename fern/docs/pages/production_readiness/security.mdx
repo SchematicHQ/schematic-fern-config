@@ -17,9 +17,25 @@ Our most recent report is from Feb 14, 2026 and can be provided upon request.
 
 ![Soc2 Logo](../../assets/images/architecture/security-soc2.png)
 
+For the full compliance overview, see our [Trust Center](https://trust.schematichq.com).
+
+### Customer Data
+
+Customer Data is the information you submit to Schematic for processing on your behalf. It includes the identity keys your systems use to refer to a company or user, optional profile traits (name, email, role, or any custom field you send), usage events recorded through the `track` API, and the subscription state Schematic mirrors from your billing provider.
+
+For the list of third parties that process Customer Data on our behalf, see [Subprocessors](https://schematichq.com/subprocessors).
+
 ### Payment Security (PCI Compliance)
 
-Schematic leverages Stripe for all payment processing. Stripe is certified as a PCI Level 1 Service Provider, ensuring industry-standard protection for all payment data.
+Schematic does not store, process, or transmit payment card data. Schematic leverages Stripe for all payment processing, and Stripe is certified as a PCI Level 1 Service Provider, ensuring industry-standard protection for all payment data.
+
+### Encryption
+
+All customer-facing endpoints require TLS 1.2 or higher, terminated at the load balancer. Data at rest is encrypted with AES-256. API keys and service credentials are stored in encrypted secret stores and are never written to logs. Outbound webhooks are signed, and every Schematic SDK includes helpers for verifying webhook signatures before your application processes them.
+
+### API access
+
+API access is segmented by environment and key type. Publishable keys are scoped for client-side SDKs and carry limited authority. Secret keys are used by server-side SDKs and grant the access required to call privileged endpoints. Embedded components render with short-lived JWT session tokens minted on your server, which avoids exposing secret keys to the browser.
 
 ### Application Security Measures
 
@@ -44,6 +60,10 @@ For all customers, Schematic supports SSO through Google and Github. Additionall
 ![2 Factor Authorization](../../assets/images/architecture/security-2fa.png)
 
 We can also support Custom SSO providers such as Okta, Auth0, etc for customers on the Enterprise plan. If you have any questions, please reach out to us at `support@schematichq.com`.
+
+### Incident response
+
+Customers are notified within 72 hours of a confirmed incident affecting their Customer Data, in line with the [Data Processing Addendum](https://schematichq.com/dpa).
 
 ### Policies
 
