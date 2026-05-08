@@ -25161,6 +25161,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: company_scoped_only
+          in: query
+          description: >-
+            Only return plans that are scoped to a company (custom plans
+            assigned to a company)
+          schema:
+            type: boolean
+            description: >-
+              Only return plans that are scoped to a company (custom plans
+              assigned to a company)
         - name: exclude_company_scoped
           in: query
           description: >-
@@ -25289,6 +25299,11 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      company_scoped_only:
+                        type: boolean
+                        description: >-
+                          Only return plans that are scoped to a company (custom
+                          plans assigned to a company)
                       exclude_company_scoped:
                         type: boolean
                         description: >-
@@ -25812,6 +25827,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: company_scoped_only
+          in: query
+          description: >-
+            Only return plans that are scoped to a company (custom plans
+            assigned to a company)
+          schema:
+            type: boolean
+            description: >-
+              Only return plans that are scoped to a company (custom plans
+              assigned to a company)
         - name: exclude_company_scoped
           in: query
           description: >-
@@ -25936,6 +25961,11 @@ paths:
                     properties:
                       company_id:
                         type: string
+                      company_scoped_only:
+                        type: boolean
+                        description: >-
+                          Only return plans that are scoped to a company (custom
+                          plans assigned to a company)
                       exclude_company_scoped:
                         type: boolean
                         description: >-
