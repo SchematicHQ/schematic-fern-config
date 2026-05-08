@@ -185,6 +185,8 @@ components:
           nullable: true
         id:
           type: string
+        integration:
+          $ref: '#/components/schemas/ApiKeyIntegrationResponseData'
         last_used_at:
           type: string
           format: date-time
@@ -212,6 +214,20 @@ components:
         - updated_at
         - secret
       title: ApiKeyCreateResponseData
+    ApiKeyIntegrationResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        state:
+          $ref: '#/components/schemas/IntegrationState'
+        type:
+          $ref: '#/components/schemas/IntegrationType'
+      required:
+        - id
+        - state
+        - type
+      title: ApiKeyIntegrationResponseData
     ApiKeyResponseData:
       type: object
       properties:
@@ -228,6 +244,8 @@ components:
           nullable: true
         id:
           type: string
+        integration:
+          $ref: '#/components/schemas/ApiKeyIntegrationResponseData'
         last_used_at:
           type: string
           format: date-time
@@ -264,6 +282,8 @@ components:
       properties:
         actor_type:
           $ref: '#/components/schemas/ActorType'
+        api_key:
+          $ref: '#/components/schemas/ApiKeyResponseData'
         api_key_id:
           type: string
           nullable: true
@@ -333,6 +353,8 @@ components:
       properties:
         actor_type:
           $ref: '#/components/schemas/ActorType'
+        api_key:
+          $ref: '#/components/schemas/ApiKeyResponseData'
         api_key_id:
           type: string
           nullable: true
@@ -6995,6 +7017,8 @@ components:
         api_key:
           type: string
           nullable: true
+        api_key_view:
+          $ref: '#/components/schemas/ApiKeyResponseData'
         body:
           type: object
         body_preview:
