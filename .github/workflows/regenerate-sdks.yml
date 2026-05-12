@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -22,7 +23,7 @@ jobs:
 
       - name: Regenerate all SDKs
         env:
-          GH_TOKEN: ${{ secrets.SDK_RELEASE_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Map fern group names to release workflow filenames
           workflow_file() {
@@ -41,7 +42,7 @@ jobs:
             fi
 
             # Get the latest release from the downstream repo
-            release=$(gh release view --repo "$repo" --json tagName,publishedAt 2>/dev/null || echo "")
+            release=$(gh release view --repo "$repo" --json tagName,publishedAt || echo "")
             if [ -z "$release" ]; then
               echo "Skipping $group: no releases found in $repo"
               continue
