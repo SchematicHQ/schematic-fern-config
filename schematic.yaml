@@ -21280,6 +21280,17 @@ paths:
               Include time-bucketed usage aggregation (today, this week, this
               month, billing period) for credit-based entitlements. Defaults to
               false for performance.
+        - name: managed_by
+          in: query
+          description: >-
+            Filter for features managed by a billing provider, or by Schematic
+            (no billing provider)
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BillingProviderType'
+            description: >-
+              Filter for features managed by a billing provider, or by Schematic
+              (no billing provider)
         - name: q
           in: query
           schema:
@@ -21344,6 +21355,12 @@ paths:
                         description: Page limit (default 100)
                         format: int64
                         example: '100'
+                      managed_by:
+                        allOf:
+                          - $ref: '#/components/schemas/BillingProviderType'
+                        description: >-
+                          Filter for features managed by a billing provider, or
+                          by Schematic (no billing provider)
                       offset:
                         type: integer
                         description: Page offset (default 0)
@@ -21476,6 +21493,17 @@ paths:
               Include time-bucketed usage aggregation (today, this week, this
               month, billing period) for credit-based entitlements. Defaults to
               false for performance.
+        - name: managed_by
+          in: query
+          description: >-
+            Filter for features managed by a billing provider, or by Schematic
+            (no billing provider)
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BillingProviderType'
+            description: >-
+              Filter for features managed by a billing provider, or by Schematic
+              (no billing provider)
         - name: q
           in: query
           schema:
@@ -21536,6 +21564,12 @@ paths:
                         description: Page limit (default 100)
                         format: int64
                         example: '100'
+                      managed_by:
+                        allOf:
+                          - $ref: '#/components/schemas/BillingProviderType'
+                        description: >-
+                          Filter for features managed by a billing provider, or
+                          by Schematic (no billing provider)
                       offset:
                         type: integer
                         description: Page offset (default 0)
