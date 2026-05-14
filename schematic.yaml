@@ -1187,6 +1187,9 @@ components:
           type: string
         interval:
           $ref: '#/components/schemas/BillingProductPriceInterval'
+        interval_count:
+          type: integer
+          format: int64
         nickname:
           type: string
           nullable: true
@@ -1205,6 +1208,7 @@ components:
         - external_price_id
         - id
         - interval
+        - interval_count
         - price
         - provider_type
         - scheme
@@ -1233,6 +1237,9 @@ components:
           type: string
         interval:
           $ref: '#/components/schemas/BillingProductPriceInterval'
+        interval_count:
+          type: integer
+          format: int64
         is_active:
           type: boolean
         meter_event_name:
@@ -1288,6 +1295,7 @@ components:
         - created_at
         - currency
         - interval
+        - interval_count
         - is_active
         - package_size
         - price
@@ -1381,6 +1389,10 @@ components:
           type: string
         interval:
           type: string
+        interval_count:
+          type: integer
+          format: int64
+          nullable: true
         meter_id:
           type: string
           nullable: true
@@ -1498,6 +1510,9 @@ components:
           type: string
         interval:
           $ref: '#/components/schemas/BillingProductPriceInterval'
+        interval_count:
+          type: integer
+          format: int64
         is_active:
           type: boolean
         meter_id:
@@ -1536,6 +1551,7 @@ components:
         - created_at
         - currency
         - interval
+        - interval_count
         - is_active
         - package_size
         - price
@@ -2946,6 +2962,8 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        quarterly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         trial_days:
           type: integer
           format: int64
@@ -4102,6 +4120,23 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quarterly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         soft_limit:
           type: integer
           format: int64
@@ -4281,6 +4316,10 @@ components:
         interval:
           type: string
           maxLength: 255
+        interval_count:
+          type: integer
+          format: int64
+          nullable: true
         is_active:
           type: boolean
         meter_id:
@@ -4792,6 +4831,23 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quarterly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         soft_limit:
           type: integer
           format: int64
@@ -5394,6 +5450,23 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quarterly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         soft_limit:
           type: integer
           format: int64
@@ -6295,6 +6368,19 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         yearly_price_tiers:
           type: array
           items:
@@ -6535,6 +6621,8 @@ components:
         currency:
           type: string
         monthly_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        quarterly_price:
           $ref: '#/components/schemas/BillingPriceView'
         yearly_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -7353,6 +7441,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
+        quarterly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
         soft_limit:
           type: integer
           description: >-
@@ -7902,6 +7992,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
+        quarterly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
         soft_limit:
           type: integer
           description: >-
@@ -9186,6 +9278,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        quarterly_price:
+          type: integer
+          format: int64
+          nullable: true
         yearly_price:
           type: integer
           format: int64
@@ -9201,6 +9297,8 @@ components:
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         one_time_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        quarterly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         yearly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
@@ -9277,6 +9375,8 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        quarterly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         trial_days:
           type: integer
           format: int64
@@ -9338,6 +9438,8 @@ components:
         id:
           type: string
         metered_monthly_price:
+          $ref: '#/components/schemas/BillingPriceView'
+        metered_quarterly_price:
           $ref: '#/components/schemas/BillingPriceView'
         metered_yearly_price:
           $ref: '#/components/schemas/BillingPriceView'
@@ -9631,6 +9733,8 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        quarterly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         trial_days:
           type: integer
           format: int64
@@ -10239,6 +10343,8 @@ components:
           $ref: '#/components/schemas/BillingPriceResponseData'
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        quarterly_price:
+          $ref: '#/components/schemas/BillingPriceResponseData'
         trial_days:
           type: integer
           format: int64
@@ -12425,6 +12531,23 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quarterly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         soft_limit:
           type: integer
           format: int64
@@ -12753,6 +12876,13 @@ components:
         one_time_price_id:
           type: string
           nullable: true
+        quarterly_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_price_id:
+          type: string
+          nullable: true
         trial_days:
           type: integer
           format: int64
@@ -12996,6 +13126,23 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quarterly_metered_price_id:
+          type: string
+          nullable: true
+          deprecated: true
+        quarterly_price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePriceTierRequestBody'
+          nullable: true
+          maxItems: 100
+        quarterly_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        quarterly_unit_price_decimal:
+          type: string
+          nullable: true
         soft_limit:
           type: integer
           format: int64
@@ -13050,6 +13197,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
+        quarterly_usage_based_price:
+          $ref: '#/components/schemas/BillingPriceView'
         value_bool:
           type: boolean
           nullable: true
