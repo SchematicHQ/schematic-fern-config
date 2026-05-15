@@ -4719,6 +4719,43 @@ components:
         - bundle_name
         - price_per_unit
       title: CreateCreditBundleRequestBody
+    CreateCustomPlanBundlePlanRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+        description:
+          type: string
+          maxLength: 1024
+          minLength: 0
+        icon:
+          allOf:
+            - $ref: '#/components/schemas/PlanIcon'
+          nullable: true
+        name:
+          type: string
+          maxLength: 256
+          minLength: 1
+      required:
+        - company_id
+        - description
+        - name
+      title: CreateCustomPlanBundlePlanRequestBody
+    CreateCustomPlanBundleRequestBody:
+      type: object
+      properties:
+        billing_product:
+          $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleEntitlementRequestBody'
+          maxItems: 100
+        plan:
+          $ref: '#/components/schemas/CreateCustomPlanBundlePlanRequestBody'
+      required:
+        - entitlements
+      title: CreateCustomPlanBundleRequestBody
     CreateCustomPlanRequestBody:
       type: object
       properties:
@@ -19959,6 +19996,46 @@ paths:
                   - data
                   - params
                 title: RetryCustomPlanBillingResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plan-bundles:
+    post:
+      operationId: createCustomPlanBundle
+      summary: Create custom plan bundle
+      tags:
+        - planbundle
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomPlanBundleRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanBundleResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateCustomPlanBundleParams
+                required:
+                  - data
+                  - params
+                title: CreateCustomPlanBundleResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
