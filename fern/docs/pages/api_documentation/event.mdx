@@ -31,7 +31,7 @@ Datetime when event was sent to Schematic. Format is ISO 8601.
 </ParamField>
 
 <ParamField path="captured_at" type="datetime">
-Datetime when event was received by Schematic. Format is ISO 8601.
+Effective timestamp of the event in Schematic. By default this is the server receipt time, but when the event is submitted with `trusted_client_clock` or `backfill`, it is the client-provided `sent_at`. Format is ISO 8601. See [Backfills and usage corrections](/playbooks/backfill-and-corrections).
 </ParamField>
 
 <ParamField path="loaded_at" type="datetime">
@@ -68,6 +68,18 @@ Current status of event in Schematic data pipeline (pending, success, failed, un
 
 <ParamField path="idempotency_key" type="string">
 Optional client-supplied key used to deduplicate events. If a second event is submitted with the same `idempotency_key` within 24 hours, scoped to the same environment and event type, it is dropped before processing.
+</ParamField>
+
+### Request-only fields
+
+Two optional boolean fields on the create-event payload let you submit events with client-provided timestamps. Both require a secret API key and a `sent_at` value. See [Backfills and usage corrections](/playbooks/backfill-and-corrections) for full semantics.
+
+<ParamField path="trusted_client_clock" type="boolean">
+When `true`, the client-provided `sent_at` is used as the effective event timestamp instead of server receipt time. Billing side effects still fire. `sent_at` must be within 5 minutes in the future and 34 days in the past.
+</ParamField>
+
+<ParamField path="backfill" type="boolean">
+When `true`, the event is stored at its `sent_at` timestamp but all billing impact, webhooks, and `last_seen_at` bumps are skipped. Intended for analytics-only imports of historical usage. `sent_at` must be within 5 minutes in the future and 365 days in the past.
 </ParamField>
 
 <Aside>
