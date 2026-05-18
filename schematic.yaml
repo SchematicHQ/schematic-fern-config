@@ -5013,6 +5013,12 @@ components:
     CreateEventRequestBody:
       type: object
       properties:
+        backfill:
+          type: boolean
+          description: >-
+            Requires a secret API key, and trusted_client_clock. Import
+            historical data without affecting billing.
+          nullable: true
         body:
           $ref: '#/components/schemas/EventBody'
         event_type:
@@ -5032,6 +5038,12 @@ components:
             Optionally provide a timestamp at which the event was sent to
             Schematic
           format: date-time
+          nullable: true
+        trusted_client_clock:
+          type: boolean
+          description: >-
+            Requires a secret API key and sent_at. Use sent_at as the effective
+            timestamp.
           nullable: true
       required:
         - event_type
@@ -6522,6 +6534,9 @@ components:
       properties:
         api_key:
           type: string
+        backfill:
+          type: boolean
+          nullable: true
         body:
           type: object
         idempotency_key:
@@ -6531,6 +6546,9 @@ components:
         sent_at:
           type: string
           format: date-time
+          nullable: true
+        trusted_client_clock:
+          type: boolean
           nullable: true
         type:
           $ref: '#/components/schemas/EventType'
