@@ -1,0 +1,284 @@
+---
+title: Auth0 Integration
+
+slug: integrations/auth0
+---
+
+<Note>
+This is an **implementation guide**, not a native integration. Schematic does not
+offer a turnkey Auth0 connector. Auth0 still works with Schematic today through
+Schematic's [keys system](/developer_resources/key_management): you bring the
+Auth0 organization and user IDs as keys, and everything else behaves normally.
+This page describes exactly what you would set up.
+</Note>
+
+[Auth0](https://auth0.com) is an authentication and identity provider. Because
+Schematic identifies companies and users by your own `keys` rather than by
+Schematic-generated IDs, you can use Auth0 as the source of truth for identity
+and layer Schematic entitlements, feature flags, and embeddable components on top
+of it without storing any Schematic IDs.
+
+There are three pieces to a complete Auth0 implementation:
+
+1. **Create companies and users in Schematic keyed by their Auth0 IDs.** This
+happens either from an Auth0 Post-Login Action or inline in your own
+signup/provisioning flow. From then on you address those entities by their Auth0
+IDs in every API/SDK call and usage event, so you never need to store or look up
+a Schematic ID.
+2. **A one-time backfill** from Auth0 into Schematic when you deploy, so existing
+organizations and users don't have gaps.
+3. **Ongoing sync** so Schematic stays accurate as profiles change and users come
+and go. With Auth0 this mostly comes for free from the Post-Login Action; deletes
+need a little extra handling.
+
+## How Auth0 maps to Schematic
+
+| Auth0 object | Schematic entity | Recommended keys |
+|---|---|---|
+| Organization (`org_...`) | Company | `auth0_organization_id` |
+| User (`auth0\|...`, `google-oauth2\|...`) | User | `auth0_user_id`, `email` |
+| Organization member | Sets the user's parent company | n/a |
+
+An Auth0 Organization becomes a Schematic **company**, an Auth0 User becomes a
+Schematic **user**, and an Auth0 organization membership tells you which company
+a user belongs to. The Auth0 user ID (the `sub` claim) and organization ID are
+stable and unique, which makes them good primary `keys`. Review
+[Key Management](/developer_resources/key_management) for background on how
+`keys` work.
+
+<Info>
+Auth0 Organizations is an opt-in feature. If you don't use it, your "company" in
+Schematic likely corresponds to a tenant identifier you keep in
+`app_metadata` instead. Map that identifier to the company key wherever this
+guide uses `auth0_organization_id`; everything else is the same.
+</Info>
+
+<Info>
+The key names `auth0_organization_id`, `auth0_user_id`, and `email` used
+throughout this guide are recommendations, not requirements. Schematic key names
+are arbitrary strings, so you can choose names that fit your own conventions.
+What matters is that you pick a name for each and use it consistently in every
+call. Storing more than one key per entity is encouraged: Schematic resolves
+between keys, so a user keyed by both `auth0_user_id` and `email` can be
+addressed by whichever value you have on hand in a given context.
+</Info>
+
+## 1. Create companies and users keyed by Auth0 IDs
+
+When an organization or user is created in Auth0, upsert the matching entity into
+Schematic and store the Auth0 IDs as `keys`. Because Schematic upserts are
+idempotent, the same call safely creates the entity the first time and updates it
+on every call after that.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+// An organization signs up
+await client.companies.upsertCompany({
+  keys: { auth0_organization_id: "org_EXAMPLE0123456789" },
+  name: "Acme Inc.",
+});
+
+// A user signs up and belongs to that organization
+await client.companies.upsertUser({
+  keys: {
+    auth0_user_id: "auth0|EXAMPLE0123456789",
+    email: "marcelina.davis@example.com",
+  },
+  name: "Marcelina Davis",
+  // `company` accepts the parent company's keys, so the user is
+  // associated with the right Schematic company
+  company: { auth0_organization_id: "org_EXAMPLE0123456789" },
+});
+```
+
+### Where to make these calls
+
+Unlike some providers, Auth0 Actions can make external HTTP calls, so the
+idiomatic place to do this is a **Post-Login Action**. The action runs on every
+login, which means it also keeps names, emails, and organization membership fresh
+over time without any separate update mechanism. You can also do the upserts
+inline in your own provisioning flow if you prefer; use whichever fits, or both.
+
+- **Post-Login Action (recommended).** Add a Post-Login Action, install the
+Schematic SDK as a dependency, and store your Schematic API key as an Action
+Secret. The action is blocking, so wrap the calls in a `try/catch` and keep them
+fast: a Schematic hiccup should never block a user's login.
+
+  ```ts
+  exports.onExecutePostLogin = async (event, api) => {
+    const { SchematicClient } = require("@schematichq/schematic-typescript-node");
+    const client = new SchematicClient({
+      apiKey: event.secrets.SCHEMATIC_API_KEY,
+    });
+
+    try {
+      if (event.organization) {
+        await client.companies.upsertCompany({
+          keys: { auth0_organization_id: event.organization.id },
+          name: event.organization.display_name ?? event.organization.name,
+        });
+      }
+
+      await client.companies.upsertUser({
+        keys: {
+          auth0_user_id: event.user.user_id,
+          email: event.user.email,
+        },
+        name: event.user.name,
+        ...(event.organization
+          ? { company: { auth0_organization_id: event.organization.id } }
+          : {}),
+      });
+    } catch (err) {
+      // Never block login on a Schematic hiccup
+      console.error("Schematic sync failed", err);
+    }
+  };
+  ```
+
+- **In your own signup/provisioning flow.** Wherever your application already
+creates the organization or user, add the same Schematic upserts immediately
+after. This is something you wire into your own code, and it is a good choice
+when you want the entity to exist in Schematic before the user's first request
+completes.
+
+There is also a **Post-User-Registration Action**, but it only fires for
+database connections and has no organization context, so it covers fewer cases
+than Post-Login. Post-Login on every login is the most reliable single hook.
+
+### Use the Auth0 IDs in every subsequent call
+
+Once the Auth0 IDs are stored as `keys`, you address companies and users by those
+same IDs everywhere. You never store a Schematic ID.
+
+Checking a feature flag or entitlement:
+
+```ts
+const isOn = await client.checkFlag(
+  {
+    company: { auth0_organization_id: "org_EXAMPLE0123456789" },
+    user: { auth0_user_id: "auth0|EXAMPLE0123456789" },
+  },
+  "your-feature-flag",
+);
+```
+
+Tracking usage of a metered feature:
+
+```ts
+client.track({
+  event: "api-request",
+  company: { auth0_organization_id: "org_EXAMPLE0123456789" },
+  user: { auth0_user_id: "auth0|EXAMPLE0123456789" },
+});
+```
+
+The same Auth0 IDs work for identify events, trait updates, usage retrieval, and
+[embeddable components](/components/overview), which become aware of the
+logged-in Auth0 user automatically.
+
+## 2. One-time backfill when you deploy
+
+The Post-Login Action only reaches users the next time they log in, so existing
+organizations and users have gaps until then. To close them immediately, run a
+one-time backfill with the Auth0 Management API.
+
+The cleanest path iterates organizations and their members. Auth0's organization
+endpoints use checkpoint pagination: pass `take` and follow the `next` cursor
+until it is empty. Member listing supports more than 1000 results this way, which
+the `GET /api/v2/users` endpoint does not.
+
+```ts
+import { ManagementClient } from "auth0";
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const auth0 = new ManagementClient({
+  domain: process.env.AUTH0_DOMAIN,
+  clientId: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET,
+});
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+let from: string | undefined;
+do {
+  const { data } = await auth0.organizations.getAll({ take: 100, from });
+
+  for (const org of data.organizations) {
+    await client.companies.upsertCompany({
+      keys: { auth0_organization_id: org.id },
+      name: org.display_name ?? org.name,
+    });
+
+    // Members of this organization -> Schematic users
+    let memberFrom: string | undefined;
+    do {
+      const members = await auth0.organizations.getMembers({
+        id: org.id,
+        take: 100,
+        from: memberFrom,
+      });
+      for (const member of members.data.members) {
+        await client.companies.upsertUser({
+          keys: { auth0_user_id: member.user_id, email: member.email },
+          name: member.name,
+          company: { auth0_organization_id: org.id },
+        });
+      }
+      memberFrom = members.data.next;
+    } while (memberFrom);
+  }
+
+  from = data.next;
+} while (from);
+```
+
+<Info>
+For users who are not members of any organization, or tenants that don't use
+Auth0 Organizations, use Auth0's bulk **User Export job** rather than paging
+`GET /api/v2/users`, which never returns more than 1000 users. Upsert each
+exported user the same way, mapping your own tenant identifier to the company
+key. Because upserts are idempotent and matched on `keys`, the backfill is safe
+to re-run.
+</Info>
+
+## 3. Keep Schematic in sync over time
+
+Auth0 does not emit clean entity webhooks the way some providers do, so the sync
+strategy is different from a webhook-per-event model.
+
+- **Profile and membership changes** are handled by the Post-Login Action from
+section 1. Because it upserts on every login, names, emails, and organization
+membership stay current without any extra wiring. This is enough for most teams.
+- **Deletions** are the one case the Post-Login Action cannot cover, since a
+deleted user never logs in again. Handle deletes where you already delete the
+Auth0 user: in the admin or account-management flow that calls the Auth0
+Management API to remove the user or organization, call Schematic in the same
+place.
+
+  ```ts
+  await schematic.companies.deleteUserByKeys({
+    keys: { auth0_user_id: "auth0|EXAMPLE0123456789" },
+  });
+
+  await schematic.companies.deleteCompanyByKeys({
+    keys: { auth0_organization_id: "org_EXAMPLE0123456789" },
+  });
+  ```
+
+- **Deletions initiated outside your app** (for example directly in the Auth0
+dashboard) won't hit that code path. If that happens in your environment,
+configure an Auth0 **Log Stream** with a custom webhook and react to the
+deletion log events. Log Streams deliver log records rather than entity objects
+and are not meant for real-time decisions, so treat this as an asynchronous
+cleanup path and key the Schematic delete off the user or organization ID in the
+log event.
+
+<Warning>
+Keep the Post-Login Action fast and wrapped in `try/catch`. It is blocking, so an
+unhandled error or a slow call there degrades the login experience for every
+user. Logging failures and moving on keeps authentication healthy while you
+investigate.
+</Warning>
