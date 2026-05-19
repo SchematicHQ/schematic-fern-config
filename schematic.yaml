@@ -1457,6 +1457,8 @@ components:
           type: string
         billing_product_id:
           type: string
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         controlled_by:
@@ -1482,6 +1484,7 @@ components:
           nullable: true
       required:
         - account_id
+        - billing_strategy
         - charge_type
         - environment_id
         - plan_id
@@ -1687,6 +1690,12 @@ components:
         - orb
         - schematic
         - stripe
+    BillingStrategy:
+      type: string
+      enum:
+        - schematic_managed
+        - provider_managed
+        - no_billing
     BillingSubscriptionDiscount:
       type: object
       properties:
@@ -2098,6 +2107,7 @@ components:
       type: string
       enum:
         - free
+        - none
         - one_time
         - recurring
     CheckFlagRequestBody:
@@ -2881,6 +2891,8 @@ components:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_can_trial:
@@ -2952,6 +2964,8 @@ components:
           deprecated: true
         is_free:
           type: boolean
+          description: 'Deprecated: Use BillingStrategy instead'
+          deprecated: true
         is_trialable:
           type: boolean
         monthly_price:
@@ -2993,6 +3007,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - billing_strategy
         - charge_type
         - company_count
         - controlled_by
@@ -9373,6 +9388,8 @@ components:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -9420,6 +9437,8 @@ components:
           deprecated: true
         is_free:
           type: boolean
+          description: 'Deprecated: Use BillingStrategy instead'
+          deprecated: true
         is_trialable:
           type: boolean
         monthly_price:
@@ -9454,6 +9473,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - billing_strategy
         - charge_type
         - company_count
         - controlled_by
@@ -9717,6 +9737,8 @@ components:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -9778,6 +9800,8 @@ components:
           deprecated: true
         is_free:
           type: boolean
+          description: 'Deprecated: Use BillingStrategy instead'
+          deprecated: true
         is_trialable:
           type: boolean
         monthly_price:
@@ -9812,6 +9836,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - billing_strategy
         - charge_type
         - company_count
         - controlled_by
@@ -10325,6 +10350,8 @@ components:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -10388,6 +10415,8 @@ components:
           deprecated: true
         is_free:
           type: boolean
+          description: 'Deprecated: Use BillingStrategy instead'
+          deprecated: true
         is_trialable:
           type: boolean
         monthly_price:
@@ -10422,6 +10451,7 @@ components:
         - name
         - plan_type
         - updated_at
+        - billing_strategy
         - charge_type
         - company_count
         - controlled_by
@@ -12903,6 +12933,10 @@ components:
       properties:
         billing_product_id:
           type: string
+          nullable: true
+        billing_strategy:
+          allOf:
+            - $ref: '#/components/schemas/BillingStrategy'
           nullable: true
         charge_type:
           $ref: '#/components/schemas/ChargeType'
