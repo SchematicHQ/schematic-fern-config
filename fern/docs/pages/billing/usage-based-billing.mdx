@@ -146,6 +146,10 @@ Checkout our [Credit Burndown Docs](/billing/credit-burndown).
 
 Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key** — publishable API keys will reject them.
 
+<Note>
+As an alternative to sending negative values for adjustment, usage events can be backdated. If `trusted_client_clock` is `true`, clients can set their own value for `sent_at`. See [Backfills and usage corrections](/playbooks/backfill-and-corrections).
+</Note>
+
 ### How to submit a negative quantity event
 
 Include a negative integer for the `quantity` field in your track event. The `quantity` must be a non-zero integer (fractional values are not supported).

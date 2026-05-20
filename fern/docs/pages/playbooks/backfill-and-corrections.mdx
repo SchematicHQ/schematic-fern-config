@@ -1,0 +1,135 @@
+---
+title: Backfills and usage corrections
+slug: playbooks/backfill-and-corrections
+description: Submit events with client-provided timestamps to import historical usage or correct events that arrive after the fact.
+---
+
+By default, Schematic stamps every event with the time it was received. Two optional flags on the track-event payload let you override that and submit an event with the time it *actually happened*:
+
+- **`trusted_client_clock`** — use the client-provided `sent_at` as the event's effective timestamp. Billing side effects still fire (against the logical timestamp). Best for **correcting recent usage** that arrived late or with a bad timestamp.
+- **`backfill`** — analytics-only mode for **importing historical usage**. Events are stored at their logical time but skip all billing side effects.
+
+Both flags require a **secret API key** (`sch_` prefix) and a `sent_at` value on the event. See [Authentication](/api-reference/authentication) for key types.
+
+## When to use which mode
+
+| You want to... | Use |
+|---|---|
+| Record usage that just happened (normal flow) | Neither flag — server time is used |
+| Correct an event that happened yesterday or earlier today, including billing impact | `trusted_client_clock` |
+| Import months of historical usage for analytics, without re-billing customers | `backfill` |
+
+## `trusted_client_clock`
+
+When `true`, Schematic uses the `sent_at` you provide as the event's effective timestamp (`captured_at`) instead of server receipt time.
+
+**Requirements for setting `sent_at`:**
+- No more than 5 minutes in the future
+- No more than **34 days** in the past
+
+The 34-day past bound sits one day inside Stripe's meter-event 35-day cap, to absorb wall-clock skew between Schematic and Stripe. For older events, use `backfill`.
+
+All normal processing still happens — billing impact, webhooks, and activity updates fire as usual — just anchored to the logical timestamp instead of the receipt time. Feature usage counters only count the event toward periods that the logical timestamp falls within, so an event timestamped yesterday won't show up in today's daily counter.
+
+```json
+{
+  "api_key": "sch_secret_...",
+  "type": "track",
+  "sent_at": "2026-05-17T14:30:00Z",
+  "trusted_client_clock": true,
+  "body": {
+    "event": "api-call",
+    "company": { "your-company-key": "value" },
+    "quantity": 50
+  }
+}
+```
+
+## `backfill`
+
+`backfill: true` implies `trusted_client_clock` — `sent_at` is the effective timestamp — but **all billing side effects are skipped**. Use this when you want historical usage to appear in analytics without re-running billing.
+
+**Requirements for setting `sent_at` when `backfill: true`:**
+- No more than 5 minutes in the future
+- No more than **365 days** in the past
+
+**Skipped:**
+- Billing impact (credit consumption, Stripe meter reporting, auto-topup)
+- Webhooks
+- `last_seen_at` bumps on companies and users (historical events shouldn't shift present-time activity)
+
+**Still happens:**
+- The event is stored at its logical timestamp and shows up in analytics there.
+- Feature usage counters reflect the event for periods the logical timestamp falls within.
+- Companies and users referenced by the event are still created or linked from the event keys — their `last_seen_at` just isn't touched.
+
+```json
+{
+  "api_key": "sch_secret_...",
+  "type": "track",
+  "sent_at": "2025-10-15T09:00:00Z",
+  "backfill": true,
+  "body": {
+    "event": "api-call",
+    "company": { "your-company-key": "value" },
+    "quantity": 1000
+  }
+}
+```
+
+## Behavior matrix
+
+| Behavior | Normal | `trusted_client_clock` | `backfill` |
+|---|---|---|---|
+| Effective `captured_at` | server time | `sent_at` | `sent_at` |
+| Billing impact | Yes (current time) | Yes (logical time) | No |
+| Webhooks | Yes | Yes | No |
+| Feature usage counters | Yes (all periods) | Period-filtered | Period-filtered |
+| Company/user create or link | Yes | Yes | Yes |
+| Company/user `last_seen_at` bump | Yes | Yes | No |
+
+## SDK example
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+// Usage correction: an api-call from yesterday that we missed
+await client.track({
+  event: "api-call",
+  company: { "your-company-key": "value" },
+  quantity: 50,
+  sentAt: new Date("2026-05-17T14:30:00Z"),
+  trustedClientClock: true,
+});
+
+// Historical backfill: import a month-old event for analytics only
+await client.track({
+  event: "api-call",
+  company: { "your-company-key": "value" },
+  quantity: 1000,
+  sentAt: new Date("2025-10-15T09:00:00Z"),
+  backfill: true,
+});
+```
+
+## Retention
+
+Events are retained for 365 days, measured from the event's effective `captured_at`. A `backfill` submitted near the 365-day past bound therefore lands with very little remaining retention — by design. Aggregated feature usage is preserved separately on the same logical-period anchor, so usage charts and entitlement counters stay intact even after the underlying event expires.
+
+## Validation errors
+
+| Condition | Error |
+|---|---|
+| `trusted_client_clock` or `backfill` with a publishable key | `trusted_client_clock and backfill require a secret API key` |
+| `trusted_client_clock` or `backfill` without `sent_at` | `sent_at is required when trusted_client_clock or backfill is true` |
+| `sent_at` more than 5 minutes in the future | `sent_at cannot be more than 5 minutes in the future` |
+| `trusted_client_clock` with `sent_at` more than 34 days in the past | `sent_at cannot be more than 34 days in the past for trusted_client_clock; for older events use backfill (analytics-only, no billing side effects)` |
+| `backfill` with `sent_at` more than 365 days in the past | `sent_at cannot be more than 365 days in the past` |
+
+## Related
+
+- [Creating a metered feature](/playbooks/metering)
+- [Negative quantities (usage adjustments)](/billing/usage-based-billing#negative-quantities-usage-adjustments)
+- [The Event object](/api-reference/events/event-object)
