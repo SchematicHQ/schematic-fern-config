@@ -118,6 +118,24 @@ components:
       enum:
         - admin
         - member
+    AcquireCreditLeaseRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        requested_amount:
+          type: number
+      required:
+        - company_id
+        - credit_type_id
+        - requested_amount
+      title: AcquireCreditLeaseRequestBody
     ActivityEntryResponseData:
       type: object
       properties:
@@ -6161,6 +6179,39 @@ components:
         - expires_at
         - quantity
         - quantity_remaining
+    CreditLeaseResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        granted_amount:
+          type: number
+        id:
+          type: string
+        released_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - company_id
+        - credit_type_id
+        - granted_amount
+        - expires_at
+        - created_at
+        - updated_at
+      title: CreditLeaseResponseData
     CreditLedgerEnrichedEntryResponseData:
       type: object
       properties:
@@ -7378,6 +7429,18 @@ components:
         - flag_check
         - identify
         - track
+    ExtendCreditLeaseRequestBody:
+      type: object
+      properties:
+        additional_amount:
+          type: number
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - additional_amount
+      title: ExtendCreditLeaseRequestBody
     FeatureCompanyResponseData:
       type: object
       properties:
@@ -10764,6 +10827,9 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
+    ReleaseCreditLeaseRequestBody:
+      type: object
+      title: ReleaseCreditLeaseRequestBody
     RetryCustomPlanBillingRequestBody:
       type: object
       properties:
@@ -15612,6 +15678,140 @@ paths:
                   - data
                   - params
                 title: ListGrantsForCreditResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/lease:
+    post:
+      operationId: acquireCreditLease
+      summary: Acquire credit lease
+      tags:
+        - credits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcquireCreditLeaseRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditLeaseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: AcquireCreditLeaseParams
+                required:
+                  - data
+                  - params
+                title: AcquireCreditLeaseResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/lease/{lease_id}/extend:
+    put:
+      operationId: extendCreditLease
+      summary: Extend credit lease
+      tags:
+        - credits
+      parameters:
+        - name: lease_id
+          in: path
+          description: lease_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtendCreditLeaseRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditLeaseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ExtendCreditLeaseParams
+                required:
+                  - data
+                  - params
+                title: ExtendCreditLeaseResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/lease/{lease_id}/release:
+    put:
+      operationId: releaseCreditLease
+      summary: Release credit lease
+      tags:
+        - credits
+      parameters:
+        - name: lease_id
+          in: path
+          description: lease_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseCreditLeaseRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditLeaseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReleaseCreditLeaseParams
+                required:
+                  - data
+                  - params
+                title: ReleaseCreditLeaseResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
