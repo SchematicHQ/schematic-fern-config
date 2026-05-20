@@ -147,7 +147,7 @@ Checkout our [Credit Burndown Docs](/billing/credit-burndown).
 Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key** — publishable API keys will reject them.
 
 <Note>
-If the issue is that the event arrived late (the underlying usage happened earlier than the receipt time), set `trusted_client_clock: true` with the original `sent_at` instead of issuing a negative+positive pair. This attributes the usage to the correct period in both analytics and Stripe meter reporting. See [Backfills and usage corrections](/playbooks/backfill-and-corrections).
+As an alternative to sending negative values for adjustment, usage events can be backdated. If `trusted_client_clock` is `true`, clients can set their own value for `sent_at`. See [Backfills and usage corrections](/playbooks/backfill-and-corrections).
 </Note>
 
 ### How to submit a negative quantity event

@@ -23,7 +23,7 @@ Both flags require a **secret API key** (`sch_` prefix) and a `sent_at` value on
 
 When `true`, Schematic uses the `sent_at` you provide as the event's effective timestamp (`captured_at`) instead of server receipt time.
 
-**Bounds on `sent_at`:**
+**Requirements for setting `sent_at`:**
 - No more than 5 minutes in the future
 - No more than **34 days** in the past
 
@@ -49,7 +49,7 @@ All normal processing still happens — billing impact, webhooks, and activity u
 
 `backfill: true` implies `trusted_client_clock` — `sent_at` is the effective timestamp — but **all billing side effects are skipped**. Use this when you want historical usage to appear in analytics without re-running billing.
 
-**Bounds on `sent_at`:**
+**Requirements for setting `sent_at` when `backfill: true`:**
 - No more than 5 minutes in the future
 - No more than **365 days** in the past
 
