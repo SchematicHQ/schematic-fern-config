@@ -47,6 +47,16 @@ them good primary `keys`. Review
 `keys` work.
 
 <Info>
+This guide assumes you use WorkOS **User Management** (AuthKit): durable
+`user_...` users, `org_...` organizations, and `om_...` memberships. If you use
+WorkOS only for standalone SSO, each login gives you a profile rather than a
+persistent User Management user, so the user and membership webhooks and list
+endpoints below do not apply. In that case, upsert the company and user from your
+own callback using whatever stable identifiers you keep, and the rest of this
+guide works the same.
+</Info>
+
+<Info>
 The key names `workos_organization_id`, `workos_user_id`, and `email` used
 throughout this guide are recommendations, not requirements. Schematic key names
 are arbitrary strings, so you can choose names that fit your own conventions.
@@ -91,6 +101,16 @@ await client.companies.upsertUser({
 });
 ```
 
+<Info>
+This guide associates each user with a single company through the `company`
+field, which fits the common case of one user belonging to one organization.
+WorkOS users can belong to **multiple** organizations. If yours do, use the
+plural `companies` field instead and pass the user's full set of organizations.
+Schematic treats `companies` as the exhaustive list, so it adds new memberships
+and removes any you leave out. The webhook handler in section 3 uses this
+exhaustive pattern.
+</Info>
+
 ### Where to make these calls
 
 WorkOS does not run arbitrary custom code for you after a signup. WorkOS Actions
@@ -134,7 +154,7 @@ const isOn = await client.checkFlag(
 Tracking usage of a metered feature:
 
 ```ts
-client.track({
+await client.track({
   event: "api-request",
   company: { workos_organization_id: "org_EXAMPLE0123456789" },
   user: { workos_user_id: "user_EXAMPLE0123456789" },
@@ -163,10 +183,12 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY);
 const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
 
 // 1. Backfill organizations -> Schematic companies
+const organizationIds: string[] = [];
 let after: string | undefined;
 do {
   const page = await workos.organizations.listOrganizations({ limit: 100, after });
   for (const org of page.data) {
+    organizationIds.push(org.id);
     await client.companies.upsertCompany({
       keys: { workos_organization_id: org.id },
       name: org.name,
@@ -189,22 +211,26 @@ do {
 } while (after);
 
 // 3. Backfill memberships so each user is tied to the right company.
-//    List memberships per organization, iterating the organizations above.
-after = undefined;
-do {
-  const page = await workos.userManagement.listOrganizationMemberships({
-    organizationId: "org_EXAMPLE0123456789",
-    limit: 100,
-    after,
-  });
-  for (const membership of page.data) {
-    await client.companies.upsertUser({
-      keys: { workos_user_id: membership.userId },
-      company: { workos_organization_id: membership.organizationId },
+//    Page through every organization collected in step 1. Because `company`
+//    adds the user to that company without removing others, a user who belongs
+//    to multiple organizations accumulates all of them across the loop.
+for (const organizationId of organizationIds) {
+  after = undefined;
+  do {
+    const page = await workos.userManagement.listOrganizationMemberships({
+      organizationId,
+      limit: 100,
+      after,
     });
-  }
-  after = page.listMetadata.after ?? undefined;
-} while (after);
+    for (const membership of page.data) {
+      await client.companies.upsertUser({
+        keys: { workos_user_id: membership.userId },
+        company: { workos_organization_id: membership.organizationId },
+      });
+    }
+    after = page.listMetadata.after ?? undefined;
+  } while (after);
+}
 ```
 
 <Info>
@@ -249,7 +275,10 @@ const app = express();
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
 const schematic = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
 
-app.post("/webhooks/workos", express.json(), async (req, res) => {
+// Use express.raw, not express.json. constructEvent verifies the signature
+// against the exact bytes WorkOS sent, so it needs the raw body. Handing it a
+// parsed-then-re-serialized object can fail verification if the JSON differs.
+app.post("/webhooks/workos", express.raw({ type: "application/json" }), async (req, res) => {
   let event;
   try {
     event = await workos.webhooks.constructEvent({
@@ -261,54 +290,73 @@ app.post("/webhooks/workos", express.json(), async (req, res) => {
     return res.status(400).send("Invalid signature");
   }
 
-  // Acknowledge quickly, then process
-  res.status(200).send("OK");
+  // The event type is on `event.event`, not `event.type`.
+  const { event: type, data } = event;
+  try {
+    switch (type) {
+      case "organization.created":
+      case "organization.updated":
+        await schematic.companies.upsertCompany({
+          keys: { workos_organization_id: data.id },
+          name: data.name,
+        });
+        break;
 
-  const { type, data } = event;
-  switch (type) {
-    case "organization.created":
-    case "organization.updated":
-      await schematic.companies.upsertCompany({
-        keys: { workos_organization_id: data.id },
-        name: data.name,
-      });
-      break;
+      case "organization.deleted":
+        await schematic.companies.deleteCompanyByKeys({
+          keys: { workos_organization_id: data.id },
+        });
+        break;
 
-    case "organization.deleted":
-      await schematic.companies.deleteCompanyByKeys({
-        keys: { workos_organization_id: data.id },
-      });
-      break;
+      case "user.created":
+      case "user.updated":
+        await schematic.companies.upsertUser({
+          keys: { workos_user_id: data.id, email: data.email },
+          name: `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim(),
+        });
+        break;
 
-    case "user.created":
-    case "user.updated":
-      await schematic.companies.upsertUser({
-        keys: { workos_user_id: data.id, email: data.email },
-        name: `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim(),
-      });
-      break;
+      case "user.deleted":
+        await schematic.companies.deleteUserByKeys({
+          keys: { workos_user_id: data.id },
+        });
+        break;
 
-    case "user.deleted":
-      await schematic.companies.deleteUserByKeys({
-        keys: { workos_user_id: data.id },
-      });
-      break;
-
-    case "organization_membership.created":
-    case "organization_membership.updated":
-      // Re-associate the user with the correct company
-      await schematic.companies.upsertUser({
-        keys: { workos_user_id: data.userId },
-        company: { workos_organization_id: data.organizationId },
-      });
-      break;
+      case "organization_membership.created":
+      case "organization_membership.updated":
+      case "organization_membership.deleted": {
+        // Re-derive the user's current organizations and write them as the
+        // exhaustive `companies` list. This reflects both additions and
+        // removals: a deleted membership drops that company, and a user left
+        // with none is cleared (companies: []).
+        const memberships = await workos.userManagement.listOrganizationMemberships({
+          userId: data.userId,
+          limit: 100,
+        });
+        await schematic.companies.upsertUser({
+          keys: { workos_user_id: data.userId },
+          companies: memberships.data.map((m) => ({
+            workos_organization_id: m.organizationId,
+          })),
+        });
+        break;
+      }
+    }
+  } catch (err) {
+    // Return a non-2xx so WorkOS retries the delivery.
+    console.error("Schematic sync failed", err);
+    return res.status(500).send("Sync failed");
   }
+
+  res.status(200).send("OK");
 });
 ```
 
 <Warning>
-Respond to the webhook with a `2xx` immediately and do the Schematic work after
-(or on a queue). WorkOS retries on non-`2xx` responses or timeouts, so keep the
-handler fast and idempotent. Logging the WorkOS event `id` lets you safely skip
-duplicates.
+WorkOS retries on non-`2xx` responses or timeouts. The handler above does the
+Schematic work first and returns `200` only once it succeeds, so a transient
+failure returns `500` and WorkOS retries it. Keep the work fast and idempotent.
+If processing is heavy, enqueue the verified event, return `2xx` immediately, and
+do the Schematic work from the queue with its own retries instead. Logging the
+WorkOS event `id` lets you safely skip duplicates.
 </Warning>
