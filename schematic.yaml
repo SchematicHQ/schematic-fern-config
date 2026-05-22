@@ -17034,6 +17034,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/payment-methods/{billing_id}:
+    delete:
+      operationId: deletePaymentMethodByExternalID
+      summary: Delete payment method by external ID
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeletePaymentMethodByExternalIDParams
+                required:
+                  - data
+                  - params
+                title: DeletePaymentMethodByExternalIDResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/price:
     get:
       operationId: listBillingPrices
