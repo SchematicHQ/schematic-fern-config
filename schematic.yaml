@@ -2905,6 +2905,11 @@ components:
           type: string
           nullable: true
           deprecated: true
+        available_periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanPriceCadence'
+          maxItems: 1000
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
@@ -3038,6 +3043,7 @@ components:
         - is_custom
         - entitlements
         - compatible_plan_ids
+        - available_periods
         - company_can_trial
         - current
         - custom
@@ -9802,6 +9808,11 @@ components:
           type: string
           nullable: true
           deprecated: true
+        available_periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanPriceCadence'
+          maxItems: 1000
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
@@ -9918,6 +9929,7 @@ components:
         - is_custom
         - entitlements
         - compatible_plan_ids
+        - available_periods
       title: PlanGroupPlanDetailResponseData
     PlanGroupPlanEntitlementsOrder:
       type: object
@@ -10113,6 +10125,12 @@ components:
         - code
         - description
       title: PlanIssueResponseData
+    PlanPriceCadence:
+      type: string
+      enum:
+        - monthly
+        - quarterly
+        - yearly
     PlanResponseData:
       type: object
       properties:
@@ -10415,6 +10433,11 @@ components:
           type: string
           nullable: true
           deprecated: true
+        available_periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanPriceCadence'
+          maxItems: 1000
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
@@ -10533,6 +10556,7 @@ components:
         - is_custom
         - entitlements
         - compatible_plan_ids
+        - available_periods
         - custom
         - included_credit_grants
       title: PlanViewPublicResponseData
