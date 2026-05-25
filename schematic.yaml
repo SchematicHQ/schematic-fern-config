@@ -2366,6 +2366,9 @@ components:
           type: string
         interval:
           type: string
+        invoice_id:
+          type: string
+          nullable: true
         invoice_url:
           type: string
           nullable: true
@@ -6536,6 +6539,9 @@ components:
         days_until_due:
           type: integer
           format: int64
+        external_invoice_id:
+          type: string
+          nullable: true
         id:
           type: string
         paid_at:
@@ -8921,6 +8927,9 @@ components:
       required:
         - success
       title: ManagePlanResponseResponseData
+    MarkCustomPlanBillingPaidRequestBody:
+      type: object
+      title: MarkCustomPlanBillingPaidRequestBody
     MeterRequestBody:
       type: object
       properties:
@@ -20272,6 +20281,53 @@ paths:
                   - data
                   - params
                 title: ListCustomPlanBillingsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plan-billings/{custom_plan_billing_id}/mark-paid:
+    put:
+      operationId: markCustomPlanBillingPaid
+      summary: Mark custom plan billing paid
+      tags:
+        - plans
+      parameters:
+        - name: custom_plan_billing_id
+          in: path
+          description: custom_plan_billing_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkCustomPlanBillingPaidRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CustomPlanBillingResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: MarkCustomPlanBillingPaidParams
+                required:
+                  - data
+                  - params
+                title: MarkCustomPlanBillingPaidResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
