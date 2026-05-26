@@ -4187,6 +4187,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
+          minimum: 0
         value_bool:
           type: boolean
           nullable: true
@@ -4935,6 +4947,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
+          minimum: 0
         value_bool:
           type: boolean
           nullable: true
@@ -5566,6 +5590,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
+          minimum: 0
         value_bool:
           type: boolean
           nullable: true
@@ -9632,6 +9668,17 @@ components:
           format: date-time
         usage_based_product:
           $ref: '#/components/schemas/BillingProductResponseData'
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
         value_bool:
           type: boolean
           nullable: true
@@ -10817,6 +10864,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
+          deprecated: true
           maxItems: 100
       required:
         - excluded_company_ids
@@ -12746,6 +12794,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
+          minimum: 0
         value_bool:
           type: boolean
           nullable: true
@@ -13345,6 +13405,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingTiersMode'
           nullable: true
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
+          minimum: 0
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -13393,6 +13465,17 @@ components:
           nullable: true
         quarterly_usage_based_price:
           $ref: '#/components/schemas/BillingPriceView'
+        usage_quantity:
+          type: integer
+          description: >-
+            The committed unit quantity for this entitlement. For custom plans
+            this is the quantity the company is contractually committed to; for
+            standard plans it is the quantity pre-filled when subscribing. Only
+            applies to pay-in-advance entitlements. Note: this is not yet
+            enforced/auto-provisioned as a true default — it is currently stored
+            for downstream billing use.
+          format: int64
+          nullable: true
         value_bool:
           type: boolean
           nullable: true
