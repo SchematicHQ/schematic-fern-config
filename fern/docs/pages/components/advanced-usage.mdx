@@ -78,17 +78,20 @@ In the above example, while the plan is pre-selected, the user will still be abl
 
 ```ts
 const config = {
-  planId: 'plan_abc123',      // pre-select a Plan
-  addOnIds: ['plan_addon123'],   // pre-select 1 or more add ons
+  planId: 'plan_abc123',           // pre-select a Plan
+  addOnIds: ['plan_addon123'],     // pre-select 1 or more add ons
   skipped: {
     planStage: true,               // if true, skip plan selection
     addOnStage: true               // if true, skip add on selection
-  }
-  hideSkipped:  true               // if true, hide skipped stages from breadcrumb navigation
+  },
+  hideSkipped: true,               // if true, hide skipped stages from breadcrumb navigation
+  startTrialIfAvailable: true      // if true (default), start a trial when the plan is trialable and the company is eligible
 };
 
 initializeWithPlan(config);
 ```
+
+When the pre-selected plan offers a trial and the company is eligible, `initializeWithPlan` starts checkout in trial mode by default. This matches the behavior of the in-dialog "Start trial" button, so customers using the bypass flow get the same trial they would have gotten by clicking through the plan stage. Pass `startTrialIfAvailable: false` to charge immediately instead.
 
 ### Examples
 
