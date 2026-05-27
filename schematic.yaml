@@ -5265,6 +5265,41 @@ components:
         - event_name
         - event_payload_key
       title: CreateMeterRequestBody
+    CreateMigrationInput:
+      type: object
+      properties:
+        company_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 10000
+        excluded_company_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 10000
+        plan_id:
+          type: string
+        plan_version_id_to:
+          type: string
+        plan_version_ids_from:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+        strategy:
+          $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+        target_plan_type:
+          $ref: '#/components/schemas/PlanType'
+      required:
+        - company_ids
+        - excluded_company_ids
+        - plan_id
+        - plan_version_ids_from
+        - plan_version_id_to
+        - strategy
+        - target_plan_type
+      title: CreateMigrationInput
     CreateOrUpdateConditionGroupRequestBody:
       type: object
       properties:
@@ -8995,6 +9030,20 @@ components:
       enum:
         - billing_cycle
         - first_of_month
+    MigrationErrorCode:
+      type: string
+      enum:
+        - ambiguous_subscription_item
+        - multiple_subscriptions
+        - no_price_for_interval
+        - not_on_origin_version
+        - permanent_config
+        - permanent_decline
+        - transient_decline
+        - transient_infra
+        - transient_stripe
+        - unknown
+        - would_leave_empty_subscription
     MrrResponseData:
       type: object
       properties:
@@ -10315,6 +10364,10 @@ components:
         error:
           type: string
           nullable: true
+        error_code:
+          allOf:
+            - $ref: '#/components/schemas/MigrationErrorCode'
+          nullable: true
         id:
           type: string
         migration_id:
@@ -10376,6 +10429,11 @@ components:
           nullable: true
         plan_version_id_to:
           type: string
+        plan_version_ids_from:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
         skipped_companies:
           type: integer
           format: int64
@@ -10399,6 +10457,7 @@ components:
         - failed_companies
         - id
         - plan_id
+        - plan_version_ids_from
         - plan_version_id_to
         - skipped_companies
         - status
@@ -10938,6 +10997,17 @@ components:
         - customer_email
         - pay_in_advance
       title: RetryCustomPlanBillingRequestBody
+    RetryMigrationRequestBody:
+      type: object
+      properties:
+        error_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MigrationErrorCode'
+          maxItems: 10
+      required:
+        - error_codes
+      title: RetryMigrationRequestBody
     Rule:
       type: object
       properties:
@@ -18298,6 +18368,19 @@ paths:
           schema:
             type: string
             description: Filter companies by plan version ID (starts with plvr_)
+        - name: plan_version_ids
+          in: query
+          description: >-
+            Filter companies by one or more plan version IDs (each ID starts
+            with plvr_). Takes precedence over plan_version_id when set.
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more plan version IDs (each ID starts
+              with plvr_). Takes precedence over plan_version_id when set.
+            items:
+              type: string
+            maxItems: 100
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -18459,6 +18542,15 @@ paths:
                         description: >-
                           Filter companies by plan version ID (starts with
                           plvr_)
+                      plan_version_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more plan version IDs (each
+                          ID starts with plvr_). Takes precedence over
+                          plan_version_id when set.
+                        items:
+                          type: string
+                        maxItems: 100
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -18715,6 +18807,19 @@ paths:
           schema:
             type: string
             description: Filter companies by plan version ID (starts with plvr_)
+        - name: plan_version_ids
+          in: query
+          description: >-
+            Filter companies by one or more plan version IDs (each ID starts
+            with plvr_). Takes precedence over plan_version_id when set.
+          schema:
+            type: array
+            description: >-
+              Filter companies by one or more plan version IDs (each ID starts
+              with plvr_). Takes precedence over plan_version_id when set.
+            items:
+              type: string
+            maxItems: 100
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -18872,6 +18977,15 @@ paths:
                         description: >-
                           Filter companies by plan version ID (starts with
                           plvr_)
+                      plan_version_ids:
+                        type: array
+                        description: >-
+                          Filter companies by one or more plan version IDs (each
+                          ID starts with plvr_). Takes precedence over
+                          plan_version_id when set.
+                        items:
+                          type: string
+                        maxItems: 100
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -25657,6 +25771,48 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /plan-version-company-migrations/{plan_version_company_migration_id}/retry:
+    post:
+      operationId: retryCompanyMigration
+      summary: Retry company migration
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_company_migration_id
+          in: path
+          description: plan_version_company_migration_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/PlanVersionCompanyMigrationResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: RetryCompanyMigrationParams
+                required:
+                  - data
+                  - params
+                title: RetryCompanyMigrationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plan-version-company-migrations/count:
     get:
       operationId: countCompanyMigrations
@@ -25817,6 +25973,45 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createMigration
+      summary: Create migration
+      tags:
+        - planmigrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMigrationInput'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateMigrationParams
+                required:
+                  - data
+                  - params
+                title: CreateMigrationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plan-version-migrations/{plan_version_migration_id}:
     get:
       operationId: getMigration
@@ -25848,6 +26043,53 @@ paths:
                   - data
                   - params
                 title: GetMigrationResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/{plan_version_migration_id}/retry:
+    post:
+      operationId: retryMigration
+      summary: Retry migration
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_migration_id
+          in: path
+          description: plan_version_migration_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetryMigrationRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: RetryMigrationParams
+                required:
+                  - data
+                  - params
+                title: RetryMigrationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
