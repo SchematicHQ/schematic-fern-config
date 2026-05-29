@@ -12148,16 +12148,10 @@ components:
           description: 'Discriminator: always "stripe" for this variant'
           enum:
             - stripe
-        version:
-          type: integer
-          description: >-
-            Stripe integration config version (1 = legacy API key install, 2 =
-            Connect/App install)
       required:
         - type
         - is_sandbox
         - live_mode
-        - version
       title: StripeIntegrationConfig
     SubscriptionStatus:
       type: string
