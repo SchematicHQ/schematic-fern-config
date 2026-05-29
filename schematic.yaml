@@ -8600,10 +8600,12 @@ components:
           clerk: '#/components/schemas/ClerkIntegrationConfig'
           orb: '#/components/schemas/OrbIntegrationConfig'
           stripe: '#/components/schemas/StripeIntegrationConfig'
+          workos: '#/components/schemas/WorkOSIntegrationConfig'
       oneOf:
         - $ref: '#/components/schemas/StripeIntegrationConfig'
         - $ref: '#/components/schemas/OrbIntegrationConfig'
         - $ref: '#/components/schemas/ClerkIntegrationConfig'
+        - $ref: '#/components/schemas/WorkOSIntegrationConfig'
       title: IntegrationConfig
     IntegrationResponseData:
       type: object
@@ -8640,6 +8642,7 @@ components:
         - orb
         - stripe
         - unknown
+        - workos
     IntegrationWebhookUrlResponseData:
       type: object
       properties:
@@ -13914,6 +13917,29 @@ components:
         - actor_type
         - environments
       title: WhoAmIResponseData
+    WorkOSIntegrationConfig:
+      type: object
+      properties:
+        first_events_received:
+          type: boolean
+          description: >-
+            Whether Schematic has received the first webhook event from WorkOS
+            after install
+          nullable: true
+        type:
+          type: string
+          description: 'Discriminator: always "workos" for this variant'
+          enum:
+            - workos
+        webhook_url:
+          type: string
+          description: >-
+            URL configured on the WorkOS webhook endpoint that delivers events
+            to Schematic
+          nullable: true
+      required:
+        - type
+      title: WorkOSIntegrationConfig
     ZeroOutGrantRequestBody:
       type: object
       properties:
