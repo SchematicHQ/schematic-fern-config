@@ -93,6 +93,25 @@ initializeWithPlan(config);
 
 When the pre-selected plan offers a trial and the company is eligible, `initializeWithPlan` starts checkout in trial mode by default. This matches the behavior of the in-dialog "Start trial" button, so customers using the bypass flow get the same trial they would have gotten by clicking through the plan stage. Pass `startTrialIfAvailable: false` to charge immediately instead.
 
+### Pre-filling checkout fields
+
+If your application already knows the customer's billing email or name, you can pre-populate those fields in the checkout payment form so the user does not have to retype them. Pass a `checkoutPrefill` prop to `EmbedProvider`:
+
+```tsx
+<EmbedProvider
+  checkoutPrefill={{
+    billingDetails: {
+      email: "ada@example.com",
+      name: "Ada Lovelace",
+    },
+  }}
+>
+  <Checkout />
+</EmbedProvider>
+```
+
+Pre-filled values are only applied to fields the checkout is configured to collect. The email field appears when email collection is enabled, and the name is part of the billing address form. The user can edit any pre-filled value before submitting, and their edits are never overwritten if the prefill value changes.
+
 ### Examples
 
 You can see a full example, including error handling and loading states in our example app. 
