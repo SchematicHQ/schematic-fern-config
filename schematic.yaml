@@ -2964,6 +2964,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          nullable: true
           maxItems: 1000
         features:
           type: array
@@ -3044,7 +3045,6 @@ components:
         - is_trialable
         - versions
         - is_custom
-        - entitlements
         - compatible_plan_ids
         - available_periods
         - company_can_trial
@@ -9590,6 +9590,12 @@ components:
           type: string
         draft_version:
           $ref: '#/components/schemas/PlanVersionResponseData'
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanEntitlementResponseData'
+          nullable: true
+          maxItems: 1000
         features:
           type: array
           items:
@@ -9966,6 +9972,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          nullable: true
           maxItems: 1000
         features:
           type: array
@@ -10035,7 +10042,6 @@ components:
         - is_trialable
         - versions
         - is_custom
-        - entitlements
         - compatible_plan_ids
         - available_periods
       title: PlanGroupPlanDetailResponseData
@@ -10603,6 +10609,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
+          nullable: true
           maxItems: 1000
         features:
           type: array
@@ -10672,7 +10679,6 @@ components:
         - is_trialable
         - versions
         - is_custom
-        - entitlements
         - compatible_plan_ids
         - available_periods
         - custom
@@ -26289,6 +26295,12 @@ paths:
           schema:
             type: string
             description: Filter plans scoped to a specific company (custom plans)
+        - name: with_entitlements
+          in: query
+          description: Include each plan's entitlements in the response
+          schema:
+            type: boolean
+            description: Include each plan's entitlements in the response
         - name: without_entitlement_for
           in: query
           description: >-
@@ -26400,6 +26412,9 @@ paths:
                         description: >-
                           Filter plans scoped to a specific company (custom
                           plans)
+                      with_entitlements:
+                        type: boolean
+                        description: Include each plan's entitlements in the response
                       without_entitlement_for:
                         type: string
                         description: >-
@@ -26955,6 +26970,12 @@ paths:
           schema:
             type: string
             description: Filter plans scoped to a specific company (custom plans)
+        - name: with_entitlements
+          in: query
+          description: Include each plan's entitlements in the response
+          schema:
+            type: boolean
+            description: Include each plan's entitlements in the response
         - name: without_entitlement_for
           in: query
           description: >-
@@ -27062,6 +27083,9 @@ paths:
                         description: >-
                           Filter plans scoped to a specific company (custom
                           plans)
+                      with_entitlements:
+                        type: boolean
+                        description: Include each plan's entitlements in the response
                       without_entitlement_for:
                         type: string
                         description: >-
