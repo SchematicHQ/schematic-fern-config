@@ -1,3 +1,336 @@
 .fern-sidebar-link-content svg {
   display: none !important;
 }
+
+/* ==========================================================================
+   Osano consent banner — match the Schematic docs theme (dark + light).
+   Ported from schematic-ms app/globals.css, but retokenized so it adapts to
+   Fern's light/dark modes instead of being dark-only. Fern signals the theme
+   with a class on <html> (.dark, and .light/:root for light). Colors are
+   driven by the --osano-* variables defined per theme below; the primary CTA
+   reuses Fern's own --accent token so the banner tracks the docs brand in both
+   modes. Fonts are inherited so the banner uses the docs fonts, not the app's.
+   Osano ships its own stylesheet with the script, so overrides need !important.
+   ========================================================================== */
+
+:root,
+.light,
+.light-theme {
+  --osano-surface: #ffffff;
+  --osano-border: #e3e2e0;
+  --osano-text: #21201c; /* = --grayscale-12 (light) */
+  --osano-text-muted: #63635e; /* = --grayscale-11 (light) */
+  --osano-secondary-bg: #f9f9f8;
+  --osano-secondary-text: #21201c;
+  --osano-track: #d0cfcb;
+  --osano-overlay: rgba(0, 0, 0, 0.4);
+  --osano-primary: var(--accent); /* docs accent (#db6769) */
+  --osano-primary-hover: #c25557;
+  --osano-primary-text: #ffffff;
+}
+
+.dark {
+  --osano-surface: #0f0f0f; /* app's proven dark palette */
+  --osano-border: #2d2e33;
+  --osano-text: #ffffff;
+  --osano-text-muted: #cccccc;
+  --osano-secondary-bg: #18191c;
+  --osano-secondary-text: #e1e4eb;
+  --osano-track: #2d2e33;
+  --osano-overlay: rgba(0, 0, 0, 0.6);
+  --osano-primary: var(--accent);
+  --osano-primary-hover: #c25557;
+  --osano-primary-text: #ffffff;
+}
+
+/* Use the docs font on every Osano element — banner, drawer, buttons, inputs,
+   labels, the cookie table, everything. */
+[class*='osano-cm'] {
+  font-family: inherit !important;
+}
+
+/* Surfaces: notice bar + preferences drawer. The drawer's actual painted panel
+   is .osano-cm-info (a child of .osano-cm-info-dialog) — that's where Osano's
+   purple lives, so it must be in this list or the drawer stays purple. */
+.osano-cm-window,
+.osano-cm-dialog,
+.osano-cm-info,
+.osano-cm-info-dialog-header,
+.osano-cm-header {
+  background-color: var(--osano-surface) !important;
+  color: var(--osano-text) !important;
+  border-color: var(--osano-border) !important;
+}
+
+/* .osano-cm-info-dialog is a FULL-VIEWPORT fixed layer wrapping the panel —
+   painting it would black out the whole page. Keep it transparent so the page
+   shows through, and dim it only while the drawer is open. */
+.osano-cm-info-dialog {
+  background-color: transparent !important;
+}
+.osano-cm-info-dialog:has(.osano-cm-info--open) {
+  background-color: var(--osano-overlay) !important;
+}
+
+/* Osano paints the drawer header with a purple linear-gradient
+   (background-image, not -color) — clear it so the header reads themed. */
+.osano-cm-info-dialog-header,
+.osano-cm-header {
+  background-image: none !important;
+}
+
+/* The drawer panel ships a light-grey box-shadow ring that reads as a pale
+   "sidebar border". Replace it with a depth shadow + a single subtle border. */
+.osano-cm-info {
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.55) !important;
+  border-left: 1px solid var(--osano-border) !important;
+}
+
+/* Drawer header close (✕) — borderless, slightly smaller, pulled in so its
+   right edge sits on the same 20px gutter as the "Storage Preferences" title. */
+.osano-cm-info-dialog-header__close.osano-cm-close {
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--osano-text-muted) !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin-right: 20px !important;
+}
+.osano-cm-info-dialog-header__close.osano-cm-close:hover {
+  background-color: transparent !important;
+  color: var(--osano-text) !important;
+}
+.osano-cm-info-dialog-header__close.osano-cm-close svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.osano-cm-dialog {
+  border: 1px solid var(--osano-border) !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Float the notice bar at the BOTTOM as an inset card. Osano's bar defaults to
+   a full-width strip pinned to top:0; override it to sit bottom-center with a
+   gap on every side so it reads as a floating card. */
+.osano-cm-dialog--type_bar {
+  top: auto !important;
+  bottom: 1.5rem !important;
+  left: 1.5rem !important;
+  right: 1.5rem !important;
+  width: auto !important;
+  max-width: 760px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+@media (max-width: 640px) {
+  .osano-cm-dialog--type_bar {
+    bottom: 1rem !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+}
+
+/* Body / description copy */
+.osano-cm-message,
+.osano-cm-content__message,
+.osano-cm-info-dialog-header__description,
+.osano-cm-label,
+.osano-cm-list-item__description,
+.osano-cm-disclosure__list-name {
+  color: var(--osano-text-muted) !important;
+}
+
+/* Headers */
+.osano-cm-header {
+  color: var(--osano-text) !important;
+}
+
+/* "Privacy Policy" / disclosure links */
+.osano-cm-link,
+.osano-cm-message a,
+.osano-cm-content__message a,
+.osano-cm-disclosure__toggle {
+  color: var(--osano-text) !important;
+  text-decoration: underline !important;
+}
+.osano-cm-link:hover,
+.osano-cm-message a:hover,
+.osano-cm-content__message a:hover,
+.osano-cm-disclosure__toggle:hover {
+  color: var(--osano-text-muted) !important;
+}
+
+/* Hide Osano's "Powered by Osano" footer credit */
+.osano-cm-powered-by,
+.osano-cm-view__powered-by {
+  display: none !important;
+}
+
+/* --- Drawer spacing + typography --- */
+
+/* Consistent horizontal gutters (20px) for the drawer content so the intro
+   paragraph, category rows and buttons all line up with the header. */
+.osano-cm-view--type_consent {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  padding-bottom: 20px !important;
+}
+
+/* Header ("Storage Preferences") — larger, bolder, more breathing room */
+.osano-cm-info .osano-cm-header,
+.osano-cm-info-dialog-header__header {
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  padding: 22px 20px !important;
+}
+
+/* Intro paragraph at the top of the drawer */
+.osano-cm-view__description {
+  margin-top: 14px !important;
+  margin-bottom: 20px !important;
+}
+
+/* Each category box (Essential / Targeted Advertising / …). The divider is the
+   disclosure's bottom border; keep the gap above/below every divider equal. */
+.osano-cm-drawer-item {
+  padding-top: 20px !important;
+  padding-bottom: 0 !important;
+}
+
+/* Label row + the category name */
+.osano-cm-list-item__toggle {
+  margin: 0 !important;
+}
+.osano-cm-toggle__label,
+.osano-cm-label {
+  font-size: 1rem !important; /* 16px */
+  font-weight: 500 !important;
+}
+
+/* Description copy under each category */
+.osano-cm-list-item__description,
+.osano-cm-description {
+  font-size: 0.8125rem !important; /* 13px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  margin-top: 12px !important;
+}
+
+/* Cookie/disclosure detail table (Name/_value, Provider/_value, …) */
+.osano-cm-disclosure-item__title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--osano-text-muted) !important;
+  margin: 0 0 4px !important;
+  padding-top: 0 !important;
+}
+.osano-cm-disclosure-item__description {
+  margin: 0 0 12px !important;
+  padding-top: 0 !important;
+}
+
+/* "View Disclosures" disclosure row — its bottom border is the divider. */
+.osano-cm-disclosure--collapse {
+  padding-top: 14px !important;
+  padding-bottom: 20px !important;
+  margin-left: -20px !important;
+  margin-right: -20px !important;
+  margin-bottom: 0 !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+.osano-cm-disclosure__toggle {
+  font-size: 0.8125rem !important; /* 13px */
+}
+
+/* Let the Save button's own top margin own the gap (so it isn't doubled). */
+.osano-cm-list {
+  padding-bottom: 0 !important;
+}
+
+/* Save button: equal gap above (margin-top) and below (view padding-bottom). */
+.osano-cm-save,
+.osano-cm-view__button {
+  margin-top: 20px !important;
+}
+
+/* All buttons share the product's pill shape + font */
+.osano-cm-button {
+  border-radius: 0.375rem !important;
+  font-weight: 500 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Primary actions: Accept All (banner) + Save (drawer). */
+.osano-cm-accept,
+.osano-cm-accept-all,
+.osano-cm-save {
+  background-color: var(--osano-primary) !important;
+  color: var(--osano-primary-text) !important;
+  border: none !important;
+}
+.osano-cm-accept:hover,
+.osano-cm-accept-all:hover,
+.osano-cm-save:hover {
+  background-color: var(--osano-primary-hover) !important;
+}
+
+/* Secondary actions: Deny / Deny All + Manage */
+.osano-cm-deny,
+.osano-cm-denyAll,
+.osano-cm-manage {
+  background-color: var(--osano-secondary-bg) !important;
+  color: var(--osano-secondary-text) !important;
+  border: 1px solid var(--osano-border) !important;
+}
+.osano-cm-deny:hover,
+.osano-cm-denyAll:hover,
+.osano-cm-manage:hover {
+  background-color: var(--osano-border) !important;
+}
+
+/* Close (✕) on the bar + drawer. The mark is an inline <svg> whose paths are
+   filled solid black by Osano — drive `fill` off currentColor. */
+.osano-cm-close {
+  color: var(--osano-text-muted) !important;
+}
+.osano-cm-close:hover {
+  color: var(--osano-text) !important;
+}
+.osano-cm-close svg,
+.osano-cm-close svg path {
+  fill: currentColor !important;
+}
+
+/* Category toggles — brand accent when on, muted track when off. Osano draws a
+   2px green border on the switch; override border-color in every state. */
+.osano-cm-toggle__switch {
+  background-color: var(--osano-track) !important;
+  border-color: var(--osano-track) !important;
+  transform: scale(0.85) !important;
+  transform-origin: right center !important;
+}
+.osano-cm-toggle--checked .osano-cm-toggle__switch {
+  background-color: var(--osano-primary) !important;
+  border-color: var(--osano-primary) !important;
+}
+/* Essential category is locked on — dim it so it reads as non-interactive */
+.osano-cm-toggle--disabled .osano-cm-toggle__switch {
+  opacity: 0.5 !important;
+}
+
+/* Drawer list rows */
+.osano-cm-list-item,
+.osano-cm-drawer-item {
+  border-color: var(--osano-border) !important;
+}
+
+/* Hide Osano's default floating cookie icon — replaced by the "Cookie Settings"
+   footer link injected in docs/assets/osano-cookie-settings.js. These two are a
+   matched pair: per Osano, hiding the widget REQUIRES another entry point. */
+.osano-cm-widget {
+  display: none !important;
+}
