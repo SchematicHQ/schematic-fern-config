@@ -11,11 +11,19 @@ function openCookieSettings() {
 
 export default function CustomFooter() {
   return (
-    <div className="not-prose flex justify-center pb-8">
+    <div
+      className="not-prose"
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        marginTop: "-94px",
+        paddingBottom: "32px",
+      }}
+    >
       <button
         type="button"
         onClick={openCookieSettings}
-        className="text-(color:--grayscale-a9) hover:text-(color:--grayscale-a11) transition-colors text-sm"
+        className="text-(color:--grayscale-a9) hover:text-(color:--grayscale-a11) transition-colors text-xs cursor-pointer"
       >
         Cookie Settings
       </button>
