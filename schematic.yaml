@@ -24307,8 +24307,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /integrations/stripe/dataset-sample-v2:
     get:
-      operationId: loadSampleDataSetV2
-      summary: Load sample data set V2
+      operationId: loadSampleDataSet
+      summary: Load sample data set
       tags:
         - integrationsapi
       responses:
@@ -24324,11 +24324,11 @@ paths:
                   params:
                     type: object
                     description: Input parameters
-                    title: LoadSampleDataSetV2Params
+                    title: LoadSampleDataSetParams
                 required:
                   - data
                   - params
-                title: LoadSampleDataSetV2Response
+                title: LoadSampleDataSetResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
