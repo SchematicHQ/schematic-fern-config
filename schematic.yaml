@@ -693,6 +693,7 @@ components:
         - free
         - plan
         - purchased
+        - rollover
     BillingCreditGrantResponseData:
       type: object
       properties:
@@ -741,6 +742,12 @@ components:
         renewal_period:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
+        source_grant_id:
+          type: string
+          description: >-
+            For rollover grants, the ID of the source grant that this grant
+            rolled from.
           nullable: true
         source_label:
           type: string
@@ -1185,6 +1192,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
+        rollover_percentage:
+          type: integer
+          description: >-
+            Percentage of unused credits that carry over when this grant resets.
+            Only meaningful when reset_type is plan_period.
+          format: int64
         updated_at:
           type: string
           format: date-time
@@ -1197,6 +1210,7 @@ components:
         - credit_name
         - auto_topup_enabled
         - auto_topup_self_service
+        - rollover_percentage
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -2882,6 +2896,9 @@ components:
           nullable: true
         reset_type:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
+        rollover_percentage:
+          type: integer
+          format: int64
         singular_name:
           type: string
           description: >-
@@ -2902,6 +2919,7 @@ components:
         - reset_type
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
+        - rollover_percentage
         - created_at
         - updated_at
       title: CompanyPlanCreditGrantView
@@ -4355,6 +4373,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
+        rollover_percentage:
+          type: integer
+          description: >-
+            Percentage of unused credits that carry over when this grant resets.
+            Only applies when reset_type is plan_period. Rolled-over credits
+            expire at the next reset and are not rolled again. Defaults to 0.
+          format: int64
+          nullable: true
+          maximum: 100
+          minimum: 0
       required:
         - reset_cadence
         - reset_start
@@ -6023,6 +6051,9 @@ components:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
           nullable: true
         singular_name:
+          type: string
+          nullable: true
+        source_grant_id:
           type: string
           nullable: true
         source_label:
@@ -9563,6 +9594,9 @@ components:
           nullable: true
         reset_type:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
+        rollover_percentage:
+          type: integer
+          format: int64
         singular_name:
           type: string
           description: >-
@@ -9583,6 +9617,7 @@ components:
         - reset_type
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
+        - rollover_percentage
         - created_at
         - updated_at
       title: PlanCreditGrantView
@@ -12573,6 +12608,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetType'
           nullable: true
+        rollover_percentage:
+          type: integer
+          description: >-
+            Percentage of unused credits that carry over when this grant resets.
+            Only applies when reset_type is plan_period. Rolled-over credits
+            expire at the next reset and are not rolled again.
+          format: int64
+          nullable: true
+          maximum: 100
+          minimum: 0
       required:
         - reset_cadence
         - reset_start
