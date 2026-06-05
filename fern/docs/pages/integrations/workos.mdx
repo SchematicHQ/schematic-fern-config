@@ -21,11 +21,10 @@ Using WorkOS and Schematic together allows you to build identity and pricing and
 
 You can set up the WorkOS integration in the **Integrations** tab within Schematic.
 
-{/* TODO: add screenshot at fern/docs/assets/images/workos/workos-integrationpage.png and uncomment
+TODO: add screenshot at fern/docs/assets/images/workos/workos-integrationpage.png and uncomment
 <img
-src="../../assets/images/workos/workos-integrationpage.png"
+src="../../assets/images/workos/workos-integration.png"
 />
-*/}
 
 Once there, do the following:
 
@@ -51,6 +50,17 @@ On initial import, if an organization or user in Schematic already exists with a
 
 You will now be able to assign entitlements and enforce them in your application using Schematic flags, features, and plans.
 
+### Migrating from a Manual WorkOS Integration
+
+If you've already setup WorkOS manually and can easily switch to Schematic's Native WorkOS integration.
+
+To avoid duplicating companies and users in Schematic, you'll want to make sure that your Schematic companies have a `workos_organization_id` key set to the organization id from WorkOS. Likewise, Schematic users need to have a `workos_user_id` set to the user id from WorkOS. 
+
+If you currently use different key names, the migration approach is:
+1. Run a backfill that adds `workos_organization_id` and `workos_user_id` to your companies and users
+2. Switch your api calls to using these key names instead of your existing key names
+3. Enable the integration
+
 ### **Using Schematic Components with the WorkOS integration**
 
 Similar to WorkOS's UI components, Schematic offers drop-in components for end-to-end purchasing experiences and plan management.
@@ -59,18 +69,7 @@ Once you've imported organizations and users and you've built out your packaging
 
 When Schematic Components are embedded in your application, they will be aware of the identity of the logged in user and serve the appropriate data and controls.
 
-{/* TODO: add screenshot at fern/docs/assets/images/workos/workos-components.png and uncomment
 <img
-src="../../assets/images/workos/workos-components.png"
+src="../../assets/images/clerk/clerk-components.png"
 />
-*/}
 
-## **Example**
-
-To see a full example of a Schematic implementation with WorkOS, check out [this sample app](/developer_resources/sample_apps/sample_nextjs).
-
-{/* TODO: add screenshot at fern/docs/assets/images/workos/workos-example-rendered.png and uncomment
-<img
-src="../../assets/images/workos/workos-example-rendered.png"
-/>
-*/}
