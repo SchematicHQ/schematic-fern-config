@@ -743,6 +743,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
           nullable: true
+        reserved:
+          type: number
+          nullable: true
+        settled:
+          type: number
+          nullable: true
         source_grant_id:
           type: string
           description: >-
@@ -793,6 +799,12 @@ components:
         - manual
         - plan_change
         - plan_period_reset
+    BillingCreditLedgerAuthority:
+      type: string
+      enum:
+        - schematic_authoritative
+        - external_mirror
+        - external_rated
     BillingCreditLedgerResponseData:
       type: object
       properties:
@@ -913,6 +925,8 @@ components:
           nullable: true
         id:
           type: string
+        ledger_authority:
+          $ref: '#/components/schemas/BillingCreditLedgerAuthority'
         name:
           type: string
         plural_name:
@@ -944,6 +958,7 @@ components:
         - default_expiry_unit
         - default_rollover_policy
         - burn_strategy
+        - ledger_authority
         - cost_editable
         - currency_prices
         - created_at
@@ -1725,6 +1740,7 @@ components:
     BillingProviderType:
       type: string
       enum:
+        - metronome
         - orb
         - schematic
         - stripe
@@ -2461,6 +2477,10 @@ components:
           type: string
         remaining:
           type: number
+        reserved:
+          type: number
+        settled:
+          type: number
         source:
           $ref: '#/components/schemas/BillingProviderType'
         total:
@@ -2469,6 +2489,8 @@ components:
       required:
         - credit_id
         - remaining
+        - reserved
+        - settled
         - source
       title: CompanyCreditBalanceResponseData
     CompanyDetailResponseData:
@@ -6050,6 +6072,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
           nullable: true
+        reserved:
+          type: number
+          nullable: true
+        settled:
+          type: number
+          nullable: true
         singular_name:
           type: string
           nullable: true
@@ -6220,6 +6248,10 @@ components:
           nullable: true
         usage_event_id:
           type: string
+          nullable: true
+        usage_reason:
+          allOf:
+            - $ref: '#/components/schemas/CreditUsageReason'
           nullable: true
         zeroed_out_reason:
           allOf:
@@ -6526,6 +6558,14 @@ components:
           description: Credit usage for the current day
           nullable: true
       title: CreditUsageAggregation
+    CreditUsageReason:
+      type: string
+      enum:
+        - lease_hold
+        - lease_release
+        - manual_adjustment
+        - reconciliation
+        - track
     CreditsAutoTopupCompanySummary:
       type: object
       properties:
@@ -7389,6 +7429,9 @@ components:
         idempotency_key:
           type: string
           nullable: true
+        lease_id:
+          type: string
+          nullable: true
         loaded_at:
           type: string
           format: date-time
@@ -7468,6 +7511,9 @@ components:
         id:
           type: string
         idempotency_key:
+          type: string
+          nullable: true
+        lease_id:
           type: string
           nullable: true
         loaded_at:
@@ -9151,6 +9197,7 @@ components:
         - multiple_subscriptions
         - no_price_for_interval
         - not_on_origin_version
+        - operation_item_not_found
         - permanent_config
         - permanent_decline
         - transient_decline
