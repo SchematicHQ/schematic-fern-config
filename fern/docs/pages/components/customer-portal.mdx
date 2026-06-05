@@ -110,11 +110,13 @@ A few values below are numbers that represent dates (specifically, seconds since
 | trialEnd? | `Date?` | If the subscription is a trial, the date when the trial will end. |
 | trialEndSetting? | `string?` | If the subscription is a trial, the setting for when the trial will end. Can be `end_of_trial` or `end_of_billing_period`. |
 
+<Info>This `plan-changed` event is a client-side browser event, separate from the server-side [`company.plan_changed` webhook](/integrations/webhooks/plan-changed). Use the browser event to react in your front end (for example, refreshing the page or redirecting the user), and use the webhook to trigger backend or internal workflows.</Info>
+
 ### Unsubscribes
 
 The same `plan-changed` event also fires when a customer unsubscribes. In that case the `detail` property is a delete response of the shape `{ deleted?: boolean }` rather than the subscription object above, so you can branch on it to handle cancellations differently.
 
-A common use case is to show a cancellation survey or feedback form after a user unsubscribes. Listen for the event, check for the delete response shape, and redirect:
+A common use case is to show a cancellation survey or feedback form after a user unsubscribes. Listen for the event, check for the delete response shape, and handle accordingly:
 
 ```javascript
 window.addEventListener("plan-changed", (event) => {
@@ -124,5 +126,3 @@ window.addEventListener("plan-changed", (event) => {
   }
 });
 ```
-
-<Info>This `plan-changed` event is a client-side browser event, separate from the server-side [`company.plan_changed` webhook](/integrations/webhooks/plan-changed). Use the browser event to react in your front end (for example, refreshing the page or redirecting the user), and use the webhook to trigger backend or internal workflows.</Info>
