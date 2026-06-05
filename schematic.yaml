@@ -8845,6 +8845,7 @@ components:
         propertyName: type
         mapping:
           clerk: '#/components/schemas/ClerkIntegrationConfig'
+          metronome: '#/components/schemas/MetronomeIntegrationConfig'
           orb: '#/components/schemas/OrbIntegrationConfig'
           stripe: '#/components/schemas/StripeIntegrationConfig'
           workos: '#/components/schemas/WorkOSIntegrationConfig'
@@ -8853,6 +8854,7 @@ components:
         - $ref: '#/components/schemas/OrbIntegrationConfig'
         - $ref: '#/components/schemas/ClerkIntegrationConfig'
         - $ref: '#/components/schemas/WorkOSIntegrationConfig'
+        - $ref: '#/components/schemas/MetronomeIntegrationConfig'
       title: IntegrationConfig
     IntegrationInstallConfig:
       type: object
@@ -8937,6 +8939,7 @@ components:
       type: string
       enum:
         - clerk
+        - metronome
         - orb
         - stripe
         - unknown
@@ -9337,6 +9340,17 @@ components:
       enum:
         - billing_cycle
         - first_of_month
+    MetronomeIntegrationConfig:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'Discriminator: always "metronome" for this variant'
+          enum:
+            - metronome
+      required:
+        - type
+      title: MetronomeIntegrationConfig
     MigrationErrorCode:
       type: string
       enum:
