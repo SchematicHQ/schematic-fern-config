@@ -121,42 +121,7 @@ See the code: https://github.com/SchematicHQ/schematic-next-example/blob/main/sr
 
 ## Reacting to Plan Changes in the Browser
 
-When a checkout completes inside a Schematic component, the component dispatches a `plan-changed` event on the `window`. You can listen for this event to run your own logic after a user subscribes, upgrades, downgrades, or unsubscribes, without polling or wiring up a webhook.
-
-```ts
-window.addEventListener("plan-changed", (event) => {
-  // event.detail describes what changed
-});
-```
-
-The shape of `event.detail` depends on what happened:
-
-- When a user completes a checkout (subscribe, upgrade, or downgrade), `event.detail` is a [`BillingSubscriptionResponseData`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/BillingSubscriptionResponseData.ts) object describing the new subscription.
-- When a user unsubscribes, `event.detail` is a delete response of the shape `{ deleted?: boolean }`.
-
-<Info>This is a client-side browser event, separate from the server-side [`company.plan_changed` webhook](/integrations/webhooks/plan-changed). Use the browser event to react in your front end (for example, redirecting the user), and use the webhook to trigger backend or internal workflows.</Info>
-
-### Sending users to a feedback form after they unsubscribe
-
-A common use case is to show a cancellation survey or feedback form after a user unsubscribes. Listen for `plan-changed`, check for the delete response shape, and redirect:
-
-```tsx
-useEffect(() => {
-  const handlePlanChanged = (event: CustomEvent) => {
-    // An unsubscribe returns a delete response: { deleted?: boolean }
-    if (event.detail?.deleted) {
-      window.location.href = "/cancellation-feedback";
-    }
-  };
-
-  window.addEventListener("plan-changed", handlePlanChanged as EventListener);
-  return () => {
-    window.removeEventListener("plan-changed", handlePlanChanged as EventListener);
-  };
-}, []);
-```
-
-You can apply the same pattern to trigger an upsell offer or a welcome flow after a successful subscribe by inspecting the `BillingSubscriptionResponseData` payload instead.
+Schematic components dispatch a `plan-changed` event on the `window` when a checkout completes, so you can run your own logic after a user subscribes, upgrades, downgrades, or unsubscribes. This includes patterns like redirecting users to a cancellation feedback form after they unsubscribe. See [Checkout Flow Events](/components/customer-portal#checkout-flow-events) for the event payload and examples.
 
 ## Collecting Taxes
 
