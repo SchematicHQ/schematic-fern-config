@@ -4,359 +4,71 @@ title: WorkOS Integration
 slug: integrations/workos
 ---
 
-<Note>
-This is an **implementation guide**, not a native integration. Schematic does not
-offer a turnkey WorkOS connector. WorkOS still works with Schematic today through
-Schematic's [keys system](/developer_resources/key_management): you bring the
-WorkOS organization and user IDs as keys, and everything else behaves normally.
-This page describes exactly what you would set up.
-</Note>
+Using the WorkOS integration with Schematic, you can:
 
-[WorkOS](https://workos.com) is an authentication and directory provider. Because
-Schematic identifies companies and users by your own `keys` rather than by
-Schematic-generated IDs, you can use WorkOS as the source of truth for identity
-and layer Schematic entitlements, feature flags, and embeddable components on top
-of it without storing any Schematic IDs.
+- Automatically import organizations and users from your existing identity provider, WorkOS
+- Enrich Schematic company profiles with existing metadata
+- Assign and enforce entitlements directly in your application with feature flags
+- Embed drop-in components that are context-aware for a complete purchasing experience
 
-There are three pieces to a complete WorkOS implementation:
+This integration allows you to extend identity with entitlements and our library of embeddable UI components for end-to-end purchasing experiences and plan management.
 
-1. **Create companies and users in Schematic keyed by their WorkOS IDs.** This
-happens either inline in your own signup/provisioning flow or from WorkOS
-webhooks. From then on you address those entities by their WorkOS IDs in every
-API/SDK call and usage event, so you never need to store or look up a Schematic
-ID.
-2. **A one-time backfill** from WorkOS into Schematic when you deploy, so
-existing organizations and users don't have gaps.
-3. **Optionally (recommended), WorkOS webhooks** to keep Schematic in sync as
-your user base changes over time. Not every WorkOS customer needs this; whether
-it's worth it depends on how much your organizations and users churn.
+Using WorkOS and Schematic together allows you to build identity and pricing and packaging into your applications without toiling over extensive homegrown solutions, from log in to checkout.
 
-## How WorkOS maps to Schematic
+## **Getting started**
 
-| WorkOS object | Schematic entity | Recommended keys |
-|---|---|---|
-| Organization (`org_...`) | Company | `workos_organization_id` |
-| User (`user_...`) | User | `workos_user_id`, `email` |
-| Organization Membership (`om_...`) | Sets the user's parent company | n/a |
+### **Connecting WorkOS to Schematic**
 
-A WorkOS Organization becomes a Schematic **company**, a WorkOS User becomes a
-Schematic **user**, and a WorkOS Organization Membership tells you which company
-a user belongs to. The WorkOS IDs are stable and globally unique, which makes
-them good primary `keys`. Review
-[Key Management](/developer_resources/key_management) for background on how
-`keys` work.
+You can set up the WorkOS integration in the **Integrations** tab within Schematic.
 
-<Info>
-This guide assumes you use WorkOS **User Management** (AuthKit): durable
-`user_...` users, `org_...` organizations, and `om_...` memberships. If you use
-WorkOS only for standalone SSO, each login gives you a profile rather than a
-persistent User Management user, so the user and membership webhooks and list
-endpoints below do not apply. In that case, upsert the company and user from your
-own callback using whatever stable identifiers you keep, and the rest of this
-guide works the same.
-</Info>
+<img
+src="../../assets/images/integrations/workos-integration.png"
+/>
 
-<Info>
-The key names `workos_organization_id`, `workos_user_id`, and `email` used
-throughout this guide are recommendations, not requirements. Schematic key names
-are arbitrary strings, so you can choose names that fit your own conventions.
-What matters is that you pick a name for each and use it consistently in every
-call. Storing more than one key per entity is encouraged: Schematic resolves
-between keys, so a user keyed by both `workos_user_id` and `email` can be
-addressed by whichever value you have on hand in a given context.
-</Info>
+Once there, do the following:
 
-## 1. Create companies and users keyed by WorkOS IDs
+1. In your WorkOS dashboard, create a new webhook and set its endpoint to the URL shown in Schematic.
+2. Subscribe to the events listed in Schematic so that Schematic receives updates from WorkOS when organizations, memberships, or users change:
+    - `organization.created`, `organization.updated`, `organization.deleted`
+    - `organization_membership.created`, `organization_membership.updated`, `organization_membership.deleted`
+    - `user.created`, `user.updated`, `user.deleted`
+3. Once you've created the webhook, WorkOS will provide a signing secret. Copy it and add it to the **WorkOS Webhook signing secret** field in Schematic.
+4. Create a WorkOS secret API key and add it to the **WorkOS API key** field in Schematic. Click **Connect to WorkOS**.
 
-When an organization or user is created in WorkOS, upsert the matching entity
-into Schematic and store the WorkOS IDs as `keys`. Because Schematic upserts are
-idempotent, the same call safely creates the entity the first time and updates
-it on every call after that.
+Once you're connected, Schematic will import organizations, users, and memberships from WorkOS. A `workos_organization_id` will be added as a unique key to companies, and a `workos_user_id` will be added as a unique key to users along with an additional key, `email`. The following data will be imported and kept up-to-date automatically:
 
-```ts
-import { SchematicClient } from "@schematichq/schematic-typescript-node";
+- Organizations
+    - name
+- Users
+    - email
+    - createdat (epoch time)
+    - updatedat (epoch time)
+    - role
 
-const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+On initial import, if an organization or user in Schematic already exists with a `workos_organization_id` or `workos_user_id` that matches data from WorkOS, the record will simply be updated.
 
-// An organization signs up
-await client.companies.upsertCompany({
-  keys: { workos_organization_id: "org_EXAMPLE0123456789" },
-  name: "Acme Inc.",
-  traits: {
-    // Optional: carry over WorkOS context you want to target on
-    workosExternalId: "EXAMPLE_EXTERNAL_ID",
-  },
-});
+You will now be able to assign entitlements and enforce them in your application using Schematic flags, features, and plans.
 
-// A user signs up and joins that organization
-await client.companies.upsertUser({
-  keys: {
-    workos_user_id: "user_EXAMPLE0123456789",
-    email: "marcelina.davis@example.com",
-  },
-  name: "Marcelina Davis",
-  // `company` accepts the parent company's keys, so the user is
-  // associated with the right Schematic company
-  company: { workos_organization_id: "org_EXAMPLE0123456789" },
-});
-```
+### Migrating from a Manual WorkOS Integration
 
-<Info>
-This guide associates each user with a single company through the `company`
-field, which fits the common case of one user belonging to one organization.
-WorkOS users can belong to **multiple** organizations. If yours do, use the
-plural `companies` field instead and pass the user's full set of organizations.
-Schematic treats `companies` as the exhaustive list, so it adds new memberships
-and removes any you leave out. The webhook handler in section 3 uses this
-exhaustive pattern.
-</Info>
+If you've already setup WorkOS manually and can easily switch to Schematic's Native WorkOS integration.
 
-### Where to make these calls
+To avoid duplicating companies and users in Schematic, you'll want to make sure that your Schematic companies have a `workos_organization_id` key set to the organization id from WorkOS. Likewise, Schematic users need to have a `workos_user_id` set to the user id from WorkOS. 
 
-WorkOS does not run arbitrary custom code for you after a signup. WorkOS Actions
-are synchronous allow/deny gates for authentication and registration, so they
-are the wrong tool for syncing to an external system. That leaves two practical
-places to make the Schematic upserts, and you can use either or both:
+If you currently use different key names, the migration approach is:
+1. Run a backfill that adds `workos_organization_id` and `workos_user_id` to your companies and users
+2. Switch your api calls to using these key names instead of your existing key names
+3. Enable the integration
 
-- **In your own signup/provisioning flow.** Wherever your application already
-creates the organization or user, for example your AuthKit callback handler or
-the code that provisions a tenant in your database, add the Schematic upsert
-immediately after. This is something you wire into your own code. It has the
-lowest latency and keeps creation in your control.
-- **From WorkOS webhooks.** Subscribe to `organization.created`,
-`user.created`, and `organization_membership.created` and do the upserts in the
-webhook handler. This is the same handler used for ongoing sync in section 3,
-so if you handle those events, signup creation is already covered and you may
-not need any inline calls at all.
+### **Using Schematic Components with the WorkOS integration**
 
-Many teams route everything through webhooks so there is a single sync path for
-creation, updates, and deletes. Wiring the upserts into your provisioning flow
-is a good choice when you want the company or user to exist in Schematic before
-the user's first request completes.
+Similar to WorkOS's UI components, Schematic offers drop-in components for end-to-end purchasing experiences and plan management.
 
-### Use the WorkOS IDs in every subsequent call
+Once you've imported organizations and users and you've built out your packaging model in Schematic, you can navigate to the **Components** tab in Schematic to design, customize, and deploy Customer Portals.
 
-Once the WorkOS IDs are stored as `keys`, you address companies and users by
-those same IDs everywhere. You never store a Schematic ID.
+When Schematic Components are embedded in your application, they will be aware of the identity of the logged in user and serve the appropriate data and controls.
 
-Checking a feature flag or entitlement:
+<img
+src="../../assets/images/clerk/clerk-components.png"
+/>
 
-```ts
-const isOn = await client.checkFlag(
-  {
-    company: { workos_organization_id: "org_EXAMPLE0123456789" },
-    user: { workos_user_id: "user_EXAMPLE0123456789" },
-  },
-  "your-feature-flag",
-);
-```
-
-Tracking usage of a metered feature:
-
-```ts
-await client.track({
-  event: "api-request",
-  company: { workos_organization_id: "org_EXAMPLE0123456789" },
-  user: { workos_user_id: "user_EXAMPLE0123456789" },
-});
-```
-
-The same WorkOS IDs work for identify events, trait updates, usage retrieval,
-and [embeddable components](/components/overview), which become aware of the
-logged-in WorkOS user automatically.
-
-## 2. One-time backfill when you deploy
-
-Creating entities going forward only covers organizations and users created
-after you ship. To avoid gaps for everyone who already exists in WorkOS, run a
-one-time backfill that pages through WorkOS and upserts each organization, user,
-and membership into Schematic using the same `keys`.
-
-WorkOS list endpoints are cursor-paginated: pass `limit` (up to 100) and follow
-the `after` cursor from `listMetadata` until it is empty.
-
-```ts
-import { WorkOS } from "@workos-inc/node";
-import { SchematicClient } from "@schematichq/schematic-typescript-node";
-
-const workos = new WorkOS(process.env.WORKOS_API_KEY);
-const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
-
-// 1. Backfill organizations -> Schematic companies
-const organizationIds: string[] = [];
-let after: string | undefined;
-do {
-  const page = await workos.organizations.listOrganizations({ limit: 100, after });
-  for (const org of page.data) {
-    organizationIds.push(org.id);
-    await client.companies.upsertCompany({
-      keys: { workos_organization_id: org.id },
-      name: org.name,
-    });
-  }
-  after = page.listMetadata.after ?? undefined;
-} while (after);
-
-// 2. Backfill users -> Schematic users
-after = undefined;
-do {
-  const page = await workos.userManagement.listUsers({ limit: 100, after });
-  for (const user of page.data) {
-    await client.companies.upsertUser({
-      keys: { workos_user_id: user.id, email: user.email },
-      name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
-    });
-  }
-  after = page.listMetadata.after ?? undefined;
-} while (after);
-
-// 3. Backfill memberships so each user is tied to the right company.
-//    Page through every organization collected in step 1. Because `company`
-//    adds the user to that company without removing others, a user who belongs
-//    to multiple organizations accumulates all of them across the loop.
-for (const organizationId of organizationIds) {
-  after = undefined;
-  do {
-    const page = await workos.userManagement.listOrganizationMemberships({
-      organizationId,
-      limit: 100,
-      after,
-    });
-    for (const membership of page.data) {
-      await client.companies.upsertUser({
-        keys: { workos_user_id: membership.userId },
-        company: { workos_organization_id: membership.organizationId },
-      });
-    }
-    after = page.listMetadata.after ?? undefined;
-  } while (after);
-}
-```
-
-<Info>
-Because upserts are idempotent and matched on `keys`, the backfill is safe to
-re-run. If a company or user already exists with a matching
-`workos_organization_id` or `workos_user_id`, the record is updated rather than
-duplicated.
-</Info>
-
-## 3. (Recommended) Keep Schematic in sync with WorkOS webhooks
-
-The backfill is a point-in-time snapshot, and creating entities only covers new
-ones. WorkOS webhooks close the gap for everything that changes afterward:
-profile and name updates, users moving between organizations, and deletions.
-Not every WorkOS customer wires this up. If your organizations and users rarely
-change, the backfill plus signup-time creation may be enough. If your user base
-churns meaningfully, webhooks keep Schematic accurate without manual cleanup.
-
-### Subscribe to the relevant events
-
-In the WorkOS Dashboard, create a webhook endpoint pointing at a public HTTPS
-URL in your application and subscribe to the events you care about:
-
-- `user.created`, `user.updated`, `user.deleted`
-- `organization.created`, `organization.updated`, `organization.deleted`
-- `organization_membership.created`, `organization_membership.updated`, `organization_membership.deleted`
-
-### Verify and handle each event
-
-WorkOS signs every webhook request with a `WorkOS-Signature` header. The WorkOS
-Node SDK verifies the signature and constructs the event for you with
-`workos.webhooks.constructEvent`. Always verify before acting on a payload, then
-translate the WorkOS event into the matching Schematic upsert or delete keyed by
-the WorkOS ID.
-
-```ts
-import { WorkOS } from "@workos-inc/node";
-import { SchematicClient } from "@schematichq/schematic-typescript-node";
-import express from "express";
-
-const app = express();
-const workos = new WorkOS(process.env.WORKOS_API_KEY);
-const schematic = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
-
-// Use express.raw, not express.json. constructEvent verifies the signature
-// against the exact bytes WorkOS sent, so it needs the raw body. Handing it a
-// parsed-then-re-serialized object can fail verification if the JSON differs.
-app.post("/webhooks/workos", express.raw({ type: "application/json" }), async (req, res) => {
-  let event;
-  try {
-    event = await workos.webhooks.constructEvent({
-      payload: req.body,
-      sigHeader: req.headers["workos-signature"],
-      secret: process.env.WORKOS_WEBHOOK_SECRET,
-    });
-  } catch {
-    return res.status(400).send("Invalid signature");
-  }
-
-  // The event type is on `event.event`, not `event.type`.
-  const { event: type, data } = event;
-  try {
-    switch (type) {
-      case "organization.created":
-      case "organization.updated":
-        await schematic.companies.upsertCompany({
-          keys: { workos_organization_id: data.id },
-          name: data.name,
-        });
-        break;
-
-      case "organization.deleted":
-        await schematic.companies.deleteCompanyByKeys({
-          keys: { workos_organization_id: data.id },
-        });
-        break;
-
-      case "user.created":
-      case "user.updated":
-        await schematic.companies.upsertUser({
-          keys: { workos_user_id: data.id, email: data.email },
-          name: `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim(),
-        });
-        break;
-
-      case "user.deleted":
-        await schematic.companies.deleteUserByKeys({
-          keys: { workos_user_id: data.id },
-        });
-        break;
-
-      case "organization_membership.created":
-      case "organization_membership.updated":
-      case "organization_membership.deleted": {
-        // Re-derive the user's current organizations and write them as the
-        // exhaustive `companies` list. This reflects both additions and
-        // removals: a deleted membership drops that company, and a user left
-        // with none is cleared (companies: []).
-        const memberships = await workos.userManagement.listOrganizationMemberships({
-          userId: data.userId,
-          limit: 100,
-        });
-        await schematic.companies.upsertUser({
-          keys: { workos_user_id: data.userId },
-          companies: memberships.data.map((m) => ({
-            workos_organization_id: m.organizationId,
-          })),
-        });
-        break;
-      }
-    }
-  } catch (err) {
-    // Return a non-2xx so WorkOS retries the delivery.
-    console.error("Schematic sync failed", err);
-    return res.status(500).send("Sync failed");
-  }
-
-  res.status(200).send("OK");
-});
-```
-
-<Warning>
-WorkOS retries on non-`2xx` responses or timeouts. The handler above does the
-Schematic work first and returns `200` only once it succeeds, so a transient
-failure returns `500` and WorkOS retries it. Keep the work fast and idempotent.
-If processing is heavy, enqueue the verified event, return `2xx` immediately, and
-do the Schematic work from the queue with its own retries instead. Logging the
-WorkOS event `id` lets you safely skip duplicates.
-</Warning>
