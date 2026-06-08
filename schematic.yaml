@@ -2087,6 +2087,9 @@ components:
           type: string
         new_price_id:
           type: string
+        opt_in_accepted:
+          type: boolean
+          nullable: true
         pay_in_advance:
           type: array
           items:
@@ -2144,6 +2147,9 @@ components:
           type: string
         new_price_id:
           type: string
+        opt_in_accepted:
+          type: boolean
+          nullable: true
         pay_in_advance:
           type: array
           items:
@@ -2481,10 +2487,19 @@ components:
           type: boolean
         collect_phone:
           type: boolean
+        opt_in_enabled:
+          type: boolean
+        opt_in_text:
+          type: string
+          nullable: true
+        opt_in_title:
+          type: string
+          nullable: true
       required:
         - collect_address
         - collect_email
         - collect_phone
+        - opt_in_enabled
       title: CheckoutSettingsResponseData
     CheckoutSubscription:
       type: object
@@ -5909,6 +5924,16 @@ components:
         initial_plan_price_id:
           type: string
           nullable: true
+        opt_in_enabled:
+          type: boolean
+        opt_in_text:
+          type: string
+          nullable: true
+          maxLength: 1024
+        opt_in_title:
+          type: string
+          nullable: true
+          maxLength: 80
         ordered_add_ons:
           type: array
           items:
@@ -5977,6 +6002,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - opt_in_enabled
         - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
@@ -11066,6 +11092,14 @@ components:
           type: integer
           format: int64
           deprecated: true
+        opt_in_required:
+          type: boolean
+        opt_in_text:
+          type: string
+          nullable: true
+        opt_in_title:
+          type: string
+          nullable: true
         payment_method_required:
           type: boolean
         percent_off:
@@ -11105,6 +11139,7 @@ components:
         - percent_off
         - amount_off
         - is_scheduled_downgrade
+        - opt_in_required
         - payment_method_required
         - usage_violations
       title: PreviewSubscriptionChangeResponseData
@@ -13297,6 +13332,16 @@ components:
         initial_plan_price_id:
           type: string
           nullable: true
+        opt_in_enabled:
+          type: boolean
+        opt_in_text:
+          type: string
+          nullable: true
+          maxLength: 1024
+        opt_in_title:
+          type: string
+          nullable: true
+          maxLength: 80
         ordered_add_ons:
           type: array
           items:
@@ -13365,6 +13410,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - opt_in_enabled
         - prevent_self_service_downgrade
         - enable_tax_collection
         - ordered_add_ons
