@@ -130,7 +130,12 @@ groups:
           mode: pull-request
         config:
           enableWireTests: false
-          exportedClientName: SchematicClient
+          # Do NOT set exportedClientName: the generated root client must stay
+          # named Client/NewClient. The public SchematicClient/NewSchematicClient
+          # is a hand-written wrapper in schematic-go (client/schematic_client.go,
+          # kept via .fernignore) that embeds *Client and calls NewClient.
+          # Renaming the generated client to SchematicClient collides with it
+          # (NewSchematicClient redeclared; undefined: NewClient).
           module:
             path: github.com/schematichq/schematic-go
             version: '1.18'
