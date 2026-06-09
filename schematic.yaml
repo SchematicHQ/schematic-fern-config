@@ -8079,7 +8079,25 @@ components:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
-            remaining credit amount
+            credit available to fund new consumption or a new lease hold — open
+            lease holds are excluded. Clients that hold a lease should gate on
+            this plus their own unspent hold; clients with no lease awareness
+            should use credit_settled instead
+          nullable: true
+        credit_reserved:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            unspent amount held by an open credit lease. Returns to
+            credit_remaining when the lease is released
+          nullable: true
+        credit_settled:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            balance net of actual consumption, unaffected by open lease holds
+            (credit_remaining plus credit_reserved). The number to display to
+            end users
           nullable: true
         credit_total:
           type: number
@@ -11361,14 +11379,8 @@ components:
           format: int64
           nullable: true
           maximum: 365
-        pay_in_advance:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
-          maxItems: 100
       required:
         - customer_email
-        - pay_in_advance
       title: RetryCustomPlanBillingRequestBody
     RetryMigrationRequestBody:
       type: object
@@ -12061,7 +12073,25 @@ components:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
-            remaining credit amount
+            credit available to fund new consumption or a new lease hold — open
+            lease holds are excluded. Clients that hold a lease should gate on
+            this plus their own unspent hold; clients with no lease awareness
+            should use credit_settled instead
+          nullable: true
+        credit_reserved:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            unspent amount held by an open credit lease. Returns to
+            credit_remaining when the lease is released
+          nullable: true
+        credit_settled:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            balance net of actual consumption, unaffected by open lease holds
+            (credit_remaining plus credit_reserved). The number to display to
+            end users
           nullable: true
         credit_total:
           type: number
