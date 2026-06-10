@@ -154,7 +154,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 
 Schematic delivers webhooks asynchronously. Your endpoint should acknowledge receipt by responding with any `2xx` status code. Respond promptly: slow responses can be treated as failures once the request times out.
 
-If your endpoint responds with a non-`2xx` status (anything `300` or above) or the request times out, Schematic treats the delivery as failed and retries it. Retries use exponential backoff with jitter, for up to 5 attempts per event. Once those attempts are exhausted, the event is not delivered again.
+If your endpoint responds with a non-`2xx` status (anything `300` or above) or the request times out, Schematic treats the delivery as failed and retries it. Retries use exponential backoff with jitter, up to 5 retries after the initial attempt (6 delivery attempts in total). Once those attempts are exhausted, the event is not delivered again.
 
 <Note>Because an event can be delivered more than once (for example, if a retry overlaps a slow success, or your endpoint processes the request but its response is lost in transit), design your handler to be idempotent. The webhook payload includes enough context to deduplicate events on your side.</Note>
 
