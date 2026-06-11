@@ -9603,6 +9603,12 @@ components:
           type: string
         id:
           type: string
+        is_version_upgrade:
+          type: boolean
+          description: >-
+            True when this change moved the company to a different version of
+            the same plan (e.g. a plan version migration) rather than to a
+            different plan.
         previous_base_plan:
           $ref: '#/components/schemas/PlanSnapshotView'
         previous_base_plan_version:
@@ -9645,6 +9651,7 @@ components:
         - created_at
         - environment_id
         - id
+        - is_version_upgrade
         - traits_updated
         - updated_at
       title: PlanChangeResponseData
