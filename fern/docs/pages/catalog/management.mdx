@@ -17,12 +17,15 @@ When a company changes plans, whether an upgrade or a downgrade, Schematic autom
 
 - The customer goes through a checkout flow via the Schematic Customer Portal Component
 - You update a company's plan via the Schematic App using the "Manage Plan" button
+- You migrate the company to a new plan version (see [Plan Versions](/catalog/plans#plan-versions))
 - A customer's trial period ends, and they are converted to the default plan
 - A customer fails to pay their bill, their subscription is marked `unpaid` in Stripe, and they are downgraded to the default plan
 
 ### Plan Change Basics
 
 Whenever a plan changes, Schematic will automatically update the company's entitlements and usage limits. Accrued usage is fully preserved. All company overrides are preserved and re-applied. If a company override is less generous than the current plan entitlement, the more generous amount will be applied. 
+
+This applies to [plan version migrations](/catalog/plans#plan-version-migrations) as well: when a company is migrated to a new version of its plan, its entitlement limits and price are updated to the new version (with prorations for price changes), while accrued usage and overrides are preserved. Companies that are not migrated are grandfathered onto their current version and keep their existing entitlements and price until you migrate them later.
 
 Schematic prevents companies from downgrading to a plan if they will be over the usage limits of the new plan. 
 
@@ -134,7 +137,7 @@ If you've integrated Stripe, Schematic offers several ways to handle plan change
 
 **On the company profile page in Schematic**
 
-You can manage a company's plan directly on the company profile page in Schematic. These changes automatically sync with Stripe to update a company's subscsription.
+You can manage a company's plan directly on the company profile page in Schematic using the **Manage Plan** button. These changes automatically sync with Stripe to update a company's subscsription. The company's current plan version is shown both on the profile (e.g. a "Pro v26" badge) and in the Manage Plan panel; assigning a plan here uses its latest published version. To move a company to a specific older version instead, use a [version migration](/catalog/plans#plan-version-migrations).
 
 <Info>If you're having trouble, see the [Stripe FAQ](/integrations/stripe-troubleshooting) for more information.</Info>
 
