@@ -17,7 +17,7 @@ Defining billing in Schematic functionally maps Stripe products to Schematic pla
 
 If you do define billing, those that have a Stripe subscription with the mapped product will be assigned the corresponding plan in Schematic. Moreover, if a company changes plans via Schematic (either via Schematic admin options or via in-app [components](https://docs.schematichq.com/components/overview)), the Stripe subscription will be updated accordingly.
 
-Defining billing is optional -- you can define a plan in Schematic that is not linked to Stripe billing at all. In that case, you can indepedently manage plan membership and how companies are charged.
+Defining billing is optional. You can define a plan in Schematic that is not linked to Stripe billing at all. In that case, you can indepedently manage plan membership and how companies are charged.
 
 ![Schematic plans mapped to Stripe billing](../../assets/images/catalog/catalog-plans-billing.png)
 
@@ -35,9 +35,9 @@ Plans in Schematic are versioned to support a range of common monetization scena
 
 Each plan has a version selector in the top right of the plan page, and every version carries a status:
 
-- **Draft** — a work-in-progress version that is not yet live. Editing a published plan creates a draft. Drafts cannot be checked out and have no companies until they are published.
-- **Published** — the live version. New checkouts and new plan assignments use the published version.
-- **Archived** — a previous version that is no longer the live version.
+- **Draft**: a work-in-progress version that is not yet live. Editing a published plan creates a draft. Drafts cannot be checked out and have no companies until they are published.
+- **Published**: the live version. New checkouts and new plan assignments use the published version.
+- **Archived**: a previous version that is no longer the live version.
 
 ![Schematic plan version example](../../assets/images/catalog/catalog-plans-versions.png)
 
@@ -91,7 +91,7 @@ When you're done adding entitlements, click "Save" in the top right to finalize 
 
 ## Creating a new plan version
 
-Any edit to a published plan — whether an entitlement change or a change to the plan itself (e.g. name or price) — creates a new **draft** version. You can keep editing the draft (via **Edit Plan Version**) until you are ready to publish; nothing changes for existing companies while a version is in draft.
+Any edit to a published plan, whether an entitlement change or a change to the plan itself (e.g. name or price), creates a new **draft** version. You can keep editing the draft (via **Edit Plan Version**) until you are ready to publish. Nothing changes for existing companies while a version is in draft.
 
 When the draft is ready, a banner appears at the top of the plan page (e.g. "Pro v27 is ready to publish"). Click **Publish version** to enter the publishing flow.
 
