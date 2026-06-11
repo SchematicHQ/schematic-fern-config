@@ -31,18 +31,26 @@ If you want to surface plan and trial information in your app (e.g. a plan name 
 
 ### Plan Versions
 
-Plans in Schematic are versioned to better support a range of common monetization scenarios. Plan versions make it easy to support both larger plan iterations (e.g. annual pricing changes) as well as short term pricing experiments. 
+Plans in Schematic are versioned to support a range of common monetization scenarios. Plan versions make it easy to handle both larger plan iterations (e.g. annual pricing changes) and short term pricing experiments, while controlling exactly when changes take effect and how existing companies are handled.
+
+Each plan has a version selector in the top right of the plan page, and every version carries a status:
+
+- **Draft** — a work-in-progress version that is not yet live. Editing a published plan creates a draft. Drafts cannot be checked out and have no companies until they are published.
+- **Published** — the live version. New checkouts and new plan assignments use the published version.
+- **Archived** — a previous version that is no longer the live version.
 
 ![Schematic plan version example](../../assets/images/catalog/catalog-plans-versions.png)
 
-More details can be found in 
+For a full walkthrough of editing a plan and rolling out a new version, see [Rolling Out New Plan Versions](/catalog/guides/plan-versions).
 
 #### Plan Version Migrations
 
-When migrating to a new plan version, you will be able to determine what happens to customers on the old verison. You can:
-- Migrate all customers to the new plan version
-- Leave all customers on the legacy plan version
-- Migrate some customers, while leaving others on the legacy plan version
+When you publish a new version, you decide what happens to the companies on the current version. You can:
+- **Migrate all** companies to the new version
+- **Choose which companies** migrate, leaving the rest on their current version
+- **Keep all** companies on their current version (grandfathering), while new checkouts use the new version
+
+You can also migrate companies between versions at any time from the **Migrations** tab on the plan page, independent of publishing.
 
 ## Create a plan
 
@@ -83,30 +91,36 @@ When you're done adding entitlements, click "Save" in the top right to finalize 
 
 ## Creating a new plan version
 
-Any edit made to a plan, whether an entitlement change or a change to the plan itself (e.g. name or price), will create a new plan version in a draft state. You can continue editing the draft until you are ready to publish. 
+Any edit to a published plan — whether an entitlement change or a change to the plan itself (e.g. name or price) — creates a new **draft** version. You can keep editing the draft (via **Edit Plan Version**) until you are ready to publish; nothing changes for existing companies while a version is in draft.
 
-When you are ready to publish the new version, click the "Publish" button in the top right hand corner. From here you'll enter the publishing flow. 
+When the draft is ready, a banner appears at the top of the plan page (e.g. "Pro v27 is ready to publish"). Click **Publish version** to enter the publishing flow.
 
-### Review changes to the plan
+### Review changes
 
-The first step will let you review changes to the plan. First, you can see a summarized view of the entitltement changes. Then, further down you can see a full list of changes. 
-
-Once you have published the new plan version, this will be the version shown in components for customers to purchase. It is not possible to checkout onto an old plan version (companies are allowed to remain on prior versions). 
+The first step shows a side-by-side comparison of the current published version and your draft, followed by a summary of exactly which entitlements were added, removed, or changed.
 
 ![Plan version change - review](../../assets/images/catalog/catalog-plan-version-change-1.png)
 
-### Subscriber Migration
+Once published, the new version becomes the **Published** version shown in Schematic Components for new checkouts. Customers cannot check out onto an older version, though existing companies can remain on the version they are on.
 
-The next page determines how current subscribers will be migrated. When a customer is migrated to the new plan version, their entitlement limits and plan price will be automatically updated to the new version (prorations will occur for price changes). If a company is not migrated, it will maintain it's current entitlements and prices and can be migrated at a later date (or not at all). 
+### Subscriber migration
 
-![Plan version - migration 1](../../assets/images/catalog/catalog-plan-versions-migration-1.png)
+The next step, "How will current subscribers be managed?", determines what happens to companies on the current version. You have three options:
 
-If you do not want to migrate any companies to the new version, select the bottom option.
+- **Migrate all** companies to the new version. This publishes immediately and skips the company-selection step. Migrated companies have their entitlement limits and price updated to the new version (prorations apply for price changes).
+- **Choose which companies** migrate. You continue to a screen where you select which companies to move; any company you leave unselected stays on its current version.
+- **Keep all** companies on the current version. Existing companies are grandfathered onto their current version, and only new checkouts use the newly published version.
 
-If you wish to migrate some or all companies to the new version, select the top option. This will then bring you to a screen that will let you customize which companies will be migrated to the new plan version. Non-selected companies will stay on their current plan version. 
+![Plan version - subscriber management](../../assets/images/catalog/catalog-plan-versions-migration-1.png)
 
-![Plan version - migration 2](../../assets/images/catalog/catalog-plan-versions-migration-2.png)
+If you choose which companies to migrate, you'll see the full list with each company's current and new subscription. Unselected companies remain on their current version.
 
-When you're done you can check the progress of the migration on the "Migrations" tab on the plan page. 
+![Plan version - company selection](../../assets/images/catalog/catalog-plan-versions-migration-2.png)
+
+Companies that aren't migrated keep their current entitlements and price, and can be migrated later — or not at all.
+
+### Monitoring migrations
+
+You can track migration progress on the **Migrations** tab of the plan page, including the status and strategy of each run. You can also start a migration here at any time, independent of publishing, to move companies from another version onto this one.
 
 ![Plan version - migrations tab](../../assets/images/catalog/catalog-plan-versions-migrations-tab.png)
