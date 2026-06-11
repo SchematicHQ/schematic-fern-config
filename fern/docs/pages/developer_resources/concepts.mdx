@@ -61,6 +61,8 @@ Plans and add ons can both be tied to a Stripe billing product, enabling Schemat
 
 A subscription represents a company's current plan (and add ons), typically synced from Stripe. When a Stripe subscription changes, Schematic automatically updates the company's plan assignment.
 
+A company is always on a specific **version** of its plan. Plans are versioned (`draft` → `published` → `archived`), and when you publish a new version you choose whether to migrate the company to it or leave it on its current version. Add ons are versioned independently. See [Plan Versions](/catalog/plans#plan-versions) for the full model.
+
 ### Usage
 
 Usage is event-based or trait-based consumption tracked against a feature. It powers metered entitlements and usage-based billing, and is the basis for enforcement (e.g., blocking access after a limit is reached).
