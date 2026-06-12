@@ -1,0 +1,23 @@
+---
+title: Run sales-assisted trials and POCs
+slug: use-cases/sales-assisted-trials
+description: Grant a time-boxed, scoped evaluation tied to an open opportunity.
+---
+
+Enterprise deals often hinge on a proof of concept: a defined window where a prospect gets access to evaluate the product against their own use case. The eval needs to start quickly, match what sales scoped, and wind down cleanly when it ends.
+
+## Common approaches
+
+Under deal pressure, the usual move is for sales to ask engineering to "just turn it on" for the prospect, which in practice means a hard-coded flag or a temporary plan bump applied to that one account. It unblocks the evaluation immediately, so it tends to be the path of least resistance.
+
+The problem is that these grants are invisible and easy to forget. Nothing records that this access is a 30-day POC tied to a specific opportunity, so when the eval ends someone has to remember to undo it, and if they don't, the prospect keeps premium access for free. Scoping the trial to only the features under evaluation, or extending it when the deal slips a couple of weeks, means yet another round of manual code or config changes.
+
+## How Schematic fits in
+
+Grant the evaluation with a company override or a trial, scoped to exactly the features in play and set to expire at the end of the window. The grant is visible and auditable right on the company, customer-facing teams can set it up or extend it without engineering, and when it expires access reverts on its own. If the deal closes, you convert the prospect onto their negotiated plan rather than unwinding a pile of one-off flags.
+
+## Learn more
+
+- [Company Overrides](/feature-management/overrides) — grant scoped, time-limited access to a single company.
+- [Handling customer exceptions and feature trials](/playbooks/exceptions) — a playbook for time-limited grants.
+- [Trials](/catalog/trials) — plan-level trials with defined end dates and conversion behavior.
