@@ -8,7 +8,9 @@ Changes in Schematic often need to kick off work somewhere else. A new company s
 
 ## Common approaches
 
-Teams poll the API on a schedule, or bolt notification calls onto their application code wherever a relevant change happens. Polling is wasteful and laggy, and scattered notification logic is easy to miss, easy to duplicate, and hard to keep consistent as the product grows.
+Teams usually reach for one of two patterns. Either they poll the API on a schedule, scanning for companies, plans, or usage that changed since the last run, or they bolt notification calls directly onto application code at each spot where something relevant happens, posting to Slack here and updating the CRM there.
+
+Neither holds up well. Polling is wasteful when nothing changed and laggy when something does, and it can't catch events that happen and resolve between runs. Inline notification calls scatter the same concern across the codebase, so it's easy to miss a code path, easy to double-send, and hard to keep consistent as the product grows. In both cases the automation logic is tangled into your application rather than driven cleanly off the events themselves.
 
 ## How Schematic fits in
 

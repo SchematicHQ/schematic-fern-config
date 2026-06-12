@@ -8,7 +8,9 @@ Sales-led deals rarely fit neatly into the good-better-best plans on your pricin
 
 ## Common approaches
 
-Teams add one-off flags or special-case config in application code for each negotiated account. Over time that becomes a tangle of bespoke logic that's hard to audit, easy to break, and harder still to change when the customer renews on different terms.
+When a deal closes on non-standard terms, the fastest path is usually to add a one-off flag or a special-case config in application code for that account, hard-coding the extra seats, the custom limit, or the feature that isn't in any standard plan. For the first few enterprise deals this feels reasonable and ships quickly.
+
+But each bespoke account adds another branch of logic that only applies to one customer, and there's no single place to see what a given company was actually sold. The terms live in code rather than in your catalog, so auditing what's been promised is hard, changing it at renewal is risky, and the person who negotiated the deal can't adjust it without an engineer. Multiply that across a growing book of custom contracts and it becomes a real maintenance and compliance burden.
 
 ## How Schematic fits in
 

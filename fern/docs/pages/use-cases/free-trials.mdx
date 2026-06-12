@@ -8,7 +8,9 @@ Letting prospects try a paid plan before they commit is one of the most reliable
 
 ## Common approaches
 
-Teams often hard-code a trial flag with an expiry date, then write logic to grant premium access during the window and remember to revoke it afterward. The edge cases pile up fast: whether a card is required, which plan the customer lands on after the trial, and how to surface trial state in the product.
+Teams often hard-code a trial flag with an expiry date, then write logic to grant premium access during the window and revoke it when the clock runs out. It looks simple at first: set a date, check it on each request, and turn the features off when the trial ends.
+
+The edge cases pile up quickly, though. Whether a card is required up front changes what should happen at expiry, convert to paid automatically, or drop to a free tier, and each path needs its own handling. You also have to decide which plan the customer lands on afterward, make sure a trial only applies the first time, and surface trial state in the product so users see how long they have left. Each of these is easy to get subtly wrong, and a missed revocation means customers keep paid access for free.
 
 ## How Schematic fits in
 

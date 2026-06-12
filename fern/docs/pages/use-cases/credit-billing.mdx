@@ -8,7 +8,9 @@ Credit models, where customers buy a balance that burns down as they use feature
 
 ## Common approaches
 
-Teams track a credit balance in their own database, decrement it on every action, build top-up purchase flows, and handle expiration, grant ordering, and refunds themselves. Getting consumption rates, which credits burn first, and revenue recognition right is a substantial build that grows with every new feature.
+Teams typically track a credit balance in their own database, decrement it on every billable action, and build purchase flows so customers can top up when they run low. The core loop, grant some credits, subtract as they're used, block when the balance hits zero, is straightforward to prototype.
+
+The depth shows up in the details. Credits come from different sources, the monthly plan grant, purchased bundles, promotional credits, refunds, and each typically has its own expiration, which forces a decision about which credits burn first. On top of that you need per-feature consumption rates that can change over time, auto top-up so customers don't get cut off mid-task, refunds when an action fails, and a revenue-recognition story finance can trust. Building all of that, and keeping it correct as you add features, is a substantial project in its own right.
 
 ## How Schematic fits in
 

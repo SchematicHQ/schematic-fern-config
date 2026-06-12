@@ -8,7 +8,9 @@ Some products get more valuable the more they're used. Pricing that way means me
 
 ## Common approaches
 
-Teams log usage to their own database, run jobs to tally it, and hand-roll limit checks throughout the app. It holds together until plans change, limits vary by customer, or that usage needs to drive an upgrade or an invoice, at which point the homegrown metering becomes its own product to maintain.
+Teams usually start by logging usage to their own database, running scheduled jobs to tally it up, and scattering limit checks throughout the application code. For a single metered feature with one global limit, that's manageable, and many products ship their first usage-based feature exactly this way.
+
+It stops scaling as soon as the pricing gets real. Limits that vary by plan or by customer, periods that reset on each customer's billing date, soft limits with overage, and the need to show usage-versus-limit in the UI all turn the homegrown meter into its own system to build and maintain. And tallying usage for your own enforcement is only half the work, getting those same numbers onto an accurate invoice means reconciling your counts against the billing system, which is where the home-grown approach tends to break down.
 
 ## How Schematic fits in
 

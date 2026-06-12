@@ -8,7 +8,9 @@ Plenty of buyers would rather pick a plan, pay, and start using your product tha
 
 ## Common approaches
 
-Teams often stand up a Stripe Checkout link or a static pricing page, then write webhook handlers to translate Stripe events back into in-app access. That can work for a first purchase, but upgrades, downgrades, add-ons, and proration each need more glue code, and the pricing page drifts out of sync with what you actually sell.
+Most teams start by standing up a Stripe Checkout link or a static pricing page and wiring it to a few webhook handlers that translate Stripe events back into in-app access. For a single, first-time purchase that gets the job done: the customer pays, a webhook fires, and you flip on the features they bought.
+
+The trouble starts after that first sale. Upgrades, downgrades, add-ons, and mid-cycle proration each introduce new Stripe events and new edge cases, so the handler code grows and the access logic gets harder to reason about. Meanwhile the pricing page is maintained separately from what you actually sell, so every packaging change means touching the page, the checkout, and the entitlement mapping in lockstep, and any one of them drifting out of sync shows up as a customer who paid but can't access what they bought.
 
 ## How Schematic fits in
 

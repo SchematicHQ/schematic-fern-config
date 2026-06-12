@@ -8,7 +8,9 @@ Once customers are paying, they still need to manage their subscription: change 
 
 ## Common approaches
 
-A common setup sends customers to Stripe's billing portal for invoices and payment, then builds separate in-app screens for plan changes and usage. The experience is split across surfaces, and the in-app pieces tend to drift out of sync with what billing actually reflects.
+A common setup sends customers to Stripe's billing portal for invoices and payment methods, then builds separate in-app screens for the things Stripe doesn't know about, like plan changes, add-ons, and usage against limits. Each surface handles part of the job, so the customer bounces between your product and a Stripe-branded page to manage one subscription.
+
+That split is also a maintenance burden. The in-app screens have to be kept consistent with billing, so a plan change made in your UI and a payment-method update made in Stripe's portal can momentarily disagree, and usage shown in-app may not match what's actually being invoiced. As you add plans, add-ons, and usage-based features, every one of these home-grown screens needs to keep up.
 
 ## How Schematic fits in
 

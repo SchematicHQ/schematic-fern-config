@@ -8,7 +8,9 @@ Your product enforces access in real time, but billing lives in Stripe, and the 
 
 ## Common approaches
 
-Teams write and maintain webhook handlers in both directions: mapping Stripe events to in-app entitlements, and pushing app-side changes back to Stripe. That integration layer is significant to build, and it tends to break as the catalog grows and new plans, add-ons, and usage products are introduced.
+The do-it-yourself version is a two-way integration. In one direction you listen for Stripe webhooks, subscription created, updated, canceled, payment failed, and translate each into the right entitlement changes in your app. In the other, you push changes made in your product, an upgrade, an added seat, a cancellation, back to Stripe so billing reflects them.
+
+Getting that integration correct is a real project, and keeping it correct is the harder part. Every new plan, add-on, or usage-based product is another mapping to maintain, and subscription lifecycle states like past-due, paused, or incomplete each need a deliberate decision about whether access should continue. Miss one of those edge cases and the two systems quietly disagree, so a customer keeps access after canceling, or loses it after a payment that actually succeeded.
 
 ## How Schematic fits in
 

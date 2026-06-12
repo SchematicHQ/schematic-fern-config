@@ -8,7 +8,9 @@ Individual customers routinely need access that differs from their plan: a goodw
 
 ## Common approaches
 
-The usual fix is to special-case the customer in application code, or quietly move them onto a different plan. Both obscure why the exception exists, are easy to forget to reverse, and make it hard for customer success to see or manage what a given account actually has.
+The usual fix is to special-case the customer in application code, or to quietly move them onto a different plan that happens to include what they need. Either one resolves the immediate request, so it's tempting to reach for them whenever a one-off comes up.
+
+Both approaches hide the reason the exception exists. A flag buried in code or an off-catalog plan assignment doesn't record that this was a 30-day goodwill grant or a trial tied to an open opportunity, so there's nothing to reverse it when the time is up and nothing to point to when someone asks why this account has access it shouldn't. Customer success can't see or adjust these exceptions without engineering, and over time the accumulated special cases make it genuinely hard to know who has what.
 
 ## How Schematic fits in
 
