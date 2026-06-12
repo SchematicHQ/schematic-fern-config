@@ -27,25 +27,20 @@ Currently, features and flags are one-to-one, but in the future more than one fl
 Let's add one feature to Schematic and entitle it to a plan.
 
 1. Navigate to **Features** and click “Create”.
-2. In the modal, add a name, description, and pick the event-based feature type. Click “Continue”.
+2. In the panel that opens, add a name and an optional description, then choose how you want to control access to the feature. For a metered feature like this one, pick **Event-based**.
 
 ![Create feature](../../assets/images/quickstart/quickstart-features-create.png)
 
-<Info>You can choose between Boolean, Event-based, or Trait-based feature types.</Info>
+<Info>You can choose between Boolean, Event-based, or Trait-based feature types. The feature type can't be changed after the feature is created.</Info>
 
-3. Define a flag key. 
-    1. You'll use this `key` in your application to reference this feature.
+3. Under **Flag**, set the flag key you'll use in your application to reference this feature. Then, under **Event**, select or create the event that meters the feature's usage (for example, a `query` event). Click **Create feature** to finish.
 
-![Create feature 2](../../assets/images/quickstart/quickstart-features-create-2.png)
+![Create feature flag and event](../../assets/images/quickstart/quickstart-features-create-2.png)
 
-4. Attach an event to the feature. Add the `query` event to meter the feature and measure feature usage (if it doesn't exist already, create it).
-
-![Create feature 3](../../assets/images/quickstart/quickstart-features-create-3.png)
-
-5. Once the feature is created, click ”Add plan entitlement” to add an entitlement and specify the limit for Search Query for a given plan.
+4. Open the new feature and click a plan (or **Add plan entitlement**) to set the limit for that plan, along with the period the entitlement resets on.
 
 <Info>Event-based features can have no limit, some numerical limit that is static within a period, or a limit that is dynamic based on traits that exist at the company level. Read more [here](https://docs.schematichq.com/playbooks/metering#entitlement-options).</Info>
 
-![Entitlement a Feature](../../assets/images/quickstart/quickstart-features-entitlements.png)
+![Entitle a feature](../../assets/images/quickstart/quickstart-features-entitlements.png)
 
 <Info>You'll need to make sure to send usage events to Schematic to track feature utilization as it occurs. Read more [here](https://docs.schematichq.com/playbooks/metering#setting-up-an-event-based-metered-feature).</Info>

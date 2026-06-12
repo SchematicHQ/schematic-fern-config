@@ -20,33 +20,32 @@ In the [quickstart app](https://github.com/schematichq/schematic-quickstart), th
 
 First, we'll need to create an event-based feature in Schematic.
 
-1. Select "Features" from the top navigation
-2. Click "Create" on the right side of the screen
-3. Call the feature "New Event Feature"
-4. Set the feature type to be "Event Based". This will make sure we can track events and enabled Usage Based billing when we entitle it to a plan.
-5. Click "Continue" at the bottom
-6. On the next screen, for the flag key, use "new-event-feature" -- this is the value the quickstart app is using.
-7. Click "Continue".
-8. Now, we'll need to associate an event with this feature. Call it `new-event-feature-clicked` -- this is the value the quickstart app is using.
-9. Now click "Save".
+1. Select **Features** from the left navigation.
+2. Click "Create" in the top right of the screen.
+3. Name the feature "New Event Feature" and set the type to **Event-based**. This lets us track events and power usage-based billing when we entitle it to a plan.
 
 ![Create an event-based feature step 1](../../assets/images/quickstart/quickstart-tracking-usage-1.png)
 
+4. Scroll down to **Flag** and set the flag key to "new-event-feature" -- this is the value the quickstart app expects.
+
 ![Create an event-based feature step 2](../../assets/images/quickstart/quickstart-tracking-usage-2.png)
+
+5. Under **Event**, select or create the event that meters this feature. Enter `new-event-feature-clicked` (the value the quickstart app sends) and choose "create event". Then click "Create feature".
 
 ![Create an event-based feature step 3](../../assets/images/quickstart/quickstart-tracking-usage-3.png)
 
 ## Entitle the feature to a plan
 
-Now that we have a feature, we need to "entitle" it to the plan -- this is how we determine how much usage each plan provides and/or how much we'll charge for each use of this feature.
+Now that we have a feature, we need to "entitle" it to a plan -- this is how we determine how much usage each plan provides and/or how much we charge for each use of the feature.
 
-When you saved the feature, you should have dropped onto that feature's page. If not, then select "Features" from the top navigation and click on the feature you just created (New Event Feature).
+When you create the feature, you'll drop onto that feature's page. If not, select **Features** from the left navigation and click the feature you just created (New Event Feature).
 
-1. Click "Add Plan Entitlement" to begin
-2. Select the "Demo Plan" plan
-3. Set a value for 25 -- this is how many of these events a user can use per period.
-4. For Period, select "Monthly" and have the usage reset "According to Billing Period" (this is the most common setting). This means that the user will get 25 usages per month, and that the "month"" will be measured based on the day they signed up (i.e. if they signup on March 15th, then the "month" will be March 15th to April 14th).
-4. Click "Save".
+1. On the **Entitlements** tab, click the plan you want to give access to, or click "Add plan entitlement" to choose one.
+2. In the **Monetization Settings** panel, set the **Type** to **Numerical** and enter a **Value** -- this is how many events a company can use per period.
+3. Under **Define reset**, set the **Period** to "Monthly" and have the usage reset "According to billing period" (the most common setting). This means the allowance resets each month, measured from the day the company signed up (e.g. if they sign up on March 15th, the "month" runs March 15th to April 14th).
+4. Click "Save changes".
+
+The example below shows an existing event-based feature, **AI Conversations**, entitled to the **Free** plan with a limit of 50 per month.
 
 ![Entitle Usage](../../assets/images/quickstart/quickstart-tracking-usage-4.png)
 
@@ -86,7 +85,7 @@ Schematic tracks the most recent `track` or `identify` (see [identifying users](
 
 ## We're done!
 
-You just created a usage-based feature in Schematic and entitled it to a plan. Usage based features are a cornerstone of most modern billing plans. In this demo, we created a simple entitlement that allows user's on this plan to consume 25 events/month. There are [many more usage based billing setups](/billing/usage-based-billing) that Schematic supports.
+You just created a usage-based feature in Schematic and entitled it to a plan. Usage based features are a cornerstone of most modern billing plans. In this demo, we created a simple entitlement that gives companies on the plan a set number of usages each month. There are [many more usage based billing setups](/billing/usage-based-billing) that Schematic supports.
 
 ## Next steps
 
