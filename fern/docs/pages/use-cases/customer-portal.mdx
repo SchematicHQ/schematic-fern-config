@@ -1,0 +1,24 @@
+---
+title: Give customers a self-service portal
+slug: use-cases/customer-portal
+description: One branded place for customers to manage subscriptions, payment, invoices, and usage.
+---
+
+Once customers are paying, they still need to manage their subscription: change plans, update a card, pull an invoice, or check how much of their plan they've used. Every one of those that turns into a support ticket is cost for you and friction for them.
+
+## Common approaches
+
+A common setup sends customers to Stripe's billing portal for invoices and payment methods, then builds separate in-app screens for the things Stripe doesn't know about, like plan changes, add-ons, and usage against limits. Each surface handles part of the job, so the customer bounces between your product and a Stripe-branded page to manage one subscription.
+
+That split is also a maintenance burden. The in-app screens have to be kept consistent with billing, so a plan change made in your UI and a payment-method update made in Stripe's portal can momentarily disagree, and usage shown in-app may not match what's actually being invoiced. As you add plans, add-ons, and usage-based features, every one of these home-grown screens needs to keep up.
+
+## How Schematic fits in
+
+Schematic's customer portal gives customers one branded place to upgrade, downgrade, cancel, manage add-ons, view invoices and payment methods, and watch usage against their limits. Changes sync to Stripe and update entitlements immediately, so access always matches billing. You control which elements appear and how the portal looks in the component builder, no code deploy required.
+
+## Learn more
+
+- [Customer Portal and Checkout Flow](/components/customer-portal) — what the portal covers and how it works with Stripe.
+- [Create a Component](/components/create-component) — build and configure the portal in the component builder.
+- [Add to Your App](/components/set-up) — embed the portal in React, Vue, or plain JS.
+- [Building Your Own Portal](/components/headless-customer-portal) — go headless when you need full control of the UI.

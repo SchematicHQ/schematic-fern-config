@@ -1,0 +1,23 @@
+---
+title: Close custom deals
+slug: use-cases/custom-deals
+description: Package bespoke pricing and entitlements for negotiated contracts without touching code.
+---
+
+Sales-led deals rarely fit neatly into the good-better-best plans on your pricing page. Negotiated contracts come with their own pricing and their own mix of entitlements, and you need to honor them without forking your application for every customer.
+
+## Common approaches
+
+When a deal closes on non-standard terms, the fastest path is usually to add a one-off flag or a special-case config in application code for that account, hard-coding the extra seats, the custom limit, or the feature that isn't in any standard plan. For the first few enterprise deals this feels reasonable and ships quickly.
+
+But each bespoke account adds another branch of logic that only applies to one customer, and there's no single place to see what a given company was actually sold. The terms live in code rather than in your catalog, so auditing what's been promised is hard, changing it at renewal is risky, and the person who negotiated the deal can't adjust it without an engineer. Multiply that across a growing book of custom contracts and it becomes a real maintenance and compliance burden.
+
+## How Schematic fits in
+
+Build a custom plan with the negotiated entitlements and pricing and assign it to the company, or layer per-company overrides on top of a standard plan. Custom plans can be kept off your public pricing table and shown instead with a "talk to us" message, and everything, the entitlements, the pricing, the assignment, is managed from Schematic rather than in code.
+
+## Learn more
+
+- [Configuring the Catalog](/catalog/configuration) — display custom plans and control where they appear.
+- [Managing Company Plans](/catalog/managing-company-plans) — assign a plan to a specific company.
+- [Company Overrides](/feature-management/overrides) — adjust individual entitlements on top of a plan.

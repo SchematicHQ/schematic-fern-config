@@ -1,0 +1,24 @@
+---
+title: Automate with webhooks and AI
+slug: use-cases/automation
+description: Drive Slack, CRM, and AI-assisted workflows off Schematic events.
+---
+
+Changes in Schematic often need to kick off work somewhere else. A new company should notify the team, a plan change should update the CRM, usage crossing a limit or credits running low should trigger an alert or an onboarding step.
+
+## Common approaches
+
+Teams usually reach for one of two patterns. Either they poll the API on a schedule, scanning for companies, plans, or usage that changed since the last run, or they bolt notification calls directly onto application code at each spot where something relevant happens, posting to Slack here and updating the CRM there.
+
+Neither holds up well. Polling is wasteful when nothing changed and laggy when something does, and it can't catch events that happen and resolve between runs. Inline notification calls scatter the same concern across the codebase, so it's easy to miss a code path, easy to double-send, and hard to keep consistent as the product grows. In both cases the automation logic is tangled into your application rather than driven cleanly off the events themselves.
+
+## How Schematic fits in
+
+Subscribe to Schematic webhooks for the events you care about, company and plan changes, entitlement and credit triggers, and route them to Slack, your CRM, or any endpoint. For ad-hoc and AI-assisted workflows, the Schematic MCP server lets your team query and manage entitlement data directly from AI tools like Claude, for example pulling a company's usage for a quarterly review.
+
+## Learn more
+
+- [Webhooks](/integrations/webhooks) — the available events and how to set up an endpoint.
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — fire on usage and limit thresholds.
+- [Build a Slack webhook](/playbooks/slack-webhook) — a worked example routing events to Slack.
+- [MCP Server](/for-developers#model-context-protocol-mcp) — manage entitlement data from AI tools.

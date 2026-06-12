@@ -1,0 +1,23 @@
+---
+title: Price by usage
+slug: use-cases/usage-based-pricing
+description: Meter consumption, enforce limits, and turn rising usage into expansion.
+---
+
+Some products get more valuable the more they're used. Pricing that way means metering consumption accurately, enforcing limits as customers reach them, and turning that usage into upgrades and expansion revenue.
+
+## Common approaches
+
+Teams usually start by logging usage to their own database, running scheduled jobs to tally it up, and scattering limit checks throughout the application code. For a single metered feature with one global limit, that's manageable, and many products ship their first usage-based feature exactly this way.
+
+It stops scaling as soon as the pricing gets real. Limits that vary by plan or by customer, periods that reset on each customer's billing date, soft limits with overage, and the need to show usage-versus-limit in the UI all turn the homegrown meter into its own system to build and maintain. And tallying usage for your own enforcement is only half the work, getting those same numbers onto an accurate invoice means reconciling your counts against the billing system, which is where the home-grown approach tends to break down.
+
+## How Schematic fits in
+
+Define a metered feature (event-based for things like API calls, trait-based for things like seats), set entitlement limits per plan, and report usage. Schematic enforces access at runtime as customers approach their limits and supports a range of models, pay-as-you-go, pay-in-advance, fixed fee with overage, volume, and graduated pricing, so you can match how you want to charge without rebuilding metering each time.
+
+## Learn more
+
+- [Usage Based Billing Models](/billing/usage-based-billing) — the supported pricing models and how to configure each.
+- [Creating a metered feature](/playbooks/metering) — step-by-step setup for event- and trait-based features.
+- [Tracking Feature Usage](/feature-management/feature-analytics) — recording the events and traits that power metering.
