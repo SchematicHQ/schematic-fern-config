@@ -1,0 +1,21 @@
+---
+title: Bill for usage
+slug: use-cases/usage-billing
+description: Turn metered usage into accurate Stripe invoices automatically.
+---
+
+Metering usage is only half the job. The consumption you measure has to land on an accurate invoice, every billing period, without a manual reconciliation at month-end.
+
+## Common approaches
+
+Teams export usage from their own system, reconcile it against active subscriptions, and push quantities into Stripe by hand or with a custom job. It's error-prone, hard to audit when a customer questions a charge, and a recurring scramble at the close of every billing period.
+
+## How Schematic fits in
+
+Map a usage-based feature to a Stripe metered product, and Schematic reports billable usage to Stripe in real time, reflected consistently in your app, the Schematic dashboard, and Stripe. Choose the billing model per entitlement, pay-as-you-go, fixed fee with overage, volume, or graduated, and use negative-quantity events for refunds and corrections. Stripe stays the source of truth for invoicing; Schematic keeps the quantities accurate.
+
+## Learn more
+
+- [Usage Based Billing Models](/billing/usage-based-billing) — configure how usage maps to charges.
+- [Stripe Integration](/integrations/stripe) — how usage features map to Stripe metered products.
+- [Stripe Integration Guide](/integrations/stripe-integration-guide) — the technical setup for mapping and syncing.

@@ -1,0 +1,22 @@
+---
+title: Automate with webhooks and AI
+slug: use-cases/automation
+description: Drive Slack, CRM, and AI-assisted workflows off Schematic events.
+---
+
+Changes in Schematic often need to kick off work somewhere else. A new company should notify the team, a plan change should update the CRM, usage crossing a limit or credits running low should trigger an alert or an onboarding step.
+
+## Common approaches
+
+Teams poll the API on a schedule, or bolt notification calls onto their application code wherever a relevant change happens. Polling is wasteful and laggy, and scattered notification logic is easy to miss, easy to duplicate, and hard to keep consistent as the product grows.
+
+## How Schematic fits in
+
+Subscribe to Schematic webhooks for the events you care about, company and plan changes, entitlement and credit triggers, and route them to Slack, your CRM, or any endpoint. For ad-hoc and AI-assisted workflows, the Schematic MCP server lets your team query and manage entitlement data directly from AI tools like Claude, for example pulling a company's usage for a quarterly review.
+
+## Learn more
+
+- [Webhooks](/integrations/webhooks) — the available events and how to set up an endpoint.
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — fire on usage and limit thresholds.
+- [Build a Slack webhook](/playbooks/slack-webhook) — a worked example routing events to Slack.
+- [MCP Server](/for-developers#model-context-protocol-mcp) — manage entitlement data from AI tools.

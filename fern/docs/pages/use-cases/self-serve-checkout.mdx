@@ -1,0 +1,22 @@
+---
+title: Convert and expand users self-serve
+slug: use-cases/self-serve-checkout
+description: Let customers sign up, upgrade, and add capacity without talking to sales.
+---
+
+Plenty of buyers would rather pick a plan, pay, and start using your product than sit through a sales call. Capturing that revenue means showing the right plans, taking payment, and unlocking access the moment a customer pays, for first purchases and for every upgrade after.
+
+## Common approaches
+
+Teams often stand up a Stripe Checkout link or a static pricing page, then write webhook handlers to translate Stripe events back into in-app access. That can work for a first purchase, but upgrades, downgrades, add-ons, and proration each need more glue code, and the pricing page drifts out of sync with what you actually sell.
+
+## How Schematic fits in
+
+Drop in Schematic's pricing table and checkout components. They render your live plans straight from the catalog, run the full purchase, upgrade, downgrade, and add-on flow on top of Stripe, and provision entitlements the instant checkout completes, with no webhook mapping to maintain. When you change pricing or restructure plans in Schematic, the checkout UI updates without a deploy.
+
+## Learn more
+
+- [Pricing Table](/components/pricing-table) — the public-facing plan and pricing component.
+- [Customer Portal and Checkout Flow](/components/customer-portal) — the full checkout and subscription-management experience.
+- [Standalone Components](/components/standalone-components) — lightweight components for public pricing pages.
+- [Quickstart](/quickstart/overview) — set up your account, plans, and SDK first.

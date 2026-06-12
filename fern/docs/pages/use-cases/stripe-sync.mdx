@@ -1,0 +1,22 @@
+---
+title: Keep Stripe in sync
+slug: use-cases/stripe-sync
+description: Keep entitlements and billing aligned through a bidirectional Stripe sync.
+---
+
+Your product enforces access in real time, but billing lives in Stripe, and the two have to agree. When a subscription, plan, add-on, or quantity changes, both your app and Stripe need to reflect it, without anyone updating records by hand.
+
+## Common approaches
+
+Teams write and maintain webhook handlers in both directions: mapping Stripe events to in-app entitlements, and pushing app-side changes back to Stripe. That integration layer is significant to build, and it tends to break as the catalog grows and new plans, add-ons, and usage products are introduced.
+
+## How Schematic fits in
+
+Schematic runs a bidirectional sync with Stripe. Map plans and add-ons to Stripe products and usage features to metered products; changes made through Schematic checkout and the customer portal write straight to Stripe, while subscription changes in Stripe provision or revoke entitlements automatically. Subscription status drives access, so cancellations and failed payments move customers to the right state without custom code.
+
+## Learn more
+
+- [Stripe Integration](/integrations/stripe) — how the bidirectional sync works end to end.
+- [Stripe Integration Guide](/integrations/stripe-integration-guide) — mapping companies, plans, and prices correctly.
+- [Stripe App](/integrations/stripe-app) — manage Schematic from inside the Stripe dashboard.
+- [Automatically provision customers using Stripe](/playbooks/provisioning) — a playbook for provisioning from subscriptions.

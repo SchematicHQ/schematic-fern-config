@@ -1,0 +1,20 @@
+---
+title: Run free trials
+slug: use-cases/free-trials
+description: Grant time-limited access and convert trial users cleanly when the trial ends.
+---
+
+Letting prospects try a paid plan before they commit is one of the most reliable ways to convert them, but only if access is granted cleanly for the trial window and handled correctly the moment it ends.
+
+## Common approaches
+
+Teams often hard-code a trial flag with an expiry date, then write logic to grant premium access during the window and remember to revoke it afterward. The edge cases pile up fast: whether a card is required, which plan the customer lands on after the trial, and how to surface trial state in the product.
+
+## How Schematic fits in
+
+Turn on a trial when you create or edit a plan, and Schematic grants that plan's entitlements for the trial period automatically the first time a company is assigned it. In catalog configuration you decide whether payment is required up front, in which case the customer converts to the paid plan automatically, or not, in which case they downgrade to your default plan. The React and Vue SDKs expose trial status and end date, so you can render countdowns and post-trial conversion prompts without extra API calls.
+
+## Learn more
+
+- [Trials](/catalog/trials) — configure trials on a plan and render trial state in your app.
+- [Configuring the Catalog](/catalog/configuration) — set trial rules, including whether payment is required up front.
