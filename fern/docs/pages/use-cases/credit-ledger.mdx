@@ -1,0 +1,23 @@
+---
+title: Meter on a real-time credit ledger
+slug: use-cases/credit-ledger
+description: Drive enforcement and billing off an accurate, real-time ledger instead of a stale snapshot.
+---
+
+Credit-based and usage-based pricing is only as trustworthy as the metering underneath it. Enforcing limits, refunding failed actions, and billing accurately all depend on a ledger that is correct in real time, not a number you reconcile after the period closes.
+
+## Common approaches
+
+A common shortcut is to stream usage events to a warehouse like Snowflake or Databricks and pull a snapshot every 24 hours. It's quick to stand up and perfectly fine for analytics and reporting, so it's often the first thing teams reach for.
+
+A 24-hour snapshot is not a ledger, though. It isn't transactional, so it can't safely drive enforcement; it's always stale, so customers blow past limits before the numbers catch up; and without idempotency, a retried event double-counts while a dropped one disappears. Once real money and real enforcement ride on these numbers, "approximately right, eventually" stops being good enough, and bolting correctness onto an analytics pipeline after the fact is a hard retrofit.
+
+## How Schematic fits in
+
+Schematic gives you a real-time credit ledger with exactly-once event semantics, idempotent writes, and replay safety, so every action draws the balance down accurately and enforcement evaluates against current state. Holds let you reserve credits before an action and then commit or release them based on the outcome, so an in-flight agent can't overspend or get charged for work that failed. And pricing versioning keeps legacy customers on their old rates while new customers get the new ones, with no migration scramble.
+
+## Learn more
+
+- [Credit Burndown Billing Model](/billing/credit-burndown) — credit grants, consumption, and balances on the ledger.
+- [Creating a metered feature](/playbooks/metering) — send the usage events the ledger is built from, including idempotency keys.
+- [Backfills and usage corrections](/playbooks/backfill-and-corrections) — correct and replay events safely.

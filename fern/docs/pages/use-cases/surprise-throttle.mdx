@@ -1,0 +1,23 @@
+---
+title: Warn customers before they hit a limit
+slug: use-cases/surprise-throttle
+description: Surface usage transparently with soft warnings and grace periods so a limit is never a surprise.
+---
+
+A throttle without warning is a churn event. When a customer's usage gets cut off at a limit they never saw coming, the support ticket follows, then the CSM escalation, then a renewal conversation that goes sideways. The policy may be correct, but to the customer it reads as the product breaking.
+
+## Common approaches
+
+Enforcement is often binary: access works right up until the moment the limit trips, and then it just stops. The customer's first signal that they were anywhere near a cap is the error message, with no chance to react before service degrades.
+
+Teams that try to soften the edge bolt on ad-hoc threshold emails or a usage dashboard, but alerts wired by hand are easy to get wrong and rarely consistent from one feature to the next. A cut-off with no lead time still lands as a surprise, and the work of building warnings, grace windows, and clear messaging for every metered feature is its own project that tends to get deprioritized.
+
+## How Schematic fits in
+
+Schematic surfaces usage transparently in your product and fires soft warnings as customers approach a cap, at 70, 80, and 90 percent, with grace periods so a brief overage doesn't immediately cut off service. The limit still does its job, but the customer sees it coming and has a clear path to add capacity or upgrade before anything stops, which turns a potential churn moment into an expansion one.
+
+## Learn more
+
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — fire as usage crosses warning thresholds.
+- [Customer Portal and Checkout Flow](/components/customer-portal) — show usage against limits and an upgrade path in-product.
+- [Usage Based Billing Models](/billing/usage-based-billing) — configure soft and hard limits and overage behavior.

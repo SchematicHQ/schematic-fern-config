@@ -4,9 +4,18 @@ slug: use-cases/overview
 description: The common things teams build with Schematic, and where to start with each.
 ---
 
-Schematic gives product, growth, and engineering teams one place to define what customers get, enforce it in real time, and bill for it, without hard-coding pricing and access into your application.
+Schematic gives product, growth, and engineering teams one place to define what customers get, enforce it in real time, and bill for it, without hard-coding pricing and access into your application. It's purpose-built for monetizing AI and usage-based products: metering, credits, real-time limit enforcement, and custom plans.
 
 These use cases cover the things teams most often want to do. Each one explains the goal, how it's usually approached, and how Schematic fits in, then points you to the deeper setup docs. New to Schematic? Start with the [Quickstart](/quickstart/overview) to set up your account and SDK first.
+
+## AI monetization
+
+Selling AI means protecting two things: your margins, and your customers' trust. These use cases cover both.
+
+- **[Show customers what an action will cost](/use-cases/pre-flight)** — pre-flight cost previews so customers know the price before they run an expensive action.
+- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — transparent usage, soft warnings, and grace periods so a throttle is never a surprise.
+- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
+- **[Meter on a real-time credit ledger](/use-cases/credit-ledger)** — drive enforcement and billing off an accurate ledger with holds, not a stale snapshot.
 
 ## Product-led growth
 
@@ -14,8 +23,10 @@ These use cases cover the things teams most often want to do. Each one explains 
 - **[Give customers a self-service portal](/use-cases/customer-portal)** — one branded place to manage subscriptions, payment, invoices, and usage.
 - **[Run free trials](/use-cases/free-trials)** — grant time-limited access and convert trial users cleanly when the trial ends.
 - **[Price by usage](/use-cases/usage-based-pricing)** — meter consumption, enforce limits, and turn rising usage into expansion.
-- **[Bill for usage](/use-cases/usage-billing)** — turn metered usage into accurate Stripe invoices automatically.
+- **[Bill for usage](/use-cases/usage-billing)** — turn metered usage into accurate invoices automatically.
 - **[Run credit-based billing](/use-cases/credit-billing)** — sell a prepaid credit balance that burns down as customers use features.
+- **[Show customers what an action will cost](/use-cases/pre-flight)** — pre-flight cost previews that build buying confidence and surface upsells.
+- **[Meter on a real-time credit ledger](/use-cases/credit-ledger)** — the real-time ledger and holds underneath credit and usage pricing.
 
 ## Sales-led growth
 
@@ -28,9 +39,11 @@ These use cases cover the things teams most often want to do. Each one explains 
 - **[Manage exceptions with overrides](/use-cases/overrides)** — adjust a single company's access for trials, goodwill, or in-flight deals.
 - **[Spot churn and expansion with usage signals](/use-cases/usage-signals)** — watch usage against entitlements to flag at-risk and upsell-ready accounts.
 - **[Stay ahead of renewals and expirations](/use-cases/renewals)** — catch trials, overrides, and contracts before they lapse and access changes.
+- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — protect the customer relationship with soft warnings and grace periods.
 
 ## Operations
 
 - **[Reprice and repackage safely](/use-cases/plan-versioning)** — roll out new pricing and packaging and migrate customers on your terms.
-- **[Keep Stripe in sync](/use-cases/stripe-sync)** — keep entitlements and billing aligned through a bidirectional Stripe sync.
+- **[Keep your billing system in sync](/use-cases/stripe-sync)** — keep entitlements and billing aligned through a native, two-way sync with Stripe or Metronome.
 - **[Automate with webhooks and AI](/use-cases/automation)** — drive Slack, CRM, and AI-assisted workflows off Schematic events.
+- **[Protect your margins](/use-cases/margin-protection)** — enforce hard caps and overage limits so heavy usage can't run away with your costs.

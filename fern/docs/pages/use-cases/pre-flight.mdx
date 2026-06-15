@@ -1,0 +1,23 @@
+---
+title: Show customers what an action will cost
+slug: use-cases/pre-flight
+description: Give customers a cost estimate before they run an expensive AI action.
+---
+
+AI features carry variable, sometimes large per-action costs, and customers won't adopt what they can't predict. A research agent that might burn 15-20 credits is a gamble unless the customer can see the price before they commit to running it.
+
+## Common approaches
+
+Most products show the cost after the fact: a usage page that ticks up once the action finishes, or a monthly invoice that arrives weeks later. The customer learns what something cost only after they've already spent it, which is precisely the uncertainty that stalls adoption of the most valuable, most expensive features.
+
+That uncertainty has become a procurement issue, not just a UX one. When Microsoft burned through a year of AI credits in four months, every buyer started asking "do you have limit management?" before signing. Without a way to preview cost, customers either avoid your premium features or wrap them in their own guardrails, and "how much will this cost me?" turns into a recurring sales and support question.
+
+## How Schematic fits in
+
+Schematic exposes a pre-flight cost endpoint that returns a cost estimate, the customer's current balance, and their plan state for a given action. You can render "this will cost about 15-20 credits, you have 312 remaining" right in your product before the customer runs it, so they act with confidence instead of fear. The same check is a natural upsell moment: when a customer is short, you can offer credits or an upgrade in the flow rather than failing the action.
+
+## Learn more
+
+- [Credit Burndown Billing Model](/billing/credit-burndown) — the credit balance a pre-flight check reads against.
+- [Customer Portal and Checkout Flow](/components/customer-portal) — surface balance and add-credit paths in-product.
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — react as customers approach their balance.
