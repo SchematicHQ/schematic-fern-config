@@ -18,31 +18,29 @@ In the [quickstart app](https://github.com/schematichq/schematic-quickstart), th
 
 ## Create a boolean feature
 
-First, we'll need to create a feature in Schematic. 
+First, we'll need to create a feature in Schematic.
 
-1. Select "Features" from the top navigation
-2. Click "Create" on the right side of the screen
-3. Call the feature "New Boolean Feature"
-4. *NOTE: The type of this feature is "Boolean"  -- either we have access or we don't.*
-5. Click "Continue" at the bottom
-6. On the next screen, for the flag key, you MUST provide "new-boolean-feature". This is the value the quickstart app is expecting. 
-7. Click "Continue", then click "Save" on the final screen
+1. Select **Features** from the left navigation.
+2. Click "Create" in the top right of the screen.
+3. In the panel that opens, name the feature "New Boolean Feature". Leave the type set to **Boolean** -- either a company has access or it doesn't.
 
 ![Create a feature step 1](../../assets/images/quickstart/quickstart-entitle-feature-1.png)
+
+4. Scroll down to **Flag** and set the flag key to "new-boolean-feature". You MUST use this exact key, as it's the value the quickstart app expects. Then click "Create feature".
 
 ![Create a feature step 2](../../assets/images/quickstart/quickstart-entitle-feature-2.png)
 
 ## Entitle the feature to a plan
 
-Now that we have a feature, we need to "entitle" it to the plan -- this is how we give our customers on a plan access to this feature. 
+Now that we have a feature, we need to "entitle" it to a plan -- this is how we give customers on a plan access to the feature.
 
-When you saved the feature, you should have dropped onto that feature's page. If not, then select "Features" from the top navigation and click on the feature you just created (New Boolean Feature).
+When you create the feature, you'll drop onto that feature's page. If not, select **Features** from the left navigation and click the feature you just created (New Boolean Feature).
 
-1. Click "Add Plan Entitlement" to begin
-2. Select the "Demo Plan" plan
-3. Click "Save"
+1. On the **Entitlements** tab, click the plan you want to give access to, or click "Add plan entitlement" to choose one. The example below shows the Entitlements tab for an existing feature, **Video Generation**, that is already entitled to several plans -- your feature's tab will look like this once you add a plan.
 
 ![Entitle a feature step 1](../../assets/images/quickstart/quickstart-entitle-feature-3.png)
+
+2. In the **Monetization Settings** panel, toggle the feature **On** for that plan, then click "Save changes". For a boolean feature this simply includes it in the plan. The example below includes Video Generation in the Pro plan.
 
 ![Entitle a feature step 2](../../assets/images/quickstart/quickstart-entitle-feature-4.png)
 
@@ -70,7 +68,7 @@ const {
 
 ## We're done!
 
-You just created a feature in Schematic and entitled it to a plan. This is the core building block of Schematic. The feature we created here was a Boolean feature, a simple feature that either grants or denies access. These are the most common type of feature in most plans. For example everything boxed in red below is a boolean feature.
+You just created a feature in Schematic and entitled it to a plan. This is the core building block of Schematic. The feature we created here was a Boolean feature, a simple feature that either grants or denies access. These are the most common type of feature in most plans. For example, the on/off features listed on each plan in the pricing table below are boolean features.
 
 ![Boolean features on a pricing page](../../assets/images/quickstart/quickstart-entitle-feature-5.png)
 
