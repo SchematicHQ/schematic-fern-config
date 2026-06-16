@@ -11230,16 +11230,9 @@ components:
           maxItems: 1000
         migration_strategy:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
-        pay_in_advance:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdatePayInAdvanceRequestBody'
-          deprecated: true
-          maxItems: 100
       required:
         - excluded_company_ids
         - migration_strategy
-        - pay_in_advance
       title: PublishPlanVersionRequestBody
     QuickstartResp:
       type: object
