@@ -3340,6 +3340,8 @@ components:
           nullable: true
         interval:
           type: string
+        is_initial:
+          type: boolean
         latest_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
         payment_method:
@@ -3372,6 +3374,7 @@ components:
         - total_price
         - status
         - currency
+        - is_initial
         - cancel_at_period_end
       title: CompanySubscriptionResponseData
     ComparableOperator:
