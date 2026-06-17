@@ -17554,6 +17554,16 @@ paths:
             description: >-
               Filter for active prices on active products (defaults to true if
               not specified)
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter for prices belonging to a specific plan version (e.g. the
+            latest published version)
+          schema:
+            type: string
+            description: >-
+              Filter for prices belonging to a specific plan version (e.g. the
+              latest published version)
         - name: price
           in: query
           schema:
@@ -17665,6 +17675,11 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter for prices belonging to a specific plan version
+                          (e.g. the latest published version)
                       price:
                         type: integer
                         format: int64
@@ -17830,6 +17845,16 @@ paths:
             description: >-
               Filter for active prices on active products (defaults to true if
               not specified)
+        - name: plan_version_id
+          in: query
+          description: >-
+            Filter for prices belonging to a specific plan version (e.g. the
+            latest published version)
+          schema:
+            type: string
+            description: >-
+              Filter for prices belonging to a specific plan version (e.g. the
+              latest published version)
         - name: price
           in: query
           schema:
@@ -17941,6 +17966,11 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter for prices belonging to a specific plan version
+                          (e.g. the latest published version)
                       price:
                         type: integer
                         format: int64
