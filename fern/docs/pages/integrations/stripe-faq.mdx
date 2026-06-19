@@ -47,3 +47,44 @@ Within the schematic app, there are a few cases in which a plan can't be changed
 | Free plan -> Paid Plan <br /> *Company is not in stripe OR Company is in Stripe without a payment method* | ✅ <br />(Must enter a payment method) | ❌ |
 | Paid Plan -> Paid Plan <br /> *Company is in Stripe with a payment method* | ✅ | ✅ |
 | Paid Plan -> Free Plan <br /> *This is effectively a cancellation* | ✅ | ✅ |
+
+## My customer didn't receive an invoice email
+
+Invoice and receipt emails are sent by **Stripe**, not by Schematic. When a company subscribes to a paid or custom plan, Schematic creates the subscription and Stripe handles billing, including emailing the invoice. If those emails aren't arriving, the cause is almost always one of the following, in order of how often we see it.
+
+### You're testing in a Stripe sandbox (test mode)
+
+By default, **Stripe does not email customers in sandboxes**. Paying an invoice in a sandbox doesn't send a receipt, and invoices finalized through the API in a sandbox don't send an invoice email either. This is the most common reason a new billing flow "looks broken" during testing, when in fact it's configured correctly.
+
+To actually receive an email while testing in a sandbox, do one of the following:
+
+1. Open the invoice in the Stripe Dashboard and click **Send invoice** to send it manually, or
+2. Set the test customer's email to one of your **team member** addresses (from [Stripe Settings > Team](https://dashboard.stripe.com/settings/team)). Stripe will deliver sandbox emails to verified team addresses.
+
+Once you confirm the flow works in the sandbox, the automatic sending behavior in live mode is controlled by the settings below.
+
+### The "Send finalized invoices" setting is off (live mode)
+
+For plans billed by sending an invoice (Stripe collection method `send_invoice`, which is how "Talk to us" custom plans are typically billed), Stripe only emails the invoice automatically if this setting is enabled:
+
+**Settings > Billing > [Subscriptions and emails](https://dashboard.stripe.com/settings/billing/automatic) > Manage invoices sent to customers > Send finalized invoices and credit notes to customers**
+
+If this toggle is off, finalizing an invoice sends nothing. See Stripe's [Send customer emails](https://docs.stripe.com/invoicing/send-email) guide for details.
+
+### You're expecting an invoice but the plan charges the card automatically
+
+Stripe sends two different emails depending on how the plan bills:
+
+- For plans that **send an invoice to pay** (`send_invoice`), the customer gets an **invoice email** with a hosted payment link, controlled by the *Send finalized invoices* setting above.
+- For plans that **charge the card automatically** (`charge_automatically`, Stripe's default), the customer gets a **receipt**, not an invoice email. Receipts are controlled separately at **Settings > Business > [Customer emails](https://dashboard.stripe.com/settings/emails) > Successful payments**.
+
+If you expected an invoice in the inbox but the plan charges automatically, the customer would receive a receipt instead, and only if that *Successful payments* setting is on.
+
+### Other things that silently suppress the email
+
+- The Stripe **customer has no email address** set when the invoice finalizes.
+- The amount is **below Stripe's minimum charge** for the currency, so it's credited to the customer's balance instead of charged, and no receipt is sent.
+
+<Info>
+To verify your configuration independently of automatic sending, open any invoice in the Stripe Dashboard and click **Send invoice**, or call `POST /v1/invoices/{id}/send` via the API. If the manual send arrives, your data is correct and the issue is purely an automatic-email setting.
+</Info>
