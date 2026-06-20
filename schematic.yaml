@@ -2301,6 +2301,13 @@ components:
     CheckFlagsResponseData:
       type: object
       properties:
+        credit_balances:
+          additionalProperties:
+            $ref: '#/components/schemas/CompanyCreditBalance'
+          type: object
+          description: >-
+            Lease-aware credit balances keyed by credit ID, covering every
+            credit type the company holds a balance in
         flags:
           type: array
           items:
@@ -2608,6 +2615,27 @@ components:
       required:
         - type
       title: ClerkIntegrationConfig
+    CompanyCreditBalance:
+      type: object
+      properties:
+        remaining:
+          type: number
+          description: >-
+            Remaining credit, excluding any open lease hold (the value SDKs gate
+            on)
+        reserved:
+          type: number
+          description: Amount held by the company's open credit lease, 0 when none is open
+        settled:
+          type: number
+          description: >-
+            Spendable balance including the open lease hold (remaining +
+            reserved)
+      required:
+        - remaining
+        - reserved
+        - settled
+      title: CompanyCreditBalance
     CompanyCreditBalanceResponseData:
       type: object
       properties:
