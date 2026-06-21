@@ -8012,6 +8012,12 @@ components:
             allocated amount
           format: int64
           nullable: true
+        consumption_rate:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            credit cost per unit of usage
+          nullable: true
         credit_id:
           type: string
           description: >-
@@ -8059,6 +8065,12 @@ components:
           description: >-
             If the feature is event-based, the name of the event tracked for
             usage
+          nullable: true
+        event_subtype:
+          type: string
+          description: >-
+            For event-based or credit-metered feature entitlements, the event
+            subtype whose usage is tracked
           nullable: true
         feature_id:
           type: string
@@ -12006,6 +12018,12 @@ components:
             allocated amount
           format: int64
           nullable: true
+        consumption_rate:
+          type: number
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            credit cost per unit of usage
+          nullable: true
         credit_id:
           type: string
           description: >-
@@ -12053,6 +12071,12 @@ components:
           description: >-
             If the feature is event-based, the name of the event tracked for
             usage
+          nullable: true
+        event_subtype:
+          type: string
+          description: >-
+            For event-based or credit-metered feature entitlements, the event
+            subtype whose usage is tracked
           nullable: true
         feature_id:
           type: string
