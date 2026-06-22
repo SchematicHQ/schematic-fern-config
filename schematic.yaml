@@ -15250,6 +15250,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/coupons/{billing_id}:
+    delete:
+      operationId: deleteBillingCoupon
+      summary: Delete billing coupon
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteBillingCouponParams
+                required:
+                  - data
+                  - params
+                title: DeleteBillingCouponResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/credits:
     get:
       operationId: listBillingCredits
@@ -16937,6 +16978,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/customer/{billing_id}:
+    delete:
+      operationId: deleteBillingCustomer
+      summary: Delete billing customer
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteBillingCustomerParams
+                required:
+                  - data
+                  - params
+                title: DeleteBillingCustomerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/customer/upsert:
     post:
       operationId: upsertBillingCustomer
@@ -17293,6 +17375,47 @@ paths:
                   - data
                   - params
                 title: UpsertInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/invoices/{billing_id}:
+    delete:
+      operationId: deleteBillingInvoice
+      summary: Delete billing invoice
+      tags:
+        - billing
+      parameters:
+        - name: billing_id
+          in: path
+          description: billing_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteBillingInvoiceParams
+                required:
+                  - data
+                  - params
+                title: DeleteBillingInvoiceResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
