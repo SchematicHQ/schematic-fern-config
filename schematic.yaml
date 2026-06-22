@@ -12604,6 +12604,26 @@ components:
         - created_at
         - updated_at
       title: TemporaryAccessTokenResponseData
+    TestWebhookRequestBody:
+      type: object
+      properties:
+        request_type:
+          $ref: '#/components/schemas/WebhookRequestType'
+      required:
+        - request_type
+      title: TestWebhookRequestBody
+    TestWebhookResponseData:
+      type: object
+      properties:
+        response_code:
+          type: integer
+          format: int64
+        success:
+          type: boolean
+      required:
+        - response_code
+        - success
+      title: TestWebhookResponseData
     TimeSeriesGranularity:
       type: string
       enum:
@@ -29251,6 +29271,53 @@ paths:
                   - data
                   - params
                 title: DeleteWebhookResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /webhooks/{webhook_id}/test:
+    post:
+      operationId: sendTestWebhookAction
+      summary: Send test webhook action
+      tags:
+        - webhooks
+      parameters:
+        - name: webhook_id
+          in: path
+          description: webhook_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestWebhookRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TestWebhookResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: SendTestWebhookActionParams
+                required:
+                  - data
+                  - params
+                title: SendTestWebhookActionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
