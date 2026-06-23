@@ -11256,6 +11256,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/CustomPlanActivationStrategy'
           nullable: true
+        coupon_external_id:
+          type: string
+          nullable: true
+          maxLength: 255
         customer_email:
           type: string
           nullable: true
