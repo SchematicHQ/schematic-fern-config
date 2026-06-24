@@ -9645,6 +9645,12 @@ components:
           type: string
         id:
           type: string
+        integration:
+          allOf:
+            - $ref: '#/components/schemas/IntegrationResponseData'
+          description: >-
+            The integration that performed this change, when the actor is an
+            integration-owned API key (e.g. a billing-provider sync).
         is_version_upgrade:
           type: boolean
           description: >-
@@ -14316,8 +14322,10 @@ components:
           $ref: '#/components/schemas/ActorType'
         api_key_id:
           type: string
+          nullable: true
         environment_id:
           type: string
+          nullable: true
         environments:
           type: array
           items:
