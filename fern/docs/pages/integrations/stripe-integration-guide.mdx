@@ -39,6 +39,8 @@ The following Schematic concepts are synced to Stripe products/prices
 
 When you setup one of these Schematic concepts, you are given the option to map these to an existing product/price in Stripe or to create a new product/price in Stripe to map to. 
 
+<Info>Because plans and add ons are [versioned](/catalog/plans#plan-versions), the base Stripe **product** is shared across all of a plan's versions, but **prices are version-specific**. When you publish a new version that changes pricing, Schematic creates new Stripe prices for that version and leaves the existing prices intact, so companies on older versions keep their current pricing until they are migrated.</Info>
+
 ![Stripe New Product and Prices](../../assets/images/stripe/stripe-new-product-prices.png)
 
 ![Stripe Existing Product and Prices](../../assets/images/stripe/stripe-existing-product-prices.png)
