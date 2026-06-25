@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v97288f60
+  x-rules-engine-schema-version: v5b3e7220
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -136,6 +136,7 @@ components:
           nullable: true
         requested_amount:
           type: number
+          format: double
       required:
         - company_id
         - credit_type_id
@@ -489,6 +490,7 @@ components:
           type: string
         percent_off:
           type: number
+          format: double
           nullable: true
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
@@ -734,8 +736,10 @@ components:
           format: int64
         quantity_remaining:
           type: number
+          format: double
         quantity_used:
           type: number
+          format: double
         renewal_enabled:
           type: boolean
         renewal_period:
@@ -744,9 +748,11 @@ components:
           nullable: true
         reserved:
           type: number
+          format: double
           nullable: true
         settled:
           type: number
+          format: double
           nullable: true
         source_grant_id:
           type: string
@@ -1385,6 +1391,7 @@ components:
           type: string
         price:
           type: number
+          format: double
         price_decimal:
           type: string
           nullable: true
@@ -1399,6 +1406,7 @@ components:
           $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
+          format: double
         subscription_count:
           type: integer
           format: int64
@@ -1473,6 +1481,7 @@ components:
           $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
+          format: double
         subscription_id:
           type: string
         subscription_item_external_id:
@@ -1712,6 +1721,7 @@ components:
           type: string
         price:
           type: number
+          format: double
         price_decimal:
           type: string
           nullable: true
@@ -1721,6 +1731,7 @@ components:
           $ref: '#/components/schemas/BillingProviderType'
         quantity:
           type: number
+          format: double
         updated_at:
           type: string
           format: date-time
@@ -1815,6 +1826,7 @@ components:
           type: boolean
         percent_off:
           type: number
+          format: double
           nullable: true
         promo_code_external_id:
           type: string
@@ -2323,6 +2335,10 @@ components:
       properties:
         company_id:
           type: string
+        currency:
+          type: string
+          nullable: true
+          maxLength: 3
         selected_plan_id:
           type: string
           nullable: true
@@ -2623,14 +2639,17 @@ components:
           description: >-
             Remaining credit, excluding any open lease hold (the value SDKs gate
             on)
+          format: double
         reserved:
           type: number
           description: Amount held by the company's open credit lease, 0 when none is open
+          format: double
         settled:
           type: number
           description: >-
             Spendable balance including the open lease hold (remaining +
             reserved)
+          format: double
       required:
         - remaining
         - reserved
@@ -2643,14 +2662,18 @@ components:
           type: string
         remaining:
           type: number
+          format: double
         reserved:
           type: number
+          format: double
         settled:
           type: number
+          format: double
         source:
           $ref: '#/components/schemas/BillingProviderType'
         total:
           type: number
+          format: double
           nullable: true
       required:
         - credit_id
@@ -2670,6 +2693,7 @@ components:
         billing_credit_balances:
           additionalProperties:
             type: number
+            format: double
           type: object
           nullable: true
         billing_subscription:
@@ -2910,6 +2934,7 @@ components:
           type: string
         consumption_rate:
           type: number
+          format: double
           nullable: true
         created_at:
           type: string
@@ -3713,6 +3738,7 @@ components:
         ast:
           additionalProperties:
             type: number
+            format: double
           type: object
         created_at:
           type: string
@@ -3775,6 +3801,7 @@ components:
           $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
+          format: double
           nullable: true
         credit_id:
           type: string
@@ -3906,6 +3933,7 @@ components:
           $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
+          format: double
           nullable: true
         created_at:
           type: string
@@ -4018,6 +4046,7 @@ components:
           $ref: '#/components/schemas/ConditionType'
         consumption_rate:
           type: number
+          format: double
           nullable: true
         created_at:
           type: string
@@ -4119,6 +4148,7 @@ components:
         count:
           type: integer
           description: The number of resources
+          format: int64
     CouponRequestBody:
       type: object
       properties:
@@ -4143,6 +4173,7 @@ components:
           maxLength: 255
         percent_off:
           type: number
+          format: double
         times_redeemed:
           type: integer
           format: int64
@@ -4328,6 +4359,7 @@ components:
           minimum: 50
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         currency:
           type: string
@@ -4707,6 +4739,7 @@ components:
           maxLength: 255
         price:
           type: number
+          format: double
         provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
@@ -4860,6 +4893,7 @@ components:
           type: string
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         expiration_date:
           type: string
@@ -4904,6 +4938,7 @@ components:
         ast:
           additionalProperties:
             type: number
+            format: double
           type: object
         entity_type:
           $ref: '#/components/schemas/ComponentEntityType'
@@ -4942,6 +4977,7 @@ components:
           maxLength: 255
         percent_off:
           type: number
+          format: double
         times_redeemed:
           type: integer
           format: int64
@@ -5101,6 +5137,7 @@ components:
           minimum: 50
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         currency:
           type: string
@@ -5238,6 +5275,7 @@ components:
       properties:
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         feature_id:
           type: string
@@ -5568,6 +5606,7 @@ components:
         credit_cost:
           type: number
           description: Cost of credit to use to measure this condition
+          format: double
           nullable: true
         credit_id:
           type: string
@@ -5779,6 +5818,7 @@ components:
           minimum: 50
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         currency:
           type: string
@@ -6262,8 +6302,10 @@ components:
           format: int64
         quantity_remaining:
           type: number
+          format: double
         quantity_used:
           type: number
+          format: double
         renewal_enabled:
           type: boolean
         renewal_period:
@@ -6272,9 +6314,11 @@ components:
           nullable: true
         reserved:
           type: number
+          format: double
           nullable: true
         settled:
           type: number
+          format: double
           nullable: true
         singular_name:
           type: string
@@ -6362,6 +6406,7 @@ components:
       properties:
         amount:
           type: number
+          format: double
         auto_topup_log_id:
           type: string
           nullable: true
@@ -6420,6 +6465,7 @@ components:
           nullable: true
         grant_quantity_remaining:
           type: number
+          format: double
           nullable: true
         grant_reason:
           allOf:
@@ -6434,9 +6480,11 @@ components:
           nullable: true
         quantity_consumed:
           type: number
+          format: double
           nullable: true
         quantity_remaining_at_zero_out:
           type: number
+          format: double
           nullable: true
         source_id:
           type: integer
@@ -6487,6 +6535,7 @@ components:
           $ref: '#/components/schemas/BillingCreditGrantReason'
         quantity:
           type: number
+          format: double
       required:
         - grant_reason
         - quantity
@@ -6541,6 +6590,7 @@ components:
           format: date-time
         granted_amount:
           type: number
+          format: double
         id:
           type: string
         released_at:
@@ -6564,6 +6614,7 @@ components:
       properties:
         amount:
           type: number
+          format: double
         created_at:
           type: string
           format: date-time
@@ -6588,6 +6639,7 @@ components:
       properties:
         amount:
           type: number
+          format: double
         created_at:
           type: string
           format: date-time
@@ -6620,10 +6672,12 @@ components:
       properties:
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         credit_grant_counts:
           additionalProperties:
             type: number
+            format: double
           type: object
         credit_grant_details:
           type: array
@@ -6632,9 +6686,11 @@ components:
           maxItems: 1000
         credit_remaining:
           type: number
+          format: double
           nullable: true
         credit_total:
           type: number
+          format: double
           nullable: true
         credit_type_icon:
           type: string
@@ -6644,6 +6700,7 @@ components:
           nullable: true
         credit_used:
           type: number
+          format: double
           nullable: true
         usage_aggregation:
           $ref: '#/components/schemas/CreditUsageAggregation'
@@ -6654,18 +6711,22 @@ components:
         usage_this_billing_period:
           type: number
           description: Credit usage within the current billing period
+          format: double
           nullable: true
         usage_this_calendar_month:
           type: number
           description: Credit usage within the current calendar month
+          format: double
           nullable: true
         usage_this_week:
           type: number
           description: Credit usage within the current calendar week (Monday to Sunday)
+          format: double
           nullable: true
         usage_today:
           type: number
           description: Credit usage for the current day
+          format: double
           nullable: true
       title: CreditUsageAggregation
     CreditUsageReason:
@@ -7482,6 +7543,7 @@ components:
         quantity:
           type: integer
           description: Optionally specify the quantity of the event
+          format: int64
         traits:
           type: object
           description: A map of trait names to trait values
@@ -7713,6 +7775,7 @@ components:
       properties:
         additional_amount:
           type: number
+          format: double
         expires_at:
           type: string
           format: date-time
@@ -7745,10 +7808,12 @@ components:
         credit_consumption_rate:
           type: number
           description: The rate at which credits are consumed per unit of usage
+          format: double
           nullable: true
         credit_grant_counts:
           additionalProperties:
             type: number
+            format: double
           type: object
         credit_grant_details:
           type: array
@@ -7762,10 +7827,12 @@ components:
           nullable: true
         credit_remaining:
           type: number
+          format: double
           nullable: true
         credit_total:
           type: number
           description: 'Deprecated: Use credit_remaining instead.'
+          format: double
           nullable: true
           deprecated: true
         credit_type_icon:
@@ -7782,6 +7849,7 @@ components:
             period)
         credit_used:
           type: number
+          format: double
           nullable: true
         effective_limit:
           type: integer
@@ -7796,6 +7864,7 @@ components:
         effective_price:
           type: number
           description: Per-unit price for current usage scenario
+          format: double
           nullable: true
         entitlement_expiration_date:
           type: string
@@ -7839,6 +7908,7 @@ components:
         percent_used:
           type: number
           description: Percentage of allocation consumed (0-100+)
+          format: double
           nullable: true
         period:
           allOf:
@@ -8017,6 +8087,7 @@ components:
           description: >-
             If the company has a credit-based entitlement for this feature, the
             credit cost per unit of usage
+          format: double
           nullable: true
         credit_id:
           type: string
@@ -8032,6 +8103,7 @@ components:
             lease holds are excluded. Clients that hold a lease should gate on
             this plus their own unspent hold; clients with no lease awareness
             should use credit_settled instead
+          format: double
           nullable: true
         credit_reserved:
           type: number
@@ -8039,6 +8111,7 @@ components:
             If the company has a credit-based entitlement for this feature, the
             unspent amount held by an open credit lease. Returns to
             credit_remaining when the lease is released
+          format: double
           nullable: true
         credit_settled:
           type: number
@@ -8047,18 +8120,21 @@ components:
             balance net of actual consumption, unaffected by open lease holds
             (credit_remaining plus credit_reserved). The number to display to
             end users
+          format: double
           nullable: true
         credit_total:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
             total credit amount
+          format: double
           nullable: true
         credit_used:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
             amount of credit used
+          format: double
           nullable: true
         event_name:
           type: string
@@ -8328,10 +8404,12 @@ components:
         credit_consumption_rate:
           type: number
           description: The rate at which credits are consumed per unit of usage
+          format: double
           nullable: true
         credit_grant_counts:
           additionalProperties:
             type: number
+            format: double
           type: object
         credit_grant_details:
           type: array
@@ -8345,10 +8423,12 @@ components:
           nullable: true
         credit_remaining:
           type: number
+          format: double
           nullable: true
         credit_total:
           type: number
           description: 'Deprecated: Use credit_remaining instead.'
+          format: double
           nullable: true
           deprecated: true
         credit_type_icon:
@@ -8363,6 +8443,7 @@ components:
             period)
         credit_used:
           type: number
+          format: double
           nullable: true
         effective_limit:
           type: integer
@@ -8377,6 +8458,7 @@ components:
         effective_price:
           type: number
           description: Per-unit price for current usage scenario
+          format: double
           nullable: true
         entitlement_expiration_date:
           type: string
@@ -8420,6 +8502,7 @@ components:
         percent_used:
           type: number
           description: Percentage of allocation consumed (0-100+)
+          format: double
           nullable: true
         period:
           allOf:
@@ -8776,6 +8859,7 @@ components:
       properties:
         active_credits:
           type: number
+          format: double
         mrr:
           type: array
           items:
@@ -10008,6 +10092,7 @@ components:
           nullable: true
         consumption_rate:
           type: number
+          format: double
           nullable: true
         created_at:
           type: string
@@ -11090,6 +11175,7 @@ components:
           type: boolean
         percent_off:
           type: number
+          format: double
           deprecated: true
         period_start:
           type: string
@@ -11143,6 +11229,7 @@ components:
           format: int64
         percent_off:
           type: number
+          format: double
         period_start:
           type: string
           format: date-time
@@ -11764,7 +11851,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v97288f60
+        - v5b3e7220
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -11835,6 +11922,7 @@ components:
         credit_balances:
           additionalProperties:
             type: number
+            format: double
           type: object
         entitlements:
           type: array
@@ -11935,6 +12023,7 @@ components:
           $ref: '#/components/schemas/RulesengineConditionType'
         consumption_rate:
           type: number
+          format: double
           nullable: true
         credit_id:
           type: string
@@ -12033,6 +12122,7 @@ components:
           description: >-
             If the company has a credit-based entitlement for this feature, the
             credit cost per unit of usage
+          format: double
           nullable: true
         credit_id:
           type: string
@@ -12048,6 +12138,7 @@ components:
             lease holds are excluded. Clients that hold a lease should gate on
             this plus their own unspent hold; clients with no lease awareness
             should use credit_settled instead
+          format: double
           nullable: true
         credit_reserved:
           type: number
@@ -12055,6 +12146,7 @@ components:
             If the company has a credit-based entitlement for this feature, the
             unspent amount held by an open credit lease. Returns to
             credit_remaining when the lease is released
+          format: double
           nullable: true
         credit_settled:
           type: number
@@ -12063,18 +12155,21 @@ components:
             balance net of actual consumption, unaffected by open lease holds
             (credit_remaining plus credit_reserved). The number to display to
             end users
+          format: double
           nullable: true
         credit_total:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
             total credit amount
+          format: double
           nullable: true
         credit_used:
           type: number
           description: >-
             If the company has a credit-based entitlement for this feature, the
             amount of credit used
+          format: double
           nullable: true
         event_name:
           type: string
@@ -12646,6 +12741,7 @@ components:
       properties:
         change_pct:
           type: number
+          format: double
           nullable: true
         feature_id:
           type: string
@@ -12903,6 +12999,7 @@ components:
       properties:
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         expiration_date:
           type: string
@@ -12957,6 +13054,7 @@ components:
         ast:
           additionalProperties:
             type: number
+            format: double
           type: object
         entity_type:
           allOf:
@@ -13035,6 +13133,7 @@ components:
       properties:
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         metric_period:
           allOf:
@@ -13192,6 +13291,7 @@ components:
           minimum: 50
         credit_consumption_rate:
           type: number
+          format: double
           nullable: true
         currency:
           type: string
@@ -13935,6 +14035,7 @@ components:
           nullable: true
         consumption_rate:
           type: number
+          format: double
           nullable: true
         feature_id:
           type: string
