@@ -732,8 +732,8 @@ components:
         price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         quantity:
-          type: integer
-          format: int64
+          type: number
+          format: double
         quantity_remaining:
           type: number
           format: double
@@ -6298,8 +6298,8 @@ components:
         price:
           $ref: '#/components/schemas/BillingProductPriceResponseData'
         quantity:
-          type: integer
-          format: int64
+          type: number
+          format: double
         quantity_remaining:
           type: number
           format: double
@@ -6460,8 +6460,8 @@ components:
           type: string
           nullable: true
         grant_quantity:
-          type: integer
-          format: int64
+          type: number
+          format: double
           nullable: true
         grant_quantity_remaining:
           type: number
