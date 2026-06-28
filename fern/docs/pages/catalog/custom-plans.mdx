@@ -9,10 +9,6 @@ Unlike a standard [plan](/catalog/plans), a custom plan is only ever assigned to
 
 ![Custom plans list](../../assets/images/catalog/catalog-custom-plans-list.png)
 
-<Note>
-This is different from marking a standard plan as "Custom" to show a "Talk to us" message instead of a price in your pricing table, which is a display setting covered in [Configuring the Catalog](/catalog/configuration#custom-plans). A custom plan here is a real, per-company plan with its own entitlements and billing.
-</Note>
-
 ### When to use a custom plan
 
 Reach for a custom plan when a single company needs terms that differ from your standard catalog and you are closing the deal through sales rather than self-service. Common cases include negotiated enterprise pricing, a bespoke bundle of entitlements, or a one-off contract billed by invoice.
@@ -38,7 +34,10 @@ For a step-by-step walkthrough, see [Creating a Custom Plan](/catalog/guides/cus
 
 Custom plans are designed for an invoiced sales motion. While the plan is a draft, you review its entitlements and then **finalize** it to start billing. Finalizing generates a custom plan invoice for the company.
 
-The activation strategy is **On payment**: the company becomes active on the custom plan once the invoice is paid, within the configured due window (for example, 30 days). Until then, the plan stays pending.
+When you finalize, you choose an activation strategy that controls when the company gets access:
+
+- **On payment** — the company becomes active on the custom plan once the invoice is paid, within the configured due window (for example, 30 days). Until then, the plan stays pending.
+- **Immediately** — the company gets access to the plan right away, before paying. If they do not pay within the payment terms, access is removed.
 
 ![Custom plan invoice paid and active](../../assets/images/catalog/catalog-custom-plan-billing.png)
 
