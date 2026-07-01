@@ -3211,6 +3211,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingCreditResponseData'
+          maxItems: 1000
         currency_prices:
           type: array
           items:
@@ -3305,6 +3310,7 @@ components:
         - company_count
         - controlled_by
         - currency_prices
+        - credits
         - features
         - is_default
         - is_free
@@ -10046,6 +10052,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingCreditResponseData'
+          maxItems: 1000
         currency_prices:
           type: array
           items:
@@ -10121,6 +10132,7 @@ components:
         - company_count
         - controlled_by
         - currency_prices
+        - credits
         - features
         - is_default
         - is_free
@@ -10432,6 +10444,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingCreditResponseData'
+          maxItems: 1000
         currency_prices:
           type: array
           items:
@@ -10511,6 +10528,7 @@ components:
         - company_count
         - controlled_by
         - currency_prices
+        - credits
         - features
         - is_default
         - is_free
@@ -11070,6 +11088,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingCreditResponseData'
+          maxItems: 1000
         currency_prices:
           type: array
           items:
@@ -11151,6 +11174,7 @@ components:
         - company_count
         - controlled_by
         - currency_prices
+        - credits
         - features
         - is_default
         - is_free
