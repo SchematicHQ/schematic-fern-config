@@ -516,6 +516,12 @@ components:
         - provider_type
         - times_redeemed
       title: BillingCouponResponseData
+    BillingCreditAutoTopupAvailability:
+      type: string
+      enum:
+        - 'off'
+        - automatic
+        - user_controlled
     BillingCreditBundleResponseData:
       type: object
       properties:
@@ -1128,8 +1134,12 @@ components:
         auto_topup_amount_type:
           type: string
           nullable: true
+        auto_topup_availability:
+          $ref: '#/components/schemas/BillingCreditAutoTopupAvailability'
         auto_topup_enabled:
           type: boolean
+          description: Derived from auto_topup_availability; use that instead.
+          deprecated: true
         auto_topup_expiry_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditExpiryType'
@@ -1144,6 +1154,8 @@ components:
           nullable: true
         auto_topup_self_service:
           type: boolean
+          description: Derived from auto_topup_availability; use that instead.
+          deprecated: true
         auto_topup_threshold_credits:
           type: integer
           format: int64
@@ -1152,6 +1164,11 @@ components:
           type: integer
           format: int64
           nullable: true
+        can_buy_bundles:
+          type: boolean
+          description: >-
+            Whether buyers can purchase one-time credit bundles on this grant,
+            independent of auto top-up availability.
         created_at:
           type: string
           format: date-time
@@ -1229,6 +1246,8 @@ components:
         - plan_name
         - credit_amount
         - credit_name
+        - auto_topup_availability
+        - can_buy_bundles
         - auto_topup_enabled
         - auto_topup_self_service
         - rollover_percentage
@@ -3007,6 +3026,10 @@ components:
         billing_credit_auto_topup_amount_type:
           type: string
           nullable: true
+        billing_credit_auto_topup_availability:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditAutoTopupAvailability'
+          nullable: true
         billing_credit_auto_topup_enabled:
           type: boolean
         billing_credit_auto_topup_expiry_type:
@@ -3031,6 +3054,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_credit_can_buy_bundles:
+          type: boolean
         company_auto_topup_amount:
           type: integer
           format: int64
@@ -3132,6 +3157,7 @@ components:
         - reset_type
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
+        - billing_credit_can_buy_bundles
         - rollover_percentage
         - created_at
         - updated_at
@@ -4548,6 +4574,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreditAutoTopupAmountType'
           nullable: true
+        auto_topup_availability:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditAutoTopupAvailability'
+          nullable: true
         auto_topup_enabled:
           type: boolean
           nullable: true
@@ -4578,6 +4608,9 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        can_buy_bundles:
+          type: boolean
+          nullable: true
         credit_amount:
           type: integer
           format: int64
@@ -9810,6 +9843,10 @@ components:
         billing_credit_auto_topup_amount_type:
           type: string
           nullable: true
+        billing_credit_auto_topup_availability:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditAutoTopupAvailability'
+          nullable: true
         billing_credit_auto_topup_enabled:
           type: boolean
         billing_credit_auto_topup_expiry_type:
@@ -9834,6 +9871,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_credit_can_buy_bundles:
+          type: boolean
         created_at:
           type: string
           format: date-time
@@ -9924,6 +9963,7 @@ components:
         - reset_type
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
+        - billing_credit_can_buy_bundles
         - rollover_percentage
         - created_at
         - updated_at
@@ -12935,6 +12975,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreditAutoTopupAmountType'
           nullable: true
+        auto_topup_availability:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditAutoTopupAvailability'
+          nullable: true
         auto_topup_enabled:
           type: boolean
           nullable: true
@@ -12965,6 +13009,9 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        can_buy_bundles:
+          type: boolean
+          nullable: true
         credit_amount:
           type: integer
           format: int64
