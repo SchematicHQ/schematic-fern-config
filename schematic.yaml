@@ -2098,6 +2098,9 @@ components:
           items:
             $ref: '#/components/schemas/UpdateAutoTopupOverrideRequestBody'
           maxItems: 100
+        billing_entity_id:
+          type: string
+          nullable: true
         company_id:
           type: string
         coupon_external_id:
@@ -2160,6 +2163,9 @@ components:
           items:
             $ref: '#/components/schemas/UpdateAutoTopupOverrideRequestBody'
           maxItems: 100
+        billing_entity_id:
+          type: string
+          nullable: true
         coupon_external_id:
           type: string
           nullable: true
@@ -2650,6 +2656,82 @@ components:
       required:
         - type
       title: ClerkIntegrationConfig
+    CompanyBillingEntityResponseData:
+      type: object
+      properties:
+        billing_entity:
+          $ref: '#/components/schemas/CompanyResponseData'
+        has_own_stripe_customer:
+          type: boolean
+      required:
+        - has_own_stripe_customer
+      title: CompanyBillingEntityResponseData
+    CompanyBillingEntitySubscriptionResponseData:
+      type: object
+      properties:
+        cancel_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancel_at_period_end:
+          type: boolean
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionDiscountView'
+          maxItems: 1000
+        expired_at:
+          type: string
+          format: date-time
+          nullable: true
+        interval:
+          type: string
+        is_initial:
+          type: boolean
+        latest_invoice:
+          $ref: '#/components/schemas/InvoiceResponseData'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodResponseData'
+        plan_name:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingProductForSubscriptionResponseData'
+          maxItems: 1000
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
+        status:
+          type: string
+        subscription_external_id:
+          type: string
+        total_price:
+          type: integer
+          format: int64
+        trial_end:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - customer_external_id
+        - interval
+        - products
+        - discounts
+        - provider_type
+        - subscription_external_id
+        - total_price
+        - status
+        - currency
+        - is_initial
+        - cancel_at_period_end
+        - plan_name
+      title: CompanyBillingEntitySubscriptionResponseData
     CompanyCreditBalance:
       type: object
       properties:
@@ -4803,6 +4885,9 @@ components:
           nullable: true
         cancel_at_period_end:
           type: boolean
+        company_id:
+          type: string
+          nullable: true
         currency:
           type: string
           maxLength: 3
@@ -9372,6 +9457,12 @@ components:
           nullable: true
         base_plan_version_id:
           type: string
+          nullable: true
+        billing_entity_id:
+          type: string
+          description: >-
+            The company that pays for this subscription. Must already have a
+            Stripe customer. Only honored when starting a new subscription.
           nullable: true
         cancel_immediately:
           type: boolean
@@ -19828,6 +19919,99 @@ paths:
                   - data
                   - params
                 title: LookupCompanyResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /company-billing-entity:
+    get:
+      operationId: getCompanyBillingEntity
+      summary: Get company billing entity
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyBillingEntityResponseData'
+                    title: GetCompanyBillingEntityResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                    title: GetCompanyBillingEntityParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyBillingEntityResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /company-billing-entity-subscriptions:
+    get:
+      operationId: getBillingEntityChildSubscriptions
+      summary: Get billing entity child subscriptions
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/CompanyBillingEntitySubscriptionResponseData
+                    title: GetBillingEntityChildSubscriptionsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                    title: GetBillingEntityChildSubscriptionsParams
+                required:
+                  - data
+                  - params
+                title: GetBillingEntityChildSubscriptionsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
