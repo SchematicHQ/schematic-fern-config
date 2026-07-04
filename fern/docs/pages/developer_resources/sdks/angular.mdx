@@ -269,7 +269,7 @@ export class CreditMeterComponent {
 | `balance` | `number` | The spendable balance, or `0` while loading or when the company holds no balance in this credit |
 | `isLoading` | `boolean` | `true` while the balance is still loading and no value has arrived yet |
 
-By default it surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, pass a second argument (`"remaining"` or `"reserved"`) to surface those values instead. The credit ID is available on a feature's entitlement: `entitlement$(key)` emits `creditId` for credit-based features.
+It surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, read the underlying client instead: `getClient().getCreditBalance(creditId)` returns all three views of the balance — `settled`, `remaining` (excluding open lease holds), and `reserved` (the amount held by open leases) — as a point-in-time snapshot; subscribe with `getClient().addCreditBalanceListener(callback)` to react to changes. The credit ID is available on a feature's entitlement: `entitlement$(key)` emits `creditId` for credit-based features.
 
 *Note: `creditBalance$` requires `@schematichq/schematic-angular` 1.5.0 or later.*
 
@@ -292,7 +292,7 @@ Injectable service providing all Schematic functionality:
 | `flagValue$(key, fallback?)` | `Observable<boolean>` | Observe a feature flag's boolean value |
 | `entitlement$(key, fallback?)` | `Observable<CheckFlagReturn>` | Observe detailed entitlement data |
 | `plan$()` | `Observable<CheckPlanReturn \| undefined>` | Observe plan information |
-| `creditBalance$(creditId, type?)` | `Observable<SchematicCreditBalance>` | Observe a company's lease-aware credit balance |
+| `creditBalance$(creditId)` | `Observable<SchematicCreditBalance>` | Observe a company's lease-aware credit balance |
 | `isPending$()` | `Observable<boolean>` | Observe loading state |
 
 ### `SCHEMATIC_CLIENT`

@@ -204,11 +204,16 @@ The hook returns an object with the following properties:
 | `balance` | `number` | The spendable balance, or `0` while loading or when the company holds no balance in this credit |
 | `isLoading` | `boolean` | `true` while the balance is still loading and no value has arrived yet |
 
-By default the hook surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, pass `opts.type` as `"remaining"` or `"reserved"` to surface those values instead:
+The hook surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, read the underlying client instead: `client.getCreditBalance(creditId)` returns all three views of the balance — `settled`, `remaining` (excluding open lease holds), and `reserved` (the amount held by open leases):
 
 ```tsx
-const { balance } = useSchematicCreditBalance("credit-id", { type: "reserved" });
+import { useSchematic } from "@schematichq/schematic-react";
+
+const { client } = useSchematic();
+const balance = client.getCreditBalance("credit-id"); // { settled, remaining, reserved } | undefined
 ```
+
+`getCreditBalance` returns a point-in-time snapshot; to react to changes, subscribe with `client.addCreditBalanceListener(callback)`.
 
 The credit ID is available on a feature's entitlement: `useSchematicEntitlement(key)` returns `creditId` for credit-based features.
 
