@@ -201,11 +201,16 @@ The composable returns an object with the following reactive properties:
 | `balance` | `ComputedRef<number>` | The spendable balance, or `0` while loading or when the company holds no balance in this credit |
 | `isLoading` | `ComputedRef<boolean>` | `true` while the balance is still loading and no value has arrived yet |
 
-By default the composable surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, pass `opts.type` as `"remaining"` or `"reserved"` to surface those values instead:
+The composable surfaces the `settled` balance, which is the spendable number you should show end users. For advanced lease-aware accounting, read the underlying client instead: `client.getCreditBalance(creditId)` returns all three views of the balance — `settled`, `remaining` (excluding open lease holds), and `reserved` (the amount held by open leases):
 
 ```ts
-const { balance } = useSchematicCreditBalance("credit-id", { type: "reserved" });
+import { useSchematicClient } from "@schematichq/schematic-vue";
+
+const client = useSchematicClient();
+const balance = client.getCreditBalance("credit-id"); // { settled, remaining, reserved } | undefined
 ```
+
+`getCreditBalance` returns a point-in-time snapshot; to react to changes, subscribe with `client.addCreditBalanceListener(callback)`.
 
 The credit ID is available on a feature's entitlement: `useSchematicEntitlement(key)` returns `creditId` for credit-based features.
 
