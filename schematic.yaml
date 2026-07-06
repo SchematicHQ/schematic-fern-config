@@ -807,6 +807,7 @@ components:
       type: string
       enum:
         - expired
+        - integration_uninstalled
         - manual
         - plan_change
         - plan_period_reset
@@ -9189,6 +9190,10 @@ components:
           type: boolean
         is_connect_install:
           type: boolean
+        last_webhook_received_at:
+          type: string
+          format: date-time
+          nullable: true
         state:
           $ref: '#/components/schemas/IntegrationState'
         type:
@@ -9559,6 +9564,13 @@ components:
     MetronomeIntegrationConfig:
       type: object
       properties:
+        external_customer_id_key:
+          type: string
+          description: >-
+            Schematic company key used to store the Metronome customer's ingest
+            alias; when unset, imported customers carry only
+            metronome_customer_id
+          nullable: true
         type:
           type: string
           description: 'Discriminator: always "metronome" for this variant'
