@@ -4594,6 +4594,12 @@ components:
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
+        warning_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarningTierRequestBody'
+          nullable: true
+          maxItems: 1
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -6060,6 +6066,12 @@ components:
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
+        warning_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarningTierRequestBody'
+          nullable: true
+          maxItems: 1
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -7554,6 +7566,7 @@ components:
         - $ref: '#/components/schemas/EventBodyTrack'
         - $ref: '#/components/schemas/EventBodyFlagCheck'
         - $ref: '#/components/schemas/EventBodyIdentify'
+        - $ref: '#/components/schemas/EventBodyInference'
       title: EventBody
     EventBodyFlagCheck:
       type: object
@@ -7657,6 +7670,73 @@ components:
       required:
         - keys
       title: EventBodyIdentify
+    EventBodyInference:
+      type: object
+      properties:
+        cached_input_tokens:
+          type: integer
+          description: Number of input tokens served from cache
+          format: int64
+        company:
+          additionalProperties:
+            type: string
+          type: object
+          description: >-
+            Key-value pairs to identify the company associated with the
+            inference event
+        cost:
+          type: string
+          description: >-
+            Provided cost of the inference request as a decimal string; derived
+            from model pricing when omitted
+        currency:
+          type: string
+          description: ISO 4217 currency code for the provided cost; defaults to 'usd'
+        event:
+          type: string
+          description: Optional track event name to fan out for usage-based billing
+        input_tokens:
+          type: integer
+          description: Number of input tokens for the inference request
+          format: int64
+        operation:
+          type: string
+          description: The inference operation; defaults to 'chat'
+        output_tokens:
+          type: integer
+          description: Number of output tokens for the inference request
+          format: int64
+        provider:
+          type: string
+          description: The inference provider (e.g. 'anthropic', 'openai')
+        reasoning_tokens:
+          type: integer
+          description: Number of reasoning tokens for the inference request
+          format: int64
+        request_model:
+          type: string
+          description: The model requested for the inference request
+        requests:
+          type: integer
+          description: Number of requests represented by this event; defaults to 1
+          format: int64
+        response_model:
+          type: string
+          description: The model that served the inference response
+        user:
+          additionalProperties:
+            type: string
+          type: object
+          description: >-
+            Key-value pairs to identify the user associated with the inference
+            event
+      required:
+        - company
+        - input_tokens
+        - output_tokens
+        - provider
+        - response_model
+      title: EventBodyInference
     EventBodyTrack:
       type: object
       properties:
@@ -10338,6 +10418,11 @@ components:
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
+        warning_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarningTierResponseData'
+          maxItems: 1000
       required:
         - created_at
         - currency_prices
@@ -10348,6 +10433,7 @@ components:
         - rule_id
         - updated_at
         - value_type
+        - warning_tiers
       title: PlanEntitlementResponseData
     PlanEntitlementsOrder:
       type: object
@@ -13586,6 +13672,12 @@ components:
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
+        warning_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarningTierRequestBody'
+          nullable: true
+          maxItems: 1
         yearly_metered_price_id:
           type: string
           nullable: true
@@ -14368,6 +14460,36 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WarningTierRequestBody:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 255
+        value:
+          type: integer
+          format: int64
+          maximum: 9999999999999
+          minimum: 1
+      required:
+        - key
+        - value
+      title: WarningTierRequestBody
+    WarningTierResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: integer
+          format: int64
+      required:
+        - id
+        - key
+        - value
+      title: WarningTierResponseData
     WebFeatureUsageWebhookOutput:
       type: object
       properties:
