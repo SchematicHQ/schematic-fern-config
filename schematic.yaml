@@ -5934,11 +5934,6 @@ components:
           maxItems: 100
         plan:
           $ref: '#/components/schemas/CreatePlanRequestBody'
-        traits:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
-          maxItems: 100
       required:
         - entitlements
       title: CreatePlanBundleRequestBody
@@ -9887,11 +9882,6 @@ components:
           maxItems: 1000
         plan:
           $ref: '#/components/schemas/PlanResponseData'
-        traits:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlanTraitResponseData'
-          maxItems: 1000
       title: PlanBundleResponseData
     PlanChangeAction:
       type: string
@@ -13547,11 +13537,6 @@ components:
         plan_version_id:
           type: string
           nullable: true
-        traits:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdatePlanTraitTraitRequestBody'
-          maxItems: 100
       required:
         - entitlements
       title: UpdatePlanBundleRequestBody
