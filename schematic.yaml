@@ -5621,6 +5621,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        ending_balance:
+          type: integer
+          format: int64
+          nullable: true
         external_id:
           type: string
           nullable: true
@@ -5629,6 +5633,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        starting_balance:
+          type: integer
+          format: int64
+          nullable: true
         status:
           allOf:
             - $ref: '#/components/schemas/InvoiceStatus'
@@ -9333,10 +9341,18 @@ components:
           type: string
           format: date-time
           nullable: true
+        ending_balance:
+          type: integer
+          format: int64
+          nullable: true
         payment_method_external_id:
           type: string
           nullable: true
           maxLength: 255
+        starting_balance:
+          type: integer
+          format: int64
+          nullable: true
         status:
           allOf:
             - $ref: '#/components/schemas/InvoiceStatus'
@@ -9389,6 +9405,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        ending_balance:
+          type: integer
+          format: int64
         environment_id:
           type: string
         external_id:
@@ -9401,6 +9420,9 @@ components:
           nullable: true
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
+        starting_balance:
+          type: integer
+          format: int64
         status:
           allOf:
             - $ref: '#/components/schemas/InvoiceStatus'
@@ -9426,8 +9448,10 @@ components:
         - created_at
         - currency
         - customer_external_id
+        - ending_balance
         - environment_id
         - provider_type
+        - starting_balance
         - subtotal
         - updated_at
       title: InvoiceResponseData
