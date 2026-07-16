@@ -11784,12 +11784,60 @@ components:
         - payment_method_required
         - usage_violations
       title: PreviewSubscriptionChangeResponseData
+    PreviewSubscriptionDiscountResponseData:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+          format: int64
+          nullable: true
+        coupon_name:
+          type: string
+        currency:
+          type: string
+          nullable: true
+        customer_facing_code:
+          type: string
+          nullable: true
+        duration:
+          type: string
+        duration_in_months:
+          type: integer
+          format: int64
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+        percent_off:
+          type: number
+          format: double
+          nullable: true
+        promo_code_external_id:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+      required:
+        - coupon_name
+        - duration
+        - is_active
+        - started_at
+      title: PreviewSubscriptionDiscountResponseData
     PreviewSubscriptionFinanceResponseData:
       type: object
       properties:
         amount_off:
           type: integer
           format: int64
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewSubscriptionDiscountResponseData'
+          maxItems: 1000
         due_now:
           type: integer
           format: int64
@@ -11833,6 +11881,7 @@ components:
           maxItems: 1000
       required:
         - amount_off
+        - discounts
         - due_now
         - upcoming_invoice_line_items
         - new_charges
