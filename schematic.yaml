@@ -5211,6 +5211,11 @@ components:
       properties:
         billing_product:
           $ref: '#/components/schemas/UpsertBillingProductRequestBody'
+        credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBundleCreditGrantRequestBody'
+          maxItems: 100
         entitlements:
           type: array
           items:
