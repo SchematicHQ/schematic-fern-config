@@ -2039,6 +2039,13 @@ components:
       enum:
         - graduated
         - volume
+    BindCatalogRequestBody:
+      type: object
+      properties:
+        catalog_id:
+          type: string
+          nullable: true
+      title: BindCatalogRequestBody
     CancelSubscriptionRequest:
       type: object
       properties:
@@ -2090,6 +2097,221 @@ components:
       required:
         - events
       title: CaptureRawEventBatch
+    CatalogConfigOrderedBundle:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+      required:
+        - bundle_id
+      title: CatalogConfigOrderedBundle
+    CatalogConfigOrderedBundleResponseData:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+      required:
+        - bundle_id
+      title: CatalogConfigOrderedBundleResponseData
+    CatalogConfigOrderedEntitlement:
+      type: object
+      properties:
+        plan_entitlement_id:
+          type: string
+        visible:
+          type: boolean
+          nullable: true
+      required:
+        - plan_entitlement_id
+      title: CatalogConfigOrderedEntitlement
+    CatalogConfigOrderedEntitlementResponseData:
+      type: object
+      properties:
+        plan_entitlement_id:
+          type: string
+        visible:
+          type: boolean
+      required:
+        - plan_entitlement_id
+        - visible
+      title: CatalogConfigOrderedEntitlementResponseData
+    CatalogConfigOrderedPlan:
+      type: object
+      properties:
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedEntitlement'
+          nullable: true
+          maxItems: 200
+        plan_id:
+          type: string
+      required:
+        - plan_id
+      title: CatalogConfigOrderedPlan
+    CatalogConfigOrderedPlanResponseData:
+      type: object
+      properties:
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedEntitlementResponseData'
+          maxItems: 1000
+        plan_id:
+          type: string
+      required:
+        - plan_id
+        - entitlements
+      title: CatalogConfigOrderedPlanResponseData
+    CatalogConfigurationResponseData:
+      type: object
+      properties:
+        add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+          maxItems: 1000
+        custom_plan_cta_text:
+          type: string
+          nullable: true
+        custom_plan_cta_url:
+          type: string
+          nullable: true
+        custom_plan_price_text:
+          type: string
+          nullable: true
+        custom_plans_visible:
+          type: boolean
+        ordered_add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedPlanResponseData'
+          maxItems: 1000
+        ordered_bundles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedBundleResponseData'
+          maxItems: 1000
+        ordered_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedPlanResponseData'
+          maxItems: 1000
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
+          maxItems: 1000
+        pricing_model:
+          type: string
+          nullable: true
+        pricing_url:
+          type: string
+          nullable: true
+      required:
+        - custom_plans_visible
+        - plans
+        - add_ons
+        - ordered_plans
+        - ordered_add_ons
+        - ordered_bundles
+      title: CatalogConfigurationResponseData
+    CatalogCreditBundleIDsResponseData:
+      type: object
+      properties:
+        credit_bundle_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+      required:
+        - credit_bundle_ids
+      title: CatalogCreditBundleIDsResponseData
+    CatalogDerivedFeatureResponseData:
+      type: object
+      properties:
+        icon:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - icon
+        - name
+      title: CatalogDerivedFeatureResponseData
+    CatalogDerivedFeaturesResponseData:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogDerivedFeatureResponseData'
+          maxItems: 1000
+      required:
+        - features
+      title: CatalogDerivedFeaturesResponseData
+    CatalogPlanIDsResponseData:
+      type: object
+      properties:
+        plan_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+      required:
+        - plan_ids
+      title: CatalogPlanIDsResponseData
+    CatalogResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        custom_plan_cta_text:
+          type: string
+          nullable: true
+        custom_plan_cta_url:
+          type: string
+          nullable: true
+        custom_plan_price_text:
+          type: string
+          nullable: true
+        custom_plans_visible:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+        environment_id:
+          type: string
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        pricing_model:
+          type: string
+          nullable: true
+        pricing_url:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - environment_id
+        - name
+        - is_default
+        - created_at
+        - updated_at
+        - custom_plans_visible
+      title: CatalogResponseData
     ChangeSubscriptionInternalRequestBody:
       type: object
       properties:
@@ -3269,6 +3491,11 @@ components:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         billing_strategy:
           $ref: '#/components/schemas/BillingStrategy'
+        catalogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCatalogMembershipResponseData'
+          maxItems: 1000
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_can_trial:
@@ -3862,6 +4089,9 @@ components:
             type: number
             format: double
           type: object
+        catalog_id:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -4972,6 +5202,22 @@ components:
         - discounts
         - cancel_at_period_end
       title: CreateBillingSubscriptionRequestBody
+    CreateCatalogRequestBody:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 1024
+        is_default:
+          type: boolean
+        name:
+          type: string
+          maxLength: 255
+      required:
+        - is_default
+        - name
+      title: CreateCatalogRequestBody
     CreateCompanyCreditGrant:
       type: object
       properties:
@@ -9920,6 +10166,17 @@ components:
         plan:
           $ref: '#/components/schemas/PlanResponseData'
       title: PlanBundleResponseData
+    PlanCatalogMembershipResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: PlanCatalogMembershipResponseData
     PlanChangeAction:
       type: string
       enum:
@@ -10245,6 +10502,11 @@ components:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         billing_strategy:
           $ref: '#/components/schemas/BillingStrategy'
+        catalogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCatalogMembershipResponseData'
+          maxItems: 1000
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -10638,6 +10900,11 @@ components:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         billing_strategy:
           $ref: '#/components/schemas/BillingStrategy'
+        catalogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCatalogMembershipResponseData'
+          maxItems: 1000
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -11282,6 +11549,11 @@ components:
           $ref: '#/components/schemas/BillingProductDetailResponseData'
         billing_strategy:
           $ref: '#/components/schemas/BillingStrategy'
+        catalogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCatalogMembershipResponseData'
+          maxItems: 1000
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         company_count:
@@ -13324,6 +13596,66 @@ components:
         - reset_cadence
         - reset_start
       title: UpdateBillingPlanCreditGrantRequestBody
+    UpdateCatalogConfigurationRequestBody:
+      type: object
+      properties:
+        custom_plan_cta_text:
+          type: string
+          nullable: true
+          maxLength: 255
+        custom_plan_cta_url:
+          type: string
+          nullable: true
+          maxLength: 512
+        custom_plan_price_text:
+          type: string
+          nullable: true
+          maxLength: 255
+        custom_plans_visible:
+          type: boolean
+          nullable: true
+        ordered_add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedPlan'
+          nullable: true
+          maxItems: 100
+        ordered_bundles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedBundle'
+          nullable: true
+          maxItems: 100
+        ordered_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigOrderedPlan'
+          nullable: true
+          maxItems: 100
+        pricing_model:
+          type: string
+          nullable: true
+          maxLength: 255
+        pricing_url:
+          type: string
+          nullable: true
+          maxLength: 512
+      title: UpdateCatalogConfigurationRequestBody
+    UpdateCatalogRequestBody:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 1024
+        is_default:
+          type: boolean
+          nullable: true
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+      title: UpdateCatalogRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -19244,6 +19576,589 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /catalogs:
+    get:
+      operationId: listCatalogs
+      summary: List catalogs
+      tags:
+        - catalogs
+      parameters:
+        - name: is_default
+          in: query
+          schema:
+            type: boolean
+        - name: q
+          in: query
+          description: Search by catalog name
+          schema:
+            type: string
+            description: Search by catalog name
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CatalogResponseData'
+                    title: ListCatalogsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      is_default:
+                        type: boolean
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      q:
+                        type: string
+                        description: Search by catalog name
+                        maxLength: 512
+                    title: ListCatalogsParams
+                required:
+                  - data
+                  - params
+                title: ListCatalogsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createCatalog
+      summary: Create catalog
+      tags:
+        - catalogs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCatalogRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateCatalogParams
+                required:
+                  - data
+                  - params
+                title: CreateCatalogResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}:
+    get:
+      operationId: getCatalog
+      summary: Get catalog
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCatalogParams
+                required:
+                  - data
+                  - params
+                title: GetCatalogResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateCatalog
+      summary: Update catalog
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCatalogRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCatalogParams
+                required:
+                  - data
+                  - params
+                title: UpdateCatalogResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteCatalog
+      summary: Delete catalog
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteCatalogParams
+                required:
+                  - data
+                  - params
+                title: DeleteCatalogResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/configuration:
+    get:
+      operationId: getConfiguration
+      summary: Get configuration
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogConfigurationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetConfigurationParams
+                required:
+                  - data
+                  - params
+                title: GetConfigurationResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateConfiguration
+      summary: Update configuration
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCatalogConfigurationRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateConfigurationParams
+                required:
+                  - data
+                  - params
+                title: UpdateConfigurationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/credit-bundles:
+    get:
+      operationId: getCreditBundlesInCatalog
+      summary: Get credit bundles in catalog
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogCreditBundleIDsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCreditBundlesInCatalogParams
+                required:
+                  - data
+                  - params
+                title: GetCreditBundlesInCatalogResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/credit-bundles/{credit_bundle_id}:
+    post:
+      operationId: addCreditBundle
+      summary: Add credit bundle
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+        - name: credit_bundle_id
+          in: path
+          description: credit_bundle_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: removeCreditBundle
+      summary: Remove credit bundle
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+        - name: credit_bundle_id
+          in: path
+          description: credit_bundle_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/features:
+    get:
+      operationId: getDerivedFeatures
+      summary: Get derived features
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogDerivedFeaturesResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetDerivedFeaturesParams
+                required:
+                  - data
+                  - params
+                title: GetDerivedFeaturesResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/plans:
+    get:
+      operationId: getPlansInCatalog
+      summary: Get plans in catalog
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CatalogPlanIDsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPlansInCatalogParams
+                required:
+                  - data
+                  - params
+                title: GetPlansInCatalogResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /catalogs/{catalog_id}/plans/{plan_id}:
+    post:
+      operationId: addPlan
+      summary: Add plan
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: removePlan
+      summary: Remove plan
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /checkout-internal:
     post:
       operationId: checkoutInternal
@@ -21433,6 +22348,53 @@ paths:
                   - data
                   - params
                 title: DeleteComponentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /components/{component_id}/catalog:
+    put:
+      operationId: bindCatalog
+      summary: Bind catalog
+      tags:
+        - components
+      parameters:
+        - name: component_id
+          in: path
+          description: component_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BindCatalogRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComponentResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: BindCatalogParams
+                required:
+                  - data
+                  - params
+                title: BindCatalogResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -30561,6 +31523,7 @@ tags:
   - name: accesstokens
   - name: accounts
   - name: billing
+  - name: catalogs
   - name: checkout
   - name: companies
   - name: components
