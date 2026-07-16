@@ -8410,6 +8410,14 @@ components:
           allOf:
             - $ref: '#/components/schemas/EntitlementValueType'
           description: The type of the entitlement value
+        warning_tiers:
+          type: array
+          description: >-
+            Customer-defined usage warning thresholds configured on this
+            entitlement
+          items:
+            $ref: '#/components/schemas/WarningTier'
+          maxItems: 1000
       required:
         - feature_id
         - feature_key
@@ -12517,6 +12525,14 @@ components:
           allOf:
             - $ref: '#/components/schemas/RulesengineEntitlementValueType'
           description: The type of the entitlement value
+        warning_tiers:
+          type: array
+          description: >-
+            Customer-defined usage warning thresholds configured on this
+            entitlement
+          items:
+            $ref: '#/components/schemas/RulesengineWarningTier'
+          maxItems: 1000
       required:
         - feature_id
         - feature_key
@@ -12691,6 +12707,20 @@ components:
         - traits
         - rules
       title: RulesengineUser
+    RulesengineWarningTier:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A customer-defined identifier for the warning tier
+        value:
+          type: integer
+          description: The warning threshold, in the entitlement's usage units
+          format: int64
+      required:
+        - key
+        - value
+      title: RulesengineWarningTier
     ScheduledCheckoutResponseData:
       type: object
       properties:
@@ -14474,6 +14504,20 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    WarningTier:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A customer-defined identifier for the warning tier
+        value:
+          type: integer
+          description: The warning threshold, in the entitlement's usage units
+          format: int64
+      required:
+        - key
+        - value
+      title: WarningTier
     WarningTierRequestBody:
       type: object
       properties:
@@ -21803,6 +21847,87 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /data-exports:
+    get:
+      operationId: listDataExports
+      summary: List data exports
+      tags:
+        - dataexports
+      parameters:
+        - name: export_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataExportType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataExportStatus'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataExportResponseData'
+                    title: ListDataExportsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      export_type:
+                        $ref: '#/components/schemas/DataExportType'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      status:
+                        $ref: '#/components/schemas/DataExportStatus'
+                    title: ListDataExportsParams
+                required:
+                  - data
+                  - params
+                title: ListDataExportsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
     post:
       operationId: createDataExport
       summary: Create data export
@@ -21834,6 +21959,45 @@ paths:
                 title: CreateDataExportResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /data-exports/{data_export_id}:
+    get:
+      operationId: getDataExport
+      summary: Get data export
+      tags:
+        - dataexports
+      parameters:
+        - name: data_export_id
+          in: path
+          description: data_export_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DataExportResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetDataExportParams
+                required:
+                  - data
+                  - params
+                title: GetDataExportResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
