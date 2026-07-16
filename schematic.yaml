@@ -14459,6 +14459,20 @@ components:
     UpsertCompanyRequestBody:
       type: object
       properties:
+        base_plan_id:
+          type: string
+          description: >-
+            Assign this base plan when creating the company (starts with plan_).
+            Takes precedence over the environment's initial plan and must be
+            provisionable without a payment method.
+          nullable: true
+        base_plan_price_id:
+          type: string
+          description: >-
+            The Schematic price to provision for base_plan_id (starts with
+            bilpp_). Required and must be $0 for a billing-linked plan; omit for
+            a plan that is not billing-linked.
+          nullable: true
         id:
           type: string
           description: If you know the Schematic ID, you can use that here instead of keys
