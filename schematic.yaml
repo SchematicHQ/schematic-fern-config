@@ -302,6 +302,47 @@ components:
         - capture
         - read
         - write
+    AuditLogExportMetadata:
+      type: object
+      properties:
+        actor_type:
+          type: string
+          description: Restrict the export to audit log entries from this actor type
+          nullable: true
+        end_time:
+          type: string
+          description: >-
+            Restrict the export to audit log entries that started before this
+            time
+          format: date-time
+          nullable: true
+        export_type:
+          type: string
+          description: 'Discriminator: always "audit-log" for this variant'
+          enum:
+            - audit-log
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        q:
+          type: string
+          description: Free-text search over audit log entries
+          nullable: true
+        start_time:
+          type: string
+          description: >-
+            Restrict the export to audit log entries that started at or after
+            this time
+          format: date-time
+          nullable: true
+      required:
+        - export_type
+      title: AuditLogExportMetadata
     AuditLogListResponseData:
       type: object
       properties:
@@ -3163,6 +3204,125 @@ components:
         - period
         - value
       title: CompanyEventPeriodMetricsResponseData
+    CompanyFeatureUsageExportMetadata:
+      type: object
+      properties:
+        company_ids:
+          type: array
+          description: >-
+            Restrict the export to these Schematic company IDs (starting with
+            'comp_')
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        credit_type_ids:
+          type: array
+          description: Restrict the export to companies with these billing credit type IDs
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        export_type:
+          type: string
+          description: 'Discriminator: always "company-feature-usage" for this variant'
+          enum:
+            - company-feature-usage
+        feature_ids:
+          type: array
+          description: >-
+            Schematic feature IDs (starting with 'feat_') to include as usage
+            columns; at least one is required
+          items:
+            type: string
+          maxItems: 100
+        has_scheduled_downgrade:
+          type: boolean
+          description: >-
+            Restrict the export to companies that do (or do not) have a
+            scheduled downgrade
+          nullable: true
+        monetized_subscriptions:
+          type: boolean
+          description: >-
+            Restrict the export to companies with (or without) a monetized
+            subscription
+          nullable: true
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        plan_id:
+          type: string
+          description: >-
+            Restrict the export to companies on this plan ID (starting with
+            'plan_')
+          nullable: true
+        plan_ids:
+          type: array
+          description: Restrict the export to companies on any of these plan IDs
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        plan_version_id:
+          type: string
+          description: Restrict the export to companies on this plan version ID
+          nullable: true
+        q:
+          type: string
+          description: Free-text search over company name and keys
+          nullable: true
+        subscription_statuses:
+          type: array
+          description: >-
+            Restrict the export to companies whose subscription has one of these
+            statuses
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        subscription_types:
+          type: array
+          description: >-
+            Restrict the export to companies whose subscription has one of these
+            types
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        with_entitlement_for:
+          type: string
+          description: >-
+            Restrict the export to companies that have an entitlement for this
+            feature ID
+          nullable: true
+        with_subscription:
+          type: boolean
+          description: Restrict the export to companies with a subscription
+          nullable: true
+        without_feature_override_for:
+          type: string
+          description: >-
+            Restrict the export to companies without a company-level override
+            for this feature ID
+          nullable: true
+        without_plan:
+          type: boolean
+          description: Restrict the export to companies without a plan
+          nullable: true
+        without_subscription:
+          type: boolean
+          description: Restrict the export to companies without a subscription
+          nullable: true
+      required:
+        - export_type
+        - feature_ids
+      title: CompanyFeatureUsageExportMetadata
     CompanyLedgerResponseData:
       type: object
       properties:
@@ -5503,14 +5663,12 @@ components:
         export_type:
           $ref: '#/components/schemas/DataExportType'
         metadata:
-          type: string
-          maxLength: 10240
+          $ref: '#/components/schemas/DataExportMetadata'
         output_file_type:
           $ref: '#/components/schemas/DataExportOutputFileType'
       required:
         - export_type
         - output_file_type
-        - metadata
       title: CreateDataExportRequestBody
     CreateEntitlementInBundleRequestBody:
       type: object
@@ -7351,6 +7509,17 @@ components:
         - api_key
         - type
       title: DataEventPayload
+    DataExportMetadata:
+      type: object
+      discriminator:
+        propertyName: export_type
+        mapping:
+          audit-log: '#/components/schemas/AuditLogExportMetadata'
+          company-feature-usage: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+      oneOf:
+        - $ref: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+        - $ref: '#/components/schemas/AuditLogExportMetadata'
+      title: DataExportMetadata
     DataExportOutputFileType:
       type: string
       enum:
@@ -7370,7 +7539,7 @@ components:
         id:
           type: string
         metadata:
-          type: string
+          $ref: '#/components/schemas/DataExportMetadata'
         output_file_type:
           $ref: '#/components/schemas/DataExportOutputFileType'
         status:
@@ -7384,7 +7553,6 @@ components:
         - environment_id
         - export_type
         - status
-        - metadata
         - output_file_type
         - created_at
         - updated_at
