@@ -5795,6 +5795,12 @@ components:
           nullable: true
         value_type:
           $ref: '#/components/schemas/EntitlementValueType'
+        warning_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarningTierRequestBody'
+          nullable: true
+          maxItems: 1
         yearly_metered_price_id:
           type: string
           nullable: true
