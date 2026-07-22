@@ -7435,6 +7435,69 @@ components:
       required:
         - consecutive_failures
       title: CreditsAutoTopupRetryFailure
+    CreditsAutoTopupSuccess:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CreditsAutoTopupCompanySummary'
+        credit:
+          $ref: '#/components/schemas/CreditsAutoTopupCreditSummary'
+        grant_id:
+          type: string
+        quantity:
+          type: integer
+          format: int64
+      required:
+        - grant_id
+        - quantity
+      title: CreditsAutoTopupSuccess
+    CreditsCreditPurchaseSuccess:
+      type: object
+      properties:
+        bundle_id:
+          type: string
+        bundle_name:
+          type: string
+        company:
+          $ref: '#/components/schemas/CreditsWebhookCompanySummary'
+        credit:
+          $ref: '#/components/schemas/CreditsWebhookCreditSummary'
+        grant_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+        quantity:
+          type: integer
+          format: int64
+      required:
+        - bundle_id
+        - bundle_name
+        - grant_ids
+        - quantity
+      title: CreditsCreditPurchaseSuccess
+    CreditsWebhookCompanySummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CreditsWebhookCompanySummary
+    CreditsWebhookCreditSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CreditsWebhookCreditSummary
     CurrencyPriceRequestBody:
       type: object
       properties:
@@ -15401,6 +15464,7 @@ components:
         - company.updated
         - credit.limit.reached
         - credit.limit.warning
+        - credit.purchase.success
         - entitlement.limit.reached
         - entitlement.limit.warning
         - entitlement.soft_limit.reached
@@ -15428,6 +15492,7 @@ components:
         - user.updated
         - auto.topup.hard.failure
         - auto.topup.retry.exceeded
+        - auto.topup.success
     WebhookResponseData:
       type: object
       properties:
