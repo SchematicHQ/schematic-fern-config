@@ -60,16 +60,47 @@ Credit triggers fire based on credit usage:
 
 Credit triggers are configured per credit type, using a `credit_id` in the trigger config when creating or updating a webhook endpoint.
 
-## Auto-topup failure events
+## Credit purchase events
 
-These events fire when a scheduled credit auto-topup fails:
+This event fires when a company successfully purchases a credit bundle:
 
 | Event | When it fires |
 | --- | --- |
+| `credit.purchase.success` | A credit bundle purchase completes and the grants are committed |
+
+### Payload
+
+**`credit.purchase.success`** — typed as [`CreditsCreditPurchaseSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsCreditPurchaseSuccess.ts):
+
+| Field | Description |
+| --- | --- |
+| `bundleId` | ID of the purchased credit bundle |
+| `bundleName` | Name of the purchased credit bundle |
+| `company` | Summary of the purchasing company |
+| `credit` | Summary of the credit that was topped up |
+| `grantIds` | IDs of the credit grants created by the purchase |
+| `quantity` | Number of credits granted by the purchase |
+
+## Auto-topup events
+
+These events fire on the outcome of a scheduled credit auto-topup:
+
+| Event | When it fires |
+| --- | --- |
+| `auto.topup.success` | An auto-topup completes and the credits are granted |
 | `auto.topup.hard.failure` | An auto-topup attempt fails and will not be retried |
 | `auto.topup.retry.exceeded` | An auto-topup has failed too many consecutive times |
 
 ### Payload
+
+**`auto.topup.success`** — typed as [`CreditsAutoTopupSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupSuccess.ts):
+
+| Field | Description |
+| --- | --- |
+| `company` | Summary of the affected company |
+| `credit` | Summary of the credit that was topped up |
+| `grantId` | ID of the credit grant created by the top-up |
+| `quantity` | Number of credits granted by the top-up |
 
 **`auto.topup.hard.failure`** — typed as [`CreditsAutoTopupHardFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupHardFailure.ts):
 
