@@ -1,0 +1,310 @@
+---
+title: Metronome Integration
+
+slug: integrations/metronome
+---
+
+Using the Metronome integration with Schematic, you can:
+
+- Keep Metronome as your billing system while Schematic enforces credit balances in your application in real time
+- Automatically import Metronome rate cards, products, customers, and credits into Schematic
+- Gate feature access on credit balances with low-latency, abuse-resistant checks using the Schematic Node.js SDK
+- Display live credit balances to your end users with Schematic's frontend SDKs
+
+The integration is built on a parallel-ledger model: **Metronome remains authoritative for rating and billing**, and **Schematic maintains a real-time enforcement ledger** that mirrors it. Your application sends the same usage event to both systems, and Schematic periodically reconciles its ledger against Metronome so the two converge even when writes fail or Metronome re-rates historical usage.
+
+## How the integration works
+
+- **Import**: Schematic imports your Metronome rate cards, products, customers, credit grants, and contracts, and keeps them up to date via webhooks.
+- **Enforce**: your application checks credit balances through the Schematic Node.js SDK, which uses credit leases and reservations for low-latency, race-safe enforcement.
+- **Dual-write**: your application sends each usage event to both Metronome (for billing) and Schematic (for enforcement), using the same event name.
+- **Reconcile**: an hourly reconciliation job compares Schematic's ledger against Metronome's invoice breakdowns and applies corrections to Schematic's ledger, so the two systems converge even after failed writes or Metronome-side re-rating.
+
+## Connecting Metronome to Schematic
+
+You can set up the Metronome integration in the **Integrations** tab within Schematic. Connecting requires two values from Metronome: an API key and a webhook signing secret.
+
+1. In your Metronome dashboard, create an API key and add it to the **Metronome API key** field in Schematic.
+2. In your Metronome dashboard, create a new webhook and set its endpoint to the webhook URL shown in Schematic.
+3. Once you've created the webhook, Metronome will provide a signing secret. Copy it and add it to the **Metronome webhook secret** field in Schematic.
+4. Click **Connect**.
+
+Schematic validates the API key when you connect. Metronome doesn't provide an API for managing webhooks, so Schematic can't verify the webhook configuration automatically — double-check the endpoint URL and secret if real-time updates don't arrive. Every delivered webhook is verified against the signing secret, and Schematic monitors webhook liveness: if it detects Metronome-side changes without recent webhook traffic, it flags the connection so you can fix the webhook configuration.
+
+<Info>Even if a webhook is missed or misconfigured, data still converges: the hourly reconciliation re-fetches grant state and usage from Metronome. Webhooks make updates real-time; reconciliation makes them reliable.</Info>
+
+### What gets imported
+
+Once you're connected, Schematic imports your Metronome data and keeps it in sync automatically:
+
+| Metronome | Schematic |
+| --- | --- |
+| Customer | Company, keyed by `metronome_customer_id`; custom fields become `metronome_`-prefixed traits |
+| Rate card | Plan, plus a credit type for the rate card's currency |
+| Rate (FLAT, usage-based) | Credit-burndown entitlement on the rate card's plan, denominated in the credit the rate is priced in |
+| Product (USAGE type) | Feature and flag, with the tracked event derived from the billable metric |
+| Credit grant / contract credit | Credit grant |
+| Contract | Subscription binding the company to the rate card's plan |
+
+On initial import, if a company in Schematic already exists with a matching `metronome_customer_id`, the record will simply be updated.
+
+### Reading unsupported rows
+
+Not every Metronome configuration maps onto Schematic's enforcement model. When Schematic encounters something it doesn't support — for example, a billable metric with a non-SUM aggregation, or a tiered rate — it records an **unsupported row** on the integration page with a typed reason instead of importing it.
+
+Unsupported rows are for visibility, not enforcement: they tell you exactly which parts of your Metronome catalog Schematic is and isn't enforcing, so you can decide whether that's acceptable or whether to adjust the configuration. See the [supported configurations](#supported-configurations) section below for every reason and what triggers it.
+
+## Enforcing credit balances
+
+Once credits are imported, your application can gate feature access on them. Credit enforcement is available in the [Node.js SDK](/developer_resources/sdks/nodejs) (`@schematichq/schematic-typescript-node` 1.5.0 or later) via **credit leases and reservations**.
+
+Instead of making a network call to Schematic on every request, the SDK transactionally leases a tranche of credits from the company's balance and holds it locally. Each flag check is then evaluated against the lease:
+
+1. **Lease**: the SDK acquires a hold on a portion of the company's credit balance (10,000 credits by default). The hold lasts until the lease is returned or expires, so concurrent workloads — or other services — can't spend the same credits twice.
+2. **Reserve**: when you call `check()` with an expected usage amount, the SDK atomically reserves that many credits against the local lease before allowing the operation. This prevents time-of-check/time-of-use races: two concurrent requests can't both pass a check against the same remaining balance.
+3. **Settle**: after the operation completes, you report actual usage with `trackWithReservation()`. Any difference between the reserved amount and actual usage is returned to the lease, and a track event is sent to Schematic to burn down the real balance.
+
+This gives you authoritative, abuse-resistant enforcement with in-memory check latency in the hot path.
+
+### Install and configure the SDK
+
+```bash
+npm install @schematichq/schematic-typescript-node
+```
+
+Initialize the client with `useDataStream: true` and a `creditLeases` configuration. In any deployment with more than one process, also pass a Redis client — see [Horizontal scaling](#horizontal-scaling-requires-redis) below.
+
+```ts
+import { createClient } from "redis";
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const redisClient = createClient({ url: process.env.REDIS_URL });
+await redisClient.connect();
+
+const client = new SchematicClient({
+    apiKey: process.env.SCHEMATIC_API_KEY,
+    useDataStream: true,
+    dataStream: { redisClient }, // shared cache; also backs lease and reservation state
+    creditLeases: {
+        defaultLeaseDuration: 5 * 60 * 1000, // ms; how long a lease is held before it expires
+        defaultReservationTTL: 60 * 1000, // ms; how long a reservation is held if not settled by a track call
+        defaultLeaseSize: 10_000, // credits per lease
+        lowWaterMark: 0.25, // acquire a new lease when the current one falls below 25%
+    },
+});
+```
+
+All `creditLeases` fields are optional; the values above are the defaults.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `defaultLeaseDuration` | `300000` (5 min) | How long a lease holds credits before expiring server-side. Longer leases mean fewer reacquisitions but more credits held per process. |
+| `defaultReservationTTL` | `60000` (60 s) | How long a reservation is held if not explicitly settled by `trackWithReservation`. Size this above your longest check-to-track gap. |
+| `defaultLeaseSize` | `10000` | Credits acquired per lease. Larger tranches mean fewer lease acquisitions but hold more of the balance at once. |
+| `lowWaterMark` | `0.25` | When a reservation drops the lease balance below this fraction of the lease size, the SDK acquires a new lease in the background so checks don't wait on acquisition. |
+| `redisClient` | — | Overrides `dataStream.redisClient` for lease/reservation state, if you want a separate Redis. |
+| `overrides` | — | Per-credit-type overrides of the settings above, keyed by credit type ID. |
+
+<Info>Leases are managed for you: the SDK acquires them on demand, refreshes them at the low-water mark, and releases in-memory leases on `client.close()`. Expired or unreturned leases release automatically on the server, so a crashed process holds credits for at most `defaultLeaseDuration`.</Info>
+
+### Check, run, and settle
+
+In your request path, call `check()` with the expected usage for the operation. For operations where the exact cost isn't known upfront (for example, LLM inference), reserve the upper bound — such as the request's `max_tokens` — and settle the actual amount afterwards:
+
+```ts
+async function runInferenceForCompany(companyId: string, prompt: string, maxTokens: number) {
+    // Preflight: reserves up to maxTokens worth of credits against the lease
+    const result = await client.check({ company: { id: companyId } }, "inference", {
+        usage: maxTokens,
+        eventSubtype: "inference_tokens",
+    });
+
+    if (!result.allowed) {
+        throw new Error("Credit balance exceeded");
+    }
+
+    const inference = await runInference(prompt, maxTokens);
+
+    // Settle: reports actual usage, returns the unused portion of the reservation to the lease
+    if (result.reservation) {
+        await client.trackWithReservation(result.reservation, inference.tokensUsed);
+    }
+
+    return inference;
+}
+```
+
+A few details worth knowing:
+
+- The `usage` option is denominated in event units (for example, tokens), not credits; the SDK multiplies by the feature's credit consumption rate to determine how many credits to reserve.
+- `eventSubtype` identifies which metered event this check is for. For features imported from Metronome, this is the Metronome billable metric's `event_type`.
+- `trackWithReservation` uses a deterministic idempotency key derived from the reservation ID, so retries never double-bill.
+- If a reservation isn't settled within `defaultReservationTTL`, it's swept back to the lease. A late `trackWithReservation` call still records the usage in Schematic — it just no longer adjusts the local lease.
+- `result.reservation` is only present when the check passed through the credit-lease path (i.e., the flag has a credit-based entitlement and you passed `usage`). Guard on it as shown above.
+
+### Prewarm leases with identify
+
+The first `check()` for a company must acquire a lease, which requires a round trip to Schematic. To avoid paying that latency on a user's first request, prewarm the lease when a session starts by passing the credit type IDs to `identify`:
+
+```ts
+await client.identify(
+    {
+        keys: { userId: "user-id" },
+        company: { keys: { companyId: "company-id" } },
+    },
+    {
+        prewarm: ["credit-type-id"], // acquire leases for these credit types in the background
+    },
+);
+```
+
+Prewarming is fire-and-forget: it runs in the background after the identify event is flushed and never blocks the identify call.
+
+### Fail-open vs. fail-closed
+
+If the SDK can't acquire a lease (for example, Schematic is unreachable and there's no local lease to check against), the behavior is controlled per check with the `onAcquireFailure` option. The default is `"fail-closed"`: the check is denied.
+
+```ts
+const result = await client.check({ company: { id: companyId } }, "inference", {
+    usage: maxTokens,
+    eventSubtype: "inference_tokens",
+    onAcquireFailure: "fail-open",
+});
+```
+
+With `"fail-open"`, the credit gate is bypassed — the rest of the flag evaluation (plan targeting, overrides, non-credit conditions) still runs, but the credit balance is treated as unlimited and no reservation is issued.
+
+Because the option is per-check, you can mix policies: for example, fail open for established paid customers where availability matters more than a small amount of unmetered usage, and fail closed for trials or free tiers where abuse risk dominates.
+
+<Warning>With `"fail-open"`, usage during an outage is still tracked and billed once connectivity is restored — but it isn't enforced, so a customer can temporarily exceed their balance.</Warning>
+
+### Horizontal scaling requires Redis
+
+Lease and reservation state must be shared across all processes that enforce the same credit balances. Passing a connected Redis client via `dataStream.redisClient` (as in the setup example above) automatically backs lease and reservation state with atomic Redis operations, so any number of pods or workers can safely reserve against the same leases.
+
+Without Redis, the SDK falls back to per-process in-memory stores and logs a warning. That's fine for a single process or local development, but in a horizontally scaled deployment each process would hold its own leases against the same balance, weakening enforcement.
+
+## Sending usage to both systems
+
+With the parallel-ledger model, your application sends each usage event twice: to Metronome for rating and billing, and to Schematic for enforcement. Keep your existing Metronome ingestion exactly as it is, and add the Schematic write alongside it — either implicitly via `trackWithReservation` as shown above, or with a plain [`track`](/api-reference/events/create-event) call for paths that don't need a reservation.
+
+### Event names must match
+
+For usage to reconcile, both systems have to agree on what an event is called:
+
+- In **Metronome**, usage is matched to a billable metric by the event's `event_type`.
+- In **Schematic**, usage is matched to a feature by the event name (the feature's tracked event).
+
+When Schematic imports a Metronome product, it derives the feature's tracked event automatically from the billable metric's `event_type` filter — so the feature listens for **the same event name you already send to Metronome**. Send that same name in your Schematic `track` calls (and as `eventSubtype` in lease-based checks), and the two ledgers will measure the same thing.
+
+```ts
+// One usage event, two writes
+
+// 1. Bill it: your existing Metronome ingestion, unchanged
+await sendUsageToMetronome({
+    customer_id: metronomeCustomerId,
+    event_type: "inference_tokens", // matched to the billable metric
+    timestamp: new Date().toISOString(),
+    transaction_id: requestId, // Metronome's idempotency key
+    properties: { tokens: tokensUsed },
+});
+
+// 2. Enforce it: the same event name, tracked in Schematic
+await client.track({
+    event: "inference_tokens", // matched to the imported feature
+    company: { id: companyId },
+    quantity: tokensUsed,
+});
+```
+
+<Info>If a billable metric's `event_type` filter can't be mapped directly, Schematic falls back to a slug of the billable metric's name. You can see (and verify) each feature's tracked event on the feature page in Schematic.</Info>
+
+### When one write fails
+
+Dual writes will occasionally disagree: a request dies between the two calls, one system is briefly unreachable, or Metronome re-rates historical usage. The integration is designed so that these divergences are temporary and self-healing, with **Metronome as the source of truth for billed usage**:
+
+- If an event lands in Metronome but not Schematic, Schematic has under-counted; reconciliation consumes the missing credits from the company's balance.
+- If an event lands in Schematic but not Metronome, Schematic has over-counted; reconciliation refunds the difference.
+- Schematic never writes usage back to Metronome.
+
+This means a failed Schematic write is an enforcement gap (the customer briefly has more spendable balance than they should), while a failed Metronome write is a billing gap that Schematic will not paper over — fix Metronome ingestion failures with retries on your side, using an idempotency key such as Metronome's `transaction_id`.
+
+### What to expect from reconciliation
+
+- **Cadence**: reconciliation runs hourly, for companies with activity since their last reconcile.
+- **Comparison window**: Schematic compares its tracked usage against Metronome's invoice breakdowns, in hour-aligned windows. A company's reconciliation watermark only advances through usage that Metronome has rolled into invoice breakdowns, so recent, not-yet-invoiced usage is simply re-checked on the next run — it's never incorrectly marked as reconciled.
+- **Tolerance**: drift within 0.01 credits is ignored.
+- **Corrections are ledger adjustments**: when drift exceeds the tolerance, Schematic writes a compensating entry to the company's credit ledger (a consumption or a refund) rather than editing history. See [reconciliation adjustments](#reconciliation-adjustments-in-the-ledger) below for what these look like.
+- **Grant self-healing**: reconciliation also re-fetches each candidate company's grant list from Metronome, re-ingesting grants from missed `credit_grant.created` webhooks and zeroing grants from missed voids.
+
+In practice: expect a divergence to be corrected within about an hour of Metronome invoicing the usage, and treat small transient differences between the two systems as normal operating behavior rather than a bug.
+
+## Operating the integration
+
+### Reading credit balances
+
+A company's balance for a credit type has three lease-aware views:
+
+| Balance | Meaning |
+| --- | --- |
+| `settled` | The spendable balance, counting open lease holds as still available. **This is the number to display to end users.** |
+| `remaining` | The balance excluding credits currently held by open leases — the value lease-holding SDKs gate on. |
+| `reserved` | The amount currently held by the company's open credit leases; `0` when none are open. |
+
+Bind user-facing counters to `settled`. Because leases hold credits before they're consumed, `remaining` dips whenever a backend process takes out a lease and recovers when the lease is settled or released — if you display it, users see their balance "flicker" downward during normal operation. `settled` is invariant to in-flight lease mechanics and only moves when usage is actually recorded.
+
+In React, use the `useSchematicCreditBalance` hook from `@schematichq/schematic-react` (1.5.0 or later), which surfaces the `settled` balance and updates live as usage is tracked:
+
+```tsx
+import { useSchematicCreditBalance } from "@schematichq/schematic-react";
+
+const CreditMeter = () => {
+    const { balance, isLoading } = useSchematicCreditBalance("credit-id");
+
+    if (isLoading) {
+        return <div>Loading…</div>;
+    }
+
+    return <div>{balance} credits remaining</div>;
+};
+```
+
+The credit ID is available on a feature's entitlement: `useSchematicEntitlement(key)` returns `creditId` for credit-based features. See the [React SDK docs](/developer_resources/sdks/react) for details, including access to the `remaining` and `reserved` views.
+
+### Reconciliation adjustments in the ledger
+
+When the hourly reconciliation finds drift between Metronome and Schematic, the correction appears in the company's credit ledger as an adjustment entry:
+
+- The entry's usage reason is `reconciliation`, distinguishing it from ordinary tracked usage.
+- A positive correction (Metronome billed more than Schematic recorded) appears as a credit consumption; a negative one appears as a refund.
+- Each correction carries a deterministic identifier derived from the company, credit type, and comparison window, so retried reconciliation runs are identifiable and never silently double-apply.
+
+If you see `reconciliation` entries regularly and at meaningful volume, that's a signal one of your two usage writes is unreliable — check for failed or missing events on whichever side the corrections are compensating.
+
+## Supported configurations
+
+Schematic imports what it can enforce faithfully and records everything else as an unsupported row with a typed reason. The current matrix:
+
+| Configuration | Support | Unsupported reason |
+| --- | --- | --- |
+| USAGE products | Imported as features | — |
+| Subscription, fixed, composite, and professional-service products | Not imported | `product_non_usage` |
+| Billable metrics with SUM aggregation (or no billable metric) | Imported | — |
+| Billable metrics with LATEST, MAX, COUNT, or UNIQUE aggregation | Not imported | `metric_aggregation_unsupported` |
+| FLAT rates | Imported as credit-burndown entitlements | — |
+| Tiered, percentage, custom, and proportional rates | Not imported | `rate_type_unsupported` |
+| Rates priced in a custom pricing unit | Imported; usage burns down that unit's own credit | — |
+| Rates with no credit type | Not imported | `credit_type_missing` |
+| Rates with a billing frequency (recurring charges) | Not imported | `rate_recurring` |
+| Zero- or negative-priced rates | Not imported | `rate_zero` |
+| USD rate cards | Imported | — |
+| Non-USD rate cards | Entire rate card skipped, including its plan, entitlements, and contracts | `fiat_currency_unsupported` |
+| Credit grants with rollover settings | Grant imported; rollover config recorded for visibility only | `credit_grant_rollover` |
+
+Notes on specific reasons:
+
+- **`metric_aggregation_unsupported`**: Schematic's event processing sums event quantities. A non-SUM billable metric would diverge from Metronome's metering on the first event, so these products are skipped rather than enforced incorrectly.
+- **`credit_grant_rollover`**: the grant itself imports and is enforced normally. Rollover is applied by Metronome — at expiry, Metronome issues a new grant with the rolled-over balance, which Schematic ingests like any other grant, so balances converge without Schematic applying rollover itself. The unsupported row exists only to make that division of labor visible.
+- **Per-user limits**: credit enforcement operates at the company level. Usage is attributed to users for analytics, but per-user credit limits within a company are not part of the enforcement model.
+
+If part of your Metronome catalog shows up as unsupported and you need it enforced, reach out to [support@schematichq.com](mailto:support@schematichq.com) — the matrix expands over time.
