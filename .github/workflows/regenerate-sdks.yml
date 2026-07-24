@@ -50,8 +50,11 @@ jobs:
             tag=$(echo "$release" | jq -r '.tagName')
             published=$(echo "$release" | jq -r '.publishedAt')
 
-            # Strip leading 'v' if present
+            # Strip leading 'v' if present, then bump patch so this dispatch
+            # publishes a fresh version (otherwise a follow-up merge in the
+            # downstream repo would need another run here just to rev).
             version="${tag#v}"
+            version=$(echo "$version" | awk -F. '{$NF=$NF+1; OFS="."; print}')
 
             # Skip if no input changes since that release: neither the shared spec
             # files nor this group's block in generators.yml have moved.
