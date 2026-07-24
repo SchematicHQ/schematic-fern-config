@@ -11740,6 +11740,41 @@ components:
         - in_progress
         - pending
         - skipped
+    PlanVersionMigrationPreviewCompanyResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        has_billing_changes:
+          type: boolean
+        has_custom_pricing:
+          type: boolean
+        note:
+          type: string
+          nullable: true
+        plan_version_id_from:
+          type: string
+          nullable: true
+        will_update_subscription:
+          type: boolean
+      required:
+        - company_id
+        - has_billing_changes
+        - has_custom_pricing
+        - will_update_subscription
+      title: PlanVersionMigrationPreviewCompanyResponseData
+    PlanVersionMigrationPreviewResponseData:
+      type: object
+      properties:
+        companies:
+          type: array
+          items:
+            $ref: >-
+              #/components/schemas/PlanVersionMigrationPreviewCompanyResponseData
+          maxItems: 1000
+      required:
+        - companies
+      title: PlanVersionMigrationPreviewResponseData
     PlanVersionMigrationResponseData:
       type: object
       properties:
@@ -12028,6 +12063,27 @@ components:
         - custom
         - included_credit_grants
       title: PlanViewPublicResponseData
+    PreviewMigrationRequestBody:
+      type: object
+      properties:
+        company_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 100
+          minItems: 1
+        plan_id:
+          type: string
+        plan_version_id_to:
+          type: string
+        target_plan_type:
+          $ref: '#/components/schemas/PlanType'
+      required:
+        - company_ids
+        - plan_id
+        - plan_version_id_to
+        - target_plan_type
+      title: PreviewMigrationRequestBody
     PreviewObject:
       type: object
       properties:
@@ -29207,6 +29263,47 @@ paths:
                   - data
                   - params
                 title: CountMigrationsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/preview:
+    post:
+      operationId: previewMigration
+      summary: Preview migration
+      tags:
+        - planmigrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewMigrationRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/PlanVersionMigrationPreviewResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewMigrationParams
+                required:
+                  - data
+                  - params
+                title: PreviewMigrationResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
