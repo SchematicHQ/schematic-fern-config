@@ -15640,6 +15640,13 @@ paths:
             type: string
             description: Search filter
             maxLength: 512
+        - name: role
+          in: query
+          description: Filter by member role
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/AccountMemberRole'
+            description: Filter by member role
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15697,6 +15704,10 @@ paths:
                         type: string
                         description: Search filter
                         maxLength: 512
+                      role:
+                        allOf:
+                          - $ref: '#/components/schemas/AccountMemberRole'
+                        description: Filter by member role
                     title: ListAccountMembersParams
                 required:
                   - data
@@ -15772,6 +15783,13 @@ paths:
             type: string
             description: Search filter
             maxLength: 512
+        - name: role
+          in: query
+          description: Filter by member role
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/AccountMemberRole'
+            description: Filter by member role
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -15825,6 +15843,10 @@ paths:
                         type: string
                         description: Search filter
                         maxLength: 512
+                      role:
+                        allOf:
+                          - $ref: '#/components/schemas/AccountMemberRole'
+                        description: Filter by member role
                     title: CountAccountMembersParams
                 required:
                   - data
