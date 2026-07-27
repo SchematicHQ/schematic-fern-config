@@ -3,8 +3,6 @@ title: Python
 slug: developer_resources/sdks/python
 ---
 
-# Schematic Python Library
-
 The Schematic Python Library provides convenient access to the Schematic API from
 applications written in Python.
 
@@ -129,7 +127,7 @@ async def handle_request():
 ```
 
 ## Exception Handling
-All errors thrown by the SDK will be subclasses of `ApiError`.
+All errors thrown by the SDK will be subclasses of [`ApiError`](https://github.com/SchematicHQ/schematic-python/blob/main/src/schematic/core/api_error.py).
 
 ```python
 try:
@@ -467,6 +465,25 @@ config = SchematicConfig(
 )
 client = Schematic("", config)
 client.check_flag("some-flag-key") # Returns True
+```
+
+You can also set flag defaults dynamically after the client has been constructed using `set_flag_default` and `set_flag_defaults`. This is useful in automated testing contexts, where you may want to specify per-test flag values:
+
+```python
+from schematic.client import Schematic, SchematicConfig
+
+client = Schematic("", SchematicConfig(offline=True))
+
+# Set a single flag default
+client.set_flag_default("some-flag-key", True)
+
+# Or set multiple flag defaults at once
+client.set_flag_defaults({
+    "some-flag-key": True,
+    "another-flag-key": False,
+})
+
+client.check_flag("some-flag-key")  # Returns True
 ```
 
 ### Timeouts

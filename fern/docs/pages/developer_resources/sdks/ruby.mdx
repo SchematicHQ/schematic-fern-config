@@ -131,7 +131,7 @@ client = Schematic::SchematicClient.new(
 client.close
 ```
 
-You can also adjust the log level of the built-in console logger:
+You can also adjust the log level of the built-in console logger via the `log_level` option:
 
 ```ruby
 require "schematichq"
@@ -139,11 +139,11 @@ require "schematichq"
 api_key = ENV["SCHEMATIC_API_KEY"]
 client = Schematic::SchematicClient.new(
   api_key: api_key,
-  logger: Schematic::ConsoleLogger.new(level: :debug)
+  log_level: :debug
 )
 ```
 
-If no logger is provided, the client will use a default console logger at the `:info` level that outputs to stderr.
+If no logger is provided, the client will use a default console logger at the `:warn` level that outputs to stderr. The `log_level` option only applies to this built-in logger; when you supply your own `logger`, its level is left untouched.
 
 ## Usage Examples
 
@@ -218,6 +218,36 @@ client.track({
   },
   quantity: 1500
 })
+```
+
+#### Event options
+
+Both `track` and `identify` accept an `options:` keyword for optional event metadata. Only fields you set are sent.
+
+```ruby
+client.track(
+  { event: "query-tokens", company: { "id" => "your-company-id" }, quantity: 1500 },
+  options: {
+    # Dedupe key. Duplicate events with the same key are dropped
+    # server-side for 24 hours.
+    idempotency_key: "evt_2026_05_21_query_tokens",
+    # Timestamp the event occurred (Time or ISO 8601 String). Required
+    # when trusted_client_clock is true.
+    sent_at: Time.now.utc,
+    # Use sent_at as the effective event time instead of server receipt
+    # time. Requires a secret API key and sent_at.
+    trusted_client_clock: true,
+    # Import historical data without affecting billing. Requires a secret
+    # API key and trusted_client_clock.
+    backfill: false
+  }
+)
+
+client.identify(
+  { keys: { "user_id" => "your-user-id" }, name: "Wile E. Coyote" },
+  # identify only supports idempotency_key.
+  options: { idempotency_key: "ident_your-user-id" }
+)
 ```
 
 ### Creating and updating companies

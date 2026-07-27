@@ -405,114 +405,36 @@ public bool VerifyWebhookManually(string body, string signature, string timestam
 
 ## Configuration Options
 
-There are a number of configuration options that can be specified passing in `ClientOptions` as a second parameter when instantiating the Schematic client.
+There are a number of configuration options that can be specified by passing `ClientOptions` as a second parameter when instantiating the Schematic client.
 
-### Flag Check Options
+### Cache Options
 
-By default, the client will do some local caching for flag checks. If you would like to change this behavior, you can do so using an initialization option to specify the max size of the cache (in terms of number of cached items) and the max age of the cache:
+The recommended way to configure caching is through the fluent helpers on `ClientOptions` or by setting `ClientOptions.CacheConfiguration` directly.
+
+By default an in-memory cache will be configured, but you can customize it further if required:
 
 ```csharp
 using SchematicHQ.Client;
-using System.Collections.Generic;
 
-int cacheMaxItems = 1000; // Max number of entries in the cache
-TimeSpan cacheTtl = TimeSpan.FromSeconds(1); // Set TTL to 1 second
-
-var options = new ClientOptions
-{
-    CacheProviders = new List<ICacheProvider<bool?>>
-    {
-        new LocalCache<bool?>(cacheMaxItems, cacheTtl)
-    }
-};
+var options = new ClientOptions()
+    .WithLocalCache(capacity: 10000, ttl: TimeSpan.FromSeconds(1));
 
 Schematic schematic = new Schematic("YOUR_API_KEY", options);
 ```
-***Note about LocalCache:*** LocalCache implementation returns default value the type it is initiated with when it is a cache miss. Hence, when using with Schematic it is initiated with type (bool?) so that cache returns null when it is a miss
 
-### Redis Cache Configuration
-
-For distributed applications or when you need persistent caching across application restarts, you can use Redis as your cache provider:
+If you prefer to configure it explicitly, you can set `CacheConfiguration` yourself:
 
 ```csharp
 using SchematicHQ.Client;
 using SchematicHQ.Client.Cache;
-using SchematicHQ.Client.Datastream;
 
 var options = new ClientOptions
 {
     CacheConfiguration = new CacheConfiguration
     {
-        ProviderType = CacheProviderType.Redis,
-        RedisConfig = new RedisCacheConfig
-        {
-            // Required: Redis server endpoints
-            Endpoints = new List<string> { "redis.example.com:6379" },
-
-            // Optional: Authentication
-            Password = "your-redis-password",
-            Username = "default",  // For Redis 6.0+ ACL
-
-            // Optional: Connection settings
-            Ssl = true,
-            ConnectTimeout = 5000,  // milliseconds
-            ConnectRetry = 3,
-            AbortOnConnectFail = false,  // Continue if Redis is unavailable
-
-            // Optional: Cache settings
-            KeyPrefix = "schematic:",
-            Database = 0,
-            CacheTTL = TimeSpan.FromMinutes(5)
-        }
-    }
-};
-
-Schematic schematic = new Schematic("YOUR_API_KEY", options);
-```
-
-You can also use the fluent API for simpler Redis configuration:
-
-```csharp
-var options = new ClientOptions()
-    .WithRedisCache(new RedisCacheConfig
-    {
-        Endpoints = new List<string> { "redis.example.com:6379" },
-        Password = "secret",
-        Username = "default"  // For Redis 6.0+ ACL
-    });
-```
-
-#### Redis Cluster Configuration
-
-For Redis Cluster deployments, use the `RedisCacheClusterConfig` class:
-
-```csharp
-var options = new ClientOptions
-{
-    CacheConfiguration = new CacheConfiguration
-    {
-        ProviderType = CacheProviderType.Redis,
-        RedisConfig = new RedisCacheClusterConfig
-        {
-            // Multiple cluster nodes
-            Endpoints = new List<string>
-            {
-                "cluster1.example.com:6379",
-                "cluster2.example.com:6379",
-                "cluster3.example.com:6379"
-            },
-
-            // Authentication
-            Password = "cluster-password",
-            Username = "default",  // For Redis 6.0+ ACL
-
-            // Cluster optimization
-            RouteByLatency = true,  // Enable latency-based routing
-
-            // Other settings
-            ConnectTimeout = 10000,
-            AbortOnConnectFail = false
-        }
+        ProviderType = CacheProviderType.Local,
+        LocalCacheCapacity = 10000,
+        CacheTtl = TimeSpan.FromSeconds(1)
     }
 };
 ```
@@ -521,15 +443,78 @@ You can also disable local caching entirely; bear in mind that, in this case, ev
 
 ```csharp
 using SchematicHQ.Client;
-using System.Collections.Generic;
 
-var options = new ClientOptions
-{
-    CacheProviders = new List<ICacheProvider<bool?>>()
-};
+var options = new ClientOptions()
+    .WithLocalCache(capacity: 0);
 
 Schematic schematic = new Schematic("YOUR_API_KEY", options);
 ```
+
+### Redis Cache Configuration
+
+For distributed applications or when you want cache persistence across application restarts, use Redis:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+
+var options = new ClientOptions()
+    .WithRedisCache(new RedisCacheConfig
+    {
+        Configuration = "redis.example.com:6379",
+        KeyPrefix = "schematic:",
+        Database = 0,
+        CacheTTL = TimeSpan.FromMinutes(5)
+    });
+
+Schematic schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+If you need more control over the connection, supply a `ConfigurationOptions` instance or a `ConnectionMultiplexerFactory`:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+using StackExchange.Redis;
+
+var redisOptions = ConfigurationOptions.Parse("redis-primary.example.com:6379,redis-replica.example.com:6379");
+redisOptions.AbortOnConnectFail = false;
+redisOptions.Ssl = true;
+
+var options = new ClientOptions()
+    .WithRedisCache(new RedisCacheConfig
+    {
+        ConfigurationOptions = redisOptions,
+        KeyPrefix = "schematic:",
+        Database = 0,
+        CacheTTL = TimeSpan.FromMinutes(10)
+    });
+```
+
+### Custom Cache Implementation
+
+If you want to provide your own cache backend, implement `ICacheProvider` and assign it to `ClientOptions.CacheProvider`:
+
+```csharp
+using SchematicHQ.Client;
+using SchematicHQ.Client.Cache;
+
+public sealed class MyCustomCache : ICacheProvider
+{
+    // ...
+}
+
+var options = new ClientOptions
+{
+    CacheProvider = new MyCustomCache()
+};
+
+var schematic = new Schematic("YOUR_API_KEY", options);
+```
+
+Custom caches are useful if you need specialized eviction, a different backing store, or additional observability around cache access.
+
+### Default Flags
 
 You may want to specify default flag values for your application, which will be used if there is a service interruption or if the client is running in offline mode (see below):
 
@@ -709,78 +694,19 @@ using SchematicHQ.Client;
 using SchematicHQ.Client.Cache;
 using SchematicHQ.Client.Datastream;
 
-// Create options with Datastream configuration
 var options = new ClientOptions
 {
-    // Enable Datastream (required)
     UseDatastream = true,
-
-    // Configure Datastream-specific options
-    DatastreamOptions = new DatastreamOptions()
-        // Use Redis cache for better performance in distributed environments
-        .WithRedisCache(new RedisCacheConfig
-        {
-            Endpoints = new List<string>
-            {
-                "redis-primary.example.com:6379",
-                "redis-replica.example.com:6379"
-            },
-            Password = "your-redis-password",  // Optional
-            Username = "default",  // Optional (Redis 6.0+ ACL)
-            KeyPrefix = "my-app:",
-            CacheTTL = TimeSpan.FromMinutes(10),
-            Database = 0,
-            Ssl = true  // Enable SSL if needed
-        })
-        // Or use local cache for single-instance applications
-        //.WithLocalCache(capacity: 10000, ttl: TimeSpan.FromMinutes(5))
-};
-
-// Initialize client with options
-var schematic = new Schematic("YOUR_API_KEY", options);
-```
-
-### Using Datastream with Shared Cache Configuration
-
-You can configure your main client cache and Datastream to use the same cache settings:
-
-```csharp
-using SchematicHQ.Client;
-using SchematicHQ.Client.Cache;
-
-// Configure with multiple Redis endpoints for high availability
-var options = new ClientOptions
-{
-    // Enable Datastream
-    UseDatastream = true,
-
-    // Create cache configuration with Redis settings (used by both main client and Datastream)
-    CacheConfiguration = new CacheConfiguration
+    DatastreamOptions = new DatastreamOptions
     {
-        ProviderType = CacheProviderType.Redis,
-        RedisConfig = new RedisCacheConfig
-        {
-            Endpoints = new List<string>
-            {
-                "redis-1.example.com:6379",
-                "redis-2.example.com:6379",
-                "redis-3.example.com:6379"
-            },
-            Password = "your-redis-password",  // Optional
-            Username = "default",              // Optional (Redis 6.0+)
-            KeyPrefix = "prod:",
-            CacheTTL = TimeSpan.FromMinutes(10),
-            Ssl = true,                       // Enable SSL if needed
-            ConnectTimeout = 5000,            // Connection timeout in ms
-            AbortOnConnectFail = false        // Continue if Redis is unavailable
-        }
+        CacheTTL = TimeSpan.FromMinutes(10)
     }
 };
 
-// Schematic will use the same cache configuration for both
-// the main client and Datastream client
 var schematic = new Schematic("YOUR_API_KEY", options);
 ```
+
+`DatastreamOptions` currently controls Datastream-specific TTL behavior; the cache provider itself still comes from `ClientOptions.CacheConfiguration` (or `CacheProvider` for custom implementations).
 
 ### Checking Flags with Datastream
 
@@ -815,18 +741,14 @@ using SchematicHQ.Client;
 using SchematicHQ.Client.Cache;
 using SchematicHQ.Client.Datastream;
 
-var options = new ClientOptions
-{
-    UseDatastream = true,
-    
-    DatastreamOptions = new DatastreamOptions()
-        .WithRedisCache(new RedisCacheConfig
-        {
-            Endpoints = new List<string> { "redis://localhost:6379" },
-            KeyPrefix = "schematic-replica:",
-            CacheTTL = TimeSpan.FromHours(24)
-        })
-};
+var options = new ClientOptions()
+    .WithRedisCache(new RedisCacheConfig
+    {
+        Configuration = "localhost:6379",
+        KeyPrefix = "schematic-replica:",
+        CacheTTL = TimeSpan.FromHours(24)
+    })
+    .WithReplicatorMode("https://health.your-app.com/schematic-replicator");
 
 var schematic = new Schematic("YOUR_API_KEY", options);
 ```
@@ -837,26 +759,20 @@ var schematic = new Schematic("YOUR_API_KEY", options);
 using SchematicHQ.Client;
 using SchematicHQ.Client.Cache;
 using SchematicHQ.Client.Datastream;
+using StackExchange.Redis;
 
-var options = new ClientOptions
-{
-    UseDatastream = true,
-    
-    DatastreamOptions = new DatastreamOptions()
-        .WithHealthCheckUrl("https://health.your-app.com/schematic-replicator")
-        .WithRedisCache(new RedisCacheConfig
-        {
-            Endpoints = new List<string>
-            {
-                "redis-primary.example.com:6379",
-                "redis-replica.example.com:6379"
-            },
-            KeyPrefix = "schematic-replica:",
-            CacheTTL = TimeSpan.FromHours(24),
-            ConnectTimeout = 10000,
-            AbortOnConnectFail = false
-        })
-};
+var redisOptions = ConfigurationOptions.Parse("redis-primary.example.com:6379,redis-replica.example.com:6379");
+redisOptions.AbortOnConnectFail = false;
+redisOptions.Ssl = true;
+
+var options = new ClientOptions()
+    .WithRedisCache(new RedisCacheConfig
+    {
+        ConfigurationOptions = redisOptions,
+        KeyPrefix = "schematic-replica:",
+        CacheTTL = TimeSpan.FromHours(24)
+    })
+    .WithReplicatorMode("https://health.your-app.com/schematic-replicator");
 
 var schematic = new Schematic("YOUR_API_KEY", options);
 ```
@@ -865,5 +781,5 @@ var schematic = new Schematic("YOUR_API_KEY", options);
 
 | Configuration Method | Description | Example |
 |---------------------|-------------|---------|
-| `.WithHealthCheckUrl(url)` | Sets a custom health check endpoint URL for monitoring replicator status | `"https://health.example.com/replicator"` |
+| `.WithReplicatorMode(url)` | Enables replicator mode and sets the health check endpoint URL | `"https://health.example.com/replicator"` |
 | `.WithRedisCache(config)` | Configures Redis as the cache provider for replicator data | Required for replicator mode |
