@@ -851,6 +851,7 @@ components:
         - customer_archived
         - expired
         - integration_uninstalled
+        - license_retired
         - manual
         - plan_change
         - plan_period_reset
@@ -8826,6 +8827,14 @@ components:
       properties:
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
+        billing_product:
+          allOf:
+            - $ref: '#/components/schemas/BillingProductResponseData'
+          description: >-
+            The billing provider product that sells this feature in the current
+            environment. Set for license features once they have been priced in
+            a plan; a feature priced in several environments has a different
+            product in each.
         created_at:
           type: string
           format: date-time
@@ -8847,6 +8856,12 @@ components:
           type: string
         id:
           type: string
+        license_id:
+          type: string
+          description: >-
+            The license sold through this feature. Set only on features of type
+            license, and created automatically with them.
+          nullable: true
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
@@ -8877,6 +8892,13 @@ components:
         updated_at:
           type: string
           format: date-time
+        usage_limit_trait_id:
+          type: string
+          description: >-
+            Set when the feature carries a pay-in-advance quantity. Provisioned
+            lazily for other feature types, and at creation for license
+            features.
+          nullable: true
       required:
         - id
         - name
@@ -9049,6 +9071,12 @@ components:
           type: string
         id:
           type: string
+        license_id:
+          type: string
+          description: >-
+            The license sold through this feature. Set only on features of type
+            license, and created automatically with them.
+          nullable: true
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
@@ -9077,6 +9105,13 @@ components:
         updated_at:
           type: string
           format: date-time
+        usage_limit_trait_id:
+          type: string
+          description: >-
+            Set when the feature carries a pay-in-advance quantity. Provisioned
+            lazily for other feature types, and at creation for license
+            features.
+          nullable: true
       required:
         - id
         - name
@@ -9134,6 +9169,12 @@ components:
           type: string
         id:
           type: string
+        license_id:
+          type: string
+          description: >-
+            The license sold through this feature. Set only on features of type
+            license, and created automatically with them.
+          nullable: true
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
@@ -9155,6 +9196,13 @@ components:
         updated_at:
           type: string
           format: date-time
+        usage_limit_trait_id:
+          type: string
+          description: >-
+            Set when the feature carries a pay-in-advance quantity. Provisioned
+            lazily for other feature types, and at creation for license
+            features.
+          nullable: true
       required:
         - id
         - name
@@ -9169,6 +9217,7 @@ components:
       enum:
         - boolean
         - event
+        - license
         - trait
     FeatureUsageDetailResponseData:
       type: object
@@ -9399,6 +9448,8 @@ components:
           type: string
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
+        billing_product:
+          $ref: '#/components/schemas/BillingProductResponseData'
         created_at:
           type: string
           format: date-time
@@ -9420,6 +9471,9 @@ components:
           type: string
         id:
           type: string
+        license_id:
+          type: string
+          nullable: true
         lifecycle_phase:
           allOf:
             - $ref: '#/components/schemas/FeatureLifecyclePhase'
@@ -10126,6 +10180,25 @@ components:
       required:
         - keys
       title: KeysRequestBody
+    LicenseResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      title: LicenseResponseData
     LimitTimeSeriesPointResponseData:
       type: object
       properties:
@@ -27326,6 +27399,245 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /licenses:
+    get:
+      operationId: listLicenses
+      summary: List licenses
+      tags:
+        - licenses
+      parameters:
+        - name: feature_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+        - name: name
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LicenseResponseData'
+                    title: ListLicensesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      feature_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      name:
+                        type: string
+                        maxLength: 255
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: ListLicensesParams
+                required:
+                  - data
+                  - params
+                title: ListLicensesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /licenses/{license_id}:
+    get:
+      operationId: getSingleLicense
+      summary: Get single license
+      tags:
+        - licenses
+      parameters:
+        - name: license_id
+          in: path
+          description: license_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LicenseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetSingleLicenseParams
+                required:
+                  - data
+                  - params
+                title: GetSingleLicenseResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /licenses/count:
+    get:
+      operationId: countLicenses
+      summary: Count licenses
+      tags:
+        - licenses
+      parameters:
+        - name: feature_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+        - name: name
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      feature_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                      ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      name:
+                        type: string
+                        maxLength: 255
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountLicensesParams
+                required:
+                  - data
+                  - params
+                title: CountLicensesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /manage-plan:
     post:
       operationId: managePlan
@@ -32174,6 +32486,7 @@ tags:
   - name: features
   - name: insights
   - name: integrationsapi
+  - name: licenses
   - name: planbundle
   - name: plangroups
   - name: planmigrations
