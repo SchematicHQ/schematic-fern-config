@@ -7580,6 +7580,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        send_invoice:
+          type: boolean
         status:
           $ref: '#/components/schemas/CustomPlanBillingStatus'
         stripe_invoice_url:
@@ -7595,6 +7597,7 @@ components:
         - days_until_due
         - id
         - plan_id
+        - send_invoice
         - status
         - updated_at
       title: CustomPlanBillingResponseData
@@ -12469,6 +12472,12 @@ components:
           maxItems: 1000
         migration_strategy:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+        send_invoice:
+          type: boolean
+          description: >-
+            Whether Stripe emails the invoice when it is finalized. Defaults to
+            true.
+          nullable: true
       required:
         - excluded_company_ids
         - migration_strategy
@@ -12531,6 +12540,12 @@ components:
           format: int64
           nullable: true
           maximum: 365
+        send_invoice:
+          type: boolean
+          description: >-
+            Whether Stripe emails the invoice when it is finalized. Defaults to
+            true.
+          nullable: true
       required:
         - customer_email
       title: RetryCustomPlanBillingRequestBody
