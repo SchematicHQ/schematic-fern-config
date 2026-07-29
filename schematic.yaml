@@ -15432,6 +15432,77 @@ components:
         - timestamp
         - usage
       title: UsageTimeSeriesPointResponseData
+    UserCreditUsageResponseData:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        credit_name:
+          type: string
+          description: The display name of the credit type
+        credits_used:
+          type: number
+          description: >-
+            The user's net track-driven consumption of the credit within the
+            window (draws minus refunds)
+          format: double
+        share:
+          type: number
+          description: >-
+            This row's fraction (0-1) of the company's total track-driven
+            consumption of the credit within the window, including unattributed
+            consumption
+          format: double
+        user:
+          allOf:
+            - $ref: '#/components/schemas/UserResponseData'
+          description: >-
+            The user the consumption is attributed to; null for consumption from
+            events sent without a user
+        user_id:
+          type: string
+          description: >-
+            The user the consumption is attributed to; null for unattributed
+            consumption
+          nullable: true
+      required:
+        - billing_credit_id
+        - credit_name
+        - credits_used
+        - share
+      title: UserCreditUsageResponseData
+    UserDailyCreditPointResponseData:
+      type: object
+      properties:
+        credits_used:
+          type: number
+          description: The user's net credit consumption on the day
+          format: double
+        date:
+          type: string
+          description: The UTC day
+          format: date-time
+      required:
+        - credits_used
+        - date
+      title: UserDailyCreditPointResponseData
+    UserDailyUsagePointResponseData:
+      type: object
+      properties:
+        date:
+          type: string
+          description: The UTC day
+          format: date-time
+        feature:
+          $ref: '#/components/schemas/FeatureResponseData'
+        value:
+          type: integer
+          description: The user's usage of the feature on the day
+          format: int64
+      required:
+        - date
+        - value
+      title: UserDailyUsagePointResponseData
     UserDetailResponseData:
       type: object
       properties:
@@ -15479,6 +15550,40 @@ components:
         - entity_traits
         - company_memberships
       title: UserDetailResponseData
+    UserFeatureUsageResponseData:
+      type: object
+      properties:
+        feature:
+          $ref: '#/components/schemas/FeatureResponseData'
+        last_seen:
+          type: string
+          description: When the user last used the feature within the window
+          format: date-time
+        share:
+          type: number
+          description: >-
+            This row's fraction (0-1) of the company's total usage of the
+            feature within the window, including unattributed usage
+          format: double
+        user:
+          allOf:
+            - $ref: '#/components/schemas/UserResponseData'
+          description: >-
+            The user the usage is attributed to; null for usage from events sent
+            without a user
+        user_id:
+          type: string
+          description: The user the usage is attributed to; null for unattributed usage
+          nullable: true
+        value:
+          type: integer
+          description: The user's usage of the feature within the window
+          format: int64
+      required:
+        - last_seen
+        - share
+        - value
+      title: UserFeatureUsageResponseData
     UserResponseData:
       type: object
       properties:
@@ -15505,6 +15610,82 @@ components:
         - created_at
         - updated_at
       title: UserResponseData
+    UserUsageByCompanyResponseData:
+      type: object
+      properties:
+        credits:
+          type: array
+          description: Per-user net credit consumption within the window
+          items:
+            $ref: '#/components/schemas/UserCreditUsageResponseData'
+          maxItems: 1000
+        end_time:
+          type: string
+          description: End of the usage window (exclusive)
+          format: date-time
+        rows:
+          type: array
+          description: >-
+            Per-user, per-feature usage within the window; rows for a feature
+            sum to the company total
+          items:
+            $ref: '#/components/schemas/UserFeatureUsageResponseData'
+          maxItems: 1000
+        start_time:
+          type: string
+          description: Start of the usage window
+          format: date-time
+      required:
+        - credits
+        - end_time
+        - rows
+        - start_time
+      title: UserUsageByCompanyResponseData
+    UserUsageDetailResponseData:
+      type: object
+      properties:
+        credits:
+          type: array
+          description: The user's net credit consumption within the window
+          items:
+            $ref: '#/components/schemas/UserCreditUsageResponseData'
+          maxItems: 1000
+        daily_credit_points:
+          type: array
+          description: The user's net credit consumption by UTC day
+          items:
+            $ref: '#/components/schemas/UserDailyCreditPointResponseData'
+          maxItems: 1000
+        daily_points:
+          type: array
+          description: The user's per-feature usage by UTC day
+          items:
+            $ref: '#/components/schemas/UserDailyUsagePointResponseData'
+          maxItems: 1000
+        end_time:
+          type: string
+          description: End of the usage window (exclusive)
+          format: date-time
+        feature_totals:
+          type: array
+          description: The user's per-feature usage totals within the window
+          items:
+            $ref: '#/components/schemas/UserFeatureUsageResponseData'
+          maxItems: 1000
+        start_time:
+          type: string
+          description: Start of the usage window
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserResponseData'
+      required:
+        - credits
+        - daily_credit_points
+        - daily_points
+        - end_time
+        - feature_totals
+        - start_time
+      title: UserUsageDetailResponseData
     WarningTier:
       type: object
       properties:
@@ -31272,6 +31453,161 @@ paths:
                 title: UpsertUserTraitResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user-usage-by-company:
+    get:
+      operationId: getUserUsageByCompany
+      summary: Get user usage by company
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          description: Company to break usage down for
+          required: true
+          schema:
+            type: string
+            description: Company to break usage down for
+        - name: end_time
+          in: query
+          description: End of the usage window (exclusive); defaults to now
+          schema:
+            type: string
+            description: End of the usage window (exclusive); defaults to now
+            format: date-time
+        - name: feature_id
+          in: query
+          description: Restrict to a single event-based feature
+          schema:
+            type: string
+            description: Restrict to a single event-based feature
+        - name: start_time
+          in: query
+          description: Start of the usage window; defaults to 30 days before the end
+          schema:
+            type: string
+            description: Start of the usage window; defaults to 30 days before the end
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserUsageByCompanyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Company to break usage down for
+                      end_time:
+                        type: string
+                        description: End of the usage window (exclusive); defaults to now
+                        format: date-time
+                      feature_id:
+                        type: string
+                        description: Restrict to a single event-based feature
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the usage window; defaults to 30 days before
+                          the end
+                        format: date-time
+                    title: GetUserUsageByCompanyParams
+                required:
+                  - data
+                  - params
+                title: GetUserUsageByCompanyResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user-usage-detail:
+    get:
+      operationId: getUserUsageDetail
+      summary: Get user usage detail
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          description: Company the user belongs to
+          required: true
+          schema:
+            type: string
+            description: Company the user belongs to
+        - name: end_time
+          in: query
+          description: End of the usage window (exclusive); defaults to now
+          schema:
+            type: string
+            description: End of the usage window (exclusive); defaults to now
+            format: date-time
+        - name: start_time
+          in: query
+          description: Start of the usage window; defaults to 30 days before the end
+          schema:
+            type: string
+            description: Start of the usage window; defaults to 30 days before the end
+            format: date-time
+        - name: user_id
+          in: query
+          description: User to break usage down for
+          required: true
+          schema:
+            type: string
+            description: User to break usage down for
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserUsageDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Company the user belongs to
+                      end_time:
+                        type: string
+                        description: End of the usage window (exclusive); defaults to now
+                        format: date-time
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the usage window; defaults to 30 days before
+                          the end
+                        format: date-time
+                      user_id:
+                        type: string
+                        description: User to break usage down for
+                    title: GetUserUsageDetailParams
+                required:
+                  - data
+                  - params
+                title: GetUserUsageDetailResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
