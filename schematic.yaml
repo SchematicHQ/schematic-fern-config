@@ -2158,23 +2158,23 @@ components:
     CatalogConfigOrderedEntitlement:
       type: object
       properties:
-        plan_entitlement_id:
+        feature_id:
           type: string
         visible:
           type: boolean
           nullable: true
       required:
-        - plan_entitlement_id
+        - feature_id
       title: CatalogConfigOrderedEntitlement
     CatalogConfigOrderedEntitlementResponseData:
       type: object
       properties:
-        plan_entitlement_id:
+        feature_id:
           type: string
         visible:
           type: boolean
       required:
-        - plan_entitlement_id
+        - feature_id
         - visible
       title: CatalogConfigOrderedEntitlementResponseData
     CatalogConfigOrderedPlan:
@@ -2327,8 +2327,6 @@ components:
         description:
           type: string
           nullable: true
-        environment_id:
-          type: string
         id:
           type: string
         is_default:
@@ -2347,7 +2345,6 @@ components:
       required:
         - id
         - account_id
-        - environment_id
         - name
         - is_default
         - created_at
@@ -5483,13 +5480,10 @@ components:
           type: string
           nullable: true
           maxLength: 1024
-        is_default:
-          type: boolean
         name:
           type: string
           maxLength: 255
       required:
-        - is_default
         - name
       title: CreateCatalogRequestBody
     CreateCompanyCreditGrant:
