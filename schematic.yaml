@@ -3827,7 +3827,11 @@ components:
           deprecated: true
         is_free:
           type: boolean
-          description: 'Deprecated: Use BillingStrategy instead'
+          description: >-
+            Deprecated: reports the plan's charge type, not its price. Read the
+            plan's prices to tell whether it costs anything, or billing_strategy
+            to tell how it is billed.
+          nullable: true
           deprecated: true
         is_trialable:
           type: boolean
@@ -3878,7 +3882,6 @@ components:
         - credits
         - features
         - is_default
-        - is_free
         - is_trialable
         - versions
         - is_custom
@@ -11019,7 +11022,11 @@ components:
           deprecated: true
         is_free:
           type: boolean
-          description: 'Deprecated: Use BillingStrategy instead'
+          description: >-
+            Deprecated: reports the plan's charge type, not its price. Read the
+            plan's prices to tell whether it costs anything, or billing_strategy
+            to tell how it is billed.
+          nullable: true
           deprecated: true
         is_trialable:
           type: boolean
@@ -11063,7 +11070,6 @@ components:
         - credits
         - features
         - is_default
-        - is_free
         - is_trialable
         - versions
       title: PlanDetailResponseData
@@ -11426,7 +11432,11 @@ components:
           deprecated: true
         is_free:
           type: boolean
-          description: 'Deprecated: Use BillingStrategy instead'
+          description: >-
+            Deprecated: reports the plan's charge type, not its price. Read the
+            plan's prices to tell whether it costs anything, or billing_strategy
+            to tell how it is billed.
+          nullable: true
           deprecated: true
         is_trialable:
           type: boolean
@@ -11470,7 +11480,6 @@ components:
         - credits
         - features
         - is_default
-        - is_free
         - is_trialable
         - versions
         - is_custom
@@ -12112,7 +12121,11 @@ components:
           deprecated: true
         is_free:
           type: boolean
-          description: 'Deprecated: Use BillingStrategy instead'
+          description: >-
+            Deprecated: reports the plan's charge type, not its price. Read the
+            plan's prices to tell whether it costs anything, or billing_strategy
+            to tell how it is billed.
+          nullable: true
           deprecated: true
         is_trialable:
           type: boolean
@@ -12156,7 +12169,6 @@ components:
         - credits
         - features
         - is_default
-        - is_free
         - is_trialable
         - versions
         - is_custom
