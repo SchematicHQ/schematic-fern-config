@@ -33,6 +33,17 @@ jobs:
             esac
           }
 
+          # Bump the patch component of an X.Y.Z semver, dropping any
+          # pre-release/build metadata. Prints nothing on parse failure.
+          bump_patch() {
+            local core="${1%%-*}"; core="${core%%+*}"
+            local major minor patch
+            IFS='.' read -r major minor patch <<< "$core"
+            if [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ && "$patch" =~ ^[0-9]+$ ]]; then
+              echo "${major}.${minor}.$((patch + 1))"
+            fi
+          }
+
           for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
             # Get the downstream repo from generators.yml
             repo=$(yq ".groups.\"$group\".generators[0].github.repository" fern/generators.yml)
@@ -50,8 +61,15 @@ jobs:
             tag=$(echo "$release" | jq -r '.tagName')
             published=$(echo "$release" | jq -r '.publishedAt')
 
-            # Strip leading 'v' if present
-            version="${tag#v}"
+            # Strip leading 'v' if present, then bump the patch version so the
+            # downstream release publishes a new version instead of colliding
+            # with the current one (which would force a manual re-run).
+            current_version="${tag#v}"
+            version=$(bump_patch "$current_version")
+            if [ -z "$version" ]; then
+              echo "Skipping $group: could not parse semver from tag $tag"
+              continue
+            fi
 
             # Skip if no input changes since that release: neither the shared spec
             # files nor this group's block in generators.yml have moved.
@@ -70,7 +88,7 @@ jobs:
 
             # Trigger the release workflow
             wf=$(workflow_file "$group")
-            echo "Triggering $wf for $group with version $version (from $repo $tag)..."
+            echo "Triggering $wf for $group with version $version (bumped from $repo $tag)..."
             if gh workflow run "$wf" -f "version=$version"; then
               echo "  Done: dispatched $wf v$version"
             else
