@@ -103,6 +103,7 @@ Use [`POST /manage-plan/preview`](#preview-manage-plan) to see the exact prorate
   "coupon_external_id": "DISCOUNT20",
   "promo_code": "LAUNCH2024",
   "payment_method_external_id": "pm_stripe_abc",
+  "billing_entity_id": "comp_vwx567",
   "trial_end": "2024-12-31T23:59:59Z"
 }
 ```
@@ -153,6 +154,10 @@ A promotional code to apply.
 
 <ParamField path="payment_method_external_id" type="string">
 A Stripe payment method ID to use for this subscription.
+</ParamField>
+
+<ParamField path="billing_entity_id" type="string">
+The company that pays for this subscription, when it is different from `company_id`. The billing entity must already have a Stripe customer. Only honored when starting a new subscription; sending it for a company that already has an active subscription returns a `400`. See [Billing Entities](/billing/billing-entities).
 </ParamField>
 
 <ParamField path="trial_end" type="datetime">
@@ -331,6 +336,7 @@ The Manage Plan API validates the full request before applying any changes. If v
 - **Missing price for billing-linked add-on**: Billing-linked add-ons require a `price_id`. Look up the available prices via [`GET /plans/:id`](/api-reference/plans/get-plan).
 - **Price specified for non-billing add-on**: You cannot specify a `price_id` for an add-on that is not linked to a billing product. Omit the `price_id` for these add-ons.
 - **Plan not found or not available to company**: The base plan or an add-on does not exist, or the company is not eligible for it (e.g. it's restricted by a [plan audience](/catalog/managing-company-plans#plan-audiences-advanced)).
+- **Billing entity on an existing subscription**: `billing_entity_id` can only be set when a subscription is created. Sending it for a company that already has an active subscription returns `billing entity can only be set when starting a new subscription`. The billing entity must also already have a Stripe customer.
 - **Stripe errors**: Any error returned by Stripe during the subscription update (e.g. payment method declined, customer not found, currency mismatch) will be surfaced back to you. The Schematic state is rolled back if the Stripe call fails.
 
 For all errors, the response will include a descriptive message indicating what went wrong. We recommend using [`POST /manage-plan/preview`](#preview-manage-plan) before applying changes in production flows so users can be shown the financial impact and any validation issues up front.
