@@ -218,6 +218,10 @@ components:
           nullable: true
         name:
           type: string
+        rate_limit_percent:
+          type: integer
+          format: int64
+          nullable: true
         readonly:
           type: boolean
         scopes:
@@ -277,6 +281,10 @@ components:
           nullable: true
         name:
           type: string
+        rate_limit_percent:
+          type: integer
+          format: int64
+          nullable: true
         readonly:
           type: boolean
         scopes:
@@ -4848,6 +4856,12 @@ components:
           type: string
           maxLength: 256
           minLength: 1
+        rate_limit_percent:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 99
+          minimum: 0
         readonly:
           type: boolean
           nullable: true
@@ -14116,6 +14130,12 @@ components:
           nullable: true
           maxLength: 256
           minLength: 1
+        rate_limit_percent:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 99
+          minimum: 0
       title: UpdateApiKeyRequestBody
     UpdateAutoTopupOverrideRequestBody:
       type: object
