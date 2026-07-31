@@ -1254,6 +1254,12 @@ components:
           nullable: true
         id:
           type: string
+        license_id:
+          type: string
+          description: >-
+            The license whose quantity scales this grant. Set only when scaling
+            is per_license.
+          nullable: true
         plan:
           $ref: '#/components/schemas/PreviewObjectResponseData'
         plan_id:
@@ -1283,6 +1289,12 @@ components:
             Percentage of unused credits that carry over when this grant resets.
             Only meaningful when reset_type is plan_period.
           format: int64
+        scaling:
+          allOf:
+            - $ref: '#/components/schemas/PlanCreditGrantScaling'
+          description: >-
+            Whether the grant is a fixed amount per company, or issued once per
+            license the company holds.
         updated_at:
           type: string
           format: date-time
@@ -1293,6 +1305,7 @@ components:
         - plan_name
         - credit_amount
         - credit_name
+        - scaling
         - auto_topup_availability
         - can_buy_bundles
         - auto_topup_enabled
@@ -3670,6 +3683,9 @@ components:
           nullable: true
         id:
           type: string
+        license_id:
+          type: string
+          nullable: true
         plan:
           $ref: '#/components/schemas/GenericPreviewObject'
         plan_id:
@@ -3697,6 +3713,8 @@ components:
         rollover_percentage:
           type: integer
           format: int64
+        scaling:
+          $ref: '#/components/schemas/PlanCreditGrantScaling'
         singular_name:
           type: string
           description: >-
@@ -3719,6 +3737,7 @@ components:
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
         - rollover_percentage
+        - scaling
         - created_at
         - updated_at
       title: CompanyPlanCreditGrantView
@@ -4111,12 +4130,15 @@ components:
           type: boolean
         collect_phone:
           type: boolean
+        proration_behavior:
+          $ref: '#/components/schemas/ProrationBehavior'
         tax_collection_enabled:
           type: boolean
       required:
         - collect_email
         - collect_address
         - collect_phone
+        - proration_behavior
         - tax_collection_enabled
       title: ComponentCheckoutSettings
     ComponentDisplaySettings:
@@ -5234,6 +5256,12 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        license_id:
+          type: string
+          description: >-
+            The license whose quantity scales this grant. Required when scaling
+            is per_license.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -5257,6 +5285,13 @@ components:
           nullable: true
           maximum: 100
           minimum: 0
+        scaling:
+          allOf:
+            - $ref: '#/components/schemas/PlanCreditGrantScaling'
+          description: >-
+            Whether the grant is a fixed amount per company, or issued once per
+            license the company holds. Defaults to fixed.
+          nullable: true
       required:
         - reset_cadence
         - reset_start
@@ -10765,6 +10800,11 @@ components:
         - unsubscribe
         - upgrade
         - upgrade_trial
+    PlanCreditGrantScaling:
+      type: string
+      enum:
+        - fixed
+        - per_license
     PlanCreditGrantView:
       type: object
       properties:
@@ -10848,6 +10888,9 @@ components:
           nullable: true
         id:
           type: string
+        license_id:
+          type: string
+          nullable: true
         plan:
           $ref: '#/components/schemas/GenericPreviewObject'
         plan_id:
@@ -10875,6 +10918,8 @@ components:
         rollover_percentage:
           type: integer
           format: int64
+        scaling:
+          $ref: '#/components/schemas/PlanCreditGrantScaling'
         singular_name:
           type: string
           description: >-
@@ -10897,6 +10942,7 @@ components:
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
         - rollover_percentage
+        - scaling
         - created_at
         - updated_at
       title: PlanCreditGrantView
@@ -14219,6 +14265,12 @@ components:
           format: int64
           nullable: true
           minimum: 1
+        license_id:
+          type: string
+          description: >-
+            The license whose quantity scales this grant. Cannot be changed
+            after creation.
+          nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -14237,6 +14289,13 @@ components:
           nullable: true
           maximum: 100
           minimum: 0
+        scaling:
+          allOf:
+            - $ref: '#/components/schemas/PlanCreditGrantScaling'
+          description: >-
+            Whether the grant is a fixed amount per company, or issued once per
+            license the company holds. Cannot be changed after creation.
+          nullable: true
       required:
         - reset_cadence
         - reset_start
