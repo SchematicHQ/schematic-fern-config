@@ -12588,6 +12588,8 @@ components:
             Whether Stripe emails the invoice when it is finalized. Defaults to
             true.
           nullable: true
+        tax_id:
+          $ref: '#/components/schemas/TaxIDInput'
       required:
         - excluded_company_ids
         - migration_strategy
