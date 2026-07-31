@@ -4,14 +4,14 @@ title: Billing Entities
 slug: billing/billing-entities
 ---
 
-A billing entity lets one company pay for another company's subscription. The company that receives the plan keeps its own Schematic record, its own entitlements, and its own usage data. Only the bill moves.
+Billing entities let one company pay for another company's subscription. The company that receives the plan keeps its own Schematic record, its own entitlements, and its own usage data.
 
 ## When to use billing entities
 
 Billing entities are most common in sales-led motions where the contract and the product footprint don't line up one-to-one:
 
 - **Parent company rollups.** A holding company or corporate parent covers the tab for several divisions or subsidiaries, but each one needs its own Schematic account so plans, features, and usage stay separate.
-- **Multiple products under one customer.** You launch a second product that is distinct enough to warrant its own plans and features, so it gets its own company record while the original company continues to pay.
+- **Multiple products under one customer.** A company launches a second product that is distinct enough to warrant its own plans and features, so it gets its own company record, while the billing is handled by the original company.
 - **Resellers and agencies.** An agency pays for the accounts it manages on behalf of its clients, and each client keeps an independent account.
 
 In all of these cases the alternative is to collapse everyone into a single company record, which means giving up separate plans, separate entitlements, and separate usage reporting. Billing entities let you keep that separation while consolidating payment.
@@ -97,7 +97,9 @@ The subscription lives on the **billing entity's** Stripe customer, so you will 
 | `schematic_company_id` | The company the subscription is **for**. Always present on every Schematic subscription. |
 | `schematic_billing_entity_id` | The company **paying** for the subscription. Present only when a billing entity is involved. |
 
-{/* SCREENSHOT NEEDED: Stripe subscription detail page for the Acme Corporation subscription (owned by the Advanced Analytics Ltd customer), with the Metadata panel in the right sidebar visible showing schematic_billing_entity_id and schematic_company_id. Save as ../../assets/images/billing/billing-entity-stripe-metadata.png */}
+In the example above, the subscription sits on Advanced Analytics Ltd's Stripe customer, and the metadata records both companies: `schematic_billing_entity_id` is Advanced Analytics Ltd (`comp_P9xcdY6MTkC`) and `schematic_company_id` is Acme Corporation (`comp_Ta2XCKNoyog`).
+
+![Schematic metadata on a Stripe subscription with a billing entity](../../assets/images/billing/billing-entity-stripe-metadata.png)
 
 On an ordinary single-company subscription, `schematic_company_id` is present and `schematic_billing_entity_id` is absent. If you are writing reconciliation or reporting logic against Stripe, always resolve the subscribing company from `schematic_company_id`. Reading the Stripe customer on the subscription will give you the payer, which is not the same company in a billing entity setup.
 
