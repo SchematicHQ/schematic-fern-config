@@ -42,15 +42,13 @@ AI skills for Schematic Components help you integrate and customize UI component
 
 ## Model Context Protocol (MCP)
 
-Schematic's MCP server allows AI assistants to directly interact with your Schematic account through the Model Context Protocol. This enables AI tools to:
+Schematic hosts an MCP server at `https://api.schematichq.com/mcp`. Any MCP-compatible AI assistant can connect to it to interact with your Schematic account directly:
 
 - Query company information and plans
 - Check feature usage and entitlements
 - Manage company overrides
 - Create and update features and plans
 - Analyze usage patterns
-
-The MCP server is part of the [official MCP Registry](https://registry.modelcontextprotocol.io/?q=schematichq). Download and install insctructions can be found at [our MCP GitHub repository](https://github.com/schematicHQ/schematic-mcp). 
 
 ### Common Use Cases
 
@@ -61,14 +59,30 @@ The MCP integration is particularly useful for:
 - **Data analysis** - Use natural language queries to analyze usage patterns and customer data
 - **Plan management** - Let AI assistants help you create and modify plans based on your requirements
 
-### Getting Started with MCP
+### Connect with OAuth
 
-To use Schematic's MCP integration:
+Clients that support MCP OAuth (such as Claude) can connect with your Schematic user account — no API key needed.
 
-1. Install the Schematic MCP server from the [schematic-mcp repository](https://github.com/schematicHQ/schematic-mcp)
-2. Configure your MCP server with Schematic API credentials
-3. Connect your AI assistant to the MCP server
-4. Start using natural language queries to interact with Schematic
+In Claude, go to **Settings > Connectors > Add custom connector** and enter `https://api.schematichq.com/mcp` as the URL. When you connect, Schematic asks you to sign in, pick an environment, and choose read-only or read and write access. Write tools also respect your team member permissions: a grant can never do more than you can do in the Schematic app, and permission changes take effect immediately.
+
+In Claude Code:
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp
+```
+
+Then run `/mcp` to sign in.
+
+### Connect with an API key
+
+Clients can also authenticate with a Schematic secret API key as a bearer token:
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp \
+  --header "Authorization: Bearer your-secret-api-key"
+```
+
+Read-only API keys can use only the read tools.
 
 **Example MCP queries:**
 - "What plan is company Acme Corp on?"
