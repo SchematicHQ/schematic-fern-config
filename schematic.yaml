@@ -19616,6 +19616,18 @@ paths:
           schema:
             type: string
             maxLength: 255
+        - name: interval_count
+          in: query
+          description: >-
+            Filter for prices billed every N intervals; combine with interval
+            (e.g. interval=month, interval_count=3 for quarterly)
+          schema:
+            type: integer
+            description: >-
+              Filter for prices billed every N intervals; combine with interval
+              (e.g. interval=month, interval_count=3 for quarterly)
+            format: int64
+            minimum: 1
         - name: is_active
           in: query
           description: >-
@@ -19734,6 +19746,14 @@ paths:
                       interval:
                         type: string
                         maxLength: 255
+                      interval_count:
+                        type: integer
+                        description: >-
+                          Filter for prices billed every N intervals; combine
+                          with interval (e.g. interval=month, interval_count=3
+                          for quarterly)
+                        format: int64
+                        minimum: 1
                       is_active:
                         type: boolean
                         description: >-
@@ -19911,6 +19931,18 @@ paths:
           schema:
             type: string
             maxLength: 255
+        - name: interval_count
+          in: query
+          description: >-
+            Filter for prices billed every N intervals; combine with interval
+            (e.g. interval=month, interval_count=3 for quarterly)
+          schema:
+            type: integer
+            description: >-
+              Filter for prices billed every N intervals; combine with interval
+              (e.g. interval=month, interval_count=3 for quarterly)
+            format: int64
+            minimum: 1
         - name: is_active
           in: query
           description: >-
@@ -20029,6 +20061,14 @@ paths:
                       interval:
                         type: string
                         maxLength: 255
+                      interval_count:
+                        type: integer
+                        description: >-
+                          Filter for prices billed every N intervals; combine
+                          with interval (e.g. interval=month, interval_count=3
+                          for quarterly)
+                        format: int64
+                        minimum: 1
                       is_active:
                         type: boolean
                         description: >-
