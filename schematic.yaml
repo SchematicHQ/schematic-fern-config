@@ -1007,7 +1007,7 @@ components:
           type: string
           nullable: true
         product:
-          $ref: '#/components/schemas/BillingProductResponseData'
+          $ref: '#/components/schemas/BillingProductRecordResponseData'
         singular_name:
           type: string
           nullable: true
@@ -1785,6 +1785,40 @@ components:
         - usage_type
         - price_external_id
       title: BillingProductPricing
+    BillingProductRecordResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        name:
+          type: string
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - account_id
+        - created_at
+        - environment_id
+        - external_id
+        - is_active
+        - name
+        - provider_type
+        - updated_at
+      title: BillingProductRecordResponseData
     BillingProductResponseData:
       type: object
       properties:
@@ -9530,7 +9564,7 @@ components:
         billing_linked_resource:
           $ref: '#/components/schemas/BillingLinkedResourceResponseData'
         billing_product:
-          $ref: '#/components/schemas/BillingProductResponseData'
+          $ref: '#/components/schemas/BillingProductRecordResponseData'
         created_at:
           type: string
           format: date-time
