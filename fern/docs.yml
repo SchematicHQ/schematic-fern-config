@@ -247,8 +247,6 @@ navigation:
                 path: ./docs/pages/components/pricing-table.mdx
       - section: Developer Resources
         contents:
-          - page: Concepts
-            path: ./docs/pages/developer_resources/concepts.mdx
           - page: Key Management
             path: ./docs/pages/developer_resources/entity-key-management.mdx
           - page: Environments
@@ -634,11 +632,15 @@ redirects:
   - source: "/developer_resources/entity-key-management"
     destination: "/developer_resources/key_management"
     permanent: true
+    # merged into the single canonical Concepts page at /concepts
+  - source: "/developer_resources/concepts"
+    destination: "/concepts"
+    permanent: true
   - source: "/quickstart/components"
     destination: "/quickstart/create-a-component"
     permanent: true
   - source: "/companies"
-    destination: "/developer_resources/concepts#user-and-company-profiles"
+    destination: "/concepts#user-and-company-profiles"
     permanent: true
   - source: "/getting-started/developer-resources/sample-apps/next-js-weather-search-app"
     destination: "/developer_resources/sample_apps/sample_nextjs"
@@ -662,7 +664,7 @@ redirects:
     destination: "/developer_resources/environments"
     permanent: true
   - source: "/users"
-    destination: "/developer_resources/concepts#user-and-company-profiles"
+    destination: "/concepts#user-and-company-profiles"
     permanent: true
   - source: "/components"
     destination: "/components/overview"
