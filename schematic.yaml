@@ -7811,9 +7811,11 @@ components:
         mapping:
           audit-log: '#/components/schemas/AuditLogExportMetadata'
           company-feature-usage: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+          event: '#/components/schemas/EventExportMetadata'
       oneOf:
         - $ref: '#/components/schemas/CompanyFeatureUsageExportMetadata'
         - $ref: '#/components/schemas/AuditLogExportMetadata'
+        - $ref: '#/components/schemas/EventExportMetadata'
       title: DataExportMetadata
     DataExportOutputFileType:
       type: string
@@ -7864,6 +7866,7 @@ components:
       enum:
         - audit-log
         - company-feature-usage
+        - event
     DatastreamCompanyPlan:
       type: object
       properties:
@@ -8579,6 +8582,73 @@ components:
         - status
         - features
       title: EventDetailResponseData
+    EventExportMetadata:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: >-
+            Restrict the export to events for this company ID (starting with
+            'comp_')
+          nullable: true
+        end_time:
+          type: string
+          description: Restrict the export to events captured at or before this time
+          format: date-time
+          nullable: true
+        event_subtype:
+          type: string
+          description: Restrict the export to track events with this subtype
+          nullable: true
+        event_types:
+          type: array
+          description: >-
+            Restrict the export to these event types (e.g. "track", "identify");
+            defaults to track, identify and inference events. Flag check events
+            are only exported when requested here explicitly, and require a
+            flag_id.
+          items:
+            type: string
+            enum:
+              - flag_check
+              - identify
+              - inference
+              - track
+          nullable: true
+          maxItems: 100
+        export_type:
+          type: string
+          description: 'Discriminator: always "event" for this variant'
+          enum:
+            - event
+        flag_id:
+          type: string
+          description: >-
+            Restrict the export to flag-check events for this flag ID (starting
+            with 'flag_')
+          nullable: true
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        start_time:
+          type: string
+          description: Restrict the export to events captured at or after this time
+          format: date-time
+          nullable: true
+        user_id:
+          type: string
+          description: >-
+            Restrict the export to events for this user ID (starting with
+            'user_')
+          nullable: true
+      required:
+        - export_type
+      title: EventExportMetadata
     EventResponseData:
       type: object
       properties:
