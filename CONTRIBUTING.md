@@ -17,7 +17,7 @@ Read this before adding a page, adding a hub, or changing navigation.
 | `slug:` frontmatter? | Required on every new page. Absolute, no leading slash. |
 | `description:` frontmatter? | Required on every new page. One sentence, states the outcome. |
 | Can I edit `developer_resources/sdks/*`? | Six of the fifteen are generated. Check the list below before touching any of them. |
-| How do I check my work? | `fern check` locally, then the preview URL the PR bot posts. |
+| How do I check my work? | `npx fern-api check` locally, then the preview URL the PR bot posts. Plain `npx fern check` is the wrong package and fails. |
 
 ---
 
@@ -47,7 +47,7 @@ Do not size the grid to fill the row. If a section has 4 links, `cols={2}` over 
 
 Icons are Font Awesome class strings (`fa-solid`, `fa-regular`, `fa-brands`). Every card in a group needs one, or the group looks broken.
 
-**Bullets, worked example.** `fern/docs/pages/use-cases/overview.mdx` carries 23 links across five `##` sections. Each entry is a bolded link plus a one-line description of the outcome:
+**Bullets, worked example.** `fern/docs/pages/use-cases/overview.mdx` carries roughly two dozen links across five `##` sections, far past what a card grid can hold. Each entry is a bolded link plus a one-line description of the outcome:
 
 ```mdx
 ## AI monetization
@@ -66,7 +66,7 @@ The same page may appear under more than one heading on a bulleted hub. Cross-li
 
 ### 2. Every content group gets exactly one overview page
 
-Ten exist today: `billing`, `catalog`, `components`, `developer_resources/sdks`, `feature-management`, `get_started`, `integrations`, `playbooks`, `quickstart`, `use-cases`.
+One exists for each of `billing`, `catalog`, `components`, `developer_resources/sdks`, `feature-management`, `get_started`, `integrations`, `playbooks`, `quickstart`, and `use-cases`.
 
 The overview page is the group's first nav entry and answers, in order:
 
@@ -76,7 +76,7 @@ The overview page is the group's first nav entry and answers, in order:
 
 It is not a duplicate of the sidebar. If the overview page is only a list of the pages already visible in the sidebar beneath it, it is doing no work. Say what the group is for, then link.
 
-A group without a real overview page is a defect. `fern/docs/pages/integrations/overview.mdx` is currently frontmatter and nothing else.
+A group whose overview page is frontmatter and nothing else, or a bare list with no framing, is a defect and should be treated as unfinished rather than as precedent.
 
 ---
 
@@ -113,7 +113,7 @@ Two mechanisms cross-list the same page in two places. They are not interchangea
 | `link:` entry in `fern/docs.yml` | The sidebar, under a second section | Cross-listing a page into a second sidebar section, or deep-linking an anchor within a long page |
 | Bullet or card on a hub page | Page body only | Cross-listing with an explanation of why the reader would want it |
 
-Seventeen `link:` entries exist today, in two shapes:
+The `link:` entries in `fern/docs.yml` come in two shapes:
 
 ```yaml
 # Cross-list an existing page into a second section
@@ -139,7 +139,7 @@ Which to pick:
 
 ### 5. `slug:` frontmatter is required and it wins
 
-Fern reads an absolute `slug:` from frontmatter and it overrides the path the navigation would otherwise derive. 118 of the 125 pages under `fern/docs/pages/` declare one. The seven that do not are six API object pages inside the API Reference tab plus one empty file.
+Fern reads an absolute `slug:` from frontmatter and it overrides the path the navigation would otherwise derive. Nearly every page under `fern/docs/pages/` declares one. The handful that do not are API object pages inside the API Reference tab.
 
 ```yaml
 ---
@@ -151,10 +151,11 @@ description: Sell a prepaid credit balance that burns down as customers use feat
 
 Consequences a new page author needs to know:
 
-- **The URL does not follow the directory or the sidebar.** `fern/docs/pages/production_readiness/availability.mdx` declares `slug: architecture/availability` and serves at `/architecture/availability`. Do not infer a page's URL from where its file lives, and do not infer it from the sidebar group either.
+- **The URL does not follow the directory or the sidebar.** `fern/docs/pages/get_started/introduction.mdx` declares `slug: what-is-schematic` and serves at `/what-is-schematic`, with the directory dropping out of the URL entirely. Do not infer a page's URL from where its file lives, and do not infer it from the sidebar group either.
+- **The filename is not the last URL segment either.** `fern/docs/pages/catalog/configure-catalog.mdx` declares `slug: catalog/configuration` and serves at `/catalog/configuration`, which is also what the eight `link:` anchors in section 4 point at. Read the frontmatter before linking to a page.
 - **Moving a file changes nothing.** Regrouping the sidebar or moving an MDX file does not change a URL, because the slug is pinned in the file.
 - **Changing a slug breaks links silently.** Nothing in the build catches an internal link to a slug that no longer exists. If you change a slug, `grep -rn "old/slug" fern/` across `.mdx` and `docs.yml`, fix every hit, and add a redirect.
-- **Redirects live in the `redirects:` block at the bottom of `fern/docs.yml`.** 44 exist. Add to that block, and point the new redirect at the final destination rather than at another redirect, so no chains form.
+- **Redirects live in the `redirects:` block at the bottom of `fern/docs.yml`.** Add to that block, and point the new redirect at the final destination rather than at another redirect, so no chains form.
 
 Format: no leading slash, no trailing slash, lowercase, hyphens between words. Match the group prefix of the pages around it.
 
@@ -162,7 +163,7 @@ Format: no leading slash, no trailing slash, lowercase, hyphens between words. M
 
 ### 6. `description:` frontmatter is required
 
-Fern feeds `description:` into the auto-generated `llms.txt`, which is how coding agents and search index the docs. A page without a description is close to invisible to retrieval. Only 33 of 125 pages carry one today, so new pages must not add to that gap.
+Fern feeds `description:` into the auto-generated `llms.txt`, which is how coding agents and search index the docs. A page without a description is close to invisible to retrieval. Most existing pages still lack one, and closing that gap is a separate sweep, so at minimum do not add to it.
 
 Model to copy, from `fern/docs/pages/use-cases/credit-billing.mdx`:
 
@@ -206,14 +207,14 @@ Anything under `fern/docs/pages/api_documentation/` and the API Reference tab is
 ### 8. Verifying a docs change
 
 ```sh
+npx fern-api check
+
+# or, after a global install
 npm install -g fern-api   # only required once
 fern check
-
-# or, without installing
-npx fern-api check
 ```
 
-The CLI package is `fern-api`, not `fern`. Plain `npx fern check` resolves the unrelated `fern` package pinned in `package.json` and fails.
+The CLI package is `fern-api`, not `fern`. Plain `npx fern check` resolves the unrelated `fern` package pinned in `package.json` and fails with "could not determine executable to run".
 
 Run it from the repo root. It validates `fern/docs.yml` and the API definition, and it is the same check CI runs in `.github/workflows/fern-check.yml`. It catches a nav entry pointing at a file that does not exist. It does not catch a broken internal link or a `link:` href pointing at a dead slug, so check those by hand.
 
@@ -234,5 +235,5 @@ Then open the PR. `.github/workflows/preview-docs.yml` runs `fern generate --doc
 - [ ] Added to `fern/docs.yml` navigation under exactly one section
 - [ ] Linked from its group's `overview.mdx`
 - [ ] If cross-listed, cross-listed by one mechanism, not two
-- [ ] `npx fern check` passes
+- [ ] `npx fern-api check` passes (not `npx fern check`, see section 8)
 - [ ] Preview URL checked
