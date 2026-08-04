@@ -1,0 +1,67 @@
+---
+title: Troubleshooting
+slug: troubleshooting/overview
+description: Find the fix for a broken-state problem in Schematic, organized by the symptom you are seeing rather than by the subsystem it came from.
+---
+
+This page is for the "why is this in a broken state" questions, as opposed to the "how do I build this" questions that the rest of the docs answer. Find the heading that matches what you are actually seeing, then follow the link to the page that explains it. If you are setting something up for the first time, start from the [Quickstart](/quickstart/overview) or [Use cases](/use-cases/overview) instead.
+
+Most broken-state reports involve Stripe, and the single deepest page is [Commonly seen issues](/integrations/stripe-troubleshooting). It stays where it is, under Integrate > Stripe, and is linked into the relevant symptoms below.
+
+## A plan change didn't go through
+
+- **[No Change Plan button in the customer portal](/integrations/stripe-troubleshooting#no-change-plan-button-in-schematic-customer-portal-component)** — usually there are no Live Plans for the customer to switch to.
+- **[Unable to change a plan from the Schematic app](/integrations/stripe-troubleshooting#unable-to-change-plan-in-schematic-app)** — the company has no payment method on file in Stripe, so the change is blocked.
+- **[Which plan changes are allowed, and where](/integrations/stripe-troubleshooting#plan-change-flows)** — the matrix of what works self-serve through a component versus through Manage Plan in the app.
+- **[Live Plans configuration](/catalog/configuration#live-plans)** — the catalog setting that decides which plans a customer can see and select.
+- **[The downgrade applied later than expected](/catalog/managing-company-plans#scheduled-downgrades)** — downgrades are scheduled to the end of the billing period rather than applied on the spot.
+- **[The proration amount looks wrong](/catalog/managing-company-plans#upgradedowngrade-logic)** — how Schematic classifies a change as an upgrade or a downgrade, which determines both timing and proration.
+
+## The customer didn't get an invoice or receipt email
+
+- **[Start here](/integrations/stripe-troubleshooting#my-customer-didnt-receive-an-invoice-email)** — Stripe sends these emails, not Schematic, and four settings account for nearly every case.
+- **[You are testing in a Stripe sandbox](/integrations/stripe-troubleshooting#youre-testing-in-a-stripe-sandbox-test-mode)** — sandboxes do not email customers by default, which makes a correctly configured flow look broken.
+- **[Send finalized invoices is turned off](/integrations/stripe-troubleshooting#the-send-finalized-invoices-setting-is-off-live-mode)** — invoice-billed plans send nothing in live mode unless this toggle is on.
+- **[The plan charges the card instead of invoicing](/integrations/stripe-troubleshooting#youre-expecting-an-invoice-but-the-plan-charges-the-card-automatically)** — automatic-charge plans send a receipt, which a different Stripe setting controls.
+- **[Something is silently suppressing the email](/integrations/stripe-troubleshooting#other-things-that-silently-suppress-the-email)** — a customer with no email address, or an amount below Stripe's minimum charge.
+
+## The company is missing from Stripe, or linked to the wrong record
+
+- **[When Schematic creates a Stripe customer](/integrations/stripe-troubleshooting#when-does-schematic-create-a-customer-in-stripe)** — companies on free plans get no Stripe customer unless your Initial Plan carries a $0 price.
+- **[How companies map between Schematic and Stripe](/integrations/stripe-integration-guide#schematic-company-mapping)** — the keys that tie a Schematic company to a Stripe customer.
+- **[You are pointed at the wrong Stripe account](/integrations/stripe-integration-guide#prod-vs-dev-stripe-accounts)** — how prod and dev Stripe accounts line up with Schematic environments.
+- **[The subscription is past due, unpaid, or canceled](/integrations/stripe#subscription-statuses)** — what each Stripe subscription status does to the company's access in Schematic.
+- **[Where to see a company's Stripe data in Schematic](/integrations/stripe#viewing-company-data-in-schematic)** — the subscription, invoices, and payment method Schematic has on record.
+
+## A feature is locked when it should be open, or open when it should be locked
+
+- **[How an entitlement check resolves](/feature-management/overview#how-entitlement-checks-work)** — plan entitlement, then overrides, then global rules, then disabled by default.
+- **[Overrides take the most generous value](/feature-management/overrides#most-generous-policy)** — a restrictive override can lose to a more generous plan entitlement.
+- **[The override quietly expired](/feature-management/overrides#time-limited-overrides)** — time-limited overrides stop applying when they lapse, with no other signal.
+- **[The company key doesn't match](/developer_resources/key_management)** — a check made against a key Schematic doesn't recognize resolves against no company at all.
+- **[You are checking against the wrong environment](/developer_resources/environments)** — API keys are environment-scoped, so a staging key evaluates staging plans and staging companies.
+- **[The trial expired](/catalog/configuration#trial-expiry-plan)** — the plan a company lands on once its trial ends, and what that plan entitles.
+- **[The SDK returned a cached or fallback value](/developer_resources/sdks/cross-platform-features#local-caching)** — backend SDKs cache locally, and fall back to configured defaults when they cannot reach Schematic.
+
+## Usage counts look wrong
+
+- **[Events aren't attributed to the feature](/feature-management/feature-analytics)** — a feature counts an event only once that event is selected in the feature's Event section.
+- **[Trait-based and event-based features count differently](/playbooks/metering#trait-based-vs-event-based-features)** — one reports a current value and the other accumulates, so mixing them up produces surprising totals.
+- **[The events were rejected](/playbooks/backfill-and-corrections#validation-errors)** — the validation rules that cause a usage event to be dropped instead of counted.
+- **[Late or replayed events landed in the wrong period](/playbooks/backfill-and-corrections#behavior-matrix)** — how trusted client clock and backfill modes decide which billing period an event counts against.
+- **[You need to correct an over-reported count](/billing/usage-based-billing#negative-quantities-usage-adjustments)** — submit a negative quantity to adjust usage after the fact.
+- **[Credits didn't come back after a refund](/billing/credit-burndown#credit-refunds-via-negative-quantities)** — how a negative quantity restores a credit balance.
+
+## A webhook never arrived
+
+- **[Delivery and retries](/integrations/webhooks#delivery-and-retries)** — six attempts with exponential backoff, after which the event is not delivered again.
+- **[Your endpoint was deactivated](/integrations/webhooks#endpoint-health)** — Schematic disables an endpoint failing 90% or more of at least 25 events in a rolling 24 hours, and you re-enable it from the dashboard.
+- **[Check the webhook log](/integrations/webhooks#developer-tooling)** — every webhook Schematic has sent for your account, so you can tell whether it was sent at all.
+- **[Signature verification fails](/integrations/webhooks#signature-verification)** — parsed or re-serialized request bodies do not match the signature, so verify against the raw body.
+- **[The plan change didn't fire the webhook you expected](/integrations/webhooks/plan-changed#common-scenarios)** — which transitions emit the plan changed event, and what the payload carries.
+
+## Still stuck
+
+Before you write in, check the Events tab and the most recent flag evaluation in the Schematic dashboard to see what Schematic actually recorded, and the Audit Log under Settings for create, update, and delete API requests.
+
+If that doesn't explain it, email `help@schematichq.com` or reach us in your shared Slack channel. Include the company ID, the environment, and roughly when it happened. Suspected bugs go to `support@schematichq.com`.
