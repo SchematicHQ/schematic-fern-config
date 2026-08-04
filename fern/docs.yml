@@ -593,6 +593,19 @@ analytics:
 css: ./styles.css
 
 redirects:
+    # DEV-307: production readiness pages moved off the misleading /architecture/* prefix
+  - source: "/architecture/security"
+    destination: "/production_readiness/security"
+    permanent: true
+  - source: "/architecture/availability"
+    destination: "/production_readiness/availability"
+    permanent: true
+  - source: "/architecture/observability"
+    destination: "/production_readiness/observability"
+    permanent: true
+  - source: "/architecture/roles-and-permissions"
+    destination: "/production_readiness/roles-and-permissions"
+    permanent: true
   - source: "/introduction"
     destination: "/what-is-schematic"
     permanent: true
@@ -606,7 +619,7 @@ redirects:
     destination: "/feature-management/:slug"
     permanent: true
   - source: "/security"
-    destination: "/architecture/security"
+    destination: "/production_readiness/security"
     permanent: true
   - source: "/quickstart"
     destination: "/quickstart/overview"
@@ -624,7 +637,7 @@ redirects:
     destination: "/api-reference/companies/upsert-user-trait"
     permanent: true
   - source: "/availability"
-    destination: "/architecture/availability"
+    destination: "/production_readiness/availability"
     permanent: true
   - source: /environments"
     destination: "/developer_resources/environments"
