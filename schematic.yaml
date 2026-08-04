@@ -24235,6 +24235,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /entity-key-definitions/{entity_key_definition_id}:
+    delete:
+      operationId: deleteEntityKeyDefinition
+      summary: Delete entity key definition
+      tags:
+        - companies
+      parameters:
+        - name: entity_key_definition_id
+          in: path
+          description: entity_key_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteEntityKeyDefinitionParams
+                required:
+                  - data
+                  - params
+                title: DeleteEntityKeyDefinitionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /entity-key-definitions/count:
     get:
       operationId: countEntityKeyDefinitions
@@ -24315,6 +24356,84 @@ paths:
                   - data
                   - params
                 title: CountEntityKeyDefinitionsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-keys/count:
+    get:
+      operationId: countEntityKeys
+      summary: Count entity keys
+      tags:
+        - companies
+      parameters:
+        - name: definition_id
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      definition_id:
+                        type: string
+                      entity_type:
+                        $ref: '#/components/schemas/EntityType'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountEntityKeysParams
+                required:
+                  - data
+                  - params
+                title: CountEntityKeysResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
