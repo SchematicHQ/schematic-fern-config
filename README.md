@@ -6,6 +6,8 @@ This repository contains your Fern Configuration:
 - [Generators config](./fern/generators.yml)
 - [Public documentation](./fern/docs/)
 
+Before adding or editing a docs page, read the docs page conventions in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 ## Validating your API Definition
 
 To validate your API, run:
