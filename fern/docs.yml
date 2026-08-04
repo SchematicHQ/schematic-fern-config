@@ -6,7 +6,7 @@ instances:
 title: SchematicHQ
 tabs:
   documentation:
-    display-name: Getting Started
+    display-name: Documentation
     icon: "fa-regular fa-book"
   api:
     display-name: API Reference
@@ -23,7 +23,7 @@ default-language: typescript
 navigation:
   - tab: documentation
     layout:
-      - section: Getting Started
+      - section: Get started
         skip-slug: true
         contents:
           - page: Overview
@@ -34,11 +34,27 @@ navigation:
             path: ./docs/pages/get_started/concepts.mdx
           # - page: How to use Schematic
           #   path: ./docs/pages/get_started/howto.mdx
-      - section: Using Schematic
-        contents:
           - page: Who Uses Schematic
             path: ./docs/pages/using_schematic/who-uses-schematic.mdx
-      - section: Use Cases
+          - section: Quickstart
+            contents:
+              - page: Quickstart
+                path: ./docs/pages/quickstart/overview.mdx
+              - page: Account Setup
+                path: ./docs/pages/quickstart/account-setup.mdx
+              - page: Entitling a Feature
+                path: ./docs/pages/quickstart/entitling-a-feature.mdx
+              - page: Tracking Usage
+                path: ./docs/pages/quickstart/tracking-usage.mdx
+              - page: Components
+                path: ./docs/pages/quickstart/create-a-component.mdx
+              - page: Identifying Users
+                path: ./docs/pages/quickstart/identifying-users.mdx
+              - page: Setup the SDK
+                path: ./docs/pages/quickstart/setup-sdk.mdx
+          - page: Entity Relationship Diagram
+            path: ./docs/pages/developer_resources/erd.mdx
+      - section: Use cases
         contents:
           - page: Overview
             path: ./docs/pages/use-cases/overview.mdx
@@ -98,60 +114,7 @@ navigation:
                 path: ./docs/pages/use-cases/automation.mdx
               - link: Protect your margins
                 href: /use-cases/margin-protection
-      - section: Playbooks
-        contents:
-          - page: Overview
-            slug: overview
-            path: ./docs/pages/playbooks/overview.mdx
-          - page: Creating a metered feature
-            slug: metering
-            path: ./docs/pages/playbooks/metering.mdx
-          - page: Backfills and usage corrections
-            slug: backfill-and-corrections
-            path: ./docs/pages/playbooks/backfill-and-corrections.mdx
-          - page: Rolling out beta functionality with Flags
-            slug: rollout
-            path: ./docs/pages/playbooks/rollout.mdx
-          - page: Handling customer exceptions and feature trials
-            slug: exceptions
-            path: ./docs/pages/playbooks/exceptions.mdx
-          - page: Automatically provision customers using Stripe
-            slug: provisioning-stripe
-            path: ./docs/pages/playbooks/provisioning-stripe.mdx
-          - page: Build a slack webhook
-            slug: slack-webhook
-            path: ./docs/pages/playbooks/slack-webhook.mdx
-      - section: Quickstart
-        contents:
-          - page: Quickstart
-            path: ./docs/pages/quickstart/overview.mdx
-          - page: Account Setup
-            path: ./docs/pages/quickstart/account-setup.mdx
-          - page: Entitling a Feature
-            path: ./docs/pages/quickstart/entitling-a-feature.mdx
-          - page: Tracking Usage
-            path: ./docs/pages/quickstart/tracking-usage.mdx
-          - page: Components
-            path: ./docs/pages/quickstart/create-a-component.mdx
-          - page: Identifying Users
-            path: ./docs/pages/quickstart/identifying-users.mdx
-          - page: Setup the SDK
-            path: ./docs/pages/quickstart/setup-sdk.mdx
-      - section: Using Feature Flags
-        contents:
-          - page: Overview
-            path: ./docs/pages/feature-management/overview.mdx
-          - page: Flags
-            path: ./docs/pages/feature-management/flags.mdx
-          - page: Features
-            path: ./docs/pages/feature-management/features.mdx
-          - page: Tracking Feature Usage
-            path: ./docs/pages/feature-management/tracking-usage.mdx
-          - page: Company Overrides
-            path: ./docs/pages/feature-management/overrides.mdx
-          - page: Feature Types
-            path: ./docs/pages/feature-management/feature-types.mdx
-      - section: Building Your Catalog
+      - section: Model your pricing
         contents:
           - page: Overview
             path: ./docs/pages/catalog/overview.mdx
@@ -192,13 +155,21 @@ navigation:
                 path: ./docs/pages/catalog/guides-plan-versions.mdx
               - page: Creating a Custom Plan
                 path: ./docs/pages/catalog/guides-custom-plans.mdx
-      - section: AI Tooling
+      - section: Enforce entitlements
         contents:
-          - page: For Developers
-            path: ./docs/pages/ai_tooling/for-developers.mdx
-          # - page: For GTM Teams
-          #   path: ./docs/pages/ai_tooling/for-gtm-teams.mdx
-      - section: Setting Up Billing
+          - page: Overview
+            path: ./docs/pages/feature-management/overview.mdx
+          - page: Flags
+            path: ./docs/pages/feature-management/flags.mdx
+          - page: Features
+            path: ./docs/pages/feature-management/features.mdx
+          - page: Tracking Feature Usage
+            path: ./docs/pages/feature-management/tracking-usage.mdx
+          - page: Company Overrides
+            path: ./docs/pages/feature-management/overrides.mdx
+          - page: Feature Types
+            path: ./docs/pages/feature-management/feature-types.mdx
+      - section: Bill for usage
         contents:
           - page: Overview
             path: ./docs/pages/billing/overview.mdx
@@ -221,7 +192,7 @@ navigation:
             path: ./docs/pages/billing/credit-burndown.mdx
           - page: Billing Entities
             path: ./docs/pages/billing/billing-entities.mdx
-      - section: Using UI Components
+      - section: Embed billing UI
         contents:
           - page: Overview
             path: ./docs/pages/components/overview.mdx
@@ -245,10 +216,52 @@ navigation:
                 path: ./docs/pages/components/standalone-components.mdx
               - page: Pricing Table
                 path: ./docs/pages/components/pricing-table.mdx
-      - section: Developer Resources
+      - section: Integrate
         contents:
-          - page: Concepts
-            path: ./docs/pages/developer_resources/concepts.mdx
+          - page: Overview
+            path: ./docs/pages/integrations/overview.mdx
+          - section: Stripe
+            icon: "fa-brands fa-stripe"
+            contents:
+              - page: Overview
+                path: ./docs/pages/integrations/stripe-overview.mdx
+              - page: Stripe App
+                path: ./docs/pages/integrations/stripe-app.mdx
+              - page: Integration Guide
+                path: ./docs/pages/integrations/stripe-integration-guide.mdx
+              - page: Advanced Use Cases
+                path: ./docs/pages/integrations/stripe-advanced-use-cases.mdx
+              - page: Troubleshooting
+                path: ./docs/pages/integrations/stripe-faq.mdx
+          - page: Segment Integration
+            path: ./docs/pages/integrations/segment.mdx
+            icon: "fa-solid fa-circle-nodes"
+          - page: Clerk Integration
+            path: ./docs/pages/integrations/clerk.mdx
+            icon: "fa-solid fa-lock-open"
+          - page: WorkOS Integration
+            path: ./docs/pages/integrations/workos.mdx
+            icon: "fa-solid fa-key"
+          # - page: Auth0 Integration
+          #   path: ./docs/pages/integrations/auth0.mdx
+          #   icon: "fa-solid fa-user-lock"
+          - page: Salesforce Integration
+            path: ./docs/pages/integrations/salesforce.mdx
+            icon: "fa-brands fa-salesforce"
+          - page: Hubspot Integration
+            path: ./docs/pages/integrations/hubspot.mdx
+            icon: "fa-brands fa-hubspot"
+          - section: Webhooks
+            icon: "fa-brands fa-connectdevelop"
+            contents:
+              - page: General
+                path: ./docs/pages/integrations/webhooks.mdx
+              - page: Plan Changed Webhook
+                path: ./docs/pages/integrations/webhooks-plan-changed.mdx
+              - page: Entitlement & Credit Trigger Webhooks
+                path: ./docs/pages/integrations/webhooks-entitlement-triggers.mdx
+      - section: Build
+        contents:
           - page: Key Management
             path: ./docs/pages/developer_resources/entity-key-management.mdx
           - page: Environments
@@ -256,8 +269,6 @@ navigation:
           - page: Manage Plan API
             path: ./docs/pages/developer_resources/manage-plan-api.mdx
             hidden: true
-          - page: Entity Relationship Diagram
-            path: ./docs/pages/developer_resources/erd.mdx
           - section: Sample Apps
             contents:
               - page: Next.js - Weather Search App
@@ -265,6 +276,7 @@ navigation:
               - page: Python - Image Search App
                 path: ./docs/pages/developer_resources/sample_apps/sample_python.mdx
           - section: SDKs
+            collapsed: true
             contents:
               - page: Overview
                 path: ./docs/pages/developer_resources/sdks/overview.mdx
@@ -310,7 +322,30 @@ navigation:
               - page: Ruby
                 path: ./docs/pages/developer_resources/sdks/ruby.mdx
                 icon: "fa-regular fa-gem"
-      - section: Production Readiness
+      - section: Operate
+        contents:
+          - page: Overview
+            slug: overview
+            path: ./docs/pages/playbooks/overview.mdx
+          - page: Creating a metered feature
+            slug: metering
+            path: ./docs/pages/playbooks/metering.mdx
+          - page: Backfills and usage corrections
+            slug: backfill-and-corrections
+            path: ./docs/pages/playbooks/backfill-and-corrections.mdx
+          - page: Rolling out beta functionality with Flags
+            slug: rollout
+            path: ./docs/pages/playbooks/rollout.mdx
+          - page: Handling customer exceptions and feature trials
+            slug: exceptions
+            path: ./docs/pages/playbooks/exceptions.mdx
+          - page: Automatically provision customers using Stripe
+            slug: provisioning-stripe
+            path: ./docs/pages/playbooks/provisioning-stripe.mdx
+          - page: Build a slack webhook
+            slug: slack-webhook
+            path: ./docs/pages/playbooks/slack-webhook.mdx
+      - section: Run in production
         contents:
           - page: Availability
             path: ./docs/pages/production_readiness/availability.mdx
@@ -320,50 +355,16 @@ navigation:
             path: ./docs/pages/production_readiness/security.mdx
           - page: Roles & Permissions
             path: ./docs/pages/production_readiness/roles-and-permissions.mdx
-      - section: Integrations
+      - section: Troubleshoot
         contents:
-          - page: Overview
-            path: ./docs/pages/integrations/overview.mdx
-          - section: Stripe
-            icon: "fa-brands fa-stripe"
-            contents:
-              - page: Overview
-                path: ./docs/pages/integrations/stripe-overview.mdx
-              - page: Stripe App
-                path: ./docs/pages/integrations/stripe-app.mdx
-              - page: Integration Guide
-                path: ./docs/pages/integrations/stripe-integration-guide.mdx
-              - page: Advanced Use Cases
-                path: ./docs/pages/integrations/stripe-advanced-use-cases.mdx
-              - page: Troubleshooting
-                path: ./docs/pages/integrations/stripe-faq.mdx
-          - page: Segment Integration
-            path: ./docs/pages/integrations/segment.mdx
-            icon: "fa-solid fa-circle-nodes"
-          - page: Clerk Integration
-            path: ./docs/pages/integrations/clerk.mdx
-            icon: "fa-solid fa-lock-open"
-          - page: WorkOS Integration
-            path: ./docs/pages/integrations/workos.mdx
-            icon: "fa-solid fa-key"
-          # - page: Auth0 Integration
-          #   path: ./docs/pages/integrations/auth0.mdx
-          #   icon: "fa-solid fa-user-lock"
-          - page: Salesforce Integration
-            path: ./docs/pages/integrations/salesforce.mdx
-            icon: "fa-brands fa-salesforce"
-          - page: Hubspot Integration
-            path: ./docs/pages/integrations/hubspot.mdx
-            icon: "fa-brands fa-hubspot"
-          - section: Webhooks
-            icon: "fa-brands fa-connectdevelop"
-            contents:
-              - page: General
-                path: ./docs/pages/integrations/webhooks.mdx
-              - page: Plan Changed Webhook
-                path: ./docs/pages/integrations/webhooks-plan-changed.mdx
-              - page: Entitlement & Credit Trigger Webhooks
-                path: ./docs/pages/integrations/webhooks-entitlement-triggers.mdx
+          - link: Stripe sync issues
+            href: /integrations/stripe-troubleshooting
+      - section: AI tooling
+        contents:
+          - page: For Developers
+            path: ./docs/pages/ai_tooling/for-developers.mdx
+          # - page: For GTM Teams
+          #   path: ./docs/pages/ai_tooling/for-gtm-teams.mdx
   - tab: api
     layout:
       - page: Resources
