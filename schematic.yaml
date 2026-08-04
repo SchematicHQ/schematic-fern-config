@@ -3378,7 +3378,7 @@ components:
           type: array
           description: >-
             Schematic feature IDs (starting with 'feat_') to include as usage
-            columns; at least one is required
+            columns; empty means no usage columns
           items:
             type: string
           maxItems: 100
@@ -3423,6 +3423,19 @@ components:
           type: string
           description: Free-text search over company name and keys
           nullable: true
+        sort_order_column:
+          type: string
+          description: >-
+            Column to sort the exported rows by (e.g. name, created_at, plan);
+            defaults to name
+          nullable: true
+        sort_order_direction:
+          type: string
+          description: Direction to sort the exported rows by; defaults to asc
+          nullable: true
+          enum:
+            - asc
+            - desc
         subscription_statuses:
           type: array
           description: >-
@@ -3441,6 +3454,20 @@ components:
             type: string
           nullable: true
           maxItems: 100
+        visible_columns:
+          type: array
+          description: >-
+            Company columns to include, mirroring the companies list; omit to
+            include the plan column only
+          items:
+            type: string
+            enum:
+              - plan
+              - subscription
+              - users
+              - last_seen_at
+          nullable: true
+          maxItems: 10
         with_entitlement_for:
           type: string
           description: >-
@@ -3467,7 +3494,6 @@ components:
           nullable: true
       required:
         - export_type
-        - feature_ids
       title: CompanyFeatureUsageExportMetadata
     CompanyLedgerResponseData:
       type: object
