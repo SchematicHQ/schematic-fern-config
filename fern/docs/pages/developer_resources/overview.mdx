@@ -4,20 +4,20 @@ slug: developers
 description: "Where engineers start with Schematic: the SDK matrix, the REST API, MCP and agent tooling, sample apps, keys, and environments."
 ---
 
-Integrating Schematic comes down to three things your code does. You tell Schematic who your companies and users are, you ask whether a company is entitled to a feature before you run it, and you report usage back so limits, invoices, and the customer's UI stay accurate. Plans, entitlements, credit balances, and Stripe sync are configured outside your codebase and take effect without a deploy, so repricing and repackaging do not turn into engineering tickets.
+Integrating Schematic comes down to three things your code does. You tell Schematic who your companies and users are, you send usage events for the consumption you meter and bill on, and you check a company's entitlement before running a feature so the limits you sold are enforced as that usage happens. Plans, prices, entitlements, and credit balances are configured outside your codebase and take effect without a deploy, so repricing and repackaging do not turn into engineering tickets.
 
 This section covers the SDKs, the REST API, and the operational pieces you need to run that integration in production.
 
 ## Start here
 
-- **[Instrument your app](/quickstart/instrument-your-app)** — the code track, from installing an SDK to checking a flag and reporting usage.
+- **[Instrument your app](/quickstart/instrument-your-app)** — the code track, from installing an SDK to reporting usage and checking a flag.
 - **[SDKs](/developer_resources/sdks/overview)** — the SDK index, with install and setup for each.
 - **[Cross-platform features](/developer_resources/sdks/cross-platform-features)** — the local caching, event buffering, retries, and real-time updates you get from any SDK.
 - **[API reference](/api-reference/resources)** — every REST resource and endpoint, grouped by object.
 
 ## Server-side SDKs
 
-Reach for a server SDK when an entitlement decision cannot be trusted to the browser, and for reporting usage from your backend.
+Reach for a server SDK to report usage from your backend, and when an entitlement decision cannot be trusted to the browser.
 
 - **[Node.js](/developer_resources/sdks/nodejs)** — for TypeScript and JavaScript services.
 - **[Python](/developer_resources/sdks/python)** — for Django, Flask, FastAPI, and background workers.
