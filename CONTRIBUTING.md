@@ -16,6 +16,7 @@ Read this before adding a page, adding a hub, or changing navigation.
 | Hub page or a `docs.yml` `link:` entry? | Sidebar cross-listing uses `link:`. Prose cross-listing uses a hub. A given cross-reference lives in exactly one of the two, never both. |
 | `slug:` frontmatter? | Required on every new page. Absolute, no leading slash. |
 | `description:` frontmatter? | Required on every new page. One sentence, states the outcome. |
+| What do I call credits, and what is Schematic? | Product nouns only, never "wallet". Schematic is a billing engine with a deep Stripe integration. See section 7. |
 | Can I edit `developer_resources/sdks/*`? | Six of the fifteen are generated. Check the list below before touching any of them. |
 | How do I check my work? | `npx fern-api check` locally, then the preview URL the PR bot posts. Plain `npx fern check` is the wrong package and fails. |
 
@@ -185,7 +186,26 @@ Write the description before writing the page. If it is hard to write in one sen
 
 ---
 
-### 7. Generated pages: do not hand-edit
+### 7. Product vocabulary
+
+**Use the product nouns a reader sees in the UI and API.** A synonym invented in the docs sends the reader looking for a screen that does not exist.
+
+| Concept | Write | Do not write |
+|---|---|---|
+| Credits | credit balance, credit grant, credit bundle, credit burndown, credit ledger | "wallet", or any other coinage |
+| What Schematic is | a billing engine with a deep Stripe integration | "built on Stripe", "only works with Stripe", "requires Stripe" |
+| Where billing happens | Schematic bills, and syncs two ways with Stripe | "Stripe is your source of truth", "Stripe remains the source of truth for billing" |
+| Entitlements | how enforcement happens | what the product is, "the entitlement layer" |
+
+"wallet" appears zero times in the product, so do not introduce it in the docs.
+
+Naming Stripe at the feature level is accurate and expected. "Checkout requires a connected Stripe account" is a feature note and is fine. "Schematic is built on Stripe" is an identity claim and is wrong. Where naming Stripe buys nothing, "your billing system" is the safer phrasing.
+
+Usage-based billing leads, because it is what brings most readers here. Seat-based and hybrid are fully supported and must never read as legacy or second-class.
+
+---
+
+### 8. Generated pages: do not hand-edit
 
 Six pages under `fern/docs/pages/developer_resources/sdks/` are rewritten verbatim from the READMEs in their SDK repos by `scripts/sync_sdk_readmes.py`:
 
@@ -204,7 +224,7 @@ Anything under `fern/docs/pages/api_documentation/` and the API Reference tab is
 
 ---
 
-### 8. Verifying a docs change
+### 9. Verifying a docs change
 
 ```sh
 npx fern-api check
@@ -235,5 +255,6 @@ Then open the PR. `.github/workflows/preview-docs.yml` runs `fern generate --doc
 - [ ] Added to `fern/docs.yml` navigation under exactly one section
 - [ ] Linked from its group's `overview.mdx`
 - [ ] If cross-listed, cross-listed by one mechanism, not two
-- [ ] `npx fern-api check` passes (not `npx fern check`, see section 8)
+- [ ] Product nouns match section 7, and nothing says "wallet"
+- [ ] `npx fern-api check` passes (not `npx fern check`, see section 9)
 - [ ] Preview URL checked
