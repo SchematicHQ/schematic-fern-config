@@ -1,10 +1,12 @@
 ---
 title: Concepts
-description: "Definitions of Schematic's core concepts, including features, flags, entitlements, plans, add ons, companies, keys, traits, and usage, plus how an entitlement check resolves at runtime."
+description: "Definitions of Schematic's core concepts, including features, flags, entitlements, plans, add ons, subscriptions, companies, keys, traits, usage, and credits, plus how an entitlement check resolves at runtime."
 slug: concepts
 ---
 
-This page defines the core concepts in Schematic and shows how they fit together. The first half is a glossary. The second half covers how Schematic resolves an entitlement check, how data flows between your application, Schematic, and Stripe, and how to verify that your integration is working.
+Schematic is a billing engine with a deep Stripe integration. It runs subscriptions, usage-based and credit billing, and the real-time entitlement checks that enforce what each customer has paid for.
+
+This page defines the core concepts and shows how they fit together. The first half is a glossary. The second half covers how Schematic resolves an entitlement check, how data flows between your application, Schematic, and your billing system, and how to verify that your integration is working.
 
 ## Features
 
@@ -56,7 +58,7 @@ Add ons carry their own entitlements. An add on entitlement can introduce a feat
 
 ## Subscriptions
 
-A **subscription** represents a company's current plan and add ons, typically synced from Stripe. When a Stripe subscription changes, Schematic updates the company's plan assignment automatically.
+A **subscription** represents a company's current plan and add ons, along with the billing terms attached to them. Subscriptions are created through Schematic's checkout flow or synced in from your billing system, and Schematic keeps the company's plan assignment in step with the subscription as it changes.
 
 Plans and add ons can each be tied to a Stripe billing product, which is what lets Schematic assign the correct plan and add ons when a subscription is created or changed.
 
@@ -95,9 +97,17 @@ Traits serve two purposes: they can be used as conditions in flag targeting rule
 
 ## Usage
 
-**Usage** is event-based or trait-based consumption tracked against a feature. It powers metered entitlements and usage-based billing, and it is the basis for enforcement, such as blocking access once a limit is reached.
+**Usage** is event-based or trait-based consumption tracked against a feature. It is what metered entitlements and usage-based billing are calculated from, and it is the basis for enforcement, such as blocking access once a limit is reached.
 
-Usage events arrive as `track` calls and are attributed to a company, a user, and a feature.
+Usage events are attributed to a company, a user, and a feature, and are most often reported with `track` calls from your application.
+
+## Credits
+
+**Credits** are a prepaid balance a company spends as it uses your product. You define a credit type, grant a quantity of it to a company, and set how many credits each feature consumes, which lets you price several features against one metric instead of metering each separately.
+
+A **credit grant** is what adds credits to a company's **credit balance**. Plans grant credits each billing period, customers buy more in **credit bundles** through checkout or auto top-up, and you can issue promotional or adjustment grants through the API. Grants carry their own expiration, and **burndown** draws from the grant closest to expiring, so a company spends its period credits before the bundles it purchased.
+
+Every grant and every draw is written to the **credit ledger**, which is transactional and updates in real time. The balance an entitlement check reads is therefore the current one, not a figure reconciled after the period closes, and the same ledger backs refunds and the balance customers see in the customer portal. See [Credit Burndown Billing Model](/billing/credit-burndown) for setup.
 
 ## Components
 
