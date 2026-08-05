@@ -33,13 +33,15 @@ Not everything should be metered. Seats, flat-rate tiers, and hybrid plans that 
 
 ### Monetization
 
+- **[Billing models](/billing/overview)** — every way Schematic can charge, and how to pick between them.
 - **[Price by usage](/use-cases/usage-based-pricing)** — meter tokens, agent runs, or whatever unit carries your cost, and turn rising usage into expansion.
+- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage.
 - **[Creating a metered feature](/playbooks/metering)** — define the event, set the limit per plan, and start reporting usage.
-- **[Show customers what an action will cost](/use-cases/pre-flight)** — preview the price before an expensive run, so nobody is surprised by the bill.
-- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
-- **[Meter on a real-time credit ledger](/use-cases/credit-ledger)** — drive enforcement and billing off an accurate balance with holds, not a stale snapshot.
-- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — usage warnings and grace periods, so a throttle is never a surprise.
 - **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates.
+- **[Meter on a real-time credit ledger](/use-cases/credit-ledger)** — drive enforcement and billing off an accurate balance with holds, not a stale snapshot.
+- **[Show customers what an action will cost](/use-cases/pre-flight)** — preview the price before an expensive run, so nobody is surprised by the bill.
+- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — usage warnings and grace periods, so a throttle is never a surprise.
+- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
 
 ### Product and customer ops
 
@@ -51,10 +53,10 @@ Not everything should be metered. Seats, flat-rate tiers, and hybrid plans that 
 
 ### Finance
 
-- **[Billing overview](/billing/overview)** — which billing models Schematic runs, and where the Stripe integration fits into each one.
-- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage, with limits enforced as customers reach them.
-- **[Credit burndown](/billing/credit-burndown)** — what a prepaid balance is worth on the books, and how it draws down.
 - **[Stripe integration](/integrations/stripe)** — what Schematic syncs into Stripe, what it reads back, and how the two-way sync behaves.
+- **[Mapping your catalog to Stripe](/integrations/stripe-integration-guide)** — how plans, add ons, and metered features line up with Stripe products and prices.
+- **[Collecting tax](/integrations/stripe-advanced-use-cases#stripe-tax)** — Stripe Tax and third-party providers, and what checkout collects from the customer.
+- **[Billing entities](/billing/billing-entities)** — let a parent company pay for another company's subscription while each keeps its own entitlements.
 - **[Backfills and usage corrections](/playbooks/backfill-and-corrections)** — import historical usage or correct late events so invoices reconcile.
 - **[Troubleshooting](/troubleshooting/overview)** — the common broken states, starting with billing and Stripe sync, and how to fix each one.
 
