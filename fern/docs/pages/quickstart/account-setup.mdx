@@ -1,10 +1,11 @@
 ---
-title: Account Setup
-subtitle: Create a Schematic account
+title: Create your account
+subtitle: Sign up, create your API keys, and load sample data
 slug: quickstart/account-setup
+description: Step one of the dashboard track. Create a Schematic account, generate API keys for your engineers, and load sample plans and customers.
 ---
 
-First, you'll need to create a Schematic account. This is free and will only take a few minutes. 
+Creating a Schematic account is free and takes a few minutes. This is step one of [Set up your first plan](/quickstart/set-up-your-first-plan).
 
 <iframe
   width="100%"
@@ -18,31 +19,31 @@ First, you'll need to create a Schematic account. This is free and will only tak
 
 ## 1. Create an account
 
-Go to [Schematic](https://app.schematichq.com/sign-in) and create an account with your Google account, or Github account, or email.
+Go to [Schematic](https://app.schematichq.com/sign-in) and sign up with Google, GitHub, or email. The signup flow asks a few questions about your company and then drops you into the dashboard.
 
-This flow will ask you a few simple questions about your company.
+## 2. Create your API keys
 
-## 2. Create an API Key
+API keys are how your application talks to Schematic. You do not need them for anything on this track, but creating them now means your engineers are not blocked when they start [instrumenting your app](/quickstart/instrument-your-app).
 
-1. First, create a file at the root of your project called `.env.local`. Copy the contents of `.env.sample` to `.env.local`, which will provide you the names of the 2 keys we'll setup here (the components one we'll setup later).
-2. Click **Settings** (the gear icon) at the bottom of the left navigation.
-3. Click "API Keys" in the Settings menu.
-4. Click "Create" in the top right
-5. Give the key a name, e.g. "Quickstart"
-6. Click "Create"
-7. Copy the publishable key and secret key, and add them to the `.env.local` file. 
-8. *NOTE: the secret key is never shown again, so make sure to save it in a secure location. You can always create a new key if you lose it.*
+1. Click **Settings**, the gear icon at the bottom of the left navigation.
+2. Click **API Keys** in the Settings menu.
+3. Click **Create** in the top right.
+4. Give the key a name, for example "Quickstart".
+5. Click **Create**.
+6. Copy both keys and hand them to whoever is doing the integration.
+
+<Warning>The secret key is shown once and never again. Store it somewhere secure the moment you create it. If you lose it, create a new key and delete the old one.</Warning>
 
 ![Create an API Key](../../assets/images/quickstart/quickstart-account-setup-api-key.png)
 
-### 3. Create Sample data
+## 3. Load sample data
 
-On the Quickstart page in your Schematic account, click the "Generate Sample Data" button. This will create a demo customer, plan, and a few features.
+On the Quickstart page in your account, click **Generate Sample Data**. This creates a demo customer, a plan, and a few features, so you have something realistic to work against instead of an empty dashboard.
 
 ![Generate Sample Data](../../assets/images/quickstart/quickstart-account-setup-sample-data.png)
 
-<Info>The sample data is only for demonstration purposes. You can delete freely delete it when you've finished the quickstart.</Info>
+<Info>The sample data exists only for demonstration. Delete it freely once you have finished the quickstart.</Info>
 
-## Next steps
+## Next step
 
-We recommend you checkout the entitlements page in the quickstart app to see how to a feature to a plan.
+Your account is ready. Next, [add your first feature](/quickstart/entitling-a-feature) and entitle it to a plan.
