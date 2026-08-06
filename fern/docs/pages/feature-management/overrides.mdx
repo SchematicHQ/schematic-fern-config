@@ -11,7 +11,7 @@ In many scenarios customers might need features that don't come standard in a pr
 - Feature trials
 - Testing 
 
-In Schematic, we call these "Company Overrides", and they can be applied individually to any company, or programatically via our API. We'll cover both scenarios below.
+In Schematic, we call these "Company Overrides", and they can be applied individually to any company, or programmatically via our API. We'll cover both scenarios below.
 
 ## Applying an override in the Schematic UI
 
@@ -30,13 +30,13 @@ In Schematic, we call these "Company Overrides", and they can be applied individ
 
 ### Time-limited overrides
 
-While creating an override in the UI, you can also set an expiration date. This is useful for allowing a customer to try a feature for a limited time, often as part of a presale or upgrade motion. Additionally, this can help ease the burden of a pricing migration in which a customer may be losing a access to a feature they priorily had access to.
+While creating an override in the UI, you can also set an expiration date. This is useful for allowing a customer to try a feature for a limited time, often as part of a presale or upgrade motion. Additionally, this can help ease the burden of a pricing migration in which a customer may be losing access to a feature they previously had.
 
 ![Time-limited override](../../assets/images/feature-management/features-timed-overrides.png)
 
-<Note>If you grant a additional access to a numeric feature (e.g. seats), when the override expires, the customer will retain their additional usage, but will not be able to add more until they drop below their default plan limit.</Note>
+<Note>If you grant additional access to a numeric feature (e.g. seats), when the override expires, the customer will retain their additional usage, but will not be able to add more until they drop below their default plan limit.</Note>
 
-## Applying an override programatically
+## Applying an override programmatically
 
 In situations where you may allow the user to enable an individual feature themselves in your application (e.g. trying a specific within their account) or otherwise manage exceptions outside of Schematic (e.g. in Hubspot or your own admin layer), you can use our API to apply the override by using the `/company-overrides` endpoint.
 

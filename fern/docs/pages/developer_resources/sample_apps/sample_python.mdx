@@ -1,6 +1,6 @@
 ---
 title: Python - Image Search App
-description: ""
+description: A Python image search app that uses Schematic to meter usage, check feature access, and manage the subscription lifecycle.
 slug: developer_resources/sample_apps/sample_python
 ---
 
@@ -50,7 +50,7 @@ cp .env.example .env
 
 5. Populate your .env file
 - Generate Flickr API keys here (to fill in FLICKR_API_KEY, FLICKR_SECRET_KEY): https://www.flickr.com/services/apps/create/ (you will need to create a dummy app - call it anything)
-- Generate Schematic API keys in your account here (to fill in SCHEMATIC_API_KEY): https://docs.schematichq.com/quickstart#setting-up-dev-and-prod-environments
+- Generate Schematic API keys in your account here (to fill in SCHEMATIC_API_KEY): https://docs.schematichq.com/developer_resources/environments
 
 ## Getting started with the Schematic app
 
@@ -83,10 +83,10 @@ src="../../../assets/images/sample_python_screenshot.png"
 
 To see how Schematic is integrated into the Billy app to manage features and plans, go [here](https://github.com/SchematicHQ/billy-python/blob/main/vendors/schematic_python.py).
 
-To read more about how to use the Schematic app, go [here](https://docs.schematichq.com/).
+To read more about how to use the Schematic app, go [here](/).
 
 ## Resources
 
 - [How to implement metered features with Schematic](https://github.com/SchematicHQ/billy-python/blob/e03d3bb35b87925eb4151842894b784585330d77/main.py#L96)
-- [Sending usage events to Schematic](https://docs.schematichq.com/quickstart#sending-track-and-identify-calls)
-- [Evaluating company entitlements with Schematic](https://docs.schematichq.com/quickstart#evaluating-entitlements)
+- [Sending usage events to Schematic](/quickstart/instrument-your-app#4-send-usage-events)
+- [Evaluating company entitlements with Schematic](/quickstart/instrument-your-app#3-check-an-entitlement)

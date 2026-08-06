@@ -21,7 +21,7 @@ The `SchematicProvider` is a Provider that enables Schematic hooks and component
 
 In these examples, we'll use Clerk, but this should work for any auth provider. We setup clerk as directed [here](https://clerk.com/docs/nextjs/getting-started/quickstart). 
 
-To start, we create a unified `ClientWrapper` ([code](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/components/ClientWrapper.tsx)), that combines the Clerk provider, Schematic provider, and additionally ensures we are operating on the client side (a requirement for the Schematic React SDK).
+To start, we create a unified `ClientWrapper` ([code](https://github.com/SchematicHQ/schematic-next-example/blob/main/src/components/ClientWrapper.tsx)), that combines the Clerk provider, Schematic provider, and additionally ensures we are operating on the client side (a requirement for the Schematic React SDK).
 
 The most important part is calling `identify`, which sets the user/company context for flag checks and updates the last seen timestamp in Schematic. 
 
@@ -46,21 +46,21 @@ useEffect(() => {
 }, [authContext, identify]);
 ```
 
-In this example, `useAuthContext` ([code](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/hooks/useAuthContext.ts)) is responsible for providing user and company info from your auth provider in a structured format. 
+In this example, `useAuthContext` ([code](https://github.com/SchematicHQ/schematic-next-example/blob/main/src/hooks/useAuthContext.ts)) is responsible for providing user and company info from your auth provider in a structured format. 
 
 ## Schematic Components
 
 [Schematic components](/components/overview) are React components that can be embedded in your application to provide a complete plan management UI to end users. They are pre-built and customizable, and can be embedded in your application using a Component ID from Schematic. 
 
-To embed a component, you'll need to generate an access token for the company. In Next.js this is easy to setup using the `/api` folder as shown [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/app/api/accessToken/route.ts). This code reuses some of our authorization code to pull the correct company information. 
+To embed a component, you'll need to generate an access token for the company. In Next.js this is easy to setup using the `/api` folder as shown [here](https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/api/accessToken/route.ts). This code reuses some of our authorization code to pull the correct company information. 
 
-For the component itself, we typically see users creating a dedicated page for it. A sample page, with appropriate error handling and loading states, is shown [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/app/plan/page.tsx).
+For the component itself, we typically see users creating a dedicated page for it. A sample page, with appropriate error handling and loading states, is shown [here](https://github.com/SchematicHQ/schematic-next-example/blob/main/src/app/usage/page.tsx).
 
 *Note: Components must be loaded client side (`"use client"`), and will error during server-side rendering if not.*
 
 ## Unified Entitlement and Permission Hook
 
-"Can a user do XXX" typically requires two checks: entitlements and permissions. To keep our code base cleaner, the Schematic web app uses a unified entitlement and permission hook that combines the `useSchematicEntitlement` and permission checks (using Clerk permission). A reproduction of our hook can be found [here](https://github.com/SchematicHQ/schematic-nextjs-demo/blob/main/hooks/useSchematicFeature.ts).
+"Can a user do XXX" typically requires two checks: entitlements and permissions. To keep our code base cleaner, the Schematic web app uses a unified entitlement and permission hook that combines the `useSchematicEntitlement` and permission checks (using Clerk permission).
 
 This hook provides a few values derived out of the permission and entitlements that are commonly needed:
 

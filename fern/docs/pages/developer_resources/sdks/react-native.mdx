@@ -10,7 +10,7 @@ Schematic's React SDK also works for React Native apps. See the [React SDK docum
 
 When your application is brought back to the foreground, Schematic will automatically reconnect to the WebSocket to resume flag checks and event tracking. This will ensure that your application is always up to date with the latest flag data and event tracking.
 
-However, the SDK implements reconnects with an expontial backoff timer, which may cause a delay before fresh flag values are available. For cases where you need immediate flag updates when returning to the foreground (e.g., after an in-app purchase), you can use one of these methods to re-establish the connection:
+However, the SDK implements reconnects with an exponential backoff timer, which may cause a delay before fresh flag values are available. For cases where you need immediate flag updates when returning to the foreground (e.g., after an in-app purchase), you can use one of these methods to re-establish the connection:
 
 - `forceReconnect()`: Always closes and re-establishes the WebSocket connection, guaranteeing fresh values
 - `reconnectIfNeeded()`: Only reconnects if the current connection is unhealthy (more efficient for frequent foreground events)

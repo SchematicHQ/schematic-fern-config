@@ -48,7 +48,7 @@ For Stripe-linked plans, Schematic handles upgrades and downgrades differently. 
 
 When determining if a plan change is an upgrade or downgrade, the following logic is used. Below are the steps for determining if a change is an upgrade, whereas the inverse is considered a downgrade.
 
-1. Both plans need to be paid (otherwise it's a sunbscribe/unsubscribe)
+1. Both plans need to be paid (otherwise it's a subscribe/unsubscribe)
 2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
 3. If the new plan has a higher base price, it's an upgrade.
 4. If the new plan includes a new add on, it's an upgrade.
@@ -138,7 +138,7 @@ If you've integrated Stripe, Schematic offers several ways to handle plan change
 
 **On the company profile page in Schematic**
 
-You can manage a company's plan directly on the company profile page in Schematic using the **Manage Plan** button. These changes automatically sync with Stripe to update a company's subscsription. The company's current plan version is shown both on the profile (e.g. a "v3" badge) and in the Manage Plan panel; assigning a plan here uses its latest published version. 
+You can manage a company's plan directly on the company profile page in Schematic using the **Manage Plan** button. These changes automatically sync with Stripe to update a company's subscription. The company's current plan version is shown both on the profile (e.g. a "v3" badge) and in the Manage Plan panel; assigning a plan here uses its latest published version. 
 
 <Info>If you're having trouble, see the [Stripe FAQ](/integrations/stripe-troubleshooting) for more information.</Info>
 
@@ -186,5 +186,5 @@ You can uses traits to explicitly assign companies to plans. If you update those
 ![Plan audience trait](../../assets/images/catalog/management-plan-audiences-trait.png)
 
 For example:
-- Adding custom attributes that correspond to explicit plan assigments (e.g. a Plan trait that has values for legacy, basic, standard, and pro)
+- Adding custom attributes that correspond to explicit plan assignments (e.g. a Plan trait that has values for legacy, basic, standard, and pro)
 - Updating a company's usage or attributes so they move into a new plan based on that attribute (e.g. a Geography trait)

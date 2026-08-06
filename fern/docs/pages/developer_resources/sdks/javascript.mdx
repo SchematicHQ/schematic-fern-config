@@ -1,6 +1,7 @@
 ---
-title: Javascript (Client-side)
-description: Use schematic-angular to quickly identify users, track events, and check flags client-side in your javsacript app with Schematic.
+title: JavaScript (Client-side)
+description: Use schematic-js to quickly identify users, track events, and check flags client-side in your JavaScript app with Schematic.
+slug: developer_resources/sdks/javascript
 ---
 
 `schematic-js` is a client-side JavaScript SDK for tracking event-based usage, identifying users, and checking flags using [Schematic](https://schematichq.com).
@@ -19,7 +20,7 @@ pnpm add @schematichq/schematic-js
 
 You can use Schematic to identify users; after this, your subsequent track events and flag checks will be associated with this user.
 
-A number of these examples use `keys` to identify companies and users. Learn more about keys [here](https://docs.schematichq.com/developer_resources/key_management).
+A number of these examples use `keys` to identify companies and users. Learn more about keys [here](/developer_resources/key_management).
 
 ```typescript
 import { Schematic } from "@schematichq/schematic-js";
@@ -134,7 +135,7 @@ When events (track, identify) cannot be sent due to network issues, they are aut
 
 ### WebSocket Fallback
 
-In WebSocket mode, if the WebSocket connection fails, the SDK will provide the last known value or the configured fallback values as [outlined above](/#flag-check-fallbacks). The WebSocket will also automatically attempt to re-establish it's connection with Schematic using an exponential backoff. 
+In WebSocket mode, if the WebSocket connection fails, the SDK will provide the last known value or the configured fallback values as [outlined above](#flag-check-fallbacks). The WebSocket will also automatically attempt to re-establish its connection with Schematic using an exponential backoff. 
 
 ## Troubleshooting
 
