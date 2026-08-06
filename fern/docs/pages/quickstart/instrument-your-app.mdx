@@ -1,0 +1,157 @@
+---
+title: Instrument your app
+subtitle: Wire Schematic into your application in five moves
+slug: quickstart/instrument-your-app
+description: The code track of the quickstart. Install an SDK, identify companies, check entitlements, send usage events, and render a component.
+---
+
+This is the code track. Every step here is code you write once: mount the SDK, tell Schematic which company is active, meter what that company consumes, and enforce what it is entitled to. The plans, features, and allowances themselves are configured in the dashboard and change without a deploy, so nothing below hard-codes a limit or a price.
+
+If the vocabulary is unfamiliar, [Concepts](/concepts) defines features, entitlements, companies, and flags. The examples below use `@schematichq/schematic-react`. The same five moves exist in every SDK, listed in the [SDK overview](/developer_resources/sdks/overview).
+
+## What you need first
+
+- A Schematic account and a publishable key from [Settings, API Keys](https://app.schematichq.com/x/settings/api-keys).
+- At least one feature with a flag key. If nobody has created one yet, either run through [Set up your first plan](/quickstart/set-up-your-first-plan) or click **Generate Sample Data** on the Quickstart page in the app.
+
+## 1. Install and mount the SDK
+
+```bash
+npm install @schematichq/schematic-react
+```
+
+Wrap your application in `SchematicProvider` so every hook below has a client to talk to.
+
+```tsx
+"use client";
+
+import { SchematicProvider } from "@schematichq/schematic-react";
+
+ReactDOM.render(
+  <SchematicProvider publishableKey="your-publishable-key">
+    <App />
+  </SchematicProvider>,
+  document.getElementById("root"),
+);
+```
+
+Full install and configuration details, including the provider options, are on [Install the SDK](/quickstart/setup-sdk).
+
+## 2. Identify the company and user
+
+Schematic resolves entitlements per company, so nothing works until the SDK knows which company is signed in. Call `identify` once when your session is established.
+
+```tsx
+import { useEffect } from "react";
+import { useSchematicEvents } from "@schematichq/schematic-react";
+
+const SchematicIdentity = () => {
+  const { identify } = useSchematicEvents();
+
+  useEffect(() => {
+    identify({
+      company: { keys: { "demo-id": "demo-company" } },
+      keys: { "demo-id": "demo-user" },
+    });
+  }, [identify]);
+
+  return null;
+};
+```
+
+The keys are your identifiers, not ours. Use whatever you already have, such as your internal account ID or a Stripe customer ID. [Identify users and companies](/quickstart/identifying-users) covers traits, the server-side `upsertCompany` equivalent, and when to reach for each.
+
+## 3. Check an entitlement
+
+`useSchematicEntitlement` reads like a feature flag. Ask whether the current company has access and render accordingly.
+
+```tsx
+import { useSchematicEntitlement } from "@schematichq/schematic-react";
+
+const { value: isEnabled } = useSchematicEntitlement("new-boolean-feature");
+
+<button disabled={!isEnabled} onClick={handleClick}>
+  {isEnabled ? "Generate report" : "Upgrade to generate reports"}
+</button>;
+```
+
+The string is the flag key set on the feature in the dashboard. Whether that flag resolves true depends on the company's plan, any overrides, and any trial, and none of that logic lives in your codebase.
+
+## 4. Send usage events
+
+For metered features, the same hook returns the allowance and the usage so far, and `useSchematicEvents` gives you `track` to report each use.
+
+```tsx
+import {
+  useSchematicEntitlement,
+  useSchematicEvents,
+} from "@schematichq/schematic-react";
+
+const {
+  value: isEnabled,
+  featureUsage,
+  featureAllocation,
+  featureUsageExceeded,
+} = useSchematicEntitlement("new-event-feature");
+
+const { track } = useSchematicEvents();
+
+<>
+  <button
+    disabled={!isEnabled || featureUsageExceeded}
+    onClick={() => track({ event: "new-event-feature-clicked" })}
+  >
+    {featureUsageExceeded ? "Monthly limit reached" : "Run it"}
+  </button>
+  <div>
+    {featureUsage} / {featureAllocation}
+  </div>
+</>;
+```
+
+`track` is fire and forget on the client. Report the same event from your backend instead when the action can happen outside a browser session, or when you cannot trust the client to report honestly. See [usage-based billing](/billing/usage-based-billing) for how allowances, overages, and resets are configured.
+
+## 5. Render a component
+
+Components such as the Customer Portal and Checkout are configured in the dashboard and dropped into your app by ID. Because they let a customer change their own billing, rendering one needs a temporary access token scoped to a single company, and that token requires a secret key. Issue it on your server and never ship the secret key to the client.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const schematicClient = new SchematicClient({ apiKey });
+
+const resp = await schematicClient.accesstokens.issueTemporaryAccessToken({
+  lookup: {
+    "demo-id": "demo-company",
+  },
+});
+
+const accessToken = resp.data?.token;
+```
+
+Pass that token to the embed alongside the component ID. The [Components docs](/components/overview) cover mounting, theming, and the full set of templates.
+
+## Verify it worked
+
+- The **Companies** tab lists the company you identified, with a last seen timestamp that updates on every `identify` or `track` call.
+- The **Events** tab shows each event as it arrives, which is the fastest way to confirm your flag key and event name match what the dashboard expects.
+- Flipping an entitlement in the dashboard changes what your app renders on the next check, with no deploy.
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Set up your first plan" icon="fa-solid fa-table-list" href="/quickstart/set-up-your-first-plan">
+    The other track. The dashboard side of the same setup, for whoever owns pricing and packaging.
+  </Card>
+  <Card title="Concepts" icon="fa-solid fa-book" href="/concepts">
+    Plain-language definitions of features, plans, entitlements, and companies.
+  </Card>
+</CardGroup>
+
+Go deeper on the parts you touched:
+
+- **[Key management](/developer_resources/key_management)** — how company and user keys resolve, and how to pick them.
+- **[SDKs](/developer_resources/sdks/overview)** — the same five moves in Go, Python, Node, Java, Ruby, and C#.
+- **[Components](/components/overview)** — checkout, meters, and paywalls beyond the Customer Portal.
+- **[Stripe integration](/integrations/stripe)** — sync plans, subscriptions, and invoices both directions.
+- **[Feature analytics](/feature-management/feature-analytics)** — read the events you are now sending.

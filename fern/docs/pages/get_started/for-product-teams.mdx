@@ -1,0 +1,85 @@
+---
+title: For Product Teams
+slug: product-teams
+description: "Where product and packaging teams start with Schematic: pricing models, credits, plans, features, entitlements, add ons, and what customers see at checkout."
+---
+
+If you own packaging and pricing, these are your decisions. What you charge for and how you meter it, which plans you sell, where the limits sit, what costs extra, who gets an exception, and what a customer sees when they decide to upgrade. In Schematic all of that is configuration rather than code, so you can change a plan, launch an add on, or publish new pricing without waiting on a release.
+
+Usage-based pricing is where those decisions get hardest. Which metric you charge on, how much of it you include in the plan, and what happens when a customer runs past that allowance all come back to whether the buyer can predict the bill. Schematic lets you answer that in the packaging itself, so customers can see what they have consumed, forecast where they will land, and set their own spending limits. You can price on real usage rather than discounting to a flat fee to get the deal signed, at any size of company. Seat-based and hybrid packaging use the same catalog and the same controls.
+
+This page maps the docs that support those decisions. Work through the sections in order if you are setting things up for the first time, or jump to the one that matches what you are deciding today.
+
+## Start here
+
+- **[Set up your first plan](/quickstart/set-up-your-first-plan)** — the dashboard track, from an empty account to a working plan, with no code.
+- **[Concepts](/concepts)** — plain-language definitions of the terms the rest of the docs assume.
+- **[What is Schematic?](/what-is-schematic)** — what the product does, from metering and billing usage through to enforcing what each company is entitled to.
+- **[Catalog overview](/catalog/overview)** — the pricing patterns Schematic supports out of the box, including good-better-best, trials, seats, usage, credits, and hybrids of the last two.
+
+## Choose a pricing model
+
+- **[Billing overview](/billing/overview)** — how Schematic and Stripe divide the work, and which billing models are supported.
+- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage, configured per entitlement.
+- **[Seat-based billing models](/billing/seat-based-billing)** — included seats, purchased seats, and the overage model that lets customers add seats without a checkout.
+- **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates, with top-ups when it runs out.
+- **[Price by usage](/use-cases/usage-based-pricing)** — the decision itself, covering which metric to charge on and how limits turn into expansion.
+
+## The building blocks
+
+Once you know the model you are charging on, the catalog is where you express it.
+
+- **[Plans](/catalog/plans)** — the base packaging a company is on, and how a plan maps to a price in Stripe.
+- **[Add ons](/catalog/add-ons)** — extras a company buys on top of a plan, versioned separately from the plan itself.
+- **[Features](/feature-management/features)** — the units of value you package, entitle, and meter.
+- **[Feature types](/feature-management/feature-types)** — boolean, trait-based, and event-based, and which one fits what you are selling.
+- **[Feature management overview](/feature-management/overview)** — how plan membership, add ons, and overrides combine into a company's entitlements.
+
+## Build and change your catalog
+
+- **[Setting up your first plans](/catalog/guides/first-plans)** — a worked example building a free and a paid plan through to a working checkout.
+- **[Configuring the catalog](/catalog/configuration)** — the plan new companies start on, which plans customers can select, and the rules for upgrades and downgrades.
+- **[Rolling out new plan versions](/catalog/guides/plan-versions)** — publish a pricing or packaging change and decide who migrates and who is grandfathered.
+- **[Trials](/catalog/trials)** — add a trial to a plan, decide whether a card is required up front, and control where customers land when it ends.
+- **[Managing company plans](/catalog/managing-company-plans)** — what actually happens on an upgrade, a downgrade, a failed payment, or a trial expiry.
+- **[Creating a metered feature](/playbooks/metering)** — put a limit on a feature and decide how usage counts against it.
+
+## Price for a single customer
+
+- **[Custom plans](/catalog/custom-plans)** — negotiated pricing and packaging scoped to one company, billed by invoice rather than checkout.
+- **[Creating a custom plan](/catalog/guides/custom-plans)** — the step-by-step version of that flow, from draft to a paid invoice.
+- **[Company overrides](/feature-management/overrides)** — change one entitlement for one company without touching the plan everyone else is on.
+- **[Handling customer exceptions and feature trials](/playbooks/exceptions)** — when to reach for an override, a custom plan, or a new plan version.
+- **[Billing entities](/billing/billing-entities)** — let a parent company pay for another company's subscription while each keeps its own entitlements.
+
+## What customers see
+
+- **[Components overview](/components/overview)** — the embeddable billing UI, and what each component is for.
+- **[Create a component](/components/create-component)** — build and style a component in the Schematic builder before engineering embeds it.
+- **[Customer portal and checkout flow](/components/customer-portal)** — the self-service experience for buying, upgrading, downgrading, and managing payment.
+- **[Element library](/components/element-library)** — the blocks you can add to a portal, and which of them need Stripe connected.
+- **[Pricing table](/components/pricing-table)** — a public pricing table for your marketing site that reloads your plans every time it renders.
+- **[Tracking feature usage](/feature-management/feature-analytics)** — see how a feature is actually used before you price or repackage it.
+
+## Common jobs
+
+These pages are organized around outcomes rather than around the product, so start here when you know what you want to achieve but not what to configure.
+
+- **[Use cases](/use-cases/overview)** — the full index, cross-listed by the kind of business you are running.
+- **[Convert and expand users self-serve](/use-cases/self-serve-checkout)** — sign-up, upgrade, and capacity increases without a sales conversation.
+- **[Run free trials](/use-cases/free-trials)** — time-limited access and a clean conversion when the trial ends.
+- **[Run credit-based billing](/use-cases/credit-billing)** — sell a prepaid credit balance that burns down as customers use features.
+- **[Reprice and repackage safely](/use-cases/plan-versioning)** — roll out new pricing and migrate existing customers on your terms.
+- **[Close custom deals](/use-cases/custom-deals)** — bespoke pricing and entitlements for negotiated contracts.
+- **[Expand accounts with upsells and add-ons](/use-cases/expand-accounts)** — grow existing accounts with seats, add ons, and tier upgrades.
+- **[Protect your margins](/use-cases/margin-protection)** — hold the limits you priced for so heavy usage does not erode a plan.
+- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — soft warnings and grace periods instead of a hard stop nobody expected.
+- **[Manage exceptions with overrides](/use-cases/overrides)** — adjust one company's access for a trial, a goodwill gesture, or a deal in flight.
+- **[Spot churn and expansion with usage signals](/use-cases/usage-signals)** — read usage against entitlements to find at-risk and upsell-ready accounts.
+- **[Stay ahead of renewals and expirations](/use-cases/renewals)** — catch trials, overrides, and contracts before access changes on its own.
+
+## Hand off to engineering
+
+Everything above is configured in the Schematic dashboard and takes effect without a deploy. The work that does need code is checking entitlements before a feature runs, reporting usage back, and embedding the components you built.
+
+- **[Build with Schematic](/developers)** — the engineering hub, covering SDKs, the API, keys, and environments.
