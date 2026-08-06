@@ -42,18 +42,26 @@ navigation:
             contents:
               - page: Quickstart
                 path: ./docs/pages/quickstart/overview.mdx
-              - page: Account Setup
-                path: ./docs/pages/quickstart/account-setup.mdx
-              - page: Entitling a Feature
-                path: ./docs/pages/quickstart/entitling-a-feature.mdx
-              - page: Tracking Usage
-                path: ./docs/pages/quickstart/tracking-usage.mdx
-              - page: Components
-                path: ./docs/pages/quickstart/create-a-component.mdx
-              - page: Identifying Users
-                path: ./docs/pages/quickstart/identifying-users.mdx
-              - page: Setup the SDK
-                path: ./docs/pages/quickstart/setup-sdk.mdx
+              - section: Set up your first plan
+                contents:
+                  - page: Set up your first plan
+                    path: ./docs/pages/quickstart/set-up-your-first-plan.mdx
+                  - page: Create your account
+                    path: ./docs/pages/quickstart/account-setup.mdx
+                  - page: Add your first feature
+                    path: ./docs/pages/quickstart/entitling-a-feature.mdx
+                  - page: Meter usage
+                    path: ./docs/pages/quickstart/tracking-usage.mdx
+                  - page: Publish a billing portal
+                    path: ./docs/pages/quickstart/create-a-component.mdx
+              - section: Instrument your app
+                contents:
+                  - page: Instrument your app
+                    path: ./docs/pages/quickstart/instrument-your-app.mdx
+                  - page: Install the SDK
+                    path: ./docs/pages/quickstart/setup-sdk.mdx
+                  - page: Identify users and companies
+                    path: ./docs/pages/quickstart/identifying-users.mdx
           - page: Entity Relationship Diagram
             path: ./docs/pages/developer_resources/erd.mdx
       - section: Use cases
@@ -239,8 +247,8 @@ navigation:
                 path: ./docs/pages/integrations/stripe-integration-guide.mdx
               - page: Advanced Use Cases
                 path: ./docs/pages/integrations/stripe-advanced-use-cases.mdx
-              - page: Troubleshooting
-                path: ./docs/pages/integrations/stripe-faq.mdx
+              - link: Troubleshooting
+                href: /integrations/stripe-troubleshooting
           - page: Segment Integration
             path: ./docs/pages/integrations/segment.mdx
             icon: "fa-solid fa-circle-nodes"
@@ -367,8 +375,10 @@ navigation:
             path: ./docs/pages/production_readiness/roles-and-permissions.mdx
       - section: Troubleshoot
         contents:
-          - link: Stripe sync issues
-            href: /integrations/stripe-troubleshooting
+          - page: Overview
+            path: ./docs/pages/troubleshooting/overview.mdx
+          - page: Commonly Seen Stripe Issues
+            path: ./docs/pages/integrations/stripe-faq.mdx
       - section: AI tooling
         contents:
           - page: For Developers
@@ -608,6 +618,17 @@ analytics:
 css: ./styles.css
 
 redirects:
+  - source: "/architecture/security"
+    destination: "/production_readiness/security"
+    permanent: true
+  - source: "/architecture/availability"
+    destination: "/production_readiness/availability"
+    permanent: true
+  - source: "/architecture/observability"
+    destination: "/production_readiness/observability"
+    permanent: true
+  - source: "/architecture/roles-and-permissions"
+    destination: "/production_readiness/roles-and-permissions"
   - source: "/using-schematic/who-uses-schematic"
     destination: "/overview"
     permanent: true
@@ -624,7 +645,7 @@ redirects:
     destination: "/feature-management/:slug"
     permanent: true
   - source: "/security"
-    destination: "/architecture/security"
+    destination: "/production_readiness/security"
     permanent: true
   - source: "/quickstart"
     destination: "/quickstart/overview"
@@ -642,19 +663,19 @@ redirects:
     destination: "/api-reference/companies/upsert-user-trait"
     permanent: true
   - source: "/availability"
-    destination: "/architecture/availability"
-    permanent: true
-  - source: /environments"
-    destination: "/developer_resources/environments"
+    destination: "/production_readiness/availability"
     permanent: true
   - source: "/developer_resources/entity-key-management"
     destination: "/developer_resources/key_management"
+    permanent: true
+  - source: "/developer_resources/concepts"
+    destination: "/concepts"
     permanent: true
   - source: "/quickstart/components"
     destination: "/quickstart/create-a-component"
     permanent: true
   - source: "/companies"
-    destination: "/developer_resources/concepts#user-and-company-profiles"
+    destination: "/concepts#user-and-company-profiles"
     permanent: true
   - source: "/getting-started/developer-resources/sample-apps/next-js-weather-search-app"
     destination: "/developer_resources/sample_apps/sample_nextjs"
@@ -678,7 +699,7 @@ redirects:
     destination: "/developer_resources/environments"
     permanent: true
   - source: "/users"
-    destination: "/developer_resources/concepts#user-and-company-profiles"
+    destination: "/concepts#user-and-company-profiles"
     permanent: true
   - source: "/components"
     destination: "/components/overview"

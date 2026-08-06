@@ -1,10 +1,11 @@
 ---
-title: Tracking Usage
-subtitle: Quickly track usage to power Usage Based billing
+title: Meter usage
+subtitle: Count each use and give a plan a monthly allowance
 slug: quickstart/tracking-usage
+description: Step three of the dashboard track. Create an event-based feature, set a monthly allowance on a plan, and confirm usage is arriving.
 ---
 
-In the [quickstart app](https://github.com/schematichq/schematic-quickstart), the Tracking Usage page shows 2 buttons, one of which is disabled. Let's create an event-based feature in Schematic and entitle it to our plan so that this button will become clickable and track usage.
+Some features are not on or off. They are worth measuring, and often worth charging for. An event-based feature counts each use and enforces an allowance per plan, which is the foundation of usage-based pricing. This is step three of [Set up your first plan](/quickstart/set-up-your-first-plan).
 
 <iframe
   width="100%"
@@ -18,75 +19,47 @@ In the [quickstart app](https://github.com/schematichq/schematic-quickstart), th
 
 ## Create an event-based feature
 
-First, we'll need to create an event-based feature in Schematic.
-
 1. Select **Features** from the left navigation.
-2. Click "Create" in the top right of the screen.
-3. Name the feature "New Event Feature" and set the type to **Event-based**. This lets us track events and power usage-based billing when we entitle it to a plan.
+2. Click **Create** in the top right of the screen.
+3. Name the feature "New Event Feature" and set the type to **Event-based**.
 
 ![Create an event-based feature step 1](../../assets/images/quickstart/quickstart-tracking-usage-1.png)
 
-4. Scroll down to **Flag** and set the flag key to "new-event-feature" -- this is the value the quickstart app expects.
+4. Scroll down to **Flag** and set the flag key to "new-event-feature". As with any feature, the flag key is the name your application uses to ask about it.
 
 ![Create an event-based feature step 2](../../assets/images/quickstart/quickstart-tracking-usage-2.png)
 
-5. Under **Event**, select or create the event that meters this feature. Enter `new-event-feature-clicked` (the value the quickstart app sends) and choose "create event". Then click "Create feature".
+5. Under **Event**, select or create the event that meters this feature. Enter "new-event-feature-clicked" and choose **create event**. Then click **Create feature**. The event name is what your application reports every time a customer uses the feature, so agree on it with your engineers.
 
 ![Create an event-based feature step 3](../../assets/images/quickstart/quickstart-tracking-usage-3.png)
 
-## Entitle the feature to a plan
+## Set the allowance on a plan
 
-Now that we have a feature, we need to "entitle" it to a plan -- this is how we determine how much usage each plan provides and/or how much we charge for each use of the feature.
+Entitling an event-based feature does two things at once. It decides how much usage the plan includes, and it decides what happens when a company runs out.
 
-When you create the feature, you'll drop onto that feature's page. If not, select **Features** from the left navigation and click the feature you just created (New Event Feature).
+Creating the feature drops you onto that feature's page. If you navigated away, select **Features** from the left navigation and click **New Event Feature**.
 
-1. On the **Entitlements** tab, click the plan you want to give access to, or click "Add plan entitlement" to choose one.
-2. In the **Monetization Settings** panel, set the **Type** to **Numerical** and enter a **Value** -- this is how many events a company can use per period.
-3. Under **Define reset**, set the **Period** to "Monthly" and have the usage reset "According to billing period" (the most common setting). This means the allowance resets each month, measured from the day the company signed up (e.g. if they sign up on March 15th, the "month" runs March 15th to April 14th).
-4. Click "Save changes".
+1. On the **Entitlements** tab, click the plan you want to give access to, or click **Add plan entitlement** to choose one.
+2. In the **Monetization Settings** panel, set the **Type** to **Numerical** and enter a **Value**. This is how many events a company on this plan can use per period.
+3. Under **Define reset**, set the **Period** to "Monthly" and have the usage reset **According to billing period**, the most common setting. The allowance then resets each month measured from the day the company signed up. A company that signs up on March 15th gets a month running March 15th to April 14th.
+4. Click **Save changes**.
 
 The example below shows an existing event-based feature, **AI Conversations**, entitled to the **Free** plan with a limit of 50 per month.
 
 ![Entitle Usage](../../assets/images/quickstart/quickstart-tracking-usage-4.png)
 
+## Confirm the usage is arriving
 
-## Code example
-
-Below is the code that controls the button we just enabled. Tracking users and plans and then determining what a user is entitled to happens within Schematic. Our APIs and SDKs expose an interface similar to a feature flag -- you just need to check if the user has access and respond accordingly.
-
-```
-const {
-  value: isFeatureEnabled,
-  featureUsage,
-  featureAllocation,
-  featureUsageExceeded,
-} = useSchematicEntitlement("demo-event-feature");
-
-const { track } = useSchematicEvents();
-
-<button
-  className="bg-blue-500 text-white px-4 py-2 rounded-md"
-  disabled={!isFeatureEnabled}
-  onClick={() => { track({ event: 'demo-event-feature-clicked' }); } }
->
-  {featureUsageExceeded ? 'No more clicks allowed!' : 'Track Clicks!'}
-</button>
-
-<div>
-  {featureUsage} / {featureAllocation}
-</div>
-```
-
-## Setting Last Seen Timestamp
-
-Schematic tracks the most recent `track` or `identify` (see [identifying users](/quickstart/identifying-users)) event for a company and user. This is helpful while getting started to make sure your events are being sent to Schematic. Once implemented, this is also helpful for understanding usage patterns and customer health. 
+Once your application is reporting the event, each company's record shows a last seen timestamp for the most recent activity Schematic received. While you are getting set up, this is the quickest way to confirm the connection is working. Later it becomes a useful health signal, because a paying account that has gone quiet is worth a conversation.
 
 ![Last Seen Timestamp](../../assets/images/quickstart/quickstart-last-seen.png)
 
-## We're done!
+If the timestamp never updates, the event name in your application probably does not match the one you entered above. Check it with whoever did the integration.
 
-You just created a usage-based feature in Schematic and entitled it to a plan. Usage based features are a cornerstone of most modern billing plans. In this demo, we created a simple entitlement that gives companies on the plan a set number of usages each month. There are [many more usage based billing setups](/billing/usage-based-billing) that Schematic supports.
+## What you built
 
-## Next steps
+Companies on this plan now get a set number of uses each month, enforced automatically, with usage visible in the dashboard. That is the simplest usage-based setup. Schematic supports [many more](/billing/usage-based-billing), including overages, credit burndown, and charging per unit.
 
-We recommend you checkout the Components page in the quickstart app to see how to create a fully featured Billing Portal.
+## Next step
+
+Next, [publish a billing portal](/quickstart/create-a-component) so customers can see their plan and usage, and upgrade without emailing you.
