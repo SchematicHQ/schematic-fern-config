@@ -1,10 +1,12 @@
 ---
 title: For Product Teams
 slug: product-teams
-description: "Where product and packaging teams start with Schematic: plans, features, entitlements, add ons, pricing models, and what customers see at checkout."
+description: "Where product and packaging teams start with Schematic: pricing models, credits, plans, features, entitlements, add ons, and what customers see at checkout."
 ---
 
-If you own packaging and pricing, these are your decisions. Which plans you sell, what each one includes, where the limits sit, what costs extra, who gets an exception, and what a customer sees when they decide to upgrade. In Schematic all of that is configuration rather than code, so you can change a plan, launch an add on, or publish new pricing without waiting on a release.
+If you own packaging and pricing, these are your decisions. What you charge for and how you meter it, which plans you sell, where the limits sit, what costs extra, who gets an exception, and what a customer sees when they decide to upgrade. In Schematic all of that is configuration rather than code, so you can change a plan, launch an add on, or publish new pricing without waiting on a release.
+
+Usage-based pricing is where those decisions get hardest. Which metric you charge on, how much of it you include in the plan, and what happens when a customer runs past that allowance all come back to whether the buyer can predict the bill. Schematic lets you answer that in the packaging itself, so customers can see what they have consumed, forecast where they will land, and set their own spending limits. You can price on real usage rather than discounting to a flat fee to get the deal signed, at any size of company. Seat-based and hybrid packaging use the same catalog and the same controls.
 
 This page maps the docs that support those decisions. Work through the sections in order if you are setting things up for the first time, or jump to the one that matches what you are deciding today.
 
@@ -12,10 +14,20 @@ This page maps the docs that support those decisions. Work through the sections 
 
 - **[Set up your first plan](/quickstart/set-up-your-first-plan)** — the dashboard track, from an empty account to a working plan, with no code.
 - **[Concepts](/concepts)** — plain-language definitions of the terms the rest of the docs assume.
-- **[What is Schematic?](/what-is-schematic)** — what the product does and where it sits between your app and your billing system.
+- **[What is Schematic?](/what-is-schematic)** — what the product does, from metering and billing usage through to enforcing what each company is entitled to.
 - **[Catalog overview](/catalog/overview)** — the pricing patterns Schematic supports out of the box, including good-better-best, trials, seats, usage, credits, and hybrids of the last two.
 
+## Choose a pricing model
+
+- **[Billing overview](/billing/overview)** — how Schematic and Stripe divide the work, and which billing models are supported.
+- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage, configured per entitlement.
+- **[Seat-based billing models](/billing/seat-based-billing)** — included seats, purchased seats, and the overage model that lets customers add seats without a checkout.
+- **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates, with top-ups when it runs out.
+- **[Price by usage](/use-cases/usage-based-pricing)** — the decision itself, covering which metric to charge on and how limits turn into expansion.
+
 ## The building blocks
+
+Once you know the model you are charging on, the catalog is where you express it.
 
 - **[Plans](/catalog/plans)** — the base packaging a company is on, and how a plan maps to a price in Stripe.
 - **[Add ons](/catalog/add-ons)** — extras a company buys on top of a plan, versioned separately from the plan itself.
@@ -31,14 +43,6 @@ This page maps the docs that support those decisions. Work through the sections 
 - **[Trials](/catalog/trials)** — add a trial to a plan, decide whether a card is required up front, and control where customers land when it ends.
 - **[Managing company plans](/catalog/managing-company-plans)** — what actually happens on an upgrade, a downgrade, a failed payment, or a trial expiry.
 - **[Creating a metered feature](/playbooks/metering)** — put a limit on a feature and decide how usage counts against it.
-
-## Choose a pricing model
-
-- **[Billing overview](/billing/overview)** — how Schematic and Stripe divide the work, and which billing models are supported.
-- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage, configured per entitlement.
-- **[Seat-based billing models](/billing/seat-based-billing)** — included seats, purchased seats, and the overage model that lets customers add seats without a checkout.
-- **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates, with top-ups when it runs out.
-- **[Price by usage](/use-cases/usage-based-pricing)** — the decision itself, covering which metric to charge on and how limits turn into expansion.
 
 ## Price for a single customer
 
