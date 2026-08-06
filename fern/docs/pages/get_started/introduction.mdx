@@ -5,51 +5,60 @@ description: See how Schematic bills usage, seats, and credits, and enforces eve
 slug: what-is-schematic
 ---
 
-Schematic is the entitlement layer for B2B SaaS applications. We sit between your product and your billing system, giving you a single source of truth for who has access to what—and automating the enforcement of plans, limits, and usage across your application.
+Schematic is a usage-based billing engine for AI and software companies. It handles the billing work that general-purpose tools struggle with: metered AI and token consumption, credit balances that several features draw down at different rates, real-time usage enforcement, and the negotiated, sales-led deals that break self-serve billing tools.
+
+Usage-based pricing is where most teams arrive, and seat-based, hybrid, and flat-rate plans are supported the same way. You define plans, prices, limits, and credit bundles in one catalog, and Schematic meters consumption, enforces entitlements in real time, and bills for what customers actually use. Teams run it from their first paid customer through their largest enterprise contract.
 
 ## Why teams use Schematic
 
-**For GTM teams:** Launch plans, change limits, manage trials, and grant customer exceptions—all without engineering tickets. If you can imagine a pricing change, you can ship it yourself.
+Usage-based pricing tends to stall in procurement because buyers do not trust it. They fear runaway bills, and they fear being throttled without warning. Schematic gives your customers visibility into what they have consumed, forecasts of where they will land, self-service controls, and configurable spending limits, so both sides can sign knowing usage will stay inside budget. That takes friction out of procurement and shortens the sales cycle.
 
-**For Engineering teams:** Stop maintaining entitlement infrastructure. No syncing billing state across systems, no feature flag sprawl for plan logic, no building usage metering systems, no manual database overrides when Sales needs an exception.
+**For GTM teams:** Launch plans, change prices and limits, manage trials, and grant customer exceptions, all without engineering tickets. If you can imagine a pricing change, you can ship it yourself.
 
-With Schematic, teams ship pricing changes faster, reduce engineering overhead, and get out of billing projects forever.
+**For Engineering teams:** Stop building billing infrastructure. No usage metering system to run, no billing state to reconcile across systems, no feature flag sprawl for plan logic, no manual database overrides when Sales needs an exception.
 
 ## How Schematic works with Stripe
-**Stripe handles billing and payments. Schematic handles entitlements and plan enforcement.**
 
-We keep the two in sync automatically, so Stripe remains your source of truth for subscriptions while your application gets a clean API for access control and usage tracking.
+**Schematic runs the billing engine. Stripe runs the payment rails.**
+
+Your catalog lives in Schematic: plans, add ons, prices, usage-based billing models, credit bundles, and per-company overrides. Schematic meters consumption, enforces entitlements as customers use your product, and drives the subscription lifecycle, then keeps Stripe in step through a native two-way sync so invoicing and payments settle where your finance team already works.
+
 What this means in practice:
 
-- **Stripe stays your payment processor** - All subscription and payment data lives in Stripe
-- **Schematic adds the entitlement layer** - Plan limits, feature access, usage metering, and customer overrides
-- **Automatic sync** - No webhook handlers to maintain, no billing state to reconcile
-- **Clean separation** - GTM can modify packaging in Schematic without touching Stripe configuration
+- **Pricing and packaging live in Schematic** - Plans, limits, usage-based billing models, credit bundles, and customer overrides
+- **Stripe processes payments** - Invoices, payment methods, retries, receipts, and tax
+- **Two-way sync** - Changes on either side land on the other, with no webhook handlers to maintain and no billing state to reconcile
+- **Clean separation** - GTM can change packaging and pricing in Schematic without touching Stripe configuration
 
-This architecture lets you adopt sophisticated pricing models (usage-based, hybrid, seat-based, feature-gated) without rebuilding your billing infrastructure or tightly coupling pricing logic into your application code.
+This lets you run sophisticated pricing models (usage-based, credit-based, hybrid, seat-based, feature-gated) without building metering, enforcement, and reconciliation yourself, and without coupling pricing logic into your application code.
 
 [Learn more about Schematic's Stripe Integration.](/integrations/stripe)
 
 ## What you can do with Schematic
 
-### Enforce entitlements with Feature Flags
+### Bill for usage and credits
 
-[Control which customers access which features](/feature-management/overview) based on their plan, usage, or custom rules—without touching application code. Update limits, bundle features, or create custom configurations from the Schematic dashboard.
+[Turn metered consumption into accurate invoices](/billing/usage-based-billing) with pay-as-you-go, fixed fee with overage, volume, or graduated pricing. Or [sell a prepaid credit balance](/use-cases/credit-billing) that burns down as customers use features, with the ledger and the invoice always agreeing.
+
+### Enforce entitlements in real time
+
+[Control which customers access which features](/feature-management/overview) based on their plan, usage, or custom rules, without touching application code. Update limits, bundle features, or create custom configurations from the Schematic dashboard.
 
 ### Track usage with Metering
 
-[Automatically track customer usage](/feature-management/tracking-usage) for billing, enforcing limits, or telemetry. Usage events can be attributed to companies, users, or features, forming the basis for usage-based pricing and customer insights.
+[Track customer usage](/feature-management/feature-analytics) for billing, enforcing limits, or telemetry. Usage events can be attributed to companies, users, or features, forming the basis for usage-based pricing and customer insights.
 
 ### Embed UI Components
 
 [Add pre-built components](/components/overview) for checkout, upgrade/downgrade flows, customer portals, pricing tables, and usage meters. Give customers self-service control while maintaining consistent branding
+
 ### Manage the entire customer lifecycle
 
 Get a 360-degree view combining account data, usage patterns, and billing status. Power internal workflows for sales, support, and account management with complete customer context.
 
 ### Handle exceptions gracefully
 
-Grant temporary access, apply credits, create custom plans, or [override limits](/feature-management/overrides) for individual customers—all through the dashboard or API, no code changes required.
+Grant temporary access, apply credits, create custom plans, or [override limits](/feature-management/overrides) for individual customers, all through the dashboard or API, no code changes required.
 
 ## Core concepts
 
@@ -67,12 +76,12 @@ A centralized record aggregating company information, subscription details, and 
 
 ### Subscriptions
 
-[Stripe subscriptions](/integrations/stripe) automatically link to Company Profiles. Companies can have membership in multiple Plans or add ons simultaneously, with the most permissive entitlements applying.
+Subscriptions link to Company Profiles automatically and stay in sync with [Stripe](/integrations/stripe). Companies can have membership in multiple Plans or add ons simultaneously, with the most permissive entitlements applying.
 
 ### Metering
 
-[Track usage events](/feature-management/tracking-usage) for monetization or enforcement. Events can be attributed to companies, users, or features, supporting flexible usage-based models or packaged limits.
+[Track usage events](/feature-management/feature-analytics) for monetization or enforcement. Events can be attributed to companies, users, or features, supporting flexible usage-based models or packaged limits.
 
 ### Getting started
 
-Ready to decouple your pricing logic from your application code? Check out our [Quick Start Guide](/quickstart/overview) or book a demo to see Schematic in action.
+Ready to move your pricing and packaging into Schematic? Check out our [Quick Start Guide](/quickstart/overview) or book a demo to see Schematic in action.
