@@ -16,9 +16,28 @@ The trouble starts after that first sale. Upgrades, downgrades, add-ons, and mid
 
 Drop in Schematic's pricing table and checkout components. They render your live plans straight from the catalog, run the full purchase, upgrade, downgrade, and add-on flow on top of Stripe, and provision entitlements the instant checkout completes, with no webhook mapping to maintain. When you change pricing or restructure plans in Schematic, the checkout UI updates without a deploy.
 
-## Learn more
+## What it looks like
+
+![The plan catalog behind the pricing table](../../assets/images/use-cases/plans-catalog.png)
+
+The plans, prices, and entitlements the checkout renders from. Anything marked as part of a catalog appears to customers, so restructuring what you sell happens here rather than in the pricing page's markup. Find it under **Plans**.
+
+![Plans Table, Upcoming Bill, and Invoices elements](../../assets/images/use-cases/component-elements-billing.png)
+
+The Plans Table element turns that catalog into the customer-facing pricing and upgrade UI, showing the current plan next to the ones available. Upcoming Bill and Invoices cover what a customer owes and what they have already paid, so an upgrade does not send them elsewhere to check.
+
+![A company's plan change history](../../assets/images/use-cases/plan-history.png)
+
+Completed purchases land as **Component Checkout** rows, each with the plan the customer came from and the plan they moved to. Entitlements are provisioned at that moment, so there is no window where someone has paid but cannot use what they bought. Find it on the company profile.
+
+## Configure it
 
 - [Pricing Table](/components/pricing-table) — the public-facing plan and pricing component.
+- [Configuring the Catalog](/catalog/configuration) — control which plans appear in checkout and where.
 - [Customer Portal and Checkout Flow](/components/customer-portal) — the full checkout and subscription-management experience.
+
+## Implement it
+
+- [Add to Your App](/components/set-up) — embed the pricing table and checkout in React, Vue, or plain JS.
 - [Standalone Components](/components/standalone-components) — lightweight components for public pricing pages.
 - [Quickstart](/quickstart/overview) — set up your account, plans, and SDK first.

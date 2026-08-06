@@ -16,8 +16,22 @@ That uncertainty has become a procurement issue, not just a UX one. When Microso
 
 Schematic exposes a pre-flight cost endpoint that returns a cost estimate, the customer's current balance, and their plan state for a given action. You can render "this will cost about 15-20 credits, you have 312 remaining" right in your product before the customer runs it, so they act with confidence instead of fear. The same check is a natural upsell moment: when a customer is short, you can offer credits or an upgrade in the flow rather than failing the action.
 
-## Learn more
+## What it looks like
 
-- [Credit Burndown Billing Model](/billing/credit-burndown) — the credit balance a pre-flight check reads against.
+![A company's credit balance and grants](../../assets/images/use-cases/credit-balance-grants.png)
+
+The balance a pre-flight check reads against, 54 credits remaining across the grants that make it up. Rendering that number next to an action's estimated cost is what turns "run it and find out" into a decision the customer can make. Find it on the company profile under **Credit balance**.
+
+![Plan, payment method, and entitlement usage for one company](../../assets/images/use-cases/entitlement-usage-rail.png)
+
+The plan state a pre-flight response carries alongside the estimate: which plan the company is on, what it costs, and how much of each entitlement is left before the period resets. When the balance will not cover the action, this is the context you use to offer the right top-up or upgrade instead of failing the request.
+
+## Configure it
+
+- [Credit Burndown Billing Model](/billing/credit-burndown) — the credit balance and consumption rates a pre-flight check reads against.
 - [Customer Portal and Checkout Flow](/components/customer-portal) — surface balance and add-credit paths in-product.
+
+## Implement it
+
+- [Accessing credit information via API](/billing/credit-burndown#accessing-credit-information-via-api) — read balances and grants before an action runs.
 - [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — react as customers approach their balance.

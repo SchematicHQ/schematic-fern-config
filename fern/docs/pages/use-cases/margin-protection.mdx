@@ -16,8 +16,22 @@ The homegrown alternative is to scatter cap checks through application code, but
 
 Schematic enforces entitlements and usage limits at runtime, soft limits, hard caps, and overage thresholds, so a heavy user is held to what their plan allows the instant they reach it, not at the end of the month. The caps are configured from the UI alongside the rest of your pricing, so the guardrails that protect your margins move with your pricing instead of lagging a deploy behind it, and the business team can tune them without pulling in engineering.
 
-## Learn more
+## What it looks like
+
+![Entitlement usage against limits for one company](../../assets/images/use-cases/entitlements-detail.png)
+
+What the account is entitled to and how much of it is gone: 693 dashboard prompts used with 54 remaining before the period resets, 4 of 10 user seats taken, and data sources already at 1 against a limit of 0. Find it on the company profile, under **Entitlements Usage**.
+
+![Flag checks resolving in real time](../../assets/images/use-cases/flag-checks.png)
+
+Each check your application makes, with the flag, the timestamp, the user, and the company it was evaluated for. This is enforcement actually happening, one decision per request, rather than a report assembled after the period closes.
+
+## Configure it
 
 - [Usage Based Billing Models](/billing/usage-based-billing) — configure soft limits, hard caps, and overage.
 - [Company Overrides](/feature-management/overrides) — set per-customer limits where a deal requires it.
+
+## Implement it
+
+- [Flags](/feature-management/flags) — the checks your application makes to enforce a limit at runtime.
 - [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — alert internally when an account runs hot.

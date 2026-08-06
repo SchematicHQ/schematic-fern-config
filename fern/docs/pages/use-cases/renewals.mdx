@@ -16,9 +16,27 @@ In practice, those lists drift and reminders slip. A trial lapses with no conver
 
 Time-bound access in Schematic carries its expiration with it: trials have an end date and defined conversion behavior, overrides can be set to expire, and subscription status reflects where a customer is in their lifecycle. You can surface trial countdowns in-product, configure what happens when a trial ends, convert to paid or fall back to a default plan, and use webhooks to alert your team ahead of a lapse so the renewal or conversion conversation happens before access changes.
 
-## Learn more
+## What it looks like
+
+![A company's subscription with its status and current period](../../assets/images/use-cases/subscription-stripe.png)
+
+The renewal date is a property of the subscription itself: an **Active** badge, the price, and the period it runs through. **See in Stripe** opens the same record in billing when you need the invoice side of it. Find it on the company profile, on the **Subscription** tab.
+
+![A company override with an expiry date](../../assets/images/use-cases/company-override.png)
+
+Overrides carry their own expiry date, so a goodwill grant or a feature trial reverses itself on schedule rather than living on until someone notices. The **Expiry Date** column is where you check what is about to lapse on an account. Find it on the company profile.
+
+![Plan, payment method, and entitlement usage for one company](../../assets/images/use-cases/entitlement-usage-rail.png)
+
+The same dates from the customer's side: the plan they are on, the next bill due, and when each entitlement resets. This is the context a CSM wants before a renewal call, since an account that is nowhere near its limits and an account that is pressed against them need different conversations.
+
+## Configure it
 
 - [Trials](/catalog/trials) — trial end dates, conversion, and rendering trial state in your app.
 - [Company Overrides](/feature-management/overrides) — set overrides to expire on a date.
 - [Configuring the Catalog](/catalog/configuration) — set trial expiry behavior and fallback plans.
+
+## Implement it
+
 - [Webhooks](/integrations/webhooks) — alert your team ahead of an expiration.
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — fire when an account approaches a limit before renewal.

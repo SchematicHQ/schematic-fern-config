@@ -14,10 +14,25 @@ The problem is that this runs on a deadline, every billing period, with money on
 
 ## How Schematic fits in
 
-Map a usage-based feature to a Stripe metered product, and Schematic reports billable usage to Stripe in real time, reflected consistently in your app, the Schematic dashboard, and Stripe. Choose the billing model per entitlement, pay-as-you-go, fixed fee with overage, volume, or graduated, and use negative-quantity events for refunds and corrections. Stripe stays the source of truth for invoicing; Schematic keeps the quantities accurate.
+Map a usage-based feature to a Stripe metered product, and Schematic reports billable usage to Stripe in real time, reflected consistently in your app, the Schematic dashboard, and Stripe. Choose the billing model per entitlement, pay-as-you-go, fixed fee with overage, volume, or graduated, and use negative-quantity events for refunds and corrections. Stripe issues the invoice, and Schematic keeps the quantities on it accurate.
 
-## Learn more
+## What it looks like
+
+![A company's subscription with its line items and totals](../../assets/images/use-cases/subscription-stripe.png)
+
+What the customer will be billed, line item by line item, with the quantity behind each one and the period it covers. **See in Stripe** opens the matching record on the billing side, so checking that the two agree takes one click instead of an export. Find it on the company profile, on the **Subscription** tab.
+
+![The raw usage events behind the charges](../../assets/images/use-cases/usage-events.png)
+
+The events every billable quantity was assembled from, each with its timestamp, the company and user it was attributed to, and its full properties. When a customer questions a charge, this is the trail back to the actions that produced it. Find it under **Events**.
+
+## Configure it
 
 - [Usage Based Billing Models](/billing/usage-based-billing) — configure how usage maps to charges.
 - [Stripe Integration](/integrations/stripe) — how usage features map to Stripe metered products.
+
+## Implement it
+
 - [Stripe Integration Guide](/integrations/stripe-integration-guide) — the technical setup for mapping and syncing.
+- [Creating a metered feature](/playbooks/metering) — send the usage events that become billable quantities.
+- [Backfills and usage corrections](/playbooks/backfill-and-corrections) — correct a period with negative-quantity events.

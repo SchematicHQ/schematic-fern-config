@@ -16,8 +16,21 @@ A 24-hour snapshot is not a ledger, though. It isn't transactional, so it can't 
 
 Schematic gives you a real-time credit ledger with exactly-once event semantics, idempotent writes, and replay safety, so every action draws the balance down accurately and enforcement evaluates against current state. Holds let you reserve credits before an action and then commit or release them based on the outcome, so an in-flight agent can't overspend or get charged for work that failed. And pricing versioning keeps legacy customers on their old rates while new customers get the new ones, with no migration scramble.
 
-## Learn more
+## What it looks like
+
+![A company's credit balance broken out by grant](../../assets/images/use-cases/credit-balance-grants.png)
+
+The current balance and each grant behind it, with its price, expiry date, and how far it has burned down, so you can tell which grant a given draw came out of rather than reading a single aggregate number. **View ledger** opens the entry-by-entry history. Find it on the company profile under **Credit balance**.
+
+![The raw usage events the ledger is built from](../../assets/images/use-cases/usage-events.png)
+
+Every event as it arrived, with its name, timestamp, attributed user, and the full properties payload, so any balance can be traced back to the actions that produced it. Find it under **Events**.
+
+## Configure it
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) — credit grants, consumption, and balances on the ledger.
+
+## Implement it
+
 - [Creating a metered feature](/playbooks/metering) — send the usage events the ledger is built from, including idempotency keys.
 - [Backfills and usage corrections](/playbooks/backfill-and-corrections) — correct and replay events safely.

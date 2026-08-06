@@ -16,7 +16,22 @@ Editing in place means a change intended for new customers can silently alter wh
 
 Every edit to a plan becomes a new draft version that you publish when you're ready. At publish time, you decide how current subscribers are handled: migrate all of them, choose specific companies, or keep them on their existing version. You can track migration progress per plan, so you always know exactly who is on which version and nobody moves until you say so.
 
-## Learn more
+## What it looks like
+
+![The plan catalog with version numbers and company counts](../../assets/images/use-cases/plans-catalog.png)
+
+One row per plan, each showing its published version and how many companies are on it. Enterprise is on v16 with 6 companies, Free is on v9 with 74. Repricing does not fork the list into near-duplicate plans; it advances the version number on the plan that is already there. Find it under **Plans**.
+
+![A company's plan change history](../../assets/images/use-cases/plan-history.png)
+
+The audit trail for one account, showing every move between plans, the origin and destination, and what caused it. Migrations you run appear here as **Plan migration** rows alongside self-serve checkouts and changes made by your team. Find it on the company profile.
+
+## Configure it
 
 - [Rolling Out New Plan Versions](/catalog/guides/plan-versions) — the full publish-and-migrate flow.
 - [Plans](/catalog/plans) — how plan versions and drafts work.
+
+## Implement it
+
+- [Managing Company Plans](/catalog/managing-company-plans) — move a specific company between plans and versions.
+- [Plan Changed Webhook](/integrations/webhooks/plan-changed) — react in your application when a company's plan version changes.
