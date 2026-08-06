@@ -1,90 +1,73 @@
 ---
 title: Welcome to Schematic Docs
 slug: overview
+description: "Schematic is a usage-based billing engine for AI and software companies, covering metered consumption, credit balances, and real-time enforcement."
 ---
 
-Find all the guides and resources you need to implement billing and feature flags with Schematic.
+Schematic is a usage-based billing engine for AI and software companies. Meter consumption, bill on credits, enforce every limit in real time, and give customers a live view of what they are spending.
 
-## Quickstarts & Tutorials
+Usage-based pricing keeps gaining ground because it lines up what a customer pays with what they actually get out of the product. One of the key risks is when buyers cannot predict the bill. Schematic gives your customers visibility into what they are using, forecasts of where they will land, and spending limits they set themselves, so a usage-based deal clears review at any size of company.
 
-<CardGroup cols={3}>
-  <Card title="Quickstart App" icon="fa-solid fa-circle-play" href="/quickstart/overview">
-    Try out Schematic's core features with our quickstart app.
-  </Card>
-  <Card title="Setup your First Plans" icon="fa-solid fa-books" href="/catalog/guides/first-plans">
-    Setup and publish your first plans with Schematic.
-  </Card>
-  <Card title="Pricing Models" icon="fa-solid fa-book-open-cover" href="/playbooks/overview">
-    Learn how to implement common pricing models with Schematic.
-  </Card>
-</CardGroup>
+Schematic supports all pricing setups including seats, flat-rate tiers, and hybrid plans. You can price each part of your product the way it actually sells, and change the mix later without touching application code.
 
-## Explore by Feature
+## Start here
 
 <CardGroup cols={2}>
-  <Card title="Feature Flags" icon="fa-solid fa-flag" href="/feature-management/overview">
-    Learn how to manage feature flags with Schematic.
+  <Card title="Set up your first plan" icon="fa-solid fa-table-list" href="/quickstart/set-up-your-first-plan">
+    Setup your pricing in Schematic's app. Go from an empty account to a published plan with pricing, metered features, limits, and a working checkout. No code.
   </Card>
-  <Card title="Plans" icon="fa-solid fa-table-list" href="/catalog/overview">
-    Setup and manage your plans with Schematic.
-  </Card>
-  <Card title="Integrate with Stripe" icon="fa-brands fa-stripe" href="/billing/overview">
-    Sync data bi-directionally with Stripe to keep your billing data up to date.
-  </Card>
-  <Card title="Drop-in UI Components" icon="fa-solid fa-toolbox" href="/components/overview">
-   Deploy billing quickly with our out of the box UI components like Customer Portal and Checkout.
+  <Card title="Instrument your app" icon="fa-solid fa-code" href="/quickstart/instrument-your-app">
+    Wire Schematic in your product. Install an SDK, identify your companies and users, report the usage you bill on, and check an entitlement before a feature runs.
   </Card>
 </CardGroup>
 
-## Explore by SDK
+## What teams build with Schematic
 
-<CardGroup cols={3}>
-  <Card title="React" icon="fa-brands fa-react" href="/developer_resources/sdks/react">
-    Easily add Schematic SDK to your React or Next.js app.
-  </Card>
-  <Card title="Go" icon="fa-brands fa-golang" href="/developer_resources/sdks/go">
-    Quickly instrument your Go application with the Schematic SDK.
-  </Card>
-  <Card title="Node.js" icon="fa-brands fa-node-js" href="/developer_resources/sdks/nodejs">
-    Quickly instrument your node.js application with the Schematic SDK.
-  </Card>
-</CardGroup>
+- **[Price by usage](/use-cases/usage-based-pricing)** — meter tokens, agent runs, or whatever unit carries your cost, and turn rising usage into expansion.
+- **[Run credit-based billing](/use-cases/credit-billing)** — sell a prepaid credit balance that burns down as customers use features.
+- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
+- **[Show customers what an action will cost](/use-cases/pre-flight)** — preview the price before an expensive run, so nobody is surprised by the bill.
+- **[Close custom deals](/use-cases/custom-deals)** — package bespoke pricing and entitlements for negotiated contracts without touching code.
+- **[Convert and expand users self-serve](/use-cases/self-serve-checkout)** — let customers sign up, upgrade, and add capacity without talking to sales.
 
-[View all SDKs &gt;](/developer_resources/sdks/overview)
+[See all 20 use cases &gt;](/use-cases/overview)
 
-## Learn the Concepts
+## Where to start
 
-<CardGroup cols={2}>
-  <Card title="What is Schematic?" icon="fa-solid fa-school" href="/what-is-schematic">
-    Learn more about the core concepts of Schematic.
-  </Card>
-  <Card title="Why Feature Flags?" icon="fa-solid fa-flag" href="https://schematichq.com/blog/feature-flags-theory-and-reality">
-    Our CTO, Ben, explains why we built Schematic.
-  </Card>
-  <Card title="Managing Customer Plans" icon="fa-solid fa-clipboard-list" href="/catalog/managing-company-plans">
-    Learn how to manage customer plans with Schematic.
-  </Card>
-  <Card title="Key Technical Concepts" icon="fa-solid fa-gears" href="/concepts">
-    Dig into all of the key technical concepts for understanding how to implement Schematic.
-  </Card>
-</CardGroup>
+### Engineering
 
-## Architecture, Security & Reliability
+- **[Build with Schematic](/developers)** — the engineering hub, covering the SDKs, the REST API, sample apps, keys, and environments.
+- **[Flags](/feature-management/flags)** — how an entitlement check resolves at runtime, and what your code gets back.
+- **[Webhooks](/integrations/webhooks)** — subscribe to plan changes and entitlement triggers to drive your own workflows.
+- **[Stripe integration guide](/integrations/stripe-integration-guide)** — wire Schematic and Stripe together so subscriptions and entitlements stay in step.
+- **[API reference](/api-reference/resources)** — every REST resource and endpoint, grouped by object.
+- **[MCP server](/for-developers#model-context-protocol-mcp)** — connect Schematic to Claude and ask about a company's plan, usage, and overrides in plain language.
+- **[Observability and support](/production_readiness/observability)** — the logs, event history, and debugging tools for a live integration.
 
-<CardGroup cols={3}>
-  <Card title="API Performance" icon="fa-solid fa-gauge-max" href="/architecture/availability">
-    Learn how Schematic is built to be performant and scalable.
-  </Card>
-  <Card title="Observability" icon="fa-solid fa-tower-observation" href="/architecture/observability">
-    Learn how to observe, monitor, and debug your integration with Schematic.
-  </Card>
-  <Card title="Security" icon="fa-solid fa-lock" href="/architecture/security">
-    Learn how Schematic safegaurds your billing data. 
-  </Card>
-</CardGroup>
+### Monetization
 
-<CardGroup cols={2}>
-  <Card title="Join our Slack" icon="fa-solid fa-comments" href="https://join.slack.com/t/schematic-community/shared_invite/zt-3682izdiu-EN~76z9xXhwKNRK~~3bFLQ">
-    Join our official Slack community to chat with us directly.
-  </Card>
-</CardGroup>
+- **[Billing models](/billing/overview)** — every way Schematic can charge, and how to pick between them.
+- **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage.
+- **[Creating a metered feature](/playbooks/metering)** — define the event, set the limit per plan, and start reporting usage.
+- **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates.
+
+### Product and customer ops
+
+- **[For product teams](/product-teams)** — the packaging hub, covering plans, add ons, trials, pricing models, and what customers see at checkout.
+- **[Concepts](/concepts)** — the vocabulary the rest of the docs assume, including plans, features, entitlements, and credits.
+- **[Reprice and repackage safely](/use-cases/plan-versioning)** — roll out new pricing and migrate existing customers on your terms.
+- **[Company overrides](/feature-management/overrides)** — change one entitlement for one company without touching the plan everyone else is on.
+- **[Handling customer exceptions and feature trials](/playbooks/exceptions)** — when to reach for an override, a custom plan, or a time-boxed feature trial.
+
+### Finance
+
+- **[Stripe integration](/integrations/stripe)** — what Schematic syncs into Stripe, what it reads back, and how the two-way sync behaves.
+- **[Stripe integration guide](/integrations/stripe-integration-guide)** — how plans, add ons, and metered features line up with Stripe products and prices.
+- **[Collecting tax](/integrations/stripe-advanced-use-cases#stripe-tax)** — Stripe Tax and third-party providers, and what checkout collects from the customer.
+- **[Billing entities](/billing/billing-entities)** — let a parent company pay for another company's subscription while each keeps its own entitlements.
+- **[Backfills and usage corrections](/playbooks/backfill-and-corrections)** — import historical usage or correct late events so invoices reconcile.
+- **[Troubleshooting](/troubleshooting/overview)** — the common broken states, starting with billing and Stripe sync, and how to fix each one.
+
+## Community
+
+Join the [Schematic Slack community](https://join.slack.com/t/schematic-community/shared_invite/zt-3682izdiu-EN~76z9xXhwKNRK~~3bFLQ) to ask questions and talk to us directly.
