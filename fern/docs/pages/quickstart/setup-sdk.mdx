@@ -1,10 +1,11 @@
 ---
-title: Setup the SDK
-subtitle: Integrate the Schematic SDK into your application
+title: Install the SDK
+subtitle: Add Schematic to your application and confirm it is talking to your account
 slug: quickstart/setup-sdk
+description: Install a Schematic SDK, mount the provider with a publishable key, and verify the connection with a flag check.
 ---
 
-The `schematic-react` SDK is a client-side React library for [Schematic](https://schematichq.com) which provides hooks to track events, check flags, and more.
+This is the first step of [Instrument your app](/quickstart/instrument-your-app). The examples use `@schematichq/schematic-react`, a client-side React library that provides hooks to check flags, read entitlements, and track events. Every other language and framework is listed in the [SDK overview](/developer_resources/sdks/overview).
 
 ## Install
 
@@ -16,20 +17,24 @@ yarn add @schematichq/schematic-react
 pnpm add @schematichq/schematic-react
 ```
 
-## Usage
+## Get a publishable key
 
-### SchematicProvider
+Generate a publishable key from [Settings, API Keys](https://app.schematichq.com/x/settings/api-keys) in the Schematic dashboard. Publishable keys look like `api_...` and are safe to use client-side.
 
-Similar to libraries like Clerk, Use the `SchematicProvider` to wrap your application and provide the Schematic instance to all components:
+<Warning>Secret keys are not. Keep them on your server. Only server-side SDKs and the temporary access token flow described in [Instrument your app](/quickstart/instrument-your-app) should ever see one.</Warning>
+
+## Mount the provider
+
+Similar to libraries like Clerk, `SchematicProvider` wraps your application and provides the Schematic client to everything below it.
 
 ```tsx
-`use client`
+"use client";
 
 import { SchematicProvider } from "@schematichq/schematic-react";
 
 ReactDOM.render(
   <SchematicProvider publishableKey="your-publishable-key">
-      <App />
+    <App />
   </SchematicProvider>,
   document.getElementById("root"),
 );
@@ -37,41 +42,12 @@ ReactDOM.render(
 
 <Warning>At this time, the React SDK only supports client-side rendering.</Warning>
 
-You can generate a publishable key from the [Schematic Dashboard](https://app.schematichq.com/x/settings/api-keys). These keys look like `api_...` and are meant to be used client-side.
+## Verify the connection
 
-![Generating API keys in Schematic](../../assets/images/quickstart/quickstart-account-setup-api-key.png "Generating API keys in Schematic")
-
-### Identifying the user with Schematic
-
-To set the user context for events and flag checks, you can use the `identify` function provided by the `useSchematicEvents` hook. The example below assumes your company has an application id of `company123`. This will upsert the company into Schematic, and set the context for the current web session (i.e. later calls will operate on this company).
-
-```tsx
-import { useSchematicEvents } from "@schematichq/schematic-react";
-
-const MyComponent = () => {
-  const { identify } = useSchematicEvents();
-
-  useEffect(() => {
-    identify({
-      company: {
-        keys: { id: "company123" },
-      },
-    });
-  }, []);
-
-  return <div>My Component</div>;
-};
-```
-
-<Note> See [Key Management](/developer_resources/key_management) for more information on keys and how to use them in Schematic.</Note>
-
-### Check a flag
-
-To check our flag, you can use the `useSchematicFlag` hook:
+`useSchematicFlag` takes a flag key and returns whether the current context has access. Point it at any flag key that exists in your account and render both branches.
 
 ```tsx
 import { useSchematicFlag } from "@schematichq/schematic-react";
-import { Feature, Fallback } from "./components";
 
 const MyComponent = () => {
   const isFeatureEnabled = useSchematicFlag("mechanical-keyboard");
@@ -80,22 +56,8 @@ const MyComponent = () => {
 };
 ```
 
-### Next Steps!
+Until you identify a company, this check resolves against no context and will read false for anything gated. That is expected at this point.
 
-Congrats 🎉! Now you have the basics setup to start using Schematic. 
+## Next step
 
-If you'd like to dig deeper into our SDK and platform, here are a few places to start:
-
-- [Out of the box components](/components/overview)
-- [Usage-based plans](/billing/usage-based-billing)
-- [Backend SDKs](/developer_resources/sdks/go)
-- [Integrations](/integrations/stripe)
-- [Events](/feature-management/feature-analytics)
-
-If you'd like to learn more about how Schematic can build and manage your pricing and billing, here are a few places to start:
-
-- [Building your pricing catalog](/catalog/overview)
-- [Usage-based plans](/billing/usage-based-billing)
-- [Per-company overrides](/playbooks/exceptions#what-are-examples-of-customer-exceptions)
-- [Trials](/catalog/trials)
-- [Add Ons](/catalog/add-ons)
+[Identify users and companies](/quickstart/identifying-users) so entitlement checks resolve against a real account, then return to [Instrument your app](/quickstart/instrument-your-app) for entitlement checks, usage events, and components.

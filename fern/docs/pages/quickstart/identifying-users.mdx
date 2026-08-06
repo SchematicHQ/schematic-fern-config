@@ -1,33 +1,34 @@
 ---
-title: Identifying Users
-description: Creating and identifying customer company and users in Schematic
+title: Identify users and companies
+subtitle: Give Schematic the context every entitlement check resolves against
 slug: quickstart/identifying-users
+description: Identify companies and users with your own keys, on the frontend with identify or on the backend with upsertCompany, and attach traits.
 ---
 
-Schematic implements a flexible system for identifying users and companies. Instead of creating our own identifiers, we use the identifiers that are already in your system. We often refer to the identifiers as "keys".
+This is the second step of [Instrument your app](/quickstart/instrument-your-app). It assumes you have already [installed the SDK](/quickstart/setup-sdk).
 
-A key can be any alphanumeric string, and should normally be an identifier you're already using. Good examples include your internal customer ID, a Stripe customer ID, or a Salesforce account ID. 
+Schematic does not mint its own identifiers. It uses the ones already in your system, and calls them keys. A key can be any alphanumeric string. Your internal customer ID, a Stripe customer ID, or a Salesforce account ID all work.
 
-## Identifying a user on the frontend
+## Identify on the frontend
 
-Schematic frontend SDKs provide an `identify` function that can be used to identify a user. This function takes a information about both the user and company. It further ensures that future SDK calls will use this information as context for further calls. A react example looks like this:
+The frontend SDKs expose an `identify` function that takes information about both the user and the company, and sets that context for every subsequent call in the session.
 
-```
+```tsx
 useEffect(() => {
   identify({
     company: {
-      keys: { 'demo-id': 'demo-company' },
+      keys: { "demo-id": "demo-company" },
     },
-    keys: { 'demo-id': 'demo-user' },
+    keys: { "demo-id": "demo-user" },
   });
 }, [identify]);
 ```
 
-In this example, we are identifying the company with an id of `demo-company` and the user with an id of `demo-user`.
+This identifies the company `demo-company` and the user `demo-user`.
 
-## Identifying a user on the backend
+## Identify on the backend
 
-The API calls that the backend SDKs wrap all take a `keys` argument that are used to identify the company and user. Below is an example of providing the keys when creating a company via the `upsertCompany` function in Python.
+The backend SDKs wrap API calls that all take a `keys` argument. Below is `upsertCompany` in Python.
 
 ```python
 client.companies.upsert_company(
@@ -35,29 +36,27 @@ client.companies.upsert_company(
 )
 ```
 
-## Details on Identifying a user
+## What actually matters
 
-Fundamentally, when identifying a user, the most important information is the keys for the company -- these are required to load the correct plan, entitlements, and usage data for the user. Identifying the user can also be helpful for better understanding usage data. 
+The company keys are the required part. They are what loads the correct plan, entitlements, and usage data. Identifying the user on top of that is optional, and worth doing because it makes usage data far more legible later.
 
-In addition to the keys, you can also provide traits and a name for the company and user. Traits represent metadata that can be used for targeting and entitlements ([example](/playbooks/metering#trait-based-vs-event-based-features)). 
+Beyond keys you can attach a name and traits. Traits are metadata you can target on, including [trait-based entitlements](/playbooks/metering#trait-based-vs-event-based-features).
 
-Below are examples of `identify` and `upsertCompany` that use keys, traits, and a name:
-
-```
+```tsx
 useEffect(() => {
   identify({
     company: {
-      keys: { 'demo-id': 'demo-company' },
+      keys: { "demo-id": "demo-company" },
       name: "Acme Widgets, Inc.",
       traits: {
-        "city": "Atlanta",
-        "high_score": 25,
-        "is_active": true,
-      }
+        city: "Atlanta",
+        high_score: 25,
+        is_active: true,
+      },
     },
-    keys: { 'demo-id': 'demo-user' },
+    keys: { "demo-id": "demo-user" },
     traits: {
-      "role": "admin",
+      role: "admin",
     },
     name: "John Doe",
   });
@@ -71,25 +70,29 @@ client.companies.upsert_company(
     traits={
         "city": "Atlanta",
         "high_score": 25,
-        "is_active": true,
+        "is_active": True,
     },
 )
 ```
 
-## Differences between `identify` and `upsertCompany`
+## Choosing between `identify` and `upsertCompany`
 
-`Identify` and `upsertCompany`/`upsertUser` are similar. Both will upsert the company (and user) they receive: this means that if you identify a company that has never been seen before, it will be created. The core difference is that `identify` is designed to be called on the frontend, is asynchronous, and creates an `identify` event in the event table (see the events tab); `upsertCompany`/`upsertUser` are designed to be called server side, are synchronous, and return the newly created item -- this makes them better for programmatic use cases.
+Both upsert. Identify a company Schematic has never seen and it gets created either way. The differences are where they run and what they return.
 
-![Identify example](../../assets/images/developer_resources/developer-resources-identify-1.png)
+| | `identify` | `upsertCompany` / `upsertUser` |
+|---|---|---|
+| Runs | Frontend | Server side |
+| Behavior | Asynchronous | Synchronous |
+| Returns | Nothing | The created or updated record |
+| Side effect | Writes an `identify` event to the event table | None |
+| Best for | Setting session context | Programmatic and batch use |
 
-## Setting Last Seen Timestamp
+## Last seen timestamps
 
-Schematic tracks the most recent `identify` or `track` (see [tracking usage](/quickstart/tracking-usage)) event for a company and user. This is helpful while getting started to make sure your events are being sent to Schematic. Once implemented, this is also helpful for understanding usage patterns and customer health. 
+Schematic records the most recent `identify` or `track` call per company and user. While you are wiring things up, the Companies and Events tabs are the fastest confirmation that your calls are landing. Afterwards, an account that has stopped sending activity is a churn signal worth acting on.
 
-![Last Seen Timestamp](../../assets/images/quickstart/quickstart-last-seen.png)
+You can also set the timestamp explicitly through the [companyUpsert endpoint](/api-reference/companies/upsert-company), in the API or any SDK.
 
-Additionally, you can manually set the last seen timestamp when hitting the [companyUpsert endpoint](/api-reference/companies/upsert-company), through the api or one of our SDKs. 
+## Next step
 
-## Learn more about Keys
-
-Keys are a core concept in Schematic. Learn more about them in the [Key Management](/developer_resources/key_management) docs. 
+Return to [Instrument your app](/quickstart/instrument-your-app) for entitlement checks, usage events, and components. Keys are a core concept, and [Key Management](/developer_resources/key_management) covers how they resolve and how to choose them.
