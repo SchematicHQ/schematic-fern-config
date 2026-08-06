@@ -3378,7 +3378,7 @@ components:
           type: array
           description: >-
             Schematic feature IDs (starting with 'feat_') to include as usage
-            columns; at least one is required
+            columns; empty means no usage columns
           items:
             type: string
           maxItems: 100
@@ -3423,6 +3423,19 @@ components:
           type: string
           description: Free-text search over company name and keys
           nullable: true
+        sort_order_column:
+          type: string
+          description: >-
+            Column to sort the exported rows by (e.g. name, created_at, plan);
+            defaults to name
+          nullable: true
+        sort_order_direction:
+          type: string
+          description: Direction to sort the exported rows by; defaults to asc
+          nullable: true
+          enum:
+            - asc
+            - desc
         subscription_statuses:
           type: array
           description: >-
@@ -3441,6 +3454,20 @@ components:
             type: string
           nullable: true
           maxItems: 100
+        visible_columns:
+          type: array
+          description: >-
+            Company columns to include, mirroring the companies list; omit to
+            include the plan column only
+          items:
+            type: string
+            enum:
+              - plan
+              - subscription
+              - users
+              - last_seen_at
+          nullable: true
+          maxItems: 10
         with_entitlement_for:
           type: string
           description: >-
@@ -3467,7 +3494,6 @@ components:
           nullable: true
       required:
         - export_type
-        - feature_ids
       title: CompanyFeatureUsageExportMetadata
     CompanyLedgerResponseData:
       type: object
@@ -7811,9 +7837,11 @@ components:
         mapping:
           audit-log: '#/components/schemas/AuditLogExportMetadata'
           company-feature-usage: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+          event: '#/components/schemas/EventExportMetadata'
       oneOf:
         - $ref: '#/components/schemas/CompanyFeatureUsageExportMetadata'
         - $ref: '#/components/schemas/AuditLogExportMetadata'
+        - $ref: '#/components/schemas/EventExportMetadata'
       title: DataExportMetadata
     DataExportOutputFileType:
       type: string
@@ -7864,6 +7892,7 @@ components:
       enum:
         - audit-log
         - company-feature-usage
+        - event
     DatastreamCompanyPlan:
       type: object
       properties:
@@ -8579,6 +8608,73 @@ components:
         - status
         - features
       title: EventDetailResponseData
+    EventExportMetadata:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: >-
+            Restrict the export to events for this company ID (starting with
+            'comp_')
+          nullable: true
+        end_time:
+          type: string
+          description: Restrict the export to events captured at or before this time
+          format: date-time
+          nullable: true
+        event_subtype:
+          type: string
+          description: Restrict the export to track events with this subtype
+          nullable: true
+        event_types:
+          type: array
+          description: >-
+            Restrict the export to these event types (e.g. "track", "identify");
+            defaults to track, identify and inference events. Flag check events
+            are only exported when requested here explicitly, and require a
+            flag_id.
+          items:
+            type: string
+            enum:
+              - flag_check
+              - identify
+              - inference
+              - track
+          nullable: true
+          maxItems: 100
+        export_type:
+          type: string
+          description: 'Discriminator: always "event" for this variant'
+          enum:
+            - event
+        flag_id:
+          type: string
+          description: >-
+            Restrict the export to flag-check events for this flag ID (starting
+            with 'flag_')
+          nullable: true
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        start_time:
+          type: string
+          description: Restrict the export to events captured at or after this time
+          format: date-time
+          nullable: true
+        user_id:
+          type: string
+          description: >-
+            Restrict the export to events for this user ID (starting with
+            'user_')
+          nullable: true
+      required:
+        - export_type
+      title: EventExportMetadata
     EventResponseData:
       type: object
       properties:
@@ -24235,6 +24331,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /entity-key-definitions/{entity_key_definition_id}:
+    delete:
+      operationId: deleteEntityKeyDefinition
+      summary: Delete entity key definition
+      tags:
+        - companies
+      parameters:
+        - name: entity_key_definition_id
+          in: path
+          description: entity_key_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteEntityKeyDefinitionParams
+                required:
+                  - data
+                  - params
+                title: DeleteEntityKeyDefinitionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /entity-key-definitions/count:
     get:
       operationId: countEntityKeyDefinitions
@@ -24315,6 +24452,84 @@ paths:
                   - data
                   - params
                 title: CountEntityKeyDefinitionsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-keys/count:
+    get:
+      operationId: countEntityKeys
+      summary: Count entity keys
+      tags:
+        - companies
+      parameters:
+        - name: definition_id
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      definition_id:
+                        type: string
+                      entity_type:
+                        $ref: '#/components/schemas/EntityType'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountEntityKeysParams
+                required:
+                  - data
+                  - params
+                title: CountEntityKeysResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
