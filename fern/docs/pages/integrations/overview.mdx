@@ -1,5 +1,42 @@
 ---
-title: Integrations Overview
+title: Integrations
 slug: integrations/overview
+description: Every system Schematic connects to, what each integration syncs, and where to set it up.
 ---
 
+Schematic is a usage-based billing platform with a deep Stripe integration. Integrations are how customer, subscription, and usage data flows in and out of it: billing state from Stripe, organizations and users from your identity provider, usage events from Segment, company traits from your CRM, and outbound events to anything you want to notify.
+
+Each integration below has its own setup guide. If you are new to Schematic, start with the [Quickstart](/quickstart/overview) to create your account and connect an SDK first, then come back and connect the systems you need.
+
+## Stripe
+
+Stripe is the most common Schematic integration and the one most teams set up first. It is a two-way sync: subscriptions and customers flow into Schematic to drive entitlements, and plan changes made through Schematic components flow back into Stripe.
+
+- **[Stripe Integration](/integrations/stripe)** — what the integration covers, how the two-way sync works, and when Stripe customers get created.
+- **[Stripe App](/integrations/stripe-app)** — a Schematic side panel inside Stripe for viewing entitlements, changing plans, and granting overrides.
+- **[Integration Guide](/integrations/stripe-integration-guide)** — the developer guide to mapping companies, plans, add-ons, and prices between the two systems.
+- **[Advanced Use Cases](/integrations/stripe-advanced-use-cases)** — Stripe Tax, third-party tax providers, and other less common configurations.
+- **[Troubleshooting](/integrations/stripe-troubleshooting)** — common Stripe sync and plan change problems, with the fix for each.
+
+## Identity providers
+
+Import organizations and users from the identity provider you already run, so Schematic company profiles stay current without custom sync code.
+
+- **[Clerk Integration](/integrations/clerk)** — import Clerk organizations and users, and enrich Schematic company profiles with their metadata.
+- **[WorkOS Integration](/integrations/workos)** — import WorkOS organizations and users into Schematic company and user profiles.
+
+## Usage and customer data
+
+Send events and traits into Schematic from the tools your product and go-to-market teams already use.
+
+- **[Segment Integration](/integrations/segment)** — forward identify and track calls you already send through Segment, with no additional instrumentation.
+- **[Salesforce Integration](/integrations/salesforce)** — call the Schematic API from Flow Builder to create companies and users and keep their traits updated.
+- **[Hubspot Integration](/integrations/hubspot)** — do the same from a HubSpot workflow using a custom code action.
+
+## Webhooks
+
+Webhooks are the outbound direction. Schematic notifies your systems when data changes or when a customer crosses a usage threshold, which is how most Slack alerts, CRM updates, and AI-assisted workflows get built.
+
+- **[Webhooks](/integrations/webhooks)** — every supported event, the payload type for each, and how to create and verify an endpoint.
+- **[Plan Changed Webhook](/integrations/webhooks/plan-changed)** — the `company.plan_changed` event in depth, for upgrade, downgrade, and trial-end workflows.
+- **[Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers)** — usage-driven events that fire when a company approaches or hits a limit or runs down its credits.
