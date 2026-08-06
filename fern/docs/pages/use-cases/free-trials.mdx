@@ -16,12 +16,6 @@ The edge cases pile up quickly, though. Whether a card is required up front chan
 
 Turn on a trial when you create or edit a plan, and Schematic grants that plan's entitlements for the trial period automatically the first time a company is assigned it. In catalog configuration you decide whether payment is required up front, in which case the customer converts to the paid plan automatically, or not, in which case they downgrade to your default plan. The React and Vue SDKs expose trial status and end date, so you can render countdowns and post-trial conversion prompts without extra API calls.
 
-## What it looks like
-
-![A company's plan change history](../../assets/images/use-cases/plan-history.png)
-
-Every plan a company has moved between, with the origin plan, the destination plan, and what caused the move. This is where the end of a trial shows up: a company that does not convert lands on the fallback plan, and a company that does converts up to the paid plan. Find it on the company profile.
-
 ## Configure it
 
 - [Trials](/catalog/trials) — configure trials on a plan and render trial state in your app.
