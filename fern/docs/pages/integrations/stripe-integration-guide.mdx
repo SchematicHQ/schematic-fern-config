@@ -11,9 +11,9 @@ This is a developer's guide for ensuring that Schematic can sync data with Strip
 
 For a more general overview of the Stripe integration and it's capabilities, see the [Stripe Integration](/integrations/stripe) page.
 
-## Endstate
+## End state
 
-The endgoal of setting up Stripe integration is that Schematic has the following values correctly linked so that Schematic can 2-way sync data with Stripe. This ensures that newly created records in either system are mirrored into the other and that no duplicate records are created. The mapped data is
+The end goal of setting up Stripe integration is that Schematic has the following values correctly linked so that Schematic can 2-way sync data with Stripe. This ensures that newly created records in either system are mirrored into the other and that no duplicate records are created. The mapped data is
 
 1. Schematic Company ↔ Stripe Customer
   - This is mapped via the `stripe_customer_id` trait on the company
@@ -35,7 +35,7 @@ Upon setup of the Stripe Integration, all plans and prices are immediately impor
 The following Schematic concepts are synced to Stripe products/prices
 
 1. Schematic Plan → Stripe product + monthly/yearly price
-2. Schematic Addon → Stripe product + montly/yearly/one-time price
+2. Schematic Addon → Stripe product + monthly/yearly/one-time price
 3. Schematic Usage Based Entitlement → Stripe price
 
 When you setup one of these Schematic concepts, you are given the option to map these to an existing product/price in Stripe or to create a new product/price in Stripe to map to. 
@@ -78,7 +78,7 @@ Then, select which metadata value you want Schematic to pull.
 When importing companies this way, a few things to note:
 1. Schematic will check existing companies for a key with the same name and value as the metadata field you selected. On a match, it will update the existing company instead of creating a new one.
 2. When a new company is created, it will set both `stripe_customer_id` and the metadata key you selected.
-3. Going forward, Schematic will still priotizie `stripe_customer_id` as the key it uses to sync companies with Stripe.
+3. Going forward, Schematic will still prioritize `stripe_customer_id` as the key it uses to sync companies with Stripe.
 
 ### Prod vs. Dev Stripe Accounts
 

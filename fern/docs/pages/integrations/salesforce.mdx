@@ -25,7 +25,7 @@ Once created, click on "Manage Assignments" and add assign to a user.
 
 Navigate to Named Credentials and click on External Credentials on the setup page.
 
-Create a new external credential with a label such as ```schematic_credential``` (mirror the same in the name field). Select "No Authentication" in the Authentication Protocal dropdown (we will define an API key in the header of the Named Credential).
+Create a new external credential with a label such as ```schematic_credential``` (mirror the same in the name field). Select "No Authentication" in the Authentication Protocol dropdown (we will define an API key in the header of the Named Credential).
 
 <img
   src="../../assets/images/salesforce_integration_1.png"
@@ -57,7 +57,7 @@ Click on Named Credentials on the setup page.
   src="../../assets/images/salesforce_integration_4.png"
 />
 
-Create a new namaed credential with a label such as ```schematic``` (mirror the same in the name field). In the URL field, input ```https://api.schematichq.com``` and make sure "Enabled for Callouts" is selected.
+Create a new named credential with a label such as ```schematic``` (mirror the same in the name field). In the URL field, input ```https://api.schematichq.com``` and make sure "Enabled for Callouts" is selected.
 
 In the External Credentials dropdown select the credentials we created earlier (the certificate is not necessary).
 
@@ -79,7 +79,7 @@ Scroll down to Custom Headers and select New. Define two key value pairs:
   src="../../assets/images/salesforce_integration_6.png"
 />
 
-If you don't already have a Schematic API key, [create one](/quickstart#create-an-api-key)
+If you don't already have a Schematic API key, [create one](/quickstart/account-setup#2-create-your-api-keys)
 
 ## Build a Flow
 
@@ -193,7 +193,7 @@ Add an Assignment element prior to the HTTP Callout in the flow to assign values
   src="../../assets/images/salesforce_integration_12.png"
 />
 
-In this example, we'll use static values, but we can also reference objects within Salesforce to assign values dynamically if we retreive them prior to assignment in the Flow Builder. 
+In this example, we'll use static values, but we can also reference objects within Salesforce to assign values dynamically if we retrieve them prior to assignment in the Flow Builder. 
 
 ### Test the connection with Schematic
 

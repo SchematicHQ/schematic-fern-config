@@ -32,8 +32,6 @@ navigation:
             path: ./docs/pages/get_started/introduction.mdx
           - page: Concepts
             path: ./docs/pages/get_started/concepts.mdx
-          # - page: How to use Schematic
-          #   path: ./docs/pages/get_started/howto.mdx
           - link: For Developers
             href: /developers
           - page: For Product Teams
@@ -258,9 +256,9 @@ navigation:
           - page: WorkOS Integration
             path: ./docs/pages/integrations/workos.mdx
             icon: "fa-solid fa-key"
-          # - page: Auth0 Integration
-          #   path: ./docs/pages/integrations/auth0.mdx
-          #   icon: "fa-solid fa-user-lock"
+          - page: Auth0 Integration
+            path: ./docs/pages/integrations/auth0.mdx
+            icon: "fa-solid fa-user-lock"
           - page: Salesforce Integration
             path: ./docs/pages/integrations/salesforce.mdx
             icon: "fa-brands fa-salesforce"
@@ -315,7 +313,7 @@ navigation:
               - page: Nextjs
                 path: ./docs/pages/developer_resources/sdks/nextjs.mdx
                 icon: "fa-regular fa-circle-n"
-              - page: Javascript (Client-side)
+              - page: JavaScript (Client-side)
                 path: ./docs/pages/developer_resources/sdks/javascript.mdx
                 icon: "fa-brands fa-js"
               - page: Go
@@ -383,8 +381,6 @@ navigation:
         contents:
           - page: For Developers
             path: ./docs/pages/ai_tooling/for-developers.mdx
-          # - page: For GTM Teams
-          #   path: ./docs/pages/ai_tooling/for-gtm-teams.mdx
   - tab: api
     layout:
       - page: Resources
@@ -709,6 +705,9 @@ redirects:
     permanent: true
   - source: "/plans"
     destination: "/catalog/managing-company-plans"
+    permanent: true
+  - source: "/documentation/build/sd-ks/javascript-client-side"
+    destination: "/developer_resources/sdks/javascript"
     permanent: true
     # old api references that are wrong for some reason
   - source: "/api-reference/companies/list-company-plans"

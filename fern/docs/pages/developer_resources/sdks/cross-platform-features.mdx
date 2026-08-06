@@ -40,11 +40,11 @@ Additionally, local caching can be configured to use an external cache provider,
 
 With WebSocket connections, updates can be pushed instantly from Schematic to your application as Schematic processes plan changes and feature usage. **This allows your product to reflect changes in entitlement state in real time.**
 
-Automatic real-time updates are avaiable for all Schematic users, regardless of which tier they are on (including Free tier). 
+Automatic real-time updates are available for all Schematic users, regardless of which tier they are on (including Free tier). 
 
 ### Frontend SDKs
 
-Schematic's Frontend SDKs already implement this functionality, and you don't need to do anything to enable it. When you call `identify` the user, the SDK automatically setups a listener to flag changes for the company and user over the WebSocket connection. For our Vue and React SDKs, this will propogate the change into your applciation state anutomatically through the appropriate mechanisms. 
+Schematic's Frontend SDKs already implement this functionality, and you don't need to do anything to enable it. When you call `identify` the user, the SDK automatically setups a listener to flag changes for the company and user over the WebSocket connection. For our Vue and React SDKs, this will propagate the change into your application state automatically through the appropriate mechanisms. 
 
 ### Backend SDKs 
 
