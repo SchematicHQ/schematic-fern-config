@@ -16,9 +16,23 @@ Handled by hand, though, expansion neither scales nor compounds. There's no cons
 
 Model add-ons and seat-based entitlements in your catalog once, then let customers add them through the customer portal or have your team assign them to a company directly. Add-ons and seat counts map to Stripe products, so an expansion updates billing and entitlements together and the new access takes effect immediately. Pay-in-advance pricing lets customers buy seats or capacity in defined chunks as they grow.
 
-## Learn more
+## What it looks like
+
+![Add ons defined in the catalog](../../assets/images/use-cases/add-ons.png)
+
+Add ons are defined once, next to your plans, each with the features and credits it grants and its own price. They can be recurring, like the $25 per month bundle here, or one-time, like a $50 onboarding package. Find them under **Add Ons**.
+
+![A company's subscription with its line items](../../assets/images/use-cases/subscription-stripe.png)
+
+An expansion lands here. The subscription carries a line item per thing sold, the Pro plan plus a quantity of four user seats, and **See in Stripe** jumps straight to the matching record in billing. Find it on the company profile, on the **Subscription** tab.
+
+## Configure it
 
 - [Add Ons](/catalog/add-ons) — package extra features or capacity on top of a plan.
-- [Customer Portal and Checkout Flow](/components/customer-portal) — let customers add seats and add-ons themselves.
-- [Managing Company Plans](/catalog/managing-company-plans) — assign add-ons and plan changes to a specific company.
 - [Usage Based Billing Models](/billing/usage-based-billing) — sell seats and capacity with pay-in-advance pricing.
+- [Managing Company Plans](/catalog/managing-company-plans) — assign add-ons and plan changes to a specific company.
+
+## Implement it
+
+- [Customer Portal and Checkout Flow](/components/customer-portal) — let customers add seats and add-ons themselves.
+- [Manage Plan API](/developer_resources/manage-plan-api) — add or change add-ons and pay-in-advance quantities from code.

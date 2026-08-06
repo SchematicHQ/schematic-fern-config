@@ -16,9 +16,31 @@ Getting that integration correct is a real project, and keeping it correct is th
 
 Schematic runs a native, two-way sync with your billing system, so you keep Stripe or Metronome rather than migrating off it. Map plans and add-ons to billing products and usage features to metered products; changes made through Schematic checkout and the customer portal write straight to billing, while subscription changes in the billing system provision or revoke entitlements automatically. Subscription status drives access, so cancellations and failed payments move customers to the right state without custom code.
 
-## Learn more
+## What it looks like
+
+![The Stripe integration panel showing a connected account](../../assets/images/use-cases/stripe-integration.png)
+
+The connection itself, with the connected account ID and how it was connected. This is a first-class integration you turn on, not a set of webhook handlers you maintain. Find it under **Integrations**.
+
+![Customers imported from Stripe](../../assets/images/use-cases/stripe-imported-customers.png)
+
+Connecting pulls your existing customers across with their subscriptions and their Stripe IDs, so companies in Schematic are matched to the records that already bill them. New customers stay matched by passing the Stripe customer ID on API requests and events.
+
+![A company's subscription with its line items](../../assets/images/use-cases/subscription-stripe.png)
+
+The subscription as Schematic sees it: status, price, period, and a line item per product sold, with **See in Stripe** to open the same record on the billing side. This is the view that shows the two systems agreeing. Find it on the company profile, on the **Subscription** tab.
+
+![A company's plan change history](../../assets/images/use-cases/plan-history.png)
+
+Both directions of the sync in one list. **Component Checkout** rows are changes that started in your product and were written out to billing; the **Change in Stripe** row is a subscription edited on the billing side that moved the company's plan and entitlements in Schematic. Find it on the company profile.
+
+## Configure it
 
 - [Stripe Integration](/integrations/stripe) — how the bidirectional sync works end to end.
 - [Stripe Integration Guide](/integrations/stripe-integration-guide) — mapping companies, plans, and prices correctly.
 - [Stripe App](/integrations/stripe-app) — manage Schematic from inside the Stripe dashboard.
+
+## Implement it
+
 - [Automatically provision customers using Stripe](/playbooks/provisioning) — a playbook for provisioning from subscriptions.
+- [Stripe Advanced Use Cases](/integrations/stripe-advanced-use-cases) — trials, proration, and other lifecycle edge cases.

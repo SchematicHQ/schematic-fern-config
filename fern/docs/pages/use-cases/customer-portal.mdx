@@ -16,9 +16,25 @@ That split is also a maintenance burden. The in-app screens have to be kept cons
 
 Schematic's customer portal gives customers one branded place to upgrade, downgrade, cancel, manage add-ons, view invoices and payment methods, and watch usage against their limits. Changes sync to Stripe and update entitlements immediately, so access always matches billing. You control which elements appear and how the portal looks in the component builder, no code deploy required.
 
-## Learn more
+## What it looks like
+
+The portal is a component you create and configure in Schematic, alongside any others you need, such as a public pricing table or a separate portal for sales-led accounts. Each one has an ID you drop into your app. Find it under **Components**.
+
+Inside the builder you assemble the portal from elements. The subscription and usage elements cover what a customer's plan gives them and how much of it they have used:
+
+![Plan Manager, Included Features, and Metered Features elements](../../assets/images/use-cases/component-builder.png)
+
+The customer portal also supports self-service checkout to change plans, adjust entitlements like seat counts, and purchase additional credits. 
+
+![Checkout](../../assets/images/use-cases/checkout.png)
+
+## Configure it
 
 - [Customer Portal and Checkout Flow](/components/customer-portal) — what the portal covers and how it works with Stripe.
 - [Create a Component](/components/create-component) — build and configure the portal in the component builder.
+- [Element Library](/components/element-library) — every element you can add and what each needs.
+
+## Implement it
+
 - [Add to Your App](/components/set-up) — embed the portal in React, Vue, or plain JS.
 - [Building Your Own Portal](/components/headless-customer-portal) — go headless when you need full control of the UI.

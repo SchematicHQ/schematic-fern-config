@@ -16,8 +16,18 @@ The depth shows up in the details. Credits come from different sources, the mont
 
 Create a credit type, grant credits on a plan each billing period, and set how many credits each feature consumes. Schematic burns down the balance as features are used, sells top-up bundles through checkout, supports auto top-up so customers don't get interrupted, and handles refunds via negative-quantity events. Customers see their balance in the customer portal, and the credit pricing you set drives revenue recognition.
 
-## Learn more
+## What it looks like
+
+![A company's credit balance and the grants behind it](../../assets/images/use-cases/credit-balance-grants.png)
+
+One balance, 54 credits remaining, and every credit grant that makes it up listed separately: the monthly in-plan grant that resets on the billing date, promotional credits, and an auto top-up purchase, each with its own price, expiry date, and burndown. Find it on the company profile under **Credit balance**.
+
+## Configure it
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) — set up credit types, grants, consumption rates, and bundles.
-- [Meter on a real-time credit ledger](/use-cases/credit-ledger) — the ledger, holds, and exactly-once semantics underneath credits.
 - [Usage Based Billing Models](/billing/usage-based-billing) — how credit burndown relates to the other usage models.
+
+## Implement it
+
+- [Accessing credit information via API](/billing/credit-burndown#accessing-credit-information-via-api) — read balances and grant credits programmatically.
+- [Meter on a real-time credit ledger](/use-cases/credit-ledger) — the ledger, holds, and exactly-once semantics underneath credits.
