@@ -58,7 +58,7 @@ Schematic checkout is built on top of Stripe. When a customer completes a checko
 
 **Payment UI is rendered via Stripe Elements.** Card data is collected directly by Stripe's secure frontend library and never passes through Schematic or your servers. This means you do not need to maintain a Cardholder Data Environment (CDE) — [Stripe's PCI DSS compliance](https://stripe.com/guides/pci-compliance) covers the full payment collection flow.
 
-Schematic holds the plans, prices, and entitlements, and Stripe handles the money movement. The two stay in sync automatically.
+Schematic ensures that customer billing state stays in sync between Stripe and Schematic.
 
 For more details on the Stripe integration, see the [Stripe Integration](/integrations/stripe) page.
 
