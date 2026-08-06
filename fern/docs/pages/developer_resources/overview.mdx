@@ -1,0 +1,67 @@
+---
+title: Build with Schematic
+slug: developers
+description: "Where engineers start with Schematic: the SDK matrix, the REST API, MCP and agent tooling, sample apps, keys, and environments."
+---
+
+Integrating Schematic comes down to three things your code does. You tell Schematic who your companies and users are, you send usage events for the consumption you meter and bill on, and you check a company's entitlement before running a feature so the limits you sold are enforced as that usage happens. Plans, prices, entitlements, and credit grants are configured outside your codebase and take effect without a deploy, so repricing and repackaging do not turn into engineering tickets.
+
+This section covers the SDKs, the REST API, and the operational pieces you need to run that integration in production.
+
+## Start here
+
+- **[Instrument your app](/quickstart/instrument-your-app)** — the code track, from installing an SDK to reporting usage and checking a flag.
+- **[SDKs](/developer_resources/sdks/overview)** — the SDK index, with install and setup for each.
+- **[Cross-platform features](/developer_resources/sdks/cross-platform-features)** — the local caching, event buffering, retries, and real-time updates you get from any SDK.
+- **[API reference](/api-reference/resources)** — every REST resource and endpoint, grouped by object.
+
+## Server-side SDKs
+
+Reach for a server SDK to report usage from your backend, and when an entitlement decision cannot be trusted to the browser.
+
+- **[Node.js](/developer_resources/sdks/nodejs)** — for TypeScript and JavaScript services.
+- **[Python](/developer_resources/sdks/python)** — for Django, Flask, FastAPI, and background workers.
+- **[Go](/developer_resources/sdks/go)** — for Go services and CLIs.
+- **[Java](/developer_resources/sdks/java)** — for JVM services, published to Maven Central.
+- **[C#](/developer_resources/sdks/csharp)** — for .NET services.
+- **[Ruby](/developer_resources/sdks/ruby)** — for Rails and other Ruby applications.
+
+## Client-side and framework SDKs
+
+Reach for a client SDK when the UI itself needs to know what a company is entitled to, and needs to update when that changes.
+
+- **[React](/developer_resources/sdks/react)** — hooks and providers for entitlement-aware React components.
+- **[Next.js](/developer_resources/sdks/nextjs)** — the React SDK wired up for the App Router and server components.
+- **[React Native](/developer_resources/sdks/react-native)** — the same hooks for iOS and Android apps.
+- **[Vue](/developer_resources/sdks/vue)** — composables for Vue and Nuxt.
+- **[Angular](/developer_resources/sdks/angular)** — services and directives for Angular apps.
+- **[JavaScript](/developer_resources/sdks/javascript)** — the framework-free browser SDK.
+
+## API and authentication
+
+- **[Resources](/api-reference/resources)** — the full endpoint list, organized by the object it acts on.
+- **[Authentication](/api-reference/authentication)** — publishable and secret API keys, and which one belongs where.
+- **[Pagination](/api-reference/pagination)** — how list endpoints page and how to walk them.
+- **[Rate limiting](/api-reference/rate_limiting)** — the limits you will hit and the headers that tell you where you are.
+
+## AI and agent tooling
+
+- **[AI tooling for developers](/for-developers)** — the hosted MCP server, OAuth and API key connection, and the AI skills repo for generating integration code.
+
+## Sample apps
+
+- **[Next.js weather search app](/developer_resources/sample_apps/sample_nextjs)** — a full Next.js app using Clerk auth, feature flags, usage tracking, and an embedded customer portal.
+- **[Python image search app](/developer_resources/sample_apps/sample_python)** — a metered Flask app that checks access, reports usage, and manages the subscription lifecycle.
+
+## Data model and operations
+
+- **[Concepts for engineers](/developer_resources/concepts)** — profiles, keys versus traits, flags, and how they fit together at runtime.
+- **[Entity relationship diagram](/developer_resources/erd)** — how companies, users, plans, features, and entitlements relate.
+- **[Key management](/developer_resources/key_management)** — how to map IDs from your app, Stripe, and your CRM onto one Schematic entity.
+- **[Environments](/developer_resources/environments)** — which resources are environment-scoped, which are account-wide, and how to promote work to production.
+
+## Where to go next
+
+- **[Enforce entitlements](/feature-management/overview)** — flags, features, feature types, and company overrides.
+- **[Embed billing UI](/components/overview)** — drop-in checkout, pricing tables, and customer portal.
+- **[Webhooks](/integrations/webhooks)** — subscribe to plan changes and entitlement triggers to drive your own workflows.
