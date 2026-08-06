@@ -8,7 +8,7 @@ Schematic is a usage-based billing engine for AI and software companies. Meter c
 
 Usage-based pricing keeps gaining ground because it lines up what a customer pays with what they actually get out of the product. One of the key risks is when buyers cannot predict the bill. Schematic gives your customers visibility into what they are using, forecasts of where they will land, and spending limits they set themselves, so a usage-based deal clears review at any size of company.
 
-Seats, flat-rate tiers, and hybrid plans that pair a platform fee with metered overage all live side by side in Schematic. All pricing setups are supported with real-time entitlement checks and the customer-facing controls. You can price each part of your product the way it actually sells, and change the mix later without touching application code.
+Schematic supports all pricing setups including seats, flat-rate tiers, and hybrid plans. You can price each part of your product the way it actually sells, and change the mix later without touching application code.
 
 ## Start here
 
@@ -20,6 +20,17 @@ Seats, flat-rate tiers, and hybrid plans that pair a platform fee with metered o
     Wire Schematic in your product. Install an SDK, identify your companies and users, report the usage you bill on, and check an entitlement before a feature runs.
   </Card>
 </CardGroup>
+
+## What teams build with Schematic
+
+- **[Price by usage](/use-cases/usage-based-pricing)** — meter tokens, agent runs, or whatever unit carries your cost, and turn rising usage into expansion.
+- **[Run credit-based billing](/use-cases/credit-billing)** — sell a prepaid credit balance that burns down as customers use features.
+- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
+- **[Show customers what an action will cost](/use-cases/pre-flight)** — preview the price before an expensive run, so nobody is surprised by the bill.
+- **[Close custom deals](/use-cases/custom-deals)** — package bespoke pricing and entitlements for negotiated contracts without touching code.
+- **[Convert and expand users self-serve](/use-cases/self-serve-checkout)** — let customers sign up, upgrade, and add capacity without talking to sales.
+
+[See all 20 use cases &gt;](/use-cases/overview)
 
 ## Where to start by role
 
@@ -34,14 +45,9 @@ Seats, flat-rate tiers, and hybrid plans that pair a platform fee with metered o
 ### Monetization
 
 - **[Billing models](/billing/overview)** — every way Schematic can charge, and how to pick between them.
-- **[Price by usage](/use-cases/usage-based-pricing)** — meter tokens, agent runs, or whatever unit carries your cost, and turn rising usage into expansion.
 - **[Usage-based billing models](/billing/usage-based-billing)** — pay as you go, pay in advance, and fixed fee with overage.
 - **[Creating a metered feature](/playbooks/metering)** — define the event, set the limit per plan, and start reporting usage.
 - **[Credit burndown](/billing/credit-burndown)** — sell a credit balance that several features draw down at different rates.
-- **[Meter on a real-time credit ledger](/use-cases/credit-ledger)** — drive enforcement and billing off an accurate balance with holds, not a stale snapshot.
-- **[Show customers what an action will cost](/use-cases/pre-flight)** — preview the price before an expensive run, so nobody is surprised by the bill.
-- **[Warn customers before they hit a limit](/use-cases/surprise-throttle)** — usage warnings and grace periods, so a throttle is never a surprise.
-- **[Protect your margins](/use-cases/margin-protection)** — enforce the limits you priced for in real time, before heavy usage erodes a plan.
 
 ### Product and customer ops
 
@@ -54,7 +60,7 @@ Seats, flat-rate tiers, and hybrid plans that pair a platform fee with metered o
 ### Finance
 
 - **[Stripe integration](/integrations/stripe)** — what Schematic syncs into Stripe, what it reads back, and how the two-way sync behaves.
-- **[Mapping your catalog to Stripe](/integrations/stripe-integration-guide)** — how plans, add ons, and metered features line up with Stripe products and prices.
+- **[Stripe integration guide](/integrations/stripe-integration-guide)** — how plans, add ons, and metered features line up with Stripe products and prices.
 - **[Collecting tax](/integrations/stripe-advanced-use-cases#stripe-tax)** — Stripe Tax and third-party providers, and what checkout collects from the customer.
 - **[Billing entities](/billing/billing-entities)** — let a parent company pay for another company's subscription while each keeps its own entitlements.
 - **[Backfills and usage corrections](/playbooks/backfill-and-corrections)** — import historical usage or correct late events so invoices reconcile.
@@ -62,16 +68,7 @@ Seats, flat-rate tiers, and hybrid plans that pair a platform fee with metered o
 
 ## Browse
 
-- **[Use cases](/use-cases/overview)** — the full index of what teams build with Schematic, cross-listed by the kind of business you run.
-- **[What is Schematic?](/what-is-schematic)** — what the product does, which teams operate it, and how it works alongside your billing system.
-- **[Concepts](/concepts)** — plain-language definitions of every term used across the docs.
-- **[All SDKs](/developer_resources/sdks/overview)** — every server, client, and framework SDK, with install and setup for each.
-- **[API reference](/api-reference/resources)** — every REST resource and endpoint, grouped by object.
-- **[Integrations](/integrations/overview)** — Stripe, Segment, Salesforce, HubSpot, the auth providers, and webhooks.
-- **[MCP server](/for-developers#model-context-protocol-mcp)** — connect Schematic to Claude and ask about a company's plan, usage, and overrides in plain language.
-- **[Security](/production_readiness/security)** — how Schematic protects your data, and the compliance posture behind it.
-- **[Availability](/production_readiness/availability)** — the uptime commitment and the caching architecture that keeps entitlement checks fast.
-- **[Troubleshooting](/troubleshooting/overview)** — diagnose a plan, sync, invoice, or entitlement that is not behaving.
+[What is Schematic?](/what-is-schematic) · [Concepts](/concepts) · [All SDKs](/developer_resources/sdks/overview) · [API reference](/api-reference/resources) · [Integrations](/integrations/overview) · [MCP server](/for-developers#model-context-protocol-mcp) · [Security](/production_readiness/security) · [Availability](/production_readiness/availability) · [Troubleshooting](/troubleshooting/overview)
 
 ## Community
 
