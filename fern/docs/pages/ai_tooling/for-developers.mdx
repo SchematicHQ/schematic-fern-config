@@ -1,10 +1,12 @@
 ---
 title: AI Tooling
-description: Connect AI coding assistants to Schematic through the AI skills repos, the hosted MCP server, and the Claude plugin.
+description: Connect AI coding assistants to Schematic through the AI skills repos and the hosted MCP server.
 slug: for-developers
 ---
 
 Learn how to use Schematic with AI development tools and assistants to accelerate your integration and development workflow.
+
+<Info>Working in customer success, RevOps, or sales rather than engineering? See [For GTM Teams](/for-gtm-teams) for renewal prep, churn and expansion signals, and contract validation workflows.</Info>
 
 ## Overview
 
@@ -90,19 +92,6 @@ Read-only API keys can use only the read tools.
 - "Show me feature usage for the 'api_calls' feature across all companies"
 - "Create a company override to enable 'beta_features' for company comp_123"
 
-{/* 
-## Claude Plugin
-
-Schematic offers a Claude plugin that allows you to interact with Schematic directly from Claude. This plugin enables you to:
-
-- Query Schematic data through natural language
-- Generate integration code with full context of your Schematic setup
-- Get recommendations for plan configurations and feature entitlements
-
-### Installation
-
-Installation directions for the Claude plugin are coming soon. Once available, you'll be able to install the plugin directly from Claude's plugin directory.
-
 ## Best Practices
 
 ### Using AI Skills
@@ -117,7 +106,7 @@ When using Schematic AI Skills with your coding assistant:
 
 When working with the MCP integration:
 
-- **Secure your credentials** - Store API keys securely and never commit them to version control
-- **Use appropriate permissions** - Grant only the permissions needed for your use case
+- **Prefer OAuth over API keys** - An OAuth connection runs as you and respects your team member permissions, and permission changes take effect immediately
+- **Secure your credentials** - When you do use an API key, store it securely and never commit it to version control
+- **Use appropriate permissions** - Connect read-only unless you specifically need write access, and pick the environment deliberately
 - **Validate responses** - Verify that MCP queries return accurate data before using it in production
-*/}
