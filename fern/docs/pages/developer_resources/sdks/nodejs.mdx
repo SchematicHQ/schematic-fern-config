@@ -118,7 +118,7 @@ await client.events.createEvent({
 });
 ```
 
-Events are deduplicated server-side on the idempotency key for 24 hours, so retrying a send that may or may not have landed is safe. Unlike `close()`, which logs a failed flush and resolves anyway, this path surfaces the error to you.
+Events are deduplicated server-side on the idempotency key for 24 hours, so retrying a send that may or may not have landed is safe.
 
 ### Custom Logging
 
