@@ -115,6 +115,59 @@ Every grant and every draw is written to the **credit ledger**, which is transac
 
 Components stay in sync with Schematic automatically, reflecting each company's current entitlements and subscription in real time. Read more in the [Components overview](/components/overview).
 
+## Billable units
+
+The concepts above describe how Schematic models your product. A few of them are also the units Schematic's own pricing is measured in, and those are defined here so there is one canonical answer to what each one counts.
+
+This page defines the units. The [pricing page](https://schematichq.com/pricing) has the numbers and what each plan includes.
+
+### Monetized subscription
+
+A **monetized subscription** is a company with an active subscription and a payment method, that has been billed or will be billed depending on usage or trial expiration. It is the primary unit Schematic's pricing is measured in.
+
+A company counts as a monetized subscription when it is:
+
+- On a plan with a recurring price
+- On a plan that charges per unit of usage
+- On a plan that includes some usage and charges for usage beyond it
+- In a trial that requires a payment method, since it will be billed at the end of the trial unless it cancels
+
+A company does not count when it is:
+
+- Without an active subscription managed by Schematic
+- On a free plan
+- In a trial that does not require a payment method
+
+The distinction is whether money is expected to change hands, not whether it already has. A trial that captured a payment method counts from the start of the trial.
+
+### Event volume
+
+An **event** is a single `identify` or `track` call your application sends to Schematic, and event volume is the count of them per month.
+
+Both types count. `identify` calls that create or update a company or user profile are events, as are `track` calls that record usage. The [Events](#events) section above covers the distinction between them.
+
+### Flag evaluation
+
+A **flag evaluation** occurs when you check a flag for a given context to determine if a user or company should be entitled to a resource in your application.
+
+Flag evaluations are unlimited on every plan, so this definition is for understanding rather than for predicting a bill. It is worth knowing that an evaluation is not the same thing as an API call: with [DataStream or the Replicator](/production_readiness/availability), flags are evaluated locally in your process against a synced copy of the rules, so a high-volume application can perform far more evaluations than it makes network requests.
+
+### Override
+
+An **override** is a per-company exception to what a plan grants for a specific feature. The count is of overrides currently in place, not of times an override was applied.
+
+Time-limited overrides expire on their own and stop counting once they do, which makes them the right shape for a temporary exception. See [Overrides](/feature-management/overrides).
+
+### Webhook
+
+A **webhook** is a configured endpoint Schematic delivers events to. The count is of endpoints you have configured, not of deliveries made to them, so one endpoint receiving many event types counts once. See [Webhooks](/integrations/webhooks).
+
+### Seats
+
+Seats are not a billable unit. Schematic does not charge per seat, and the number of people from your team who use Schematic does not affect what you pay.
+
+Note that this is separate from seat-based billing in your own product, where a seat may well be a unit you charge your customers for. See [Seat Based Billing Models](/billing/seat-based-billing).
+
 ## How Schematic evaluates access
 
 ### User and company profiles

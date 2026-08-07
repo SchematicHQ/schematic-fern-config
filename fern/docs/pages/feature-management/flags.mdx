@@ -11,6 +11,8 @@ A significant difference between Schematic and other tools that offer flags is t
 
 For example, if a company is a part of a beta cohort, you can asynchronously update their profile in Schematic and that context will be used when the flag is evaluated. The full example is [here](/playbooks/rollout), and demonstrates how to check flags in your codebase.
 
+A **flag evaluation** is a single check of a flag for a given context. Evaluations do not have to be network calls: with [DataStream or the Replicator](/production_readiness/availability), flags are evaluated locally against a synced copy of the rules. See [Flag evaluation](/concepts#flag-evaluation) for the canonical definition.
+
 <iframe
   width="560"
   height="400"
