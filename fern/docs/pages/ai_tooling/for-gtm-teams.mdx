@@ -1,7 +1,74 @@
 ---
 title: For GTM Teams
+description: Use the Schematic MCP server from Claude to prep renewals, surface churn and expansion signals, and check what was sold against what was provisioned.
+
 slug: for-gtm-teams
 ---
 
+Customer success, RevOps, and sales teams all need the same thing from Schematic: an accurate picture of what a customer is entitled to and what they are actually using. That data lives in Schematic, but getting it out has usually meant either learning the dashboard or asking engineering.
 
+The [MCP server](/for-developers#model-context-protocol-mcp) removes both steps. Connect an MCP-compatible assistant such as Claude, and you can ask for what you need in plain language.
 
+This page covers the workflows GTM teams run most. For setting up the connection, and for the developer-facing tooling, see [AI Tooling](/for-developers).
+
+## Before you start
+
+You need an MCP-compatible AI assistant and a Schematic account. Sign in with OAuth rather than an API key: the connection then runs as you, respecting your team member permissions, and a change to your permissions takes effect immediately.
+
+When you connect you choose an environment and whether the connection is read-only or read and write. **Read-only is the right default for most GTM work.** Everything on this page except adjusting an entitlement works read-only, and it removes the possibility of a misread question changing a customer's account.
+
+Setup instructions are in [Connect with OAuth](/for-developers#connect-with-oauth).
+
+## Prepping a renewal
+
+The problem this solves is a CSM walking into a renewal without knowing how the account has actually been using the product. Assembling that by hand means the plan, the entitlements attached to it, and usage against each metered feature, which is a lot of clicking for a call that happens every quarter.
+
+Ask for it instead:
+
+- "What plan is Acme Corp on, and what entitlements does that plan include?"
+- "Show me Acme Corp's usage against each metered feature for the last 90 days."
+- "Which of Acme Corp's entitlements are they close to using up?"
+- "Has Acme Corp had any overrides applied, and are any of them expiring?"
+
+The last one matters more than it looks. An override granted during onboarding and never revisited is a common source of renewal surprises, because the customer has been using something their plan does not actually include.
+
+## Spotting churn and expansion signals
+
+The same data answers the opposite question, at portfolio scale rather than per account. Low usage against an entitlement is a churn signal. Usage pressing against a limit is an expansion signal.
+
+- "Which companies on the Pro plan have used less than 20% of their included usage this month?"
+- "Which companies are near the limit on any metered feature?"
+- "How many companies are on each plan right now?"
+- "Show me companies whose credit balance is running low."
+
+Run the first one on a schedule and it becomes a weekly churn sweep. Run the second and it becomes an upsell queue. Neither needs a dashboard or a report to be built first.
+
+## Checking what was sold against what was provisioned
+
+Custom deals are where entitlements drift from the contract, because the plan is configured by hand after the deal closes. Nobody usually checks the two against each other until a customer complains.
+
+- "What entitlements does the custom plan attached to Acme Corp include?"
+- "Compare the entitlements on Acme Corp's plan to these order form terms: [paste the terms]."
+- "List every company on a custom plan and what each one is entitled to."
+
+Running this over recently closed deals catches the mismatch while it is still cheap to fix. See [Close custom deals](/use-cases/custom-deals) for how custom plans are set up in the first place.
+
+## Adjusting an entitlement
+
+This one needs a read and write connection, and it is worth being deliberate about who has one.
+
+- "Set an override on Acme Corp for the api_calls feature at 50,000 for the next 30 days."
+- "List the overrides currently in place for Acme Corp."
+- "Remove the override on Acme Corp for beta_features."
+
+Time-limited overrides are the safer instrument for anything granted as a concession, since they expire on their own instead of quietly becoming permanent. See [Manage exceptions with overrides](/use-cases/overrides).
+
+A write connection can never do more than you can do in the Schematic app. If your account cannot change a plan, neither can an assistant connected as you.
+
+## Where this fits
+
+The MCP server is for ad-hoc questions and human-in-the-loop workflows. For automation that needs to run reliably without someone asking, use [webhooks](/integrations/webhooks) instead, which push events to Slack, your CRM, or any endpoint as they happen. [Automate with webhooks and AI](/use-cases/automation) covers how the two fit together.
+
+- [Spot churn and expansion with usage signals](/use-cases/usage-signals)
+- [Stay ahead of renewals and expirations](/use-cases/renewals)
+- [Expand accounts with upsells and add-ons](/use-cases/expand-accounts)
