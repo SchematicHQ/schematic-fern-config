@@ -1,0 +1,110 @@
+---
+title: Working with AI
+description: Connect Schematic to Claude, ChatGPT, or any AI assistant to prep renewals, surface churn and expansion signals, and check what was sold against what was provisioned.
+slug: working-with-ai
+---
+
+Customer success, RevOps, sales, and finance teams all need the same thing from Schematic: an accurate picture of what a customer is entitled to and what they are actually using. That data lives in Schematic, but getting it out has usually meant either learning the dashboard or asking engineering.
+
+The [MCP server](/building-with-ai#model-context-protocol-mcp) removes both steps. Connect an AI assistant such as Claude or ChatGPT, and you can ask for what you need in plain language. No SQL, no report to build, no ticket.
+
+<Info>Writing integration code? See [Building with AI](/building-with-ai) for the AI skills repo and editor setup.</Info>
+
+## Before you start
+
+You need a Schematic account and an AI assistant that supports custom MCP connectors. Setup takes a couple of minutes and you only do it once.
+
+Two things to decide when you connect:
+
+**Sign in with your Schematic account rather than an API key.** The connection then runs as you, respecting your team member permissions, and a change to your permissions takes effect immediately. Every client below supports this.
+
+**Connect read-only.** You also pick an environment and whether the connection can write. Read-only is the right default for most of this work: everything on this page except adjusting an entitlement works read-only, and it removes any chance of a misread question changing a customer's account.
+
+## Connect your assistant
+
+<Tabs>
+  <Tab title="Claude">
+
+Works the same in the Claude web app, the desktop app, and Cowork.
+
+1. Open **Settings > Connectors**.
+2. Click **Add custom connector**.
+3. Enter `https://api.schematichq.com/mcp` as the URL and save.
+4. Click **Connect** and sign in to Schematic, then pick your environment and access level.
+
+Claude connects from Anthropic's cloud rather than your own machine, so the connector works identically on mobile.
+
+  </Tab>
+  <Tab title="ChatGPT">
+
+Custom MCP connectors live behind developer mode.
+
+1. Open **Settings > Apps > Advanced settings** and turn on **Developer mode**.
+2. Go to **Settings > Connectors** and click **Create**.
+3. Enter `https://api.schematichq.com/mcp` as the URL and complete the sign-in.
+
+Available on Plus and Pro. On Business, Enterprise, and Edu, a workspace admin may need to allow custom MCP connectors first under **Workspace Settings > Permissions & Roles > Connected Data**.
+
+  </Tab>
+  <Tab title="Other assistants">
+
+Any assistant that supports remote MCP connectors can use the server. Point it at `https://api.schematichq.com/mcp` and let it run the sign-in flow.
+
+If your assistant cannot sign in this way, ask an engineer on your team for a read-only Schematic API key, which the assistant can send as a bearer token. See [Connect with an API key](/building-with-ai#connect-with-an-api-key).
+
+  </Tab>
+</Tabs>
+
+## Prepping a renewal
+
+The problem this solves is a CSM walking into a renewal without knowing how the account has actually been using the product. Assembling that by hand means the plan, the entitlements attached to it, and usage against each metered feature, which is a lot of clicking for a call that happens every quarter.
+
+Ask for it instead:
+
+- "What plan is Acme Corp on, and what entitlements does that plan include?"
+- "Show me Acme Corp's usage against each metered feature for the last 90 days."
+- "Which of Acme Corp's entitlements are they close to using up?"
+- "Has Acme Corp had any overrides applied, and are any of them expiring?"
+
+The last one matters more than it looks. An override granted during onboarding and never revisited is a common source of renewal surprises, because the customer has been using something their plan does not actually include.
+
+## Spotting churn and expansion signals
+
+The same data answers the opposite question, at portfolio scale rather than per account. Low usage against an entitlement is a churn signal. Usage pressing against a limit is an expansion signal.
+
+- "Which companies on the Pro plan have used less than 20% of their included usage this month?"
+- "Which companies are near the limit on any metered feature?"
+- "How many companies are on each plan right now?"
+- "Show me companies whose credit balance is running low."
+
+Run the first one on a schedule and it becomes a weekly churn sweep. Run the second and it becomes an upsell queue. Neither needs a dashboard or a report to be built first.
+
+## Checking what was sold against what was provisioned
+
+Custom deals are where entitlements drift from the contract, because the plan is configured by hand after the deal closes. Nobody usually checks the two against each other until a customer complains.
+
+- "What entitlements does the custom plan attached to Acme Corp include?"
+- "Compare the entitlements on Acme Corp's plan to these order form terms: [paste the terms]."
+- "List every company on a custom plan and what each one is entitled to."
+
+Running this over recently closed deals catches the mismatch while it is still cheap to fix. See [Close custom deals](/use-cases/custom-deals) for how custom plans are set up in the first place.
+
+## Adjusting an entitlement
+
+This one needs a read and write connection, and it is worth being deliberate about who has one.
+
+- "Set an override on Acme Corp for the api_calls feature at 50,000 for the next 30 days."
+- "List the overrides currently in place for Acme Corp."
+- "Remove the override on Acme Corp for beta_features."
+
+Time-limited overrides are the safer instrument for anything granted as a concession, since they expire on their own instead of quietly becoming permanent. See [Manage exceptions with overrides](/use-cases/overrides).
+
+A write connection can never do more than you can do in the Schematic app. If your account cannot change a plan, neither can an assistant connected as you.
+
+## Where this fits
+
+The MCP server is for ad-hoc questions and human-in-the-loop workflows. For automation that needs to run reliably without someone asking, use [webhooks](/integrations/webhooks) instead, which push events to Slack, your CRM, or any endpoint as they happen. [Automate with webhooks and AI](/use-cases/automation) covers how the two fit together.
+
+- [Spot churn and expansion with usage signals](/use-cases/usage-signals)
+- [Stay ahead of renewals and expirations](/use-cases/renewals)
+- [Expand accounts with upsells and add-ons](/use-cases/expand-accounts)

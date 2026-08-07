@@ -1,0 +1,154 @@
+---
+title: Building with AI
+description: Connect AI coding assistants to Schematic through the AI skills repo and the hosted MCP server, from Claude Code, Codex, Cursor, or any MCP-compatible client.
+slug: building-with-ai
+---
+
+Use Schematic with AI coding assistants to accelerate your integration and development workflow.
+
+<Info>Not writing code? See [Working with AI](/working-with-ai) for renewal prep, churn and expansion signals, and contract validation workflows that run entirely in a chat assistant.</Info>
+
+## Overview
+
+There are two pieces of tooling here, and they solve different problems.
+
+The **AI skills repo** teaches your coding assistant how to write correct Schematic integration code, so it reaches for the right SDK method and the right pattern instead of guessing. The **hosted MCP server** connects your assistant to your actual Schematic account, so it can read your real plans, features, and companies while it works.
+
+They are useful together: skills tell the assistant how Schematic works, and MCP tells it how *your* Schematic is configured.
+
+## Schematic AI Skills
+
+Schematic AI Skills give AI coding assistants the context they need to integrate Schematic into your codebase. All skills live in the [Schematic AI Tools GitHub repository](https://github.com/schematicHQ/schematic-ai-tools).
+
+There are three, split by where the code runs.
+
+The **frontend** skill covers Schematic's React, Vue, and JavaScript SDKs: feature flag checks in UI components, usage tracking, identify calls, and plan-based rendering.
+
+The **backend** skill covers server-side integrations across Node/TypeScript, Python, Go, Java, and C#: API integration code, middleware for entitlement enforcement, usage tracking endpoints, and webhook verification.
+
+The **components** skill covers Schematic's embedded billing UI: the customer portal, pricing tables, checkout flows, and usage meters.
+
+### Install in Claude Code
+
+Install the plugin from the Schematic marketplace:
+
+```bash
+/plugin marketplace add SchematicHQ/schematic-ai-tools
+/plugin install schematic-ai-tools@schematichq
+```
+
+The skills activate on their own when you ask about feature flags, entitlements, or billing components. The plugin also registers the MCP server, so `/mcp` is all you need to authenticate afterward.
+
+### Install in Cursor
+
+Cursor uses a rules file rather than a plugin. Copy the condensed ruleset to your project root:
+
+```bash
+curl -o .cursorrules https://raw.githubusercontent.com/schematichq/schematic-ai-tools/main/.cursorrules
+```
+
+### Other assistants
+
+Any assistant that reads instructions from a file in your repo can use these skills. The three `SKILL.md` files under [`plugins/schematic-ai-tools/skills/`](https://github.com/schematicHQ/schematic-ai-tools/tree/main/plugins/schematic-ai-tools/skills) are plain markdown with no Claude-specific syntax, so you can paste the one you need into whatever file your tool reads, such as `AGENTS.md` for Codex or a Windsurf rules file. The `.cursorrules` file is a condensed version of all three if you want a single smaller file.
+
+## Model Context Protocol (MCP)
+
+Schematic hosts an MCP server at `https://api.schematichq.com/mcp`. Any MCP-compatible AI assistant can connect to it to interact with your Schematic account directly:
+
+- Query company information and plans
+- Check feature usage and entitlements
+- Manage company overrides
+- Create and update features and plans
+- Analyze usage patterns
+
+The server speaks streamable HTTP and supports MCP OAuth, which is what most clients need to know to connect.
+
+### Common use cases
+
+The MCP integration is particularly useful for **code generation**, where the assistant queries your actual Schematic data so the integration code it writes matches your real feature keys and plans. It also helps with **troubleshooting** a specific company, plan, or feature without leaving your editor, **analyzing usage patterns** through natural language queries, and **managing plans** by describing the change you want rather than clicking through the app.
+
+### Connect with OAuth
+
+OAuth is the better default. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately. No API key to store or rotate.
+
+When you connect, Schematic asks you to sign in, pick an environment, and choose read-only or read and write access. A write connection can never do more than you can do in the Schematic app.
+
+<Tabs>
+  <Tab title="Claude Code">
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp
+```
+
+Then run `/mcp` to sign in.
+
+  </Tab>
+  <Tab title="Codex">
+
+Codex has no CLI shortcut for HTTP servers, so add the server to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.schematic]
+url = "https://api.schematichq.com/mcp"
+```
+
+Then sign in:
+
+```bash
+codex mcp login schematic
+```
+
+  </Tab>
+  <Tab title="Cursor">
+
+Add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
+
+```json
+{
+  "mcpServers": {
+    "schematic": {
+      "url": "https://api.schematichq.com/mcp"
+    }
+  }
+}
+```
+
+Cursor prompts you to sign in the first time it connects.
+
+  </Tab>
+  <Tab title="Other clients">
+
+Point the client at `https://api.schematichq.com/mcp` over streamable HTTP and let it run the OAuth flow. Clients that only support SSE, or that cannot reach the public internet, need the API key method below instead.
+
+  </Tab>
+</Tabs>
+
+### Connect with an API key
+
+Clients that do not support MCP OAuth can authenticate with a Schematic secret API key as a bearer token:
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp \
+  --header "Authorization: Bearer your-secret-api-key"
+```
+
+In Codex, reference an environment variable rather than pasting the key into your config:
+
+```toml
+[mcp_servers.schematic]
+url = "https://api.schematichq.com/mcp"
+bearer_token_env_var = "SCHEMATIC_API_KEY"
+```
+
+Read-only API keys can use only the read tools, which makes them a reasonable choice when you want an assistant that can look but not touch.
+
+**Example MCP queries:**
+- "What plan is company Acme Corp on?"
+- "Show me feature usage for the 'api_calls' feature across all companies"
+- "Create a company override to enable 'beta_features' for company comp_123"
+
+## Best practices
+
+When using Schematic AI Skills with your coding assistant, share your tech stack, framework, and specific use case up front, mention your Schematic environment and existing integrations, and review the generated code the same way you would review a teammate's.
+
+When working with the MCP integration, prefer OAuth over API keys so the connection runs as you and respects your permissions. If you do use an API key, store it securely and never commit it. Connect read-only unless you specifically need write access, pick the environment deliberately, and verify that query results look right before acting on them in production.
