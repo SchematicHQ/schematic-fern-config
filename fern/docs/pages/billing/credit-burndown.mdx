@@ -339,11 +339,39 @@ Auto top-up buys credits automatically when a customer's balance falls below a t
 7. **Top-up Grant Expiration** sets the expiry policy for the purchased grant. A 1 year duration is a good default: long enough for customers to use the credits, short enough to keep revenue recognition simple. Auto top-up grants support Duration and No Expiry only, not the billing period options.
 8. Review the confirmation showing final cost, threshold, and expiration, then click "Create plan grant".
 
+### Who controls auto top-up
+
+Each credit grant sets whether auto top-up is available and who operates it:
+
+| Availability | Behavior |
+| --- | --- |
+| `off` | Auto top-up is unavailable on this grant |
+| `automatic` | You configure it and it runs. The customer does not turn it on or off. |
+| `user_controlled` | The customer decides whether auto top-up is on, from the customer portal |
+
+Choose `user_controlled` when you want customers managing their own refills, which is the usual arrangement for self-serve plans, and `automatic` when continuity matters more than customer control, such as an enterprise account that should never be interrupted mid-workload.
+
+Separately, `can_buy_bundles` controls whether customers can purchase one-time [credit bundles](#5-configure-credit-bundles-that-customers-can-purchase-to-top-up-their-balance) themselves. It is independent of auto top-up availability, so you can let a customer buy credits on demand without also letting them set up an automatic refill, or the reverse.
+
+### Setting the threshold
+
+The example above uses a percentage of the remaining balance. You can set the threshold as an absolute number of credits instead, which is usually the clearer choice when a plan's grant size varies between companies, since a fixed percentage of a larger grant means a larger buffer.
+
+The two threshold forms are alternatives. Set the one that matches how you want the trigger to scale.
+
+### Overriding auto top-up for a single company
+
+Auto top-up is configured on the plan, so every company on that plan inherits the same settings. You can override the amount, the threshold, and whether it is enabled for an individual company without creating a separate plan. This is the usual way to handle an enterprise account that needs a larger refill than the plan's default, or a company that has asked you to turn automatic purchasing off.
+
 ### Triggering an Auto Top-Up
 
 An auto top-up fires while processing an event that draws from a credit balance, when that balance is at or below the threshold. If several events arrive close together, only one top-up is purchased.
 
 If a top-up purchase fails, Schematic retries the next time the balance is drawn from.
+
+Three webhook events report the outcome of each attempt: `auto.topup.success`, `auto.topup.hard.failure`, and `auto.topup.retry.exceeded`. A hard failure carries the Stripe error code when the failure originated there, which is what lets you tell a declined card apart from a missing payment method. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers#auto-topup-events) for the full payloads.
+
+Because a failing top-up means a customer is about to be cut off, wiring `auto.topup.hard.failure` to an internal alert and a customer-facing email is worth doing before you turn auto top-up on. See [Spend and usage controls](/billing/spend-controls) for how auto top-up fits with the other limits available to you.
 
 ## Accessing Credit Information via API
 
