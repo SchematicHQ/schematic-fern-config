@@ -6,6 +6,20 @@ slug: playbooks/provisioning
 
 When you connect Stripe to Schematic, any subscription updates will be picked up by Schematic and applied to company profiles. This means that when a new customer signs up, they'll automatically get the right entitlements based on the plan they were sold. Moreover, if that ever changes, Schematic will listen to Stripe to keep access in sync.
 
+## How the handoff works
+
+Provisioning is the step between a customer paying and a customer having access, and Schematic closes it without anyone assigning a plan by hand.
+
+Stripe owns the subscription. When one is created or changed there, Stripe notifies Schematic. Schematic looks at the Stripe product on that subscription, resolves which Schematic plan it corresponds to, and assigns the company to that plan. Entitlements follow from the plan, so the company has access the moment the assignment lands.
+
+The mapping from Stripe product to Schematic plan is what makes this automatic, and it is configured once rather than per deal. See [Plan audiences](/catalog/managing-company-plans#plan-audiences-advanced) for how the rules work, including targeting by trait or by specific company when a billing product is not the right signal.
+
+Because the sync is driven by Stripe rather than polled, the same path handles every subsequent change. An upgrade, a downgrade, or an added subscription item updates entitlements as it happens, and a cancellation removes them.
+
+<Info>This page covers the self-serve and subscription-driven path. Sales-led deals billed by invoice provision through [custom plans](/catalog/custom-plans) instead, where the activation strategy you choose at finalize time decides whether access starts on payment or immediately.</Info>
+
+## Setup
+
 To get setup, follow the steps below.
 
 1. Set up the Stripe integration [here](/integrations/stripe).
