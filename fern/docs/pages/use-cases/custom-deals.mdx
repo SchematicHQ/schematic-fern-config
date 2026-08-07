@@ -26,6 +26,22 @@ Negotiated plans in the catalog, each tied to exactly one company and carrying i
 
 The lighter-weight option for a smaller concession: one entitlement raised for one company, here 15 Dashboard Prompts per month, with an optional expiry date, while the rest of the plan stays standard. Find it on the company profile.
 
+## The motion end to end
+
+A sales-led deal runs the same five steps every time, and each one has a destination in these docs. The point of doing it this way is that only the first step needs a human after the terms are agreed.
+
+**1. Close the deal.** The order form is signed outside Schematic. What matters here is that the terms it names, entitlements, limits, and price, are the ones you are about to configure.
+
+**2. Turn it into a custom plan.** Build a [custom plan](/catalog/custom-plans) from the company's profile with the negotiated entitlements and pricing, duplicating a standard plan as a starting point if the deal is close to one. No code, and no branch in your application for this account. The [step-by-step guide](/catalog/guides/custom-plans) walks the whole thing.
+
+**3. Invoice them.** Finalizing the plan generates the invoice through Stripe and lets you choose whether Stripe emails it. The invoice has a hosted page the customer pays on. See [Getting the invoice to the customer](/catalog/custom-plans#getting-the-invoice-to-the-customer).
+
+**4. They pay, and the account switches itself on.** With the **On payment** activation strategy, the company activates on the custom plan when the invoice is paid, and entitlements follow from the plan immediately. Nobody assigns anything. Subscription-driven deals provision the same way through [Stripe](/playbooks/provisioning), by mapping the Stripe product to a plan.
+
+**5. Run the account, then renew it.** Usage meters against the plan's entitlements from day one, exceptions are handled with [overrides](/feature-management/overrides) rather than new plans, and expansion is sold with [add-ons](/use-cases/expand-accounts). At renewal, [usage signals](/use-cases/usage-signals) tell you what the customer actually consumed, which is the difference between renegotiating from evidence and renegotiating from a guess. See [Stay ahead of renewals](/use-cases/renewals).
+
+Editing a finalized custom plan creates a new draft version, so a mid-term change follows the same review-then-publish path rather than editing live terms in place.
+
 ## Configure it
 
 - [Custom Plans](/catalog/custom-plans) covers creating a per-company plan for a negotiated, invoiced deal.

@@ -42,6 +42,19 @@ When you finalize, you choose an activation strategy that controls when the comp
 
 ![Custom plan invoice paid and active](../../assets/images/catalog/catalog-custom-plan-billing.png)
 
+### Getting the invoice to the customer
+
+The invoice itself is issued through Stripe, which is what gives the customer a way to pay it without you building one. Two settings control how it reaches them:
+
+- **Send invoice** decides whether Stripe emails the invoice to the customer when it is finalized. Leave it off when your team would rather deliver it through the deal thread or a procurement portal.
+- **Days until due** sets the payment window, and it is the same window the **On payment** activation strategy waits on.
+
+Either way the invoice has a Stripe-hosted page where the customer can pay by card or by whatever methods you have enabled in Stripe, so you can pass that link along yourself rather than relying on the email.
+
+Schematic tracks the result. The plan's **Billing** tab shows the invoice status, and when it is paid the company activates on the plan without anyone assigning it. A failed or expired invoice can be retried against the same plan, so a payment problem does not mean rebuilding the deal.
+
+<Info>In sandbox environments, Stripe does not send invoice emails by default. See [Configuring the Catalog](/catalog/configuration) and the [Stripe FAQ](/integrations/stripe-troubleshooting) if an expected invoice email does not arrive.</Info>
+
 ## Versions and migrations
 
 Like standard plans, custom plans are versioned. Editing a finalized custom plan creates a new draft version that you can review and publish, and you can track changes on the plan's **Migrations** tab. Because a custom plan only ever applies to one company, publishing a new version updates that single company. See [Plan Versions](/catalog/plans#plan-versions) for how versioning works.
