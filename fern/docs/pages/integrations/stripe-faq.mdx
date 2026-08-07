@@ -24,7 +24,13 @@ This can feel like a chicken-and-egg situation: you can't assign a paid plan wit
 1. The customer uses the **Schematic Checkout Component** to subscribe to a paid plan. During checkout, they enter a payment method, and Schematic provisions both a Stripe customer and a subscription automatically.
 2. Once a payment method is on file, you or the customer can freely change plans via the Schematic App or Customer Portal Component.
 
-For development or internal purposes, you can also enter a payment method directly in the Stripe Dashboard for a given customer.
+For development or internal purposes, you can also enter a payment method directly in the Stripe Dashboard for a given customer. To test these flows, we recommend using Stripe's pre-configured [sandbox credit cards (e.g. `4242`)](https://docs.stripe.com/testing). 
+
+![Add Credit Card in Stripe](../../assets/images/stripe/stripe-troubleshooting-add-card.png)
+
+When adding a credit card via the the Stripe Dashboard, you'll also need to set it as the default payment method for Schematic to recognize this. (This is handled automatically when a customer checkouts through Schematic Components). 
+
+![Set Default Paymethod Method in Stripe](../../assets/images/stripe/stripe-troubleshooting-set-default-card.png)
 
 <Info>
 Schematic does not currently support admins setting a payment method on behalf of a customer via the Schematic App. If this is a need, the checkout flow is the recommended path.
