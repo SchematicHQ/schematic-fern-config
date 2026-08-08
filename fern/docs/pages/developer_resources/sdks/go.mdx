@@ -90,6 +90,43 @@ func main() {
 }
 ```
 
+## Graceful shutdown
+
+Events recorded with `Track()` are buffered client-side and flushed on an interval, so they are not yet on the server when `Track()` returns. `client.Close()` flushes the buffer (with retries and exponential backoff) and blocks until that flush completes, so `defer client.Close()` in `main()` is enough to guarantee delivery on a normal exit. The wait is bounded, so a wedged network cannot hang your shutdown path indefinitely.
+
+Signals are not a normal exit, though — a process killed by SIGTERM never runs deferred functions. Trap the signal so `Close` actually gets called:
+
+```go
+func main() {
+  client := schematicclient.NewSchematicClient(option.WithAPIKey(os.Getenv("SCHEMATIC_API_KEY")))
+  defer client.Close()
+
+  sigs := make(chan os.Signal, 1)
+  signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+  // ... run your server ...
+
+  <-sigs
+  server.Shutdown(context.Background()) // stop accepting new work first
+  client.Close()                        // then flush any buffered events
+}
+```
+
+If a specific event needs to be durable before your code proceeds — rather than only at shutdown — call `Flush` to send the buffer without closing the client:
+
+```go
+client.Track(ctx, &schematicgo.EventBodyTrack{
+  Event:   "some-event-subtype",
+  Company: map[string]string{"company_id": "your-company-id"},
+})
+
+if err := client.Flush(ctx); err != nil {
+  // the event was not delivered; retry or record it for replay
+}
+```
+
+Events are deduplicated server-side on the idempotency key for 24 hours, so retrying a send that may or may not have landed is safe.
+
 ## Usage examples
 
 A number of these examples use `keys` to identify companies and users. Learn more about keys [here](/developer_resources/key_management).

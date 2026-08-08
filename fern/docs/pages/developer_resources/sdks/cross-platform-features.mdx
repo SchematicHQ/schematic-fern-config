@@ -28,7 +28,9 @@ The SDKs automatically handle network outages and connection drops by detecting 
 
 ## Event Buffering
 
-Our SDKs implement intelligent event buffering to batch multiple events together before sending them to the Schematic service. This reduces the number of network requests, and allows for event tracking to be asynchronous from the standpoint of your application. All SDKs implement automatic retries on failure, flush events when the application is closed, and handle network interruptions gracefully.
+Our SDKs implement intelligent event buffering to batch multiple events together before sending them to the Schematic service. This reduces the number of network requests, and allows for event tracking to be asynchronous from the standpoint of your application. All SDKs implement automatic retries on failure and handle network interruptions gracefully.
+
+Because buffered events are not yet on the server when `track()` returns, closing the client is what flushes them — and closing is a blocking operation. **Await (or otherwise wait on) the SDK's close method in your shutdown handler**; a fire-and-forget close followed by process exit drops whatever is still buffered. See the individual SDK pages for the graceful-shutdown pattern in your language.
 
 ## Local Caching
 

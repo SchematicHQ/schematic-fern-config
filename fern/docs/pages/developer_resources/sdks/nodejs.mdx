@@ -28,7 +28,7 @@ const client = new SchematicClient({ apiKey });
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
 
 By default, the client will do some local caching for flag checks. If you would like to change this behavior, you can do so using an initialization option to specify the max size of the cache (in terms of number of records) and the max age of the cache (in milliseconds):
@@ -48,7 +48,7 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
 
 You can also disable local caching entirely with an initialization option; bear in mind that, in this case, every flag check will result in a network request:
@@ -66,7 +66,7 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
 
 You may want to specify default flag values for your application, which will be used if there is a service interruption or if the client is running in offline mode (see below). You can do this using an initialization option:
@@ -84,8 +84,41 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
+
+### Graceful shutdown
+
+Events recorded with `track()` are buffered client-side and flushed on an interval, so they are not yet on the server when `track()` returns. `client.close()` flushes the buffer — but it returns a promise, so you must **await** it. An unawaited `close()` followed by `process.exit()` drops whatever is still in the buffer.
+
+Close the client from your shutdown handler:
+
+```ts
+const shutdown = async () => {
+    await server.close(); // stop accepting new work first
+    await client.close(); // then flush any buffered events
+    process.exit(0);
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+```
+
+If a specific event needs to be durable before your code proceeds — rather than only at shutdown — send it directly through the events API and await the round trip. This bypasses the buffer entirely:
+
+```ts
+await client.events.createEvent({
+    eventType: "track",
+    body: {
+        company: { id: "your-company-id" },
+        event: "some-event-subtype",
+        quantity: 1,
+    },
+    idempotencyKey: "your-idempotency-key",
+});
+```
+
+Events are deduplicated server-side on the idempotency key for 24 hours, so retrying a send that may or may not have landed is safe.
 
 ### Custom Logging
 
@@ -125,7 +158,7 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
 
 Example using a popular logging library like Winston:
@@ -154,7 +187,7 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
 
 If no logger is provided, the client uses a default console logger. By default it only emits `warn` and `error` messages; `debug` and `info` are suppressed to keep production output quiet. Use the `logLevel` option to raise or lower the verbosity of the default logger:
@@ -203,7 +236,7 @@ client.identify({
     },
 });
 
-client.close();
+await client.close();
 ```
 
 This call is non-blocking and there is no response to check.
@@ -229,7 +262,7 @@ client.track({
     },
 });
 
-client.close();
+await client.close();
 ```
 
 This call is non-blocking and there is no response to check.
@@ -315,7 +348,7 @@ client.companies
     })
     .catch(console.error);
 
-client.close();
+await client.close();
 ```
 
 You can define any number of company keys; these are used to address the company in the future, for example by updating the company's traits or checking a flag for the company.
@@ -353,7 +386,7 @@ client.companies
     })
     .catch(console.error);
 
-client.close();
+await client.close();
 ```
 
 You can define any number of user keys; these are used to address the user in the future, for example by updating the user's traits or checking a flag for the user.
@@ -389,7 +422,7 @@ client
     })
     .catch(console.error);
 
-client.close();
+await client.close();
 ```
 
 ### Checking flags with entitlement details
@@ -423,7 +456,7 @@ client
     })
     .catch(console.error);
 
-client.close();
+await client.close();
 ```
 
 ### Checking multiple flags
@@ -465,7 +498,7 @@ client
     })
     .catch(console.error);
 
-client.close();
+await client.close();
 ```
 
 ### Other API operations
@@ -733,7 +766,7 @@ const flagValue = await client.checkFlag(
     "some-flag-key",
 );
 
-client.close();
+await client.close();
 ```
 
 ### Configuration options
@@ -864,6 +897,12 @@ await client.trackWithReservation(result.reservation!, inference.tokensUsed);
 
 If the caller never settles a reservation, it expires after `defaultReservationTTL` and its credits are returned to the lease. If the work outlives the reservation's TTL, `trackWithReservation` still bills the usage — the track event carries a deterministic idempotency key, so duplicate or recovery emits never double-bill. However, the local lease balance is not re-debited on that late settle (the expired reservation's hold was already swept back to the lease), so it reads high until the lease rolls over. **Set `defaultReservationTTL` above the longest expected gap between `check()` and `trackWithReservation()`** to keep the local balance accurate.
 
+<Warning>
+`trackWithReservation()` settles the reservation locally and enqueues the track event on the buffer; the redemption is only billed once that event reaches Schematic. If the process exits before the buffer flushes, the redemption is lost and the lease refunds its unspent hold at release or expiry — so the work goes unbilled.
+
+Await `client.close()` in your shutdown handler (see [Graceful shutdown](#graceful-shutdown)) so in-flight redemptions are flushed on SIGTERM. The `Reservation` handle is a plain serializable object, and the redemption carries a deterministic idempotency key derived from the reservation id, so you can also persist the handle alongside your own work record and re-emit `trackWithReservation()` on restart — a replay collapses to a single billed redemption.
+</Warning>
+
 ### Pre-warming
 
 To avoid paying the lease-acquire round trip on a session's first check, pre-warm leases when the user is identified:
@@ -918,7 +957,7 @@ import { SchematicClient } from "@schematichq/schematic-typescript-node";
 
 const client = new SchematicClient({ offline: true });
 
-client.close();
+await client.close();
 ```
 
 Offline mode works well with flag defaults:
@@ -933,5 +972,5 @@ const client = new SchematicClient({
 
 // interactions with the client
 
-client.close();
+await client.close();
 ```
