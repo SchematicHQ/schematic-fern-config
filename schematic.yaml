@@ -14152,6 +14152,9 @@ components:
     TestWebhookResponseData:
       type: object
       properties:
+        failure_reason:
+          type: string
+          nullable: true
         response_code:
           type: integer
           format: int64
