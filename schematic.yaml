@@ -2856,6 +2856,8 @@ components:
           type: boolean
         collect_phone:
           type: boolean
+        collect_tax_id:
+          type: boolean
         opt_in_enabled:
           type: boolean
         opt_in_text:
@@ -2868,6 +2870,7 @@ components:
         - collect_address
         - collect_email
         - collect_phone
+        - collect_tax_id
         - opt_in_enabled
       title: CheckoutSettingsResponseData
     CheckoutSubscription:
@@ -3009,10 +3012,13 @@ components:
           type: boolean
         collect_phone:
           type: boolean
+        collect_tax_id:
+          type: boolean
       required:
         - collect_address
         - collect_email
         - collect_phone
+        - collect_tax_id
       title: CompanyBillingCheckoutSettings
     CompanyBillingDetailsResponseData:
       type: object
@@ -4198,6 +4204,8 @@ components:
           type: boolean
         collect_phone:
           type: boolean
+        collect_tax_id:
+          type: boolean
         proration_behavior:
           $ref: '#/components/schemas/ProrationBehavior'
         tax_collection_enabled:
@@ -4206,6 +4214,7 @@ components:
         - collect_email
         - collect_address
         - collect_phone
+        - collect_tax_id
         - proration_behavior
         - tax_collection_enabled
       title: ComponentCheckoutSettings
@@ -6759,6 +6768,8 @@ components:
           type: boolean
         checkout_collect_phone:
           type: boolean
+        checkout_collect_tax_id:
+          type: boolean
         custom_checkout_fields:
           type: array
           items:
@@ -6859,6 +6870,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - checkout_collect_tax_id
         - opt_in_enabled
         - prevent_self_service_downgrade
         - enable_tax_collection
@@ -15008,6 +15020,8 @@ components:
           type: boolean
         checkout_collect_phone:
           type: boolean
+        checkout_collect_tax_id:
+          type: boolean
         custom_checkout_fields:
           type: array
           items:
@@ -15108,6 +15122,7 @@ components:
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
+        - checkout_collect_tax_id
         - opt_in_enabled
         - prevent_self_service_downgrade
         - enable_tax_collection
