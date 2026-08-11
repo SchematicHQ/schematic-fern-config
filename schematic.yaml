@@ -8189,6 +8189,35 @@ components:
         - trait_type
         - updated_at
       title: EntityTraitDefinitionResponseData
+    EntityTraitDefinitionUsage:
+      type: object
+      properties:
+        checkout_field_config_count:
+          type: integer
+          format: int64
+        company_override_count:
+          type: integer
+          format: int64
+        feature_count:
+          type: integer
+          format: int64
+        plan_entitlement_count:
+          type: integer
+          format: int64
+        plan_trait_count:
+          type: integer
+          format: int64
+        rule_condition_count:
+          type: integer
+          format: int64
+      required:
+        - company_override_count
+        - feature_count
+        - plan_entitlement_count
+        - rule_condition_count
+        - checkout_field_config_count
+        - plan_trait_count
+      title: EntityTraitDefinitionUsage
     EntityTraitDetailResponseData:
       type: object
       properties:
@@ -24866,6 +24895,85 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteEntityTraitDefinition
+      summary: Delete entity trait definition
+      tags:
+        - companies
+      parameters:
+        - name: entity_trait_definition_id
+          in: path
+          description: entity_trait_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteEntityTraitDefinitionParams
+                required:
+                  - data
+                  - params
+                title: DeleteEntityTraitDefinitionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-trait-definitions/{entity_trait_definition_id}/usage:
+    get:
+      operationId: getEntityTraitDefinitionUsage
+      summary: Get entity trait definition usage
+      tags:
+        - companies
+      parameters:
+        - name: entity_trait_definition_id
+          in: path
+          description: entity_trait_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/EntityTraitDefinitionUsage'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetEntityTraitDefinitionUsageParams
+                required:
+                  - data
+                  - params
+                title: GetEntityTraitDefinitionUsageResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /entity-trait-definitions/count:
     get:
       operationId: countEntityTraitDefinitions
@@ -25047,6 +25155,84 @@ paths:
                   - data
                   - params
                 title: GetEntityTraitValuesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-traits/count:
+    get:
+      operationId: countEntityTraits
+      summary: Count entity traits
+      tags:
+        - companies
+      parameters:
+        - name: definition_id
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      definition_id:
+                        type: string
+                      entity_type:
+                        $ref: '#/components/schemas/EntityType'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountEntityTraitsParams
+                required:
+                  - data
+                  - params
+                title: CountEntityTraitsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
