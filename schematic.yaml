@@ -6393,10 +6393,7 @@ components:
         target_plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - company_ids
-        - excluded_company_ids
         - plan_id
-        - plan_version_ids_from
         - plan_version_id_to
         - strategy
         - target_plan_type
@@ -12457,9 +12454,7 @@ components:
         target_plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - company_ids
         - plan_id
-        - plan_version_ids_from
         - plan_version_id_to
         - target_plan_type
       title: PreviewMigrationRequestBody
