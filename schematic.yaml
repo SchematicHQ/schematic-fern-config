@@ -28632,13 +28632,6 @@ paths:
             items:
               type: string
             maxItems: 100
-        - name: plan_ids
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-            maxItems: 100
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -28698,11 +28691,6 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
-                      plan_ids:
-                        type: array
-                        items:
-                          type: string
-                        maxItems: 100
                     title: ListPlanChangesParams
                 required:
                   - data
