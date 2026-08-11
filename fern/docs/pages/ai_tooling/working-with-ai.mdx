@@ -22,38 +22,48 @@ Two things to decide when you connect:
 
 ## Connect your assistant
 
+Connectors are tied to your Claude or ChatGPT account rather than to one device, so you add the server once and it follows you across web, desktop, and mobile.
+
 <Tabs>
   <Tab title="Claude">
-
-Works the same in the Claude web app, the desktop app, and Cowork.
-
-1. Open **Settings > Connectors**.
-2. Click **Add custom connector**.
-3. Enter `https://api.schematichq.com/mcp` as the URL and save.
+1. Open **Customize > Connectors**.
+2. Click **+**, then **Add custom connector**.
+3. Enter `https://api.schematichq.com/mcp` as the URL and click **Add**.
 4. Click **Connect** and sign in to Schematic, then pick your environment and access level.
 
-Claude connects from Anthropic's cloud rather than your own machine, so the connector works identically on mobile.
+To use it in a conversation, click **+** in the chat, choose **Connectors**, and toggle Schematic on.
 
+On Team and Enterprise plans an owner adds the connector first, under **Organization settings > Connectors > Add**, hovering **Custom** and choosing **Web**. Everyone else then finds it under **Customize > Connectors** and clicks **Connect** to sign in with their own Schematic account.
+  </Tab>
+  <Tab title="Claude Cowork">
+Cowork uses the same account-level connectors as the Claude apps. If you already added Schematic in Claude, it is available in Cowork with nothing further to do.
+
+To add it from Cowork:
+
+1. Open **Customize > Connectors**.
+2. Click **+**, then **Add custom connector**.
+3. Enter `https://api.schematichq.com/mcp` as the URL and click **Add**.
+4. Click **Connect** and sign in to Schematic, then pick your environment and access level.
+
+Cowork is a better fit than a normal Claude chat when the answer is a deliverable rather than a reply. It can work through a list of accounts and hand back a renewal brief or a churn-risk spreadsheet, instead of you asking about one company at a time.
   </Tab>
   <Tab title="ChatGPT">
-
 Custom MCP connectors live behind developer mode.
 
 1. Open **Settings > Apps > Advanced settings** and turn on **Developer mode**.
 2. Go to **Settings > Connectors** and click **Create**.
 3. Enter `https://api.schematichq.com/mcp` as the URL and complete the sign-in.
 
-Available on Plus and Pro. On Business, Enterprise, and Edu, a workspace admin may need to allow custom MCP connectors first under **Workspace Settings > Permissions & Roles > Connected Data**.
-
+Available on Plus and Pro. On Business, Enterprise, and Edu, a workspace admin may need to allow custom MCP connectors first, under **Workspace Settings > Permissions & Roles > Connected Data**.
   </Tab>
   <Tab title="Other assistants">
-
 Any assistant that supports remote MCP connectors can use the server. Point it at `https://api.schematichq.com/mcp` and let it run the sign-in flow.
 
 If your assistant cannot sign in this way, ask an engineer on your team for a read-only Schematic API key, which the assistant can send as a bearer token. See [Connect with an API key](/building-with-ai#connect-with-an-api-key).
-
   </Tab>
 </Tabs>
+
+Whichever client you use, the connection runs from the vendor's cloud rather than your own machine, so nothing needs installing locally.
 
 ## Prepping a renewal
 

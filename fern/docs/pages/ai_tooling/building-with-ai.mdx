@@ -75,16 +75,13 @@ When you connect, Schematic asks you to sign in, pick an environment, and choose
 
 <Tabs>
   <Tab title="Claude Code">
-
 ```bash
 claude mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
 Then run `/mcp` to sign in.
-
   </Tab>
   <Tab title="Codex">
-
 Codex has no CLI shortcut for HTTP servers, so add the server to `~/.codex/config.toml`:
 
 ```toml
@@ -97,10 +94,8 @@ Then sign in:
 ```bash
 codex mcp login schematic
 ```
-
   </Tab>
   <Tab title="Cursor">
-
 Add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
 
 ```json
@@ -114,12 +109,9 @@ Add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.jso
 ```
 
 Cursor prompts you to sign in the first time it connects.
-
   </Tab>
   <Tab title="Other clients">
-
 Point the client at `https://api.schematichq.com/mcp` over streamable HTTP and let it run the OAuth flow. Clients that only support SSE, or that cannot reach the public internet, need the API key method below instead.
-
   </Tab>
 </Tabs>
 
