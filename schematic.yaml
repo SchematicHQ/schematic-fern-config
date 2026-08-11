@@ -756,6 +756,12 @@ components:
       properties:
         company_id:
           type: string
+        company_license_id:
+          type: string
+          description: >-
+            The license instance this grant was issued for. Set only when a
+            per-license plan grant issued it; null on a plan's own grant.
+          nullable: true
         company_name:
           type: string
         created_at:
@@ -779,6 +785,12 @@ components:
           $ref: '#/components/schemas/BillingCreditGrantReason'
         id:
           type: string
+        license_name:
+          type: string
+          description: >-
+            Name of the license this grant was issued for, when it came from a
+            per-license plan grant.
+          nullable: true
         plan_id:
           type: string
           nullable: true
@@ -1224,6 +1236,12 @@ components:
           description: >-
             Whether buyers can purchase one-time credit bundles on this grant,
             independent of auto top-up availability.
+        company_credit_amount:
+          type: integer
+          description: >-
+            Credits granted once per company on top of the per-license amount.
+            Always 0 when scaling is fixed.
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -1313,6 +1331,7 @@ components:
         - plan_name
         - credit_amount
         - credit_name
+        - company_credit_amount
         - scaling
         - auto_topup_availability
         - can_buy_bundles
@@ -3714,6 +3733,9 @@ components:
           type: integer
           format: int64
           nullable: true
+        company_credit_amount:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -3811,6 +3833,7 @@ components:
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
         - rollover_percentage
+        - company_credit_amount
         - scaling
         - created_at
         - updated_at
@@ -5319,6 +5342,15 @@ components:
         can_buy_bundles:
           type: boolean
           nullable: true
+        company_credit_amount:
+          type: integer
+          description: >-
+            Credits granted once per company on top of the per-license amount.
+            Only valid when scaling is per_license. Defaults to 0.
+          format: int64
+          nullable: true
+          maximum: 9999999999
+          minimum: 0
         credit_amount:
           type: integer
           format: int64
@@ -7045,6 +7077,9 @@ components:
           type: string
         company_id:
           type: string
+        company_license_id:
+          type: string
+          nullable: true
         company_name:
           type: string
         created_at:
@@ -7084,6 +7119,9 @@ components:
           $ref: '#/components/schemas/BillingCreditGrantReason'
         id:
           type: string
+        license_name:
+          type: string
+          nullable: true
         plan_id:
           type: string
           nullable: true
@@ -11010,6 +11048,9 @@ components:
           nullable: true
         billing_credit_can_buy_bundles:
           type: boolean
+        company_credit_amount:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -11107,6 +11148,7 @@ components:
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
         - rollover_percentage
+        - company_credit_amount
         - scaling
         - created_at
         - updated_at
@@ -14438,6 +14480,15 @@ components:
         can_buy_bundles:
           type: boolean
           nullable: true
+        company_credit_amount:
+          type: integer
+          description: >-
+            Credits granted once per company on top of the per-license amount.
+            Only valid when the grant scales per license.
+          format: int64
+          nullable: true
+          maximum: 9999999999
+          minimum: 0
         credit_amount:
           type: integer
           format: int64
@@ -14460,8 +14511,8 @@ components:
         license_id:
           type: string
           description: >-
-            The license whose quantity scales this grant. Cannot be changed
-            after creation.
+            The license whose quantity scales this grant. Cleared when the grant
+            moves off per-license scaling.
           nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -14486,7 +14537,8 @@ components:
             - $ref: '#/components/schemas/PlanCreditGrantScaling'
           description: >-
             Whether the grant is a fixed amount per company, or issued once per
-            license the company holds. Cannot be changed after creation.
+            license the company holds. Changing this re-issues the credits
+            companies already hold for this grant.
           nullable: true
       required:
         - reset_cadence
