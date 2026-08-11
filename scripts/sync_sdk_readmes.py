@@ -2,11 +2,14 @@
 """Sync the server SDK docs pages from the READMEs in their SDK repos.
 
 Each page under fern/docs/pages/developer_resources/sdks/ is the repo's README
-verbatim, with three deviations:
+verbatim, with four deviations:
 
   1. The leading H1 is dropped; the page title comes from the frontmatter.
   2. Repo-only sections (Contributing, Reference) are dropped.
   3. Repo-relative links are rewritten to absolute GitHub URLs.
+  4. Absolute links into docs.schematichq.com are rewritten to site-relative
+     paths, so they stay inside a preview deploy instead of jumping to
+     production docs.
 
 Usage:
     scripts/sync_sdk_readmes.py            # rewrite the pages in place
@@ -44,6 +47,12 @@ SDKS = {
 DROP_SECTIONS = ("Contributing", "Reference")
 
 BRANCHES = ("main", "master")
+
+# The READMEs have to link to the docs site absolutely — they're read on GitHub
+# and on npm/PyPI. On the docs site itself those same links are just internal
+# pages, and Fern resolves site-relative paths against whatever deploy is
+# serving them, so a preview keeps its links inside the preview.
+DOCS_SITE = "https://docs.schematichq.com"
 
 
 def fetch_readme(repo):
@@ -84,6 +93,8 @@ def to_page_body(readme, repo):
     body = re.sub(
         r"\]\(\./", f"](https://github.com/SchematicHQ/{repo}/blob/main/", body
     )
+    body = re.sub(rf"\]\({re.escape(DOCS_SITE)}/", "](/", body)
+    body = re.sub(rf"\]\({re.escape(DOCS_SITE)}\)", "](/)", body)
     return body.rstrip("\n") + "\n"
 
 
