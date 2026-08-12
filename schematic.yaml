@@ -503,6 +503,11 @@ components:
         - started_at
         - url
       title: AuditLogResponseData
+    BillingCollectionMethod:
+      type: string
+      enum:
+        - charge_automatically
+        - send_invoice
     BillingCouponResponseData:
       type: object
       properties:
@@ -7763,6 +7768,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        plan_billing_source:
+          allOf:
+            - $ref: '#/components/schemas/PlanBillingSource'
+          description: >-
+            The flow that created this billing record: a custom plan, or a
+            standard plan assigned by invoice through Manage Plan.
         plan_id:
           type: string
         published_at:
@@ -7785,6 +7796,7 @@ components:
         - created_at
         - days_until_due
         - id
+        - plan_billing_source
         - plan_id
         - send_invoice
         - status
@@ -10525,6 +10537,12 @@ components:
     ManagePlanRequest:
       type: object
       properties:
+        activate_on_payment:
+          type: boolean
+          description: >-
+            If true, the company gets the plan only once the first invoice is
+            paid. Only applies to an invoiced subscription. Defaults to false.
+          nullable: true
         add_on_selections:
           type: array
           items:
@@ -10539,6 +10557,21 @@ components:
         base_plan_version_id:
           type: string
           nullable: true
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The date the subscription's billing period renews on. Only honored
+            when starting a new subscription; changing the anchor on an existing
+            subscription is not supported.
+          format: date-time
+          nullable: true
+        billing_email:
+          type: string
+          description: >-
+            Address the invoice is sent to. Required when collection_method is
+            send_invoice.
+          nullable: true
+          maxLength: 255
         billing_entity_id:
           type: string
           description: >-
@@ -10550,6 +10583,14 @@ components:
           description: >-
             If false, subscription cancels at period end. Only applies when
             removing all plans. Defaults to true.
+          nullable: true
+        collection_method:
+          allOf:
+            - $ref: '#/components/schemas/BillingCollectionMethod'
+          description: >-
+            How the subscription is paid: charged to a payment method on file,
+            or invoiced with payment terms. Invoicing is only available when
+            starting a new subscription. Defaults to charge_automatically.
           nullable: true
         company_id:
           type: string
@@ -10566,6 +10607,12 @@ components:
           items:
             $ref: '#/components/schemas/CheckoutFieldValue'
           maxItems: 100
+        days_until_due:
+          type: integer
+          description: Payment terms in days for an invoiced subscription. Defaults to 30.
+          format: int64
+          nullable: true
+          maximum: 365
         pay_in_advance_entitlements:
           type: array
           items:
@@ -10583,6 +10630,12 @@ components:
           description: >-
             If true and cancel_immediately is true, issue prorated credit. Only
             applies when removing all plans. Defaults to true.
+          nullable: true
+        send_invoice:
+          type: boolean
+          description: >-
+            Whether Stripe emails the invoice when it is finalized. Only applies
+            to an invoiced subscription. Defaults to true.
           nullable: true
         trial_end:
           type: string
@@ -10830,6 +10883,11 @@ components:
         - provider_type
         - updated_at
       title: PaymentMethodResponseData
+    PlanBillingSource:
+      type: string
+      enum:
+        - custom_plan
+        - manage_plan
     PlanBundleAction:
       type: string
       enum:
@@ -23890,6 +23948,17 @@ paths:
           schema:
             type: string
             description: Filter by plan ID
+        - name: plan_billing_source
+          in: query
+          description: >-
+            Filter by the flow that created the billing record. Defaults to
+            custom_plan.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PlanBillingSource'
+            description: >-
+              Filter by the flow that created the billing record. Defaults to
+              custom_plan.
         - name: status
           in: query
           description: Filter by billing status
@@ -23957,6 +24026,12 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      plan_billing_source:
+                        allOf:
+                          - $ref: '#/components/schemas/PlanBillingSource'
+                        description: >-
+                          Filter by the flow that created the billing record.
+                          Defaults to custom_plan.
                       plan_id:
                         type: string
                         description: Filter by plan ID
