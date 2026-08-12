@@ -12641,6 +12641,9 @@ components:
         amount_off:
           type: integer
           format: int64
+        discount_amount:
+          type: integer
+          format: int64
         discounts:
           type: array
           items:
@@ -12689,6 +12692,7 @@ components:
           maxItems: 1000
       required:
         - amount_off
+        - discount_amount
         - discounts
         - due_now
         - upcoming_invoice_line_items
