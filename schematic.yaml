@@ -23423,16 +23423,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /company-plans/{company_plan_id}:
+  /company-plans/{company_id}:
     put:
       operationId: updateCompanyPlans
       summary: Update company plans
       tags:
         - plans
       parameters:
-        - name: company_plan_id
+        - name: company_id
           in: path
-          description: company_plan_id
+          description: company_id
           required: true
           schema:
             type: string
@@ -28902,16 +28902,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plan-bundles/{plan_bundle_id}:
+  /plan-bundles/{plan_id}:
     put:
       operationId: updatePlanBundle
       summary: Update plan bundle
       tags:
         - planbundle
       parameters:
-        - name: plan_bundle_id
+        - name: plan_id
           in: path
-          description: plan_bundle_id
+          description: plan_id
           required: true
           schema:
             type: string
