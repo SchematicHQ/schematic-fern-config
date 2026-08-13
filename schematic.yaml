@@ -7769,6 +7769,14 @@ components:
       properties:
         activation_strategy:
           $ref: '#/components/schemas/CustomPlanActivationStrategy'
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The billing period renewal date pinned when the subscription
+            started, when one was set. When no invoice exists yet, the first
+            invoice is raised on this date.
+          format: date-time
+          nullable: true
         company_id:
           type: string
         created_at:
@@ -10648,6 +10656,14 @@ components:
           description: >-
             If true and cancel_immediately is true, issue prorated credit. Only
             applies when removing all plans. Defaults to true.
+          nullable: true
+        prorate_first_period:
+          type: boolean
+          description: >-
+            When true, the partial period between the subscription starting and
+            its renewal date is billed pro rata straight away. When false that
+            period is free and no invoice is raised until the renewal date. Only
+            applies alongside billing_cycle_anchor. Defaults to true.
           nullable: true
         send_invoice:
           type: boolean
