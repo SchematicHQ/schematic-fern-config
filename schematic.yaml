@@ -2700,6 +2700,11 @@ components:
       required:
         - flags
       title: CheckFlagsResponseData
+    CheckoutBundlePurchaseBehavior:
+      type: string
+      enum:
+        - individual
+        - quantity
     CheckoutDataRequestBody:
       type: object
       properties:
@@ -2874,6 +2879,8 @@ components:
     CheckoutSettingsResponseData:
       type: object
       properties:
+        bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         collect_address:
           type: boolean
         collect_email:
@@ -2891,6 +2898,7 @@ components:
           type: string
           nullable: true
       required:
+        - bundle_purchase_behavior
         - collect_address
         - collect_email
         - collect_phone
@@ -4244,6 +4252,8 @@ components:
     ComponentCheckoutSettings:
       type: object
       properties:
+        bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         collect_address:
           type: boolean
         collect_email:
@@ -4257,6 +4267,7 @@ components:
         tax_collection_enabled:
           type: boolean
       required:
+        - bundle_purchase_behavior
         - collect_email
         - collect_address
         - collect_phone
@@ -6814,6 +6825,8 @@ components:
             type: string
           deprecated: true
           maxItems: 100
+        checkout_bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         checkout_collect_address:
           type: boolean
         checkout_collect_email:
@@ -6919,6 +6932,7 @@ components:
           nullable: true
       required:
         - add_on_ids
+        - checkout_bundle_purchase_behavior
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
@@ -10975,6 +10989,8 @@ components:
           maxItems: 1000
         plan:
           $ref: '#/components/schemas/PlanResponseData'
+        plan_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
       title: PlanBundleResponseData
     PlanCatalogMembershipResponseData:
       type: object
@@ -15186,6 +15202,8 @@ components:
             type: string
           deprecated: true
           maxItems: 100
+        checkout_bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         checkout_collect_address:
           type: boolean
         checkout_collect_email:
@@ -15291,6 +15309,7 @@ components:
           nullable: true
       required:
         - add_on_ids
+        - checkout_bundle_purchase_behavior
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
@@ -31679,16 +31698,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plans/version/{plan_id}:
+  /plans/version/{plan_version_id}:
     delete:
       operationId: deletePlanVersion
       summary: Delete plan version
       tags:
         - plans
       parameters:
-        - name: plan_id
+        - name: plan_version_id
           in: path
-          description: plan_id
+          description: plan_version_id
           required: true
           schema:
             type: string
@@ -31727,16 +31746,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plans/version/{plan_id}/publish:
+  /plans/version/{plan_version_id}/publish:
     put:
       operationId: publishPlanVersion
       summary: Publish plan version
       tags:
         - plans
       parameters:
-        - name: plan_id
+        - name: plan_version_id
           in: path
-          description: plan_id
+          description: plan_version_id
           required: true
           schema:
             type: string
