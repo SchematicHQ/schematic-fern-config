@@ -10064,6 +10064,40 @@ components:
         - id
         - name
       title: GenericPreviewObject
+    GetOnboardingStateResp:
+      type: object
+      properties:
+        environment_id:
+          type: string
+          nullable: true
+        milestones:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingMilestoneView'
+          maxItems: 1000
+        path:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingPath'
+          nullable: true
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirementView'
+          maxItems: 1000
+        suggested_next:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        track:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingTrack'
+          nullable: true
+      required:
+        - milestones
+        - requirements
+        - suggested_next
+      title: GetOnboardingStateResp
     GetOrCreateCompanyMembershipRequestBody:
       type: object
       properties:
@@ -10788,6 +10822,76 @@ components:
         - amount
         - currency
       title: MrrResponseData
+    OnboardingMilestone:
+      type: string
+      enum:
+        - evaluated
+        - implemented
+    OnboardingMilestoneView:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/OnboardingMilestone'
+        missing:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        progress:
+          type: number
+          format: double
+        reached_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - missing
+        - progress
+      title: OnboardingMilestoneView
+    OnboardingPath:
+      type: string
+      enum:
+        - agent
+        - app
+    OnboardingRequirement:
+      type: string
+      enum:
+        - connect_billing
+        - create_api_key
+        - first_flag_check
+        - import_companies
+        - model_packaging
+        - send_events
+    OnboardingRequirementStatus:
+      type: string
+      enum:
+        - available
+        - blocked
+        - complete
+    OnboardingRequirementView:
+      type: object
+      properties:
+        blocked_by:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        id:
+          $ref: '#/components/schemas/OnboardingRequirement'
+        satisfied_by:
+          type: string
+        status:
+          $ref: '#/components/schemas/OnboardingRequirementStatus'
+      required:
+        - id
+        - status
+      title: OnboardingRequirementView
+    OnboardingTrack:
+      type: string
+      enum:
+        - catalog
+        - single_plan
     OrbIntegrationConfig:
       type: object
       properties:
@@ -15006,6 +15110,26 @@ components:
       required:
         - rules
       title: UpdateFlagRulesRequestBody
+    UpdateOnboardingStateRequestBody:
+      type: object
+      properties:
+        path:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingPath'
+          nullable: true
+        pricing_page_url:
+          type: string
+          nullable: true
+          maxLength: 512
+        track:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingTrack'
+          nullable: true
+        website_url:
+          type: string
+          nullable: true
+          maxLength: 512
+      title: UpdateOnboardingStateRequestBody
     UpdatePayInAdvanceRequestBody:
       type: object
       properties:
@@ -16475,6 +16599,8 @@ components:
           items:
             $ref: '#/components/schemas/EnvironmentResponseData'
           maxItems: 1000
+        onboarding_complete:
+          type: boolean
         stripe_user_id:
           type: string
         user_id:
@@ -16486,6 +16612,7 @@ components:
         - account_name
         - actor_type
         - environments
+        - onboarding_complete
       title: WhoAmIResponseData
     WorkOSIntegrationConfig:
       type: object
@@ -28852,6 +28979,77 @@ paths:
                   - data
                   - params
                 title: CancelSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /onboarding-state:
+    get:
+      operationId: getOnboardingState
+      summary: Get onboarding state
+      tags:
+        - accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetOnboardingStateResp'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetOnboardingStateParams
+                required:
+                  - data
+                  - params
+                title: GetOnboardingStateResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: updateOnboardingState
+      summary: Update onboarding state
+      tags:
+        - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOnboardingStateRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetOnboardingStateResp'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateOnboardingStateParams
+                required:
+                  - data
+                  - params
+                title: UpdateOnboardingStateResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
