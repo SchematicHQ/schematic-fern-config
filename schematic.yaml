@@ -31041,6 +31041,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: scoped_to_company_id
           in: query
           description: Filter plans scoped to a specific company (custom plans)
@@ -31163,6 +31164,7 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                        maxLength: 512
                       scoped_to_company_id:
                         type: string
                         description: >-
@@ -31728,6 +31730,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: scoped_to_company_id
           in: query
           description: Filter plans scoped to a specific company (custom plans)
@@ -31846,6 +31849,7 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                        maxLength: 512
                       scoped_to_company_id:
                         type: string
                         description: >-
