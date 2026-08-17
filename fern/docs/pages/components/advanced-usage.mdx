@@ -81,9 +81,19 @@ In the above example, while the plan is pre-selected, the user will still be abl
 const config = {
   planId: 'plan_abc123',           // pre-select a Plan
   addOnIds: ['plan_addon123'],     // pre-select 1 or more add ons
+  period: 'year',                  // pre-select a billing period ("month" or "year")
+  currency: 'EUR',                 // pre-select a currency (case-insensitive)
+  showCurrencySelector: false,     // if false, hide the currency dropdown in checkout
+  promoCode: 'SUMMER20',           // pre-apply a Stripe promotion code
+  payInAdvanceQuantities: {        // pre-fill pay-in-advance quantities, keyed by feature ID
+    feat_seats: 3
+  },
   skipped: {
     planStage: true,               // if true, skip plan selection
-    addOnStage: true               // if true, skip add on selection
+    addOnStage: true,              // if true, skip add on selection
+    creditStage: true,             // if true, skip credit selection
+    usageStage: true,              // if true, skip the plan's pay-in-advance quantity stage
+    addOnUsageStage: true          // if true, skip the add ons' pay-in-advance quantity stage
   },
   hideSkipped: true,               // if true, hide skipped stages from breadcrumb navigation
   startTrialIfAvailable: true      // if true (default), start a trial when the plan is trialable and the company is eligible
@@ -92,7 +102,15 @@ const config = {
 initializeWithPlan(config);
 ```
 
+Every field is optional. Pre-selection and stage skipping are independent, so you can pre-select a plan and still let the user review it, or skip a stage without pre-selecting anything for it. When `skipped` is omitted entirely, all stages are shown with your pre-selected values already in place. `period` defaults to the company's current billing period, or to `"month"` when it has no subscription.
+
 When the pre-selected plan offers a trial and the company is eligible, `initializeWithPlan` starts checkout in trial mode by default. This matches the behavior of the in-dialog "Start trial" button, so customers using the bypass flow get the same trial they would have gotten by clicking through the plan stage. Pass `startTrialIfAvailable: false` to charge immediately instead.
+
+`currency` is most useful in flows that skip the plan stage, where the customer never gets a chance to choose one. It is ignored when the company already has an active subscription, because that subscription's currency is locked, and when the value is not among the available currencies, in which case checkout falls back to the first available one. Pairing `currency` with `showCurrencySelector: false` pins checkout to a single currency the customer cannot change. The selector is already hidden when only one currency is available or the subscription currency is locked, so `showCurrencySelector` has no effect in those cases.
+
+`promoCode` takes the customer-facing Stripe promotion code, such as `"SUMMER20"`, not the underlying coupon ID. The discount is applied on load, so the previewed charges reflect it and it is sent with the final checkout request. The customer can still change or clear it using the discount field in the checkout form, and invalid codes are rejected the same way a manually entered code would be.
+
+`payInAdvanceQuantities` only applies to entitlements whose price behavior is pay-in-advance. Entries for other features, or for unknown feature IDs, are ignored, and values are clamped to whole numbers of zero or greater. Combine it with `skipped.usageStage` and `skipped.addOnUsageStage` to land the customer directly on the payment step with quantities already set.
 
 ### Pre-filling checkout fields
 
