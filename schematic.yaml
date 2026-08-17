@@ -13058,6 +13058,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
           nullable: true
+        require_no_migration:
+          type: boolean
+          description: >-
+            Refuse the publish if any company would be migrated onto the new
+            version
+          nullable: true
         send_invoice:
           type: boolean
           description: >-
