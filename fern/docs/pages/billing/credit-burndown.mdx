@@ -165,61 +165,56 @@ When you're finished, you can see the credit bundles in your checkout flow:
 
 ## Credit Lifecycle: Expiry and Rollover
 
-The walkthrough above uses the default lifecycle settings. Two settings control what happens to a credit balance over time: when a batch of credits stops being spendable, and what happens to a balance the customer doesn't finish.
+The walkthrough above uses the default lifecycle settings. The **Reset** setting on a credit grant decides what happens to a balance the customer doesn't finish, and it determines which of the other two settings you get.
 
-| Setting | Where it's set | What it controls |
+A grant either recurs or it doesn't, and the form changes to match:
+
+| Reset | What you configure | Where the leftover goes |
 | --- | --- | --- |
-| Expiry | Per grant, with a default on the credit type | When a batch of credits stops being spendable |
-| Rollover | Per grant, with a default on the credit type | How much of an unused balance survives a reset |
+| Daily, Weekly, Monthly, Quarterly, or Yearly | **Rollover** | A percentage carries into the next period, the rest is discarded |
+| No reset | **Grant Expiration** | Credits sit in the balance until they expire |
 
-Both are set per grant, so a plan's monthly grant and a purchased bundle of the same credit type can behave differently.
+Because the two are alternatives rather than independent knobs, a recurring grant has no expiration date of its own and a one-time grant has nothing to roll over.
 
-### Expiry windows
+You'll find these on the credit grant in **Catalog > Plans > (your plan) > (the credit grant)**, or by opening any row in the Plan Grants table on the credit type page.
 
-Each grant carries an expiry policy (`expiry_type`):
+### Reset and rollover
 
-| Policy | Behavior |
+Set **Reset** to a cadence and the grant refreshes on that schedule, aligned to the company's billing period start date. The Plan Grants table shows this as a badge, so a monthly grant reads `Monthly / according to billing period start date`.
+
+**Rollover** is a percentage of unused credits that carry over when the grant resets. Leave it at 0 and the customer loses whatever they didn't spend, which is what the walkthrough above does. Set it to 100 and the full remainder carries forward. Anything in between splits the difference, which gives customers credit for what they didn't use without letting balances compound indefinitely.
+
+<Note>
+Rolled-over credits expire at the next reset. They carry into one additional period, not indefinitely, so a customer who underuses for several months in a row does not accumulate an unbounded balance.
+</Note>
+
+### Grant expiration
+
+Set **Reset** to `No reset` and the grant becomes one-time. **Grant Expiration** then decides how long those credits stay spendable:
+
+| Grant Expiration | Behavior |
 | --- | --- |
-| `no_expiry` | Credits remain spendable indefinitely |
-| `end_of_billing_period` | Credits expire when the current billing period closes |
-| `end_of_next_billing_period` | Credits survive one additional billing period |
-| `end_of_trial` | Credits expire when the company's trial ends |
-| `duration` | Credits expire after a fixed window you specify |
+| No Expiry | Credits remain spendable indefinitely |
+| End of Billing Period | Credits expire when the current billing period closes |
+| Duration | Credits expire a fixed number of days after they are granted |
 
-A `duration` policy needs a unit (`expiry_unit`, either `days` or `billing_periods`) and a count. The credit type carries a default expiry unit and count that new grants inherit, so setting it once on the credit type covers the common case.
+Choosing **Duration** gives you quick-select buttons for 30 days, 90 days, and 1 year, plus a custom duration in days.
 
-Credit bundles carry their own expiry policy too. The bundles in step 5 above never expire, but that is the configuration used in the example rather than a property of purchased credits.
+Credit bundles carry their own expiry setting, labeled **Expiry Type**, with the same three options. The bundles in step 5 above are set to No Expiry, but that is the configuration used in the example rather than a property of purchased credits.
 
-Every grant exposes its resolved `expires_at`, so you can always see when a specific batch of credits lapses rather than inferring it from the policy.
+### Where credits come from
 
-### Rollover
+A company's balance is the sum of its grants, and each grant records its source. The **Companies** tab on a credit type lists every grant a company holds, with its status, its source, how much of it has been used, and when it expires.
 
-Rollover decides what happens to an unused balance when a recurring grant resets. It only applies to grants that actually reset, which means a reset type of `plan_period` rather than `no_reset`.
-
-A resetting grant is described by three settings:
-
-- **Reset type**: `plan_period` to refresh on a schedule, or `no_reset` for a one-time grant
-- **Reset cadence**: `daily`, `weekly`, `monthly`, `quarterly`, `every_6_months`, or `yearly`
-- **Reset start**: `billing_period` to align with the company's billing anniversary, or `first_of_month` for a calendar month
-
-When the grant resets, the rollover percentage determines how much of the unused balance carries forward. Setting it to 0 discards the remainder, 100 carries all of it, and anything in between splits the difference. A common policy carries a portion forward rather than all of it, which gives customers credit for what they didn't use without letting balances compound indefinitely.
-
-Rolled-over credits arrive as a new grant with a reason of `rollover`, linked back to the grant they came from. That means rollover is visible in the ledger as its own event rather than silently topping up the old balance, and rolled-over credits get their own expiry window.
-
-### Grant sources
-
-A company's balance is the sum of its grants, and each grant records where it came from:
-
-| Reason | Source |
+| Source | Where it came from |
 | --- | --- |
-| `plan` | Included with the company's plan |
-| `purchased` | Bought as a credit bundle |
-| `billing_credit_auto_topup` | Bought automatically by [auto top-up](#auto-top-up) |
-| `rollover` | Carried forward from a previous period |
-| `free` | Granted manually, such as a promotional grant |
-| `adjustment` | Returned by a refund |
+| Plan | Included with the company's plan |
+| Bundle | Bought as a credit bundle, or automatically by [auto top-up](#auto-top-up) |
+| Free, promotional credit | Granted manually |
+| Rollover | Carried forward from a previous period |
+| Adjustment | Returned by a refund |
 
-A company holding several grants at once draws from the one closest to expiring rather than by source, with one exception: credits returned by a refund are always consumed first, as described in [Credit Refunds via Negative Quantities](#credit-refunds-via-negative-quantities) below. To see the composition of a specific company's balance, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-grants) endpoint.
+Credits returned by a refund are always consumed before anything else, as described in [Credit Refunds via Negative Quantities](#credit-refunds-via-negative-quantities) below. To pull the composition of a specific company's balance programmatically, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-grants) endpoint.
 
 ## Credit Refunds via Negative Quantities
 
