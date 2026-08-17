@@ -10,8 +10,9 @@ In a credit burndown model, customers hold a prepaid credit balance that decreas
 The pattern shows up across AI platforms, developer tools like Supabase and PostHog, and enrichment services like Apollo.io and Clearbit. Most implementations share a shape:
 
 - A paid plan includes a credit allocation each billing cycle, usually monthly. Free plans can use credits too, typically with a small or zero allocation.
+- Customers on any plan can buy more credits whenever they want. This is what makes credits an expansion lever rather than just a usage cap: a paid customer can spend more without moving up a tier, and a free customer can start paying without a plan change at all.
 - Features draw against the balance as they are used, and different features can cost different numbers of credits.
-- When credits run out, customers buy more immediately. Many products add automatic top-ups so service is never interrupted.
+- A depleted balance is a purchase prompt, not a lockout. Many products add automatic top-ups so service is never interrupted at all.
 
 What this buys you:
 
