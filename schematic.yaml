@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v5b3e7220
+  x-rules-engine-schema-version: vc8eb8df4
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -676,7 +676,7 @@ components:
           type: array
           items:
             type: string
-          maxItems: 1000
+          maxItems: 100
         created_at:
           type: string
           format: date-time
@@ -5850,7 +5850,7 @@ components:
       properties:
         bundle_name:
           type: string
-          maxLength: 256
+          maxLength: 255
         bundle_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBundleType'
@@ -5868,6 +5868,7 @@ components:
           type: string
         currency:
           type: string
+          maxLength: 3
         currency_prices:
           type: array
           items:
@@ -6956,7 +6957,6 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - checkout_bundle_purchase_behavior
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
@@ -10098,7 +10098,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OnboardingMilestoneView'
-          maxItems: 1000
+          maxItems: 10
         path:
           allOf:
             - $ref: '#/components/schemas/OnboardingPath'
@@ -10107,7 +10107,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OnboardingRequirementView'
-          maxItems: 1000
+          maxItems: 10
         suggested_next:
           type: array
           items:
@@ -10695,6 +10695,7 @@ components:
         coupon_external_id:
           type: string
           nullable: true
+          maxLength: 255
         credit_bundles:
           type: array
           items:
@@ -10723,6 +10724,7 @@ components:
         promo_code:
           type: string
           nullable: true
+          maxLength: 255
         prorate:
           type: boolean
           description: >-
@@ -10905,6 +10907,7 @@ components:
           $ref: '#/components/schemas/OnboardingRequirement'
         satisfied_by:
           type: string
+          maxLength: 255
         status:
           $ref: '#/components/schemas/OnboardingRequirementStatus'
       required:
@@ -13551,7 +13554,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v5b3e7220
+        - vc8eb8df4
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -14972,7 +14975,7 @@ components:
       properties:
         bundle_name:
           type: string
-          maxLength: 256
+          maxLength: 255
         compatible_plan_ids:
           type: array
           description: >-
@@ -15467,7 +15470,6 @@ components:
           nullable: true
       required:
         - add_on_ids
-        - checkout_bundle_purchase_behavior
         - checkout_collect_address
         - checkout_collect_email
         - checkout_collect_phone
@@ -15707,6 +15709,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15813,6 +15816,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15820,7 +15824,7 @@ components:
         name:
           type: string
           nullable: true
-          maxLength: 256
+          maxLength: 255
         remove_keys:
           type: array
           description: >-
@@ -15866,6 +15870,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15873,7 +15878,7 @@ components:
         name:
           type: string
           nullable: true
-          maxLength: 256
+          maxLength: 255
         remove_keys:
           type: array
           description: >-
