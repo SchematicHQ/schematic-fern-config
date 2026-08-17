@@ -84,7 +84,7 @@ Now that we have a plan, we'll add the Credit Type to it.
 
 1. Click "Add credit grant" to begin the process.
 2. Select the Credit Type we created earlier, "AI Tokens".
-3. Set the number of credits the plan provides each period. Each new billing period, customers will receive this number of credits. With the default settings used here, any unused credits from the prior period expire, though you can carry a portion of them forward instead. We'll use 5,000 for this example. See [Credit Lifecycle](#credit-lifecycle-expiry-rollover-and-burn-order) for the expiry and rollover options.
+3. Set the number of credits the plan provides each period. Each new billing period, customers will receive this number of credits. With the default settings used here, any unused credits from the prior period expire, though you can carry a portion of them forward instead. We'll use 5,000 for this example. See [Credit Lifecycle](#credit-lifecycle-expiry-and-rollover) for the expiry and rollover options.
 4. Click "Create plan grant" to save your changes.
 
 ![Add Credit Grant 2](../../assets/images/billing/burndown-add-credit-grant-2.png)
@@ -119,7 +119,7 @@ When you're finished, your plan should look like this:
 
 Finally, let's add credit bundles that customers can purchase to top up their credit balance. We'll configure these bundles so the purchased credits never expire, allowing continuous usage of credit-based features after the plan's default balance is exhausted. Bundles can carry an expiry window instead if you'd rather they lapse.
 
-Under the default burn strategy, customers draw from the credit grant with the nearest expiration date. This means they'll typically use their monthly plan credits first before drawing from purchased credits, since monthly credits expire at the end of each billing period. See [Burn order](#burn-order) for the other strategies.
+When customers consume credits, they draw from the credit grant with the nearest expiration date. This means they'll typically use their monthly plan credits first before drawing from purchased credits, since monthly credits expire at the end of each billing period.
 
 1. Navigate to the Credit Type page (Catalog > Credits > "AI Tokens").
 2. Give your bundle a name. We'll use "Small Bundle" for this example.
@@ -163,17 +163,16 @@ When you're finished, you can see the credit bundles in your checkout flow:
 
 ![Add Credit Bundle 4](../../assets/images/billing/burndown-add-plan-to-catalog-4.png)
 
-## Credit Lifecycle: Expiry, Rollover, and Burn Order
+## Credit Lifecycle: Expiry and Rollover
 
-The walkthrough above uses the default lifecycle settings. Three settings control what happens to a credit balance over time, and together they determine which credits a customer spends first and what happens to a balance they don't finish.
+The walkthrough above uses the default lifecycle settings. Two settings control what happens to a credit balance over time: when a batch of credits stops being spendable, and what happens to a balance the customer doesn't finish.
 
 | Setting | Where it's set | What it controls |
 | --- | --- | --- |
 | Expiry | Per grant, with a default on the credit type | When a batch of credits stops being spendable |
 | Rollover | Per grant, with a default on the credit type | How much of an unused balance survives a reset |
-| Burn strategy | Per credit type | Which grant a consumption event draws from first |
 
-Because burn strategy is set on the credit type, every grant of that credit type shares it. Expiry and rollover are set per grant, so a plan's monthly grant and a purchased bundle of the same credit type can behave differently.
+Both are set per grant, so a plan's monthly grant and a purchased bundle of the same credit type can behave differently.
 
 ### Expiry windows
 
@@ -207,21 +206,6 @@ When the grant resets, the rollover percentage determines how much of the unused
 
 Rolled-over credits arrive as a new grant with a reason of `rollover`, linked back to the grant they came from. That means rollover is visible in the ledger as its own event rather than silently topping up the old balance, and rolled-over credits get their own expiry window.
 
-### Burn order
-
-When a customer consumes credits, the burn strategy on the credit type decides which grant is drawn down first:
-
-| Strategy | Draws from |
-| --- | --- |
-| `expiration_priority` | The grant closest to expiring |
-| `first_in_first_out` | The oldest grant |
-| `last_in_first_out` | The newest grant |
-| `plan_first_then_credit_bundles_first_in_first_out` | Plan grants first, then purchased bundles oldest-first |
-
-`expiration_priority` is the strategy the walkthrough above describes: monthly plan credits expire at the end of the period, so they burn before purchased bundles that expire later or not at all. That ordering is usually what customers expect, since it spends the credits they would otherwise lose.
-
-Adjustment grants are the one exception. Credits returned by a refund are always consumed before any other grant, whatever the burn strategy says. See [Credit Refunds via Negative Quantities](#credit-refunds-via-negative-quantities) below.
-
 ### Grant sources
 
 A company's balance is the sum of its grants, and each grant records where it came from:
@@ -235,7 +219,7 @@ A company's balance is the sum of its grants, and each grant records where it ca
 | `free` | Granted manually, such as a promotional grant |
 | `adjustment` | Returned by a refund |
 
-Because the burn strategy applies across all of them, a company holding several grants at once spends them in a predictable order rather than by source. To see the composition of a specific company's balance, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-grants) endpoint described below.
+A company holding several grants at once draws from the one closest to expiring rather than by source, with one exception: credits returned by a refund are always consumed first, as described in [Credit Refunds via Negative Quantities](#credit-refunds-via-negative-quantities) below. To see the composition of a specific company's balance, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-grants) endpoint.
 
 ## Credit Refunds via Negative Quantities
 
@@ -265,7 +249,7 @@ This returns 10 credits (2 x 5 credits per use) to the company's balance via an 
 ### Key details
 
 - **Adjustment grants accumulate**: Multiple refund events for the same company and credit type add credits to the same adjustment grant, rather than creating new grants each time.
-- **Adjustment grants are consumed first**: Regardless of the configured [burn strategy](#burn-order), adjustment grant credits are always consumed before other grant types (plan grants, purchased credits, promotional credits).
+- **Adjustment grants are consumed first**: Regardless of the configured burn strategy, adjustment grant credits are always consumed before other grant types (plan grants, purchased credits, promotional credits).
 - **Adjustment grants do not expire quickly**: Adjustment grants are given a rolling 1-year expiration that extends with each refund, so they will not expire while actively being used.
 - **Negative events create negative usage records**: For auditing purposes, a negative usage record is created in the credit usage ledger corresponding to each refund.
 
