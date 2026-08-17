@@ -9597,6 +9597,41 @@ components:
       required:
         - features
       title: FeatureUsageDetailResponseData
+    FeatureUsageHistoryResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: >-
+            Companies are identified by ID only. To report against your own
+            identifiers, resolve them once via the companies API and cache the
+            mapping; keys are not repeated on every row.
+        event_subtype:
+          type: string
+        feature_id:
+          type: string
+        period_end:
+          type: string
+          description: Exclusive end of the period this usage covers
+          format: date-time
+        period_start:
+          type: string
+          description: Inclusive start of the period this usage covers
+          format: date-time
+        usage:
+          type: integer
+          description: >-
+            Usage recorded within this period; an incremental total, not a
+            running one
+          format: int64
+      required:
+        - company_id
+        - event_subtype
+        - feature_id
+        - period_end
+        - period_start
+        - usage
+      title: FeatureUsageHistoryResponseData
     FeatureUsageLegacyResponseData:
       type: object
       properties:
@@ -26439,6 +26474,166 @@ paths:
                   - data
                   - params
                 title: ListFeatureUsageResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /feature-usage-history:
+    get:
+      operationId: listFeatureUsageHistory
+      summary: List feature usage history
+      tags:
+        - entitlements
+      parameters:
+        - name: company_ids
+          in: query
+          description: >-
+            Restrict to these company IDs; omit for every company in the
+            environment
+          schema:
+            type: array
+            description: >-
+              Restrict to these company IDs; omit for every company in the
+              environment
+            items:
+              type: string
+            maxItems: 100
+        - name: end_time
+          in: query
+          description: Exclusive end of the window; must fall on an hour boundary
+          required: true
+          schema:
+            type: string
+            description: Exclusive end of the window; must fall on an hour boundary
+            format: date-time
+        - name: feature_ids
+          in: query
+          description: >-
+            Restrict to these event features; omit for every event feature in
+            the environment. Where several features measure the same event, each
+            is reported separately and a page may carry more rows than the
+            requested limit
+          schema:
+            type: array
+            description: >-
+              Restrict to these event features; omit for every event feature in
+              the environment. Where several features measure the same event,
+              each is reported separately and a page may carry more rows than
+              the requested limit
+            items:
+              type: string
+            maxItems: 100
+        - name: granularity
+          in: query
+          description: Bucket the window; omit for a single total per company and feature
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TimeSeriesGranularity'
+            description: Bucket the window; omit for a single total per company and feature
+        - name: start_time
+          in: query
+          description: Inclusive start of the window; must fall on an hour boundary
+          required: true
+          schema:
+            type: string
+            description: Inclusive start of the window; must fall on an hour boundary
+            format: date-time
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeatureUsageHistoryResponseData'
+                    title: ListFeatureUsageHistoryResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_ids:
+                        type: array
+                        description: >-
+                          Restrict to these company IDs; omit for every company
+                          in the environment
+                        items:
+                          type: string
+                        maxItems: 100
+                      end_time:
+                        type: string
+                        description: >-
+                          Exclusive end of the window; must fall on an hour
+                          boundary
+                        format: date-time
+                      feature_ids:
+                        type: array
+                        description: >-
+                          Restrict to these event features; omit for every event
+                          feature in the environment. Where several features
+                          measure the same event, each is reported separately
+                          and a page may carry more rows than the requested
+                          limit
+                        items:
+                          type: string
+                        maxItems: 100
+                      granularity:
+                        allOf:
+                          - $ref: '#/components/schemas/TimeSeriesGranularity'
+                        description: >-
+                          Bucket the window; omit for a single total per company
+                          and feature
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      start_time:
+                        type: string
+                        description: >-
+                          Inclusive start of the window; must fall on an hour
+                          boundary
+                        format: date-time
+                    title: ListFeatureUsageHistoryParams
+                required:
+                  - data
+                  - params
+                title: ListFeatureUsageHistoryResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
