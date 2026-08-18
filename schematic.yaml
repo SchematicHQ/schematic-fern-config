@@ -12421,11 +12421,14 @@ components:
           nullable: true
         will_update_subscription:
           type: boolean
+        would_fail:
+          type: boolean
       required:
         - company_id
         - has_billing_changes
         - has_custom_pricing
         - will_update_subscription
+        - would_fail
       title: PlanVersionMigrationPreviewCompanyResponseData
     PlanVersionMigrationPreviewResponseData:
       type: object
