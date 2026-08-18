@@ -5967,7 +5967,9 @@ components:
         plan:
           $ref: '#/components/schemas/CreateCustomPlanBundlePlanRequestBody'
       required:
+        - billing_product
         - entitlements
+        - plan
       title: CreateCustomPlanBundleRequestBody
     CreateCustomPlanRequestBody:
       type: object
@@ -6699,6 +6701,7 @@ components:
         plan:
           $ref: '#/components/schemas/CreatePlanRequestBody'
       required:
+        - plan
         - entitlements
       title: CreatePlanBundleRequestBody
     CreatePlanEntitlementRequestBody:
@@ -15321,6 +15324,7 @@ components:
           nullable: true
       required:
         - entitlements
+        - plan
       title: UpdatePlanBundleRequestBody
     UpdatePlanEntitlementRequestBody:
       type: object
@@ -18625,6 +18629,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
         - name: order
@@ -18709,6 +18714,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
         - name: order
@@ -22964,6 +22970,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
       responses:
@@ -23010,6 +23017,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
       responses:
@@ -30730,6 +30738,7 @@ paths:
       parameters:
         - name: migration_id
           in: query
+          required: true
           schema:
             type: string
         - name: q
@@ -30863,6 +30872,7 @@ paths:
       parameters:
         - name: migration_id
           in: query
+          required: true
           schema:
             type: string
         - name: q
@@ -30949,6 +30959,7 @@ paths:
       parameters:
         - name: plan_version_id
           in: query
+          required: true
           schema:
             type: string
         - name: status
@@ -31156,6 +31167,7 @@ paths:
       parameters:
         - name: plan_version_id
           in: query
+          required: true
           schema:
             type: string
         - name: status
