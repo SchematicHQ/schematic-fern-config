@@ -3501,6 +3501,12 @@ components:
           type: string
           description: Restrict the export to companies on this plan version ID
           nullable: true
+        plan_version_unpublished:
+          type: boolean
+          description: >-
+            Restrict the export to companies on a plan version that is no longer
+            published
+          nullable: true
         q:
           type: string
           description: Free-text search over company name and keys
@@ -22032,6 +22038,16 @@ paths:
             items:
               type: string
             maxItems: 100
+        - name: plan_version_unpublished
+          in: query
+          description: >-
+            Filter companies assigned to a plan version that is no longer
+            published, meaning the plan has since moved on to a newer version
+          schema:
+            type: boolean
+            description: >-
+              Filter companies assigned to a plan version that is no longer
+              published, meaning the plan has since moved on to a newer version
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -22206,6 +22222,12 @@ paths:
                         items:
                           type: string
                         maxItems: 100
+                      plan_version_unpublished:
+                        type: boolean
+                        description: >-
+                          Filter companies assigned to a plan version that is no
+                          longer published, meaning the plan has since moved on
+                          to a newer version
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -22560,6 +22582,16 @@ paths:
             items:
               type: string
             maxItems: 100
+        - name: plan_version_unpublished
+          in: query
+          description: >-
+            Filter companies assigned to a plan version that is no longer
+            published, meaning the plan has since moved on to a newer version
+          schema:
+            type: boolean
+            description: >-
+              Filter companies assigned to a plan version that is no longer
+              published, meaning the plan has since moved on to a newer version
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -22730,6 +22762,12 @@ paths:
                         items:
                           type: string
                         maxItems: 100
+                      plan_version_unpublished:
+                        type: boolean
+                        description: >-
+                          Filter companies assigned to a plan version that is no
+                          longer published, meaning the plan has since moved on
+                          to a newer version
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
