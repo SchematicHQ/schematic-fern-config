@@ -5,57 +5,67 @@ description: The limits, thresholds, and top-up settings that keep usage inside 
 slug: billing/spend-controls
 ---
 
-Usage-based pricing puts two parties at risk. You need protection from a customer whose usage outruns what they are paying for, and the customer needs protection from a bill they did not see coming. Both are solved with the same set of controls, pointed in different directions.
+Usage-based pricing puts two parties at risk. You need protection from a customer whose usage outruns what they are paying for, and the customer needs protection from a bill they did not see coming. The same set of controls solves both, pointed in different directions.
 
-This page is a map of what is available and where each control is configured. The detailed setup lives on the pages linked from each section.
+This page is a map of what exists and where to find it. The detailed setup lives on the pages linked from each section.
 
 ## The controls at a glance
 
-| Control | Applies to | Who sets it | Where |
+| Control | Applies to | Who sets it | Where in the app |
 | --- | --- | --- | --- |
-| Hard limit | Metered features | You | [Usage-based billing](/billing/usage-based-billing) |
-| Soft limit | Overage pricing | You, visible to the customer | [Usage-based billing](/billing/usage-based-billing#fixed-fee-with-overage) |
-| Tier limit | Tiered pricing | Derived from your tiers | [Volume pricing](/billing/usage-based-billing#volume-pricing) |
-| Credit balance limit | Credit types | You | [Credit burndown](/billing/credit-burndown) |
-| Auto top-up | Credit grants | You, or the customer if you allow it | [Credit burndown](/billing/credit-burndown#auto-top-up) |
-| Bundle purchasing | Credit grants | You decide whether customers can | [Credit burndown](/billing/credit-burndown#who-controls-auto-top-up) |
-| Overrides | A single company | You | [Overrides](/feature-management/overrides) |
+| Hard limit | Metered features | You | The entitlement, on a plan or add on |
+| Soft limit | Overage pricing | You, visible to the customer | The entitlement, on a plan or add on |
+| Tier limit | Tiered pricing | Derived from the tiers you define | The entitlement's pricing tiers |
+| Top-up Availability | Credit grants | You, or the customer if you allow it | Catalog > Plans > the credit grant |
+| Buyers can purchase credit bundles | Credit grants | You | Catalog > Plans > the credit grant |
+| Overrides | A single company | You | The company's page |
 
 ## Limits on metered features
 
 Three limit types apply to features metered against usage, and they behave differently at the boundary.
 
-A **hard limit** is the point at which access is restricted. For usage included with a plan, that is the included amount. For [pay as you go](/billing/usage-based-billing#pay-as-you-go) and [overage pricing](/billing/usage-based-billing#fixed-fee-with-overage), where usage is not otherwise bounded, it is an upper bound you configure to prevent abuse or runaway spend. It is normally hidden from the customer.
+A **hard limit** is the point at which access is restricted. For usage included with a plan, that is the included amount. For [pay as you go](/billing/usage-based-billing#pay-as-you-go) and [overage pricing](/billing/usage-based-billing#fixed-fee-with-overage), where usage is not otherwise bounded, it is an upper bound you set to prevent abuse or runaway spend. It is normally hidden from the customer.
 
-A **soft limit** does not restrict anything. Under overage pricing it marks the point where billed usage begins, and it is shown to the customer in Schematic components so they know when they cross from included usage into paid usage.
+A **soft limit** does not restrict anything. Under overage pricing it marks where billed usage begins, and it is shown to the customer in Schematic components so they know when they cross from included usage into paid usage.
 
 A **tier limit** fires as a company crosses into each successive pricing tier under [tiered pricing](/billing/usage-based-billing#volume-pricing), which lets you tell them the rate is changing before the invoice does.
 
-Each of these has a `reached` event and a `warning` event that fires on approach, so you can act before the boundary rather than after. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) for the full event list and payloads.
+Each type has a warning event that fires on approach and a reached event that fires at the boundary, so you can act before rather than after. The warning thresholds are fixed:
+
+| Event | Fires at |
+| --- | --- |
+| `entitlement.limit.warning` | 80% of the limit |
+| `entitlement.limit.reached` | 100% of the limit |
+| `entitlement.soft_limit.warning` | 80% of the soft limit |
+| `entitlement.soft_limit.reached` | 100% of the soft limit |
+| `entitlement.tier_limit.warning` | 75% of the tier limit |
+| `entitlement.tier_limit.reached` | 100% of the tier limit |
 
 ## Controls on a credit balance
 
 For [credit burndown](/billing/credit-burndown) plans, the balance itself is the limit. A company can only spend what it holds, so the controls are about what happens as the balance runs down.
 
-**Credit limit triggers** fire `credit.limit.warning` as a balance approaches its configured limit and `credit.limit.reached` when it gets there. These are configured per credit type.
+**Credit limit events** fire as a credit-backed feature draws down what a company holds. `credit.limit.warning` fires at 80% and `credit.limit.reached` at 100%.
 
-**Auto top-up** refills the balance automatically when it drops below a threshold, so a customer is not cut off mid-workload. Whether the customer or you operate it is a per-grant setting, and it can be overridden for an individual company. See [Who controls auto top-up](/billing/credit-burndown#who-controls-auto-top-up).
+**Auto top-up** refills the balance automatically when it drops below a threshold, so a customer is not cut off mid-workload. Whether you or the customer operates it is the **Top-up Availability** setting on the credit grant. See [Who controls auto top-up](/billing/credit-burndown#who-controls-auto-top-up).
 
-**Bundle purchasing** lets a customer buy more credits on demand. It is controlled independently of auto top-up, so you can offer one without the other.
+**Bundle purchasing** lets a customer buy more credits on demand, controlled by the **Buyers can purchase credit bundles** checkbox on the same grant. It is independent of top-up availability, so you can offer one without the other.
 
-Which credits get spent first, and what happens to an unused balance at the end of a period, are governed by the credit type's burn strategy and rollover settings. See [Credit burndown](/billing/credit-burndown).
+Which credits get spent first, and what happens to an unused balance at the end of a period, are covered in [Consumption order](/billing/credit-burndown#consumption-order) and [Credit lifecycle](/billing/credit-burndown#credit-lifecycle).
 
 ## Exceptions for a single company
 
-Everything above is configured on a plan or a credit type, so every company on that plan inherits it. When one company needs different treatment, an [override](/feature-management/overrides) changes the entitlement for that company alone, and auto top-up settings can be overridden per company in the same spirit.
+Everything above is set on a plan or a credit grant, so every company on that plan inherits it. When one company needs different treatment, an [override](/feature-management/overrides) changes the entitlement for that company alone.
 
-Overrides can be time-limited, which is the right shape for a temporary limit increase you do not want to become permanent. See [Manage exceptions with overrides](/use-cases/overrides).
+Overrides can be time-limited, which is the right shape for a temporary increase you do not want to become permanent. See [Manage exceptions with overrides](/use-cases/overrides).
+
+Auto top-up is the exception to the exception: its per-company settings are only reachable through the API, not the dashboard.
 
 ## Making the controls visible to customers
 
 A limit the customer cannot see is a support ticket waiting to happen. Two surfaces close that gap:
 
 - **Components** show current usage against entitlements in the customer portal, including credit balances and the soft limit at which billed usage begins. See the [Element Library](/components/element-library).
-- **Webhooks** let you drive your own in-app banners and emails off the same warning events your internal alerting uses. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
+- **Webhooks** let you drive your own in-app banners and emails off the same warning events your internal alerting uses. Subscribe under Settings > Integrations > Webhooks, and see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) for the payloads.
 
 Wiring the warning events, not just the reached events, is what turns a hard stop into something the customer saw coming.
