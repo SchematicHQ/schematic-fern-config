@@ -1,0 +1,153 @@
+---
+title: Reporting usage for billing
+slug: playbooks/usage-reporting
+description: Pull how much every company used over a date range, so you can turn it into an invoice. Use feature usage history, not the timeseries endpoints.
+---
+
+At the end of a billing period you need one number per company: how much of a metered feature did they use between these two dates. [`GET /feature-usage-history`](/api-reference/entitlements/list-feature-usage-history) answers exactly that, one row per company, per feature, per period.
+
+<Warning>
+Do not build this on `GET /feature-usage-timeseries`. It accepts any start and end, so it looks like the right tool, but its points are **cumulative within the billing period** and padded with synthetic zeroes wherever a period resets. Summing them produces a wrong invoice with no error to tell you. Feature usage history reports **incremental** usage, so its rows can be summed.
+</Warning>
+
+## Getting a month
+
+Ask for the window and read the rows.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const page = await client.entitlements.listFeatureUsageHistory({
+  startTime: new Date("2026-06-01T00:00:00Z"),
+  endTime: new Date("2026-07-01T00:00:00Z"),
+});
+
+for (const row of page.data) {
+  console.log(row.companyId, row.featureId, row.usage);
+}
+```
+
+Each row carries:
+
+| Field | Notes |
+|---|---|
+| `companyId` | The company. IDs only, never your own keys. |
+| `featureId` | The feature the row reports. |
+| `eventSubtype` | The event key the usage was measured from. |
+| `periodStart` / `periodEnd` | The window the figure covers, clamped to what you asked for. |
+| `usage` | Incremental total for that period. Rows can be summed. |
+
+This endpoint scans every company in the environment, so it requires a **secret API key** (`sch_` prefix). Publishable keys and the Stripe app are deliberately shut out. See [Authentication](/api-reference/authentication).
+
+## The window is a half-closed range
+
+The start is included and the end is not. June is `2026-06-01T00:00:00Z` to `2026-07-01T00:00:00Z`, which covers all of June and nothing in July. Usage recorded at exactly midnight on July 1 belongs to July.
+
+That is what lets you run twelve consecutive months and have them tile with no gaps and nothing counted twice.
+
+Both bounds must land on an hour boundary in UTC. Usage is measured hourly, so an off-hour bound is **rejected rather than rounded**, and the error names whichever end is wrong. We would rather fail loudly than quietly move someone's billing window.
+
+```bash
+# 400: The start of the range must fall on an hour boundary in UTC.
+start_time=2026-06-01T00:30:00Z
+```
+
+## Event features only
+
+Usage over a date range is only meaningful for features that measure events. Trait and boolean feature IDs return a 400 telling you so. This is expected behavior, not a fault to debug.
+
+## A company with no usage is absent, not zero
+
+If a company recorded no events in the window, it has no row in the response. It does not appear with `usage: 0`.
+
+When you are reconciling a period, iterate **your own** list of companies and treat a missing company as zero. Do not derive your billable set from this response.
+
+## You get company IDs, not your own keys
+
+Rows identify companies by Schematic ID (`comp_...`). To report against your own identifiers, resolve them once against [`GET /companies`](/api-reference/companies/list-companies) and cache the mapping. Companies do not churn between monthly runs, so this does not need to be part of the hot path.
+
+## Bucketing with granularity
+
+Omit `granularity` and you get a single total per company and feature covering the whole window. That is what a monthly invoice wants.
+
+Pass `hourly`, `daily`, `weekly`, or `monthly` to break the window into buckets, with one row per company, per feature, per bucket.
+
+A single request may span at most **366 buckets**. That is a year of days, or roughly two weeks of hours. Longer requests are rejected; ask for a shorter range or a coarser granularity.
+
+## Paging
+
+Default page size is 100 and the maximum is 250. Page by raising `offset` until a page comes back empty.
+
+```ts
+const rows = [];
+const limit = 250;
+let offset = 0;
+
+while (true) {
+  const page = await client.entitlements.listFeatureUsageHistory({
+    startTime: new Date("2026-06-01T00:00:00Z"),
+    endTime: new Date("2026-07-01T00:00:00Z"),
+    limit,
+    offset,
+  });
+
+  rows.push(...page.data);
+  if (page.data.length === 0) break;
+  offset += limit;
+}
+```
+
+<Note>
+Advance `offset` by `limit`, not by the number of rows you received.
+
+Where two features measure the same event key, both are reported, so a page can come back with **more rows than the limit** you asked for. Paging happens before that fan-out. Rows are never dropped or repeated, but a loop that advances by `page.data.length` will skip some.
+</Note>
+
+## Worked example: a monthly overage run
+
+Pull the closed month, sum per company, hand the totals to billing.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const startTime = new Date("2026-06-01T00:00:00Z");
+const endTime = new Date("2026-07-01T00:00:00Z");
+
+// 1. Pull every row for the window.
+const rows = [];
+const limit = 250;
+let offset = 0;
+
+while (true) {
+  const page = await client.entitlements.listFeatureUsageHistory({ startTime, endTime, limit, offset });
+  rows.push(...page.data);
+  if (page.data.length === 0) break;
+  offset += limit;
+}
+
+// 2. Sum per company. usage is incremental, so this is just addition.
+const totals = new Map();
+for (const row of rows) {
+  totals.set(row.companyId, (totals.get(row.companyId) ?? 0) + row.usage);
+}
+
+// 3. Bill your own roster, so companies with no usage are billed as zero.
+for (const companyId of yourBillableCompanyIds) {
+  const used = totals.get(companyId) ?? 0;
+  await billOverage(companyId, used);
+}
+```
+
+<Info>
+`listFeatureUsageHistory` requires `@schematichq/schematic-typescript-node` **1.5.9 or newer**. Earlier releases predate the endpoint and do not have the method. Other SDKs may need a release cut before it appears.
+</Info>
+
+## Related
+
+- [Creating a metered feature](/playbooks/metering), for setting up the event features this reports on
+- [Backfills and usage corrections](/playbooks/backfill-and-corrections), for importing historical usage or fixing events that arrived late
+- [Usage-based billing](/billing/usage-based-billing)
