@@ -1,13 +1,13 @@
 ---
-title: Reporting usage for billing
+title: Reporting usage across companies
 slug: playbooks/usage-reporting
-description: Pull how much every company used over a date range, so you can turn it into an invoice. Use feature usage history, not the timeseries endpoints.
+description: Pull how much every company used over a date range, for finding heavy users, spotting growth, or feeding your own analytics. Use feature usage history, not the timeseries endpoints.
 ---
 
-At the end of a billing period you need one number per company: how much of a metered feature did they use between these two dates. [`GET /feature-usage-history`](/api-reference/entitlements/list-feature-usage-history) answers exactly that, one row per company, per feature, per period.
+Plenty of questions come down to one number per company: how much of a metered feature did they use between these two dates. Who is pushing their limit and ready for an upgrade conversation, which accounts grew month over month, what does the usage distribution look like. [`GET /feature-usage-history`](/api-reference/entitlements/list-feature-usage-history) answers that, one row per company, per feature, per period.
 
 <Warning>
-Prefer this over `GET /feature-usage-timeseries`. Its points are **cumulative within the billing period**, so summing them produces a wrong invoice. Feature usage history reports **incremental** usage, so its rows can be summed.
+Prefer this over `GET /feature-usage-timeseries`. Its points are **cumulative within the billing period**, so summing them double counts. Feature usage history reports **incremental** usage, so its rows can be summed.
 </Warning>
 
 ## Getting a month
@@ -33,7 +33,7 @@ Each row carries:
 
 | Field | Notes |
 |---|---|
-| `companyId` | The company. IDs only, never your own keys. |
+| `companyId` | The company, by Schematic ID (`comp_...`). |
 | `featureId` | The feature the row reports. |
 | `eventSubtype` | The event key the usage was measured from. |
 | `periodStart` / `periodEnd` | The window the figure covers, clamped to what you asked for. |
@@ -45,7 +45,7 @@ This endpoint scans every company in the environment, so it requires a **secret 
 
 June is `2026-06-01T00:00:00Z` to `2026-07-01T00:00:00Z`, which covers all of June and nothing in July. Usage recorded at exactly midnight on July 1 belongs to July. That is what lets you run twelve consecutive months and have them tile with no gaps and nothing counted twice.
 
-Both bounds must land on an hour boundary in UTC. Usage is measured hourly, so an off-hour bound is **rejected rather than rounded**, and the error names whichever end is wrong. We would rather fail loudly than quietly move someone's billing window.
+Both bounds must land on an hour boundary in UTC. Usage is measured hourly, so an off-hour bound is **rejected rather than rounded**, and the error names whichever end is wrong. We would rather fail loudly than quietly shift the window you asked for.
 
 ```bash
 # 400: The start of the range must fall on an hour boundary in UTC.
@@ -54,21 +54,17 @@ start_time=2026-06-01T00:30:00Z
 
 ## Event features only
 
-Usage over a date range is only meaningful for features that measure events. Trait and boolean feature IDs return a 400 telling you so. This is expected behavior, not a fault to debug.
+Usage over a date range is only meaningful for features that measure events. Trait and boolean feature IDs return a 400 telling you so.
 
 ## A company with no usage is absent, not zero
 
 If a company recorded no events in the window, it has no row in the response. It does not appear with `usage: 0`.
 
-When you are reconciling a period, iterate **your own** list of companies and treat a missing company as zero. Do not derive your billable set from this response.
-
-## You get company IDs, not your own keys
-
-Rows identify companies by Schematic ID (`comp_...`). To report against your own identifiers, resolve them once against [`GET /companies`](/api-reference/companies/list-companies) and cache the mapping. Companies do not churn between monthly runs, so this does not need to be part of the hot path.
+So the response tells you who used the feature, not who exists. If you need the full picture, including the accounts that used nothing, iterate **your own** list of companies and treat a missing company as zero.
 
 ## Bucketing with granularity
 
-Omit `granularity` and you get a single total per company and feature covering the whole window. That is what a monthly invoice wants.
+Omit `granularity` and you get a single total per company and feature covering the whole window. That is what a ranking or a one-off total wants.
 
 Pass `hourly`, `daily`, `weekly`, or `monthly` to break the window into buckets, with one row per company, per feature, per bucket.
 
@@ -103,9 +99,9 @@ Advance `offset` by `limit`, not by the number of rows you received.
 Where two features measure the same event key, both are reported, so a page can come back with **more rows than the limit** you asked for. Paging happens before that fan-out. Rows are never dropped or repeated, but a loop that advances by `page.data.length` will skip some.
 </Note>
 
-## Worked example: a monthly overage run
+## Worked example: finding upgrade candidates
 
-Pull the closed month, sum per company, hand the totals to billing.
+Pull last month for one feature, sum per company, and rank. The companies at the top are the ones leaning hardest on the feature, which is where an upgrade conversation starts.
 
 ```ts
 import { SchematicClient } from "@schematichq/schematic-typescript-node";
@@ -115,13 +111,19 @@ const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
 const startTime = new Date("2026-06-01T00:00:00Z");
 const endTime = new Date("2026-07-01T00:00:00Z");
 
-// 1. Pull every row for the window.
+// 1. Pull every row for the window, narrowed to the feature you care about.
 const rows = [];
 const limit = 250;
 let offset = 0;
 
 while (true) {
-  const page = await client.entitlements.listFeatureUsageHistory({ startTime, endTime, limit, offset });
+  const page = await client.entitlements.listFeatureUsageHistory({
+    startTime,
+    endTime,
+    featureIds: ["feat_api_calls"],
+    limit,
+    offset,
+  });
   rows.push(...page.data);
   if (page.data.length === 0) break;
   offset += limit;
@@ -133,11 +135,10 @@ for (const row of rows) {
   totals.set(row.companyId, (totals.get(row.companyId) ?? 0) + row.usage);
 }
 
-// 3. Bill your own roster, so companies with no usage are billed as zero.
-for (const companyId of yourBillableCompanyIds) {
-  const used = totals.get(companyId) ?? 0;
-  await billOverage(companyId, used);
-}
+// 3. Rank, and take the companies worth a conversation.
+const candidates = [...totals.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .filter(([, used]) => used > UPGRADE_THRESHOLD);
 ```
 
 <Info>
