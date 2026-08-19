@@ -325,25 +325,53 @@ That returns 10 credits to the balance through an adjustment grant, and those 10
 
 ## Auto Top-Up
 
-Auto top-up buys credits automatically when a customer's balance falls below a threshold, so they never run out mid-workflow. It is configured on the plan's credit grant.
+Auto top-up buys credits automatically when a customer's balance falls below a threshold, so they are not cut off mid-workflow. It is configured on the plan's credit grant, in the same form as the reset and expiry settings.
+
+<Note>
+The credit type needs a cost basis before top-ups can be turned on. Without a per-unit price there is nothing to charge, so **Top-up Availability** stays disabled and the form tells you a per-unit price is required.
+</Note>
 
 1. Open the credit burndown plan you want to configure.
 2. Click "Add credit grant".
 3. Select the Credit Type and Credit Amount.
-4. Enable "Auto Top-Up".
+4. Set **Top-up Availability** to Automatic or User-controlled, covered in [Who controls auto top-up](#who-controls-auto-top-up) below.
 
 ![Auto Top-Up](../../assets/images/billing/burndown-auto-top-up.png)
 
-5. **Remaining balance threshold** is the percentage of credits remaining that triggers a purchase. We'll use 10%. The remaining balance counts all plan grants, purchased grants, and promotional grants.
-6. **Top-up amount** is how many credits get bought. The cost follows the credit type's cost basis and appears in the confirmation below.
-7. **Top-up Grant Expiration** sets the expiry policy for the purchased grant. A 1 year duration is a good default: long enough for customers to use the credits, short enough to keep revenue recognition simple. Auto top-up grants support Duration and No Expiry only, not the billing period options.
-8. Review the confirmation showing final cost, threshold, and expiration, then click "Create plan grant".
+5. **Top-up Threshold** is the balance that triggers a purchase, given as a number of credits remaining rather than a percentage. The balance it checks counts all plan grants, purchased grants, and promotional grants.
+6. **Top-up Amount** is how many credits get bought. The cost follows the credit type's cost basis and appears in the confirmation below.
+7. **Top-up Grant Expiration** sets the expiry policy for the purchased credits. Auto top-up grants offer Duration and No Expiry only, not the billing period options. A 1 year duration is a good default, long enough for customers to use the credits and short enough to keep revenue recognition simple.
+8. Review the confirmation showing the final cost, threshold, and expiration, then click "Create plan grant".
+
+### Who controls auto top-up
+
+**Top-up Availability** decides both whether auto top-up runs and who operates it:
+
+| Setting | What happens |
+| --- | --- |
+| Off | Companies cannot buy more credits or manage auto top-ups. Existing credits remain until they expire. |
+| Automatic | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
+| User-controlled | Companies turn auto top-up on themselves and buy more credits in checkout and through components. Your threshold and amount become their starting defaults. |
+
+Choose User-controlled for self-serve plans where customers should manage their own refills, and Automatic when continuity matters more than customer control, such as an enterprise account that should never stop mid-workload. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both.
+
+**Buyers can purchase credit bundles** is a separate checkbox on the same grant, covering one-time [bundle](#5-configure-credit-bundles) purchases. It is independent of top-up availability, so you can let a customer buy credits on demand without letting them set up an automatic refill, or the reverse. Unchecked, the buy-more button is hidden and one-time bundle purchases are rejected.
+
+### Per-company exceptions
+
+Top-up settings live on the plan grant, so every company on that plan starts with the same threshold and amount. Individual companies can be given different values through the [API](/api-reference/billing-credits/list-company-grants), which is currently the only way to do it, as the dashboard has no per-company top-up control.
+
+Under User-controlled availability the customer changes their own threshold and amount, which covers many of the cases an override would otherwise handle.
 
 ### Triggering an Auto Top-Up
 
 An auto top-up fires while processing an event that draws from a credit balance, when that balance is at or below the threshold. If several events arrive close together, only one top-up is purchased.
 
 If a top-up purchase fails, Schematic retries the next time the balance is drawn from.
+
+Three webhook events report the outcome of each attempt: `auto.topup.success`, `auto.topup.hard.failure`, and `auto.topup.retry.exceeded`. A hard failure carries the Stripe error code when the failure originated there, which is what lets you tell a declined card apart from a missing payment method. Subscribe to them under Settings > Integrations > Webhooks, and see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers#auto-topup-events) for the full payloads.
+
+Because a failing top-up means a customer is about to be cut off, wiring `auto.topup.hard.failure` to an internal alert and a customer-facing email is worth doing before you turn auto top-up on. See [Spend and usage controls](/billing/spend-controls) for how auto top-up fits with the other limits available to you.
 
 ## Accessing Credit Information via API
 
