@@ -7,7 +7,7 @@ description: Pull how much every company used over a date range, so you can turn
 At the end of a billing period you need one number per company: how much of a metered feature did they use between these two dates. [`GET /feature-usage-history`](/api-reference/entitlements/list-feature-usage-history) answers exactly that, one row per company, per feature, per period.
 
 <Warning>
-Do not build this on `GET /feature-usage-timeseries`. It accepts any start and end, so it looks like the right tool, but its points are **cumulative within the billing period** and padded with synthetic zeroes wherever a period resets. Summing them produces a wrong invoice with no error to tell you. Feature usage history reports **incremental** usage, so its rows can be summed.
+Prefer this over `GET /feature-usage-timeseries`. Its points are **cumulative within the billing period**, so summing them produces a wrong invoice. Feature usage history reports **incremental** usage, so its rows can be summed.
 </Warning>
 
 ## Getting a month
@@ -41,11 +41,9 @@ Each row carries:
 
 This endpoint scans every company in the environment, so it requires a **secret API key** (`sch_` prefix). Publishable keys and the Stripe app are deliberately shut out. See [Authentication](/api-reference/authentication).
 
-## The window is a half-closed range
+## The start is included, the end is not
 
-The start is included and the end is not. June is `2026-06-01T00:00:00Z` to `2026-07-01T00:00:00Z`, which covers all of June and nothing in July. Usage recorded at exactly midnight on July 1 belongs to July.
-
-That is what lets you run twelve consecutive months and have them tile with no gaps and nothing counted twice.
+June is `2026-06-01T00:00:00Z` to `2026-07-01T00:00:00Z`, which covers all of June and nothing in July. Usage recorded at exactly midnight on July 1 belongs to July. That is what lets you run twelve consecutive months and have them tile with no gaps and nothing counted twice.
 
 Both bounds must land on an hour boundary in UTC. Usage is measured hourly, so an off-hour bound is **rejected rather than rounded**, and the error names whichever end is wrong. We would rather fail loudly than quietly move someone's billing window.
 
