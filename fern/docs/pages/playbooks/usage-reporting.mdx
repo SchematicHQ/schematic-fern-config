@@ -1,0 +1,152 @@
+---
+title: Reporting usage across companies
+slug: playbooks/usage-reporting
+description: Pull how much every company used over a date range, for finding heavy users, spotting growth, or feeding your own analytics. Use feature usage history, not the timeseries endpoints.
+---
+
+Plenty of questions come down to one number per company: how much of a metered feature did they use between these two dates. Who is pushing their limit and ready for an upgrade conversation, which accounts grew month over month, what does the usage distribution look like. [`GET /feature-usage-history`](/api-reference/entitlements/list-feature-usage-history) answers that, one row per company, per feature, per period.
+
+<Warning>
+Prefer this over `GET /feature-usage-timeseries`. Its points are **cumulative within the billing period**, so summing them double counts. Feature usage history reports **incremental** usage, so its rows can be summed.
+</Warning>
+
+## Getting a month
+
+Ask for the window and read the rows.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const page = await client.entitlements.listFeatureUsageHistory({
+  startTime: new Date("2026-06-01T00:00:00Z"),
+  endTime: new Date("2026-07-01T00:00:00Z"),
+});
+
+for (const row of page.data) {
+  console.log(row.companyId, row.featureId, row.usage);
+}
+```
+
+Each row carries:
+
+| Field | Notes |
+|---|---|
+| `companyId` | The company, by Schematic ID (`comp_...`). |
+| `featureId` | The feature the row reports. |
+| `eventSubtype` | The event key the usage was measured from. |
+| `periodStart` / `periodEnd` | The window the figure covers, clamped to what you asked for. |
+| `usage` | Incremental total for that period. Rows can be summed. |
+
+This endpoint scans every company in the environment, so it requires a **secret API key** (`sch_` prefix). Publishable keys and the Stripe app are deliberately shut out. See [Authentication](/api-reference/authentication).
+
+## The start is included, the end is not
+
+June is `2026-06-01T00:00:00Z` to `2026-07-01T00:00:00Z`, which covers all of June and nothing in July. Usage recorded at exactly midnight on July 1 belongs to July. That is what lets you run twelve consecutive months and have them tile with no gaps and nothing counted twice.
+
+Both bounds must land on an hour boundary in UTC. Usage is measured hourly, so an off-hour bound is **rejected rather than rounded**, and the error names whichever end is wrong. We would rather fail loudly than quietly shift the window you asked for.
+
+```bash
+# 400: The start of the range must fall on an hour boundary in UTC.
+start_time=2026-06-01T00:30:00Z
+```
+
+## Event features only
+
+Usage over a date range is only meaningful for features that measure events. Trait and boolean feature IDs return a 400 telling you so.
+
+## A company with no usage is absent, not zero
+
+If a company recorded no events in the window, it has no row in the response. It does not appear with `usage: 0`.
+
+So the response tells you who used the feature, not who exists. If you need the full picture, including the accounts that used nothing, iterate **your own** list of companies and treat a missing company as zero.
+
+## Bucketing with granularity
+
+Omit `granularity` and you get a single total per company and feature covering the whole window. That is what a ranking or a one-off total wants.
+
+Pass `hourly`, `daily`, `weekly`, or `monthly` to break the window into buckets, with one row per company, per feature, per bucket.
+
+A single request may span at most **366 buckets**. That is a year of days, or roughly two weeks of hours. Longer requests are rejected; ask for a shorter range or a coarser granularity.
+
+## Paging
+
+Default page size is 100 and the maximum is 250. Page by raising `offset` until a page comes back empty.
+
+```ts
+const rows = [];
+const limit = 250;
+let offset = 0;
+
+while (true) {
+  const page = await client.entitlements.listFeatureUsageHistory({
+    startTime: new Date("2026-06-01T00:00:00Z"),
+    endTime: new Date("2026-07-01T00:00:00Z"),
+    limit,
+    offset,
+  });
+
+  rows.push(...page.data);
+  if (page.data.length === 0) break;
+  offset += limit;
+}
+```
+
+<Note>
+Advance `offset` by `limit`, not by the number of rows you received.
+
+Where two features measure the same event key, both are reported, so a page can come back with **more rows than the limit** you asked for. Paging happens before that fan-out. Rows are never dropped or repeated, but a loop that advances by `page.data.length` will skip some.
+</Note>
+
+## Worked example: finding upgrade candidates
+
+Pull last month for one feature, sum per company, and rank. The companies at the top are the ones leaning hardest on the feature, which is where an upgrade conversation starts.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const startTime = new Date("2026-06-01T00:00:00Z");
+const endTime = new Date("2026-07-01T00:00:00Z");
+
+// 1. Pull every row for the window, narrowed to the feature you care about.
+const rows = [];
+const limit = 250;
+let offset = 0;
+
+while (true) {
+  const page = await client.entitlements.listFeatureUsageHistory({
+    startTime,
+    endTime,
+    featureIds: ["feat_api_calls"],
+    limit,
+    offset,
+  });
+  rows.push(...page.data);
+  if (page.data.length === 0) break;
+  offset += limit;
+}
+
+// 2. Sum per company. usage is incremental, so this is just addition.
+const totals = new Map();
+for (const row of rows) {
+  totals.set(row.companyId, (totals.get(row.companyId) ?? 0) + row.usage);
+}
+
+// 3. Rank, and take the companies worth a conversation.
+const candidates = [...totals.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .filter(([, used]) => used > UPGRADE_THRESHOLD);
+```
+
+<Info>
+`listFeatureUsageHistory` requires `@schematichq/schematic-typescript-node` **1.5.9 or newer**. Earlier releases predate the endpoint and do not have the method. Other SDKs may need a release cut before it appears.
+</Info>
+
+## Related
+
+- [Creating a metered feature](/playbooks/metering), for setting up the event features this reports on
+- [Backfills and usage corrections](/playbooks/backfill-and-corrections), for importing historical usage or fixing events that arrived late
+- [Usage-based billing](/billing/usage-based-billing)
