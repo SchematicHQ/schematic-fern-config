@@ -1,55 +1,12 @@
 ---
 title: Building with AI
-description: Connect AI coding assistants to Schematic through the AI skills repo and the hosted MCP server, from Claude Code, Codex, Cursor, or any MCP-compatible client.
+description: Connect AI coding assistants to Schematic through the hosted MCP server, from Claude Code, Codex, Cursor, or any MCP-compatible client.
 slug: building-with-ai
 ---
 
 Use Schematic with AI coding assistants to accelerate your integration and development workflow.
 
 <Info>Not writing code? See [Working with AI](/working-with-ai) for renewal prep, churn and expansion signals, and contract validation workflows that run entirely in a chat assistant.</Info>
-
-## Overview
-
-There are two pieces of tooling here, and they solve different problems.
-
-The **AI skills repo** teaches your coding assistant how to write correct Schematic integration code, so it reaches for the right SDK method and the right pattern instead of guessing. The **hosted MCP server** connects your assistant to your actual Schematic account, so it can read your real plans, features, and companies while it works.
-
-They are useful together: skills tell the assistant how Schematic works, and MCP tells it how *your* Schematic is configured.
-
-## Schematic AI Skills
-
-Schematic AI Skills give AI coding assistants the context they need to integrate Schematic into your codebase. All skills live in the [Schematic AI Tools GitHub repository](https://github.com/schematicHQ/schematic-ai-tools).
-
-There are three, split by where the code runs.
-
-The **frontend** skill covers Schematic's React, Vue, and JavaScript SDKs: feature flag checks in UI components, usage tracking, identify calls, and plan-based rendering.
-
-The **backend** skill covers server-side integrations across Node/TypeScript, Python, Go, Java, and C#: API integration code, middleware for entitlement enforcement, usage tracking endpoints, and webhook verification.
-
-The **components** skill covers Schematic's embedded billing UI: the customer portal, pricing tables, checkout flows, and usage meters.
-
-### Install in Claude Code
-
-Install the plugin from the Schematic marketplace:
-
-```bash
-/plugin marketplace add SchematicHQ/schematic-ai-tools
-/plugin install schematic-ai-tools@schematichq
-```
-
-The skills activate on their own when you ask about feature flags, entitlements, or billing components. The plugin also registers the MCP server, so `/mcp` is all you need to authenticate afterward.
-
-### Install in Cursor
-
-Cursor uses a rules file rather than a plugin. Copy the condensed ruleset to your project root:
-
-```bash
-curl -o .cursorrules https://raw.githubusercontent.com/schematichq/schematic-ai-tools/main/.cursorrules
-```
-
-### Other assistants
-
-Any assistant that reads instructions from a file in your repo can use these skills. The three `SKILL.md` files under [`plugins/schematic-ai-tools/skills/`](https://github.com/schematicHQ/schematic-ai-tools/tree/main/plugins/schematic-ai-tools/skills) are plain markdown with no Claude-specific syntax, so you can paste the one you need into whatever file your tool reads, such as `AGENTS.md` for Codex or a Windsurf rules file. The `.cursorrules` file is a condensed version of all three if you want a single smaller file.
 
 ## Model Context Protocol (MCP)
 
@@ -141,6 +98,6 @@ Read-only API keys can use only the read tools, which makes them a reasonable ch
 
 ## Best practices
 
-When using Schematic AI Skills with your coding assistant, share your tech stack, framework, and specific use case up front, mention your Schematic environment and existing integrations, and review the generated code the same way you would review a teammate's.
+Prefer OAuth over API keys so the connection runs as you and respects your permissions. If you do use an API key, store it securely and never commit it.
 
-When working with the MCP integration, prefer OAuth over API keys so the connection runs as you and respects your permissions. If you do use an API key, store it securely and never commit it. Connect read-only unless you specifically need write access, pick the environment deliberately, and verify that query results look right before acting on them in production.
+Connect read-only unless you specifically need write access, pick the environment deliberately, and verify that query results look right before acting on them in production. Review the code your assistant generates the same way you would review a teammate's.

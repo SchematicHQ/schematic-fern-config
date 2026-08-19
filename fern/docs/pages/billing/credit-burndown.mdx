@@ -5,178 +5,306 @@ description: Set up credit types, credit based features, credit bundles, and aut
 slug: billing/credit-burndown
 ---
 
-Recently, credit burndown models have become a popular form of usage-based billing. In credit burndown models, customers receive a credit balance that decreases as they consume product features. Customers can purchase additional credits at any time to exceed their plan's default usage limits - this flexibility is the model's primary design intent.
+In a credit burndown model, customers hold a prepaid credit balance that decreases as they use your product. When the balance runs low they buy more, which is the point of the model: usage is not capped, it is metered against something the customer has already paid for.
 
-Credit burndown models are widely adopted across the software industry, from AI platforms like ChatGPT to developer tools such as Supabase and PostHog, as well as sales enrichment services like Apollo.io and Clearbit.
+The pattern shows up across AI platforms, developer tools like Supabase and PostHog, and enrichment services like Apollo.io and Clearbit. Most implementations share a shape:
 
-Credit burndown models typically follow a similar structure:
+- A paid plan includes a credit allocation each billing cycle, usually monthly. Free plans can use credits too, typically with a small or zero allocation.
+- Customers on any plan can buy more credits whenever they want. This is what makes credits an expansion lever rather than just a usage cap: a paid customer can spend more without moving up a tier, and a free customer can start paying without a plan change at all.
+- Features draw against the balance as they are used, and different features can cost different numbers of credits.
+- A depleted balance is a purchase prompt, not a lockout. Many products add automatic top-ups so service is never interrupted at all.
 
-- Customers subscribe to a paid plan that includes an initial credit allocation per billing cycle (usually monthly).
-  - *NOTE: Free tier plans can also use credit burndown, though they typically provide minimal or zero default credits.*
-- Key features draw against the credit balance as they are used. Products usually offer multiple features with varying credit costs.
-- If credits are depleted, customers can purchase additional credits immediately to maintain service. Many products include automatic top-up options to prevent usage interruptions.
+What this buys you:
 
-Key advantages of credit burndown models include:
-
-- Revenue scales directly with customer usage, similar to other usage-based billing approaches.
-- Customers prepay for credits, eliminating billing surprises and unexpected charges.
-- Multiple different features can be unified into a single pricing metric, simplifying pricing for customers. 
-- Credit costs can vary, allowing for experimentation and bulk discounts (e.g. 100 credits for \$10, 1,000 credits for \$90, 10,000 credits for \$800, etc.)
-- Likewise, individual feature costs can be adjusted independently without affecting credit pricing or other features, enabling cost management as operational expenses change.
-
+- Revenue scales with usage, the same as other usage-based models.
+- Customers prepay, so there are no surprise invoices.
+- Several features share one pricing metric instead of each being metered separately.
+- Credit pricing supports volume discounts, such as 100 credits for \$10 and 10,000 for \$800.
+- Individual feature costs can change without touching credit pricing or any other feature, so you can adjust as your own costs move.
 
 ## Video Tutorial
 
-This video tutorial demonstrates how to set up a credit burndown billing model in Schematic, walking through the key steps of setting up credit types, plans, and credit based features.
+This video walks through setting up a credit burndown model in Schematic, covering credit types, plans, and credit based features.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/HMt57ROPSlw?si=v8w5WHWZcaOF-mFc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Implementing Credit Burndown in Schematic
 
-In this guide, we'll show you how to implement a credit burndown billing model in Schematic. We'll start with a scenario where you have an existing usage-based plan that includes two features - "AI Assists" and "AI Experiments". Our goal is to create a new plan that offers these same features but uses credits as the billing mechanism instead of direct usage tracking.
+This guide starts from a scenario where you already have a usage-based plan with two features, "AI Assists" and "AI Experiments", and builds a new plan that bills the same features through credits instead of direct usage tracking.
 
-By the end of this guide, you'll have a fully functional credit-based plan where customers can use their credits to access both features, and purchase additional credits when needed.
-
-The steps we'll be taking are:
+By the end you'll have a credit-based plan where customers spend credits on both features and can buy more when they run out.
 
 1. Create a Credit Type that can be applied to plans.
-2. Create a new plan that will use our credit burndown model.
-3. Add the Credit Type to this plan.
-4. Add features to this plan and configure how they use credits.
-5. Configure Credit Bundles that customers can purchase to top up their balance.
-6.Add this plan and credit bundles to the Catalog so Customers can use it. 
-
+2. Create a new plan that will use the credit burndown model.
+3. Add the Credit Type to that plan.
+4. Add features and configure how they consume credits.
+5. Configure Credit Bundles customers can buy to top up.
+6. Add the plan and bundles to the Catalog.
 
 ### 1. Create a Credit Type
 
-First, we'll create a Credit Type that can be applied to plans. While Schematic allows you to create multiple credit types and apply them to different plans, most companies use a single credit type across all their credit based plans for simplicity.
+Schematic supports multiple credit types, but most companies use a single type across all their credit based plans. Start there unless you have a reason not to.
 
-Mouse over `Catalog` and select `Credits` to open the Credit Type Page. 
+Mouse over `Catalog` and select `Credits` to open the Credit Type page.
 
 ![Credit Types](../../assets/images/billing/burndown-credit-types.png)
 
-Click the "Create Credit Type" button to begin:
+Click "Create Credit Type":
 
-1. Provide a name for your credit type, we'll use "AI Tokens" for this example. If you have multiple credit types, we recommend usage-based names (e.g. "Data Credits", "API Tokens") or a tier-based names (e.g. "Premium Credits").
-2. The description field (optional) is shown to users in the customer portal and checkout flow. 
-3. Provide a singular and plural name for your credits. We're using "AI Token" and "AI Tokens" for this example.
-4. Cost Basis is to help you track the cost of credits throughout your product and finance workflows. This field doesn't directly control the costs of credits, but represents a guideline for future usage. We'll use \$0.01 for this example, but you can use fractional cents (e.g. \$0.00025) if needed.
-5. Click "Create Credit Type" to save your changes.
+1. Name the credit type. We'll use "AI Tokens". With multiple types, usage-based names like "Data Credits" or "API Tokens" work better than tier-based ones.
+2. The description is optional and appears to customers in the portal and checkout flow.
+3. Give singular and plural names for the unit. We're using "AI Token" and "AI Tokens".
+4. Cost basis tracks what a credit costs you, for your own finance workflows. It does not control what customers pay. We'll use \$0.01, though fractional cents like \$0.00025 are fine.
+5. Click "Create Credit Type".
 
 ![Credit Type Created](../../assets/images/billing/burndown-create-credit-type.png)
 
-### 2. Create a new plan that will use our Credit Burndown model.
+### 2. Create a new plan
 
-Now that we have a Credit Type, we'll create a new plan that will use it. Within Schematic, any plan can incorporate credit burndown, whether it's a new plan or an existing one. For this example, we'll create a dedicated credit-based plan to keep things simple and clear. This approach makes it easier to understand how credits work.
+Any plan can use credit burndown, new or existing. We'll create a dedicated one to keep the example clear.
 
-1. Navigate to the "Plans" tab and click the "Create Plan" button.
-2. Provide a name for this plan. We'll use "Credit Based" for this example. Then click "Continue".
-3. Next, step the plan to a "Paid" plan and provide a monthly ($5) and yearly ($50) price. 
-4. Click "Save" to create the plan. 
+1. Go to the "Plans" tab and click "Create Plan".
+2. Name it. We'll use "Credit Based". Click "Continue".
+3. Set it to "Paid" with a monthly price of \$5 and a yearly price of \$50.
+4. Click "Save".
 
 ![Create Plan](../../assets/images/billing/burndown-create-plan.png)
 
-### 3. Add the Credit Type to this plan.
-
-Now that we have a plan, we'll add the Credit Type to it. 
+### 3. Add the Credit Type to the plan
 
 ![Add Credit Grant 1](../../assets/images/billing/burndown-add-credit-grant-1.png)
 
-1. Click "Add credit grant" to begin the process.
-2. Select the Credit Type we created earlier, "AI Tokens".
-3. Set the number of credits the plan provides each period. Each new billing period, customers will receive this number or credits, and any unused credits from the prior period will expire. We'll use 5,000 for this example.
-4. Click "Create plan grant" to save your changes.
+1. Click "Add credit grant".
+2. Select "AI Tokens".
+3. Set how many credits the plan provides each period. We'll use 5,000. Leave **Reset** on Monthly and **Rollover** at 0, which means unused credits are discarded when the grant resets. [Credit lifecycle](#credit-lifecycle) covers the alternatives.
+4. Click "Create plan grant".
 
 ![Add Credit Grant 2](../../assets/images/billing/burndown-add-credit-grant-2.png)
 
-### 4. Add features to this plan and configure how they use credits.
-
-Now that we have a plan with a credit grant, we'll add the credit-based features that will use these credits.
+### 4. Add features and set their consumption rates
 
 ![Add Feature 1](../../assets/images/billing/burndown-add-feature-1.png)
 
-1. Click the "Add feature" button to begin the process.
-2. Select the "AI Assists" feature and click "Continue".
+1. Click "Add feature".
+2. Select "AI Assists" and click "Continue".
 3. Set the type to "Credit burndown".
 
 ![Add Feature 2](../../assets/images/billing/burndown-add-feature-2.png)
 
-4. Select the credit type we created earlier, "AI Tokens".
-5. The consumption rate is how many credits each action will consume from the credit pool. We'll use 5 for this example.
-6. Click "Save Changes" to add this feature to the plan.
+4. Select "AI Tokens".
+5. Set the consumption rate, which is how many credits one use of the feature costs. We'll use 5.
+6. Click "Save Changes".
 
 ![Add Feature 3](../../assets/images/billing/burndown-add-feature-3.png)
 
-7. Repeat this process for the "AI Experiments" feature, setting the consumption rate to 10.
+7. Repeat for "AI Experiments" with a consumption rate of 10.
 
 ![Add Feature 4](../../assets/images/billing/burndown-add-feature-4.png)
 
-When you're finished, your plan should look like this:
+The finished plan:
 
 ![Add Feature 5](../../assets/images/billing/burndown-add-feature-5.png)
 
-### 5. Configure Credit Bundles that customers can purchase to top up their balance.
+### 5. Configure Credit Bundles
 
-Finally, let's add credit bundles that customers can purchase to top up their credit balance. These purchased credits never expire and roll over month to month, allowing continuous usage of credit-based features after the plan's default balance is exhausted.
+Bundles are what customers buy when their plan allowance runs out. We'll set these to never expire so customers can keep using credit-based features after the plan balance is gone, though bundles can carry an expiry window instead.
 
-When customers consume credits, they draw from the credit grant with the nearest expiration date. This means they'll typically use their monthly plan credits first before drawing from purchased credits, since monthly credits expire at the end of each billing period.
+Plan grants are spent before purchased bundles, so a bundle is only drawn from once the period's plan credits are exhausted. See [Consumption order](#consumption-order) for the full picture.
 
-1. Navigate to the Credit Type page (Catalog > Credits > "AI Tokens").
-2. Give your bundle a name. We'll use "Small Bundle" for this example.
-3. Select the number of credits you want to include in the bundle. We'll use 5,000 for this example, which is the number of credits the plan provides by default.
-4. Next, we set a cost for this bundle. We recommend this cost is in line with the cost basis of the credit type.  We'll use $5 for this example.
-5. Click "Create Bundle" to save your changes.
+1. Go to the Credit Type page (Catalog > Credits > "AI Tokens").
+2. Name the bundle. We'll use "Small Bundle".
+3. Set the credit quantity. We'll use 5,000, matching what the plan provides.
+4. Set a price, ideally in line with the credit type's cost basis. We'll use \$5.
+5. Click "Create Bundle".
 
 ![Create Credit Bundle 1](../../assets/images/billing/burndown-create-credit-bundle-1.png)
 
-6. Repeat this process but add a "Medium Bundle (10% off)" with 10,000 credits and a cost of $9. We recommend offering a bulk discount on larger credit purchases, to incentivize customers to purchase more credits at once.
-7. Repeat this process one more time for a "Large Bundle (20% off)" with 20,000 credits and a cost of $16.
+6. Repeat for a "Medium Bundle (10% off)" with 10,000 credits at \$9. Volume discounts on larger bundles encourage customers to buy more at once.
+7. Repeat once more for a "Large Bundle (20% off)" with 20,000 credits at \$16.
 
-When you're finished, your credit bundles should look like this:
+The finished bundles:
 
 ![Create Credit Bundle 2](../../assets/images/billing/burndown-create-credit-bundle-2.png)
 
-<Info>The cost you set for these bundles will be the basis for Recognizing the Revenue from these credits.</Info>
+<Info>The price you set on a bundle is the basis for recognizing revenue from those credits.</Info>
 
-<Info>Your new plan starts as an unpublished **draft** (version 1) — adding the credit grant and features above edits that draft. Before customers can use it, open the plan and click **Publish version** in the banner at the top of the page. Because this is the plan's first version, there are no existing subscribers to migrate. See [Plan Versions](/catalog/plans#plan-versions) for more.</Info>
+<Info>Your new plan starts as an unpublished **draft** (version 1), and everything above edits that draft. Open the plan and click **Publish version** in the banner before customers can use it. This is the plan's first version, so there are no existing subscribers to migrate. See [Plan Versions](/catalog/plans#plan-versions).</Info>
 
-### 6. Add this plan and credit bundles to the Catalog so Customers can use it. 
+### 6. Add the plan and bundles to the Catalog
 
-Now that we've finished setting up our plan and credit bundles, we'll add them to our Catalog so Customers can use them.
-
-1. Navigate to the "Catalog" tab, and select "Configuration".
-2. Click the "+" button on the far right side of the "Live Plans" section.
-3. Add the plan you just created to the list.
-4. Click "Save" to add the plan to the Catalog.
+1. Go to the "Catalog" tab and select "Configuration".
+2. Click the "+" on the right of the "Live Plans" section.
+3. Add the plan you created.
+4. Click "Save".
 
 ![Add Plan to Catalog 1](../../assets/images/billing/burndown-add-plan-to-catalog-1.png)
 
-5. Scroll down to the "Credit Bundles" section and click the "+" button to add the credit bundles you just created.
+5. Scroll to "Credit Bundles" and click "+" to add the bundles.
 
 ![Add Plan to Catalog 2](../../assets/images/billing/burndown-add-plan-to-catalog-2.png)
 
-5. **IMPORTANT**: You'll need to save your changes by clicking the "Save Changes" button in the top right of the screen.
+6. **Save your changes** with the "Save Changes" button in the top right. This step is easy to miss.
 
 ![Add Plan to Catalog 3](../../assets/images/billing/burndown-add-plan-to-catalog-3.png)
 
-When you're finished, you can see the credit bundles in your checkout flow: 
+The bundles now appear in your checkout flow:
 
 ![Add Credit Bundle 4](../../assets/images/billing/burndown-add-plan-to-catalog-4.png)
 
+## Credit lifecycle
+
+The walkthrough used the defaults. This section covers what else a credit grant can do.
+
+**Reset** is the setting everything else hangs off. A grant either recurs or it doesn't, and that choice determines which other fields you see:
+
+| Reset | You configure | What happens to an unused balance |
+| --- | --- | --- |
+| Monthly, Quarterly, or Yearly | **Rollover** | A percentage carries into the next period, the rest is discarded |
+| Daily or Weekly | Nothing further | The balance is discarded at each reset |
+| No reset | **Grant Expiration** | Credits stay in the balance until they expire |
+
+Rollover and expiration are alternatives, not independent settings. A recurring grant has no expiration date of its own, and a one-time grant has nothing to roll over.
+
+You'll find these by opening a credit grant on a plan, or any row in the Plan Grants table on a credit type page.
+
+### Reset and rollover
+
+Pick a cadence and the grant refreshes on that schedule. For Monthly, Quarterly, and Yearly you also choose when the cycle starts: **According to billing period start date**, which follows the company's own billing anniversary, or the calendar equivalent (**First of month**, **First of quarter**, or **First of year**). Daily and weekly grants always run from plan enrollment.
+
+**Rollover** is the percentage of unused credits that survive a reset. At 0 the customer loses whatever they didn't spend, which is what the walkthrough does. At 100 the full remainder carries forward. Values in between give customers partial credit for what they didn't use without letting balances compound.
+
+<Note>
+Rolled-over credits expire at the next reset. They carry forward one period, not indefinitely, so a customer who consistently underuses does not accumulate an unbounded balance.
+</Note>
+
+Rollover is only offered for monthly, quarterly, and yearly grants. Daily and weekly grants reset too often for it to be meaningful.
+
+### Grant expiration
+
+Set **Reset** to "No reset" and the grant becomes one-time. **Grant Expiration** then controls how long the credits last:
+
+| Grant Expiration | Behavior |
+| --- | --- |
+| Duration | Credits expire a fixed number of days after being granted |
+| End of Billing Period | Credits expire when a billing period closes, either the current one or the next |
+| No Expiry | Credits never expire |
+
+Choosing **Duration** gives you quick-select buttons for 30 days, 90 days, and 1 year, plus a custom value in days. Choosing **End of Billing Period** adds a **Billing Period** selector for **Current** or **Next**.
+
+On a free plan there is no billing period, so "End of Billing Period" is not offered.
+
+Credit bundles have the same three options under a field labeled **Expiry Type**. The bundles in step 5 are set to No Expiry, but that is the example's configuration, not a property of purchased credits.
+
+### Consumption order
+
+A company usually holds several grants at once. Each consumption event draws its full amount from one grant and moves to the next once that one is empty, in this order:
+
+1. **Adjustment grants**, meaning credits returned by a refund
+2. **Rollover grants**, so last period's leftovers go before the fresh grant they came from
+3. **Plan grants**, oldest first
+4. **Everything else**, oldest first, which in practice means purchased bundles and promotional credits
+
+Rollover grants sitting ahead of the new period's grant is what makes rollover useful. Because they also expire at the next reset, putting them last would mean they usually lapse unspent.
+
+### Where credits come from
+
+Every grant records its source. The **Companies** tab on a credit type lists each grant a company holds along with its status, source, usage, and expiration.
+
+| Source | Origin |
+| --- | --- |
+| Plan | Included with the company's plan |
+| Bundle | Purchased directly or by [auto top-up](#auto-top-up) |
+| Free, promotional credit | Granted manually |
+| Rollover | Carried forward from a previous period |
+| Adjustment | Returned by a refund |
+
+## App settings and their API fields
+
+Everything above is configurable through the API as well. The dashboard uses friendlier labels than the underlying fields, and in a few places one control maps to more than one field, so this table is the translation.
+
+### Credit grant on a plan
+
+These live on `BillingPlanCreditGrantResponseData`.
+
+| App control | API field | Values |
+| --- | --- | --- |
+| Reset (a cadence) | `reset_type`, `reset_cadence` | `reset_type` is `plan_period`; `reset_cadence` is `daily`, `weekly`, `monthly`, `quarterly`, or `yearly` |
+| Reset: "No reset" | `reset_type` | `no_reset`, with `reset_cadence` unset |
+| According to billing period start date | `reset_start` | `billing_period` |
+| First of month / quarter / year | `reset_start` | `first_of_month` |
+| Rollover | `rollover_percentage` | Integer 0 to 100. Only meaningful when `reset_type` is `plan_period` |
+| Grant Expiration: Duration | `expiry_type`, `expiry_unit`, `expiry_unit_count` | `duration`, with `days` and the day count |
+| Grant Expiration: End of Billing Period, Current | `expiry_type` | `end_of_billing_period` |
+| Grant Expiration: End of Billing Period, Next | `expiry_type` | `end_of_next_billing_period` |
+| Grant Expiration: No Expiry | `expiry_type` | `no_expiry` |
+| Credit Amount | `credit_amount` | Integer |
+| Buyers can purchase credit bundles | `can_buy_bundles` | Boolean |
+
+Two things the API exposes that the dashboard does not:
+
+- `expiry_type` also accepts `end_of_trial`, which expires credits when the company's trial ends. There is no dashboard control for it.
+- `expiry_unit` also accepts `billing_periods`, so a duration can be counted in billing periods rather than days. The dashboard only offers days.
+
+### Credit bundle
+
+These live on `BillingCreditBundleResponseData`.
+
+| App control | API field |
+| --- | --- |
+| Name of the credit bundle | `name` |
+| Amount of credits | `quantity` |
+| Credit bundle price | `price`, `currency_prices` |
+| Expiry Type | `expiry_type`, `expiry_unit`, `expiry_unit_count` |
+
+### Credit type
+
+These live on `BillingCreditResponseData`.
+
+| App control | API field |
+| --- | --- |
+| Credit name | `name` |
+| Describe the credit | `description` |
+| Single and multiple unit name | `singular_name`, `plural_name` |
+| Cost basis | `price` |
+| Currencies | `currency_prices` |
+| Burndown strategy | `burn_strategy` |
+
+The credit type also carries `default_expiry_unit`, `default_expiry_unit_count`, and `default_rollover_policy`, which set defaults new grants can inherit. The dashboard has no controls for them and clears them when you save the credit type, so they are only usable through the API.
+
+<Warning>
+The **Burndown strategy** field on the credit type is displayed but disabled in the dashboard, and it always renders the label "First In, First Out (FIFO)" regardless of the value stored on the credit type. Treat the API as the source of truth for this field.
+
+`burn_strategy` accepts `plan_first_then_credit_bundles_first_in_first_out` (the default), `first_in_first_out`, `last_in_first_out`, and `expiration_priority`. The [Consumption order](#consumption-order) above describes the default. Adjustment and rollover grants are consumed first under every strategy.
+</Warning>
+
+### Grant sources
+
+The `grant_reason` field on a credit grant carries the source shown in the dashboard.
+
+| Dashboard label | `grant_reason` |
+| --- | --- |
+| Plan | `plan` |
+| Bundle | `purchased`, or `billing_credit_auto_topup` when bought by auto top-up |
+| Free, promotional credit | `free` |
+| Rollover | `rollover` |
+| Adjustment | `adjustment` |
+
+Rollover grants also carry `source_grant_id`, pointing back to the grant they came from, so a carried-forward balance is traceable to its origin.
+
 ## Credit Refunds via Negative Quantities
 
-When a track event with a **negative quantity** is submitted for a feature that uses credit burndown billing, Schematic reverses the credit consumption — credits are returned to the company's balance. This is useful for refunding usage when, for example, a request failed, was retried, or needs to be corrected.
+Submitting a track event with a **negative quantity** for a credit burndown feature reverses the consumption and returns credits to the company's balance. Use it when a request failed, was retried, or needs correcting.
 
 ### How it works
 
-1. A negative quantity event is submitted using a **secret API key** (publishable keys cannot submit negative quantities).
-2. Schematic multiplies the negative quantity by the feature's credit consumption rate to determine the number of credits to refund.
-3. The refunded credits are added to an **adjustment grant** — a special credit grant that is automatically created per company per credit type.
-4. When credits are consumed in the future, adjustment grant credits are always burned first, before plan grants or purchased credits.
+1. Submit a negative quantity event using a **secret API key**. Publishable keys cannot submit negative quantities.
+2. Schematic multiplies the negative quantity by the feature's consumption rate to get the number of credits to refund.
+3. The credits go into an **adjustment grant**, created automatically per company per credit type.
+4. Adjustment grant credits are consumed before anything else on the next draw.
 
 ### Example
 
-Suppose "AI Assists" costs 5 credits per use, and a company has used 10 AI Assists (50 credits consumed). If 2 of those uses need to be reversed:
+"AI Assists" costs 5 credits per use and a company has used 10 of them, consuming 50 credits. To reverse 2 of those uses:
 
 ```ts
 await client.track({
@@ -186,72 +314,90 @@ await client.track({
 });
 ```
 
-This returns 10 credits (2 x 5 credits per use) to the company's balance via an adjustment grant. The next time the company uses any credit-consuming feature, those 10 adjustment credits will be consumed first.
+That returns 10 credits to the balance through an adjustment grant, and those 10 are spent first the next time the company uses any credit-consuming feature.
 
 ### Key details
 
-- **Adjustment grants accumulate**: Multiple refund events for the same company and credit type add credits to the same adjustment grant, rather than creating new grants each time.
-- **Adjustment grants are consumed first**: Regardless of the configured burn strategy, adjustment grant credits are always consumed before other grant types (plan grants, purchased credits, promotional credits).
-- **Adjustment grants do not expire quickly**: Adjustment grants are given a rolling 1-year expiration that extends with each refund, so they will not expire while actively being used.
-- **Negative events create negative usage records**: For auditing purposes, a negative usage record is created in the credit usage ledger corresponding to each refund.
+- **Adjustment grants accumulate.** Repeated refunds for the same company and credit type add to the existing adjustment grant rather than creating new ones.
+- **Adjustment grants are consumed first.** This holds under every burn strategy, ahead of plan grants, purchased credits, and promotional credits.
+- **Adjustment grants do not expire quickly.** They carry a rolling 1-year expiration that extends with each refund, so they will not lapse while in active use.
+- **Negative events create negative usage records.** Each refund writes a corresponding negative record to the credit usage ledger for auditing.
 
 ## Auto Top-Up
 
-In addition to manually purchasing credits, Schematic supports auto top-up for credit burndown plans to ensure that customers never run out of credits. Auto top-ups are configured at the *plan level*, and will automatically purchase the specified number of credits when the customer's balance is below a pre-set threshold.
+Auto top-up buys credits automatically when a customer's balance falls below a threshold, so they are not cut off mid-workflow. It is configured on the plan's credit grant, in the same form as the reset and expiry settings.
 
-1. Navigate to the Credit Burndown plan you want to configure auto top-up for.
-2. Click "Add credit grant" to create a new credit grant.
-3. Select the Credit Type and Credit Amount you want to use for the auto top-up.
-4. Enable "Auto Top-Up".
+<Note>
+The credit type needs a cost basis before top-ups can be turned on. Without a per-unit price there is nothing to charge, so **Top-up Availability** stays disabled and the form tells you a per-unit price is required.
+</Note>
+
+1. Open the credit burndown plan you want to configure.
+2. Click "Add credit grant".
+3. Select the Credit Type and Credit Amount.
+4. Set **Top-up Availability** to Automatic or User-controlled, covered in [Who controls auto top-up](#who-controls-auto-top-up) below.
 
 ![Auto Top-Up](../../assets/images/billing/burndown-auto-top-up.png)
 
-4. The "Remaining balance threshold" is the percentage of remaining credits at which a top-up will be purchased. We've used 10% for this example. *NOTE: The remaining balance includes all plan grants, purchased grants, and promotional grants.*
-5. The Top-up amount is the number of credits that will be purchased. The final cost will be calculated based on the cost basis of the credit type and the number of credits purchased (see [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type)). The final cost number will be displayed in the confirmation warning below.
-6. The "Top-up Grant Expiration" represents the expiration policy for the auto top-up grant. We recommend a 1 year duration for the auto top-up grant -- this provides customers with adequate time to use the credits, but also simplifies revenue recognition.
-7. Finally, we provide a confirmation warning with the final cost, threshold, and expiration policy.
-8. Click "Create plan grant" to save your changes.
+5. **Top-up Threshold** is the balance that triggers a purchase, given as a number of credits remaining rather than a percentage. The balance it checks counts all plan grants, purchased grants, and promotional grants.
+6. **Top-up Amount** is how many credits get bought. The cost follows the credit type's cost basis and appears in the confirmation below.
+7. **Top-up Grant Expiration** sets the expiry policy for the purchased credits. Auto top-up grants offer Duration and No Expiry only, not the billing period options. A 1 year duration is a good default, long enough for customers to use the credits and short enough to keep revenue recognition simple.
+8. Review the confirmation showing the final cost, threshold, and expiration, then click "Create plan grant".
+
+### Who controls auto top-up
+
+**Top-up Availability** decides both whether auto top-up runs and who operates it:
+
+| Setting | What happens |
+| --- | --- |
+| Off | Companies cannot buy more credits or manage auto top-ups. Existing credits remain until they expire. |
+| Automatic | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
+| User-controlled | Companies turn auto top-up on themselves and buy more credits in checkout and through components. Your threshold and amount become their starting defaults. |
+
+Choose User-controlled for self-serve plans where customers should manage their own refills, and Automatic when continuity matters more than customer control, such as an enterprise account that should never stop mid-workload. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both.
+
+**Buyers can purchase credit bundles** is a separate checkbox on the same grant, covering one-time [bundle](#5-configure-credit-bundles) purchases. It is independent of top-up availability, so you can let a customer buy credits on demand without letting them set up an automatic refill, or the reverse. Unchecked, the buy-more button is hidden and one-time bundle purchases are rejected.
+
+### Per-company exceptions
+
+Top-up settings live on the plan grant, so every company on that plan starts with the same threshold and amount. Individual companies can be given different values through the [API](/api-reference/billing-credits/list-company-grants), which is currently the only way to do it, as the dashboard has no per-company top-up control.
+
+Under User-controlled availability the customer changes their own threshold and amount, which covers many of the cases an override would otherwise handle.
 
 ### Triggering an Auto Top-Up
 
-Auto top-ups are triggered when processing an event that draws from a credit balance and the customer's balance is at or below the remaining balance threshold. Schematic ensures that if multiple events trigger in a short period of time, only one auto top-up will be purchased. 
+An auto top-up fires while processing an event that draws from a credit balance, when that balance is at or below the threshold. If several events arrive close together, only one top-up is purchased.
 
-In the event that an auto top-up purchase fails, Schematic will try to purchase an auto top-up grant the next time the balance is drawn from.
+If a top-up purchase fails, Schematic retries the next time the balance is drawn from.
+
+Three webhook events report the outcome of each attempt: `auto.topup.success`, `auto.topup.hard.failure`, and `auto.topup.retry.exceeded`. A hard failure carries the Stripe error code when the failure originated there, which is what lets you tell a declined card apart from a missing payment method. Subscribe to them under Settings > Integrations > Webhooks, and see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers#auto-topup-events) for the full payloads.
+
+Because a failing top-up means a customer is about to be cut off, wiring `auto.topup.hard.failure` to an internal alert and a customer-facing email is worth doing before you turn auto top-up on. See [Spend and usage controls](/billing/spend-controls) for how auto top-up fits with the other limits available to you.
 
 ## Accessing Credit Information via API
 
-When working with credit burndown models, you can retrieve credit balance and usage information through several API endpoints, the most commonly used ones are listed below.
-
 ### List Company Credit Grants
 
-To see all credit grants associated with a specific company, use the [List Company Credit Grants](/api-reference/billing-credits/list-company-grants) endpoint. This endpoint returns detailed information about each credit grant, including grant type (plan, purchased, promotional), quantity, remaining balance, and expiration dates, helping you understand the composition of a customer's credit balance.
+[List Company Credit Grants](/api-reference/billing-credits/list-company-grants) returns every grant a company holds, including its reason, quantity, remaining balance, and expiration, which is how you reconstruct the composition of a balance.
 
 ### Grant Billing Credits to Company
 
-To manually grant credits to a company (for promotional credits, refunds, or other administrative purposes), use the [Grant Billing Credits to Company](/api-reference/billing-credits/grant-billing-credits-to-company) endpoint. This allows you to add credits to a company's balance outside of the normal plan or purchase flow.
+[Grant Billing Credits to Company](/api-reference/billing-credits/grant-billing-credits-to-company) adds credits outside the normal plan or purchase flow, for promotional grants, manual refunds, or administrative corrections.
 
 ### Zero Out Grant
 
-To zero out a specific credit grant (set its remaining balance to zero), use the [Zero Out Grant](/api-reference/billing-credits/zero-out-grant) endpoint. This is useful for administrative purposes when you need to cancel a credit grant.
+[Zero Out Grant](/api-reference/billing-credits/zero-out-grant) sets a specific grant's remaining balance to zero, for when a grant needs cancelling.
 
 ### List Feature Usage
 
-Additionally, credit usage information can be found in the [List Feature Usage](/api-reference/entitlements/list-feature-usage) endpoint. This endpoint supports filtering and pagination, and when you include the `include_usage_aggregation` parameter, it returns a `credit_usage_aggregation` object with time-bucketed usage data:
+[List Feature Usage](/api-reference/entitlements/list-feature-usage) supports filtering and pagination, and with the `include_usage_aggregation` parameter it returns a `credit_usage_aggregation` object with time-bucketed data:
 
-- `usage_this_billing_period`: Total credits used in the current billing period
-- `usage_this_calendar_month`: Total credits used in the current calendar month
-- `usage_this_week`: Total credits used in the current week
-- `usage_today`: Total credits used today
+- `usage_this_billing_period`: credits used in the current billing period
+- `usage_this_calendar_month`: credits used in the current calendar month
+- `usage_this_week`: credits used in the current week
+- `usage_today`: credits used today
 
-This aggregation data allows you to provide customers with detailed insights into their credit consumption patterns and help them understand their usage trends over time.
+Use this to show customers their consumption patterns over time.
 
-### Conclusion
+## Conclusion
 
-Congratulations! You've now implemented a credit burndown model in Schematic. Credit burndown enables you to:
-
-- Offer flexible usage-based billing with prepaid credits
-- Let customers purchase additional credit bundles as needed
-- Provide volume discounts through credit bundle pricing
-- Track and manage credit usage across your product features
-
-You can use this model with both new and existing plans to give your customers more control over their usage while maintaining predictable revenue for your business.
+You now have a credit burndown model that lets customers prepay for usage, buy more when they run out, and receive volume discounts on larger purchases, while you meter several features against a single pricing metric. The same setup works on existing plans as well as new ones.

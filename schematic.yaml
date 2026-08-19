@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v5b3e7220
+  x-rules-engine-schema-version: vc8eb8df4
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -503,6 +503,11 @@ components:
         - started_at
         - url
       title: AuditLogResponseData
+    BillingCollectionMethod:
+      type: string
+      enum:
+        - charge_automatically
+        - send_invoice
     BillingCouponResponseData:
       type: object
       properties:
@@ -580,6 +585,14 @@ components:
           nullable: true
         bundle_type:
           $ref: '#/components/schemas/BillingCreditBundleType'
+        compatible_plan_ids:
+          type: array
+          description: >-
+            Plans whose companies may purchase this bundle. Empty means the
+            bundle is purchasable on every plan.
+          items:
+            type: string
+          maxItems: 100
         created_at:
           type: string
           format: date-time
@@ -641,6 +654,7 @@ components:
         - credit_name
         - currency_prices
         - has_grants
+        - compatible_plan_ids
         - created_at
         - updated_at
       title: BillingCreditBundleResponseData
@@ -658,6 +672,11 @@ components:
       properties:
         bundle_type:
           $ref: '#/components/schemas/BillingCreditBundleType'
+        compatible_plan_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 100
         created_at:
           type: string
           format: date-time
@@ -719,6 +738,7 @@ components:
         - credit_name
         - currency_prices
         - has_grants
+        - compatible_plan_ids
         - created_at
         - updated_at
       title: BillingCreditBundleView
@@ -1234,8 +1254,9 @@ components:
         can_buy_bundles:
           type: boolean
           description: >-
-            Whether buyers can purchase one-time credit bundles on this grant,
-            independent of auto top-up availability.
+            Deprecated: bundle availability is a per-bundle plan compatibility
+            set now; use compatible_plan_ids on credit bundles instead.
+          deprecated: true
         company_credit_amount:
           type: integer
           description: >-
@@ -2568,6 +2589,17 @@ components:
             maxLength: 255
           type: object
           nullable: true
+        preflight:
+          allOf:
+            - $ref: '#/components/schemas/PreflightRequestBody'
+          description: >-
+            Hypothetical usage to evaluate the flag against, for answering
+            "would this action be allowed?" before performing it. Only supported
+            when checking a single flag. Values are caller-asserted and can
+            widen a verdict as well as narrow it, so do not forward untrusted
+            input here when the result gates access. Only the flag value
+            reflects the preflight; the entitlement and usage figures in the
+            response are the company's current, unsimulated ones
         user:
           additionalProperties:
             type: string
@@ -2695,6 +2727,11 @@ components:
       required:
         - flags
       title: CheckFlagsResponseData
+    CheckoutBundlePurchaseBehavior:
+      type: string
+      enum:
+        - individual
+        - quantity
     CheckoutDataRequestBody:
       type: object
       properties:
@@ -2869,6 +2906,8 @@ components:
     CheckoutSettingsResponseData:
       type: object
       properties:
+        bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         collect_address:
           type: boolean
         collect_email:
@@ -2886,6 +2925,7 @@ components:
           type: string
           nullable: true
       required:
+        - bundle_purchase_behavior
         - collect_address
         - collect_email
         - collect_phone
@@ -3394,6 +3434,24 @@ components:
             type: string
           nullable: true
           maxItems: 100
+        entity_key_definition_ids:
+          type: array
+          description: >-
+            Company key definition IDs to include as columns, one column per
+            definition, mirroring the companies list
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        entity_trait_definition_ids:
+          type: array
+          description: >-
+            Company trait definition IDs to include as columns, one column per
+            definition, mirroring the companies list
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
         export_type:
           type: string
           description: 'Discriminator: always "company-feature-usage" for this variant'
@@ -3443,6 +3501,12 @@ components:
         plan_version_id:
           type: string
           description: Restrict the export to companies on this plan version ID
+          nullable: true
+        plan_version_unpublished:
+          type: boolean
+          description: >-
+            Restrict the export to companies on a plan version that is no longer
+            published
           nullable: true
         q:
           type: string
@@ -4221,6 +4285,8 @@ components:
     ComponentCheckoutSettings:
       type: object
       properties:
+        bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         collect_address:
           type: boolean
         collect_email:
@@ -4234,6 +4300,7 @@ components:
         tax_collection_enabled:
           type: boolean
       required:
+        - bundle_purchase_behavior
         - collect_email
         - collect_address
         - collect_phone
@@ -5341,7 +5408,11 @@ components:
           minimum: 1
         can_buy_bundles:
           type: boolean
+          description: >-
+            Deprecated: use compatible_plan_ids on credit bundles instead. Still
+            accepted; writes through to the credit's bundle compatibility.
           nullable: true
+          deprecated: true
         company_credit_amount:
           type: integer
           description: >-
@@ -5801,15 +5872,25 @@ components:
       properties:
         bundle_name:
           type: string
-          maxLength: 256
+          maxLength: 255
         bundle_type:
           allOf:
             - $ref: '#/components/schemas/BillingCreditBundleType'
           nullable: true
+        compatible_plan_ids:
+          type: array
+          description: >-
+            Plans whose companies may purchase this bundle. Omitted or empty
+            means the bundle is purchasable on every plan.
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
         credit_id:
           type: string
         currency:
           type: string
+          maxLength: 3
         currency_prices:
           type: array
           items:
@@ -5891,7 +5972,9 @@ components:
         plan:
           $ref: '#/components/schemas/CreateCustomPlanBundlePlanRequestBody'
       required:
+        - billing_product
         - entitlements
+        - plan
       title: CreateCustomPlanBundleRequestBody
     CreateCustomPlanRequestBody:
       type: object
@@ -5899,6 +5982,9 @@ components:
         company_id:
           type: string
         copied_from_plan_id:
+          type: string
+          nullable: true
+        copied_price_id:
           type: string
           nullable: true
         description:
@@ -6620,6 +6706,7 @@ components:
         plan:
           $ref: '#/components/schemas/CreatePlanRequestBody'
       required:
+        - plan
         - entitlements
       title: CreatePlanBundleRequestBody
     CreatePlanEntitlementRequestBody:
@@ -6791,6 +6878,8 @@ components:
             type: string
           deprecated: true
           maxItems: 100
+        checkout_bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         checkout_collect_address:
           type: boolean
         checkout_collect_email:
@@ -7746,6 +7835,14 @@ components:
       properties:
         activation_strategy:
           $ref: '#/components/schemas/CustomPlanActivationStrategy'
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The billing period renewal date pinned when the subscription
+            started, when one was set. When no invoice exists yet, the first
+            invoice is raised on this date.
+          format: date-time
+          nullable: true
         company_id:
           type: string
         created_at:
@@ -7763,6 +7860,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        plan_billing_source:
+          allOf:
+            - $ref: '#/components/schemas/PlanBillingSource'
+          description: >-
+            The flow that created this billing record: a custom plan, or a
+            standard plan assigned by invoice through Manage Plan.
         plan_id:
           type: string
         published_at:
@@ -7785,6 +7888,7 @@ components:
         - created_at
         - days_until_due
         - id
+        - plan_billing_source
         - plan_id
         - send_invoice
         - status
@@ -8189,6 +8293,35 @@ components:
         - trait_type
         - updated_at
       title: EntityTraitDefinitionResponseData
+    EntityTraitDefinitionUsage:
+      type: object
+      properties:
+        checkout_field_config_count:
+          type: integer
+          format: int64
+        company_override_count:
+          type: integer
+          format: int64
+        feature_count:
+          type: integer
+          format: int64
+        plan_entitlement_count:
+          type: integer
+          format: int64
+        plan_trait_count:
+          type: integer
+          format: int64
+        rule_condition_count:
+          type: integer
+          format: int64
+      required:
+        - company_override_count
+        - feature_count
+        - plan_entitlement_count
+        - rule_condition_count
+        - checkout_field_config_count
+        - plan_trait_count
+      title: EntityTraitDefinitionUsage
     EntityTraitDetailResponseData:
       type: object
       properties:
@@ -8390,6 +8523,12 @@ components:
         flag_key:
           type: string
           description: The key of the flag being checked
+        preflight:
+          type: boolean
+          description: >-
+            Whether the check was a preflight, asking whether an action would be
+            allowed rather than reporting one that happened. Absent on ordinary
+            checks
         reason:
           type: string
           description: The reason why the value was returned
@@ -9492,6 +9631,41 @@ components:
       required:
         - features
       title: FeatureUsageDetailResponseData
+    FeatureUsageHistoryResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: >-
+            Companies are identified by ID only. To report against your own
+            identifiers, resolve them once via the companies API and cache the
+            mapping; keys are not repeated on every row.
+        event_subtype:
+          type: string
+        feature_id:
+          type: string
+        period_end:
+          type: string
+          description: Exclusive end of the period this usage covers
+          format: date-time
+        period_start:
+          type: string
+          description: Inclusive start of the period this usage covers
+          format: date-time
+        usage:
+          type: integer
+          description: >-
+            Usage recorded within this period; an incremental total, not a
+            running one
+          format: int64
+      required:
+        - company_id
+        - event_subtype
+        - feature_id
+        - period_end
+        - period_start
+        - usage
+      title: FeatureUsageHistoryResponseData
     FeatureUsageLegacyResponseData:
       type: object
       properties:
@@ -9983,6 +10157,40 @@ components:
         - id
         - name
       title: GenericPreviewObject
+    GetOnboardingStateResp:
+      type: object
+      properties:
+        environment_id:
+          type: string
+          nullable: true
+        milestones:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingMilestoneView'
+          maxItems: 10
+        path:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingPath'
+          nullable: true
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirementView'
+          maxItems: 10
+        suggested_next:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        track:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingTrack'
+          nullable: true
+      required:
+        - milestones
+        - requirements
+        - suggested_next
+      title: GetOnboardingStateResp
     GetOrCreateCompanyMembershipRequestBody:
       type: object
       properties:
@@ -10496,6 +10704,12 @@ components:
     ManagePlanRequest:
       type: object
       properties:
+        activate_on_payment:
+          type: boolean
+          description: >-
+            If true, the company gets the plan only once the first invoice is
+            paid. Only applies to an invoiced subscription. Defaults to false.
+          nullable: true
         add_on_selections:
           type: array
           items:
@@ -10510,6 +10724,21 @@ components:
         base_plan_version_id:
           type: string
           nullable: true
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The date the subscription's billing period renews on. Only honored
+            when starting a new subscription; changing the anchor on an existing
+            subscription is not supported.
+          format: date-time
+          nullable: true
+        billing_email:
+          type: string
+          description: >-
+            Address the invoice is sent to. Required when collection_method is
+            send_invoice.
+          nullable: true
+          maxLength: 255
         billing_entity_id:
           type: string
           description: >-
@@ -10522,11 +10751,20 @@ components:
             If false, subscription cancels at period end. Only applies when
             removing all plans. Defaults to true.
           nullable: true
+        collection_method:
+          allOf:
+            - $ref: '#/components/schemas/BillingCollectionMethod'
+          description: >-
+            How the subscription is paid: charged to a payment method on file,
+            or invoiced with payment terms. Invoicing is only available when
+            starting a new subscription. Defaults to charge_automatically.
+          nullable: true
         company_id:
           type: string
         coupon_external_id:
           type: string
           nullable: true
+          maxLength: 255
         credit_bundles:
           type: array
           items:
@@ -10537,6 +10775,12 @@ components:
           items:
             $ref: '#/components/schemas/CheckoutFieldValue'
           maxItems: 100
+        days_until_due:
+          type: integer
+          description: Payment terms in days for an invoiced subscription. Defaults to 30.
+          format: int64
+          nullable: true
+          maximum: 365
         pay_in_advance_entitlements:
           type: array
           items:
@@ -10549,11 +10793,26 @@ components:
         promo_code:
           type: string
           nullable: true
+          maxLength: 255
         prorate:
           type: boolean
           description: >-
             If true and cancel_immediately is true, issue prorated credit. Only
             applies when removing all plans. Defaults to true.
+          nullable: true
+        prorate_first_period:
+          type: boolean
+          description: >-
+            When true, the partial period between the subscription starting and
+            its renewal date is billed pro rata straight away. When false that
+            period is free and no invoice is raised until the renewal date. Only
+            applies alongside billing_cycle_anchor. Defaults to true.
+          nullable: true
+        send_invoice:
+          type: boolean
+          description: >-
+            Whether Stripe emails the invoice when it is finalized. Only applies
+            to an invoiced subscription. Defaults to true.
           nullable: true
         trial_end:
           type: string
@@ -10646,6 +10905,7 @@ components:
       enum:
         - always_invoice
         - create_prorations
+        - none
     MrrResponseData:
       type: object
       properties:
@@ -10658,6 +10918,77 @@ components:
         - amount
         - currency
       title: MrrResponseData
+    OnboardingMilestone:
+      type: string
+      enum:
+        - evaluated
+        - implemented
+    OnboardingMilestoneView:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/OnboardingMilestone'
+        missing:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        progress:
+          type: number
+          format: double
+        reached_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - missing
+        - progress
+      title: OnboardingMilestoneView
+    OnboardingPath:
+      type: string
+      enum:
+        - agent
+        - app
+    OnboardingRequirement:
+      type: string
+      enum:
+        - connect_billing
+        - create_api_key
+        - first_flag_check
+        - import_companies
+        - model_packaging
+        - send_events
+    OnboardingRequirementStatus:
+      type: string
+      enum:
+        - available
+        - blocked
+        - complete
+    OnboardingRequirementView:
+      type: object
+      properties:
+        blocked_by:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingRequirement'
+          maxItems: 10
+        id:
+          $ref: '#/components/schemas/OnboardingRequirement'
+        satisfied_by:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/OnboardingRequirementStatus'
+      required:
+        - id
+        - status
+      title: OnboardingRequirementView
+    OnboardingTrack:
+      type: string
+      enum:
+        - catalog
+        - single_plan
     OrbIntegrationConfig:
       type: object
       properties:
@@ -10801,6 +11132,11 @@ components:
         - provider_type
         - updated_at
       title: PaymentMethodResponseData
+    PlanBillingSource:
+      type: string
+      enum:
+        - custom_plan
+        - manage_plan
     PlanBundleAction:
       type: string
       enum:
@@ -10854,6 +11190,8 @@ components:
           maxItems: 1000
         plan:
           $ref: '#/components/schemas/PlanResponseData'
+        plan_version:
+          $ref: '#/components/schemas/PlanVersionResponseData'
       title: PlanBundleResponseData
     PlanCatalogMembershipResponseData:
       type: object
@@ -12118,11 +12456,14 @@ components:
           nullable: true
         will_update_subscription:
           type: boolean
+        would_fail:
+          type: boolean
       required:
         - company_id
         - has_billing_changes
         - has_custom_pricing
         - will_update_subscription
+        - would_fail
       title: PlanVersionMigrationPreviewCompanyResponseData
     PlanVersionMigrationPreviewResponseData:
       type: object
@@ -12434,6 +12775,55 @@ components:
         - custom
         - included_credit_grants
       title: PlanViewPublicResponseData
+    PreflightEventUsageRequestBody:
+      type: object
+      properties:
+        event_subtype:
+          type: string
+          description: The event subtype the usage would be recorded under
+          maxLength: 255
+        quantity:
+          type: integer
+          description: >-
+            How many units of the event subtype the action would record. Zero
+            has no effect
+          format: int64
+          minimum: 0
+      required:
+        - event_subtype
+        - quantity
+      title: PreflightEventUsageRequestBody
+    PreflightRequestBody:
+      type: object
+      properties:
+        credit_cost:
+          additionalProperties:
+            type: number
+            format: double
+            minimum: 0
+          type: object
+          description: >-
+            Cost in credits of the action, keyed by credit ID, for callers that
+            have already computed it. Takes precedence over usage and
+            event_usage on credit balance conditions for the same credit. A cost
+            of zero means the action is free, not that the input is absent
+          maxProperties: 100
+        event_usage:
+          allOf:
+            - $ref: '#/components/schemas/PreflightEventUsageRequestBody'
+          description: >-
+            Usage of a specific event subtype. Preferred over usage when the
+            subtype is known, since it only affects conditions measuring that
+            subtype
+        usage:
+          type: integer
+          description: >-
+            Quantity of usage to simulate against any numeric condition
+            encountered while evaluating the flag. Zero has no effect
+          format: int64
+          nullable: true
+          minimum: 0
+      title: PreflightRequestBody
     PreviewMigrationRequestBody:
       type: object
       properties:
@@ -12612,6 +13002,9 @@ components:
         amount_off:
           type: integer
           format: int64
+        discount_amount:
+          type: integer
+          format: int64
         discounts:
           type: array
           items:
@@ -12660,6 +13053,7 @@ components:
           maxItems: 1000
       required:
         - amount_off
+        - discount_amount
         - discounts
         - due_now
         - upcoming_invoice_line_items
@@ -12785,6 +13179,12 @@ components:
         proration_behavior:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
+          nullable: true
+        require_no_migration:
+          type: boolean
+          description: >-
+            Refuse the publish if any company would be migrated onto the new
+            version
           nullable: true
         send_invoice:
           type: boolean
@@ -13282,7 +13682,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v5b3e7220
+        - vc8eb8df4
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -14474,7 +14874,11 @@ components:
           minimum: 1
         can_buy_bundles:
           type: boolean
+          description: >-
+            Deprecated: use compatible_plan_ids on credit bundles instead. Still
+            accepted; writes through to the credit's bundle compatibility.
           nullable: true
+          deprecated: true
         company_credit_amount:
           type: integer
           description: >-
@@ -14703,7 +15107,17 @@ components:
       properties:
         bundle_name:
           type: string
-          maxLength: 256
+          maxLength: 255
+        compatible_plan_ids:
+          type: array
+          description: >-
+            Plans whose companies may purchase this bundle. Omitted leaves
+            compatibility unchanged; empty resets the bundle to purchasable on
+            every plan.
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
         currency_prices:
           type: array
           items:
@@ -14865,6 +15279,26 @@ components:
       required:
         - rules
       title: UpdateFlagRulesRequestBody
+    UpdateOnboardingStateRequestBody:
+      type: object
+      properties:
+        path:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingPath'
+          nullable: true
+        pricing_page_url:
+          type: string
+          nullable: true
+          maxLength: 512
+        track:
+          allOf:
+            - $ref: '#/components/schemas/OnboardingTrack'
+          nullable: true
+        website_url:
+          type: string
+          nullable: true
+          maxLength: 512
+      title: UpdateOnboardingStateRequestBody
     UpdatePayInAdvanceRequestBody:
       type: object
       properties:
@@ -14900,6 +15334,7 @@ components:
           nullable: true
       required:
         - entitlements
+        - plan
       title: UpdatePlanBundleRequestBody
     UpdatePlanEntitlementRequestBody:
       type: object
@@ -15061,6 +15496,8 @@ components:
             type: string
           deprecated: true
           maxItems: 100
+        checkout_bundle_purchase_behavior:
+          $ref: '#/components/schemas/CheckoutBundlePurchaseBehavior'
         checkout_collect_address:
           type: boolean
         checkout_collect_email:
@@ -15405,6 +15842,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15416,6 +15854,15 @@ components:
         prevent_key_remap:
           type: boolean
           nullable: true
+        remove_keys:
+          type: array
+          description: >-
+            Names of keys to remove from the company. Removing a key the company
+            does not have does nothing, and a company must keep at least one
+            key.
+          items:
+            type: string
+          maxItems: 100
         traits:
           type: object
           description: A map of trait names to trait values
@@ -15502,6 +15949,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15509,7 +15957,15 @@ components:
         name:
           type: string
           nullable: true
-          maxLength: 256
+          maxLength: 255
+        remove_keys:
+          type: array
+          description: >-
+            Names of keys to remove from the user. Removing a key the user does
+            not have does nothing, and a user must keep at least one key.
+          items:
+            type: string
+          maxItems: 100
         traits:
           type: object
           description: A map of trait names to trait values
@@ -15547,6 +16003,7 @@ components:
             See [Key
             Management](https://docs.schematichq.com/developer_resources/key_management)
             for more information
+          maxProperties: 100
         last_seen_at:
           type: string
           format: date-time
@@ -15554,7 +16011,15 @@ components:
         name:
           type: string
           nullable: true
-          maxLength: 256
+          maxLength: 255
+        remove_keys:
+          type: array
+          description: >-
+            Names of keys to remove from the user. Removing a key the user does
+            not have does nothing, and a user must keep at least one key.
+          items:
+            type: string
+          maxItems: 100
         traits:
           type: object
           description: A map of trait names to trait values
@@ -16306,6 +16771,8 @@ components:
           items:
             $ref: '#/components/schemas/EnvironmentResponseData'
           maxItems: 1000
+        onboarding_complete:
+          type: boolean
         stripe_user_id:
           type: string
         user_id:
@@ -16317,6 +16784,7 @@ components:
         - account_name
         - actor_type
         - environments
+        - onboarding_complete
       title: WhoAmIResponseData
     WorkOSIntegrationConfig:
       type: object
@@ -18171,6 +18639,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
         - name: order
@@ -18255,6 +18724,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
         - name: order
@@ -21584,6 +22054,16 @@ paths:
             items:
               type: string
             maxItems: 100
+        - name: plan_version_unpublished
+          in: query
+          description: >-
+            Filter companies assigned to a plan version that is no longer
+            published, meaning the plan has since moved on to a newer version
+          schema:
+            type: boolean
+            description: >-
+              Filter companies assigned to a plan version that is no longer
+              published, meaning the plan has since moved on to a newer version
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -21758,6 +22238,12 @@ paths:
                         items:
                           type: string
                         maxItems: 100
+                      plan_version_unpublished:
+                        type: boolean
+                        description: >-
+                          Filter companies assigned to a plan version that is no
+                          longer published, meaning the plan has since moved on
+                          to a newer version
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -22112,6 +22598,16 @@ paths:
             items:
               type: string
             maxItems: 100
+        - name: plan_version_unpublished
+          in: query
+          description: >-
+            Filter companies assigned to a plan version that is no longer
+            published, meaning the plan has since moved on to a newer version
+          schema:
+            type: boolean
+            description: >-
+              Filter companies assigned to a plan version that is no longer
+              published, meaning the plan has since moved on to a newer version
         - name: q
           in: query
           description: Search for companies by name, keys or string traits
@@ -22282,6 +22778,12 @@ paths:
                         items:
                           type: string
                         maxItems: 100
+                      plan_version_unpublished:
+                        type: boolean
+                        description: >-
+                          Filter companies assigned to a plan version that is no
+                          longer published, meaning the plan has since moved on
+                          to a newer version
                       q:
                         type: string
                         description: Search for companies by name, keys or string traits
@@ -22478,6 +22980,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
       responses:
@@ -22524,6 +23027,7 @@ paths:
       parameters:
         - name: company_id
           in: query
+          required: true
           schema:
             type: string
       responses:
@@ -23254,16 +23758,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /company-plans/{company_plan_id}:
+  /company-plans/{company_id}:
     put:
       operationId: updateCompanyPlans
       summary: Update company plans
       tags:
         - plans
       parameters:
-        - name: company_plan_id
+        - name: company_id
           in: path
-          description: company_plan_id
+          description: company_id
           required: true
           schema:
             type: string
@@ -23857,6 +24361,17 @@ paths:
           schema:
             type: string
             description: Filter by plan ID
+        - name: plan_billing_source
+          in: query
+          description: >-
+            Filter by the flow that created the billing record. Defaults to
+            custom_plan.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PlanBillingSource'
+            description: >-
+              Filter by the flow that created the billing record. Defaults to
+              custom_plan.
         - name: status
           in: query
           description: Filter by billing status
@@ -23924,6 +24439,12 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      plan_billing_source:
+                        allOf:
+                          - $ref: '#/components/schemas/PlanBillingSource'
+                        description: >-
+                          Filter by the flow that created the billing record.
+                          Defaults to custom_plan.
                       plan_id:
                         type: string
                         description: Filter by plan ID
@@ -24866,6 +25387,85 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteEntityTraitDefinition
+      summary: Delete entity trait definition
+      tags:
+        - companies
+      parameters:
+        - name: entity_trait_definition_id
+          in: path
+          description: entity_trait_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteEntityTraitDefinitionParams
+                required:
+                  - data
+                  - params
+                title: DeleteEntityTraitDefinitionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-trait-definitions/{entity_trait_definition_id}/usage:
+    get:
+      operationId: getEntityTraitDefinitionUsage
+      summary: Get entity trait definition usage
+      tags:
+        - companies
+      parameters:
+        - name: entity_trait_definition_id
+          in: path
+          description: entity_trait_definition_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/EntityTraitDefinitionUsage'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetEntityTraitDefinitionUsageParams
+                required:
+                  - data
+                  - params
+                title: GetEntityTraitDefinitionUsageResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /entity-trait-definitions/count:
     get:
       operationId: countEntityTraitDefinitions
@@ -25047,6 +25647,84 @@ paths:
                   - data
                   - params
                 title: GetEntityTraitValuesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /entity-traits/count:
+    get:
+      operationId: countEntityTraits
+      summary: Count entity traits
+      tags:
+        - companies
+      parameters:
+        - name: definition_id
+          in: query
+          schema:
+            type: string
+        - name: entity_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      definition_id:
+                        type: string
+                      entity_type:
+                        $ref: '#/components/schemas/EntityType'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountEntityTraitsParams
+                required:
+                  - data
+                  - params
+                title: CountEntityTraitsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -25924,6 +26602,166 @@ paths:
                   - data
                   - params
                 title: ListFeatureUsageResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /feature-usage-history:
+    get:
+      operationId: listFeatureUsageHistory
+      summary: List feature usage history
+      tags:
+        - entitlements
+      parameters:
+        - name: company_ids
+          in: query
+          description: >-
+            Restrict to these company IDs; omit for every company in the
+            environment
+          schema:
+            type: array
+            description: >-
+              Restrict to these company IDs; omit for every company in the
+              environment
+            items:
+              type: string
+            maxItems: 100
+        - name: end_time
+          in: query
+          description: Exclusive end of the window; must fall on an hour boundary
+          required: true
+          schema:
+            type: string
+            description: Exclusive end of the window; must fall on an hour boundary
+            format: date-time
+        - name: feature_ids
+          in: query
+          description: >-
+            Restrict to these event features; omit for every event feature in
+            the environment. Where several features measure the same event, each
+            is reported separately and a page may carry more rows than the
+            requested limit
+          schema:
+            type: array
+            description: >-
+              Restrict to these event features; omit for every event feature in
+              the environment. Where several features measure the same event,
+              each is reported separately and a page may carry more rows than
+              the requested limit
+            items:
+              type: string
+            maxItems: 100
+        - name: granularity
+          in: query
+          description: Bucket the window; omit for a single total per company and feature
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TimeSeriesGranularity'
+            description: Bucket the window; omit for a single total per company and feature
+        - name: start_time
+          in: query
+          description: Inclusive start of the window; must fall on an hour boundary
+          required: true
+          schema:
+            type: string
+            description: Inclusive start of the window; must fall on an hour boundary
+            format: date-time
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeatureUsageHistoryResponseData'
+                    title: ListFeatureUsageHistoryResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_ids:
+                        type: array
+                        description: >-
+                          Restrict to these company IDs; omit for every company
+                          in the environment
+                        items:
+                          type: string
+                        maxItems: 100
+                      end_time:
+                        type: string
+                        description: >-
+                          Exclusive end of the window; must fall on an hour
+                          boundary
+                        format: date-time
+                      feature_ids:
+                        type: array
+                        description: >-
+                          Restrict to these event features; omit for every event
+                          feature in the environment. Where several features
+                          measure the same event, each is reported separately
+                          and a page may carry more rows than the requested
+                          limit
+                        items:
+                          type: string
+                        maxItems: 100
+                      granularity:
+                        allOf:
+                          - $ref: '#/components/schemas/TimeSeriesGranularity'
+                        description: >-
+                          Bucket the window; omit for a single total per company
+                          and feature
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      start_time:
+                        type: string
+                        description: >-
+                          Inclusive start of the window; must fall on an hour
+                          boundary
+                        format: date-time
+                    title: ListFeatureUsageHistoryParams
+                required:
+                  - data
+                  - params
+                title: ListFeatureUsageHistoryResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -28519,6 +29357,77 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /onboarding-state:
+    get:
+      operationId: getOnboardingState
+      summary: Get onboarding state
+      tags:
+        - accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetOnboardingStateResp'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetOnboardingStateParams
+                required:
+                  - data
+                  - params
+                title: GetOnboardingStateResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: updateOnboardingState
+      summary: Update onboarding state
+      tags:
+        - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOnboardingStateRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GetOnboardingStateResp'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateOnboardingStateParams
+                required:
+                  - data
+                  - params
+                title: UpdateOnboardingStateResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /plan-bundles:
     post:
       operationId: createPlanBundle
@@ -28559,16 +29468,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plan-bundles/{plan_bundle_id}:
+  /plan-bundles/{plan_id}:
     put:
       operationId: updatePlanBundle
       summary: Update plan bundle
       tags:
         - planbundle
       parameters:
-        - name: plan_bundle_id
+        - name: plan_id
           in: path
-          description: plan_bundle_id
+          description: plan_id
           required: true
           schema:
             type: string
@@ -28626,13 +29535,6 @@ paths:
           schema:
             type: string
         - name: company_ids
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-            maxItems: 100
-        - name: plan_ids
           in: query
           schema:
             type: array
@@ -28698,11 +29600,6 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
-                      plan_ids:
-                        type: array
-                        items:
-                          type: string
-                        maxItems: 100
                     title: ListPlanChangesParams
                 required:
                   - data
@@ -29851,6 +30748,7 @@ paths:
       parameters:
         - name: migration_id
           in: query
+          required: true
           schema:
             type: string
         - name: q
@@ -29984,6 +30882,7 @@ paths:
       parameters:
         - name: migration_id
           in: query
+          required: true
           schema:
             type: string
         - name: q
@@ -30070,6 +30969,7 @@ paths:
       parameters:
         - name: plan_version_id
           in: query
+          required: true
           schema:
             type: string
         - name: status
@@ -30277,6 +31177,7 @@ paths:
       parameters:
         - name: plan_version_id
           in: query
+          required: true
           schema:
             type: string
         - name: status
@@ -30478,6 +31379,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: scoped_to_company_id
           in: query
           description: Filter plans scoped to a specific company (custom plans)
@@ -30600,6 +31502,7 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                        maxLength: 512
                       scoped_to_company_id:
                         type: string
                         description: >-
@@ -31165,6 +32068,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 512
         - name: scoped_to_company_id
           in: query
           description: Filter plans scoped to a specific company (custom plans)
@@ -31283,6 +32187,7 @@ paths:
                         description: Filter by plan type
                       q:
                         type: string
+                        maxLength: 512
                       scoped_to_company_id:
                         type: string
                         description: >-
@@ -31367,16 +32272,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plans/version/{plan_id}:
+  /plans/version/{plan_version_id}:
     delete:
       operationId: deletePlanVersion
       summary: Delete plan version
       tags:
         - plans
       parameters:
-        - name: plan_id
+        - name: plan_version_id
           in: path
-          description: plan_id
+          description: plan_version_id
           required: true
           schema:
             type: string
@@ -31415,16 +32320,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-  /plans/version/{plan_id}/publish:
+  /plans/version/{plan_version_id}/publish:
     put:
       operationId: publishPlanVersion
       summary: Publish plan version
       tags:
         - plans
       parameters:
-        - name: plan_id
+        - name: plan_version_id
           in: path
-          description: plan_id
+          description: plan_version_id
           required: true
           schema:
             type: string

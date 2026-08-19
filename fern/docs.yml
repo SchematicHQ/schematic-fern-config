@@ -192,6 +192,8 @@ navigation:
                 href: /use-cases/credit-billing
               - link: Real-time ledger & holds
                 href: /use-cases/credit-ledger
+          - page: Spend & Usage Controls
+            path: ./docs/pages/billing/spend-controls.mdx
           - page: Seat Based Billing Models
             path: ./docs/pages/billing/seat-based-billing.mdx
           - page: Billing Entities
@@ -289,6 +291,8 @@ navigation:
           - page: Manage Plan API
             path: ./docs/pages/developer_resources/manage-plan-api.mdx
             hidden: true
+          - page: Custom Plans API
+            path: ./docs/pages/developer_resources/custom-plans-api.mdx
           - section: Sample Apps
             contents:
               - page: Next.js - Weather Search App
@@ -352,6 +356,9 @@ navigation:
           - page: Creating a metered feature
             slug: metering
             path: ./docs/pages/playbooks/metering.mdx
+          - page: Reporting usage across companies
+            slug: usage-reporting
+            path: ./docs/pages/playbooks/usage-reporting.mdx
           - page: Backfills and usage corrections
             slug: backfill-and-corrections
             path: ./docs/pages/playbooks/backfill-and-corrections.mdx
@@ -716,6 +723,51 @@ redirects:
     permanent: true
   - source: "/documentation/build/sd-ks/javascript-client-side"
     destination: "/developer_resources/sdks/javascript"
+    permanent: true
+  - source: "/observability"
+    destination: "/production_readiness/observability"
+    permanent: true
+  - source: "/roles-and-permissions"
+    destination: "/production_readiness/roles-and-permissions"
+    permanent: true
+  - source: "/billing"
+    destination: "/billing/overview"
+    permanent: true
+  - source: "/credits"
+    destination: "/billing/credit-burndown"
+    permanent: true
+  - source: "/credit-burndown"
+    destination: "/billing/credit-burndown"
+    permanent: true
+  - source: "/customer-portal"
+    destination: "/components/customer-portal"
+    permanent: true
+  - source: "/pricing-table"
+    destination: "/components/pricing-table"
+    permanent: true
+  - source: "/webhooks"
+    destination: "/integrations/webhooks"
+    permanent: true
+  - source: "/integrations"
+    destination: "/integrations/overview"
+    permanent: true
+  - source: "/sdks"
+    destination: "/developer_resources/sdks/overview"
+    permanent: true
+  - source: "/use-cases"
+    destination: "/use-cases/overview"
+    permanent: true
+  - source: "/playbooks"
+    destination: "/playbooks/overview"
+    permanent: true
+  - source: "/trials"
+    destination: "/catalog/trials"
+    permanent: true
+  - source: "/add-ons"
+    destination: "/catalog/add-ons"
+    permanent: true
+  - source: "/mcp"
+    destination: "/building-with-ai#model-context-protocol-mcp"
     permanent: true
     # old api references that are wrong for some reason
   - source: "/api-reference/companies/list-company-plans"
