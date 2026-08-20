@@ -1,6 +1,6 @@
 ---
 title: Observability & Support
-description: Trace events, flag evaluations, and the audit log in Schematic, and find the channels for reporting a bug.
+description: Trace events, flag evaluations, and the audit log in Schematic, see where rule evaluation runs, and find the support channels.
 
 slug: production_readiness/observability
 ---
@@ -12,9 +12,19 @@ The Audit Log is also available within Settings, which shows the following separ
 - A log of actions taken by users within Schematic
 - A log of create, update, and delete API requests
 
-Schematic uses external services to monitor infrastructure and alert in case of an unexpected outage. Uptime reporting is available [here](https://schematic.statuspage.io/). 
+### Where flag evaluation happens
 
-The team is on call 24/7 and can be reached either in Slack or at `support@schematichq.com`.
+Whether a flag check is observable in your own systems depends on where it runs, and Schematic supports both.
+
+By default, checks are evaluated by Schematic and served from cache. With [DataStream](/developer_resources/sdks/cross-platform-features#automatic-real-time-updates), the SDK holds current flag and company state locally and evaluates rules **client-side**, so a check does not leave your process. [Replicator](/developer_resources/sdks/cross-platform-features#replicator) goes further, keeping a full local copy of your flag data in your own infrastructure so reads never leave your network at all.
+
+That matters for observability as much as for latency: locally evaluated checks are traceable in your own logs and metrics rather than only in Schematic's. See [Availability](/production_readiness/availability) for the tradeoffs between the strategies.
+
+### Uptime and support
+
+Schematic uses external services to monitor infrastructure and alert in case of an unexpected outage. Live and historical uptime is published on the [status page](https://schematic.statuspage.io/), broken out by API, App, Event processing, and Checkout Flow / Customer Portal.
+
+The team is on call 24 hours a day, 7 days a week, and can be reached either in Slack or at `support@schematichq.com`.
 
 ### Reporting a Bug
 
