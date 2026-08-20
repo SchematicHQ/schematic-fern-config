@@ -1,0 +1,103 @@
+---
+title: Building with AI
+description: Connect AI coding assistants to Schematic through the hosted MCP server, from Claude Code, Codex, Cursor, or any MCP-compatible client.
+slug: building-with-ai
+---
+
+Use Schematic with AI coding assistants to accelerate your integration and development workflow.
+
+<Info>Not writing code? See [Working with AI](/working-with-ai) for renewal prep, churn and expansion signals, and contract validation workflows that run entirely in a chat assistant.</Info>
+
+## Model Context Protocol (MCP)
+
+Schematic hosts an MCP server at `https://api.schematichq.com/mcp`. Any MCP-compatible AI assistant can connect to it to interact with your Schematic account directly:
+
+- Query company information and plans
+- Check feature usage and entitlements
+- Manage company overrides
+- Create and update features and plans
+- Analyze usage patterns
+
+The server speaks streamable HTTP and supports MCP OAuth, which is what most clients need to know to connect.
+
+### Common use cases
+
+The MCP integration is particularly useful for **code generation**, where the assistant queries your actual Schematic data so the integration code it writes matches your real feature keys and plans. It also helps with **troubleshooting** a specific company, plan, or feature without leaving your editor, **analyzing usage patterns** through natural language queries, and **managing plans** by describing the change you want rather than clicking through the app.
+
+### Connect with OAuth
+
+OAuth is the better default. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately. No API key to store or rotate.
+
+When you connect, Schematic asks you to sign in, pick an environment, and choose read-only or read and write access. A write connection can never do more than you can do in the Schematic app.
+
+<Tabs>
+  <Tab title="Claude Code">
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp
+```
+
+Then run `/mcp` to sign in.
+  </Tab>
+  <Tab title="Codex">
+Codex has no CLI shortcut for HTTP servers, so add the server to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.schematic]
+url = "https://api.schematichq.com/mcp"
+```
+
+Then sign in:
+
+```bash
+codex mcp login schematic
+```
+  </Tab>
+  <Tab title="Cursor">
+Add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
+
+```json
+{
+  "mcpServers": {
+    "schematic": {
+      "url": "https://api.schematichq.com/mcp"
+    }
+  }
+}
+```
+
+Cursor prompts you to sign in the first time it connects.
+  </Tab>
+  <Tab title="Other clients">
+Point the client at `https://api.schematichq.com/mcp` over streamable HTTP and let it run the OAuth flow. Clients that only support SSE, or that cannot reach the public internet, need the API key method below instead.
+  </Tab>
+</Tabs>
+
+### Connect with an API key
+
+Clients that do not support MCP OAuth can authenticate with a Schematic secret API key as a bearer token:
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp \
+  --header "Authorization: Bearer your-secret-api-key"
+```
+
+In Codex, reference an environment variable rather than pasting the key into your config:
+
+```toml
+[mcp_servers.schematic]
+url = "https://api.schematichq.com/mcp"
+bearer_token_env_var = "SCHEMATIC_API_KEY"
+```
+
+Read-only API keys can use only the read tools, which makes them a reasonable choice when you want an assistant that can look but not touch.
+
+**Example MCP queries:**
+- "What plan is company Acme Corp on?"
+- "Show me feature usage for the 'api_calls' feature across all companies"
+- "Create a company override to enable 'beta_features' for company comp_123"
+
+## Best practices
+
+Prefer OAuth over API keys so the connection runs as you and respects your permissions. If you do use an API key, store it securely and never commit it.
+
+Connect read-only unless you specifically need write access, pick the environment deliberately, and verify that query results look right before acting on them in production. Review the code your assistant generates the same way you would review a teammate's.

@@ -122,10 +122,10 @@ navigation:
                 href: /use-cases/margin-protection
       - section: AI tooling
         contents:
-          - page: For Developers
-            path: ./docs/pages/ai_tooling/for-developers.mdx
-          # - page: For GTM Teams
-          #   path: ./docs/pages/ai_tooling/for-gtm-teams.mdx
+          - page: Building with AI
+            path: ./docs/pages/ai_tooling/building-with-ai.mdx
+          - page: Working with AI
+            path: ./docs/pages/ai_tooling/working-with-ai.mdx
       - section: Model your pricing
         contents:
           - page: Overview
@@ -623,6 +623,12 @@ analytics:
 css: ./styles.css
 
 redirects:
+  - source: "/for-developers"
+    destination: "/building-with-ai"
+    permanent: true
+  - source: "/for-gtm-teams"
+    destination: "/working-with-ai"
+    permanent: true
   - source: "/architecture/security"
     destination: "/production_readiness/security"
     permanent: true
@@ -761,7 +767,7 @@ redirects:
     destination: "/catalog/add-ons"
     permanent: true
   - source: "/mcp"
-    destination: "/for-developers#model-context-protocol-mcp"
+    destination: "/building-with-ai#model-context-protocol-mcp"
     permanent: true
     # old api references that are wrong for some reason
   - source: "/api-reference/companies/list-company-plans"
