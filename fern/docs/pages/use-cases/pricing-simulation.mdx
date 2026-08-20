@@ -1,0 +1,46 @@
+---
+title: Simulate a pricing change
+slug: use-cases/pricing-simulation
+description: Preview the revenue and margin impact of a pricing change against real customer usage, before you ship it.
+---
+
+<Warning>
+Pricing simulation is not available yet. This page describes the shape it is expected to take so you can plan around it, and covers what you can do today. Nothing on this page is a shipping feature, and the details will move before it lands. Follow the [roadmap](https://roadmap.schematichq.com/) for status.
+</Warning>
+
+Repricing is the highest-stakes change a monetization team makes and the one they have the least visibility into. You can model it in a spreadsheet from an aggregate usage number, ship it, and find out which accounts it broke when the invoices go out. The accounts that matter are usually the ones the average did not describe.
+
+Simulation is the answer to that: run a draft price against the usage that already happened, per customer, before anything ships.
+
+## What it is expected to do
+
+The intended shape is a draft plan you can edit without publishing, evaluated against your real usage history.
+
+**Editable assumptions.** The variables that drive the outcome, held separately from the plan itself: base fee, included credit grant per period, and your own cost per unit of consumption. Change one and the projection re-runs.
+
+**Per-customer output.** Not one blended number. A row per company showing credits consumed, top-ups they would have bought, revenue they would have generated, and margin after your costs. That per-row view is the point, because the aggregate rarely tells you which accounts a change breaks.
+
+**Run against real usage.** Historical consumption from the [ledger](/use-cases/credit-ledger) and the events behind it, not a synthetic model. Simulation is only worth trusting if it replays what actually happened.
+
+The natural questions it should answer are: does this change grow revenue or just move it, how many accounts get materially more expensive, and which named accounts would have churned or escalated under it.
+
+## What you can do today
+
+Some of the job is already possible, in pieces.
+
+**See real consumption before you model anything.** [Reporting usage across companies](/playbooks/usage-reporting) pulls one row per company per feature for a date range, and the credit ledger has the credit side. That is the input a spreadsheet model needs, and usually the part teams estimate instead of measuring.
+
+**Know your cost side.** The **cost basis** on a credit type records what a credit costs you. It does not affect what customers pay, and it exists precisely so margin analysis has a real number in it. See [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type).
+
+**Ship the change without breaking existing customers.** [Plan versioning](/use-cases/plan-versioning) keeps current customers on the price they signed while new customers get the new one, so a repricing does not have to be a migration. That reduces the blast radius of getting it wrong, which is the risk simulation is meant to remove.
+
+**Protect the margin at runtime.** Whatever the model says, [margin protection](/use-cases/margin-protection) enforces the limits you priced for as usage happens, rather than after the period closes.
+
+The gap between this and simulation is real: today you export the usage and build the model yourself. Simulation is meant to remove that step.
+
+## Related
+
+- [Reprice and repackage safely](/use-cases/plan-versioning) - roll out a new price without migrating existing customers.
+- [Protect your margins](/use-cases/margin-protection) - enforce what you priced for in real time.
+- [Meter on a real-time credit ledger](/use-cases/credit-ledger) - the consumption record a simulation would replay.
+- [Credit Burndown Billing Model](/billing/credit-burndown) - credit grants, consumption rates, and cost basis.
