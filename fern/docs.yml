@@ -188,6 +188,8 @@ navigation:
             contents:
               - page: Credit burndown
                 path: ./docs/pages/billing/credit-burndown.mdx
+              - page: Credit holds
+                path: ./docs/pages/billing/credit-holds.mdx
               - link: Run credit-based billing
                 href: /use-cases/credit-billing
               - link: Real-time ledger & holds
@@ -526,6 +528,9 @@ navigation:
               - POST /billing/credits/plan-grants
               - DELETE /billing/credits/plan-grants/{plan_grant_id}
               - GET /billing/credits/ledger
+              - POST /billing/credits/lease
+              - PUT /billing/credits/lease/{lease_id}/extend
+              - PUT /billing/credits/lease/{lease_id}/release
           - section: Account Members
             slug: accounts
             contents:
@@ -738,6 +743,12 @@ redirects:
     permanent: true
   - source: "/credit-burndown"
     destination: "/billing/credit-burndown"
+    permanent: true
+  - source: "/holds"
+    destination: "/billing/credit-holds"
+    permanent: true
+  - source: "/credit-holds"
+    destination: "/billing/credit-holds"
     permanent: true
   - source: "/customer-portal"
     destination: "/components/customer-portal"
