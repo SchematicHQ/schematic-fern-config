@@ -82,7 +82,6 @@ These are the general styling options that will affect the entire pricing table 
     theme: {
       numberOfColumns: 2,
       sectionLayout: "merged",
-      colorMode: "light",
       ...
     }
   }}
@@ -95,7 +94,7 @@ These are the general styling options that will affect the entire pricing table 
 | --- | --- | --- | --- |
 | numberOfColumns | Number of columns to display | 2 | Options: `1`, `2`, `3` |
 | sectionLayout | Layout of the pricing table | `merged` | Options: `merged`, `separated` |
-| colorMode | Color mode of the pricing table | `light` | Options: `light`, `dark` |
+| colorMode | Not currently applied | `light` | Light and dark styling is derived from `card.background`, not from this option. Set a dark `card.background` to get a dark pricing table. |
 | primary | color of any element that is the primary color | `#000000` | Typically this is for buttons, links, and other interactive elements |
 | secondary | Secondary color of the pricing table | `#194BFB` | Typically this is for the background color of the pricing table |
 | danger | Danger color of the pricing table | `#D75A5C` | Typically this is for error messages |
@@ -196,7 +195,6 @@ export default function Pricing() {
         theme: {
           numberOfColumns: 2,
           sectionLayout: "merged",
-          colorMode: "light",
           primary: "#2bbde1",
           secondary: "#2bbde1",
           card: {
