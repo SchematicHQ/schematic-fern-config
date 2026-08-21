@@ -148,6 +148,24 @@ jobs:
           echo "Overlaying $PREVIEW_SUBDIR onto /tmp/sdk-repo/"
           rsync -a --exclude='.git' "$PREVIEW_SUBDIR" /tmp/sdk-repo/
 
+      # `fern generate --preview` emits raw generator output, but a real
+      # regeneration preserves every path listed in .fernignore -- the repo's own
+      # pyproject.toml, custom source, build scripts. Overlaying the preview
+      # clobbers those, so put them back: what we compile should be what Fern
+      # would actually produce.
+      - name: Restore repo-owned files
+        working-directory: /tmp/sdk-repo
+        run: |
+          if [ ! -f .fernignore ]; then
+            echo "No .fernignore; nothing to restore."
+            exit 0
+          fi
+          grep -vE '^[[:space:]]*(#|$)' .fernignore | while read -r entry; do
+            git checkout -- "$entry" 2>/dev/null || true
+          done
+          echo "Generated files differing from the repo after restore:"
+          git status --porcelain | wc -l
+
       # The rules engine WASM binary is not tracked in the SDK repos; it is
       # downloaded from a private schematic-api release at build time. Without
       # it the Python, TypeScript and C# builds fail to resolve the module.
