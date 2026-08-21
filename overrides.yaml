@@ -93,6 +93,21 @@ paths:
       summary: Get credit ledger
       x-fern-audiences:
         - public
+  /billing/credits/lease:
+    post:
+      summary: Acquire credit lease
+      x-fern-audiences:
+        - public
+  /billing/credits/lease/{lease_id}/extend:
+    put:
+      summary: Extend credit lease
+      x-fern-audiences:
+        - public
+  /billing/credits/lease/{lease_id}/release:
+    put:
+      summary: Release credit lease
+      x-fern-audiences:
+        - public
   /billing/credits/plan-grants:
     get:
       summary: List plan credit grants

@@ -53,6 +53,8 @@ For [credit burndown](/billing/credit-burndown) plans, the balance itself is the
 
 Which credits get spent first, and what happens to an unused balance at the end of a period, are covered in [Consumption order](/billing/credit-burndown#consumption-order) and [Credit lifecycle](/billing/credit-burndown#credit-lifecycle).
 
+**Holds** keep a balance from being oversold while work is in flight, by debiting credits when an action is authorized rather than when it finishes. They matter most when concurrent workers or agents draw on the same balance. See [Credit Holds](/billing/credit-holds).
+
 ## Who inside a company is spending
 
 The controls above apply to a company as a whole. Draws are also attributed to the user or agent that caused them, and credit grants can scale with the number of licenses a company holds. See [Seat and Agent Budgets](/billing/seat-and-agent-budgets), which covers per-actor reporting.

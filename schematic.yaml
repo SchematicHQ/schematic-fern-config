@@ -5332,7 +5332,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         external_resource_id:
           type: string
           maxLength: 255
@@ -5351,7 +5350,6 @@ components:
         plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - description
         - name
         - plan_type
         - billing_provider
@@ -5940,7 +5938,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -5951,7 +5948,6 @@ components:
           minLength: 1
       required:
         - company_id
-        - description
         - name
       title: CreateCustomPlanBundlePlanRequestBody
     CreateCustomPlanBundleRequestBody:
@@ -5990,7 +5986,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -6001,7 +5996,6 @@ components:
           minLength: 1
       required:
         - company_id
-        - description
         - name
       title: CreateCustomPlanRequestBody
     CreateDataExportRequestBody:
@@ -7011,7 +7005,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -7023,7 +7016,6 @@ components:
         plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - description
         - name
         - plan_type
       title: CreatePlanRequestBody
@@ -10975,6 +10967,10 @@ components:
           maxItems: 10
         id:
           $ref: '#/components/schemas/OnboardingRequirement'
+        reached_at:
+          type: string
+          format: date-time
+          nullable: true
         satisfied_by:
           type: string
           maxLength: 255
@@ -11306,6 +11302,29 @@ components:
           items:
             $ref: '#/components/schemas/SubscriptionTraitUpdate'
           maxItems: 1000
+        trial_converted_at:
+          type: string
+          description: >-
+            When the company's trial had converted to a paid subscription as of
+            this change. Null when the trial had not converted, or for changes
+            recorded before trial status was tracked.
+          format: date-time
+          nullable: true
+        trial_expires_at:
+          type: string
+          description: >-
+            When the company's trial was set to end as of this change. Null when
+            the company had never trialed, or for changes recorded before trial
+            status was tracked.
+          format: date-time
+          nullable: true
+        trial_status:
+          allOf:
+            - $ref: '#/components/schemas/TrialStatus'
+          description: >-
+            The company's trial status. Null when the company had never trialed,
+            or for changes recorded before trial status was tracked.
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -12781,7 +12800,7 @@ components:
         event_subtype:
           type: string
           description: The event subtype the usage would be recorded under
-          maxLength: 255
+          maxLength: 128
         quantity:
           type: integer
           description: >-
@@ -13030,6 +13049,10 @@ components:
         proration:
           type: integer
           format: int64
+        proration_billed_at:
+          type: string
+          format: date-time
+          nullable: true
         tax_amount:
           type: integer
           format: int64
@@ -14471,6 +14494,12 @@ components:
             Onboarding URL returned during the v2 (Connect) install flow before
             activation
           nullable: true
+        return_to:
+          type: string
+          description: >-
+            App location that started the connect flow; the OAuth callback
+            redirects back there on success
+          nullable: true
         type:
           type: string
           description: 'Discriminator: always "stripe" for this variant'
@@ -15630,7 +15659,6 @@ components:
           type: string
           nullable: true
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'

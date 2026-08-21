@@ -72,6 +72,8 @@ navigation:
                 path: ./docs/pages/use-cases/surprise-throttle.mdx
               - page: Protect your margins
                 path: ./docs/pages/use-cases/margin-protection.mdx
+              - page: Simulate a pricing change
+                path: ./docs/pages/use-cases/pricing-simulation.mdx
               - page: Real-time ledger & holds
                 path: ./docs/pages/use-cases/credit-ledger.mdx
           - section: Product-Led Growth
@@ -188,6 +190,8 @@ navigation:
             contents:
               - page: Credit burndown
                 path: ./docs/pages/billing/credit-burndown.mdx
+              - page: Credit holds
+                path: ./docs/pages/billing/credit-holds.mdx
               - page: Seat and agent budgets
                 path: ./docs/pages/billing/seat-and-agent-budgets.mdx
               - link: Run credit-based billing
@@ -196,6 +200,8 @@ navigation:
                 href: /use-cases/credit-ledger
           - page: Spend & Usage Controls
             path: ./docs/pages/billing/spend-controls.mdx
+          - page: Revenue Recognition Data
+            path: ./docs/pages/billing/revenue-recognition.mdx
           - page: Seat Based Billing Models
             path: ./docs/pages/billing/seat-based-billing.mdx
           - page: Billing Entities
@@ -528,6 +534,9 @@ navigation:
               - POST /billing/credits/plan-grants
               - DELETE /billing/credits/plan-grants/{plan_grant_id}
               - GET /billing/credits/ledger
+              - POST /billing/credits/lease
+              - PUT /billing/credits/lease/{lease_id}/extend
+              - PUT /billing/credits/lease/{lease_id}/release
           - section: Account Members
             slug: accounts
             contents:
@@ -741,6 +750,21 @@ redirects:
   - source: "/credit-burndown"
     destination: "/billing/credit-burndown"
     permanent: true
+  - source: "/asc-606"
+    destination: "/billing/revenue-recognition"
+    permanent: true
+  - source: "/revenue-recognition"
+    destination: "/billing/revenue-recognition"
+    permanent: true
+  - source: "/rev-rec"
+    destination: "/billing/revenue-recognition"
+    permanent: true
+  - source: "/holds"
+    destination: "/billing/credit-holds"
+    permanent: true
+  - source: "/credit-holds"
+    destination: "/billing/credit-holds"
+    permanent: true
   - source: "/usage-caps"
     destination: "/billing/seat-and-agent-budgets"
     permanent: true
@@ -764,6 +788,12 @@ redirects:
     permanent: true
   - source: "/use-cases"
     destination: "/use-cases/overview"
+    permanent: true
+  - source: "/simulation"
+    destination: "/use-cases/pricing-simulation"
+    permanent: true
+  - source: "/pricing-simulation"
+    destination: "/use-cases/pricing-simulation"
     permanent: true
   - source: "/playbooks"
     destination: "/playbooks/overview"
