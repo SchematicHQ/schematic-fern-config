@@ -5,13 +5,11 @@ description: What the credit ledger gives your accounting team toward ASC 606, w
 slug: billing/revenue-recognition
 ---
 
-Credit-based pricing complicates revenue recognition in a way flat subscriptions do not. A customer who buys 10,000 credits has paid you cash you cannot recognize yet. You recognize it as they consume, and whatever they never consume becomes breakage that you recognize on its own schedule. Getting that right needs a record of every grant, every draw, and every expiry, with the price attached.
+Under credit-based pricing, cash is received before delivery. A customer who buys 10,000 credits has paid for consumption that has not happened yet, revenue is recognized as they consume, and credits they never consume are breakage recognized on a separate schedule. Applying that treatment requires a record of every grant, draw, and expiry with its price attached.
 
-Schematic holds that record. This page is about what it contains and how to get it out.
+Schematic's credit ledger is that record. This page documents what it contains, where the boundary with Stripe and your accounting system sits, and how to read the data out.
 
-## Where the boundary sits
-
-Be clear about who does what, because the answer is not "Schematic does revenue recognition."
+## System boundaries
 
 | Concern | System |
 | --- | --- |
@@ -20,15 +18,15 @@ Be clear about who does what, because the answer is not "Schematic does revenue 
 | Every grant, draw, expiry, and transfer, with price and timestamp | Schematic credit ledger |
 | Journal entries, deferred revenue schedules, and the ASC 606 policy | Your accounting or rev-rec system |
 
-Schematic is the measurement layer. It is where the consumption data lives at the granularity recognition needs, and it is the system that can tell you how much of a given grant has actually been delivered on a given date. It does not post entries, it does not produce a deferred revenue schedule, and it does not make anyone compliant. Compliance is a property of your accounting policy and how you apply it, not of a ledger.
+Schematic is the measurement layer. It holds consumption data at the granularity recognition requires and can report how much of a given grant had been delivered as of a given date. It does not post journal entries, produce deferred revenue schedules, or determine an accounting treatment. Compliance is a property of an accounting policy and its application, not of a ledger.
 
-What the ledger does is remove the usual excuse for not applying that policy properly, which is that nobody can reconstruct what was consumed and when.
+## Ledger event types
 
-## What the ledger models
+Credits are granted, consumed, and written off. Each corresponds to a different part of recognition.
 
-Three things happen to credits, and each maps to a different side of recognition.
+### Grants
 
-**A grant creates the obligation.** Credits arrive with a `grant_reason` that tells you whether cash came with them:
+A grant records an obligation. Its `grant_reason` indicates whether consideration was received:
 
 | `grant_reason` | What it means | Consideration received |
 | --- | --- | --- |
@@ -39,13 +37,17 @@ Three things happen to credits, and each maps to a different side of recognition
 | `free` | Promotional or onboarding credits | No |
 | `adjustment` | A manual correction | No |
 
-The distinction that matters most is `free` and `adjustment` against the rest. Those credits carry no consideration, so consuming them produces no revenue. Netting them into a single "credits consumed" number is the most common way a credit ledger gets rev rec wrong.
+Credits granted as `free` or `adjustment` carry no consideration, so their consumption produces no revenue. Aggregating them with the others into a single consumed figure will overstate recognized revenue.
 
-**Usage satisfies the obligation.** Every draw is a `usage` entry carrying the quantity, the feature that caused it, the grant it came out of, and the timestamp. That is the delivery record, and it is what turns deferred revenue into recognized revenue.
+### Usage
 
-Draws also carry a `usage_reason`. Ordinary consumption is `track`. If you use [credit holds](/billing/credit-holds), `lease_hold` and `lease_release` entries show credits reserved and returned. A hold is an authorization, not delivery, so a hold that was reserved and released without being consumed is not revenue.
+A `usage` entry records delivery against an obligation. It carries the quantity, the feature that caused the draw, the grant it was drawn from, and the timestamp.
 
-**Expiry and write-off produce breakage.** When credits go away unconsumed, a `zero_out` entry records it with a reason:
+Usage entries also carry a `usage_reason`. Ordinary consumption is `track`. Where [credit holds](/billing/credit-holds) are in use, `lease_hold` and `lease_release` entries record credits reserved and returned. A hold is an authorization rather than delivery, so credits reserved and released without being consumed are not revenue.
+
+### Write-offs
+
+A `zero_out` entry records credits removed without being consumed, with a reason:
 
 | `zeroed_out_reason` | What happened |
 | --- | --- |
@@ -58,11 +60,11 @@ Draws also carry a `usage_reason`. Ordinary consumption is `track`. If you use [
 | `manual` | Someone zeroed it out deliberately |
 | `reconciled` | A reconciliation corrected the balance |
 
-Your accountants will treat these differently. Expiry on a purchased grant is classic breakage. A plan-change write-off may be a modification. Keeping the reasons distinct is what lets them make that call, so preserve the reason rather than collapsing everything into "credits expired."
+These reasons are not equivalent for accounting purposes. Expiry on a purchased grant is breakage; a write-off following a plan change may be a contract modification. Preserve the reason rather than aggregating all write-offs together.
 
-## The grant is already a schedule line
+## Grant fields
 
-Each grant carries what a deferred revenue line needs:
+Each grant carries the fields a deferred revenue schedule line requires:
 
 | Field | Use |
 | --- | --- |
@@ -75,13 +77,13 @@ Each grant carries what a deferred revenue line needs:
 | `valid_from`, `expires_at` | The window the obligation lives in |
 | `zeroed_out_date`, `zeroed_out_reason` | When and why it ended early |
 
-A purchased grant of 10,000 credits at \$800 with `quantity_used` of 3,200 is \$256 delivered and \$544 still deferred, on the straightforward ratable approach. Whether that approach is the right one for your product is a question for your accountants, not for these docs. The point is that the inputs are all present, per grant, rather than aggregated into a balance that has lost its history.
+On a ratable approach, a purchased grant of 10,000 credits at \$800 with `quantity_used` of 3,200 represents \$256 delivered and \$544 deferred. Whether a ratable approach is appropriate for a given product is an accounting determination and outside the scope of these docs. The relevant point is that the inputs are recorded per grant rather than aggregated into a balance.
 
-Credits purchased as a bundle also carry `billing_invoice_id`, which is the tie back to the Stripe invoice the cash arrived on.
+Credits purchased as a bundle also carry `billing_invoice_id`, which links the grant to the Stripe invoice the payment was recorded on.
 
-## Pulling the data
+## Reading the data
 
-Read the ledger through [Get credit ledger](/api-reference/billing-credits/get-credit-ledger). It is filterable by credit type, event type, feature, and time window:
+Read the ledger through [Get credit ledger](/api-reference/billing-credits/get-credit-ledger), filterable by credit type, event type, feature, and time window:
 
 ```bash
 curl -G https://api.schematichq.com/billing/credits/ledger \
@@ -92,21 +94,17 @@ curl -G https://api.schematichq.com/billing/credits/ledger \
   --data-urlencode "limit=250"
 ```
 
-Two things to plan around.
+Two constraints apply. `company_id` is required, so no single call returns an entire environment's ledger for a period; a close process iterates companies. Pages are capped at 250 entries, so use `offset` to page through them, and set `end_time` to the period boundary so that pagination is not affected by entries written while the job runs.
 
-`company_id` is required, so there is no single call that returns a whole environment's ledger for a period. A close process iterates companies, which is fine as a scheduled job and awkward as an interactive query.
+Grants are available separately through [List credit grants](/api-reference/billing-credits/list-credit-grants). For a period-end schedule this is usually the better starting point, because one row already summarizes granted, used, and remaining amounts.
 
-Pages cap at 250 entries. Use `offset` to walk them, and pin `end_time` to the period boundary so a page boundary does not shift under you while the job runs.
+Bundle purchases, plan charges, and the invoices behind them come from [Stripe](/integrations/stripe).
 
-Grants themselves are available separately through [List credit grants](/api-reference/billing-credits/list-credit-grants), which is usually the better starting point for a period-end schedule since one row already summarizes granted, used, and remaining.
+## Not currently available
 
-Bundle purchases, plan charges, and the invoices behind them come from [Stripe](/integrations/stripe) rather than from here.
+There is no ASC 606 report, deferred revenue schedule, or journal entry export. Schematic's data exports cover audit logs, events, and company feature usage; the credit ledger is not among the export types, so it is read through the API.
 
-## What is not here
-
-There is no ASC 606 report, no deferred revenue schedule, and no journal entry export. Schematic's data exports cover audit logs, events, and company feature usage; the credit ledger is not among the export types, so pulling it means the API.
-
-Teams closing the books on credit-based pricing today read the ledger and the grant list into their accounting system or warehouse on a schedule and apply their policy there.
+Teams closing the books on credit-based pricing read the ledger and the grant list into their accounting system or warehouse on a schedule and apply their policy there.
 
 ## Related
 
