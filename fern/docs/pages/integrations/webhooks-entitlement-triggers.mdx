@@ -30,7 +30,7 @@ Entitlement triggers fire when a company's usage for a specific feature crosses 
 
 ### Setup
 
-Entitlement triggers must be configured per feature. When creating or updating a webhook endpoint in Schematic, add one or more entitlement trigger configs — each specifying the `feature_id` you want to monitor.
+Entitlement triggers must be configured per feature. When creating or updating a webhook endpoint in Schematic, add one or more entitlement trigger configs, each specifying the `feature_id` you want to monitor.
 
 ### Payload
 
@@ -71,7 +71,7 @@ This event fires when a company successfully purchases a credit bundle:
 
 ### Payload
 
-**`credit.purchase.success`** — typed as [`CreditsCreditPurchaseSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsCreditPurchaseSuccess.ts):
+**`credit.purchase.success`** is typed as [`CreditsCreditPurchaseSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsCreditPurchaseSuccess.ts):
 
 | Field | Description |
 | --- | --- |
@@ -94,7 +94,7 @@ These events fire on the outcome of a scheduled credit auto-topup:
 
 ### Payload
 
-**`auto.topup.success`** — typed as [`CreditsAutoTopupSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupSuccess.ts):
+**`auto.topup.success`** is typed as [`CreditsAutoTopupSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupSuccess.ts):
 
 | Field | Description |
 | --- | --- |
@@ -103,7 +103,7 @@ These events fire on the outcome of a scheduled credit auto-topup:
 | `grantId` | ID of the credit grant created by the top-up |
 | `quantity` | Number of credits granted by the top-up |
 
-**`auto.topup.hard.failure`** — typed as [`CreditsAutoTopupHardFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupHardFailure.ts):
+**`auto.topup.hard.failure`** is typed as [`CreditsAutoTopupHardFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupHardFailure.ts):
 
 | Field | Description |
 | --- | --- |
@@ -112,7 +112,7 @@ These events fire on the outcome of a scheduled credit auto-topup:
 | `errorMessage` | Human-readable error description |
 | `stripeErrorCode` | Stripe error code, if the failure originated in Stripe |
 
-**`auto.topup.retry.exceeded`** — typed as [`CreditsAutoTopupRetryFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupRetryFailure.ts):
+**`auto.topup.retry.exceeded`** is typed as [`CreditsAutoTopupRetryFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupRetryFailure.ts):
 
 | Field | Description |
 | --- | --- |

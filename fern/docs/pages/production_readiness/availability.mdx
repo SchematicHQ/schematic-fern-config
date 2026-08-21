@@ -61,7 +61,7 @@ In the event of *most* service disruptions:
 - Values may become temporarily stale
 - Normal operation resumes automatically once service is restored
 
-This model prioritizes simplicity and operational safety. If your application can tolerate brief periods of staleness, this is typically the best option—and requires no additional configuration.
+This model prioritizes simplicity and operational safety. If your application can tolerate brief periods of staleness, this is typically the best option, and it requires no additional configuration.
 
 ---
 
@@ -130,7 +130,7 @@ This gives you a local source of truth that your application can rely on when Sc
 
 If you're thinking about building this yourself, we strongly recommend using **Replicator** instead.
 
-Replicator provides the same core architecture—local reads, real-time updates, full cache coverage—but does so in a more robust, battle-tested, and operationally simple way.
+Replicator provides the same core architecture of local reads, real-time updates, and full cache coverage, but does so in a more robust, battle-tested, and operationally simple way.
 
 DIY replication makes sense when you need highly custom behavior. For most teams, Replicator is the safer and more maintainable solution.
 
@@ -145,4 +145,4 @@ DIY replication makes sense when you need highly custom behavior. For most teams
 
 For most teams, Schematic's default high-availability behavior is sufficient. If you need stronger freshness guarantees, lower latency, or full independence from Schematic's runtime availability, Replicator is usually the right next step.
 
-If you're unsure which approach fits your use case, reach out—we're happy to help you think through the tradeoffs.
+If you're unsure which approach fits your use case, reach out. We're happy to help you think through the tradeoffs.

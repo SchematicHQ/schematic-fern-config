@@ -29,7 +29,7 @@ When `true`, Schematic uses the `sent_at` you provide as the event's effective t
 
 The 34-day past bound sits one day inside Stripe's meter-event 35-day cap, to absorb wall-clock skew between Schematic and Stripe. For older events, use `backfill`.
 
-All normal processing still happens — billing impact, webhooks, and activity updates fire as usual — just anchored to the logical timestamp instead of the receipt time. Feature usage counters only count the event toward periods that the logical timestamp falls within, so an event timestamped yesterday won't show up in today's daily counter.
+All normal processing still happens. Billing impact, webhooks, and activity updates fire as usual, anchored to the logical timestamp instead of the receipt time. Feature usage counters only count the event toward periods that the logical timestamp falls within, so an event timestamped yesterday won't show up in today's daily counter.
 
 ```json
 {
@@ -47,7 +47,7 @@ All normal processing still happens — billing impact, webhooks, and activity u
 
 ## `backfill`
 
-`backfill: true` implies `trusted_client_clock` — `sent_at` is the effective timestamp — but **all billing side effects are skipped**. Use this when you want historical usage to appear in analytics without re-running billing.
+`backfill: true` implies `trusted_client_clock`, so `sent_at` is the effective timestamp, but **all billing side effects are skipped**. Use this when you want historical usage to appear in analytics without re-running billing.
 
 **Requirements for setting `sent_at` when `backfill: true`:**
 - No more than 5 minutes in the future
@@ -116,7 +116,7 @@ await client.track({
 
 ## Retention
 
-Events are retained for 365 days, measured from the event's effective `captured_at`. A `backfill` submitted near the 365-day past bound therefore lands with very little remaining retention — by design. Aggregated feature usage is preserved separately on the same logical-period anchor, so usage charts and entitlement counters stay intact even after the underlying event expires.
+Events are retained for 365 days, measured from the event's effective `captured_at`. A `backfill` submitted near the 365-day past bound therefore lands with very little remaining retention, by design. Aggregated feature usage is preserved separately on the same logical-period anchor, so usage charts and entitlement counters stay intact even after the underlying event expires.
 
 ## Validation errors
 

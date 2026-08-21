@@ -56,7 +56,7 @@ Schematic checkout is built on top of Stripe. When a customer completes a checko
 2. Schematic syncs the subscription state back and immediately provisions or revokes the corresponding entitlements in your app
 3. Stripe handles all downstream billing: invoicing, payment retries, and receipts
 
-**Payment UI is rendered via Stripe Elements.** Card data is collected directly by Stripe's secure frontend library and never passes through Schematic or your servers. This means you do not need to maintain a Cardholder Data Environment (CDE) — [Stripe's PCI DSS compliance](https://stripe.com/guides/pci-compliance) covers the full payment collection flow.
+**Payment UI is rendered via Stripe Elements.** Card data is collected directly by Stripe's secure frontend library and never passes through Schematic or your servers. This means you do not need to maintain a Cardholder Data Environment (CDE). [Stripe's PCI DSS compliance](https://stripe.com/guides/pci-compliance) covers the full payment collection flow.
 
 Schematic ensures that customer billing state stays in sync between Stripe and Schematic.
 
