@@ -5,16 +5,16 @@ description: Preview the revenue and margin impact of a pricing change against r
 ---
 
 <Warning>
-Pricing simulation is not available yet. This page describes the expected shape of the feature and documents what is possible today. Nothing described under [Expected behavior](#expected-behavior) is currently shipping, and the details are subject to change. See the [roadmap](https://roadmap.schematichq.com/) for status.
+Pricing simulation is in a closed beta and is not publicly available yet. This page describes the shape of the feature as it exists in that beta, and the details are subject to change before it is generally available. See the [roadmap](https://roadmap.schematichq.com/) for status.
 </Warning>
 
 A pricing change alters revenue per account, and the accounts it affects most are rarely described by the aggregate. Modeling a change against an average usage figure will not identify which specific accounts become materially more or less expensive under it.
 
-Pricing simulation is intended to address that by evaluating a draft price against usage that has already occurred, reported per customer, before the change is published.
+Pricing simulation addresses that by evaluating a draft price against usage that has already occurred, reported per customer, before the change is published.
 
-## Expected behavior
+## How it works
 
-The intended shape is a draft plan that can be edited without publishing, evaluated against historical usage.
+The shape of the beta is a draft plan that can be edited without publishing, evaluated against historical usage.
 
 **Editable assumptions.** The variables driving the outcome are held separately from the plan: base fee, included credit grant per period, and cost per unit of consumption. Changing one re-runs the projection.
 
@@ -22,11 +22,11 @@ The intended shape is a draft plan that can be edited without publishing, evalua
 
 **Evaluation against real usage.** Historical consumption from the [credit ledger](/use-cases/credit-ledger) and the events behind it, rather than a synthetic distribution.
 
-The questions this is intended to answer are whether a change grows revenue or redistributes it, how many accounts become materially more expensive, and which named accounts are most affected.
+The questions it answers are whether a change grows revenue or redistributes it, how many accounts become materially more expensive, and which named accounts are most affected.
 
-## Available today
+## Generally available today
 
-The following are available now and cover parts of the same workflow.
+The following are generally available and cover parts of the same workflow.
 
 **Per-company consumption data.** [Reporting usage across companies](/playbooks/usage-reporting) returns one row per company per feature for a date range, and the credit ledger covers the credit side. This is the input a manual model requires.
 
@@ -36,7 +36,7 @@ The following are available now and cover parts of the same workflow.
 
 **Runtime margin enforcement.** [Margin protection](/use-cases/margin-protection) enforces the limits a plan was priced around as usage occurs, rather than after the period closes.
 
-Building the projection itself is currently manual: export the usage, apply the draft pricing externally.
+Outside the beta, building the projection itself is manual: export the usage, apply the draft pricing externally.
 
 ## Related
 
