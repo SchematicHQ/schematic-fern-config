@@ -54,10 +54,15 @@ else
   git checkout -b "$BRANCH_NAME"
 fi
 
-# Capture current versions before upgrading
+# Baseline the comparison against main, not against the branch we just checked
+# out. The branch is long-lived: on every run after the one that created it, it
+# already carries the pending upgrades, so diffing against it reports no change
+# even while the PR still has everything to merge.
 VERSIONS_BEFORE=$(mktemp)
-for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
-  version=$(yq ".groups.\"$group\".generators[0].version" fern/generators.yml)
+MAIN_GENERATORS=$(mktemp)
+git show origin/main:fern/generators.yml > "$MAIN_GENERATORS"
+for group in $(yq '.groups | keys | .[]' "$MAIN_GENERATORS"); do
+  version=$(yq ".groups.\"$group\".generators[0].version" "$MAIN_GENERATORS")
   echo "$group=$version" >> "$VERSIONS_BEFORE"
 done
 
@@ -71,6 +76,9 @@ first=true
 for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
   new_version=$(yq ".groups.\"$group\".generators[0].version" fern/generators.yml)
   old_version=$(grep "^$group=" "$VERSIONS_BEFORE" | cut -d= -f2)
+  if [ -z "$old_version" ]; then
+    old_version="(absent on main)"
+  fi
   if [ "$old_version" != "$new_version" ]; then
     echo "Generator $group changed: $old_version -> $new_version"
     if [ "$first" = true ]; then
@@ -82,18 +90,26 @@ for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
   fi
 done
 CHANGED_GROUPS+="]"
-rm -f "$VERSIONS_BEFORE"
+rm -f "$VERSIONS_BEFORE" "$MAIN_GENERATORS"
 
 echo "Changed groups: $CHANGED_GROUPS"
 set_output "changed_groups" "$CHANGED_GROUPS"
 
-# Check if there are changes
-if [[ -n $(git status --porcelain) ]]; then
-  echo "Changes detected, committing..."
+# Does the branch propose anything main does not already have? This is the
+# question the PR answers, so it is the one that decides whether to keep the PR
+# open -- an upgrade applied on an earlier run still counts.
+if ! git diff --quiet origin/main -- fern/generators.yml; then
+  echo "Changes detected against main"
   set_output "has_changes" "true"
 
-  git add .
-  git commit -m "$UPGRADE_COMMIT_MESSAGE"
+  if [[ -n $(git status --porcelain) ]]; then
+    echo "Committing the upgrades applied by this run..."
+    git add .
+    git commit -m "$UPGRADE_COMMIT_MESSAGE"
+  else
+    echo "Branch already carries these upgrades; nothing new to commit."
+  fi
+
   git push origin "$BRANCH_NAME" --force-with-lease
 
   # Check if PR already exists
@@ -114,7 +130,7 @@ if [[ -n $(git status --porcelain) ]]; then
     set_output "pr_number" "$pr_number"
   fi
 else
-  echo "No changes detected"
+  echo "No changes detected: main is already on these generator versions"
   set_output "has_changes" "false"
 
   # Check if there's an existing PR we should close
