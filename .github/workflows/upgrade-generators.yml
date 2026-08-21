@@ -156,7 +156,10 @@ jobs:
         working-directory: /tmp/sdk-repo
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: ./scripts/download-wasm.sh
+        # Invoked through bash, not executed directly: the preview overlay leaves
+        # the script without its exec bit. The C# build's DownloadWasm target
+        # already calls it this way.
+        run: bash ./scripts/download-wasm.sh
 
       # Language-specific compile checks
       - name: Compile check (Python)
