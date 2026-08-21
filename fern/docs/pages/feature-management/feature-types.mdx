@@ -9,6 +9,10 @@ There are 3 different types of features in Schematic
 - **Event-based** - A feature that is metered against events reported to Schematic (e.g. api calls, reports generated).
 - **Trait-based** - A feature that is based off of information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size).
 
+<Info>
+You can define all three types before your application sends Schematic anything. Event and trait names are declared when you create the feature — see [Defining features before you send data](#defining-features-before-you-send-data).
+</Info>
+
 ## Boolean Features
 
 Boolean features are the simplest type of feature. They are often used to represent features that are either available or not available to a user or company. They are the most commonly used type of feature and are the backbone of most plans. 
@@ -39,3 +43,17 @@ We strongly recommend reporting trait usage to Schematic and leveraging Schemati
 3. Integration with Schematic's usage analytics to understand usage patterns and customer health
 
 For these reasons, we recommend reporting usage to Schematic whenever possible.
+
+## Defining features before you send data
+
+A common order of operations is to define every feature and plan in the dashboard first, then instrument the application and deploy. That works: none of the three feature types requires Schematic to have already seen real data, and you never need to seed events or traits through the API to get started.
+
+- **Boolean** - Nothing to configure beyond the feature and its flag key.
+- **Event-based** - The **Event** field on the feature is a search-or-create box. Type the event name you intend to send, for example `api_calls`, and pick **Create event: api_calls** from the dropdown. That name is stored on the feature. Usage starts accruing the first time your application calls `track` with the matching event name — no change to the feature is needed at that point.
+- **Trait-based** - The **Trait** field works the same way. Type the trait name, for example `seats`, and choose **Create trait**. This creates the trait definition immediately, ready to receive values once you start reporting them via `upsertCompanyTrait`, `upsertCompany`, or `identify`.
+
+<Info>
+The dropdowns list events and traits Schematic has already seen, so on a new account they open empty. Type the name you want and the create option appears.
+</Info>
+
+The one thing to get right is the name. The event name in your `track` call and the trait name in your company upsert have to match what you entered on the feature; otherwise the feature will sit at zero usage. If a company's **last seen** timestamp never updates, a name mismatch is the usual cause.
