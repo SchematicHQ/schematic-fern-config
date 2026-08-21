@@ -156,15 +156,20 @@ jobs:
       - name: Restore repo-owned files
         working-directory: /tmp/sdk-repo
         run: |
-          if [ ! -f .fernignore ]; then
+          if ! git cat-file -e HEAD:.fernignore 2>/dev/null; then
             echo "No .fernignore; nothing to restore."
             exit 0
           fi
-          grep -vE '^[[:space:]]*(#|$)' .fernignore | while read -r entry; do
+          # Read the list out of git, not the working tree: .fernignore is itself
+          # generator-scaffolded, so the overlay replaces it with a default that
+          # does not name any of the repo's own files.
+          git show HEAD:.fernignore | grep -vE '^[[:space:]]*(#|$)' | while read -r entry; do
             git checkout -- "$entry" 2>/dev/null || true
           done
-          echo "Generated files differing from the repo after restore:"
-          git status --porcelain | wc -l
+          git checkout -- .fernignore 2>/dev/null || true
+          echo "Files still differing from the repo ($(git status --porcelain | wc -l) total)."
+          echo "These should be generated code only -- no pyproject.toml, no lockfile:"
+          git status --porcelain | head -40
 
       # The rules engine WASM binary is not tracked in the SDK repos; it is
       # downloaded from a private schematic-api release at build time. Without
