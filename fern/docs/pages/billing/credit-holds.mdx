@@ -55,11 +55,30 @@ Because the hold is shared, its unspent portion is a shared budget rather than a
 
 **The work fits inside the hold.** Both agents commit as they finish, 260 and 90, bringing the committed amount to 350 of 400. Release returns the unspent 50, and the balance reports 150 settled, which is 500 less the 350 consumed.
 
-**The work needs more than the hold covers.** The first agent extends by 200. Only 100 credits are drawable, so the hold grows to a `granted_amount` of 500 and the balance reports 0 remaining, 500 reserved, and 500 settled. The second agent also extends by 200, and because nothing is drawable the hold is returned unchanged at 500. This is not an error, and no exception is raised.
+**The work needs more than the hold covers.** The first agent commits 260 as before, leaving 140 unspent in the hold. The second agent's work turns out to need 300 rather than 90, so what the hold has left will not cover it.
 
-Two consequences follow from the second case. Compare `granted_amount` before and after an extend to determine whether it added anything, because an extend that grew the hold by nothing is indistinguishable in shape from one that succeeded. And committing more than the hold covers is not blocked: the committed amount is allowed to exceed `granted_amount`, because the caller is the enforcement point rather than the API. Over-committing leaves release with nothing to return and settles the balance at what was actually consumed, so a company can end a period overdrawn if callers do not gate on the hold.
+An agent reads the hold's unspent portion as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. An SDK does this on its own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
 
-Without a hold in either case, both agents would read 500 remaining and each would authorize up to 400 credits of work, exposing the balance to 800 credits of consumption against the 500 it holds.
+1. The second agent extends by 160, the shortfall between the 300 it needs and the 140 available. Only 100 credits are drawable, because the original reserve already took 400 of the company's 500. The hold grows to a `granted_amount` of 500, and the balance reports 0 remaining, 240 reserved, and 240 settled.
+2. Still needing 300 against the 240 the hold now has, the second agent extends again by 60. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
+3. The second agent commits the 240 the hold covers and stops. The balance reports 0 settled, and release returns nothing.
+
+Compare `granted_amount` before and after an extend to determine whether it added anything, because an extend that grew the hold by nothing is indistinguishable in shape from one that succeeded. Treat an unchanged `granted_amount` as a signal to stop rather than to proceed.
+
+Without a hold in either case, both agents would read 500 remaining and each would authorize up to 400 credits of work, exposing the balance to 800 credits of consumption against the 500 it holds. In the second case they would have consumed 560 and overdrawn it.
+
+### Overdrawing a hold
+
+Committing more than a hold covers is not blocked. The committed amount is allowed to exceed `granted_amount`, because capping it in the API would silently discard real usage. The caller is the enforcement point.
+
+Suppose the second agent above commits all 300 rather than stopping at the 240 the hold covers, bringing the committed total to 560 against a `granted_amount` of 500.
+
+- The commit is recorded in full. Usage is never dropped.
+- The grant was debited 500, the reserved amount, at reserve and extend. The excess 60 is not deducted from any grant, because a commit against a hold draws down the hold rather than the balance.
+- Reserved reports 0 rather than a negative value.
+- Release returns nothing, since there is no unspent portion to return.
+
+The consequence is that the reported balance overstates the company's position by the overdrawn amount. Settled reads 0 while actual consumption was 560 against a balance of 500. Gate on the hold's unspent portion so this does not arise, and extend rather than over-commit when a step's real cost exceeds the estimate.
 
 ## Incremental commits across a multi-step workflow
 
@@ -85,7 +104,7 @@ Four things to account for when a hold spans a workflow rather than a single cal
 
 **Use a distinct idempotency key per step.** Each step is a separate commit, so a retry without its own key is recorded as an additional draw against the hold.
 
-**A step can commit more than the hold covers.** The committed amount is not capped at `granted_amount`, so a step whose real cost overruns the estimate is recorded in full. Extend the hold when a step's cost exceeds what remains, rather than relying on the hold to stop it.
+**A step can commit more than the hold covers.** Extend the hold when a step's real cost exceeds what the hold has left, rather than relying on the hold to stop it. See [Overdrawing a hold](#overdrawing-a-hold) for what happens if a step commits past it.
 
 ## Expiry
 
