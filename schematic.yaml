@@ -5350,7 +5350,6 @@ components:
         plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - description
         - name
         - plan_type
         - billing_provider
@@ -5949,7 +5948,6 @@ components:
           minLength: 1
       required:
         - company_id
-        - description
         - name
       title: CreateCustomPlanBundlePlanRequestBody
     CreateCustomPlanBundleRequestBody:
@@ -5998,7 +5996,6 @@ components:
           minLength: 1
       required:
         - company_id
-        - description
         - name
       title: CreateCustomPlanRequestBody
     CreateDataExportRequestBody:
@@ -7019,7 +7016,6 @@ components:
         plan_type:
           $ref: '#/components/schemas/PlanType'
       required:
-        - description
         - name
         - plan_type
       title: CreatePlanRequestBody
@@ -11320,8 +11316,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/TrialStatus'
           description: >-
-            The company's current trial status. Null when the company has never
-            trialed.
+            The company's trial status. Null when the company had never trialed,
+            or for changes recorded before trial status was tracked.
           nullable: true
         updated_at:
           type: string
@@ -12798,7 +12794,7 @@ components:
         event_subtype:
           type: string
           description: The event subtype the usage would be recorded under
-          maxLength: 255
+          maxLength: 128
         quantity:
           type: integer
           description: >-
