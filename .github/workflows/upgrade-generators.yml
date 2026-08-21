@@ -103,11 +103,11 @@ jobs:
         if: matrix.language == 'python'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: Install Poetry
         if: matrix.language == 'python'
-        run: curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+        run: curl -sSL https://install.python-poetry.org | python - -y --version 2.1.4
 
       - name: Setup Go
         if: matrix.language == 'go'
@@ -148,13 +148,23 @@ jobs:
           echo "Overlaying $PREVIEW_SUBDIR onto /tmp/sdk-repo/"
           rsync -a --exclude='.git' "$PREVIEW_SUBDIR" /tmp/sdk-repo/
 
+      # The rules engine WASM binary is not tracked in the SDK repos; it is
+      # downloaded from a private schematic-api release at build time. Without
+      # it the Python, TypeScript and C# builds fail to resolve the module.
+      - name: Download WASM binary
+        if: matrix.language == 'python' || matrix.language == 'node' || matrix.language == 'csharp'
+        working-directory: /tmp/sdk-repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: ./scripts/download-wasm.sh
+
       # Language-specific compile checks
       - name: Compile check (Python)
         if: matrix.language == 'python'
         working-directory: /tmp/sdk-repo
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          poetry install
+          poetry install --extras datastream
           poetry run mypy .
 
       - name: Compile check (TypeScript)
@@ -179,6 +189,8 @@ jobs:
       - name: Compile check (C#)
         if: matrix.language == 'csharp'
         working-directory: /tmp/sdk-repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           dotnet tool restore
           dotnet build src/SchematicHQ.Client -c Release
