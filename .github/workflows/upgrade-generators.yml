@@ -167,6 +167,19 @@ jobs:
             git checkout -- "$entry" 2>/dev/null || true
           done
           git checkout -- .fernignore 2>/dev/null || true
+          # A lockfile only means anything beside its own manifest. Where the
+          # repo owns the manifest, it owns the lock too -- even though the
+          # generator emits one and .fernignore does not name it. Restoring the
+          # manifest alone leaves the pair inconsistent, which is what broke
+          # `poetry install`.
+          restore_lock_for() {
+            if git show HEAD:.fernignore | grep -qxF "$1" && git cat-file -e "HEAD:$2" 2>/dev/null; then
+              git checkout -- "$2" 2>/dev/null || true
+            fi
+          }
+          restore_lock_for pyproject.toml poetry.lock
+          restore_lock_for package.json yarn.lock
+          restore_lock_for package.json package-lock.json
           echo "Files still differing from the repo ($(git status --porcelain | wc -l) total)."
           echo "These should be generated code only -- no pyproject.toml, no lockfile:"
           git status --porcelain | head -40
