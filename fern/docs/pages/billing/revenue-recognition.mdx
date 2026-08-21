@@ -1,13 +1,15 @@
 ---
 title: Revenue Recognition Data
-description: What the credit ledger gives your accounting team toward ASC 606, where the boundary with Stripe sits, and how to pull the numbers.
+description: What the credit ledger gives your accounting team toward rev rec under ASC 606, where the boundary with Stripe sits, and how to pull the numbers.
 
 slug: billing/revenue-recognition
 ---
 
-Under credit-based pricing, cash is received before delivery. A customer who buys 10,000 credits has paid for consumption that has not happened yet. Applying a revenue recognition policy to that arrangement requires a record of every grant, draw, and expiry with its price attached.
+Under credit-based pricing, cash arrives before delivery. A customer who buys 10,000 credits has paid for consumption that has not happened yet, so the payment is not revenue on the day it lands. Revenue recognition, rev rec, is the accounting process that determines when it becomes revenue, and under US GAAP it is governed by ASC 606.
 
-Schematic's credit ledger is that record. This page summarizes what the revenue standard asks for, documents what the ledger contains, states where the boundary with Stripe and your accounting system sits, and shows how to read the data out.
+Rev rec is not a reporting feature you should design on your own. Its output lands in audited financial statements, and it is examined again in diligence during a fundraise or an acquisition. An error is a misstatement rather than a rounding difference, it repeats every period until someone catches it, and correcting it can mean restating periods that are already closed. Credit pricing makes this harder than a flat subscription does, because delivery is spread across thousands of small draws and some of the credits are never drawn at all. Which treatment applies to your contracts is a determination for your accountants and auditors, and this page does not attempt to make it for you.
+
+What they need from engineering is measurement: a record of every grant, draw, hold, and expiry, with its price and timestamp attached, at a granularity their policy can be applied to. Schematic's credit ledger is that record. This page summarizes what ASC 606 asks for, documents what the ledger contains, states where the boundary with Stripe and your accounting system sits, and shows how to read the data out.
 
 ## What ASC 606 requires
 
@@ -22,7 +24,7 @@ Revenue follows satisfaction of the obligation rather than receipt of cash. Unde
 
 The first four steps are properties of the contract and its price, which live in the Schematic catalog and in Stripe. The fifth is a measurement question about what has actually been delivered, and that is what the credit ledger records.
 
-Nothing on this page is accounting advice. Which treatment applies to a given contract is a determination for your accountants. The data described below is recorded at the granularity that determination requires.
+The five steps are short to state and full of judgment in application, which is why the treatment is your accountants' call rather than a schema decision. What follows is the data available to support whichever call they make.
 
 ## System boundaries
 
@@ -52,13 +54,13 @@ A grant records an obligation. Its `grant_reason` indicates whether consideratio
 | `free` | Promotional or onboarding credits | No |
 | `adjustment` | A manual correction | No |
 
-Credits granted as `free` or `adjustment` carry no consideration, so their consumption produces no revenue. Aggregating them with the others into a single consumed figure will overstate recognized revenue.
+Credits granted as `free` or `adjustment` carry no consideration, so their consumption produces no revenue. Aggregating them with the others into a single consumed figure will overstate recognized revenue, and since the promotional mix changes from month to month, the overstatement is not a constant that can be backed out afterwards.
 
 ### Usage
 
 A `usage` entry records delivery against an obligation. It carries the quantity, the feature that caused the draw, the grant it was drawn from, and the timestamp.
 
-Usage entries also carry a `usage_reason`. Ordinary consumption is `track`. Where [credit holds](/billing/credit-holds) are in use, `lease_hold` and `lease_release` entries record credits reserved and returned. A hold is an authorization rather than delivery, so credits reserved and released without being consumed are not revenue.
+Usage entries also carry a `usage_reason`. Ordinary consumption is `track`. Where [credit holds](/billing/credit-holds) are in use, `lease_hold` and `lease_release` entries record credits reserved and returned. A hold is an authorization rather than delivery, so credits reserved and released without being consumed are not revenue. Counting them as consumption recognizes revenue against work that was never performed.
 
 ### Write-offs
 
@@ -119,7 +121,7 @@ Bundle purchases, plan charges, and the invoices behind them come from [Stripe](
 
 There is no ASC 606 report, deferred revenue schedule, or journal entry export. Schematic's data exports cover audit logs, events, and company feature usage; the credit ledger is not among the export types, so it is read through the API.
 
-Teams closing the books on credit-based pricing read the ledger and the grant list into their accounting system or warehouse on a schedule and apply their policy there.
+Teams closing the books on credit-based pricing read the ledger and the grant list into their accounting system or warehouse on a schedule, and apply their policy there with their accountants, rather than encoding a treatment in application code where it is hard to see and harder to correct.
 
 ## Related
 
