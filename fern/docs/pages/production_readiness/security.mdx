@@ -1,6 +1,6 @@
 ---
 title: Security
-description: Review Schematic's SOC 2 status, encryption, key scoping, application security testing, SSO, and incident response.
+description: Review Schematic's SOC 2 and GDPR posture, encryption, key scoping, application security testing, SSO, and incident response.
 
 slug: production_readiness/security
 ---
@@ -25,6 +25,25 @@ For the full compliance overview, see our [Trust Center](https://trust.schematic
 Customer Data is the information you submit to Schematic for processing on your behalf. It includes the identity keys your systems use to refer to a company or user, optional profile traits (name, email, role, or any custom field you send), usage events recorded through the `track` API, and the subscription state Schematic mirrors from your billing provider.
 
 For the list of third parties that process Customer Data on our behalf, see [Subprocessors](https://schematichq.com/subprocessors).
+
+### GDPR
+
+Schematic acts as a processor for the Customer Data described above, and you remain the controller of it. The commitments that go with that split are in the [Data Processing Addendum](https://schematichq.com/dpa), which is available to every customer and covers the processing terms, the security measures, and the subject-rights assistance a controller needs from its processor.
+
+For transfers out of the EEA, the DPA incorporates the European Commission's controller-to-processor **Standard Contractual Clauses**, with the UK Addendum for transfers governed by UK GDPR and the Swiss variations for transfers governed by the FADP.
+
+Schematic has appointed Article 27 representatives in both jurisdictions:
+
+| Jurisdiction | Representative |
+| --- | --- |
+| EU | Osano International Compliance Services Limited, 25 North Wall Quay, Dublin 1, D01 H104 |
+| UK | Osano UK Compliance LTD, 42-46 Fountain Street, Belfast, Antrim BT1 5EF |
+
+Send privacy notices and data subject requests to `privacy@schematichq.com`.
+
+Supporting the above, Schematic maintains a data inventory map, a completed Data Protection Impact Assessment, a documented pseudonymization procedure, and a sub-processor change notification process. GDPR controls are monitored continuously in Vanta alongside the SOC 2 program. Current status is on the [Trust Center](https://trust.schematichq.com), and the underlying documents can be provided on request.
+
+The third parties that process Customer Data on our behalf are listed at [Subprocessors](https://schematichq.com/subprocessors). Data deletion is governed by the Data Deletion Policy listed below.
 
 ### Payment Security (PCI Compliance)
 

@@ -14,7 +14,7 @@ A 24-hour snapshot is not a ledger, though. It isn't transactional, so it can't 
 
 ## How Schematic fits in
 
-Schematic gives you a real-time credit ledger with exactly-once event semantics, idempotent writes, and replay safety, so every action draws the balance down accurately and enforcement evaluates against current state. Holds let you reserve credits before an action and then commit or release them based on the outcome, so an in-flight agent can't overspend or get charged for work that failed. And pricing versioning keeps legacy customers on their old rates while new customers get the new ones, with no migration scramble.
+Schematic gives you a real-time credit ledger with exactly-once event semantics, idempotent writes, and replay safety, so every action draws the balance down accurately and enforcement evaluates against current state. [Holds](/billing/credit-holds) let you reserve credits before an action and then commit or release them based on the outcome, so an in-flight agent can't overspend or get charged for work that failed. And pricing versioning keeps legacy customers on their old rates while new customers get the new ones, with no migration scramble.
 
 ## What it looks like
 
@@ -29,6 +29,7 @@ Every event as it arrived, with its name, timestamp, attributed user, and the fu
 ## Configure it
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) — credit grants, consumption, and balances on the ledger.
+- [Credit Holds](/billing/credit-holds) — reserve, commit, and release so concurrent workers can't double-spend a balance.
 
 ## Implement it
 
