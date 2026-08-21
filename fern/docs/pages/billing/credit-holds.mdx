@@ -84,7 +84,7 @@ The consequence is that the reported balance overstates the company's position b
 
 A hold does not have to be committed in one operation. A long-running workflow can reserve enough credits to cover the whole flow up front, then commit after each step as that step's actual cost becomes known. Each commit reduces the hold's unspent portion, so the reserved value tracks progress through the workflow.
 
-Reserving once for the whole flow rather than once per step means the authorization decision is made against the full cost at the point where abandoning the work is still cheap, rather than discovering a depleted balance partway through.
+Reserve once for the whole flow rather than once per step. You then authorize the full cost while abandoning the work is still cheap, instead of hitting a depleted balance partway through.
 
 A three-step document workflow estimated at 900 credits reserves that amount, then commits per step:
 

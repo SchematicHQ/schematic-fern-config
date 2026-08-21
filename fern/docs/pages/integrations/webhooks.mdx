@@ -37,7 +37,7 @@ The table below lists every supported event and links to its payload type in the
 | --- | --- |
 | `subscription.trial.ended` | [`BillingSubscriptionView`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/BillingSubscriptionView.ts) |
 
-**Usage-based trigger events** — see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers)
+For usage-based trigger events, see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
 
 | Event | Body type |
 | --- | --- |
@@ -151,7 +151,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 ```
 </CodeBlocks>
 
-<Warning>Always use your framework's raw body middleware when verifying signatures — parsed or re-serialized bodies will not match the original signature.</Warning>
+<Warning>Always use your framework's raw body middleware when verifying signatures. Parsed or re-serialized bodies will not match the original signature.</Warning>
 
 ## Delivery and retries
 

@@ -10,7 +10,7 @@ There are a number of scenarios where you may want to offer add ons, and the mos
 
 ## Add on versions
 
-Like plans, add ons are versioned. Editing an add on creates a new draft version that you publish when you're ready, and at publish you decide what happens to companies on the current version — migrate all, choose which companies migrate, or keep them on their current version. Add ons are versioned **independently** of base plans: publishing a new add on version only affects companies that have that add on, not their base plan. See [Plan Versions](/catalog/plans#plan-versions) for how versioning and migrations work.
+Like plans, add ons are versioned. Editing an add on creates a new draft version that you publish when you're ready, and at publish you decide what happens to companies on the current version: migrate all, choose which companies migrate, or keep them on their current version. Add ons are versioned **independently** of base plans: publishing a new add on version only affects companies that have that add on, not their base plan. See [Plan Versions](/catalog/plans#plan-versions) for how versioning and migrations work.
 
 ## Usage-based Add Ons
 
@@ -27,6 +27,6 @@ When adding a usage-based entitlement to an add on, it can be configured to supp
 4. **Overage**: The first X units of usage are included in the base price of the add on, and then charged per unit of usage over the limit.
 5. **Tiered**: Usage is priced across defined tiers, either as volume pricing (the tier the customer falls into determines the price for all units) or graduated pricing (price per unit changes as the customer moves through tiers).
 
-For more information about these pricing models, see [Usage Based Billing](/billing/usage-based-billing) -- the priced entitlements supported by add ons work the same for add ons and plans. 
+For more information about these pricing models, see [Usage Based Billing](/billing/usage-based-billing). The priced entitlements supported by add ons work the same for add ons and plans.
 
-<Warning>Currently, Schematic does not support add ons that set a fixed the limit of usage each month. For example, an add on cannot grant 500 AI searches per month, (but can grant unlimited AI searches per month).</Warning>
+<Warning>An add on can grant unlimited use of a feature, but not a fixed monthly allowance. It can grant unlimited AI searches, for example, but not 500 per month.</Warning>

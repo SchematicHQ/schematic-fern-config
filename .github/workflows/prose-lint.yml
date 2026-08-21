@@ -1,0 +1,45 @@
+name: Prose Lint
+
+# Reports drift, it does not gate merges. Writing rules live in CLAUDE.md, which
+# loads automatically for anyone editing docs with an agent; this catches what
+# gets in another way. Run it locally any time with `python3 scripts/prose_lint.py`.
+on:
+  schedule:
+    - cron: "0 14 * * 1" # Mondays, 14:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-prose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check MDX prose against the writing rules in CLAUDE.md
+        run: |
+          set +e
+          output=$(python3 scripts/prose_lint.py)
+          status=$?
+          set -e
+
+          {
+            echo "## Prose lint"
+            echo
+            if [ $status -eq 0 ]; then
+              echo "No findings."
+            else
+              echo "Each line below breaks a writing rule in \`CLAUDE.md\`."
+              echo
+              echo '```'
+              echo "$output"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "$output"
+          exit $status

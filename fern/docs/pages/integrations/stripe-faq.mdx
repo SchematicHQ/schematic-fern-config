@@ -33,7 +33,7 @@ When adding a credit card via the Stripe Dashboard, you'll also need to set it a
 ![Set Default Payment Method in Stripe](../../assets/images/stripe/stripe-troubleshooting-set-default-card.png)
 
 <Info>
-Schematic does not currently support admins setting a payment method on behalf of a customer via the Schematic App. If this is a need, the checkout flow is the recommended path.
+Setting a payment method on a customer's behalf happens in the Stripe Dashboard, as above. To have the customer enter it themselves, send them through the checkout flow.
 </Info>
 
 ## Plan change flows
@@ -49,7 +49,7 @@ Within the schematic app, there are a few cases in which a plan can't be changed
 
 ## When does Schematic create a customer in Stripe?
 
-Schematic only creates a customer record in Stripe when a company is subscribed to a Stripe-enabled plan — that is, a plan with a price configured (even if the price is $0). Companies on free plans with no Stripe-linked price will exist in Schematic but will not have a corresponding Stripe customer.
+Schematic only creates a customer record in Stripe when a company is subscribed to a Stripe-enabled plan, meaning a plan with a price configured, even if that price is $0. Companies on free plans with no Stripe-linked price will exist in Schematic but will not have a corresponding Stripe customer.
 
 This is intentional: many teams prefer not to populate Stripe with free-tier users. However, if you want every new company to immediately have a Stripe customer provisioned, you can configure your **Initial Plan** (in Products > Configuration) to use a plan with a $0 price. This ensures all new companies are enrolled in a Stripe subscription from the moment they are created in Schematic.
 
