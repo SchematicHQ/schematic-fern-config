@@ -1,38 +1,69 @@
 ---
 title: Rate limiting
-description: Rate limits for the Schematic API, split between the low-latency application hot path and the core resource management tier.
+description: How Schematic rate-limits API requests per account, which limits apply to which endpoints, and how to read the rate-limit response headers.
 
 slug: api-reference/rate_limiting
 ---
 
-The Schematic API leverages rate limiting to ensure your applications remain performant and available. Our infrastructure is built to support high-scale production environments where reliability is critical. We have two distinct rate limiting tiers:
+Schematic rate-limits API requests per account. Every API key in an environment draws from the same budgets, and each budget allows a sustained rate of requests per second plus a burst allowance above it. You can send a short burst up to the burst size, then continue at the sustained rate.
 
-1. **Application Hot Path** - Optimized for application hot paths
-2. **Core API** - For creating and managing resources
+A request is checked against every limit that applies to it. A write, for example, counts against both the global limit and the mutation limit. If any one of them is exhausted, the request is rejected with a `429`.
 
-These rate limits are designed to protect your service while allowing for normal usage patterns. The specific limits are enforced separately for each tier to ensure your user experience remains performant.
+## Limits
 
-## Application Hot Path APIs
+| Limit | Applies to | Sustained rate | Burst |
+| --- | --- | --- | --- |
+| Global | Every request | 300 / second | 600 |
+| Mutation | `POST`, `PUT`, `PATCH`, and `DELETE` requests, except event submission and flag checks | 120 / second | 120 |
+| Events ingest | `POST /events` and `POST /event-batch` | 50 / second | 150 |
+| Analytics | Usage and event reads that scan history: `GET /events`, `GET /feature-usage-timeseries`, `GET /feature-usage-history`, `GET /user-usage-by-company`, `GET /user-usage-detail` | 12 / second | 30 |
 
-These APIs handle the hot paths of your application that must remain low latency -- mainly feature flag evaluations and event reporting. These routes are designed for high-performance and rely heavily on caching (especially for flag checks). Rate limits on these APIs primarily serve as safety mechanisms to protect against implementation issues (like infinite re-render loops in frontend applications) rather than as practical constraints on normal usage.
+Flag checks are reads that happen to use `POST`, so they count only against the global limit. Event submission counts against the events-ingest limit instead of the mutation limit.
+
+Requests made from the Schematic dashboard count toward the same budgets as requests made with your API keys.
+
+## Environments
+
+The global and mutation limits are tracked separately for production and non-production environments. Your production environment has its own budget; development and staging environments share a second budget with the same numbers. Load testing in staging cannot starve production, and adding more non-production environments does not add capacity.
+
+The events-ingest and analytics limits are account-wide: one budget covers every environment.
+
+## Response headers
+
+Every response from a rate-limited endpoint carries three headers describing the tightest limit the request was subject to:
+
+| Header | Meaning |
+| --- | --- |
+| `X-RateLimit-Limit` | The burst size of the limit. `X-RateLimit-Remaining` counts down from this value. |
+| `X-RateLimit-Remaining` | Requests you can send right now before being rejected. |
+| `X-RateLimit-Reset` | Seconds until the limit refills to `X-RateLimit-Limit`. This is a relative duration, not a timestamp. |
+
+These headers are present on successful responses too, so you can watch `X-RateLimit-Remaining` and slow down before you are rejected. They are exposed to browsers through CORS.
+
+When a request is rejected, the response is a `429 Too Many Requests` with a `Retry-After` header (in seconds) and a body naming the limit you hit:
+
+```json
+{
+  "bucket": "mutation",
+  "error": "Rate limit exceeded"
+}
+```
+
+The `bucket` value is one of `global`, `mutation`, `events_ingest`, or `analytics`.
+
+## Handling limits
+
+- **Honor `Retry-After`.** When you receive a `429`, wait at least that many seconds before retrying. For retries beyond the first, back off exponentially and add jitter so that many workers do not retry in lockstep.
+- **Batch events.** Send events through `POST /event-batch` instead of one request per event. One batch request counts once against the events-ingest limit regardless of how many events it carries.
+- **Cache flag checks.** Use the SDKs, which cache flag values locally and refresh them in the background, rather than calling the API on every evaluation. Use the bulk flag-check endpoint when you need many flags at once.
+- **Pace analytics reads.** `GET /events` and the feature-usage endpoints scan history and have the lowest limit. Fetch them on a schedule rather than on demand, and page through results with a delay between requests.
+- **Watch for fan-out.** Limits are per account, not per worker or per API key. A job that runs on many machines in parallel shares one budget; coordinate or throttle it centrally.
+- **Spread out bulk updates.** A nightly job that upserts every company or user at once will exhaust the mutation limit. Spread the work over a longer window, or send trait updates as identify events instead.
 
 <Info>
-We recommend using our SDKs, especially our front end SDKs, for optimal performance. They implement caching, bulk flag checks, and Web Socket connections for real-time updates.
+Schematic's SDKs handle most of this for you. The server-side SDKs cache flag checks and queue events; the front-end SDKs cache flag values, batch checks, and keep values fresh over a WebSocket connection.
 </Info>
 
-## Core APIs
+## Need a higher limit?
 
-These APIs are used to create and manage resources in Schematic. These APIs are subject to typical api rate limits, specifically:
-
-1. A defined rate limit that allows up to 20 write operations per second and 20 read operations per second.
-2. A concurrency limit that limits the number of requests that are active at any given time.
-
-Users should treat these limits as maximums and should avoid designing systems that generate unnecessary load. To request an increased rate limit, please contact support so we can understand the use case.
-
-Common causes and mitigations:
-1. **Batched upserts to companies/users within Schematic.** Often, This occurs if a daily cron job is set up to update traits within Schematic. We suggest either spacing out requests to our API or transitioning upserts to using identify calls via our event capture service.
-2. **Concurrent flag checks.** Often, this occurs when flag values are retrieved synchronously. We suggest using our bulk flag check endpoint to retrieve flag values asynchronously and caching those results locally.
-
-## Handling limiting gracefully
-
-Users who send many requests in a quick succession might see error responses that show up as a `429`. A basic technique to gracefully handle rate limiting is to build in a retry mechanism. The retry mechanism should follow an exponential backoff schedule to reduce request volume when necessary. 
+If your workload needs more than the limits above, [contact support](mailto:support@schematichq.com) and describe the use case. Limits can be raised per account.
