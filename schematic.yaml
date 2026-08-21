@@ -5332,7 +5332,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         external_resource_id:
           type: string
           maxLength: 255
@@ -5940,7 +5939,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -5990,7 +5988,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -7011,7 +7008,6 @@ components:
         description:
           type: string
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
@@ -10975,6 +10971,10 @@ components:
           maxItems: 10
         id:
           $ref: '#/components/schemas/OnboardingRequirement'
+        reached_at:
+          type: string
+          format: date-time
+          nullable: true
         satisfied_by:
           type: string
           maxLength: 255
@@ -11306,6 +11306,23 @@ components:
           items:
             $ref: '#/components/schemas/SubscriptionTraitUpdate'
           maxItems: 1000
+        trial_converted_at:
+          type: string
+          description: When the company's trial converted to a paid subscription.
+          format: date-time
+          nullable: true
+        trial_expires_at:
+          type: string
+          description: When the company's trial ends or ended.
+          format: date-time
+          nullable: true
+        trial_status:
+          allOf:
+            - $ref: '#/components/schemas/TrialStatus'
+          description: >-
+            The company's current trial status. Null when the company has never
+            trialed.
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -13030,6 +13047,10 @@ components:
         proration:
           type: integer
           format: int64
+        proration_billed_at:
+          type: string
+          format: date-time
+          nullable: true
         tax_amount:
           type: integer
           format: int64
@@ -14471,6 +14492,12 @@ components:
             Onboarding URL returned during the v2 (Connect) install flow before
             activation
           nullable: true
+        return_to:
+          type: string
+          description: >-
+            App location that started the connect flow; the OAuth callback
+            redirects back there on success
+          nullable: true
         type:
           type: string
           description: 'Discriminator: always "stripe" for this variant'
@@ -15630,7 +15657,6 @@ components:
           type: string
           nullable: true
           maxLength: 1024
-          minLength: 0
         icon:
           allOf:
             - $ref: '#/components/schemas/PlanIcon'
