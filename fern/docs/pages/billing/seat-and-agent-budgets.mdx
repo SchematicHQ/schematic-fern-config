@@ -74,18 +74,6 @@ The **Usage by user** table on a company's **Usage** tab, below the Events table
 
 Above the table, **Total usage** is the company's total for the window, **Active users** is how many of the company's users consumed anything in it, and **Top user** is the largest single actor's share.
 
-## Enforcing a per-actor budget
-
-Enforcement operates on entitlements and on the company balance, not on per-actor caps. No field limits how much of a company's balance an individual user or agent may consume, and nothing stops one actor from drawing the entire pool. A per-actor budget is assembled from the pieces below.
-
-**The pool is the shared ceiling.** A company cannot collectively spend more than it holds. [Auto top-up and bundle purchasing](/billing/spend-controls) determine whether the customer can raise that ceiling themselves.
-
-**Flag rules can gate per user.** A flag check takes both the company and the user, so a flag can resolve differently for two users on the same plan. This is a boolean gate rather than a spend limit, but it can prevent a given user from reaching an expensive code path.
-
-**Holds prevent concurrent overdraw.** When several agents draw on one balance at the same time, [credit holds](/billing/credit-holds) keep them from collectively overdrawing it in the interval between a balance check and a usage report.
-
-**Per-actor consumption is queryable.** A scheduled job can read per-actor consumption and disable an over-budget agent in your own system. This enforces the budget in your application rather than in Schematic, and is not real-time.
-
 ## Related
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) - credit types, grants, balances, and expiry.
