@@ -20,13 +20,29 @@ A request is checked against every limit that applies to it. A write, for exampl
 
 Flag checks are reads that happen to use `POST`, so they count only against the global limit. Event submission counts against the events-ingest limit instead of the mutation limit.
 
-Requests made from the Schematic dashboard count toward the same budgets as requests made with your API keys.
-
 ## Environments
 
 The global and mutation limits are tracked separately for production and non-production environments. Your production environment has its own budget; development and staging environments share a second budget with the same numbers. Load testing in staging cannot starve production, and adding more non-production environments does not add capacity.
 
 The events-ingest and analytics limits are account-wide: one budget covers every environment.
+
+## Per-key caps
+
+You can cap an individual API key at a percentage of your account's limits. The cap applies to every limit above: a key capped at 25% gets 25% of the global, mutation, events-ingest, and analytics budgets, rate and burst alike. A cap only lowers a key's share; it never grants budget beyond the account's.
+
+A key under its cap consumes the account budget as usual. A key over its cap is rejected with a `429` and consumes none of the account budget, so a capped key can take at most its share from the keys that share the account. Give a scanner, backfill, or batch-job key a small cap so it cannot starve the keys serving production traffic.
+
+The `429` body names the limit the key exceeded (`mutation`, for example), and the `X-RateLimit-*` headers describe the key's own capped limit rather than the account's.
+
+To set a cap in the dashboard, open the API key's create or edit dialog, turn on **Limit throughput**, and enter a percentage from 1 to 99. Through the API, pass `rate_limit_percent` when you create or update a key:
+
+| Value | On create | On update |
+| --- | --- | --- |
+| `1` to `99` | Cap the key at that percentage | Set the cap to that percentage |
+| `0` | Leave the key uncapped | Remove the cap |
+| Omitted or `null` | Leave the key uncapped | Leave the cap unchanged |
+
+API key responses include `rate_limit_percent`, which is `null` for an uncapped key.
 
 ## Response headers
 
