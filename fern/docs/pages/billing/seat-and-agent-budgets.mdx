@@ -21,8 +21,6 @@ await client.identify({
 
 Give each agent its own key rather than sharing one key across a fleet. Attribution is only as granular as the identities you send.
 
-Traits are defined by you and can be used as targeting parameters, so if you need to treat agents differently from people in flag rules, attach a trait on identify that marks which is which.
-
 ## Scaling the pool to seats
 
 A [credit grant on a plan](/billing/credit-burndown) can be a flat amount per company, or it can scale with the number of licenses the company holds.
@@ -84,7 +82,7 @@ Enforcement operates on entitlements and on the company balance, not on per-acto
 
 **The pool is the shared ceiling.** A company cannot collectively spend more than it holds. [Auto top-up and bundle purchasing](/billing/spend-controls) determine whether the customer can raise that ceiling themselves.
 
-**Flag rules can gate per user.** A flag check takes both the company and the user, so a rule targeting a user trait can grant an agent different access than a person on the same plan. This is a boolean gate rather than a spend limit, but it can prevent an agent from reaching an expensive code path.
+**Flag rules can gate per user.** A flag check takes both the company and the user, so a flag can resolve differently for two users on the same plan. This is a boolean gate rather than a spend limit, but it can prevent a given user from reaching an expensive code path.
 
 **Holds prevent concurrent overdraw.** When several agents draw on one balance at the same time, [credit holds](/billing/credit-holds) keep them from collectively overdrawing it in the interval between a balance check and a usage report.
 
