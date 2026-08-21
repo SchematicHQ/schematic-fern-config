@@ -128,6 +128,28 @@ The Node SDK reference covers configuration, failure behavior, and pre-warming i
 
 Use the HTTP API directly where the unit of work is too long-lived for a per-request reservation, or where you are managing hold state outside an SDK.
 
+## Technical details
+
+An SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The names below are the Node SDK's; the other SDKs expose the same settings.
+
+| Setting | Behavior | Default |
+| --- | --- | --- |
+| `defaultLeaseSize` | Credits requested per acquire or extend | 10,000 |
+| `defaultLeaseDuration` | How long the hold stays open before it is swept | 5 minutes |
+| `lowWaterMark` | The lease extends in the background once its unspent portion falls below this fraction, so a check does not wait on an acquire | 0.25 |
+| `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
+| `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
+
+An `overrides` map sets any of these per credit type, keyed by credit type ID.
+
+Two behaviors are worth understanding before changing the defaults.
+
+**The reservation TTL should exceed the longest gap between a check and its settle.** A reservation that expires first returns its credits to the lease. The settle still bills the usage, and the track event's idempotency key means a late or retried settle cannot double-bill, but the local lease balance reads high until the lease rolls over.
+
+**A check that cannot be gated fails closed.** When the API is unreachable, the shared cache is down, or the lease is exhausted, the check denies. Failing open is set per check, for callers where a denial is worse than letting the work through, and it bypasses only the credit gate. Plan targeting, overrides, and every other rule on the flag still run.
+
+Lease and reservation state lives in the same shared cache as the SDK's flag and company data. Across several processes that cache has to be shared, or each process gates against a lease balance only it can see.
+
 ## Using the API
 
 Reserve credits with [Acquire credit lease](/api-reference/billing-credits/acquire-credit-lease):
