@@ -5,9 +5,24 @@ description: What the credit ledger gives your accounting team toward ASC 606, w
 slug: billing/revenue-recognition
 ---
 
-Under credit-based pricing, cash is received before delivery. A customer who buys 10,000 credits has paid for consumption that has not happened yet, revenue is recognized as they consume, and credits they never consume are breakage recognized on a separate schedule. Applying that treatment requires a record of every grant, draw, and expiry with its price attached.
+Under credit-based pricing, cash is received before delivery. A customer who buys 10,000 credits has paid for consumption that has not happened yet. Applying a revenue recognition policy to that arrangement requires a record of every grant, draw, and expiry with its price attached.
 
-Schematic's credit ledger is that record. This page documents what it contains, where the boundary with Stripe and your accounting system sits, and how to read the data out.
+Schematic's credit ledger is that record. This page summarizes what the revenue standard asks for, documents what the ledger contains, states where the boundary with Stripe and your accounting system sits, and shows how to read the data out.
+
+## What ASC 606 requires
+
+ASC 606, *Revenue from Contracts with Customers*, is the FASB standard governing when revenue is recognized under US GAAP. It replaced a body of industry-specific rules with a single model, and has been effective for public companies since 2018 and for private companies since 2019. IFRS 15 is the equivalent standard under IFRS and was developed jointly with it, so the model is substantially the same under both.
+
+The model has five steps: identify the contract with the customer, identify the performance obligations in it, determine the transaction price, allocate that price across the obligations, and recognize revenue as each obligation is satisfied.
+
+- FASB's [ASC 606 page](https://www.fasb.org/page/PageContent?pageId=%2Fstandards%2Fasc-606.html) collects the standard, the amendments to it, and the implementation guidance.
+- The IFRS Foundation's [IFRS 15 page](https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/) states the same five-step model and is freely readable.
+
+Revenue follows satisfaction of the obligation rather than receipt of cash. Under credit-based pricing the two are separated in time: the customer pays when the bundle is purchased, and the obligation is satisfied as credits are consumed over the period that follows. The unconsumed portion is deferred revenue until it is drawn. Credits that are never consumed fall under the standard's guidance on unexercised customer rights, and are generally recognized as breakage.
+
+The first four steps are properties of the contract and its price, which live in the Schematic catalog and in Stripe. The fifth is a measurement question about what has actually been delivered, and that is what the credit ledger records.
+
+Nothing on this page is accounting advice. Which treatment applies to a given contract is a determination for your accountants. The data described below is recorded at the granularity that determination requires.
 
 ## System boundaries
 
