@@ -61,22 +61,22 @@ await client.track({
 });
 ```
 
-If `user` is omitted, the draw is still billed to the company correctly, but is recorded as unattributed and counts toward the company total without appearing against any actor. Treat `user` as required on any event caused by a person or an agent.
+If `user` is omitted, the draw is still billed to the company correctly, but it is recorded as unattributed and reported in the Unattributed row rather than against an actor. Treat `user` as required on any event caused by a person or an agent.
 
 Attribution is carried through to the [credit ledger](/use-cases/credit-ledger), so ledger entries identify the actor as well as the action.
 
 ## Reporting on per-actor consumption
 
-The **Usage by user** table on a company's profile reports the pool broken down by actor. It is in the usage section of the company page, below the Events table, and covers a 7, 30, or 90 day window.
+The **Usage by user** table on a company's **Usage** tab, below the Events table, reports consumption broken down by actor over a 7, 30, or 90 day window.
 
 | Column | Contents |
 | --- | --- |
-| User | One row per user or agent |
-| Usage | Consumption for the selected metric, either **Credits** or an individual metered feature |
-| Share | That row's fraction of the company's total consumption, with unattributed consumption included in the denominator |
-| Last seen | The actor's most recent activity, which identifies agents still drawing after the workflow that owned them was retired |
+| User | One row per user or agent that consumed in the window. Consumption from events sent without a user is grouped into a single **Unattributed** row |
+| Usage | The quantity recorded against that actor in the window |
+| Share | That row's percentage of the company's total, with the Unattributed row counted in the total |
+| Last seen | The actor's most recent activity |
 
-Summary statistics above the table report total usage, active users, and the highest-consuming user for the window.
+Above the table, **Total usage** is the company's total for the window, **Active users** is how many of the company's users consumed anything in it, and **Top user** is the largest single actor's share.
 
 ## Enforcing a per-actor budget
 
