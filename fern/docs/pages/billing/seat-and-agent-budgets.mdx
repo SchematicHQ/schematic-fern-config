@@ -1,15 +1,15 @@
 ---
 title: Seat and Agent Budgets
-description: Size a shared company credit pool to seats, attribute draws to the user or agent that made them, and see where a company's credits actually went.
+description: Track usage for agents and people interchangeably, scale a company's credit pool with the seats it holds, and report consumption per user.
 
 slug: billing/seat-and-agent-budgets
 ---
 
-Credits belong to a company, not to the individual people and agents inside it. A company holds one pool, and every consumption event records the user or agent that caused the draw, so the balance stays shared while consumption is reported per actor.
+Schematic tracks usage for autonomous agents and people interchangeably. Both are users on the company, both draw on its shared credit pool, and consumption is reported per user either way. A credit grant can also scale with the seats a company holds, so the pool grows as the team does.
 
 ## Agents are users
 
-Schematic has no separate entity type for autonomous agents. An agent is [identified](/quickstart/identifying-users) as a user on the company, the same way a person is, and is metered and reported on the same way. It appears in the company's user list, and usage tracked against its key is recorded against it like any other user.
+Agents and people share one identity model, so whatever works for a user works for an agent. An agent is [identified](/quickstart/identifying-users) as a user on the company, appears in the company's user list, and has its usage recorded against it like any other user.
 
 ```typescript
 await client.identify({
