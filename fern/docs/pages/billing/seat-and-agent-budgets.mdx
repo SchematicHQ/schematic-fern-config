@@ -5,11 +5,13 @@ description: Track usage for agents and people interchangeably, scale a company'
 slug: billing/seat-and-agent-budgets
 ---
 
-Schematic tracks usage for autonomous agents and people interchangeably. Both are users on the company, both draw on its shared credit pool, and consumption is reported per user either way. A credit grant can also scale with the seats a company holds, so the pool grows as the team does.
+Schematic lets you meter and charge for AI and agent-based workflows, with agents treated as billable actors alongside the people using your product.
 
 ## Agents are users
 
-Agents and people share one identity model, so whatever works for a user works for an agent. An agent is [identified](/quickstart/identifying-users) as a user on the company, appears in the company's user list, and has its usage recorded against it like any other user.
+Schematic tracks usage for autonomous agents and people interchangeably. Both are users on the company, both draw on its shared credit pool, and consumption is reported per user either way. A credit grant can also scale with the seats a company holds, so the pool grows as the team does.
+
+An agent is [identified](/quickstart/identifying-users) as a user on the company, appears in the company's user list, and has its usage recorded against it like any other user.
 
 ```typescript
 await client.identify({
