@@ -5,38 +5,38 @@ description: Preview the revenue and margin impact of a pricing change against r
 ---
 
 <Warning>
-Pricing simulation is not available yet. This page describes the shape it is expected to take so you can plan around it, and covers what you can do today. Nothing on this page is a shipping feature, and the details will move before it lands. Follow the [roadmap](https://roadmap.schematichq.com/) for status.
+Pricing simulation is not available yet. This page describes the expected shape of the feature and documents what is possible today. Nothing described under [Expected behavior](#expected-behavior) is currently shipping, and the details are subject to change. See the [roadmap](https://roadmap.schematichq.com/) for status.
 </Warning>
 
-Repricing is the highest-stakes change a monetization team makes and the one they have the least visibility into. You can model it in a spreadsheet from an aggregate usage number, ship it, and find out which accounts it broke when the invoices go out. The accounts that matter are usually the ones the average did not describe.
+A pricing change alters revenue per account, and the accounts it affects most are rarely described by the aggregate. Modeling a change against an average usage figure will not identify which specific accounts become materially more or less expensive under it.
 
-Simulation is the answer to that: run a draft price against the usage that already happened, per customer, before anything ships.
+Pricing simulation is intended to address that by evaluating a draft price against usage that has already occurred, reported per customer, before the change is published.
 
-## What it is expected to do
+## Expected behavior
 
-The intended shape is a draft plan you can edit without publishing, evaluated against your real usage history.
+The intended shape is a draft plan that can be edited without publishing, evaluated against historical usage.
 
-**Editable assumptions.** The variables that drive the outcome, held separately from the plan itself: base fee, included credit grant per period, and your own cost per unit of consumption. Change one and the projection re-runs.
+**Editable assumptions.** The variables driving the outcome are held separately from the plan: base fee, included credit grant per period, and cost per unit of consumption. Changing one re-runs the projection.
 
-**Per-customer output.** Not one blended number. A row per company showing credits consumed, top-ups they would have bought, revenue they would have generated, and margin after your costs. That per-row view is the point, because the aggregate rarely tells you which accounts a change breaks.
+**Per-customer output.** One row per company reporting credits consumed, top-ups purchased, revenue generated, and margin after costs, rather than a single blended figure.
 
-**Run against real usage.** Historical consumption from the [ledger](/use-cases/credit-ledger) and the events behind it, not a synthetic model. Simulation is only worth trusting if it replays what actually happened.
+**Evaluation against real usage.** Historical consumption from the [credit ledger](/use-cases/credit-ledger) and the events behind it, rather than a synthetic distribution.
 
-The natural questions it should answer are: does this change grow revenue or just move it, how many accounts get materially more expensive, and which named accounts would have churned or escalated under it.
+The questions this is intended to answer are whether a change grows revenue or redistributes it, how many accounts become materially more expensive, and which named accounts are most affected.
 
-## What you can do today
+## Available today
 
-Some of the job is already possible, in pieces.
+The following are available now and cover parts of the same workflow.
 
-**See real consumption before you model anything.** [Reporting usage across companies](/playbooks/usage-reporting) pulls one row per company per feature for a date range, and the credit ledger has the credit side. That is the input a spreadsheet model needs, and usually the part teams estimate instead of measuring.
+**Per-company consumption data.** [Reporting usage across companies](/playbooks/usage-reporting) returns one row per company per feature for a date range, and the credit ledger covers the credit side. This is the input a manual model requires.
 
-**Know your cost side.** The **cost basis** on a credit type records what a credit costs you. It does not affect what customers pay, and it exists precisely so margin analysis has a real number in it. See [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type).
+**Cost basis.** The cost basis on a credit type records what a credit costs you. It does not affect customer pricing, and exists so that margin analysis has a cost figure attached to the credit. See [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type).
 
-**Ship the change without breaking existing customers.** [Plan versioning](/use-cases/plan-versioning) keeps current customers on the price they signed while new customers get the new one, so a repricing does not have to be a migration. That reduces the blast radius of getting it wrong, which is the risk simulation is meant to remove.
+**Plan versioning.** [Plan versioning](/use-cases/plan-versioning) keeps existing customers on the price they signed while new customers receive the new one, so a repricing does not require migrating the existing base.
 
-**Protect the margin at runtime.** Whatever the model says, [margin protection](/use-cases/margin-protection) enforces the limits you priced for as usage happens, rather than after the period closes.
+**Runtime margin enforcement.** [Margin protection](/use-cases/margin-protection) enforces the limits a plan was priced around as usage occurs, rather than after the period closes.
 
-The gap between this and simulation is real: today you export the usage and build the model yourself. Simulation is meant to remove that step.
+Building the projection itself is currently manual: export the usage, apply the draft pricing externally.
 
 ## Related
 
