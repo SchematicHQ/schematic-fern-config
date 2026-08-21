@@ -9,20 +9,19 @@ Credits belong to a company, not to the individual people and agents inside it. 
 
 ## Agents are users
 
-Schematic has no separate entity type for autonomous agents. An agent is [identified](/quickstart/identifying-users) as a user on the company, the same as a person, and distinguished by a trait:
+Schematic has no separate entity type for autonomous agents. An agent is [identified](/quickstart/identifying-users) as a user on the company, the same way a person is, and is metered and reported on the same way. It appears in the company's user list, and usage tracked against its key is recorded against it like any other user.
 
 ```typescript
 await client.identify({
   keys: { user_id: "support-bot" },
   name: "Support Agent",
-  traits: { actor_type: "agent" },
   company: { keys: { id: "northwind" } },
 });
 ```
 
-That trait is what subsequent behavior keys off. It can be targeted in flag rules to evaluate entitlements differently for agents than for people, used to filter reporting by actor type, and used to price agent seats separately, without maintaining a parallel identity model.
-
 Give each agent its own key rather than sharing one key across a fleet. Attribution is only as granular as the identities you send.
+
+Traits are defined by you and can be used as targeting parameters, so if you need to treat agents differently from people in flag rules, attach a trait on identify that marks which is which.
 
 ## Scaling the pool to seats
 
@@ -85,7 +84,7 @@ Enforcement operates on entitlements and on the company balance, not on per-acto
 
 **The pool is the shared ceiling.** A company cannot collectively spend more than it holds. [Auto top-up and bundle purchasing](/billing/spend-controls) determine whether the customer can raise that ceiling themselves.
 
-**Flag rules can gate per user.** A flag check takes both the company and the user, so a rule targeting `actor_type` can grant agents different access than people on the same plan. This is a boolean gate rather than a spend limit, but it can prevent an agent from reaching an expensive code path.
+**Flag rules can gate per user.** A flag check takes both the company and the user, so a rule targeting a user trait can grant an agent different access than a person on the same plan. This is a boolean gate rather than a spend limit, but it can prevent an agent from reaching an expensive code path.
 
 **Holds prevent concurrent overdraw.** When several agents draw on one balance at the same time, [credit holds](/billing/credit-holds) keep them from collectively overdrawing it in the interval between a balance check and a usage report.
 
