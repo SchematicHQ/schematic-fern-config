@@ -14,11 +14,11 @@ The Audit Log is also available within Settings, which shows the following separ
 
 ### Where flag evaluation happens
 
-Whether a flag check is observable in your own systems depends on where it runs, and Schematic supports both.
+Flag evaluation can run either in Schematic or in your own infrastructure, which determines where a check is observable.
 
-By default, checks are evaluated by Schematic and served from cache. With [DataStream](/developer_resources/sdks/cross-platform-features#automatic-real-time-updates), the SDK holds current flag and company state locally and evaluates rules **client-side**, so a check does not leave your process. [Replicator](/developer_resources/sdks/cross-platform-features#replicator) goes further, keeping a full local copy of your flag data in your own infrastructure so reads never leave your network at all.
+By default, checks are evaluated by Schematic and served from cache. With [DataStream](/developer_resources/sdks/cross-platform-features#automatic-real-time-updates), the SDK holds current flag and company state locally and evaluates rules client-side, so a check does not leave your process. [Replicator](/developer_resources/sdks/cross-platform-features#replicator) maintains a full local copy of your flag data in your own infrastructure, so reads do not leave your network.
 
-That matters for observability as much as for latency: locally evaluated checks are traceable in your own logs and metrics rather than only in Schematic's. See [Availability](/production_readiness/availability) for the tradeoffs between the strategies.
+Locally evaluated checks are traceable in your own logs and metrics as well as in Schematic. See [Availability](/production_readiness/availability) for the tradeoffs between these strategies.
 
 ### Uptime and support
 
