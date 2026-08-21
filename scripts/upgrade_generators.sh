@@ -37,8 +37,10 @@ Git SHA: $GITHUB_SHA
 "
 fi
 
-# Fetch latest changes
-git fetch origin
+# Fetch latest changes. --prune matters: these PRs get closed with
+# --delete-branch, and a stale remote-tracking ref left behind by the delete
+# makes the --force-with-lease below fail with "stale info".
+git fetch --prune origin
 
 # Check if branch exists on remote
 if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
@@ -110,7 +112,18 @@ if ! git diff --quiet origin/main -- fern/generators.yml; then
     echo "Branch already carries these upgrades; nothing new to commit."
   fi
 
-  git push origin "$BRANCH_NAME" --force-with-lease
+  if ! git push origin "$BRANCH_NAME" --force-with-lease; then
+    # The lease can still go stale if the branch is deleted between our fetch
+    # and this push. Recreate it only when it genuinely no longer exists --
+    # never clobber a branch someone else is holding.
+    if [ -z "$(git ls-remote --heads origin "$BRANCH_NAME")" ]; then
+      echo "Remote branch is gone; pushing it fresh."
+      git push origin "$BRANCH_NAME"
+    else
+      echo "Push rejected and the remote branch still exists; not forcing."
+      exit 1
+    fi
+  fi
 
   # Check if PR already exists
   existing_pr=$(gh pr list --state open --head "$BRANCH_NAME" --json number --jq '.[0].number' 2>/dev/null || echo "")
