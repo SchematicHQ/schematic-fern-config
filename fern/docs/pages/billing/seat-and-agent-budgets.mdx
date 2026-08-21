@@ -5,15 +5,15 @@ description: Size a shared company credit pool to seats, attribute draws to the 
 slug: billing/seat-and-agent-budgets
 ---
 
-When a product is used by people, one credit balance per company is enough. When it is also used by autonomous agents, that stops being true. An agent can spend a month of a team's credits in an afternoon, and the company that gets the invoice wants to know which actor did it before it happens again.
+One credit balance per company is enough when a product is used only by people, but it stops being enough once autonomous agents use it too, because an agent can spend a month of a team's credits in an afternoon and the company that gets the invoice wants to know which actor did it before it happens again.
 
-Schematic models this as one pool with attribution on every draw. Credits belong to the company. Every consumption event carries the user or agent that caused it, so the pool stays single while the accounting stays per-actor.
+Schematic models this as one pool with attribution on every draw. Credits belong to the company, and every consumption event carries the user or agent that caused it, so the pool stays single while the accounting stays per-actor.
 
-This page covers what ships today. Enforced per-seat and per-agent caps are on the roadmap and are called out explicitly in [What is not enforced yet](#what-is-not-enforced-yet).
+This page covers what ships today. Enforced per-seat and per-agent caps are on the roadmap, and are called out explicitly in [What is not enforced yet](#what-is-not-enforced-yet).
 
 ## An agent is a user
 
-Schematic has no separate agent entity, and it does not need one. An autonomous agent is [identified](/quickstart/identifying-users) as a user on the company, the same as a person, and given a trait that marks what it is:
+Schematic has no separate agent entity and does not need one. An autonomous agent is [identified](/quickstart/identifying-users) as a user on the company, the same as a person, and given a trait that marks what it is:
 
 ```typescript
 await client.identify({
@@ -43,9 +43,9 @@ The dashboard controls map to these API fields on the plan credit grant:
 | Credits per License | `credit_amount` | Integer |
 | Flat Amount per Company | `company_credit_amount` | Integer. Only valid when `scaling` is `per_license` |
 
-2,000 credits per company plus 1,000 per license gives a five-seat company 7,000 credits a period, and a ten-seat company 12,000. The customer does not manage two balances. They see one pool that grew when they added people.
+2,000 credits per company plus 1,000 per license gives a five-seat company 7,000 credits a period, and a ten-seat company 12,000. The customer does not manage two balances, they see one pool that grew when they added people.
 
-Changing the grant type on a plan companies are already on re-issues their credits in the new shape, which resets any balance they had accrued. The dashboard warns about this at the point of the change. Get the shape right before the plan goes live rather than after.
+Changing the grant type on a plan companies are already on re-issues their credits in the new shape, which resets any balance they had accrued. The dashboard warns about this at the point of the change, but it is worth getting the shape right before the plan goes live rather than after.
 
 Because an agent can hold a license the same way a person can, an agent seat expands the pool on the same terms. Whether that is what you want is a pricing decision, not a technical one: agents that consume far more than people usually want their own license type at their own credit amount, rather than sharing the human seat's allocation.
 
@@ -79,25 +79,25 @@ It gives you, for a 7, 30, or 90 day window:
 - **Last seen**, which is how you find an agent that is still drawing after the workflow that owned it was retired
 - Summary stats across the top: total usage, active users, and the top user for the window
 
-The row that matters is usually not the largest one. It is the actor whose share moved.
+The row worth attention is usually not the largest one but the one whose share moved since the last window.
 
 ## Enforcing a budget today
 
 Enforcement runs off entitlements and the balance, not off a per-actor cap, so a per-actor budget is something you assemble rather than something you switch on.
 
-**Cap the pool.** The balance is the ceiling every actor shares. A company cannot collectively spend more than it holds, and [auto top-up and bundle purchasing](/billing/spend-controls) control whether they can raise that ceiling themselves.
+**Cap the pool.** The balance is the ceiling every actor shares, so a company cannot collectively spend more than it holds, and [auto top-up and bundle purchasing](/billing/spend-controls) control whether they can raise that ceiling themselves.
 
 **Gate expensive work behind a flag, evaluated per user.** A flag check takes both the company and the user, so a rule targeting `actor_type` gives agents different access than people on the same plan. That is a boolean gate rather than a spend limit, but it is the lever that stops an agent reaching the expensive path at all.
 
-**Hold before you spend.** When several agents draw on one balance concurrently, [credit holds](/billing/credit-holds) are what keep them from collectively overdrawing it between the check and the report. This is the piece most teams building agent products get wrong on the first attempt.
+**Hold before you spend.** When several agents draw on one balance concurrently, [credit holds](/billing/credit-holds) are what keep them from collectively overdrawing it between the check and the report, and it is the piece most teams building agent products miss on a first attempt.
 
-**Use the numbers you already have.** Per-actor consumption is queryable, so a nightly job that reads it and disables an over-budget agent in your own system is a working per-agent budget, enforced on your side. It is not real-time, and it is the honest answer until enforcement ships.
+**Use the numbers you already have.** Per-actor consumption is queryable, so a nightly job that reads it and disables an over-budget agent in your own system is a working per-agent budget enforced on your side. It is not real-time, but it is what is available until enforcement ships.
 
 ## What is not enforced yet
 
 Schematic does not currently enforce a per-seat or per-agent credit cap. There is no field that says "this user may spend at most 1,500 of the company's credits this month," and nothing stops one actor from drawing the entire pool.
 
-Per-license scaling of credit grants ships, as described above. Per-license scaling of entitlements, and per-license usage caps, are on the roadmap. Until they land, treat the pool as the enforceable boundary, attribution as the reporting layer, and any per-actor limit as something your application enforces using the data above.
+Per-license scaling of credit grants ships, as described above, while per-license scaling of entitlements and per-license usage caps are on the roadmap. Until those land, treat the pool as the enforceable boundary, attribution as the reporting layer, and any per-actor limit as something your application enforces using the data above.
 
 ## Related
 
