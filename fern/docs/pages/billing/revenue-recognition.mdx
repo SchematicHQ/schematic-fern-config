@@ -98,6 +98,24 @@ On a ratable approach, a purchased grant of 10,000 credits at \$800 with `quanti
 
 Credits purchased as a bundle also carry `billing_invoice_id`, which links the grant to the Stripe invoice the payment was recorded on.
 
+## The ledger in the app
+
+The ledger is visible in the app as well as through the API. The app view is the faster way to check a single company, or to see what an entry looks like before writing code against it.
+
+`Catalog` > `Credits` lists the credit types with the cost basis on each, and carries a **View ledger** button in the top right. The ledger requires a company, the same constraint the API has, so the most direct route in is from the company itself.
+
+Open a company under `Manage` > `Companies` and scroll to **Credit balance** on the Entitlements tab. It lists that company's grants with the price attached, when each was granted, when it expires or resets, and how much of it has been consumed.
+
+![Credit balance on a company](../../assets/images/billing/revrec-company-credit-balance.png)
+
+The rows above cover three different recognition cases: credits included in a plan, a promotional grant carrying no consideration, and an auto top-up the customer was charged for. **View ledger** opens the ledger filtered to that company.
+
+![Credit Ledger](../../assets/images/billing/revrec-credit-ledger.png)
+
+Each entry carries its event type, the signed amount, the credit type, and details, which for a grant is the grant reason, quantity, and expiry, and for a draw is the feature and the quantity consumed. The filters cover credit type, feature, event type, and a date range.
+
+This view is for inspection rather than for closing a period. It pages a screen at a time and has no export, so period-end numbers come from the API.
+
 ## Reading the data
 
 Read the ledger through [Get credit ledger](/api-reference/billing-credits/get-credit-ledger), filterable by credit type, event type, feature, and time window:
