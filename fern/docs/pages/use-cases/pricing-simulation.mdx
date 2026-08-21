@@ -1,0 +1,46 @@
+---
+title: Simulate a pricing change
+slug: use-cases/pricing-simulation
+description: Preview the revenue and margin impact of a pricing change against real customer usage, before you ship it.
+---
+
+<Warning>
+Pricing simulation is in a closed beta and is not publicly available yet. This page describes the shape of the feature as it exists in that beta, and the details are subject to change before it is generally available. See the [roadmap](https://roadmap.schematichq.com/) for status.
+</Warning>
+
+A pricing change alters revenue per account, and the accounts it affects most are rarely described by the aggregate. Modeling a change against an average usage figure will not identify which specific accounts become materially more or less expensive under it.
+
+Pricing simulation addresses that by evaluating a draft price against usage that has already occurred, reported per customer, before the change is published.
+
+## How it works
+
+The shape of the beta is a draft plan that can be edited without publishing, evaluated against historical usage.
+
+**Editable assumptions.** The variables driving the outcome are held separately from the plan: base fee, included credit grant per period, and cost per unit of consumption. Changing one re-runs the projection.
+
+**Per-customer output.** One row per company reporting credits consumed, top-ups purchased, revenue generated, and margin after costs, rather than a single blended figure.
+
+**Evaluation against real usage.** Historical consumption from the [credit ledger](/use-cases/credit-ledger) and the events behind it, rather than a synthetic distribution.
+
+The questions it answers are whether a change grows revenue or redistributes it, how many accounts become materially more expensive, and which named accounts are most affected.
+
+## Generally available today
+
+The following are generally available and cover parts of the same workflow.
+
+**Per-company consumption data.** [Reporting usage across companies](/playbooks/usage-reporting) returns one row per company per feature for a date range, and the credit ledger covers the credit side. This is the input a manual model requires.
+
+**Cost basis.** The cost basis on a credit type records what a credit costs you. It does not affect customer pricing, and exists so that margin analysis has a cost figure attached to the credit. See [Create a Credit Type](/billing/credit-burndown#1-create-a-credit-type).
+
+**Plan versioning.** [Plan versioning](/use-cases/plan-versioning) keeps existing customers on the price they signed while new customers receive the new one, so a repricing does not require migrating the existing base.
+
+**Runtime margin enforcement.** [Margin protection](/use-cases/margin-protection) enforces the limits a plan was priced around as usage occurs, rather than after the period closes.
+
+Outside the beta, building the projection itself is manual: export the usage, apply the draft pricing externally.
+
+## Related
+
+- [Reprice and repackage safely](/use-cases/plan-versioning) - roll out a new price without migrating existing customers.
+- [Protect your margins](/use-cases/margin-protection) - enforce what you priced for in real time.
+- [Meter on a real-time credit ledger](/use-cases/credit-ledger) - the consumption record a simulation would replay.
+- [Credit Burndown Billing Model](/billing/credit-burndown) - credit grants, consumption rates, and cost basis.
