@@ -25,6 +25,8 @@ Consider giving each agent its own key rather than sharing one key across a flee
 
 A [credit grant on a plan](/billing/credit-burndown) can be a flat amount per company, or it can scale with the number of licenses the company holds.
 
+Scale by license when buying a seat should also buy credits, so that every seat a customer purchases carries its own credit allocation. Ten seats at 5,000 credits per seat is a 50,000 credit pool, and it grows and shrinks on its own as the customer adds and removes seats. A flat amount is the right choice when the allowance belongs to the plan rather than to the size of the team.
+
 Set **Grant Type** to **Scale by license** on the grant and select the license feature that drives it. The grant is then issued once per license the company holds. Enabling **Also grant a flat amount per company** adds a fixed amount once per company on top, producing a base allocation that everyone shares plus a per-seat allocation that grows with the team.
 
 The dashboard controls map to these API fields on the plan credit grant:
@@ -38,11 +40,9 @@ The dashboard controls map to these API fields on the plan credit grant:
 
 For example, 2,000 credits per company plus 1,000 per license grants a five-seat company 7,000 credits per period and a ten-seat company 12,000. Both amounts land in the same balance; the customer does not manage two pools.
 
-Scaling by license is a property of a credit grant. Other entitlement values, including usage limits, are set per company and are not multiplied by license count.
-
 Changing the grant type on a plan that companies are already subscribed to re-issues their credits in the new shape and resets any balance they had accrued. The dashboard warns about this at the point of the change.
 
-The license quantity that drives the grant is a [trait you report on the company](/billing/seat-based-billing#reporting-seat-usage), so whether an agent expands the pool depends on whether you count agents when you report that quantity. Counting them under a separate license feature, with its own credit amount, keeps an agent's allocation independent of a human seat's.
+The **License Feature** selected on the grant is whichever feature counts seats for that plan, so whether an agent expands the pool depends on whether agents count as seats in that feature. To give agents an allocation of their own, set up a separate [license feature](/billing/seat-based-billing) for agent seats and add a second grant scaled by it, with its own **Credits per License**.
 
 See [Create plan credit grant](/api-reference/billing-credits/create-plan-credit-grant) for the full request body.
 
