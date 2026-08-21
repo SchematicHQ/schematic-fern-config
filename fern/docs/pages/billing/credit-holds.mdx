@@ -1,6 +1,6 @@
 ---
 title: Credit Holds
-description: Reserve credits before an action, commit what was actually used, and release the rest, so concurrent workers cannot double-spend one balance.
+description: Reserve credits before an action, commit what was actually used, and release the rest, so concurrent workers cannot double-spend one balance and a multi-step workflow can bill as it goes.
 
 slug: billing/credit-holds
 ---
@@ -9,18 +9,20 @@ A hold reserves credits from a company's balance before the work that will consu
 
 Holds exist because reading a balance and spending against it are normally separate steps. A worker checks the balance, starts an expensive call, and reports usage when the call returns. If several workers do this concurrently against the same balance, each can read the same remaining amount and each can start work that the balance cannot collectively cover.
 
+Because a hold can be committed against more than once, it also serves as the authorization for a multi-step workflow, which reserves the cost of the whole flow up front and commits after each step. See [Incremental commits across a multi-step workflow](#incremental-commits-across-a-multi-step-workflow).
+
 ## Lifecycle
 
-A hold has three operations, plus a fourth for work that needs more than was originally reserved.
+A hold supports four operations.
 
 | Operation | Effect |
 | --- | --- |
 | Reserve | Debits an amount from the company's balance and returns a hold |
-| Commit | Records actual usage against the hold, without debiting the balance again |
-| Release | Returns the difference between reserved and committed amounts to the balance |
 | Extend | Increases an open hold, drawing the additional amount from the balance |
+| Commit | Records actual usage against the hold, without debiting the balance again. May be called more than once against the same hold |
+| Release | Returns the difference between reserved and committed amounts to the balance |
 
-The pattern corresponds to an authorization and capture on a payment card. Reserve authorizes an upper bound, commit captures the amount actually used, and release returns the remainder.
+The pattern corresponds to an authorization and capture on a payment card. Reserve authorizes an upper bound, extend raises that upper bound while the hold is open, commit captures the amount actually used, and release returns the remainder.
 
 ## Balance values during a hold
 
@@ -48,23 +50,42 @@ A company holds 500 credits. Two agents begin work at the same time, each requir
 
 1. The first agent reserves 400. The balance reports 100 remaining, 400 reserved, and 500 settled.
 2. The second agent reserves 400 and receives the same hold, because the company and credit type match. No second debit occurs, and `granted_amount` on its response is 400, the size of the existing hold rather than the amount it asked for.
-3. Both agents commit as they finish, 260 and 90, bringing the hold's committed amount to 350 of 400.
-4. Release returns the unspent 50. The balance reports 150 settled, which is 500 less the 350 consumed.
 
-Without a hold, both agents would read 500 remaining and both would begin 400 credits of work, leaving the company 300 credits overdrawn before either report arrived.
+Because the hold is shared, its unspent portion is a shared budget rather than a per-caller allowance. The two agents have 400 credits to divide, not 400 each, and each needs to size its work against what the hold has left rather than against `granted_amount`. From here it can go two ways.
 
-Because the hold is shared, its unspent portion is a shared budget rather than a per-caller allowance. Two agents holding 400 between them have 400 to divide, not 400 each, and each needs to size its work against what the hold has left rather than against `granted_amount`.
+**The work fits inside the hold.** Both agents commit as they finish, 260 and 90, bringing the committed amount to 350 of 400. Release returns the unspent 50, and the balance reports 150 settled, which is 500 less the 350 consumed.
 
-### When the shared hold is not large enough
+**The work needs more than the hold covers.** The first agent extends by 200. Only 100 credits are drawable, so the hold grows to a `granted_amount` of 500 and the balance reports 0 remaining, 500 reserved, and 500 settled. The second agent also extends by 200, and because nothing is drawable the hold is returned unchanged at 500. This is not an error, and no exception is raised.
 
-Continuing from step 2 above, suppose both agents find they need more than the 400 the hold covers.
+Two consequences follow from the second case. Compare `granted_amount` before and after an extend to determine whether it added anything, because an extend that grew the hold by nothing is indistinguishable in shape from one that succeeded. And committing more than the hold covers is not blocked: the committed amount is allowed to exceed `granted_amount`, because the caller is the enforcement point rather than the API. Over-committing leaves release with nothing to return and settles the balance at what was actually consumed, so a company can end a period overdrawn if callers do not gate on the hold.
 
-1. The first agent extends by 200. Only 100 credits are drawable, so the hold grows by 100 to a `granted_amount` of 500. The balance reports 0 remaining, 500 reserved, and 500 settled.
-2. The second agent also extends by 200. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
+Without a hold in either case, both agents would read 500 remaining and each would authorize up to 400 credits of work, exposing the balance to 800 credits of consumption against the 500 it holds.
 
-Compare `granted_amount` before and after an extend to determine whether it added anything. An extend that grew the hold by nothing looks identical in shape to one that succeeded.
+## Incremental commits across a multi-step workflow
 
-Committing more than the hold covers is not blocked. The committed amount is allowed to exceed `granted_amount`, because the caller is the enforcement point rather than the API. Over-committing means release has nothing to return, and the balance settles at what was actually consumed, so a company can end a period overdrawn if callers do not gate on the hold. Gate on the hold's unspent portion, and treat an extend that returns an unchanged `granted_amount` as a signal to stop rather than to proceed.
+A hold does not have to be committed in one operation. A long-running workflow can reserve enough credits to cover the whole flow up front, then commit after each step as that step's actual cost becomes known. Each commit reduces the hold's unspent portion, so the reserved value tracks progress through the workflow.
+
+Reserving once for the whole flow rather than once per step means the authorization decision is made against the full cost at the point where abandoning the work is still cheap, rather than discovering a depleted balance partway through.
+
+A three-step document workflow estimated at 900 credits reserves that amount, then commits per step:
+
+| Step | Committed by this step | Total committed | Hold unspent |
+| --- | --- | --- | --- |
+| Extract | 220 | 220 | 680 |
+| Summarize | 410 | 630 | 270 |
+| Index | 95 | 725 | 175 |
+
+Release then returns the unspent 175 to the balance.
+
+Four things to account for when a hold spans a workflow rather than a single call.
+
+**Set `expires_at` to cover the whole workflow.** The default is five minutes, which is shorter than most multi-step flows. Set it explicitly, or extend the hold as the work proceeds if the duration is not predictable in advance.
+
+**A commit against a released hold debits the grant directly.** If the hold has already been released, whether explicitly or by the expiry sweep, a track event carrying its `lease_id` is not applied to the hold. It falls through and debits the company's grants instead, so the usage is billed once rather than dropped or debited twice. The remaining steps are no longer covered by a hold, and the hold's unspent portion has already been returned to the balance. The same fall-through applies to a `lease_id` belonging to a different company or credit type.
+
+**Use a distinct idempotency key per step.** Each step is a separate commit, so a retry without its own key is recorded as an additional draw against the hold.
+
+**A step can commit more than the hold covers.** The committed amount is not capped at `granted_amount`, so a step whose real cost overruns the estimate is recorded in full. Extend the hold when a step's cost exceeds what remains, rather than relying on the hold to stop it.
 
 ## Expiry
 
