@@ -11304,12 +11304,18 @@ components:
           maxItems: 1000
         trial_converted_at:
           type: string
-          description: When the company's trial converted to a paid subscription.
+          description: >-
+            When the company's trial had converted to a paid subscription as of
+            this change. Null when the trial had not converted, or for changes
+            recorded before trial status was tracked.
           format: date-time
           nullable: true
         trial_expires_at:
           type: string
-          description: When the company's trial ends or ended.
+          description: >-
+            When the company's trial was set to end as of this change. Null when
+            the company had never trialed, or for changes recorded before trial
+            status was tracked.
           format: date-time
           nullable: true
         trial_status:
