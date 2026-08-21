@@ -25,7 +25,9 @@ Consider giving each agent its own key rather than sharing one key across a flee
 
 A [credit grant on a plan](/billing/credit-burndown) can be a flat amount per company, or it can scale with the number of licenses the company holds.
 
-Scale by license when buying a seat should also buy credits, so that every seat a customer purchases carries its own credit allocation. Ten seats at 5,000 credits per seat is a 50,000 credit pool, and it grows and shrinks on its own as the customer adds and removes seats. A flat amount is the right choice when the allowance belongs to the plan rather than to the size of the team.
+It is a common pattern in AI products, particularly ones adding AI features to an established seat-based plan, for each purchased seat to carry credits of its own. Ten seats at 5,000 credits per seat gives the company a 50,000 credit pool for the period. The seat is still what the customer buys, and the credits follow it, so the pool grows and shrinks as they change their seat count.
+
+Schematic models this with the **license** feature type. A license feature tracks how many seats a company holds, and a credit grant can scale by that quantity, so the feature that sells and limits seats also determines how many credits land in the pool.
 
 Set **Grant Type** to **Scale by license** on the grant and select the license feature that drives it. The grant is then issued once per license the company holds. Enabling **Also grant a flat amount per company** adds a fixed amount once per company on top, producing a base allocation that everyone shares plus a per-seat allocation that grows with the team.
 
