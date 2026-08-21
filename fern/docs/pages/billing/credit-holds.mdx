@@ -5,67 +5,90 @@ description: Reserve credits before an action, commit what was actually used, an
 slug: billing/credit-holds
 ---
 
-Reading a credit balance and spending against it are usually two separate steps, and the interval between them is unguarded. A worker checks the balance, starts an expensive call, and reports usage when the call returns, and for that whole interval every other worker sees credits that are in fact already committed.
+A hold reserves credits from a company's balance before the work that will consume them runs. The credits are debited when the work is authorized rather than when it completes, so a balance read while work is in flight already accounts for that work.
 
-That interval rarely matters with a single worker, but it becomes a correctness problem once several agents draw on the same company pool. If three of them each read 500 credits remaining and each start a 400-credit job, the company is several hundred credits overdrawn before the first report arrives.
+Holds exist because reading a balance and spending against it are normally separate steps. A worker checks the balance, starts an expensive call, and reports usage when the call returns. If several workers do this concurrently against the same balance, each can read the same remaining amount and each can start work that the balance cannot collectively cover.
 
-A hold closes the gap by moving the debit earlier, so credits leave the balance when the work is authorized rather than when it finishes and the next reader sees a balance that already accounts for what is in flight.
+## Lifecycle
 
-## The lifecycle
+A hold has three operations, plus a fourth for work that needs more than was originally reserved.
 
-A hold moves through three steps, with a fourth available when work runs longer than expected.
+| Operation | Effect |
+| --- | --- |
+| Reserve | Debits an amount from the company's balance and returns a hold |
+| Commit | Records actual usage against the hold, without debiting the balance again |
+| Release | Returns the difference between reserved and committed amounts to the balance |
+| Extend | Increases an open hold, drawing the additional amount from the balance |
 
-**Reserve** debits an amount from the company's balance and returns a hold, so the credits leave the drawable balance at that point, before any work has happened.
+The pattern corresponds to an authorization and capture on a payment card. Reserve authorizes an upper bound, commit captures the amount actually used, and release returns the remainder.
 
-**Commit** reports what was actually used. Usage is recorded against the hold rather than debited a second time from the balance, because the debit already happened at reserve.
+## Balance values during a hold
 
-**Release** returns the difference between what was reserved and what was committed, so a hold of 400 credits that committed 260 returns 140 to the grants it came from.
+While a hold is open, a company's credit balance is reported as three values.
 
-**Extend** grows an open hold when the work needs more than was reserved, drawing the additional amount from the balance the same way the original reserve did.
+| Value | Definition | Use |
+| --- | --- | --- |
+| Remaining | Drawable amount, excluding open holds | Deciding whether to authorize further work |
+| Reserved | The open hold's unspent portion | Reporting work in flight |
+| Settled | Remaining plus reserved, the balance net of actual consumption | Customer-facing balance display |
 
-The shape is deliberately the same as an authorization and capture on a payment card. You authorize an upper bound, you capture the real amount, and the rest never leaves the account.
+Use settled for customer-facing balances. It changes only when work completes, not when a hold opens or closes, so it does not fluctuate while jobs are running. Use remaining for enforcement decisions; it decreases as soon as a hold opens.
 
 ## One hold per company and credit type
 
-Schematic keeps at most one active hold for a given company and credit type, which is both the detail that surprises people and the one the concurrency guarantee rests on. A second reserve against the same pair does not create a second hold; it receives the first one, and both callers report their usage against it.
+Schematic maintains at most one active hold for a given company and credit type. A second reserve against the same company and credit type does not create a second hold; it returns the existing one, and both callers commit their usage against it.
 
-Concurrent workers are therefore not each holding a private slice of the balance and hoping the slices do not overlap, they are drawing on one shared reservation that was debited exactly once. Reserve calls for the same company and credit type serialize against each other, so two callers arriving at the same instant get the same hold rather than two holds backed by the same credits.
+Reserve calls for the same company and credit type are serialized, so two callers arriving simultaneously receive the same hold rather than two holds backed by the same credits. This is the mechanism behind the concurrency guarantee: concurrent workers draw against a single reservation that was debited from the balance once, rather than against separate reservations that may overlap.
 
-The guarantee is scoped to that pair, meaning concurrent draws on one company's credit type cannot double-spend the balance, while two different credit types or two different companies hold independently of each other.
+The guarantee is scoped to a single company and credit type. Different credit types, and different companies, hold independently of one another.
 
-## What the balance looks like during a hold
+### Two concurrent agents
 
-A held balance splits three ways, and which number you want depends on who is asking.
+A company holds 500 credits. Two agents begin work at the same time, each requiring up to 400 credits.
 
-| Value | Meaning | Use it for |
-| --- | --- | --- |
-| Remaining | Drawable right now, with open holds excluded | Deciding whether to authorize more work |
-| Reserved | The open hold's unspent portion | Showing what is in flight |
-| Settled | Remaining plus reserved, the balance net of actual consumption | The number you show the customer |
+1. The first agent reserves 400. The balance reports 100 remaining, 400 reserved, and 500 settled.
+2. The second agent reserves 400 and receives the same hold, because the company and credit type match. No second debit occurs, and `granted_amount` on its response is 400, the size of the existing hold rather than the amount it asked for.
+3. Both agents commit as they finish, 260 and 90, bringing the hold's committed amount to 350 of 400.
+4. Release returns the unspent 50. The balance reports 150 settled, which is 500 less the 350 consumed.
 
-Show customers **settled**, since it moves only when work actually completes rather than when a hold opens or closes, so a customer-facing counter does not jump around while jobs are running. Remaining is the enforcement number, and it dips the moment a hold opens by design.
+Without a hold, both agents would read 500 remaining and both would begin 400 credits of work, leaving the company 300 credits overdrawn before either report arrived.
 
-## Expiry is not forfeiture
+Because the hold is shared, its unspent portion is a shared budget rather than a per-caller allowance. Two agents holding 400 between them have 400 to divide, not 400 each, and each needs to size its work against what the hold has left rather than against `granted_amount`.
 
-Every hold carries an expiry. If you do not set one, it defaults to five minutes, which is sized for a burst of work rather than a long-running job. Set the expiry explicitly when your work is longer, or extend the hold as it runs.
+### When the shared hold is not large enough
 
-A hold that passes its expiry without being released is swept automatically and its unspent portion goes back to the grants it was drawn from, so a process that crashes between reserve and release does not strand the credits. The sweep runs every minute, which means held credits come back promptly rather than at the end of the period.
+Continuing from step 2 above, suppose both agents find they need more than the 400 the hold covers.
 
-Credits return to the specific grants they came from, keeping each grant's original expiry date, rather than landing in a general-purpose pool. A hold drawn partly from a grant expiring this month and partly from one expiring next year releases back into both, so [consumption order](/billing/credit-burndown#consumption-order) and [expiry](/billing/credit-burndown#credit-lifecycle) still behave the way they would have if the hold had never happened.
+1. The first agent extends by 200. Only 100 credits are drawable, so the hold grows by 100 to a `granted_amount` of 500. The balance reports 0 remaining, 500 reserved, and 500 settled.
+2. The second agent also extends by 200. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
+
+Compare `granted_amount` before and after an extend to determine whether it added anything. An extend that grew the hold by nothing looks identical in shape to one that succeeded.
+
+Committing more than the hold covers is not blocked. The committed amount is allowed to exceed `granted_amount`, because the caller is the enforcement point rather than the API. Over-committing means release has nothing to return, and the balance settles at what was actually consumed, so a company can end a period overdrawn if callers do not gate on the hold. Gate on the hold's unspent portion, and treat an extend that returns an unchanged `granted_amount` as a signal to stop rather than to proceed.
+
+## Expiry
+
+Every hold has an expiry. If `expires_at` is not supplied, it defaults to five minutes. Set it explicitly for longer-running work, or extend the hold while the work is in progress.
+
+A hold that reaches its expiry without being released is released automatically, and its unspent portion returns to the balance. A sweep runs once per minute, so credits held by a process that terminated between reserve and release are returned within approximately a minute rather than at the end of the billing period. Expiry does not forfeit credits.
+
+Released credits return to the specific grants they were drawn from and retain each grant's original expiry date. A hold drawn partly from a grant expiring this month and partly from one expiring next year returns to both, so [consumption order](/billing/credit-burndown#consumption-order) and [grant expiration](/billing/credit-burndown#credit-lifecycle) behave as they would have without the hold.
 
 ## Partial funding
 
-A reserve for more than the balance can cover does not fail; it returns a hold for whatever the balance could back, and the granted amount on the response tells you how much you actually got. Only a balance with nothing drawable at all fails the reserve outright.
+A reserve for more than the balance can cover does not fail. It returns a hold for the amount the balance could back, reported as `granted_amount` on the response. A reserve fails only when no credits are drawable at all.
 
-Because of that, check the granted amount rather than assuming you received what you asked for. A worker that reserved 1,000 and received 340 needs to size its work to 340, or stop.
+Read `granted_amount` rather than assuming the requested amount was granted. A caller that requested 1,000 and received 340 must size its work to 340.
 
-## Doing it through an SDK
+## Using an SDK
 
-The Node SDK implements this pattern for you and adds a second layer on top of it, holding one lease per company and credit type and then carving per-request reservations out of that lease locally, so a check does not pay an API round trip and the credits are gated across every pod through shared Redis. That is usually the right starting point for gating inference calls or agent runs, and [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) covers setup, failure behavior, and pre-warming.
+The Schematic SDKs implement holds directly, and add a client-side layer above them. An SDK maintains one lease per company and credit type, then issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. This is the recommended approach for gating inference calls or agent runs.
 
-Use the HTTP API directly when you are working in a language whose SDK does not implement leases yet, or when the unit of work is long enough that a per-request reservation is the wrong shape.
+The Node SDK reference covers configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations). The same lease and reservation model applies in the other SDKs.
 
-## Doing it through the API
+Use the HTTP API directly where the unit of work is too long-lived for a per-request reservation, or where you are managing hold state outside an SDK.
+
+## Using the API
 
 Reserve credits with [Acquire credit lease](/api-reference/billing-credits/acquire-credit-lease):
 
@@ -80,7 +103,7 @@ curl -X POST https://api.schematichq.com/billing/credits/lease \
   }'
 ```
 
-The response carries the hold's `id` and its `granted_amount`. Commit usage against it by sending a track event with `lease_id` set:
+The response contains the hold's `id` and `granted_amount`. Commit usage against it by sending a track event with `lease_id` set:
 
 ```bash
 curl -X POST https://api.schematichq.com/events \
@@ -97,9 +120,9 @@ curl -X POST https://api.schematichq.com/events \
   }'
 ```
 
-Send an [idempotency key](/playbooks/metering) on the track event, because a retried commit without one is a second real draw against the hold.
+Include an [idempotency key](/playbooks/metering) on the track event. Without one, a retried commit is recorded as an additional draw against the hold.
 
-Release when the work is done, with [Release credit lease](/api-reference/billing-credits/release-credit-lease):
+Release the hold with [Release credit lease](/api-reference/billing-credits/release-credit-lease):
 
 ```bash
 curl -X PUT https://api.schematichq.com/billing/credits/lease/crlse_EXAMPLE0123456789/release \
@@ -108,31 +131,19 @@ curl -X PUT https://api.schematichq.com/billing/credits/lease/crlse_EXAMPLE01234
   -d '{}'
 ```
 
-To grow an open hold instead, [Extend credit lease](/api-reference/billing-credits/extend-credit-lease) takes an `additional_amount` and an optional new `expires_at`.
+To increase an open hold, [Extend credit lease](/api-reference/billing-credits/extend-credit-lease) accepts an `additional_amount` and an optional new `expires_at`.
 
-## Two agents on one balance
+## Ledger entries
 
-Working through the case the model is built for: a company holds 500 credits, and two agents pick up work at the same moment, each needing up to 400.
+Each operation is recorded in the [credit ledger](/use-cases/credit-ledger). Ledger entries carry a usage reason, and holds introduce two of them.
 
-The first agent reserves 400, after which the balance shows 100 remaining and 400 reserved, with settled still at 500.
-
-The second agent reserves 400 and receives the same hold, because the company and credit type match. It does not get a second 400 credits and no second debit happens, so it sizes its work against what the shared hold has left.
-
-Both agents commit as they finish, 260 and 90, bringing the hold's tracked amount to 350 of its 400. Release then returns the unspent 50, and settled lands at 150, which is 500 minus the 350 that was actually used.
-
-Without the hold, both agents would have read 500 remaining, both would have started 400 credits of work, and the company would have gone 300 credits negative before either report arrived.
-
-## What lands in the ledger
-
-Every step is visible in the [credit ledger](/use-cases/credit-ledger). Ledger entries carry a usage reason, and holds add two of their own:
-
-| Reason | What produced it |
+| Usage reason | Recorded when |
 | --- | --- |
-| `lease_hold` | The debit taken at reserve or extend |
-| `lease_release` | The unspent portion returned at release, expiry, or sweep |
-| `track` | Ordinary consumption, including usage committed against a hold |
+| `lease_hold` | Credits are debited at reserve or extend |
+| `lease_release` | The unspent portion is returned at release, expiry, or sweep |
+| `track` | Usage is committed, against a hold or otherwise |
 
-A hold that reserved 400 and used 350 therefore leaves a complete trail, the 400 debit, the usage as it was committed, and the 50 refund, each with its own timestamp, with no netting step that hides what happened in between.
+A hold that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied.
 
 ## Related
 
