@@ -1,0 +1,87 @@
+---
+title: Seat and Agent Budgets
+description: Track usage for agents and people interchangeably, scale a company's credit pool with the seats it holds, and report consumption per user.
+
+slug: billing/seat-and-agent-budgets
+---
+
+Schematic lets you meter and charge for AI and agent-based workflows, with agents treated as billable actors alongside the people using your product.
+
+## Agents are users
+
+Schematic tracks usage for autonomous agents and people interchangeably. Both are users on the company, both draw on its shared credit pool, and consumption is reported per user either way. A credit grant can also scale with the seats a company holds, so the pool grows as the team does.
+
+An agent is [identified](/quickstart/identifying-users) as a user on the company, appears in the company's user list, and has its usage recorded against it like any other user.
+
+```typescript
+await client.identify({
+  keys: { user_id: "support-bot" },
+  name: "Support Agent",
+  company: { keys: { id: "northwind" } },
+});
+```
+
+Consider giving each agent its own key rather than sharing one key across a fleet, since attribution is only as granular as the identities you send.
+
+## Scaling the pool to seats
+
+A [credit grant on a plan](/billing/credit-burndown) can be a flat amount per company, or it can scale with the number of licenses the company holds.
+
+It is a common pattern in AI products, particularly ones adding AI features to an established seat-based plan, for each purchased seat to carry credits of its own. Ten seats at 5,000 credits per seat gives the company a 50,000 credit pool for the period. The seat is still what the customer buys, and the credits follow it, so the pool grows and shrinks as they change their seat count.
+
+Schematic models this with the **license** feature type. A license feature tracks how many seats a company holds, and a credit grant can scale by that quantity, so the feature that sells and limits seats also determines how many credits land in the pool.
+
+Set **Grant Type** to **Scale by license** on the grant and select the license feature that drives it. The grant is then issued once per license the company holds. Enabling **Also grant a flat amount per company** adds a fixed amount once per company on top, producing a base allocation that everyone shares plus a per-seat allocation that grows with the team.
+
+The dashboard controls map to these API fields on the plan credit grant:
+
+| App control | API field | Values |
+| --- | --- | --- |
+| Grant Type | `scaling` | `fixed` or `per_license` |
+| License Feature | `license_id` | The license whose quantity scales the grant. Required when `scaling` is `per_license` |
+| Credits per License | `credit_amount` | Integer |
+| Flat Amount per Company | `company_credit_amount` | Integer. Only valid when `scaling` is `per_license` |
+
+For example, 2,000 credits per company plus 1,000 per license grants a five-seat company 7,000 credits per period and a ten-seat company 12,000. Both amounts land in the same balance; the customer does not manage two pools.
+
+The **License Feature** selected on the grant is whichever feature counts seats for that plan, so whether an agent expands the pool depends on whether agents count as seats in that feature. To give agents an allocation of their own, set up a separate [license feature](/billing/seat-based-billing) for agent seats and add a second grant scaled by it, with its own **Credits per License**.
+
+See [Create plan credit grant](/api-reference/billing-credits/create-plan-credit-grant) for the full request body.
+
+## Attributing draws to an actor
+
+A credit draw is attributed to the user identified on the track event. Send `user` alongside `company` and the consumption is recorded against that actor:
+
+```typescript
+await client.track({
+  event: "inference_tokens",
+  company: { id: "northwind" },
+  user: { user_id: "support-bot" },
+  quantity: 140,
+});
+```
+
+If `user` is omitted, the draw is still billed to the company correctly, but it is recorded as unattributed and reported in the Unattributed row rather than against an actor. Treat `user` as required on any event caused by a person or an agent.
+
+Attribution is carried through to the [credit ledger](/use-cases/credit-ledger), so ledger entries identify the actor as well as the action.
+
+## Reporting on per-actor consumption
+
+The **Usage by user** table on a company's **Usage** tab, below the Events table, reports consumption broken down by actor over a 7, 30, or 90 day window.
+
+| Column | Contents |
+| --- | --- |
+| User | One row per user or agent that consumed in the window. Consumption from events sent without a user is grouped into a single **Unattributed** row |
+| Usage | The quantity recorded against that actor in the window |
+| Share | That row's percentage of the company's total, with the Unattributed row counted in the total |
+| Last seen | The actor's most recent activity |
+
+Above the table, **Total usage** is the company's total for the window, **Active users** is how many of the company's users consumed anything in it, and **Top user** is the largest single actor's share.
+
+## Related
+
+- [Credit Burndown Billing Model](/billing/credit-burndown) - credit types, grants, balances, and expiry.
+- [Credit Holds](/billing/credit-holds) - keeping concurrent actors from overdrawing one balance.
+- [Spend & Usage Controls](/billing/spend-controls) - the limits and top-up settings the pool sits inside.
+- [Seat Based Billing Models](/billing/seat-based-billing) - billing the seats themselves.
+- [Identify users and companies](/quickstart/identifying-users) - getting actors into Schematic in the first place.
