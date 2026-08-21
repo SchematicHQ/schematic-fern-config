@@ -7,8 +7,6 @@ slug: billing/seat-and-agent-budgets
 
 Credits belong to a company, not to the individual people and agents inside it. A company holds one pool, and every consumption event records the user or agent that caused the draw, so the balance stays shared while consumption is reported per actor.
 
-This page covers what is available today. Schematic does not currently enforce per-seat or per-agent credit caps; see [What is not enforced yet](#what-is-not-enforced-yet).
-
 ## Agents are users
 
 Schematic has no separate entity type for autonomous agents. An agent is [identified](/quickstart/identifying-users) as a user on the company, the same as a person, and distinguished by a trait:
@@ -42,6 +40,8 @@ The dashboard controls map to these API fields on the plan credit grant:
 | Flat Amount per Company | `company_credit_amount` | Integer. Only valid when `scaling` is `per_license` |
 
 For example, 2,000 credits per company plus 1,000 per license grants a five-seat company 7,000 credits per period and a ten-seat company 12,000. Both amounts land in the same balance; the customer does not manage two pools.
+
+Scaling by license is a property of a credit grant. Other entitlement values, including usage limits, are set per company and are not multiplied by license count.
 
 Changing the grant type on a plan that companies are already subscribed to re-issues their credits in the new shape and resets any balance they had accrued. The dashboard warns about this at the point of the change.
 
@@ -81,7 +81,7 @@ Summary statistics above the table report total usage, active users, and the hig
 
 ## Enforcing a per-actor budget
 
-Enforcement operates on entitlements and on the company balance, not on per-actor caps, so a per-actor budget is assembled from the following.
+Enforcement operates on entitlements and on the company balance, not on per-actor caps. No field limits how much of a company's balance an individual user or agent may consume, and nothing stops one actor from drawing the entire pool. A per-actor budget is assembled from the pieces below.
 
 **The pool is the shared ceiling.** A company cannot collectively spend more than it holds. [Auto top-up and bundle purchasing](/billing/spend-controls) determine whether the customer can raise that ceiling themselves.
 
@@ -89,13 +89,7 @@ Enforcement operates on entitlements and on the company balance, not on per-acto
 
 **Holds prevent concurrent overdraw.** When several agents draw on one balance at the same time, [credit holds](/billing/credit-holds) keep them from collectively overdrawing it in the interval between a balance check and a usage report.
 
-**Per-actor consumption is queryable.** A scheduled job can read per-actor consumption and disable an over-budget agent in your own system. This enforces a per-agent budget on your side rather than Schematic's, and is not real-time.
-
-## What is not enforced yet
-
-Schematic does not enforce a per-seat or per-agent credit cap. There is no field that limits how much of a company's balance an individual user or agent may consume, and no mechanism prevents one actor from drawing the entire pool.
-
-Per-license scaling of credit grants is available, as described above. Per-license scaling of entitlements, and per-license usage caps, are not yet available. Until they are, the company balance is the enforceable boundary, attribution is the reporting layer, and per-actor limits are enforced by your application using the data above.
+**Per-actor consumption is queryable.** A scheduled job can read per-actor consumption and disable an over-budget agent in your own system. This enforces the budget in your application rather than in Schematic, and is not real-time.
 
 ## Related
 
