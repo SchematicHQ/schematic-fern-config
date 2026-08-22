@@ -4420,7 +4420,7 @@ components:
           type: boolean
           nullable: true
         upcoming_invoice:
-          $ref: '#/components/schemas/InvoiceResponseData'
+          $ref: '#/components/schemas/UpcomingInvoiceResponseData'
       required:
         - active_add_ons
         - active_plans
@@ -4526,7 +4526,7 @@ components:
           type: boolean
           nullable: true
         upcoming_invoice:
-          $ref: '#/components/schemas/InvoiceResponseData'
+          $ref: '#/components/schemas/UpcomingInvoiceResponseData'
       required:
         - active_add_ons
         - active_plans
@@ -14745,6 +14745,81 @@ components:
         - active
         - converted
         - expired
+    UpcomingInvoiceResponseData:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+          format: int64
+        amount_paid:
+          type: integer
+          format: int64
+        amount_remaining:
+          type: integer
+          format: int64
+        collection_method:
+          type: string
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        customer_external_id:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        ending_balance:
+          type: integer
+          format: int64
+        environment_id:
+          type: string
+        external_id:
+          type: string
+          nullable: true
+        payment_method_external_id:
+          type: string
+          nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
+        starting_balance:
+          type: integer
+          format: int64
+        status:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceStatus'
+          nullable: true
+        subscription_external_id:
+          type: string
+          nullable: true
+        subtotal:
+          type: integer
+          format: int64
+        updated_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+          nullable: true
+      required:
+        - amount_due
+        - amount_paid
+        - amount_remaining
+        - collection_method
+        - created_at
+        - currency
+        - customer_external_id
+        - ending_balance
+        - environment_id
+        - provider_type
+        - starting_balance
+        - subtotal
+        - updated_at
+      title: UpcomingInvoiceResponseData
     UpdateAddOnRequestBody:
       type: object
       properties:
