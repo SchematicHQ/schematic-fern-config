@@ -1,6 +1,6 @@
 ---
 title: Building with AI
-description: Connect AI coding assistants to Schematic through the hosted MCP server, from Claude Code, Codex, Cursor, or any MCP-compatible client.
+description: Connect AI assistants to Schematic through the hosted MCP server, from Claude, Claude Code, Codex, Cursor, or any MCP-compatible client.
 slug: building-with-ai
 ---
 
@@ -37,6 +37,11 @@ claude mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
 Then run `/mcp` to sign in.
+  </Tab>
+  <Tab title="Claude">
+Open **Customize > Connectors**, select **Add custom connector**, and enter `https://api.schematichq.com/mcp`. Claude runs the same sign-in, environment, and access-level choices in the browser, and the connector then stays available in every conversation without any config file to maintain.
+
+Every Claude plan can add a custom connector, including Free and Pro.
   </Tab>
   <Tab title="Codex">
 Codex has no CLI shortcut for HTTP servers, so add the server to `~/.codex/config.toml`:
@@ -95,6 +100,18 @@ Read-only API keys can use only the read tools, which makes them a reasonable ch
 - "What plan is company Acme Corp on?"
 - "Show me feature usage for the 'api_calls' feature across all companies"
 - "Create a company override to enable 'beta_features' for company comp_123"
+
+## Troubleshooting
+
+**The assistant returns no companies, or the wrong ones.** Your connection points at a different environment than the one you have open in the app. Each Schematic environment carries its own companies, plans, and features, so a connection to sandbox looks empty next to production data. Disconnect the server in your client, reconnect, and pick the environment deliberately at sign-in.
+
+**A write tool comes back with a permission error.** Either you chose read-only when you connected, or your role in Schematic stops short of the change you asked for. The connection runs as you, so reconnecting with read and write access helps only when your role already allows that change in the app.
+
+**Your client never finishes the OAuth flow.** Clients that speak only SSE, and clients running somewhere without outbound internet access, cannot complete the browser handoff. Authenticate with a secret API key as a bearer token instead, using the setup above.
+
+**API key authentication returns a 401.** Confirm you are sending a secret key rather than a publishable one, and that the key belongs to the environment you mean to query. A production key pointed at sandbox data fails the same way an invalid key does.
+
+**Tools you expect are missing.** Most clients cache the tool list from the moment they connect, so a server that gained tools since then still looks the way it did on day one. Restart the client, or remove and re-add the server, and the current list loads.
 
 ## Best practices
 
