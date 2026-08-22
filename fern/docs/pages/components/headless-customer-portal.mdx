@@ -133,7 +133,7 @@ The `feature_usage.features` array contains every feature the company has access
 
 **Pre-computed helpers.** The API returns several fields that simplify display: `effective_limit` (the resolved cap), `effective_price` (per-unit price for the current scenario), `percent_used` (0-100+), `overuse` (amount above soft limit), `is_unlimited`, and `has_valid_allocation`. These cover most display needs, though tiered pricing breakdowns require additional calculation on your end.
 
-**Reset periods.** If `period` is set (`current_day`, `current_week`, `current_month`, `current_year`, or `billing`), usage resets on that cadence. `metric_reset_at` is the next reset timestamp.
+**Reset periods.** `period` is the window usage is measured over: `current_day`, `current_week`, `current_month`, or `all_time`. `metric_reset_at` is the next reset timestamp, and for a `current_month` period `month_reset` tells you whether the month follows the company's billing cycle (`billing_cycle`) or the calendar (`first_of_month`).
 
 ## Displaying add-ons
 
