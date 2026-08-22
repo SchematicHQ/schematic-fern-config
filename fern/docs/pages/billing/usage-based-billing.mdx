@@ -143,6 +143,31 @@ Because the customer had usage in 2 different tiers, they paid the flat fee pric
 
 Checkout our [Credit Burndown Docs](/billing/credit-burndown).
 
+## Billing thresholds
+
+A customer on pay as you go or overage can run up a large balance between invoices, and you carry that
+usage unpaid until the period closes. A billing threshold shortens the wait. Set one on an entitlement
+and Stripe issues an invoice as soon as the customer's metered usage reaches the number of units you
+name, then bills the remaining usage at the end of the period as usual.
+
+### Configuring a billing threshold
+
+1. Navigate to a plan with a metered entitlement priced as "Pay as you go" or "Overage".
+2. Click on the entitlement that you'd like to monetize.
+3. Turn on "Billing threshold".
+4. Enter the "Usage threshold (units)", the amount of usage that triggers the early invoice. The minimum is 50 units.
+
+Below the field, Schematic converts the units into money at the unit price you have already configured,
+so you can confirm that 10,000 units at \$0.02 comes to \$200 of usage before you save. In Stripe, the
+value lands on the subscription item as a usage billing threshold.
+
+### What the customer sees
+
+Your buyer sees the threshold before they pay, which matters when your terms of service describe when
+you invoice. On the line item for that feature, in both checkout and the [pricing table](/components/element-library)
+component, Schematic renders an info icon next to the price. The customer hovers it to read the
+threshold that triggers an early invoice and to see that the rest is billed monthly.
+
 ## Negative Quantities (Usage Adjustments)
 
 Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key** — publishable API keys will reject them.
