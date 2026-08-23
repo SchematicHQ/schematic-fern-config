@@ -425,6 +425,9 @@ components:
     AuditLogResponseData:
       type: object
       properties:
+        account_member_id:
+          type: string
+          nullable: true
         actor_type:
           $ref: '#/components/schemas/ActorType'
         api_key:
