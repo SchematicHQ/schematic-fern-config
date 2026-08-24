@@ -16,6 +16,7 @@ This page is a map of what exists and where to find it. The detailed setup lives
 | Hard limit | Metered features | You | The entitlement, on a plan or add on |
 | Soft limit | Overage pricing | You, visible to the customer | The entitlement, on a plan or add on |
 | Tier limit | Tiered pricing | Derived from the tiers you define | The entitlement's pricing tiers |
+| Billing threshold | Pay as you go and overage entitlements | You, visible to the customer | The entitlement, on a plan or add on |
 | Top-up Availability | Credit grants | You, or the customer if you allow it | Catalog > Plans > the credit grant |
 | Buyers can purchase credit bundles | Credit grants | You | Catalog > Plans > the credit grant |
 | Overrides | A single company | You | The company's page |
@@ -40,6 +41,14 @@ Each type has a warning event that fires on approach and a reached event that fi
 | `entitlement.soft_limit.reached` | 100% of the soft limit |
 | `entitlement.tier_limit.warning` | 75% of the tier limit |
 | `entitlement.tier_limit.reached` | 100% of the tier limit |
+
+## Invoicing before the period closes
+
+Every control above changes what a customer may consume. A **billing threshold** changes when you
+collect instead: once usage on a pay as you go or overage entitlement reaches the number of units you
+set, Stripe invoices right away rather than holding the charge until the period ends, which caps how
+much unpaid usage you carry on one account. The customer sees the threshold on the feature's line item
+in checkout, so they agree to it when they buy. See [Billing thresholds](/billing/usage-based-billing#billing-thresholds).
 
 ## Controls on a credit balance
 
