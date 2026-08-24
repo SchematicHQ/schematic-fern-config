@@ -7873,6 +7873,13 @@ components:
             standard plan assigned by invoice through Manage Plan.
         plan_id:
           type: string
+        prorate_first_period:
+          type: boolean
+          description: >-
+            Whether the shortened period the renewal date created was billed pro
+            rata when the subscription started. False means that period is free
+            and the first invoice is the one raised on the renewal date.
+          nullable: true
         published_at:
           type: string
           format: date-time
@@ -13214,6 +13221,13 @@ components:
           nullable: true
         address:
           $ref: '#/components/schemas/CustomerBillingAddress'
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The date the subscription's billing period renews on. Only honored
+            on a first publish that starts a subscription.
+          format: date-time
+          nullable: true
         coupon_external_id:
           type: string
           nullable: true
@@ -13244,6 +13258,14 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        prorate_first_period:
+          type: boolean
+          description: >-
+            When true, the partial period between the subscription starting and
+            its renewal date is billed pro rata straight away. When false that
+            period is free and no invoice is raised until the renewal date. Only
+            applies alongside billing_cycle_anchor. Defaults to true.
+          nullable: true
         proration_behavior:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
@@ -13316,6 +13338,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/CustomPlanActivationStrategy'
           nullable: true
+        billing_cycle_anchor:
+          type: string
+          description: >-
+            The date the subscription's billing period renews on. Only honored
+            when the retry creates a subscription.
+          format: date-time
+          nullable: true
         customer_email:
           type: string
           maxLength: 255
@@ -13324,6 +13353,14 @@ components:
           format: int64
           nullable: true
           maximum: 365
+        prorate_first_period:
+          type: boolean
+          description: >-
+            When true, the partial period between the subscription starting and
+            its renewal date is billed pro rata straight away. When false that
+            period is free and no invoice is raised until the renewal date. Only
+            applies alongside billing_cycle_anchor. Defaults to true.
+          nullable: true
         send_invoice:
           type: boolean
           description: >-
