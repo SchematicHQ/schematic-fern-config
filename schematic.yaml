@@ -3334,6 +3334,8 @@ components:
           items:
             $ref: '#/components/schemas/PaymentMethodResponseData'
           maxItems: 1000
+        pending_migration:
+          $ref: '#/components/schemas/PendingMigrationResponseData'
         plan:
           $ref: '#/components/schemas/CompanyPlanWithBillingSubView'
         plans:
@@ -4274,6 +4276,14 @@ components:
         - source_plan_id
         - compatible_plan_ids
       title: CompatiblePlansResponseData
+    CompleteMigrationNowRequestBody:
+      type: object
+      properties:
+        proration_behavior:
+          allOf:
+            - $ref: '#/components/schemas/MigrationProrationBehavior'
+          nullable: true
+      title: CompleteMigrationNowRequestBody
     ComponentCapabilities:
       type: object
       properties:
@@ -11131,6 +11141,31 @@ components:
         - provider_type
         - updated_at
       title: PaymentMethodResponseData
+    PendingMigrationResponseData:
+      type: object
+      properties:
+        migration_id:
+          type: string
+        scheduled_for:
+          type: string
+          format: date-time
+          nullable: true
+        to_plan_id:
+          type: string
+        to_plan_name:
+          type: string
+        to_plan_version_id:
+          type: string
+        to_plan_version_number:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - migration_id
+        - to_plan_id
+        - to_plan_name
+        - to_plan_version_id
+      title: PendingMigrationResponseData
     PlanBillingSource:
       type: string
       enum:
@@ -12456,6 +12491,7 @@ components:
     PlanVersionCompanyMigrationStatus:
       type: string
       enum:
+        - cancelled
         - completed
         - failed
         - in_progress
@@ -12523,6 +12559,10 @@ components:
           format: int64
         id:
           type: string
+        next_due_at:
+          type: string
+          format: date-time
+          nullable: true
         plan_id:
           type: string
         plan_version_id_from:
@@ -12573,6 +12613,7 @@ components:
     PlanVersionMigrationStatus:
       type: string
       enum:
+        - cancelled
         - completed
         - failed
         - in_progress
@@ -12580,6 +12621,7 @@ components:
     PlanVersionMigrationStrategy:
       type: string
       enum:
+        - end_of_billing_period
         - immediate
         - leave
     PlanVersionResponseData:
@@ -31219,6 +31261,94 @@ paths:
                   - data
                   - params
                 title: GetMigrationResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/{plan_version_migration_id}/cancel:
+    post:
+      operationId: cancelMigration
+      summary: Cancel migration
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_migration_id
+          in: path
+          description: plan_version_migration_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CancelMigrationParams
+                required:
+                  - data
+                  - params
+                title: CancelMigrationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plan-version-migrations/{plan_version_migration_id}/complete-now:
+    post:
+      operationId: completeMigrationNow
+      summary: Complete migration now
+      tags:
+        - planmigrations
+      parameters:
+        - name: plan_version_migration_id
+          in: path
+          description: plan_version_migration_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteMigrationNowRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionMigrationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CompleteMigrationNowParams
+                required:
+                  - data
+                  - params
+                title: CompleteMigrationNowResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
