@@ -8,9 +8,10 @@ which SDK pages are generated and will be overwritten.
 
 ## Writing rules
 
-These apply to every `.mdx` file under `fern/docs/pages/`. Nothing blocks a merge on them.
-`scripts/prose_lint.py` covers the mechanical ones and runs weekly to catch drift, so follow the
-rules as you write rather than expecting a gate to catch you. Run it locally before opening a PR.
+These apply to every `.mdx` file under `fern/docs/pages/`. Nothing in CI blocks a merge on them.
+`scripts/prose_lint.py` covers the mechanical ones, and a weekly job on Ryan's machine runs it
+against `main` and opens a PR when it finds drift. Follow the rules as you write rather than
+expecting the sweep to catch you, and run the lint locally before opening a PR.
 
 **No em dashes in body prose.** Use commas or periods, or restructure. The one exception is the
 hub-bullet format, `- [Link](/slug) — lowercase outcome sentence`, which is a sanctioned
