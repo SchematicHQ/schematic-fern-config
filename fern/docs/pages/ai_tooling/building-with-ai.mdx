@@ -105,7 +105,7 @@ Read-only API keys can use only the read tools, which makes them a reasonable ch
 
 **The assistant returns no companies, or the wrong ones.** Your connection points at a different environment than the one you have open in the app. Each Schematic environment carries its own companies, plans, and features, so a connection to sandbox looks empty next to production data. Disconnect the server in your client, reconnect, and pick the environment deliberately at sign-in.
 
-**A write tool comes back with a permission error.** Either you chose read-only when you connected, or your role in Schematic stops short of the change you asked for. The connection runs as you, so reconnecting with read and write access helps only when your role already allows that change in the app.
+**A write tool returns a permission error.** Either you connected read-only, or your role in Schematic doesn't have write access. Reconnect and choose read and write. If that doesn't fix it, ask an admin to update your role.
 
 **Your client never finishes the OAuth flow.** Clients that speak only SSE, and clients running somewhere without outbound internet access, cannot complete the browser handoff. Authenticate with a secret API key as a bearer token instead, using the setup above.
 
