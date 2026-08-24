@@ -109,8 +109,6 @@ Read-only API keys can use only the read tools, which makes them a reasonable ch
 
 **Your client never finishes the OAuth flow.** Clients that speak only SSE, and clients running somewhere without outbound internet access, cannot complete the browser handoff. Authenticate with a secret API key as a bearer token instead, using the setup above.
 
-**API key authentication returns a 401.** Confirm you are sending a secret key rather than a publishable one, and that the key belongs to the environment you mean to query. A production key pointed at sandbox data fails the same way an invalid key does.
-
 **Tools you expect are missing.** Most clients cache the tool list from the moment they connect, so a server that gained tools since then still looks the way it did on day one. Restart the client, or remove and re-add the server, and the current list loads.
 
 ## Best practices
