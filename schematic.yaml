@@ -10184,6 +10184,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/OnboardingPath'
           nullable: true
+        pricing_page_url:
+          type: string
+          maxLength: 512
         requirements:
           type: array
           items:
@@ -10204,6 +10207,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/OnboardingTrack'
           nullable: true
+        website_url:
+          type: string
+          maxLength: 512
       required:
         - milestones
         - requirements
