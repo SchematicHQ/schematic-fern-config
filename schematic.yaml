@@ -10189,6 +10189,12 @@ components:
           items:
             $ref: '#/components/schemas/OnboardingRequirementView'
           maxItems: 10
+        stripe_import:
+          type: string
+          enum:
+            - not_started
+            - running
+            - complete
         suggested_next:
           type: array
           items:
