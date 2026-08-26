@@ -10193,11 +10193,7 @@ components:
             $ref: '#/components/schemas/OnboardingRequirementView'
           maxItems: 10
         stripe_import:
-          type: string
-          enum:
-            - not_started
-            - running
-            - complete
+          $ref: '#/components/schemas/OnboardingStripeImport'
         suggested_next:
           type: array
           items:
@@ -11012,6 +11008,12 @@ components:
         - id
         - status
       title: OnboardingRequirementView
+    OnboardingStripeImport:
+      type: string
+      enum:
+        - complete
+        - not_started
+        - running
     OnboardingTrack:
       type: string
       enum:
