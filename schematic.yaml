@@ -10176,6 +10176,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        dismissed_at:
+          type: string
+          format: date-time
+          nullable: true
         environment_id:
           type: string
           nullable: true
@@ -15487,6 +15491,9 @@ components:
     UpdateOnboardingStateRequestBody:
       type: object
       properties:
+        dismissed:
+          type: boolean
+          nullable: true
         path:
           allOf:
             - $ref: '#/components/schemas/OnboardingPath'
