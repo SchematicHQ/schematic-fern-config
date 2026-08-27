@@ -40,8 +40,8 @@ When you call `POST /manage-plan`, you provide the complete desired plan state f
 
 Because this is a replace-style API, you must always include the full desired state. The two fields most commonly missed:
 
-- **`add_on_selections`** — if a company currently has add-ons A and B, and you want to add C, you must include all three. Sending only C will remove A and B.
-- **`pay_in_advance_entitlements`** — if a company has 10 seats today and you make any plan change, you must include `{ price_id, quantity: 10 }` in this array, or their seat count will be set to zero.
+- **`add_on_selections`** replaces the whole set. If a company currently has add-ons A and B and you want to add C, include all three, because sending only C removes A and B.
+- **`pay_in_advance_entitlements`** works the same way. If a company has 10 seats today and you make any plan change, include `{ price_id, quantity: 10 }` in this array, or their seat count drops to zero.
 
 The safest pattern is: **fetch the company's current state, build the request from it, then mutate only what you intend to change.**
 

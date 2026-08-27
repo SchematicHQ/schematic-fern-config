@@ -6,8 +6,8 @@ description: Submit events with client-provided timestamps to import historical 
 
 By default, Schematic stamps every event with the time it was received. Two optional flags on the track-event payload let you override that and submit an event with the time it *actually happened*:
 
-- **`trusted_client_clock`** — use the client-provided `sent_at` as the event's effective timestamp. Billing side effects still fire (against the logical timestamp). Best for **correcting recent usage** that arrived late or with a bad timestamp.
-- **`backfill`** — analytics-only mode for **importing historical usage**. Events are stored at their logical time but skip all billing side effects.
+- **`trusted_client_clock`** uses the client-provided `sent_at` as the event's effective timestamp. Billing side effects still fire, against the logical timestamp. Reach for it when **correcting recent usage** that arrived late or with a bad timestamp.
+- **`backfill`** is an analytics-only mode for **importing historical usage**. Events are stored at their logical time but skip all billing side effects.
 
 Both flags require a **secret API key** (`sch_` prefix) and a `sent_at` value on the event. See [Authentication](/api-reference/authentication) for key types.
 
@@ -61,7 +61,7 @@ All normal processing still happens. Billing impact, webhooks, and activity upda
 **Still happens:**
 - The event is stored at its logical timestamp and shows up in analytics there.
 - Feature usage counters reflect the event for periods the logical timestamp falls within.
-- Companies and users referenced by the event are still created or linked from the event keys — their `last_seen_at` just isn't touched.
+- Companies and users referenced by the event are still created or linked from the event keys, but their `last_seen_at` is not touched.
 
 ```json
 {

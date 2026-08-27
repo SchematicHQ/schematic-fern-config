@@ -32,9 +32,9 @@ Seat-based billing in Schematic is implemented using **trait-based entitlements*
 1. Create a feature and choose "Trait-based" in the control dropdown.
 2. Follow the wizard to specify the trait key that will represent seat usage (e.g. `seats_used`).
 3. Entitle the feature to a plan and set the limit. You have a few options:
-   - **Numerical limit** -- every company on the plan gets the same seat limit.
-   - **No limit** -- unlimited seats, useful for enterprise or internal plans.
-   - **Trait** -- each company's limit is read from a trait on their profile (e.g. `seats_allocated`), which is useful when seat counts are negotiated per customer.
+   - **Numerical limit** gives every company on the plan the same seat limit.
+   - **No limit** allows unlimited seats, useful for enterprise or internal plans.
+   - **Trait** reads each company's limit from a trait on their profile (e.g. `seats_allocated`), which is useful when seat counts are negotiated per customer.
 
 <Note>Under most common situations, you'll want to choose **Numerical limit** (e.g. "Pro plan grants 5 seats") or **No limit** (e.g. "Pro plan grants unlimited seats").</Note>
 
