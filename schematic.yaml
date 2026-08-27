@@ -7524,6 +7524,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        tracked_amount:
+          type: number
+          format: double
         updated_at:
           type: string
           format: date-time
@@ -7532,6 +7535,7 @@ components:
         - company_id
         - credit_type_id
         - granted_amount
+        - tracked_amount
         - expires_at
         - created_at
         - updated_at
