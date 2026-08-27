@@ -10172,6 +10172,10 @@ components:
     GetOnboardingStateResp:
       type: object
       properties:
+        agent_connected_at:
+          type: string
+          format: date-time
+          nullable: true
         environment_id:
           type: string
           nullable: true
@@ -10973,6 +10977,7 @@ components:
     OnboardingRequirement:
       type: string
       enum:
+        - connect_agent
         - connect_billing
         - create_api_key
         - first_flag_check
