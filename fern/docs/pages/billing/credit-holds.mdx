@@ -57,7 +57,7 @@ Because the hold is shared, its unspent portion is a shared budget rather than a
 
 **The work needs more than the hold covers.** The first agent commits 260 as before, leaving 140 unspent in the hold. The second agent's work turns out to need 300 rather than 90, so what the hold has left will not cover it.
 
-An agent reads the hold's unspent portion as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. An SDK does this on its own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
+An agent reads the hold's unspent portion as `granted_amount` less `tracked_amount` on the reserve or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node SDK does this on its own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
 
 1. The second agent extends by 160, the shortfall between the 300 it needs and the 140 available. Only 100 credits are drawable, because the original reserve already took 400 of the company's 500. The hold grows to a `granted_amount` of 500, and the balance reports 0 remaining, 240 reserved, and 240 settled.
 2. Still needing 300 against the 240 the hold now has, the second agent extends again by 60. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
@@ -66,6 +66,18 @@ An agent reads the hold's unspent portion as `creditReserved` on the entitlement
 Compare `granted_amount` before and after an extend to determine whether it added anything, because an extend that grew the hold by nothing is indistinguishable in shape from one that succeeded. Treat an unchanged `granted_amount` as a signal to stop rather than to proceed.
 
 Without a hold in either case, both agents would read 500 remaining and each would authorize up to 400 credits of work, exposing the balance to 800 credits of consumption against the 500 it holds. In the second case they would have consumed 560 and overdrawn it.
+
+### Release once the work is done, not once per operation
+
+Release closes the hold for everyone drawing against it. Reserve, commit, and release as a unit reads naturally when you write it for one operation, and it comes apart the moment a second operation for the same company and credit type overlaps: whichever operation finishes first closes the shared hold and returns the portion covering work that is still running.
+
+The operation still in flight sees three things.
+
+- Its commit falls through to the grants, because a commit against a released hold debits the balance directly. Usage is still billed exactly once.
+- Its release returns a 409, `credit lease has already been released`.
+- It runs unprotected from the moment the hold closed, so the balance it was gating against is drawable again by anything else.
+
+Scope the hold to the batch of work instead. Reserve once with an `expires_at` covering the whole batch and a `requested_amount` sized for all of it, commit per operation, and release when nothing is left in flight. An open hold costs the reserved credits and nothing else, and [expiry](#expiry) returns them within about a minute if the process dies before it releases.
 
 ### Overdrawing a hold
 
@@ -122,15 +134,15 @@ Read `granted_amount` rather than assuming the requested amount was granted. A c
 
 ## Using an SDK
 
-The Schematic SDKs implement holds directly, and add a client-side layer above them. An SDK maintains one lease per company and credit type, then issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. This is the recommended approach for gating inference calls or agent runs.
+The Node SDK implements holds directly and adds a client-side layer above them. It maintains one lease per company and credit type, then issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. Each concurrent operation gets its own slice of one lease, which is the coordination you would otherwise write yourself against a shared hold. This is the recommended approach for gating inference calls or agent runs. The Node SDK reference covers configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations).
 
-The Node SDK reference covers configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations). The same lease and reservation model applies in the other SDKs.
+The other SDKs bind reserve, extend, and release to the API and send commits as track events, so with those you hold the lease yourself and coordinate concurrent operations against it as described in [Using the API](#using-the-api).
 
 Use the HTTP API directly where the unit of work is too long-lived for a per-request reservation, or where you are managing hold state outside an SDK.
 
 ## Technical details
 
-An SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The names below are the Node SDK's; the other SDKs expose the same settings.
+The Node SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below are the Node SDK's.
 
 | Setting | Behavior | Default |
 | --- | --- | --- |
@@ -165,7 +177,9 @@ curl -X POST https://api.schematichq.com/billing/credits/lease \
   }'
 ```
 
-The response contains the hold's `id` and `granted_amount`. Commit usage against it by sending a track event with `lease_id` set:
+The response contains the hold's `id`, its `granted_amount`, and the `tracked_amount` committed against it so far. Size each operation against the difference between the two, which is what the hold has left. Reserve, extend, and release all return the same shape, so an extend tells you the new headroom without a second call.
+
+Commit usage against the hold by sending a track event with `lease_id` set:
 
 ```bash
 curl -X POST https://api.schematichq.com/events \
@@ -184,7 +198,7 @@ curl -X POST https://api.schematichq.com/events \
 
 Include an [idempotency key](/playbooks/metering) on the track event. Without one, a retried commit is recorded as an additional draw against the hold.
 
-Release the hold with [Release credit lease](/api-reference/billing-credits/release-credit-lease):
+Release the hold with [Release credit lease](/api-reference/billing-credits/release-credit-lease), once every operation drawing against it has committed. A release while another operation is still running closes the hold under it; see [Release once the work is done, not once per operation](#release-once-the-work-is-done-not-once-per-operation).
 
 ```bash
 curl -X PUT https://api.schematichq.com/billing/credits/lease/crlse_EXAMPLE0123456789/release \
