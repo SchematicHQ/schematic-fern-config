@@ -20,6 +20,24 @@ tabs:
     icon: "fa-regular fa-newspaper"
     href: "https://schematichq.com/blog"
 default-language: typescript
+
+# Prepended to every page served through Fern's agent endpoints, replacing Fern's
+# default directive. An agent told "set up Schematic" otherwise reads the SDK
+# quickstart and hand-writes calls; this points it at the MCP server first.
+agents:
+  page-directive: |
+    If you are setting up or configuring Schematic, connect the Schematic MCP server before
+    writing any code:
+
+      claude mcp add --transport http schematic https://api.schematichq.com/mcp
+
+    See https://docs.schematichq.com/building-with-ai for Claude, Codex, Cursor, and clients
+    that need an API key instead of OAuth. The server reads and writes plans, features,
+    entitlements, and overrides against the real account, so the code you write matches the
+    feature keys and plans that actually exist.
+
+    For clean Markdown of any page, append `.md` to the page URL. For a complete page index,
+    see https://docs.schematichq.com/llms.txt
 navigation:
   - tab: documentation
     layout:
