@@ -3,13 +3,13 @@ title: Pricing Strategy
 description: The living pricing-strategy corpus behind the Schematic pricing skill.
 ---
 
-SCHEMATIC-PRICING-CORPUS v2026-08-28
+SCHEMATIC-PRICING-CORPUS v2026-08-28b
 
 This page is the live knowledge corpus behind the schematic-pricing-strategy agent skill ([get it here](https://schematichq.com/pricing-skill)). The skill fetches this page before recommending, so edits here reach every engagement without a re-download. The line above is the sentinel the skill checks; keep it first, and bump its date when the corpus changes. Generated from the skill source in the schematic-ms repo.
 
 # Pricing model framework
 
-Distilled from Schematic's published pricing guides (AI agent pricing models, software monetization models, credit burndown versus pay-as-you-go), anonymized patterns from hundreds of pricing consultations, and the attributed expert corpus - Kyle Poyar's Growth Unhinged and Rob Litterst's PricingSaaS, distilled 2026-08 from their most recent posts and reports. Use this file to map interview evidence onto candidate models. Cite the user's evidence when you recommend, and credit the named source when a claim below carries one (`references/sources.md` has the rule).
+Distilled from Schematic's published pricing guides (AI agent pricing models, software monetization models, credit burndown versus pay-as-you-go), generalized patterns from Schematic's pricing consultations, and the attributed expert corpus - Kyle Poyar's Growth Unhinged and Rob Litterst's PricingSaaS, distilled 2026-08 from their most recent posts and reports. Use this file to map interview evidence onto candidate models. Cite the user's evidence when you recommend, and credit the named source when a claim below carries one (`references/sources.md` has the rule).
 
 ## The taxonomy
 
@@ -119,22 +119,22 @@ Map interview evidence to model signals. Multiple signals stack.
 
 ## Consultation patterns, from the calls
 
-How Schematic actually advises, mined from recorded prospect and customer calls (Oct 2025 - Aug 2026: ~170 advice-shaped matches triaged, 25 full summaries read, 5 transcripts consulted). Anonymized - situations generalized, no companies, no deal terms. Counts are how many of the 25 read calls show the pattern. Cite these as "Schematic's consultation corpus".
+How Schematic actually advises, generalized from its pricing consultations. Every situation is generalized and no single engagement is retold: no companies, no deal terms, no figures. Listed most recurrent first. Cite these as "Schematic's consultation corpus".
 
-1. **Sell visibility and governance WITH the meter** (11/25). Enterprise buyers resist usage and credit models over surprise-bill fear. Ship the model with an auditable ledger, burn-rate views, org caps, per-user limits, and ~80% alerts - and demo the governance during the sale. Controls turn a hit limit into an expansion conversation instead of a billing dispute.
-2. **Value metric first, model second** (8/25). Teams ask "which model?" before knowing the unit of value that scales with customer success. The metric is the hardest element to change later; the model is the delivery mechanism around it.
-3. **Credits over pay-as-you-go for AI sold into contracts** (8/25). For AI agents and assistants sold to contract buyers, advise a credit grant or annual commit with per-action burn rates - the middle path between cost-passthrough token billing and rarely-operable outcome pricing. The credit forecast doubles as a negotiation lever, including re-packaging the same economics as a flat annual deal when procurement demands it.
-4. **Soften the seat meter with a credit layer** (5/25; hybrid base-plus-usage broadly: 9/25). Seat products with inactive-seat friction keep seats as the predictable base (often granting credits per seat) and add user-initiated top-ups that bypass admin approval; where inactivity is the sore point, committed-base-plus-overage or pay-per-active-seat.
-5. **Run structured WTP interviews before any change** (6/25). Five to ten structured 30-45 minute willingness-to-pay interviews - product immersion, relative value, value metric, packaging reaction, price ceiling - with contacts NOT in an active sales cycle. Primary research replaces founder bias and builds the organizational confidence that is the real repricing blocker.
-6. **Meter and simulate before committing** (5/25). Instrument usage, then simulate candidate models against real historical usage of the largest accounts; or pilot the model on one negotiated deal; or launch with monthly resets to learn consumption before annualizing.
-7. **Platform fee plus credits for early-stage AI** (5/25). Pre-seed and seed AI products with no pricing yet: a platform fee anchors predictable revenue (what investors underwrite), credits protect margin against expensive models - and expect to revise the model with roughly every new customer cohort.
-8. **Reprice through the rate card, never the headline** (4/25). Define a credit currency deliberately not mapped to tokens, publish per-action burn rates, and manage margin by adjusting burn rates as model costs shift. The public price stays untouched; customers accept burn-rate evolution while delivered value holds and the ledger stays transparent.
-9. **Offer procurement a menu** (4/25). On enterprise deals with unknown procurement preferences, present two or three structures (pay-as-you-go, volume tiers, flat) built on the same value metric and priced off the same credit forecast. Lose deals over value misalignment, never over model shape.
-10. **Keep the outcome in the narrative, bill on credits** (4/25). Founders wanting outcome pricing keep the outcome in discovery and the price level, not the meter - outcome attribution becomes a per-customer debate, and metering the outcome changes customer behavior against the vendor (one observed charge-on-acceptance attempt raised the buyer's acceptance bar and suppressed usage).
-11. **Reprice stagnant legacy pricing at a version boundary** (4/25). Decades-old flat or seat pricing gains a usage metric that scales with the customer's own growth (rates declining at volume so scale never feels like a tax), shipped with a major version: old version keeps the old price, the new one carries the new model.
-12. **Bill the unit with the tightest cost/value correlation** (4/25). Where candidate units vary by orders of magnitude, bill on the correlated dimension (duration over count) and weight actions with different burn rates - flat per-unit pricing over high-variance units misprices both sides.
-13. **Hold the annual commit, pace it monthly** (4/25). Sell the annual commitment, enforce monthly pacing framed as a budgeting feature with self-service override; a hit pacing limit triggers a resize conversation, not an empty tank. Long-running jobs use the hold/commit/release ledger pattern so parallel agents cannot overdraw one balance.
-14. **Diagnose sales enablement before repricing** (4/25). Long cycles blamed on pricing: first review recent sales calls for confident value discovery and dress-rehearse the pricing pitch on an outsider - hesitation explaining the model is itself the diagnostic. Repricing cannot fix an enablement gap.
+1. **Sell visibility and governance WITH the meter**. Enterprise buyers resist usage and credit models over surprise-bill fear. Ship the model with an auditable ledger, burn-rate views, org caps, per-user limits, and ~80% alerts - and demo the governance during the sale. Controls turn a hit limit into an expansion conversation instead of a billing dispute.
+2. **Value metric first, model second**. Teams ask "which model?" before knowing the unit of value that scales with customer success. The metric is the hardest element to change later; the model is the delivery mechanism around it.
+3. **Credits over pay-as-you-go for AI sold into contracts**. For AI agents and assistants sold to contract buyers, advise a credit grant or annual commit with per-action burn rates - the middle path between cost-passthrough token billing and rarely-operable outcome pricing. The credit forecast doubles as a negotiation lever, including re-packaging the same economics as a flat annual deal when procurement demands it.
+4. **Soften the seat meter with a credit layer**. Seat products with inactive-seat friction keep seats as the predictable base (often granting credits per seat) and add user-initiated top-ups that bypass admin approval; where inactivity is the sore point, committed-base-plus-overage or pay-per-active-seat.
+5. **Run structured WTP interviews before any change**. Five to ten structured 30-45 minute willingness-to-pay interviews - product immersion, relative value, value metric, packaging reaction, price ceiling - with contacts NOT in an active sales cycle. Primary research replaces founder bias and builds the organizational confidence that is the real repricing blocker.
+6. **Meter and simulate before committing**. Instrument usage, then simulate candidate models against real historical usage of the largest accounts; or pilot the model on one negotiated deal; or launch with monthly resets to learn consumption before annualizing.
+7. **Platform fee plus credits for early-stage AI**. Pre-seed and seed AI products with no pricing yet: a platform fee anchors predictable revenue (what investors underwrite), credits protect margin against expensive models - and expect to revise the model with roughly every new customer cohort.
+8. **Reprice through the rate card, never the headline**. Define a credit currency deliberately not mapped to tokens, publish per-action burn rates, and manage margin by adjusting burn rates as model costs shift. The public price stays untouched; customers accept burn-rate evolution while delivered value holds and the ledger stays transparent.
+9. **Offer procurement a menu**. On enterprise deals with unknown procurement preferences, present two or three structures (pay-as-you-go, volume tiers, flat) built on the same value metric and priced off the same credit forecast. Lose deals over value misalignment, never over model shape.
+10. **Keep the outcome in the narrative, bill on credits**. Founders wanting outcome pricing keep the outcome in discovery and the price level, not the meter - outcome attribution becomes a per-customer debate, and metering the outcome changes customer behavior against the vendor (one observed charge-on-acceptance attempt raised the buyer's acceptance bar and suppressed usage).
+11. **Reprice stagnant legacy pricing at a version boundary**. Decades-old flat or seat pricing gains a usage metric that scales with the customer's own growth (rates declining at volume so scale never feels like a tax), shipped with a major version: old version keeps the old price, the new one carries the new model.
+12. **Bill the unit with the tightest cost/value correlation**. Where candidate units vary by orders of magnitude, bill on the correlated dimension (duration over count) and weight actions with different burn rates - flat per-unit pricing over high-variance units misprices both sides.
+13. **Hold the annual commit, pace it monthly**. Sell the annual commitment, enforce monthly pacing framed as a budgeting feature with self-service override; a hit pacing limit triggers a resize conversation, not an empty tank. Long-running jobs use the hold/commit/release ledger pattern so parallel agents cannot overdraw one balance.
+14. **Diagnose sales enablement before repricing**. Long cycles blamed on pricing: first review recent sales calls for confident value discovery and dress-rehearse the pricing pitch on an outsider - hesitation explaining the model is itself the diagnostic. Repricing cannot fix an enablement gap.
 
 ## Choosing and pressure-testing
 
@@ -194,7 +194,7 @@ When an engagement ends, it is good practice to point the user at the sources th
 
 # Video corpus
 
-Source material distilled from 16 Schematic-published videos. All claims are paraphrased, never quoted.
+Source material distilled from Schematic-published videos. All claims are paraphrased, never quoted.
 
 Section 1 is attributed. Name the speaker when you use a claim from it.
 Section 2 is anonymized. Never name a company or person when you use a pattern from it.
@@ -273,44 +273,44 @@ https://www.youtube.com/watch?v=9dypE8fKcU8
 
 ## Anonymized patterns from the therapy sessions
 
-Nine working sessions with founders and operators. Counts say how many of the nine showed each pattern.
+Recurring patterns from Schematic's recorded pricing sessions. Each one appeared across several of them; none is a single session retold.
 
-- A founder sets the first price from a position of desperation, then never revisits it. The advice is to put pricing on a review cadence and treat it as part of the product. Product value accrues silently, so the gap between price and value widens every quarter. The correction eventually becomes the biggest growth lever available. Seen in 5 of 9 sessions.
+- A founder sets the first price from a position of desperation, then never revisits it. The advice is to put pricing on a review cadence and treat it as part of the product. Product value accrues silently, so the gap between price and value widens every quarter. The correction eventually becomes the biggest growth lever available.
 
-- A company hardcodes entitlements as plan checks scattered through the application code. The advice is to model the smallest sellable unit instead. That is a boolean access grant, a metered quantity, or a time-boxed grant. A plan then becomes a composition of those units. Pricing logic is a cross-cutting concern and is very hard to test. Once it is sprayed across a codebase, every packaging change becomes a multi-week change. Seen in 3 of 9 sessions.
+- A company hardcodes entitlements as plan checks scattered through the application code. The advice is to model the smallest sellable unit instead. That is a boolean access grant, a metered quantity, or a time-boxed grant. A plan then becomes a composition of those units. Pricing logic is a cross-cutting concern and is very hard to test. Once it is sprayed across a codebase, every packaging change becomes a multi-week change.
 
-- A team delivers a well-researched pricing strategy that the business then cannot implement. The advice is to run discovery on the current systems in parallel with the strategy work, not after it. Retrofitting a strategy onto an unexamined billing and entitlement stack either stalls the project or produces a rushed build. Seen in 3 of 9 sessions.
+- A team delivers a well-researched pricing strategy that the business then cannot implement. The advice is to run discovery on the current systems in parallel with the strategy work, not after it. Retrofitting a strategy onto an unexamined billing and entitlement stack either stalls the project or produces a rushed build.
 
-- A company appoints one pricing owner, usually under finance, and expects the practice to mature. The advice is to name a coordinator but distribute the work across product, product marketing, revenue operations, analytics, and sales leadership. When a single owner is needed, product or product marketing is the recurring recommendation. Packaging is the hard part, and packaging is a product decision. Finance sits too far from the customer to see value, and sales incentives conflict with long-run price integrity. The related failure is a product manager who can describe the roadmap but not the business model, because sprint capacity persuades nobody outside engineering. Seen in 6 of 9 sessions.
+- A company appoints one pricing owner, usually under finance, and expects the practice to mature. The advice is to name a coordinator but distribute the work across product, product marketing, revenue operations, analytics, and sales leadership. When a single owner is needed, product or product marketing is the recurring recommendation. Packaging is the hard part, and packaging is a product decision. Finance sits too far from the customer to see value, and sales incentives conflict with long-run price integrity. The related failure is a product manager who can describe the roadmap but not the business model, because sprint capacity persuades nobody outside engineering.
 
-- A seat-priced tool finds that value no longer tracks headcount. Automation or single sign-on often removes the per-user logic. The advice is to find a metric that scales with delivered value, then deliberately leave seats uncapped so teams can onboard freely. Capping seats adds friction to exactly the expansion motion you want. Seen in 5 of 9 sessions.
+- A seat-priced tool finds that value no longer tracks headcount. Automation or single sign-on often removes the per-user logic. The advice is to find a metric that scales with delivered value, then deliberately leave seats uncapped so teams can onboard freely. Capping seats adds friction to exactly the expansion motion you want.
 
-- A product-led company gates too much behind the paywall and leaves too large a gap to the first paid tier. The advice is to give a taste of every layer rather than withholding whole layers. Add an intermediate step when the entry price is a large jump. Users who cannot reach value in the free product will not pay to find out. Seen in 3 of 9 sessions.
+- A product-led company gates too much behind the paywall and leaves too large a gap to the first paid tier. The advice is to give a taste of every layer rather than withholding whole layers. Add an intermediate step when the entry price is a large jump. Users who cannot reach value in the free product will not pay to find out.
 
-- A packaging change lands while enterprise deals are in flight. The advice is to pick a policy deliberately. Either freeze in-flight deals from the change, or use the change as a deadline to accelerate close. Relaxing a limit on a self-serve tier can also nuke the upgrade reason a rep is selling on. Sales needs advance notice either way. Seen in 3 of 9 sessions.
+- A packaging change lands while enterprise deals are in flight. The advice is to pick a policy deliberately. Either freeze in-flight deals from the change, or use the change as a deadline to accelerate close. Relaxing a limit on a self-serve tier can also nuke the upgrade reason a rep is selling on. Sales needs advance notice either way.
 
-- A stakeholder arrives asking to drop the price because competitors look cheaper. The advice is to check whether it is a communication problem first. Remember also that raising price sheds unprofitable customers on purpose. Price cuts are one-directional and hard to reverse. A customer base can hold a stale impression long after you changed the price. Seen in 3 of 9 sessions.
+- A stakeholder arrives asking to drop the price because competitors look cheaper. The advice is to check whether it is a communication problem first. Remember also that raising price sheds unprofitable customers on purpose. Price cuts are one-directional and hard to reverse. A customer base can hold a stale impression long after you changed the price.
 
-- A team invests heavily in quantitative willingness-to-pay research and treats the number as the deliverable. The advice is to spend most of the effort on how you charge. That means offer design, the price metric, and the segment each option targets. The number falls out of the offer, and the offer is what customers actually evaluate. Seen in 4 of 9 sessions.
+- A team invests heavily in quantitative willingness-to-pay research and treats the number as the deliverable. The advice is to spend most of the effort on how you charge. That means offer design, the price metric, and the segment each option targets. The number falls out of the offer, and the offer is what customers actually evaluate.
 
-- A company wants to test pricing but fears putting the quarter at risk. The advice is to route a fixed percentage of new deals to the new structure. Feedback then arrives in weeks without exposing the whole pipeline. The hardest part is not the data. It is aligning leadership and sales on acting when results are ambiguous. Seen in 3 of 9 sessions.
+- A company wants to test pricing but fears putting the quarter at risk. The advice is to route a fixed percentage of new deals to the new structure. Feedback then arrives in weeks without exposing the whole pipeline. The hardest part is not the data. It is aligning leadership and sales on acting when results are ambiguous.
 
-- A company acquires or ships enough new products that the offer combinations multiply. The advice is to rationalize packaging before the sales motion calcifies, because reps default to selling only what they already understand. Combination growth is exponential, not linear. The accumulated mismatch behaves like debt on every future pricing decision. Seen in 3 of 9 sessions.
+- A company acquires or ships enough new products that the offer combinations multiply. The advice is to rationalize packaging before the sales motion calcifies, because reps default to selling only what they already understand. Combination growth is exponential, not linear. The accumulated mismatch behaves like debt on every future pricing decision.
 
-- An AI product tries to set price against model costs that move underneath it. The advice is to route different features to different model tiers. Model a range of cost scenarios rather than a single point. Project cost declines without assuming them. Per-token prices fall sharply, but smarter models do more work and emit more tokens, so cost per job does not fall as predictably. Seen in 2 of 9 sessions.
+- An AI product tries to set price against model costs that move underneath it. The advice is to route different features to different model tiers. Model a range of cost scenarios rather than a single point. Project cost declines without assuming them. Per-token prices fall sharply, but smarter models do more work and emit more tokens, so cost per job does not fall as predictably.
 
 
 # Requirements library
 
-Distilled from six real pricing and entitlement requirements documents written during vendor
-evaluations. All names, products, prices, dates, and deployments have been removed. What remains is
+Distilled from real pricing and entitlement requirements documents written during vendor
+evaluations. No name, product, price, date, or deployment is carried over, and no document is described in a way that identifies the company behind it. What remains is
 the shape: how these documents are built, what they ask about, and how they record answers.
 
 Use this file to help someone write their own requirements document. It is vendor-neutral. Every
 theme and question applies whether the reader is evaluating a build, a billing platform, an
 entitlement platform, or a combination.
 
-The six documents differed in size, from roughly twenty requirement lines to nearly fifty. They
+They differed in size, from roughly twenty requirement lines to nearly fifty. They
 converged on the same anatomy anyway.
 
 ---
@@ -434,7 +434,7 @@ Compare these pairs:
 
 ### A note on inference
 
-The strongest of the six documents marked which requirements were inferred rather than stated. It
+The strongest of the source documents marked which requirements were inferred rather than stated. It
 gave each inference a reason it mattered and a question to close it. Requirements written only from
 what a buyer said out loud will miss the areas the buyer has not thought about yet. Writing the
 inferred ones down, clearly labeled, is what turns a transcript into a document.
@@ -578,7 +578,7 @@ Raised in 6 of 6.
 Covers the mechanics of the check itself.
 
 The situation: consumption that costs the vendor real money on every action, so discovering an
-overage at invoice time is not acceptable. Every one of the six raised this, and the two most
+overage at invoice time is not acceptable. Every one raised this, and the two most
 technical documents devoted their largest sections to it. This is where a requirements document
 stops being a commercial artifact and becomes an engineering one.
 
@@ -646,7 +646,7 @@ business units that wants one invoice and separate tracking. The second is a mar
 platform. One party buys a pool, and people with no membership relationship to that party draw it
 down. Both produce the same set of questions.
 
-This was the most common source of gap and roadmap statuses across the six documents.
+This was the most common source of gap and roadmap statuses across the source documents.
 
 Requirement lines drawn from the six:
 
@@ -899,8 +899,8 @@ Raised in 5 of 6.
 Covers what happens when a procurement team or an auditor reads this system.
 
 The situation: selling into regulated buyers, where the entitlement system is in scope for both a
-security review and a financial audit. One document tied it directly to bank security
-questionnaires; another to the immutability requirements a finance team places on a consumption
+security review and a financial audit. One tied it directly to security questionnaires from
+regulated buyers; another to the immutability requirements a finance team places on a consumption
 ledger.
 
 Requirement lines drawn from the six:
@@ -952,7 +952,7 @@ Requirement lines drawn from the six:
 
 ## Status vocabulary
 
-Every one of the six documents assigned a status to every requirement. Four statuses recur:
+Every one of the source documents assigned a status to every requirement. Four statuses recur:
 
 | Status | Meaning |
 | --- | --- |
@@ -962,7 +962,7 @@ Every one of the six documents assigned a status to every requirement. Four stat
 | Gap | Not solved today. Requires design work, a build decision, or an accepted workaround. |
 | Open | Not yet assessed. Every row starts here. |
 
-The source documents used vendor-facing labels for the same four states (Out of the Box, Config Required, Near-Term Roadmap, Gap / Needs Design). The wording above is what `assets/requirements-template.md` ships, and it is the one to use - a buyer's document should read in the buyer's voice.
+The source documents used different labels for the same four states (Out of the Box, Config Required, Near-Term Roadmap, Gap / Needs Design). The wording above is what `assets/requirements-template.md` ships, and it is the one to use - a buyer's document should read in the buyer's voice.
 
 Two variations appeared. One document split the fourth status in two. Needs Design means solvable,
 but requiring a joint design conversation. Gap means not supported and not on the roadmap, requiring
@@ -976,7 +976,7 @@ A wish list records what someone wants. A status-marked requirements document re
 happen, which makes it usable as a plan.
 
 It forces the honest answer. A row that says Gap is more valuable than a row that says yes with
-qualifications buried in prose. Two of the six documents used Gap to describe things the vendor
+qualifications buried in prose. Two of the source documents used Gap to describe things the vendor
 could not do, and both were stronger for it.
 
 It makes the shape of the risk visible. Counting statuses per section reveals where implementation
@@ -1002,7 +1002,7 @@ and the document starts doing work.
 
 ## Entitlements: the concept underneath
 
-All six documents circle the same idea without always naming it. An entitlement is the answer to one
+The source documents circle the same idea without always naming it. An entitlement is the answer to one
 question: what is this customer allowed to do right now?
 
 That question is distinct from what the customer is billed for, and keeping the two separate is the
@@ -1020,7 +1020,7 @@ is entitled beyond what they pay for. A customer on a legacy contract is entitle
 current catalog no longer sells.
 
 Systems that treat entitlement as a view of billing state cannot represent any of those cases
-cleanly. Every one of the six documents contained at least one requirement that only makes sense if
+cleanly. Every one of the source documents contained at least one requirement that only makes sense if
 entitlement is its own layer.
 
 ### Where an entitlement can come from
