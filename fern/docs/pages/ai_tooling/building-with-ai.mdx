@@ -47,15 +47,13 @@ The MCP integration is particularly useful for **code generation**, where the as
   </Card>
 </CardGroup>
 
-Installing a client takes two steps that are easy to confuse. Adding the server writes a line of config, and your client will happily show the server in its list before it can call a single tool. Authenticating is what makes it work, and it is also where you make the two choices that decide what the assistant can see and do.
+OAuth is the better default for every client that supports it. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately, and there is no API key to store or rotate. Clients that cannot run the OAuth flow use [an API key](#connect-with-an-api-key) instead.
+
+Sign-in asks you two things, and both are fixed for the life of the connection. To change either, disconnect the server and connect again.
 
 **Which environment.** Each Schematic environment carries its own companies, plans, and features, so connecting to the wrong one gives you an assistant that reports an empty account.
 
 **Read-only, or read and write.** Read-only is the right default. A write connection can never do more than you can do in the Schematic app yourself.
-
-Both are fixed for the life of the connection. To change either, disconnect the server and connect again.
-
-OAuth is the better default for every client that supports it. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately, and there is no API key to store or rotate. Clients that cannot run the OAuth flow use [an API key](#connect-with-an-api-key) instead.
 
 ### Claude Code
 
