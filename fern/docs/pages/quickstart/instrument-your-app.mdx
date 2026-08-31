@@ -2,7 +2,7 @@
 title: Instrument your app
 subtitle: Wire Schematic into your application in five moves
 slug: quickstart/instrument-your-app
-description: The code track of the quickstart. Install an SDK, identify companies, check entitlements, send usage events, and render a component.
+description: The code track of the quickstart. Connect the MCP server, install an SDK, identify companies, check entitlements, send usage events, and render a component.
 ---
 
 This is the code track. Every step here is code you write once: mount the SDK, tell Schematic which company is active, meter what that company consumes, and enforce what it is entitled to. The plans, features, and allowances themselves are configured in the dashboard and change without a deploy, so nothing below hard-codes a limit or a price.
@@ -13,6 +13,16 @@ If the vocabulary is unfamiliar, [Concepts](/concepts) defines features, entitle
 
 - A Schematic account and a publishable key from [Settings, API Keys](https://app.schematichq.com/x/settings/api-keys).
 - At least one feature with a flag key. If nobody has created one yet, either run through [Set up your first plan](/quickstart/set-up-your-first-plan) or click **Generate Sample Data** on the Quickstart page in the app.
+
+## Connect the MCP server first
+
+If you are working through this with an AI coding assistant, connect Schematic's MCP server before you write any of the code below. The assistant then reads your real feature keys, plans, and entitlements out of the account instead of copying the placeholder names in these examples, and it can create the ones you are missing while you work.
+
+```bash
+claude mcp add --transport http schematic https://api.schematichq.com/mcp
+```
+
+Run `/mcp` to sign in, then pick an environment and whether the connection gets read-only or read and write access. [Building with AI](/building-with-ai) covers Claude, Codex, Cursor, and clients that need an API key instead of OAuth.
 
 ## 1. Install and mount the SDK
 
