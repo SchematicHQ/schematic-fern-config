@@ -63,9 +63,20 @@ Sign-in asks you two things, and both are fixed for the life of the connection. 
 claude mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
-2. Start Claude Code and run `/mcp`. The server appears in the list marked as needing authentication. Select it and press Enter to open the browser flow, then sign in and choose your environment and access level.
+2. Start Claude Code and list the servers with `/mcp`. Schematic is listed as needing authentication:
 
-3. Run `/mcp` again. The server now shows as connected, with the number of tools it exposes.
+```
+❯ schematic · △ needs authentication
+```
+
+Select it, press Enter, and follow the browser flow to sign in and choose your environment and access level.
+
+3. Run `/mcp` again to confirm:
+
+```
+❯ /mcp
+  ⎿  Authentication successful. Connected to schematic.
+```
 
 ### Claude
 
@@ -131,13 +142,21 @@ Confirm with `codex mcp list`.
 gemini mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
-2. Start Gemini CLI and run `/mcp list`. The server is listed as disconnected, pending OAuth. Authenticate it:
+2. Start Gemini CLI and list the servers with `/mcp list`. Schematic is listed as disconnected:
+
+```
+🔴 schematic - Disconnected (OAuth not authenticated)
+```
+
+3. Authenticate the server:
 
 ```bash
 /mcp auth schematic
 ```
 
-3. Run `/mcp list` again to confirm the server is connected.
+```
+ℹ ✅ Successfully authenticated with MCP server 'schematic'!
+```
 
 ### Claude Managed Agents
 
