@@ -1,0 +1,28 @@
+---
+title: AI Tooling Overview
+slug: ai
+description: Connect an AI assistant to your Schematic account over the hosted MCP server, for writing integration code or for running account work in chat.
+---
+
+Schematic hosts an MCP server at `https://api.schematichq.com/mcp`. Any MCP-compatible assistant can connect to it and work against your real account: the companies you have, the plans they are on, the features they are entitled to, and the usage they have recorded.
+
+Two audiences use the same server for different work, and the docs split along that line.
+
+<CardGroup cols={2}>
+  <Card title="Building with AI" icon="fa-solid fa-code" href="/building-with-ai">
+    For engineers. Connect the server to Claude Code, Cursor, Codex, or another coding assistant, so the integration code it writes uses your real feature keys and plans instead of invented ones.
+  </Card>
+  <Card title="Working with AI" icon="fa-solid fa-comments" href="/working-with-ai">
+    For customer success, RevOps, sales, and finance. Connect the server to Claude or ChatGPT and prep a renewal, surface churn and expansion signals, or check what was sold against what was provisioned.
+  </Card>
+</CardGroup>
+
+## What you decide at sign-in
+
+Both paths run the same OAuth flow, and that flow asks you two questions worth answering deliberately.
+
+**Which environment.** Each Schematic environment carries its own companies, plans, and features. A connection to sandbox looks like an empty account next to your production data, and the assistant reports it as an empty account rather than as a wrong environment. Pick the one you mean.
+
+**Read-only, or read and write.** Read-only is the right default for anything you are only asking questions about. Choose read and write when you intend the assistant to change an entitlement or create a feature. A write connection can never do more than you can do in the Schematic app yourself.
+
+Both choices are fixed for the life of the connection. To change either one, disconnect the server in your client and connect again.

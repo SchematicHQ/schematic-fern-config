@@ -24,26 +24,92 @@ The server speaks streamable HTTP and supports MCP OAuth, which is what most cli
 
 The MCP integration is particularly useful for **code generation**, where the assistant queries your actual Schematic data so the integration code it writes matches your real feature keys and plans. It also helps with **troubleshooting** a specific company, plan, or feature without leaving your editor, **analyzing usage patterns** through natural language queries, and **managing plans** by describing the change you want rather than clicking through the app.
 
-### Connect with OAuth
+## Install
 
-OAuth is the better default. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately. No API key to store or rotate.
+<CardGroup cols={3}>
+  <Card title="Cursor" icon="fa-solid fa-bolt" href="https://cursor.com/en-US/install-mcp?name=Schematic&config=eyJ1cmwiOiJodHRwczovL2FwaS5zY2hlbWF0aWNocS5jb20vbWNwIn0=">
+    One-click install
+  </Card>
+  <Card title="VS Code" icon="fa-solid fa-bolt" href="vscode:mcp/install?%7B%22url%22%3A%22https%3A%2F%2Fapi.schematichq.com%2Fmcp%22%2C%22name%22%3A%22Schematic%22%2C%22type%22%3A%22http%22%7D">
+    One-click install
+  </Card>
+  <Card title="Claude Code" icon="fa-solid fa-terminal" href="#claude-code">
+    See instructions
+  </Card>
+  <Card title="Claude" icon="fa-solid fa-comments" href="#claude">
+    See instructions
+  </Card>
+  <Card title="Codex" icon="fa-solid fa-terminal" href="#codex">
+    See instructions
+  </Card>
+  <Card title="Gemini CLI" icon="fa-solid fa-terminal" href="#gemini-cli">
+    See instructions
+  </Card>
+</CardGroup>
 
-When you connect, Schematic asks you to sign in, pick an environment, and choose read-only or read and write access. A write connection can never do more than you can do in the Schematic app.
+Installing a client takes two steps that are easy to confuse. Adding the server writes a line of config, and your client will happily show the server in its list before it can call a single tool. Authenticating is what makes it work, and it is also where you make the two choices that decide what the assistant can see and do.
 
-<Tabs>
-  <Tab title="Claude Code">
+**Which environment.** Each Schematic environment carries its own companies, plans, and features, so connecting to the wrong one gives you an assistant that reports an empty account.
+
+**Read-only, or read and write.** Read-only is the right default. A write connection can never do more than you can do in the Schematic app yourself.
+
+Both are fixed for the life of the connection. To change either, disconnect the server and connect again.
+
+OAuth is the better default for every client that supports it. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately, and there is no API key to store or rotate. Clients that cannot run the OAuth flow use [an API key](#connect-with-an-api-key) instead.
+
+### Claude Code
+
+1. Add the server:
+
 ```bash
 claude mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
-Then run `/mcp` to sign in.
-  </Tab>
-  <Tab title="Claude">
+2. Start Claude Code and run `/mcp`. The server appears in the list marked as needing authentication. Select it and press Enter to open the browser flow, then sign in and choose your environment and access level.
+
+3. Run `/mcp` again. The server now shows as connected, with the number of tools it exposes.
+
+### Claude
+
 Open **Customize > Connectors**, select **Add custom connector**, and enter `https://api.schematichq.com/mcp`. Claude runs the same sign-in, environment, and access-level choices in the browser, and the connector then stays available in every conversation without any config file to maintain.
 
 Every Claude plan can add a custom connector, including Free and Pro.
-  </Tab>
-  <Tab title="Codex">
+
+### Cursor
+
+Use the one-click install above, or add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
+
+```json
+{
+  "mcpServers": {
+    "schematic": {
+      "url": "https://api.schematichq.com/mcp"
+    }
+  }
+}
+```
+
+Cursor prompts you to sign in the first time it connects. Confirm the result under **Settings > MCP**, where a connected server shows green alongside the number of tools it loaded.
+
+### VS Code
+
+Use the one-click install above, or add the server to `.vscode/mcp.json` in your project root:
+
+```json
+{
+  "servers": {
+    "schematic": {
+      "type": "http",
+      "url": "https://api.schematichq.com/mcp"
+    }
+  }
+}
+```
+
+VS Code prompts you to sign in the first time it connects. Run the **MCP: List Servers** command to confirm the server is running.
+
+### Codex
+
 Codex has no CLI shortcut for HTTP servers, so add the server to `~/.codex/config.toml`:
 
 ```toml
@@ -56,26 +122,39 @@ Then sign in:
 ```bash
 codex mcp login schematic
 ```
-  </Tab>
-  <Tab title="Cursor">
-Add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
 
-```json
-{
-  "mcpServers": {
-    "schematic": {
-      "url": "https://api.schematichq.com/mcp"
-    }
-  }
-}
+Confirm with `codex mcp list`.
+
+### Gemini CLI
+
+1. Add the server:
+
+```bash
+gemini mcp add --transport http schematic https://api.schematichq.com/mcp
 ```
 
-Cursor prompts you to sign in the first time it connects.
-  </Tab>
-  <Tab title="Other clients">
+2. Start Gemini CLI and run `/mcp list`. The server is listed as disconnected, pending OAuth. Authenticate it:
+
+```bash
+/mcp auth schematic
+```
+
+3. Run `/mcp list` again to confirm the server is connected.
+
+### Claude Managed Agents
+
+Connect the server to [Claude Managed Agents](https://platform.claude.com) through a credential vault.
+
+1. Go to [platform.claude.com](https://platform.claude.com).
+2. Open **Credential vaults**, then **Create vault**, then **Add credential**.
+3. Select **MCP OAuth**.
+4. Enter the server URL `https://api.schematichq.com/mcp`.
+5. Leave **Access token** and **OAuth client credentials** blank.
+6. Select **Connect** and complete the Schematic sign-in when prompted.
+
+### Other clients
+
 Point the client at `https://api.schematichq.com/mcp` over streamable HTTP and let it run the OAuth flow. Clients that only support SSE, or that cannot reach the public internet, need the API key method below instead.
-  </Tab>
-</Tabs>
 
 ### Connect with an API key
 
