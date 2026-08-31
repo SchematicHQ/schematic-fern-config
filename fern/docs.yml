@@ -637,6 +637,19 @@ settings:
   http-snippets: true
   disable-analytics: true
 
+# Fern hosts its own docs MCP server at /_mcp/server, on by default, whose only tool is
+# searchDocs. These two buttons install that server, which puts a search box on the real
+# estate where a developer looks for the Schematic MCP server (api.schematichq.com/mcp,
+# documented at /building-with-ai). Hiding them leaves one Schematic MCP server in view.
+#
+# The endpoint itself stays live: `page-actions.options.mcp: false` is the documented way
+# to 404 it, and it is in Fern's published docs-yml schema, but fern-api 5.108.0 fails
+# `fern check` on it. Set it here once the CLI validator catches up.
+page-actions:
+  options:
+    claude-code: false
+    cursor: false
+
 logo:
   dark: ./docs/assets/logo-dark.svg
   light: ./docs/assets/logo-light.svg
