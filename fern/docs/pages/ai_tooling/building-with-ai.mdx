@@ -96,10 +96,15 @@ bearer_token_env_var = "SCHEMATIC_API_KEY"
 
 Read-only API keys can use only the read tools, which makes them a reasonable choice when you want an assistant that can look but not touch.
 
-**Example MCP queries:**
+## Check the connection
+
+Once your client lists Schematic as connected, ask it something you already know the answer to. A real answer confirms both the connection and the environment you picked at sign-in.
+
 - "What plan is company Acme Corp on?"
 - "Show me feature usage for the 'api_calls' feature across all companies"
 - "Create a company override to enable 'beta_features' for company comp_123"
+
+The third one needs a read and write connection. If it fails, see the troubleshooting below.
 
 ## Troubleshooting
 
@@ -116,3 +121,12 @@ Read-only API keys can use only the read tools, which makes them a reasonable ch
 Prefer OAuth over API keys so the connection runs as you and respects your permissions. If you do use an API key, store it securely and never commit it.
 
 Connect read-only unless you specifically need write access, pick the environment deliberately, and verify that query results look right before acting on them in production. Review the code your assistant generates the same way you would review a teammate's.
+
+## Next steps
+
+Your assistant can now read your real feature keys, plans, and entitlements as it writes code, so the integration it produces matches your account instead of a generic example. Pick up the integration where you left it:
+
+- **[Instrument your app](/quickstart/instrument-your-app)** — install an SDK, identify companies and users, report the usage you bill on, and check an entitlement before a feature runs.
+- **[Set up your first plan](/quickstart/set-up-your-first-plan)** — start here instead if your account has no plans yet, since the assistant has nothing to read until it does.
+- **[Developer resources](/developers)** — SDK reference, API details, and the rest of the developer surface.
+- **[Working with AI](/working-with-ai)** — the same server used from a chat assistant for renewal prep, churn and expansion signals, and contract checks.

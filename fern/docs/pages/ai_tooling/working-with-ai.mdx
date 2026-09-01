@@ -65,6 +65,8 @@ If your assistant cannot sign in this way, ask an engineer on your team for a re
 
 Whichever client you use, the connection runs from the vendor's cloud rather than your own machine, so nothing needs installing locally.
 
+Once your assistant lists Schematic as connected, ask it "How many companies are on each plan right now?" A real answer confirms both the connection and the environment you picked at sign-in. From there, the rest of this page covers the four workflows the data supports, and you can go straight to the one you came for.
+
 ## Prepping a renewal
 
 Before a renewal call you want three things: the plan the account is on, the entitlements that plan includes, and their usage on each metered feature. Each one is a separate lookup, so plenty of CSMs skip it and walk into the call guessing. Your assistant pulls all three in one question:
@@ -111,8 +113,14 @@ A write connection can never do more than you can do in the Schematic app. If yo
 
 ## Where this fits
 
-The MCP server is for ad-hoc questions and human-in-the-loop workflows. For automation that needs to run reliably without someone asking, use [webhooks](/integrations/webhooks) instead, which push events to Slack, your CRM, or any endpoint as they happen. [Automate with webhooks and AI](/use-cases/automation) covers how the two fit together.
+The MCP server is for ad-hoc questions and human-in-the-loop workflows. For automation that needs to run reliably without someone asking, use [webhooks](/integrations/webhooks) instead, which push events to Slack, your CRM, or any endpoint as they happen.
 
-- [Spot churn and expansion with usage signals](/use-cases/usage-signals)
-- [Stay ahead of renewals and expirations](/use-cases/renewals)
-- [Expand accounts with upsells and add-ons](/use-cases/expand-accounts)
+## Next steps
+
+Each workflow above has a fuller page behind it, covering how the data gets there and what to set up in Schematic so the answers are worth acting on.
+
+- **[Spot churn and expansion with usage signals](/use-cases/usage-signals)** — read low and high usage against an entitlement as the churn or upsell signal it is.
+- **[Stay ahead of renewals and expirations](/use-cases/renewals)** — catch expiring overrides, trials, and terms before the customer does.
+- **[Expand accounts with upsells and add-ons](/use-cases/expand-accounts)** — grow existing accounts with seats, add-ons, and tier upgrades.
+- **[Automate with webhooks and AI](/use-cases/automation)** — move a sweep you run by hand onto webhooks so it runs without you.
+- **[Concepts](/concepts)** — plain-language definitions of plans, features, entitlements, and companies, if a term in an answer is unfamiliar.
