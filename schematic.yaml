@@ -5949,6 +5949,35 @@ components:
         - bundle_name
         - price_per_unit
       title: CreateCreditBundleRequestBody
+    CreateCreditSpendPolicyRequestBody:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        company_id:
+          type: string
+          description: >-
+            The company the cap applies to. Set exactly one of company_id and
+            user_id.
+          nullable: true
+        label:
+          type: string
+          nullable: true
+          maxLength: 255
+        max_per_draw:
+          type: number
+          description: The largest number of credits a single draw may spend.
+          format: double
+        user_id:
+          type: string
+          description: >-
+            The user the cap applies to. Set exactly one of company_id and
+            user_id.
+          nullable: true
+      required:
+        - billing_credit_id
+        - max_per_draw
+      title: CreateCreditSpendPolicyRequestBody
     CreateCustomPlanBundlePlanRequestBody:
       type: object
       properties:
@@ -7546,6 +7575,47 @@ components:
         - created_at
         - updated_at
       title: CreditLeaseResponseData
+    CreditSpendPolicyResponseData:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        company_id:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: string
+        label:
+          type: string
+          nullable: true
+        max_per_draw:
+          type: number
+          format: double
+          nullable: true
+        scope_type:
+          $ref: '#/components/schemas/CreditSpendPolicyScope'
+        updated_at:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          nullable: true
+      required:
+        - id
+        - billing_credit_id
+        - scope_type
+        - created_at
+        - updated_at
+      title: CreditSpendPolicyResponseData
+    CreditSpendPolicyScope:
+      type: string
+      enum:
+        - company
+        - user
+        - group
     CreditTransferResponseData:
       type: object
       properties:
@@ -15403,6 +15473,18 @@ components:
         - bundle_id
         - quantity
       title: UpdateCreditBundleRequestBody
+    UpdateCreditSpendPolicyRequestBody:
+      type: object
+      properties:
+        label:
+          type: string
+          nullable: true
+          maxLength: 255
+        max_per_draw:
+          type: number
+          format: double
+          nullable: true
+      title: UpdateCreditSpendPolicyRequestBody
     UpdateEntitlementReqCommon:
       type: object
       properties:
@@ -19754,6 +19836,354 @@ paths:
                   - data
                   - params
                 title: CountBillingPlanCreditGrantsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/spend-policies:
+    get:
+      operationId: listCreditSpendPolicies
+      summary: List credit spend policies
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: scope_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CreditSpendPolicyScope'
+        - name: user_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                    title: ListCreditSpendPoliciesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      scope_type:
+                        $ref: '#/components/schemas/CreditSpendPolicyScope'
+                      user_id:
+                        type: string
+                    title: ListCreditSpendPoliciesParams
+                required:
+                  - data
+                  - params
+                title: ListCreditSpendPoliciesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createCreditSpendPolicy
+      summary: Create credit spend policy
+      tags:
+        - credits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditSpendPolicyRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateCreditSpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: CreateCreditSpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/spend-policies/{spend_policy_id}:
+    get:
+      operationId: getCreditSpendPolicy
+      summary: Get credit spend policy
+      tags:
+        - credits
+      parameters:
+        - name: spend_policy_id
+          in: path
+          description: spend_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCreditSpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: GetCreditSpendPolicyResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateCreditSpendPolicy
+      summary: Update credit spend policy
+      tags:
+        - credits
+      parameters:
+        - name: spend_policy_id
+          in: path
+          description: spend_policy_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreditSpendPolicyRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCreditSpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: UpdateCreditSpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteCreditSpendPolicy
+      summary: Delete credit spend policy
+      tags:
+        - credits
+      parameters:
+        - name: spend_policy_id
+          in: path
+          description: spend_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteCreditSpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: DeleteCreditSpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/spend-policies/count:
+    get:
+      operationId: countCreditSpendPolicies
+      summary: Count credit spend policies
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: scope_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CreditSpendPolicyScope'
+        - name: user_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      scope_type:
+                        $ref: '#/components/schemas/CreditSpendPolicyScope'
+                      user_id:
+                        type: string
+                    title: CountCreditSpendPoliciesParams
+                required:
+                  - data
+                  - params
+                title: CountCreditSpendPoliciesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
