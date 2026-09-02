@@ -13580,6 +13580,11 @@ components:
           nullable: true
         operator:
           $ref: '#/components/schemas/ComparableOperator'
+        plan_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleConditionPlanVersionResponseData'
+          maxItems: 1000
         resource_ids:
           type: array
           items:
@@ -13674,6 +13679,24 @@ components:
         - created_at
         - updated_at
       title: RuleConditionGroupResponseData
+    RuleConditionPlanVersionResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/PlanVersionStatus'
+        version:
+          type: integer
+          format: int64
+      required:
+        - id
+        - name
+        - status
+        - version
+      title: RuleConditionPlanVersionResponseData
     RuleConditionResponseData:
       type: object
       properties:
