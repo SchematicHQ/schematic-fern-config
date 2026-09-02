@@ -14699,6 +14699,16 @@ components:
           type: string
           description: Display name of the connected Stripe account
           nullable: true
+        claimable_sandbox_id:
+          type: string
+          description: >-
+            Stripe claimable sandbox this connection was provisioned from;
+            absent for an OAuth connect
+          nullable: true
+        claimable_sandbox_status:
+          type: string
+          description: 'Stripe''s claim status for the sandbox: unclaimed, claimed, or live'
+          nullable: true
         company_update_only:
           type: boolean
           description: >-
@@ -14732,6 +14742,24 @@ components:
         - is_sandbox
         - live_mode
       title: StripeIntegrationConfig
+    StripeSandboxClaimLink:
+      type: object
+      properties:
+        claim_url:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        sandbox_id:
+          type: string
+        status:
+          type: string
+      required:
+        - claim_url
+        - sandbox_id
+        - status
+      title: StripeSandboxClaimLink
     SubscriptionStatus:
       type: string
       enum:
@@ -29561,6 +29589,38 @@ paths:
                   - data
                   - params
                 title: LoadSampleDataSetResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/stripe/sandbox/claim-link:
+    get:
+      operationId: getStripeSandboxClaimLink
+      summary: Get stripe sandbox claim link
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StripeSandboxClaimLink'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetStripeSandboxClaimLinkParams
+                required:
+                  - data
+                  - params
+                title: GetStripeSandboxClaimLinkResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
