@@ -3736,6 +3736,11 @@ components:
         value_bool:
           type: boolean
           nullable: true
+        value_credit:
+          $ref: '#/components/schemas/BillingCreditResponseData'
+        value_credit_id:
+          type: string
+          nullable: true
         value_numeric:
           type: integer
           format: int64
@@ -19991,6 +19996,14 @@ paths:
           in: query
           schema:
             type: string
+        - name: user_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+            minItems: 1
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -20047,6 +20060,12 @@ paths:
                         $ref: '#/components/schemas/CreditSpendPolicyScope'
                       user_id:
                         type: string
+                      user_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                        minItems: 1
                     title: ListCreditSpendPoliciesParams
                 required:
                   - data
@@ -20249,6 +20268,14 @@ paths:
           in: query
           schema:
             type: string
+        - name: user_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+            minItems: 1
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -20301,6 +20328,12 @@ paths:
                         $ref: '#/components/schemas/CreditSpendPolicyScope'
                       user_id:
                         type: string
+                      user_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                        minItems: 1
                     title: CountCreditSpendPoliciesParams
                 required:
                   - data
