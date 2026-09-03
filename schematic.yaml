@@ -10364,6 +10364,25 @@ components:
       required:
         - type
       title: InstallIntegrationRequestBody
+    InstallStripeSandboxRequestBody:
+      type: object
+      properties:
+        country:
+          type: string
+        email:
+          type: string
+          maxLength: 255
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        seed_sample_data:
+          type: boolean
+      required:
+        - country
+        - email
+        - seed_sample_data
+      title: InstallStripeSandboxRequestBody
     IntegrationCapabilities:
       type: object
       properties:
@@ -14760,6 +14779,58 @@ components:
         - sandbox_id
         - status
       title: StripeSandboxClaimLink
+    StripeSandboxCountriesResponseData:
+      type: object
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+      required:
+        - countries
+      title: StripeSandboxCountriesResponseData
+    StripeSandboxInstallResponseData:
+      type: object
+      properties:
+        api_keys:
+          $ref: '#/components/schemas/StripeSandboxKeysResponseData'
+        claim_url:
+          type: string
+        claim_url_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        install:
+          $ref: '#/components/schemas/IntegrationInstallResponseData'
+        sandbox_id:
+          type: string
+        stripe_account_id:
+          type: string
+      required:
+        - claim_url
+        - install
+        - sandbox_id
+        - stripe_account_id
+      title: StripeSandboxInstallResponseData
+    StripeSandboxKeysResponseData:
+      type: object
+      properties:
+        mcp:
+          type: string
+        publishable:
+          type: string
+        secret:
+          type: string
+      required:
+        - mcp
+        - publishable
+        - secret
+      title: StripeSandboxKeysResponseData
     SubscriptionStatus:
       type: string
       enum:
@@ -29701,6 +29772,78 @@ paths:
                 title: InstallStripeResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/stripe/v2/sandbox:
+    post:
+      operationId: installStripeClaimableSandbox
+      summary: Install stripe claimable sandbox
+      tags:
+        - integrationsapi
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallStripeSandboxRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StripeSandboxInstallResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: InstallStripeClaimableSandboxParams
+                required:
+                  - data
+                  - params
+                title: InstallStripeClaimableSandboxResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/stripe/v2/sandbox-countries:
+    get:
+      operationId: listStripeSandboxCountries
+      summary: List stripe sandbox countries
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StripeSandboxCountriesResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ListStripeSandboxCountriesParams
+                required:
+                  - data
+                  - params
+                title: ListStripeSandboxCountriesResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
