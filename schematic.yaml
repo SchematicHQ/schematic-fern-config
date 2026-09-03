@@ -14762,6 +14762,13 @@ components:
           type: string
           description: Display name of the connected Stripe account
           nullable: true
+        claimable_sandbox_expires_at:
+          type: string
+          description: >-
+            When Stripe deletes the sandbox if nobody claims it, 60 days from
+            creation; absent on sandboxes created before it was recorded
+          format: date-time
+          nullable: true
         claimable_sandbox_id:
           type: string
           description: >-
