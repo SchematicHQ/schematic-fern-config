@@ -11050,6 +11050,34 @@ components:
         - amount
         - currency
       title: MrrResponseData
+    OTLPEnvironmentSettingsResponseData:
+      type: object
+      properties:
+        company_attribute:
+          type: string
+          nullable: true
+        company_key:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        environment_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        user_attribute:
+          type: string
+          nullable: true
+        user_key:
+          type: string
+          nullable: true
+      required:
+        - created_at
+        - environment_id
+        - updated_at
+      title: OTLPEnvironmentSettingsResponseData
     OnboardingMilestone:
       type: string
       enum:
@@ -16316,6 +16344,30 @@ components:
       required:
         - keys
       title: UpsertCompanyRequestBody
+    UpsertOTLPEnvironmentSettingsRequestBody:
+      type: object
+      properties:
+        company_attribute:
+          type: string
+          nullable: true
+          maxLength: 255
+          minLength: 1
+        company_key:
+          type: string
+          nullable: true
+          maxLength: 255
+          minLength: 1
+        user_attribute:
+          type: string
+          nullable: true
+          maxLength: 255
+          minLength: 1
+        user_key:
+          type: string
+          nullable: true
+          maxLength: 255
+          minLength: 1
+      title: UpsertOTLPEnvironmentSettingsRequestBody
     UpsertTraitRequestBody:
       type: object
       properties:
@@ -30346,6 +30398,110 @@ paths:
                   - data
                   - params
                 title: UpdateOnboardingStateResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /otlp/settings:
+    get:
+      operationId: getOTLPEnvironmentSettings
+      summary: Get OTLP environment settings
+      tags:
+        - events
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OTLPEnvironmentSettingsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetOTLPEnvironmentSettingsParams
+                required:
+                  - data
+                  - params
+                title: GetOTLPEnvironmentSettingsResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: upsertOTLPEnvironmentSettings
+      summary: Upsert OTLP environment settings
+      tags:
+        - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertOTLPEnvironmentSettingsRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OTLPEnvironmentSettingsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpsertOTLPEnvironmentSettingsParams
+                required:
+                  - data
+                  - params
+                title: UpsertOTLPEnvironmentSettingsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteOTLPEnvironmentSettings
+      summary: Delete OTLP environment settings
+      tags:
+        - events
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteOTLPEnvironmentSettingsParams
+                required:
+                  - data
+                  - params
+                title: DeleteOTLPEnvironmentSettingsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
