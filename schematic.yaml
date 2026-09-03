@@ -8709,9 +8709,15 @@ components:
     EventBodyInference:
       type: object
       properties:
+        cache_creation_input_tokens:
+          type: integer
+          description: >-
+            Number of input tokens written to a prompt cache; a subset of
+            input_tokens
+          format: int64
         cached_input_tokens:
           type: integer
-          description: Number of input tokens served from cache
+          description: Number of input tokens served from cache; a subset of input_tokens
           format: int64
         company:
           additionalProperties:
@@ -8733,7 +8739,9 @@ components:
           description: Optional track event name to fan out for usage-based billing
         input_tokens:
           type: integer
-          description: Number of input tokens for the inference request
+          description: >-
+            Total number of input tokens for the inference request, including
+            those served from and written to a prompt cache
           format: int64
         operation:
           type: string
