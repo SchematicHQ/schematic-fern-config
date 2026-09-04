@@ -3244,6 +3244,57 @@ components:
         - cancel_at_period_end
         - plan_name
       title: CompanyBillingEntitySubscriptionResponseData
+    CompanyBillingProfileResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        billing_customer_id:
+          type: string
+          nullable: true
+        collection_method:
+          $ref: '#/components/schemas/BillingCollectionMethod'
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+        environment_id:
+          type: string
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+          nullable: true
+        payment_method_id:
+          type: string
+          nullable: true
+        proration_behavior:
+          allOf:
+            - $ref: '#/components/schemas/ProrationBehavior'
+          nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - collection_method
+        - company_id
+        - created_at
+        - environment_id
+        - id
+        - is_default
+        - provider_type
+        - updated_at
+      title: CompanyBillingProfileResponseData
     CompanyCreditBalance:
       type: object
       properties:
@@ -3309,6 +3360,14 @@ components:
             format: double
           type: object
           nullable: true
+        billing_profile:
+          $ref: '#/components/schemas/CompanyBillingProfileResponseData'
+        billing_profiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyBillingProfileResponseData'
+          nullable: true
+          maxItems: 1000
         billing_subscription:
           $ref: '#/components/schemas/BillingSubscriptionView'
         billing_subscriptions:
@@ -15526,6 +15585,34 @@ components:
       required:
         - values
       title: UpdateCompanyBillingDetailsRequestBody
+    UpdateCompanyBillingProfileRequestBody:
+      type: object
+      properties:
+        collection_method:
+          $ref: '#/components/schemas/BillingCollectionMethod'
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 365
+          minimum: 1
+        is_default:
+          type: boolean
+          nullable: true
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        payment_method_id:
+          type: string
+          nullable: true
+        proration_behavior:
+          allOf:
+            - $ref: '#/components/schemas/ProrationBehavior'
+          nullable: true
+      required:
+        - collection_method
+      title: UpdateCompanyBillingProfileRequestBody
     UpdateCompanyOverrideRequestBody:
       type: object
       properties:
@@ -22146,6 +22233,141 @@ paths:
                   - data
                   - params
                 title: CountBillingProductsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/profiles:
+    get:
+      operationId: listCompanyBillingProfiles
+      summary: List company billing profiles
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: is_default
+          in: query
+          schema:
+            type: boolean
+        - name: provider_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/BillingProviderType'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyBillingProfileResponseData'
+                    title: ListCompanyBillingProfilesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      is_default:
+                        type: boolean
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      provider_type:
+                        $ref: '#/components/schemas/BillingProviderType'
+                    title: ListCompanyBillingProfilesParams
+                required:
+                  - data
+                  - params
+                title: ListCompanyBillingProfilesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/profiles/{billing_profile_id}:
+    put:
+      operationId: updateCompanyBillingProfile
+      summary: Update company billing profile
+      tags:
+        - billing
+      parameters:
+        - name: billing_profile_id
+          in: path
+          description: billing_profile_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyBillingProfileRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyBillingProfileResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCompanyBillingProfileParams
+                required:
+                  - data
+                  - params
+                title: UpdateCompanyBillingProfileResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
