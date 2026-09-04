@@ -10352,6 +10352,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        country:
+          type: string
         dismissed_at:
           type: string
           format: date-time
@@ -10465,6 +10467,7 @@ components:
       properties:
         country:
           type: string
+          nullable: true
         email:
           type: string
           maxLength: 255
@@ -10476,7 +10479,6 @@ components:
           type: boolean
           nullable: true
       required:
-        - country
         - email
       title: InstallStripeSandboxRequestBody
     IntegrationCapabilities:
@@ -15881,6 +15883,9 @@ components:
     UpdateOnboardingStateRequestBody:
       type: object
       properties:
+        country:
+          type: string
+          nullable: true
         dismissed:
           type: boolean
           nullable: true
