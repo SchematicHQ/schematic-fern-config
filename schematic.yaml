@@ -30053,6 +30053,38 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /integrations/stripe/sandbox/keys:
+    get:
+      operationId: getStripeSandboxKeys
+      summary: Get stripe sandbox keys
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ClaimedStripeSandboxKeysResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetStripeSandboxKeysParams
+                required:
+                  - data
+                  - params
+                title: GetStripeSandboxKeysResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /integrations/stripe/sandbox/keys/claim:
     post:
       operationId: claimStripeSandboxKeys
