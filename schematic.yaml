@@ -3025,6 +3025,30 @@ components:
         - provider_type
         - status
       title: CheckoutSubscription
+    ClaimStripeSandboxKeysRequestBody:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 128
+          minLength: 1
+      required:
+        - token
+      title: ClaimStripeSandboxKeysRequestBody
+    ClaimedStripeSandboxKeysResponseData:
+      type: object
+      properties:
+        publishable:
+          type: string
+        sandbox_id:
+          type: string
+        secret:
+          type: string
+      required:
+        - publishable
+        - sandbox_id
+        - secret
+      title: ClaimedStripeSandboxKeysResponseData
     ClerkIntegrationConfig:
       type: object
       properties:
@@ -29799,6 +29823,46 @@ paths:
                   - data
                   - params
                 title: GetStripeSandboxClaimLinkResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/stripe/sandbox/keys/claim:
+    post:
+      operationId: claimStripeSandboxKeys
+      summary: Claim stripe sandbox keys
+      tags:
+        - integrationsapi
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimStripeSandboxKeysRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ClaimedStripeSandboxKeysResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ClaimStripeSandboxKeysParams
+                required:
+                  - data
+                  - params
+                title: ClaimStripeSandboxKeysResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
