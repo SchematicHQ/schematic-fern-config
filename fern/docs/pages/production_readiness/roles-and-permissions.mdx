@@ -26,23 +26,27 @@ For members, permissions are granted at two levels:
 
 These apply across all environments:
 
-- **Flags** — Create, edit, and delete feature flags.
-- **Features** — Create, edit, and delete features.
-- **Plans & Add-ons** — Create, edit, and delete plans and add-ons.
+| Permission | Grants |
+|---|---|
+| **Flags** | Create, edit, and delete feature flags |
+| **Features** | Create, edit, and delete features |
+| **Plans & Add-ons** | Create, edit, and delete plans and add-ons |
 
 ## Environment permissions
 
 These are granted per environment:
 
-- **Companies** — Create, edit, and delete companies, and assign plans to companies.
-- **Users** — Create, edit, and delete users.
-- **Overrides** — Create, edit, and delete company-level overrides.
-- **Plan Entitlements** — Create, edit, and delete the entitlements attached to a plan.
-- **Plan Versions** — Create, edit, and delete plan versions.
-- **Plan & Billing** — Manage plan billing configuration and grant credits to companies.
-- **Credits** — Create, edit, and delete credits.
-- **Components** — Create, edit, and delete embedded UI components.
-- **Webhooks** — Create, edit, and delete webhooks, and reveal webhook signing secrets.
+| Permission | Grants |
+|---|---|
+| **Companies** | Create, edit, and delete companies, and assign plans to companies |
+| **Users** | Create, edit, and delete users |
+| **Overrides** | Create, edit, and delete company-level overrides |
+| **Plan Entitlements** | Create, edit, and delete the entitlements attached to a plan |
+| **Plan Versions** | Create, edit, and delete plan versions |
+| **Plan & Billing** | Manage plan billing configuration, and grant credits to companies |
+| **Credits** | Create, edit, and delete credits |
+| **Components** | Create, edit, and delete embedded UI components |
+| **Webhooks** | Create, edit, and delete webhooks, and reveal webhook signing secrets |
 
 ## Assigning roles and permissions
 
@@ -60,8 +64,10 @@ Only admins can add teammates and change roles or permissions.
 
 A common setup is a teammate who can manage customer accounts and exceptions but should not change your core catalog. Grant a **Member** these environment permissions (typically in Production):
 
-- **Companies** — to assign existing plans to companies.
-- **Overrides** — to create company-level overrides.
-- **Plan & Billing** — to grant existing credits to companies.
+| Permission | Why |
+|---|---|
+| **Companies** | Assign existing plans to companies |
+| **Overrides** | Create company-level overrides |
+| **Plan & Billing** | Grant existing credits to companies |
 
 Leave the account permissions (**Flags**, **Features**, **Plans & Add-ons**) off so they cannot change your catalog, and leave **Users**, **Plan Entitlements**, and **Plan Versions** off as well. 
