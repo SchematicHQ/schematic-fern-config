@@ -10378,6 +10378,8 @@ components:
           items:
             $ref: '#/components/schemas/OnboardingRequirementView'
           maxItems: 10
+        slack_connect:
+          $ref: '#/components/schemas/SlackConnectInviteView'
         stripe_import:
           $ref: '#/components/schemas/OnboardingStripeImport'
         suggested_next:
@@ -14799,6 +14801,34 @@ components:
         - feature_name
         - errors
       title: SkippedEntitlementResponseData
+    SlackConnectInviteStatus:
+      type: string
+      enum:
+        - accepted
+        - declined
+        - dismissed
+        - expired
+        - pending
+    SlackConnectInviteView:
+      type: object
+      properties:
+        can_resend_at:
+          type: string
+          format: date-time
+          nullable: true
+        email:
+          type: string
+          maxLength: 255
+        sent_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/SlackConnectInviteStatus'
+      required:
+        - email
+        - sent_at
+        - status
+      title: SlackConnectInviteView
     SortDirection:
       type: string
       enum:
