@@ -583,6 +583,43 @@ options := &schematicoption.DatastreamOptions{
 }
 ```
 
+`Addr` also accepts a connection URL, or you can set `URL` to be explicit. A `rediss://`
+URL enables TLS with the server name taken from the host, so no `TLSConfig` is needed:
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute,
+	CacheConfig: &schematicoption.RedisCacheConfig{
+		URL:         "rediss://user:password@cache.example.com:6379/0",
+		DialTimeout: 5 * time.Second, // Fields set here override what the URL derived
+	},
+}
+```
+
+A URL that does not parse, or that names no host, is logged as a warning and the
+datastream falls back to its local cache, rather than dialing an address you did not
+name. Credentials are redacted from that warning, and the underlying parse error is
+withheld from it entirely when the URL carries any — `net/url` quotes both the URL and
+fragments of it into its errors, so an unescaped `/` in a password ends up quoted back
+as an "invalid port".
+
+Fields set on the struct override what the URL derived, but only when they are non-zero,
+so a URL-derived setting cannot be switched back off here: drop it from the URL instead.
+
+To enable TLS against a plain `host:port` address, set `TLSConfig` yourself. An
+otherwise-empty config keeps hostname verification on and uses the system roots, which
+is what a publicly-trusted certificate (ElastiCache, for instance) needs:
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute,
+	CacheConfig: &schematicoption.RedisCacheConfig{
+		Addr:      "cache.example.com:6379",
+		TLSConfig: &tls.Config{MinVersion: tls.VersionTLS12},
+	},
+}
+```
+
 #### 2. Redis Cluster
 
 To use a Redis cluster, create a `RedisCacheClusterConfig` and pass it to the `DatastreamOptions`.
@@ -604,6 +641,56 @@ options := &schematicoption.DatastreamOptions{
 	},
 }
 ```
+
+A cluster accepts a connection URL on the same terms as a single instance — its
+configuration endpoint, typically. Set `URL`, or leave a single scheme-bearing entry in
+`Addrs`; name any further nodes with go-redis' `?addr=` parameter, or as bare `host:port`
+entries beside the URL:
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute,
+	CacheConfig: &schematicoption.RedisCacheClusterConfig{
+		URL: "rediss://user:password@clustercfg.example.com:6379?addr=node2.example.com:6379",
+	},
+}
+```
+
+`URL` takes precedence over `Addrs`, which is then ignored. Two scheme-bearing entries in
+`Addrs` is an error — each would carry its own credentials and TLS, with nothing to say
+which the cluster should use — and, like a URL that does not parse or names no host, it
+leaves the datastream on its local cache with a warning.
+
+For a cluster that requires TLS — an encrypted ElastiCache or Valkey cluster, say — set
+`TLSConfig`. It applies to every node, so seed `Addrs` with the cluster's configuration
+endpoint: slot discovery then returns hostnames the certificate covers.
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL: 5 * time.Minute,
+	CacheConfig: &schematicoption.RedisCacheClusterConfig{
+		Addrs:     []string{"cache.example.com:6379"},
+		TLSConfig: &tls.Config{MinVersion: tls.VersionTLS12},
+	},
+}
+```
+
+#### 3. Bringing your own client
+
+If your application already builds a Redis client, hand it over whole rather than
+restating its settings field by field. The configs above map a fixed set of go-redis
+options; a client passed this way keeps everything, including what those configs
+cannot express — a custom dialer, hooks, or a tracing wrapper.
+
+```go
+options := &schematicoption.DatastreamOptions{
+	CacheTTL:    5 * time.Minute,
+	CacheConfig: schematicoption.WithRedisClient(myRedisClient), // any redis.UniversalClient
+}
+```
+
+The SDK shares the client across all of its caches and never closes it, so its
+lifecycle stays yours.
 
 ---
 
