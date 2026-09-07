@@ -26,13 +26,21 @@ Schematic's checkout flow is a multi-step experience that handles the full subsc
 - **Adding or removing add ons** to adjust their subscription without changing their base plan
 - **Canceling** their subscription
 
-The checkout flow itself walks customers through up to four steps:
+The checkout flow itself walks customers through up to five steps:
 
 1. **Choose a plan** from your available [live plans](/components/overview) (this step can be pre-selected or skipped programmatically)
 2. **Select add ons** to include with the chosen plan (optional)
 3. **Purchase credits** for any credit-based features included in the plan (optional)
 4. **Enter or confirm a payment method** via Stripe's secure payment form
 5. **Review and confirm the order** to complete the transaction
+
+## Topping Up Credits Mid-Subscription
+
+A customer who burns through their plan's credit allowance halfway into the month buys more from the portal itself, without changing plans. Each credit on the [Metered Features](/components/element-library#metered-features) Element carries a **Buy More** button beside its usage bar, and clicking it opens checkout on the credits step. The customer picks a bundle, confirms, and their balance goes up. A card already on file removes the payment step as well.
+
+The button belongs to Metered Features specifically. Add that element to your portal in the builder, since a portal that shows entitlements through Included Features alone has nowhere to put it. [Element Library](/components/element-library#metered-features) lists the catalog and configuration conditions that decide whether the button renders, and [Credit Burndown](/billing/credit-burndown) covers setting up the bundles it sells.
+
+Customers on custom plans buy the same way. Because bundles can restrict themselves to particular plans and that restriction names your standard plans, leave a bundle's compatible plans empty when custom-plan customers should be able to buy it.
 
 ## Why Use Schematic Checkout Instead of Stripe
 

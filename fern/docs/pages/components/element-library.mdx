@@ -42,6 +42,8 @@ If Stripe is connected, it also optionally includes a button for users to self m
 
 The Included Features Element shows the entitlements, including usage and limits, granted to an individual customer based on their Plan. This element is available with or without Stripe connected.
 
+Credit balances and the "Buy More" button live on the [Metered Features](#metered-features) Element instead, so a portal built from Included Features alone gives a customer no way to top up their credits.
+
 ![Included features](../../assets/images/components/components-included-features.png)
 
 **Design options**
@@ -85,6 +87,24 @@ The Invoices Element shows past invoices associated with the Company's Stripe su
 The Unsubscribe Button Element allows users to unsubscribe from the their's Stripe subscription.
 
 ![Components unsubscribe button](../../assets/images/components/components-unsubscribe-button.png)
+
+#### Metered Features
+
+The Metered Features Element shows what a customer has consumed this period against each metered entitlement, and it is the only element that shows credit balances. It is off by default, so add it in the builder under the "Entitlements" category.
+
+Each credit gets a usage bar, an expandable breakdown of the grants making up the balance, and a **Buy More** button. A customer who clicks "Buy More" lands in the checkout flow on its credits step, picks a bundle, and pays without their plan entering into it. When they already have a card on file, checkout skips the payment step too, so the purchase takes two clicks.
+
+Four things have to be true for "Buy More" to appear next to a credit:
+
+1. The catalog carries at least one bundle for that credit. Add bundles under Catalog > Configuration > "Credit Bundles" and press "Save Changes", as described in [step 6 of Credit Burndown](/billing/credit-burndown#6-add-the-plan-and-bundles-to-the-catalog). A bundle you created on the credit type page but never added here reaches no component at all.
+2. One of those bundles is compatible with the plan the company is on. Each bundle carries a list of compatible plans, and an empty list means every plan. That list names your standard plans, so a company on a custom plan can buy from a bundle only when you leave the bundle unrestricted.
+3. Checkout is available to the company, which means you have connected Stripe, the catalog has live plans, and Schematic manages the company's subscription.
+4. Credits are visible. The "Hide credits" toggle in Catalog > Configuration hides balances and consumption rates across every element, including this one.
+
+**Design options**
+- Visibility of the description, feature icons, allocation, and usage
+- Font style of the header, description, allocation, and usage
+- Which features the element lists
 
 #### Pricing Table
 

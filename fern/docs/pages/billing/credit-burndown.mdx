@@ -151,6 +151,8 @@ The bundles now appear in your checkout flow:
 
 ![Add Credit Bundle 4](../../assets/images/billing/burndown-add-plan-to-catalog-4.png)
 
+Customers who already subscribed reach the same bundles from a **Buy More** button next to each credit balance in the customer portal, which opens checkout on the credits step and leaves their plan alone. That button belongs to the [Metered Features](/components/element-library#metered-features) element, so add that element to the portal component your customers see.
+
 ## Credit lifecycle
 
 The walkthrough used the defaults. This section covers what else a credit grant can do.
@@ -349,13 +351,15 @@ The credit type needs a cost basis before top-ups can be turned on. Without a pe
 
 | Setting | What happens |
 | --- | --- |
-| Off | Companies cannot buy more credits or manage auto top-ups. Existing credits remain until they expire. |
+| Off | Auto top-up never runs and companies cannot turn it on. Existing credits remain until they expire. |
 | Automatic | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
 | User-controlled | Companies turn auto top-up on themselves and buy more credits in checkout and through components. Your threshold and amount become their starting defaults. |
 
 Choose User-controlled for self-serve plans where customers should manage their own refills, and Automatic when continuity matters more than customer control, such as an enterprise account that should never stop mid-workload. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both.
 
-**Buyers can purchase credit bundles** is a separate checkbox on the same grant, covering one-time [bundle](#5-configure-credit-bundles) purchases. It is independent of top-up availability, so you can let a customer buy credits on demand without letting them set up an automatic refill, or the reverse. Unchecked, the buy-more button is hidden and one-time bundle purchases are rejected.
+One-time [bundle](#5-configure-credit-bundles) purchases run off a per-bundle setting instead of a grant setting. Each bundle in the catalog's Credit Bundles section carries a **plan compatibility** dropdown, and an empty selection lets every plan buy the bundle. Edits there save immediately, for every catalog the bundle is live in. Top-up availability does not enter into it, so you can let a customer buy credits on demand without letting them set up an automatic refill, or the reverse.
+
+A company on a plan outside a bundle's compatibility list gets no buy-more button for that bundle, and a purchase request naming it is rejected. The dropdown lists your standard plans, so leave compatibility unrestricted on any bundle you want a custom-plan customer to buy.
 
 ### Per-company exceptions
 
