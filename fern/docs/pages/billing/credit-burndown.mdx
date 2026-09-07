@@ -109,7 +109,7 @@ The finished plan:
 
 Bundles are what customers buy when their plan allowance runs out. We'll set these to never expire so customers can keep using credit-based features after the plan balance is gone, though bundles can carry an expiry window instead.
 
-Plan grants are spent before purchased bundles, so a bundle is only drawn from once the period's plan credits are exhausted. See [Consumption order](#consumption-order) for the full picture.
+Credits that expire sooner are spent first, so a bundle carrying an expiry window is drawn before a plan grant that never expires. Among grants that never expire, the oldest goes first, so these bundles are only drawn from once the period's plan credits are exhausted. See [Consumption order](#consumption-order) for the full picture.
 
 1. Go to the Credit Type page (Catalog > Credits > "AI Tokens").
 2. Name the bundle. We'll use "Small Bundle".
@@ -201,10 +201,13 @@ A company usually holds several grants at once. Each consumption event draws its
 
 1. **Adjustment grants**, meaning credits returned by a refund
 2. **Rollover grants**, so last period's leftovers go before the fresh grant they came from
-3. **Plan grants**, oldest first
-4. **Everything else**, oldest first, which in practice means purchased bundles and promotional credits
+3. **Everything else, soonest to expire first**, which in practice means plan grants, purchased bundles, and promotional credits ordered by expiry date
+
+Grants that never expire go last, and grants sharing an expiry date are drawn oldest first. Spending the shortest-dated credits first is what keeps a customer from letting a 30-day bundle lapse while a 12-month one sits ahead of it.
 
 Rollover grants sitting ahead of the new period's grant is what makes rollover useful. Because they also expire at the next reset, putting them last would mean they usually lapse unspent.
+
+When a plan grants both per-license and per-company credits, as described in [Seat and Agent Budgets](/billing/seat-and-agent-budgets), the per-license credits are spent first.
 
 ### Where credits come from
 
@@ -272,9 +275,9 @@ These live on `BillingCreditResponseData`.
 The credit type also carries `default_expiry_unit`, `default_expiry_unit_count`, and `default_rollover_policy`, which set defaults new grants can inherit. The dashboard has no controls for them and clears them when you save the credit type, so they are only usable through the API.
 
 <Warning>
-The **Burndown strategy** field on the credit type is displayed but disabled in the dashboard, and it always renders the label "First In, First Out (FIFO)" regardless of the value stored on the credit type. Treat the API as the source of truth for this field.
+The **Burndown strategy** field on the credit type shows the strategy the credit type is using, but the dashboard cannot change it. Set it through the API.
 
-`burn_strategy` accepts `plan_first_then_credit_bundles_first_in_first_out` (the default), `first_in_first_out`, `last_in_first_out`, and `expiration_priority`. The [Consumption order](#consumption-order) above describes the default. Adjustment and rollover grants are consumed first under every strategy.
+`burn_strategy` accepts `expiration_priority` (the default), `first_in_first_out`, `last_in_first_out`, and `plan_first_then_credit_bundles_first_in_first_out`. The [Consumption order](#consumption-order) above describes the default. Adjustment and rollover grants are consumed first under every strategy.
 </Warning>
 
 ### Grant sources
