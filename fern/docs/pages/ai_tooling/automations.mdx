@@ -1,0 +1,154 @@
+---
+title: Automation recipes
+slug: ai-automations
+description: Put an AI agent on a schedule to sweep redundant flag checks, catch entitlement drift, and turn usage against limits into a review queue.
+---
+
+The prompts on [Building with AI](/building-with-ai) and [Working with AI](/working-with-ai) assume you are sitting there typing them. The same prompts run unattended, on a schedule, through Cursor Automations, a scheduled Claude Code session, or any agent runner that can reach the [MCP server](/building-with-ai#model-context-protocol-mcp).
+
+What changes when nobody is watching is the cost of a wrong answer. A recipe you run by hand gets read before you act on it. A recipe on a cron job acts first, so each one below ends in something a person reviews rather than something already applied.
+
+## How a recipe runs
+
+1. The agent reads your Schematic account over the MCP server.
+2. It picks the single highest-value item to work on, not every item it found.
+3. It gathers whatever else it needs, which for the code recipes means searching the repository.
+4. It produces one reviewable artifact: a pull request, or a written summary.
+5. You review and decide.
+
+## Before you start
+
+You need the MCP server connected and authenticated, an agent runner that can execute on a schedule, and a Schematic account with enough history for the query to return something. Connect read-only for the recipes that only read, which is all of them below.
+
+The recipes that open pull requests also need repository access and whatever your project requires to run its linter and tests.
+
+## Start by hand, then schedule
+
+Run the prompt yourself first and read what comes back. You are checking whether the agent picked a sensible item and whether its reasoning holds, not whether it produced output.
+
+Then add the guardrails your codebase needs. Every prompt below has a `Rules` block, and that block is where project-specific constraints go: the paths to leave alone, the review conventions, the tests that have to pass.
+
+Only put it on a schedule once you have watched it produce something you would have approved anyway. Review every pull request before merging, on the schedule as much as by hand.
+
+## Sweep redundant flag checks
+
+A flag that resolves the same way for every company is a branch your code no longer needs. It still costs a network call, it still reads as a live decision to anyone reviewing the file, and the cleanup never makes it onto a sprint.
+
+This recipe ends in a pull request, which makes it the one to start with if you want to see the pattern work.
+
+```
+You are cleaning up feature flag checks that no longer do anything.
+
+Environment: [your Schematic environment]
+
+## Goal
+
+Find flags in Schematic that resolve the same way for every company, then
+remove the checks for them from the codebase.
+
+## How to
+
+Use the Schematic MCP server to list the flags and their targeting. Identify
+the flags that always resolve to on, with no targeting rules that would ever
+send a company down the other branch. Pick one. Search the codebase for where
+that flag is checked, and remove the check while keeping the branch that
+actually runs.
+
+## Rules
+
+* One flag per run.
+* Check open pull requests first. If one already removes this flag, pick a
+  different one.
+* A flag that is always-on but was created in the last 30 days is probably
+  mid-rollout. Leave it alone.
+* Never delete the flag in Schematic. This changes application code only.
+* Run the linter and the test suite, and fix what breaks, before opening the
+  pull request.
+* Open the pull request with a description that names the flag, quotes its
+  current targeting from Schematic as the evidence it is always-on, lists
+  every call site removed, and states what breaks if that reading is wrong.
+```
+
+## Catch entitlement drift
+
+An override outlives the reason someone added it. A custom plan gets edited during a renewal. Neither leaves a trace anywhere a human reads on purpose, so the gap between what a customer bought and what they can currently reach only surfaces when someone goes looking.
+
+This recipe reads and reports. It changes nothing, so it runs read-only.
+
+```
+You are auditing what customers were sold against what they can actually use.
+
+Environment: [your Schematic environment]
+
+## Goal
+
+Find companies whose current entitlements do not match what their contract
+says they bought, and write up what you find.
+
+## How to
+
+Use the Schematic MCP server to pull each company's plan, its entitlements,
+and any overrides on it. Compare that against the contract terms in
+[where your order forms live]. Flag anything a company can reach that was
+not sold to them, and anything they bought that they cannot reach.
+
+## Rules
+
+* Read-only. Do not adjust an entitlement, even one that is clearly wrong.
+* Report the overrides with no expiry date separately. Those are the ones
+  that quietly become permanent.
+* For each finding, give the company, the feature, what the contract says,
+  what Schematic currently allows, and which direction the gap runs.
+* Sort by revenue at risk, not by how many companies are affected.
+* If nothing has drifted, say so in one line. Do not pad the report.
+```
+
+Overrides are the usual culprit. See [Company overrides](/feature-management/overrides) for what they can change and [Close custom deals](/use-cases/custom-deals) for how negotiated terms get modeled.
+
+## Turn usage into a review queue
+
+[Working with AI](/working-with-ai#spotting-churn-and-expansion-signals) covers the two questions here, which are who is pressing against a limit and who is barely using what they pay for. Asked once, they answer a question. Asked every week, they build a queue, and the queue is worth more than either answer because it shows you which direction an account is moving.
+
+```
+You are building this week's account review queue.
+
+Environment: [your Schematic environment]
+
+## Goal
+
+Produce two lists: companies to talk to about expanding, and companies at
+risk of churning.
+
+## How to
+
+Use the Schematic MCP server to pull usage against entitlements for every
+company on a paid plan. Companies over 80% of any metered allowance go on
+the expansion list. Companies under 20% of their allowance across every
+metered feature go on the churn-risk list. Include credit balances where a
+company is on a credit-based plan.
+
+## Rules
+
+* Read-only.
+* Compare against your previous run and lead with what changed. A company
+  that was at 40% and is now at 85% matters more than one that has sat at
+  90% all quarter.
+* Skip companies in their first full billing period. There is no trend yet.
+* Note which companies appear on both lists. Heavy use of one feature and
+  none of the rest is a packaging problem, not a renewal conversation.
+* Keep each list to ten companies. If more qualify, say how many were cut.
+```
+
+## Tips
+
+**One item per run.** An agent asked to fix everything produces a pull request nobody can review. The recipes above all pick a single item on purpose.
+
+**Give the agent your project's context.** Which paths are off limits, which flags are mid-rollout, how your team writes a pull request description. A recipe that works in one repository needs this part rewritten for the next.
+
+**Have it tell you when it found nothing.** A run that reports "no drift this week" is a working run. Without that line you cannot tell a clean result from a broken job.
+
+**Keep the human review.** Every recipe here ends in something a person approves. That is the design, not a limitation of the current tooling.
+
+## Where this fits
+
+These recipes are scheduled reads with a human at the end. For automation that has to fire reliably on a specific event, use [webhooks](/integrations/webhooks) instead, which is the distinction drawn in [Automate with webhooks and AI](/use-cases/automation).
