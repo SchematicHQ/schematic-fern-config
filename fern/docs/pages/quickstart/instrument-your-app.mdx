@@ -20,6 +20,16 @@ If you are working through this with an AI coding assistant, connect Schematic's
 
 The server is at `https://api.schematichq.com/mcp`. Point your assistant at that URL and sign in, then pick an environment and whether the connection gets read-only or read and write access. [Building with AI](/building-with-ai) has the per-client setup for Claude Code, Codex, Cursor, and clients that need an API key instead of OAuth.
 
+Once it is connected, you can hand it a step instead of writing it:
+
+```
+Add an entitlement check to the export handler for our bulk export feature,
+using the real flag key from Schematic. If the feature doesn't exist yet,
+create it and entitle it to the Pro plan first.
+```
+
+[What to ask it](/building-with-ai#what-to-ask-it) has more prompts for the coding side.
+
 ## 1. Install and mount the SDK
 
 ```bash
