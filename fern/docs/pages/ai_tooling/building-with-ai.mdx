@@ -20,10 +20,6 @@ Schematic hosts an MCP server at `https://api.schematichq.com/mcp`. Any MCP-comp
 
 The server speaks streamable HTTP and supports MCP OAuth, which is what most clients need to know to connect.
 
-### Common use cases
-
-The MCP integration is particularly useful for **code generation**, where the assistant queries your actual Schematic data so the integration code it writes matches your real feature keys and plans. It also helps with **troubleshooting** a specific company, plan, or feature without leaving your editor, **analyzing usage patterns** through natural language queries, and **managing plans** by describing the change you want rather than clicking through the app.
-
 ## Install
 
 <CardGroup cols={3}>
@@ -201,6 +197,47 @@ Once your client lists Schematic as connected, ask it something you already know
 - "Create a company override to enable 'beta_features' for company comp_123"
 
 The third one needs a read and write connection. If it fails, see the troubleshooting below.
+
+## What to ask it
+
+The connection test above proves the server answers. These are the jobs it is there for, and each prompt works as written once you swap in your own names.
+
+**Build plans from a pricing page.** The assistant reads the page, sorts what it finds into plans, features, and add-ons, confirms what it is unsure of, and creates them through the server. [Set up your first plan](/quickstart/set-up-your-first-plan#start-with-your-agent) has the full walkthrough, and a PDF price sheet works in place of the link.
+
+```
+Here is our pricing page: https://example.com/pricing. Build our plans, features,
+and add-ons in Schematic to match it. Ask me before you create anything.
+```
+
+**Reconcile the flags in your code with the account.** Flag keys drift in both directions: a check in code for a flag nobody created, and a flag in Schematic that nothing checks. Neither shows up until a customer lands on the wrong branch.
+
+```
+List every Schematic flag key this repository checks. Tell me which ones don't
+exist in Schematic, and which Schematic flags nothing in the code checks.
+```
+
+**Add an entitlement check.** The assistant uses the real flag key instead of a placeholder, so the check resolves correctly the first time it runs.
+
+```
+Add an entitlement check to src/api/export.ts for the bulk_export feature, using
+the real flag key from Schematic. Return a 403 when the company isn't entitled.
+```
+
+**Add a metered feature end to end.** One request covers the feature in Schematic, the allowance on the plan, and the usage event in code.
+
+```
+Create an event-based feature called report_generated, give the Pro plan 100 per
+month, and add the usage event where this codebase generates a report.
+```
+
+**Debug a company's access.** The assistant pulls the plan, its entitlements, and any overrides in one pass, which is the same data you would collect across several screens in the app.
+
+```
+Acme Corp says they can't reach bulk_export. What plan are they on, what does
+that plan entitle, and do they have any overrides?
+```
+
+The prompts that create or change something need a read and write connection. The same prompts also run unattended on a schedule, which [Automation recipes](/ai-automations) covers.
 
 ## Troubleshooting
 

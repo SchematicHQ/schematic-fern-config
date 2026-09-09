@@ -11,6 +11,25 @@ By the end you will have a plan that grants access to a feature, a second featur
 
 ![Boolean features on a pricing page](../../assets/images/quickstart/quickstart-entitle-feature-5.png)
 
+## Start with your agent
+
+If you use Claude, ChatGPT, or a coding assistant, connect it to Schematic's MCP server first and let it do the four steps below with you. The server is at `https://api.schematichq.com/mcp`. [Working with AI](/working-with-ai#connect-your-assistant) has the setup for chat assistants and [Building with AI](/building-with-ai#install) has it for coding assistants. When you sign in, pick the environment you want to build in and choose read and write access.
+
+The Quickstart page in your Schematic account shows whether an agent is connected and has a **Copy onboarding kickoff prompt** button. Paste that prompt into your assistant and it checks what your account already has, then walks you through setup one step at a time, asking before it changes anything.
+
+If your pricing already exists somewhere, hand it over instead of describing it:
+
+```
+Here is our pricing page: https://example.com/pricing. Build our plans, features,
+and add-ons in Schematic to match it. Ask me before you create anything, and ask
+about anything the page leaves open, like limits marked unlimited or prices
+behind "contact sales".
+```
+
+A PDF of your price sheet works the same way. Attach it in place of the link. The assistant reads the page, sorts what it finds into plans, on-or-off features, metered features, and add-ons, confirms the parts it is unsure of, and creates them through the MCP server. It ends with a summary of what it created and anything left to finish in the app.
+
+The four steps below are still worth reading afterward, because they show you where each piece the agent built lives in the dashboard.
+
 ## The four steps
 
 1. **[Create your account](/quickstart/account-setup)** — sign up, generate the API keys your engineers will need, and load sample plans and customers so you have something to work with.
