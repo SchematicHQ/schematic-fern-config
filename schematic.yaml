@@ -10378,6 +10378,8 @@ components:
           items:
             $ref: '#/components/schemas/OnboardingRequirementView'
           maxItems: 10
+        roadmap:
+          $ref: '#/components/schemas/OnboardingRoadmapView'
         slack_connect:
           $ref: '#/components/schemas/SlackConnectInviteView'
         stripe_import:
@@ -11215,6 +11217,7 @@ components:
         - connect_billing
         - create_api_key
         - first_flag_check
+        - generate_roadmap
         - import_companies
         - model_packaging
         - send_events
@@ -11247,6 +11250,19 @@ components:
         - id
         - status
       title: OnboardingRequirementView
+    OnboardingRoadmapView:
+      type: object
+      properties:
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        slug:
+          type: string
+          maxLength: 255
+      required:
+        - slug
+      title: OnboardingRoadmapView
     OnboardingStripeImport:
       type: string
       enum:
