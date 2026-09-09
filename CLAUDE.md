@@ -8,14 +8,21 @@ which SDK pages are generated and will be overwritten.
 
 ## Writing rules
 
-These apply to every `.mdx` file under `fern/docs/pages/`. Nothing in CI blocks a merge on them.
-`scripts/prose_lint.py` covers the mechanical ones, and a weekly job on Ryan's machine runs it
-against `main` and opens a PR when it finds drift. Follow the rules as you write rather than
-expecting the sweep to catch you, and run the lint locally before opening a PR.
+These apply to every `.mdx` file under `fern/docs/pages/`. Nothing in CI blocks a merge on them,
+so follow them as you write. Run `python3 scripts/prose_lint.py` before opening a PR, which
+covers the mechanical ones. Ryan also has a local sweep he runs from time to time that fixes
+what the lint finds and opens a PR.
 
 **No em dashes in body prose.** Use commas or periods, or restructure. The one exception is the
 hub-bullet format, `- [Link](/slug) — lowercase outcome sentence`, which is a sanctioned
 convention.
+
+**No bolded term followed by a dash in a bullet.** `- **Trait** — each company's limit is read
+from a trait` puts punctuation where a verb belongs. Make the bolded term the subject of a real
+sentence: `- **Trait** reads each company's limit from a trait on their profile`. This covers the
+em dash, the double hyphen, and the single hyphen, all three of which have turned up in the docs
+doing the same job. When the list is really a lookup table of short parallel entries, make it a
+markdown table instead, the way `production_readiness/roles-and-permissions.mdx` does.
 
 **No short declarative sentences that only restate the sentence before them.**
 
