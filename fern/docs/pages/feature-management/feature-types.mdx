@@ -48,9 +48,9 @@ For these reasons, we recommend reporting usage to Schematic whenever possible.
 
 A common order of operations is to define every feature and plan in the dashboard first, then instrument the application and deploy. That works: none of the three feature types requires Schematic to have already seen real data, and you never need to seed events or traits through the API to get started.
 
-- **Boolean** - Nothing to configure beyond the feature and its flag key.
-- **Event-based** - The **Event** field on the feature is a search-or-create box. Type the event name you intend to send, for example `api_calls`, and pick **Create event: api_calls** from the dropdown. That name is stored on the feature. Usage starts accruing the first time your application calls `track` with the matching event name — no change to the feature is needed at that point.
-- **Trait-based** - The **Trait** field works the same way. Type the trait name, for example `seats`, and choose **Create trait**. This creates the trait definition immediately, ready to receive values once you start reporting them via `upsertCompanyTrait`, `upsertCompany`, or `identify`.
+- **Boolean** features need nothing configured beyond the feature and its flag key.
+- **Event-based** features use the **Event** field, a search-or-create box. Type the event name you intend to send, for example `api_calls`, and pick **Create event: api_calls** from the dropdown. That name is stored on the feature. Usage starts accruing the first time your application calls `track` with the matching event name, and the feature needs no change at that point.
+- **Trait-based** features use the **Trait** field the same way. Type the trait name, for example `seats`, and choose **Create trait**. This creates the trait definition immediately, ready to receive values once you start reporting them via `upsertCompanyTrait`, `upsertCompany`, or `identify`.
 
 <Info>
 The dropdowns list events and traits Schematic has already seen, so on a new account they open empty. Type the name you want and the create option appears.
