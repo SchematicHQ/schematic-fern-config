@@ -23,16 +23,16 @@ The server speaks streamable HTTP and supports MCP OAuth, which is what most cli
 ## Install
 
 <CardGroup cols={3}>
-  <Card title="Cursor" icon="fa-solid fa-bolt" href="https://cursor.com/en-US/install-mcp?name=Schematic&config=eyJ1cmwiOiJodHRwczovL2FwaS5zY2hlbWF0aWNocS5jb20vbWNwIn0=">
+  <Card title="Cursor" icon="fa-solid fa-bolt" href="#cursor">
     One-click install
   </Card>
-  <Card title="VS Code" icon="fa-solid fa-bolt" href="vscode:mcp/install?%7B%22url%22%3A%22https%3A%2F%2Fapi.schematichq.com%2Fmcp%22%2C%22name%22%3A%22Schematic%22%2C%22type%22%3A%22http%22%7D">
+  <Card title="VS Code" icon="fa-solid fa-bolt" href="#vs-code">
     One-click install
   </Card>
   <Card title="Claude Code" icon="fa-solid fa-terminal" href="#claude-code">
     See instructions
   </Card>
-  <Card title="Claude" icon="fa-solid fa-comments" href="#claude">
+  <Card title="Claude Managed Agents" icon="fa-solid fa-robot" href="#claude-managed-agents">
     See instructions
   </Card>
   <Card title="Codex" icon="fa-solid fa-terminal" href="#codex">
@@ -42,6 +42,8 @@ The server speaks streamable HTTP and supports MCP OAuth, which is what most cli
     See instructions
   </Card>
 </CardGroup>
+
+Connecting the Claude or ChatGPT apps instead of a coding client? Those add the server through a settings pane rather than config, and [Working with AI](/working-with-ai#connect-your-assistant) covers them.
 
 OAuth is the better default for every client that supports it. The connection runs as your Schematic user, so it respects your team member permissions and picks up permission changes immediately, and there is no API key to store or rotate. Clients that cannot run the OAuth flow use [an API key](#connect-with-an-api-key) instead.
 
@@ -74,15 +76,11 @@ Select it, press Enter, and follow the browser flow to sign in and choose your e
   ⎿  Authentication successful. Connected to schematic.
 ```
 
-### Claude
-
-Open **Customize > Connectors**, select **Add custom connector**, and enter `https://api.schematichq.com/mcp`. Claude runs the same sign-in, environment, and access-level choices in the browser, and the connector then stays available in every conversation without any config file to maintain.
-
-Every Claude plan can add a custom connector, including Free and Pro.
-
 ### Cursor
 
-Use the one-click install above, or add the server to `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
+[Install in Cursor](https://cursor.com/en-US/install-mcp?name=Schematic&config=eyJ1cmwiOiJodHRwczovL2FwaS5zY2hlbWF0aWNocS5jb20vbWNwIn0=) hands the server to Cursor and you are done.
+
+To add it by hand instead, put the server in `.cursor/mcp.json` in your project root, or `~/.cursor/mcp.json` to make it available everywhere:
 
 ```json
 {
@@ -98,7 +96,9 @@ Cursor prompts you to sign in the first time it connects. Confirm the result und
 
 ### VS Code
 
-Use the one-click install above, or add the server to `.vscode/mcp.json` in your project root:
+[Install in VS Code](vscode:mcp/install?%7B%22url%22%3A%22https%3A%2F%2Fapi.schematichq.com%2Fmcp%22%2C%22name%22%3A%22Schematic%22%2C%22type%22%3A%22http%22%7D) opens VS Code and adds the server for you.
+
+To add it by hand instead, put the server in `.vscode/mcp.json` in your project root:
 
 ```json
 {
