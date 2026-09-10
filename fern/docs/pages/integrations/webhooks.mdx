@@ -58,6 +58,7 @@ Each webhook from Schematic is a `POST` request with a JSON body structured as f
 
 ```json
 {
+  "event_id": "whev_xxxxxxxx",
   "action": "<webhook.name>",
   "account_id": "acct_xxxxxxx",
   "environment_id": "env_xxxxxxxx",
@@ -71,6 +72,7 @@ Each webhook from Schematic is a `POST` request with a JSON body structured as f
 
 | Field | Description |
 | --- | --- |
+| `event_id` | Identifies this delivery of this event to this endpoint. It is the same on every retry, so use it to drop duplicates. It matches the `id` of the event in the webhook log and in `GET /webhook-events` |
 | `action` | The webhook event type, e.g. `company.created` |
 | `account_id` | The account the event occurred in |
 | `environment_id` | The environment within the account the event occurred in |
@@ -83,13 +85,15 @@ The contents of `body` vary depending on the event. You can inspect real payload
 
 ## Signature verification
 
-Every webhook request Schematic sends includes three headers for verifying authenticity:
+Every webhook request Schematic sends includes three headers for verifying authenticity, plus two that describe the delivery:
 
 | Header | Description |
 | --- | --- |
 | `X-Schematic-Webhook-Signature` | HMAC-SHA256 signature of the request body, hex-encoded |
 | `X-Schematic-Webhook-Signature-Version` | Signature version — currently `v1` |
-| `X-Schematic-Webhook-Timestamp` | Unix timestamp of when the webhook was sent |
+| `X-Schematic-Webhook-Timestamp` | Unix timestamp of when this attempt was sent |
+| `X-Schematic-Webhook-Id` | Same value as `event_id` in the body, so you can deduplicate before parsing. Only the body is covered by the signature |
+| `X-Schematic-Webhook-Attempt` | Which delivery attempt this is, starting at `1` |
 
 The signature is computed as:
 
@@ -155,15 +159,32 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 
 ## Delivery and retries
 
-Schematic delivers webhooks asynchronously. Your endpoint should acknowledge receipt by responding with any `2xx` status code.
+Schematic delivers webhooks asynchronously. Your endpoint should acknowledge receipt by responding with any `2xx` status code within 5 seconds. Acknowledge first and do the work afterwards; a handler that processes the event before responding will time out under load.
 
-If your endpoint responds with a non-`2xx` status (anything `300` or above) or the request times out, Schematic treats the delivery as failed and retries it. Retries use exponential backoff with jitter, up to 5 retries after the initial attempt (6 delivery attempts in total). Once those attempts are exhausted, the event is not delivered again.
+If your endpoint responds with a non-`2xx` status (anything `300` or above, including `4xx`) or does not respond within 5 seconds, Schematic treats the attempt as failed and retries it. There are up to 8 attempts over about 24 hours, at roughly these offsets from the first:
 
-<Note>Because an event can be delivered more than once (for example, if a retry overlaps a slow success, or your endpoint processes the request but its response is lost in transit), design your handler to be idempotent. The webhook payload includes enough context to deduplicate events on your side.</Note>
+| Attempt | When |
+| --- | --- |
+| 1 | immediately |
+| 2 | 30 seconds |
+| 3 | 5 minutes |
+| 4 | 30 minutes |
+| 5 | 2 hours |
+| 6 | 5 hours |
+| 7 | 10 hours |
+| 8 | 24 hours |
+
+Each wait is jittered by about 10%. Once the last attempt fails, the event is not delivered again. Disabling or deleting an endpoint drops its pending retries; re-enabling it does not resume them.
+
+Every attempt sends the same body, so `event_id` and the `X-Schematic-Webhook-Id` header are stable across retries. The timestamp and signature are fresh on each attempt.
+
+<Note>Design your handler to be idempotent and key it on `event_id`. An event can arrive more than once, for example when your endpoint processes a request but the response is lost in transit, and a retried event can arrive after newer events for the same object. Do not rely on webhooks arriving in order; compare timestamps in `body` when order matters.</Note>
+
+Test sends from the dashboard are delivered once, are not recorded in the webhook log, and carry no `event_id` or `X-Schematic-Webhook-Id`.
 
 ### Endpoint health
 
-If an endpoint fails consistently, Schematic automatically deactivates it so it stops sending to a broken destination. Our threshold for deactivation is a failure rate of 90% or higher across at least 25 events in a rolling 24-hour window. You can re-enable the endpoint from the webhooks page in the dashboard once the issue is resolved.
+If an endpoint fails consistently, Schematic automatically deactivates it so it stops sending to a broken destination. A delivery counts as failing once it has given up, or once it has failed 3 attempts (about 30 minutes) and is still retrying. When 90% or more of at least 25 attempted deliveries in a rolling 24-hour window are failing, the endpoint is deactivated. You can re-enable the endpoint from the webhooks page in the dashboard once the issue is resolved.
 
 ## Developer Tooling
 
