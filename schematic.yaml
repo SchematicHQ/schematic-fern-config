@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: vc8eb8df4
+  x-rules-engine-schema-version: v3fd2b817
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -512,6 +512,17 @@ components:
         - started_at
         - url
       title: AuditLogResponseData
+    BillingArrearsAnchor:
+      type: string
+      enum:
+        - billing_period_start
+        - month_end
+    BillingArrearsCadence:
+      type: string
+      enum:
+        - daily
+        - end_of_billing_period
+        - monthly
     BillingCollectionMethod:
       type: string
       enum:
@@ -825,6 +836,19 @@ components:
           nullable: true
         plan_name:
           type: string
+          nullable: true
+        postpaid_charge_amount:
+          type: integer
+          description: What the postpaid charges costs, in the currency's minor unit.
+          format: int64
+          nullable: true
+        postpaid_charge_currency:
+          type: string
+          nullable: true
+        postpaid_charged_credits:
+          type: number
+          description: Credits consumed past a zero balance in the window still open.
+          format: double
           nullable: true
         price:
           $ref: '#/components/schemas/BillingPriceResponseData'
@@ -1223,6 +1247,20 @@ components:
     BillingPlanCreditGrantResponseData:
       type: object
       properties:
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window. Only meaningful when
+            arrears_cadence is monthly.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced. Defaults to
+            end_of_billing_period.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -1316,6 +1354,16 @@ components:
             The license whose quantity scales this grant. Set only when scaling
             is per_license.
           nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            A floor on the balance, not an allowance per invoice window:
+            consumption is denied once the balance would fall below minus this
+            figure, and stays denied until a new grant lands or the negative
+            balance is settled. Absent means no limit.
+          format: double
+          nullable: true
         plan:
           $ref: '#/components/schemas/PreviewObjectResponseData'
         plan_id:
@@ -1326,6 +1374,25 @@ components:
           deprecated: true
         plan_version_id:
           type: string
+          nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance, accruing at
+            postpaid_rate_per_unit rather than being denied.
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past zero, in the currency's
+            minor unit. Defaults to the credit's own cost basis when postpaid is
+            enabled without one.
+          format: int64
+          nullable: true
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal form of postpaid_rate_per_unit, for rates finer than one
+            minor unit.
           nullable: true
         reset_cadence:
           allOf:
@@ -1368,6 +1435,7 @@ components:
         - auto_topup_enabled
         - auto_topup_self_service
         - rollover_percentage
+        - postpaid_enabled
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -3848,6 +3916,14 @@ components:
     CompanyPlanCreditGrantView:
       type: object
       properties:
+        billing_credit_arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          nullable: true
+        billing_credit_arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_auto_topup_amount:
           type: integer
           format: int64
@@ -3885,6 +3961,19 @@ components:
           nullable: true
         billing_credit_can_buy_bundles:
           type: boolean
+        billing_credit_overdraft_limit:
+          type: number
+          format: double
+          nullable: true
+        billing_credit_postpaid_enabled:
+          type: boolean
+        billing_credit_postpaid_rate_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_postpaid_rate_per_unit_decimal:
+          type: string
+          nullable: true
         company_auto_topup_amount:
           type: integer
           format: int64
@@ -3995,6 +4084,7 @@ components:
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
+        - billing_credit_postpaid_enabled
         - rollover_percentage
         - company_credit_amount
         - scaling
@@ -5468,6 +5558,24 @@ components:
         apply_to_existing:
           type: boolean
           nullable: true
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when arrears_cadence is monthly; defaults
+            to billing_period_start.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced:
+            end_of_billing_period (the default) or monthly. Daily is rejected on
+            a credit grant: invoicing every day sits close enough to a top-up
+            that offering both blurs prepaid against arrears.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -5553,10 +5661,49 @@ components:
             The license whose quantity scales this grant. Required when scaling
             is per_license.
           nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            It is a floor on the balance rather than an allowance per invoice
+            window: the balance may run down to minus this figure, and beyond it
+            the flag check denies the same way an exhausted balance does with
+            postpaid off. Nothing resets when an invoice window rolls, so a
+            company that reaches the limit stays denied until a new grant lands
+            or the negative balance is settled. Omit for no limit.
+          format: double
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
           type: string
+          nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance. When false
+            (the default) the flag check denies once the balance is exhausted,
+            which is the existing behavior. When true, consumption continues and
+            accrues at postpaid_rate_per_unit, settled on arrears_cadence.
+            Intended for invoice-billed customers on net terms, who have no card
+            for auto top-up to charge.
+          nullable: true
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past a zero balance, in the
+            currency's minor unit. Optional: defaults to the credit's own cost
+            basis (price_per_unit) when postpaid_enabled is true.
+          format: int64
+          nullable: true
+          minimum: 0
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal string form of postpaid_rate_per_unit, for rates finer than
+            one minor unit (for example 0.0002). Takes precedence over
+            postpaid_rate_per_unit when both are set, matching how the credit's
+            own price_per_unit_decimal behaves.
           nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -7284,6 +7431,10 @@ components:
     CreditCompanyGrantView:
       type: object
       properties:
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_bundle_id:
           type: string
           nullable: true
@@ -7343,6 +7494,28 @@ components:
           type: string
           nullable: true
         plural_name:
+          type: string
+          nullable: true
+        postpaid_charge_amount:
+          type: integer
+          format: int64
+          nullable: true
+        postpaid_charge_currency:
+          type: string
+          nullable: true
+        postpaid_charged_credits:
+          type: number
+          format: double
+          nullable: true
+        postpaid_period_end:
+          type: string
+          format: date-time
+          nullable: true
+        postpaid_rate:
+          type: integer
+          format: int64
+          nullable: true
+        postpaid_rate_decimal:
           type: string
           nullable: true
         price:
@@ -11679,6 +11852,14 @@ components:
     PlanCreditGrantView:
       type: object
       properties:
+        billing_credit_arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          nullable: true
+        billing_credit_arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_auto_topup_amount:
           type: integer
           format: int64
@@ -11716,6 +11897,19 @@ components:
           nullable: true
         billing_credit_can_buy_bundles:
           type: boolean
+        billing_credit_overdraft_limit:
+          type: number
+          format: double
+          nullable: true
+        billing_credit_postpaid_enabled:
+          type: boolean
+        billing_credit_postpaid_rate_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_postpaid_rate_per_unit_decimal:
+          type: string
+          nullable: true
         company_credit_amount:
           type: integer
           format: int64
@@ -11815,6 +12009,7 @@ components:
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
+        - billing_credit_postpaid_enabled
         - rollover_percentage
         - company_credit_amount
         - scaling
@@ -14093,7 +14288,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - vc8eb8df4
+        - v3fd2b817
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -14165,6 +14360,12 @@ components:
           additionalProperties:
             type: number
             format: double
+          type: object
+        credit_postpaid_limit:
+          additionalProperties:
+            type: number
+            format: double
+            nullable: true
           type: object
         entitlements:
           type: array
@@ -15436,6 +15637,25 @@ components:
         apply_to_existing:
           type: boolean
           nullable: true
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when arrears_cadence is monthly; defaults
+            to billing_period_start. Send null to fall back to the default.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced:
+            end_of_billing_period (the default) or monthly. Daily is rejected on
+            a credit grant: invoicing every day sits close enough to a top-up
+            that offering both blurs prepaid against arrears. Send null to fall
+            back to the default.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -15519,6 +15739,46 @@ components:
           description: >-
             The license whose quantity scales this grant. Cleared when the grant
             moves off per-license scaling.
+          nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            It is a floor on the balance rather than an allowance per invoice
+            window: the balance may run down to minus this figure, and beyond it
+            the flag check denies the same way an exhausted balance does with
+            postpaid off. Nothing resets when an invoice window rolls, so a
+            company that reaches the limit stays denied until a new grant lands
+            or the negative balance is settled. Send null to remove the limit.
+          format: double
+          nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance. When false
+            (the default) the flag check denies once the balance is exhausted,
+            which is the existing behavior. When true, consumption continues and
+            accrues at postpaid_rate_per_unit, settled on arrears_cadence.
+            Intended for invoice-billed customers on net terms, who have no card
+            for auto top-up to charge.
+          nullable: true
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past a zero balance, in the
+            currency's minor unit. Send null to clear it, in which case an
+            enabled grant falls back to the credit's own cost basis
+            (price_per_unit).
+          format: int64
+          nullable: true
+          minimum: 0
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal string form of postpaid_rate_per_unit, for rates finer than
+            one minor unit (for example 0.0002). Takes precedence over
+            postpaid_rate_per_unit when both are set, matching how the credit's
+            own price_per_unit_decimal behaves. Send null to clear it.
           nullable: true
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
