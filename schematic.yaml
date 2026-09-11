@@ -520,7 +520,6 @@ components:
     BillingArrearsCadence:
       type: string
       enum:
-        - daily
         - end_of_billing_period
         - monthly
     BillingCollectionMethod:
@@ -5584,9 +5583,7 @@ components:
             - $ref: '#/components/schemas/BillingArrearsCadence'
           description: >-
             How often postpaid charges are closed and invoiced:
-            end_of_billing_period (the default) or monthly. Daily is rejected on
-            a credit grant: invoicing every day sits close enough to a top-up
-            that offering both blurs prepaid against arrears.
+            end_of_billing_period (the default) or monthly.
           nullable: true
         auto_topup_amount:
           type: integer
@@ -15692,9 +15689,7 @@ components:
             - $ref: '#/components/schemas/BillingArrearsCadence'
           description: >-
             How often postpaid charges are closed and invoiced:
-            end_of_billing_period (the default) or monthly. Daily is rejected on
-            a credit grant: invoicing every day sits close enough to a top-up
-            that offering both blurs prepaid against arrears. Send null to fall
+            end_of_billing_period (the default) or monthly. Send null to fall
             back to the default.
           nullable: true
         auto_topup_amount:
