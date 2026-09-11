@@ -61,6 +61,7 @@ Each webhook from Schematic is a `POST` request with a JSON body structured as f
   "action": "<webhook.name>",
   "account_id": "acct_xxxxxxx",
   "environment_id": "env_xxxxxxxx",
+  "event_id": "whe_xxxxxxxx",
   "object_type": "<object>",
   "body": {},
   // if applicable
@@ -74,6 +75,7 @@ Each webhook from Schematic is a `POST` request with a JSON body structured as f
 | `action` | The webhook event type, e.g. `company.created` |
 | `account_id` | The account the event occurred in |
 | `environment_id` | The environment within the account the event occurred in |
+| `event_id` | Identifies this event and endpoint pair, and stays the same across retries, so you can [deduplicate on it](#deduplicating-deliveries) |
 | `object_type` | The type of object the event relates to |
 | `body` | Payload containing event-specific data; shape varies by event type |
 | `company_id` | Present on company-scoped and entitlement trigger events |
@@ -157,16 +159,38 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 
 Schematic delivers webhooks asynchronously. Your endpoint should acknowledge receipt by responding with any `2xx` status code.
 
-If your endpoint responds with a non-`2xx` status (anything `300` or above) or the request times out, Schematic treats the delivery as failed and retries it. Retries use exponential backoff with jitter, up to 5 retries after the initial attempt (6 delivery attempts in total). Once those attempts are exhausted, the event is not delivered again.
+If your endpoint responds with a non-`2xx` status (anything `300` or above) or the request times out, Schematic treats the delivery as failed and retries it. You get eight attempts spread across roughly 24 hours, so you can take an endpoint down for a deploy, or sleep through an outage, and still receive the event. Each attempt lands at the offset below from the first attempt, jittered by ±10% so a shared outage does not replay every event at the same instant.
 
-<Note>Because an event can be delivered more than once (for example, if a retry overlaps a slow success, or your endpoint processes the request but its response is lost in transit), design your handler to be idempotent. The webhook payload includes enough context to deduplicate events on your side.</Note>
+| Attempt | Sent |
+| --- | --- |
+| 1 | immediately |
+| 2 | 30 seconds later |
+| 3 | 5 minutes later |
+| 4 | 30 minutes later |
+| 5 | 2 hours later |
+| 6 | 5 hours later |
+| 7 | 10 hours later |
+| 8 | 24 hours later |
+
+Once the eighth attempt fails, Schematic does not deliver the event again. Disabling or deleting the endpoint also stops any retries still in flight for it, and re-enabling the endpoint does not resume them.
+
+### Deduplicating deliveries
+
+You can receive the same event twice, most often when your endpoint processes a request but its response is lost in transit and Schematic retries. Every attempt at one event for one endpoint carries the same `event_id` in the body and in the `X-Schematic-Webhook-Id` header, so record the ids you have handled and drop a repeat rather than running your handler again.
+
+| Header | Description |
+| --- | --- |
+| `X-Schematic-Webhook-Id` | The same value as `event_id` in the body, identical on every attempt |
+| `X-Schematic-Webhook-Attempt` | Which attempt this request is, counting from `1` |
 
 ### Endpoint health
 
-If an endpoint fails consistently, Schematic automatically deactivates it so it stops sending to a broken destination. Our threshold for deactivation is a failure rate of 90% or higher across at least 25 events in a rolling 24-hour window. You can re-enable the endpoint from the webhooks page in the dashboard once the issue is resolved.
+If an endpoint fails consistently, Schematic automatically deactivates it so it stops sending to a broken destination. Our threshold for deactivation is a failure rate of 90% or higher across at least 25 events in a rolling 24-hour window. A delivery counts toward that rate once it has failed three attempts, roughly half an hour in, so Schematic catches a broken endpoint without waiting out every event's full retry window. You can re-enable the endpoint from the webhooks page in the dashboard once the issue is resolved.
 
 ## Developer Tooling
 
 On the webhooks page in Schematic, you can find a log of all webhooks Schematic has sent for your account. We will only show events that have an associated webhook configured.
+
+Each event gets one row per endpoint, and that row is updated in place as attempts are made rather than adding a row per attempt. The **Attempts** column counts the HTTP requests made so far, and a row reads `retrying` between a failed attempt and the next one, then settles on `success` or `failure`.
 
 ![webhook-log](../../assets/images/integrations/webhook-log.png)
