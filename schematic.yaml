@@ -17525,6 +17525,9 @@ components:
     WebhookEventDetailResponseData:
       type: object
       properties:
+        attempt_count:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -17557,12 +17560,16 @@ components:
         - webhook_id
         - request_type
         - status
+        - attempt_count
         - created_at
         - updated_at
       title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
       properties:
+        attempt_count:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -17593,6 +17600,7 @@ components:
         - webhook_id
         - request_type
         - status
+        - attempt_count
         - created_at
         - updated_at
       title: WebhookEventResponseData
