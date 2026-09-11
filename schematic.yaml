@@ -11025,6 +11025,8 @@ components:
           format: date-time
         id:
           type: string
+        issuer_type:
+          $ref: '#/components/schemas/TemporaryAccessTokenIssuerType'
         resource_type:
           $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         token:
@@ -11037,6 +11039,7 @@ components:
         - environment_id
         - resource_type
         - api_key_id
+        - issuer_type
         - expired_at
         - created_at
         - updated_at
@@ -15315,6 +15318,11 @@ components:
         - tw_vat
         - us_ein
         - za_vat
+    TemporaryAccessTokenIssuerType:
+      type: string
+      enum:
+        - api_key
+        - pricing_roadmap
     TemporaryAccessTokenResourceType:
       type: string
       enum:
@@ -15334,6 +15342,8 @@ components:
           format: date-time
         id:
           type: string
+        issuer_type:
+          $ref: '#/components/schemas/TemporaryAccessTokenIssuerType'
         resource_type:
           $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         updated_at:
@@ -15344,6 +15354,7 @@ components:
         - environment_id
         - resource_type
         - api_key_id
+        - issuer_type
         - expired_at
         - created_at
         - updated_at
