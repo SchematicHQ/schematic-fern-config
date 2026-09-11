@@ -54,7 +54,8 @@ Most broken-state reports involve Stripe, and the single deepest page is [Common
 
 ## A webhook never arrived
 
-- **[Delivery and retries](/integrations/webhooks#delivery-and-retries)** — six attempts with exponential backoff, after which the event is not delivered again.
+- **[Delivery and retries](/integrations/webhooks#delivery-and-retries)** — eight attempts over roughly 24 hours, after which the event is not delivered again.
+- **[The same event arrived twice](/integrations/webhooks#deduplicating-deliveries)** — deduplicate on the `event_id` in the body, which stays the same across every attempt.
 - **[Your endpoint was deactivated](/integrations/webhooks#endpoint-health)** — Schematic disables an endpoint failing 90% or more of at least 25 events in a rolling 24 hours, and you re-enable it from the dashboard.
 - **[Check the webhook log](/integrations/webhooks#developer-tooling)** — every webhook Schematic has sent for your account, so you can tell whether it was sent at all.
 - **[Signature verification fails](/integrations/webhooks#signature-verification)** — parsed or re-serialized request bodies do not match the signature, so verify against the raw body.
