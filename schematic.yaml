@@ -807,6 +807,12 @@ components:
         created_at:
           type: string
           format: date-time
+        credit_bundle_id:
+          type: string
+          description: >-
+            The catalog bundle this grant was issued from, when the company
+            bought one.
+          nullable: true
         credit_icon:
           type: string
           nullable: true
@@ -2846,6 +2852,8 @@ components:
           maxItems: 1000
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
+        company_can_trial_selected_plan:
+          type: boolean
         custom_checkout_fields:
           type: array
           items:
@@ -2860,6 +2868,8 @@ components:
           maxItems: 1000
         selected_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        selected_plan_already_trialed:
+          type: boolean
         selected_usage_based_entitlements:
           type: array
           items:
@@ -2868,6 +2878,8 @@ components:
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
       required:
+        - company_can_trial_selected_plan
+        - selected_plan_already_trialed
         - active_add_ons
         - active_usage_based_entitlements
         - selected_usage_based_entitlements
@@ -5972,6 +5984,9 @@ components:
           minimum: 1
         company_id:
           type: string
+        credit_bundle_id:
+          type: string
+          nullable: true
         credit_id:
           type: string
         currency:
@@ -7250,6 +7265,9 @@ components:
         trial_days:
           type: integer
           format: int64
+          nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
           nullable: true
         trial_expiry_plan_id:
           type: string
@@ -12423,6 +12441,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
         trial_expiry_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         trial_expiry_plan_id:
@@ -12439,6 +12459,7 @@ components:
       required:
         - add_ons
         - id
+        - trial_eligibility_per_plan
         - plans
         - ordered_plan_list
         - ordered_bundle_list
@@ -12699,6 +12720,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
         trial_expiry_plan_id:
           type: string
           nullable: true
@@ -12713,6 +12736,7 @@ components:
         - add_on_ids
         - plan_ids
         - ordered_add_on_ids
+        - trial_eligibility_per_plan
         - add_on_compatibilities
         - show_as_monthly_prices
         - show_credits
@@ -16521,6 +16545,9 @@ components:
         trial_days:
           type: integer
           format: int64
+          nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
           nullable: true
         trial_expiry_plan_id:
           type: string
