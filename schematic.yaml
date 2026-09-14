@@ -14058,12 +14058,6 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
-    ReleaseCreditLeaseRequestBody:
-      type: object
-      title: ReleaseCreditLeaseRequestBody
-    ReleaseCreditReservationRequestBody:
-      type: object
-      title: ReleaseCreditReservationRequestBody
     ReserveCreditsRequestBody:
       type: object
       properties:
@@ -20331,12 +20325,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReleaseCreditLeaseRequestBody'
-        required: true
       responses:
         '200':
           description: OK
@@ -20835,12 +20823,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReleaseCreditReservationRequestBody'
-        required: true
       responses:
         '200':
           description: OK
