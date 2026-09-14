@@ -527,6 +527,7 @@ navigation:
               - DELETE /flags/{flag_id}
               - PUT /flags/{flag_id}/rules
               - POST /flags/{key}/check
+              - POST /flags/{key}/check-and-reserve
               - POST /flags/check
           - section: Entitlements
             contents:
@@ -567,6 +568,8 @@ navigation:
               - POST /billing/credits/lease
               - PUT /billing/credits/lease/{lease_id}/extend
               - PUT /billing/credits/lease/{lease_id}/release
+              - POST /billing/credits/reservations
+              - PUT /billing/credits/reservations/{reservation_id}/release
           - section: Account Members
             slug: accounts
             contents:
