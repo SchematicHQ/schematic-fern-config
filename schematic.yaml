@@ -2662,6 +2662,131 @@ components:
         - none
         - one_time
         - recurring
+    CheckAndReserveFlagRequestBody:
+      type: object
+      properties:
+        company:
+          additionalProperties:
+            type: string
+            maxLength: 255
+          type: object
+          nullable: true
+        expires_at:
+          type: string
+          description: >-
+            When the hold lapses if no track event settles it; defaults to one
+            minute from now and may be at most one hour out. The unspent hold is
+            refunded on expiry
+          format: date-time
+          nullable: true
+        preflight:
+          allOf:
+            - $ref: '#/components/schemas/PreflightRequestBody'
+          description: >-
+            Hypothetical usage to evaluate the flag against. When credit_cost
+            names the entitlement's credit, that cost is what gets held;
+            otherwise the hold is quantity times the entitlement's consumption
+            rate
+        quantity:
+          type: number
+          description: >-
+            Units of the feature the operation will consume; defaults to 1. Sets
+            the hold size together with the entitlement's consumption rate, and
+            is echoed back on the reservation for the settling track event
+          format: double
+          nullable: true
+        user:
+          additionalProperties:
+            type: string
+            maxLength: 255
+          type: object
+          nullable: true
+      title: CheckAndReserveFlagRequestBody
+    CheckAndReserveFlagResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: If company keys were provided and matched a company, its ID
+          nullable: true
+        entitlement:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEntitlement'
+          description: If a feature entitlement rule was matched, its entitlement details
+        error:
+          type: string
+          description: If an error occurred while checking the flag, the error message
+          nullable: true
+        feature_allocation:
+          type: integer
+          description: 'Deprecated: Use Entitlement.Allocation instead.'
+          format: int64
+          nullable: true
+          deprecated: true
+        feature_usage:
+          type: integer
+          description: 'Deprecated: Use Entitlement.Usage instead.'
+          format: int64
+          nullable: true
+          deprecated: true
+        feature_usage_event:
+          type: string
+          description: 'Deprecated: Use Entitlement.EventName instead.'
+          nullable: true
+          deprecated: true
+        feature_usage_period:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
+          description: 'Deprecated: Use Entitlement.MetricPeriod instead.'
+          nullable: true
+          deprecated: true
+        feature_usage_reset_at:
+          type: string
+          description: 'Deprecated: Use Entitlement.MetricResetAt instead.'
+          format: date-time
+          nullable: true
+          deprecated: true
+        flag:
+          type: string
+          description: The key used to check the flag
+        flag_id:
+          type: string
+          description: If a flag was found, its ID
+          nullable: true
+        reason:
+          type: string
+          description: A human-readable explanation of the result
+        reservation:
+          allOf:
+            - $ref: '#/components/schemas/FlagCheckReservationResponseData'
+          description: >-
+            The hold taken on the company's credit balance for this operation,
+            when the flag allowed it and the feature is credit-metered. Settle
+            it by sending a track event carrying its ID as reservation_id; the
+            unspent hold is refunded at expires_at otherwise
+        rule_id:
+          type: string
+          description: If a rule was found, its ID
+          nullable: true
+        rule_type:
+          allOf:
+            - $ref: '#/components/schemas/RuleType'
+          description: If a rule was found, its type
+          nullable: true
+        user_id:
+          type: string
+          description: If user keys were provided and matched a user, its ID
+          nullable: true
+        value:
+          type: boolean
+          description: >-
+            A boolean flag check result; for feature entitlements, this
+            represents whether further consumption of the feature is permitted
+      required:
+        - flag
+        - reason
+        - value
+      title: CheckAndReserveFlagResponseData
     CheckFlagRequestBody:
       type: object
       properties:
@@ -7855,6 +7980,54 @@ components:
         - created_at
         - updated_at
       title: CreditLeaseResponseData
+    CreditReservationResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          description: When the unspent hold is refunded if no track event settles it
+          format: date-time
+        id:
+          type: string
+        released_at:
+          type: string
+          description: >-
+            When the reservation was settled, released, or expired; null while
+            the hold is open
+          format: date-time
+          nullable: true
+        reserved_amount:
+          type: number
+          description: Credits held from the company's balance for the operation
+          format: double
+        settled_amount:
+          type: number
+          description: >-
+            Credits the settling track event recorded against the hold; zero
+            until settled. May exceed reserved_amount, in which case the overage
+            was debited from the balance, up to the overdraft limit when one is
+            set
+          format: double
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - company_id
+        - credit_type_id
+        - reserved_amount
+        - settled_amount
+        - expires_at
+        - created_at
+        - updated_at
+      title: CreditReservationResponseData
     CreditSpendPolicyResponseData:
       type: object
       properties:
@@ -8023,6 +8196,8 @@ components:
         - lease_release
         - manual_adjustment
         - reconciliation
+        - reservation_hold
+        - reservation_release
         - track
     CreditsAutoTopupCompanySummary:
       type: object
@@ -9074,6 +9249,11 @@ components:
           type: integer
           description: Optionally specify the quantity of the event
           format: int64
+        reservation_id:
+          type: string
+          description: >-
+            Credit reservation ID this track event settles. lease_id takes
+            precedence when both are set
         traits:
           type: object
           description: A map of trait names to trait values
@@ -9146,6 +9326,9 @@ components:
         quantity:
           type: integer
           format: int64
+        reservation_id:
+          type: string
+          nullable: true
         sent_at:
           type: string
           format: date-time
@@ -9297,6 +9480,9 @@ components:
         quantity:
           type: integer
           format: int64
+        reservation_id:
+          type: string
+          nullable: true
         sent_at:
           type: string
           format: date-time
@@ -10330,6 +10516,44 @@ components:
         - flags
         - plans
       title: FeatureView
+    FlagCheckReservationResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        consumption_rate:
+          type: number
+          description: Credits per unit of usage the hold was priced at
+          format: double
+        credit_type_id:
+          type: string
+        credits_reserved:
+          type: number
+          description: Credits held from the company's balance
+          format: double
+        event_subtype:
+          type: string
+          description: The event subtype the settling track event should carry
+          nullable: true
+        expires_at:
+          type: string
+          description: When the unspent hold is refunded if no track event settles it
+          format: date-time
+        id:
+          type: string
+        quantity_reserved:
+          type: number
+          description: Units of usage the hold covers, as requested
+          format: double
+      required:
+        - id
+        - company_id
+        - consumption_rate
+        - credits_reserved
+        - credit_type_id
+        - expires_at
+        - quantity_reserved
+      title: FlagCheckReservationResponseData
     FlagDetailResponseData:
       type: object
       properties:
@@ -13837,6 +14061,42 @@ components:
     ReleaseCreditLeaseRequestBody:
       type: object
       title: ReleaseCreditLeaseRequestBody
+    ReleaseCreditReservationRequestBody:
+      type: object
+      title: ReleaseCreditReservationRequestBody
+    ReserveCreditsRequestBody:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: >-
+            Credits to hold for the operation. The full amount must be
+            available; a partial hold is never taken
+          format: double
+        company_id:
+          type: string
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          description: >-
+            When the hold lapses if no track event settles it; defaults to one
+            minute from now and may be at most one hour out. The unspent hold is
+            refunded on expiry
+          format: date-time
+          nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the original reservation instead of taking another hold
+          nullable: true
+          maxLength: 255
+      required:
+        - amount
+        - company_id
+        - credit_type_id
+      title: ReserveCreditsRequestBody
     RetryCustomPlanBillingRequestBody:
       type: object
       properties:
@@ -20510,6 +20770,95 @@ paths:
                   - data
                   - params
                 title: CountBillingPlanCreditGrantsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/reservations:
+    post:
+      operationId: reserveCredits
+      summary: Reserve credits
+      tags:
+        - credits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveCreditsRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditReservationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReserveCreditsParams
+                required:
+                  - data
+                  - params
+                title: ReserveCreditsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/reservations/{reservation_id}/release:
+    put:
+      operationId: releaseCreditReservation
+      summary: Release credit reservation
+      tags:
+        - credits
+      parameters:
+        - name: reservation_id
+          in: path
+          description: reservation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseCreditReservationRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditReservationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReleaseCreditReservationParams
+                required:
+                  - data
+                  - params
+                title: ReleaseCreditReservationResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -29582,6 +29931,53 @@ paths:
                   - data
                   - params
                 title: CheckFlagResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /flags/{key}/check-and-reserve:
+    post:
+      operationId: checkAndReserveFlag
+      summary: Check and reserve flag
+      tags:
+        - features
+      parameters:
+        - name: key
+          in: path
+          description: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckAndReserveFlagRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckAndReserveFlagResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CheckAndReserveFlagParams
+                required:
+                  - data
+                  - params
+                title: CheckAndReserveFlagResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
