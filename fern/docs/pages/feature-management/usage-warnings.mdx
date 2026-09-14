@@ -1,0 +1,106 @@
+---
+title: Usage Warnings
+description: Set a warning value on a plan entitlement so your app can tell customers they are approaching a limit before they hit it.
+
+slug: feature-management/usage-warnings
+---
+
+A usage warning is a value you set on a plan entitlement, below its limit and in the same units as usage. Schematic stores the value and returns it alongside the entitlement. It does not send a notification, throttle, or block when usage crosses it. Your app reads the value and decides what to show.
+
+Each entitlement can carry one usage warning. Leaving it empty changes nothing about how the entitlement behaves.
+
+## When to use it
+
+Without a usage warning, the first signal a customer gets about a limit is usually the moment access turns off. A usage warning gives your app a number to warn at that lives in Schematic rather than in your code, so it can differ per plan and stays visible in the dashboard.
+
+It also supports a fair-use pattern. Say a plan advertises 100 AI conversations a month but you are happy to let a customer run to 120 before cutting them off. Set the entitlement limit to 120 and the usage warning to 100. The flag turns off at 120 like any other limit. Your app shows 100 as the plan's number, warns when usage passes it, and [Schematic components](#show-the-warning-value-in-components) can display 100 as the limit.
+
+## Set a usage warning
+
+### In the dashboard
+
+Open a plan entitlement from the feature or from the plan. For an entitlement that is included in the plan and has a numeric limit, the editor shows a **Usage warning** field. Enter a value below the limit and save.
+
+The field is not shown for unlimited entitlements, boolean entitlements, or entitlements priced as pay as you go or overage.
+
+### With the API
+
+Pass a `warning_tiers` array when you [create](/api-reference/entitlements/create-plan-entitlement) or [update](/api-reference/entitlements/update-plan-entitlement) a plan entitlement:
+
+```json
+{
+  "feature_id": "feat_...",
+  "plan_id": "plan_...",
+  "value_type": "numeric",
+  "value_numeric": 120,
+  "metric_period": "current_month",
+  "warning_tiers": [
+    { "key": "default", "value": 100 }
+  ]
+}
+```
+
+The array holds at most one entry. Use the key `default`. The dashboard writes that key and components read it, so a tier under any other key is stored and returned but does not appear in the dashboard field and is ignored by components.
+
+The value is a whole number of at least 1, in the entitlement's usage units. Schematic does not check it against the limit, so keep it below the limit yourself.
+
+The entitlement needs a usage limit to warn against: a numeric limit, a trait-based limit, or a credit-based value. Setting a warning tier on a boolean or unlimited entitlement returns a 400.
+
+On update, omitting `warning_tiers` leaves the stored value alone. Sending an empty array clears it.
+
+Plan entitlement responses include the configured tiers:
+
+```json
+"warning_tiers": [
+  { "id": "pltlwt_...", "key": "default", "value": 100 }
+]
+```
+
+## Read the warning value
+
+### Check flag response
+
+When a [flag check](/api-reference/features/check-flag) matches a feature entitlement rule, the response includes the entitlement under `entitlement`, and its `warning_tiers` carry the configured value:
+
+```json
+{
+  "value": true,
+  "feature_usage": 104,
+  "feature_allocation": 120,
+  "entitlement": {
+    "feature_key": "ai-conversations",
+    "value_type": "numeric",
+    "warning_tiers": [
+      { "key": "default", "value": 100 }
+    ]
+  }
+}
+```
+
+Compare `feature_usage` to the tier value to decide whether the customer is approaching the limit. The frontend SDK hooks such as `useSchematicEntitlement` do not return the warning value yet.
+
+### Show the warning value in components
+
+Schematic components can display the usage warning in place of the hard limit. Set `warningThresholdConfig` on `EmbedProvider`:
+
+```tsx
+import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+
+<EmbedProvider warningThresholdConfig={{ showAsLimit: true }}>
+  <SchematicEmbed accessToken={accessToken} id={componentId} />
+</EmbedProvider>
+```
+
+With `showAsLimit` on, usage meters, included feature usage details, the plan manager, the pricing table, and checkout show the warning value as the entitlement's limit. Entitlements without a usage warning keep showing their hard limit. The option defaults to off and requires `@schematichq/schematic-components` 2.21.0 or later.
+
+## Usage warnings and webhooks
+
+Usage warnings do not drive webhooks. The `entitlement.limit.warning` event fires when usage reaches 80 percent of the entitlement's allocation, regardless of any usage warning set on the entitlement. There is no webhook that fires at the usage warning value. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) for the fixed thresholds each event uses.
+
+## Current limits
+
+- One usage warning per entitlement.
+- Plan entitlements only. Company overrides and credit grants do not carry a usage warning.
+- Not available on pay as you go or overage entitlements. On overage pricing the [soft limit](/billing/usage-based-billing#fixed-fee-with-overage) already marks where included usage ends.
+- The value is not validated against the limit.
+- Frontend SDK hooks do not return the value.

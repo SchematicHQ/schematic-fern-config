@@ -13,14 +13,18 @@ Entitlement and credit trigger webhooks fire based on your customers' feature us
 
 Entitlement triggers fire when a company's usage for a specific feature crosses a threshold:
 
-| Event | When it fires |
-| --- | --- |
-| `entitlement.limit.reached` | A company hits the hard limit for a feature (usage == allocation) |
-| `entitlement.limit.warning` | A company approaches the hard limit for a feature |
-| `entitlement.soft_limit.reached` | A company hits a soft limit threshold for a feature |
-| `entitlement.soft_limit.warning` | A company approaches a soft limit threshold for a feature |
-| `entitlement.tier_limit.reached` | A company hits the limit for the current tier of a tiered feature |
-| `entitlement.tier_limit.warning` | A company approaches the limit for the current tier of a tiered feature |
+| Event                             | When it fires                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| `entitlement.limit.reached`       | Usage reaches the hard limit for a feature (100 percent of the allocation)      |
+| `entitlement.limit.warning`       | Usage reaches 80 percent of the hard limit and is still below it                |
+| `entitlement.soft_limit.reached`  | Usage reaches the soft limit for a feature                                      |
+| `entitlement.soft_limit.warning`  | Usage reaches 80 percent of the soft limit and is still below it                |
+| `entitlement.tier_limit.reached`  | Usage crosses a tier boundary of a tiered feature                               |
+| `entitlement.tier_limit.warning`  | Usage is 75 percent of the way through the current tier's range                 |
+
+These percentages are fixed. They are not affected by a [usage warning](/feature-management/usage-warnings) set on the entitlement, which is a value your app reads rather than a webhook trigger.
+
+Each event fires once per feature per usage period. For trait-based features, which have no usage period, the event fires once per crossing and can fire again after usage falls back below the threshold.
 
 **Limit types explained:**
 
