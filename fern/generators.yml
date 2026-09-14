@@ -107,6 +107,13 @@ groups:
               miniflare: "^4.20260421.0"
               redis: "^4.7.0"
               "@types/ws": "^8.18.1"
+            # Security pins for transitive deps. sharp comes from miniflare,
+            # which pins 0.35.2 (GHSA-rgj7-g3m4-5g8c). The merge is shallow,
+            # so this object replaces any generated resolutions; keep the
+            # full list here.
+            resolutions:
+              sharp: "^0.35.4"
+              undici: "7.29.0"
             scripts:
               build: node build.js
               build:legacy: tsc
