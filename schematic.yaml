@@ -33654,6 +33654,22 @@ paths:
           schema:
             type: boolean
             description: Include each plan's entitlements in the response
+        - name: with_published_version
+          in: query
+          description: Only return plans that have a published version
+          schema:
+            type: boolean
+            description: Only return plans that have a published version
+        - name: without_entitlement_for_include_drafts
+          in: query
+          description: >-
+            With without_entitlement_for, also treat an entitlement on a plan's
+            draft version as existing
+          schema:
+            type: boolean
+            description: >-
+              With without_entitlement_for, also treat an entitlement on a
+              plan's draft version as existing
         - name: without_entitlement_for
           in: query
           description: >-
@@ -33778,11 +33794,19 @@ paths:
                       with_entitlements:
                         type: boolean
                         description: Include each plan's entitlements in the response
+                      with_published_version:
+                        type: boolean
+                        description: Only return plans that have a published version
                       without_entitlement_for:
                         type: string
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_entitlement_for_include_drafts:
+                        type: boolean
+                        description: >-
+                          With without_entitlement_for, also treat an
+                          entitlement on a plan's draft version as existing
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
@@ -34358,6 +34382,22 @@ paths:
           schema:
             type: boolean
             description: Include each plan's entitlements in the response
+        - name: with_published_version
+          in: query
+          description: Only return plans that have a published version
+          schema:
+            type: boolean
+            description: Only return plans that have a published version
+        - name: without_entitlement_for_include_drafts
+          in: query
+          description: >-
+            With without_entitlement_for, also treat an entitlement on a plan's
+            draft version as existing
+          schema:
+            type: boolean
+            description: >-
+              With without_entitlement_for, also treat an entitlement on a
+              plan's draft version as existing
         - name: without_entitlement_for
           in: query
           description: >-
@@ -34478,11 +34518,19 @@ paths:
                       with_entitlements:
                         type: boolean
                         description: Include each plan's entitlements in the response
+                      with_published_version:
+                        type: boolean
+                        description: Only return plans that have a published version
                       without_entitlement_for:
                         type: string
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_entitlement_for_include_drafts:
+                        type: boolean
+                        description: >-
+                          With without_entitlement_for, also treat an
+                          entitlement on a plan's draft version as existing
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
