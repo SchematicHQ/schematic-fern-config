@@ -175,15 +175,15 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 
 | Component | Hook | Page |
 | --- | --- | --- |
-| `<Invoices/>` | `useInvoices` | /components/drop-in/invoices |
-| `<UpcomingBill/>` | `useUpcomingInvoice` | /components/drop-in/upcoming-bill |
-| `<PaymentMethods/>` | `usePaymentMethods` | /components/drop-in/payment-methods |
-| `<IncludedFeatures/>` | `useFeatureUsage` | /components/drop-in/included-features |
+| `<Checkout/>` | `useCheckout` | /components/drop-in/checkout |
 | `<PlanManager/>` | `useCompany` | /components/drop-in/plan-manager |
 | `<CreditMeter/>` | `useCreditBalances` | /components/drop-in/credit-meter |
-| `<FeatureMeter/>` | `useFeatureUsage` | /components/drop-in/feature-meter |
 | `<PricingTable/>` | `useCatalog` | /components/drop-in/pricing-table |
-| `<Checkout/>` | `useCheckout` | /components/drop-in/checkout |
+| `<FeatureMeter/>` | `useFeatureUsage` | /components/drop-in/feature-meter |
+| `<IncludedFeatures/>` | `useFeatureUsage` | /components/drop-in/included-features |
+| `<UpcomingBill/>` | `useUpcomingInvoice` | /components/drop-in/upcoming-bill |
+| `<PaymentMethods/>` | `usePaymentMethods` | /components/drop-in/payment-methods |
+| `<Invoices/>` | `useInvoices` | /components/drop-in/invoices |
 | `<Unsubscribe/>` | `useUnsubscribe` | /components/drop-in/unsubscribe |
 
 Feature flags and entitlement checks use the same provider: `useSchematicFlag`, `useSchematicEntitlement`, `useSchematicPlan`. See the [React SDK](/developer_resources/sdks/react).

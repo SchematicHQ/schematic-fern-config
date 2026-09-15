@@ -17,68 +17,6 @@ type ResourceHandle<T> = {
 
 The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data.
 
-## useInvoices
-
-```ts
-function useInvoices(query?: { includePending?: boolean }): ResourceHandle<InvoicePage> & { loadMore(): Promise<void> };
-
-type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
-```
-
-The invoice history, paged. `count` is how many invoices the query matches on the server; `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. Each distinct query is its own list with its own paging. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `refetch` re-requests every page loaded so far.
-
-## useUpcomingInvoice
-
-```ts
-function useUpcomingInvoice(): ResourceHandle<UpcomingInvoice | null>;
-```
-
-The next bill: amount due, due date, the canonical period, active discounts, and `customerBalanceApplied` and `customerBalanceRemaining` computed on the server. `null` is a loaded answer that means nothing to bill; only `undefined` means the resource has not loaded.
-
-## useCompany
-
-```ts
-function useCompany(): ResourceHandle<Company>;
-```
-
-The company's current plan and add-ons with their prices in the canonical period, the subscription facts that drive notices (`trialEnd`, `postTrialPlan`, `cancelAt`, `cancelAtPeriodEnd`, `scheduledDowngrade`), the current period end, and the purchase rules that apply to it (self-service downgrade, contact-sales URL). Timestamps are RFC 3339.
-
-## useFeatureUsage
-
-```ts
-function useFeatureUsage(): ResourceHandle<FeatureUsage[]>;
-```
-
-One row per entitlement: feature identity and names, `valueType` and `valueNumeric`, `usage`, `effectiveLimit`, `percentUsed`, `isUnlimited`, `priceBehavior` with its per-period prices and tiers, `softLimit`, the credit reference and `creditEquivalentLimit` for credit-burndown features, the usage period and its reset, and per-user usage for per-seat features. Included Features and Feature Meter both read this.
-
-## useCreditBalances
-
-```ts
-function useCreditBalances(): ResourceHandle<CreditBalance[]>;
-```
-
-Balances grouped by credit: identity and names, `total`, `used`, `remaining`, `resetsAt` or `expiresAt`, the auto top-up policy, and `grants[]` with a source enum (`plan`, `bundle`, `manual`), related names, quantities, and dates. Expired and fully used grants leave the list on the server.
-
-## usePaymentMethods
-
-```ts
-function usePaymentMethods(): ResourceHandle<PaymentMethod[]> & {
-  add(): Promise<void>;                 // opens a Stripe SetupIntent and saves the result
-  remove(id: string): Promise<void>;
-  setDefault(id: string): Promise<void>;
-};
-```
-
-Cards and wallets on file with `brand`, `last4`, `expMonth`, `expYear`, `type`, and `isDefault`. The three actions apply the same rules the drop-in enforces: the last method stays while a subscription is active, and the default is always set.
-
-## useCatalog
-
-```ts
-function useCatalog(options?: { catalogId?: string }): ResourceHandle<Catalog>;
-```
-
-Plans, add-ons, and credit bundles with prices per period and currency, tier shapes, and entitlement summaries. The mode follows the credential: a publishable key alone reads the public catalog; a session reads the company's view, which adds `current` to the plan they are on and `valid` (with a reason when false) to each change the purchase rules allow.
-
 ## useCheckout
 
 ```ts
@@ -95,6 +33,68 @@ function useCheckout(): {
 ```
 
 A persisted checkout. `open` shows the drop-in dialog. `setSelections` creates the checkout on first call and replaces its selections after that; every call re-prices on the server and returns the new snapshot. `finalize` claims the version and creates or changes the subscription. [Checkout API](/components/build-your-own/checkout-api) describes the resource underneath.
+
+## useCompany
+
+```ts
+function useCompany(): ResourceHandle<Company>;
+```
+
+The company's current plan and add-ons with their prices in the canonical period, the subscription facts that drive notices (`trialEnd`, `postTrialPlan`, `cancelAt`, `cancelAtPeriodEnd`, `scheduledDowngrade`), the current period end, and the purchase rules that apply to it (self-service downgrade, contact-sales URL). Timestamps are RFC 3339.
+
+## useCreditBalances
+
+```ts
+function useCreditBalances(): ResourceHandle<CreditBalance[]>;
+```
+
+Balances grouped by credit: identity and names, `total`, `used`, `remaining`, `resetsAt` or `expiresAt`, the auto top-up policy, and `grants[]` with a source enum (`plan`, `bundle`, `manual`), related names, quantities, and dates. Expired and fully used grants leave the list on the server.
+
+## useCatalog
+
+```ts
+function useCatalog(options?: { catalogId?: string }): ResourceHandle<Catalog>;
+```
+
+Plans, add-ons, and credit bundles with prices per period and currency, tier shapes, and entitlement summaries. The mode follows the credential: a publishable key alone reads the public catalog; a session reads the company's view, which adds `current` to the plan they are on and `valid` (with a reason when false) to each change the purchase rules allow.
+
+## useFeatureUsage
+
+```ts
+function useFeatureUsage(): ResourceHandle<FeatureUsage[]>;
+```
+
+One row per entitlement: feature identity and names, `valueType` and `valueNumeric`, `usage`, `effectiveLimit`, `percentUsed`, `isUnlimited`, `priceBehavior` with its per-period prices and tiers, `softLimit`, the credit reference and `creditEquivalentLimit` for credit-burndown features, the usage period and its reset, and per-user usage for per-seat features. Included Features and Feature Meter both read this.
+
+## useUpcomingInvoice
+
+```ts
+function useUpcomingInvoice(): ResourceHandle<UpcomingInvoice | null>;
+```
+
+The next bill: amount due, due date, the canonical period, active discounts, and `customerBalanceApplied` and `customerBalanceRemaining` computed on the server. `null` is a loaded answer that means nothing to bill; only `undefined` means the resource has not loaded.
+
+## usePaymentMethods
+
+```ts
+function usePaymentMethods(): ResourceHandle<PaymentMethod[]> & {
+  add(): Promise<void>;                 // opens a Stripe SetupIntent and saves the result
+  remove(id: string): Promise<void>;
+  setDefault(id: string): Promise<void>;
+};
+```
+
+Cards and wallets on file with `brand`, `last4`, `expMonth`, `expYear`, `type`, and `isDefault`. The three actions apply the same rules the drop-in enforces: the last method stays while a subscription is active, and the default is always set.
+
+## useInvoices
+
+```ts
+function useInvoices(query?: { includePending?: boolean }): ResourceHandle<InvoicePage> & { loadMore(): Promise<void> };
+
+type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
+```
+
+The invoice history, paged. `count` is how many invoices the query matches on the server; `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. Each distinct query is its own list with its own paging. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `refetch` re-requests every page loaded so far.
 
 ## useUnsubscribe
 
