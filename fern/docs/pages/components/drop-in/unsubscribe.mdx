@@ -1,0 +1,50 @@
+---
+title: Unsubscribe
+description: The cancel action and its confirmation dialog, with your downgrade rules applied.
+slug: components/drop-in/unsubscribe
+---
+
+The cancel action and its confirmation. The subscription stays active until the end of the period, then the company moves to the free plan. Downgrade prevention and the contact-sales setting apply here the same way they do in Checkout, and Plan Manager shows the scheduled cancellation afterwards.
+
+![Unsubscribe button](../../../assets/images/components/components-unsubscribe-button.png)
+
+## Usage
+
+```tsx
+import { Unsubscribe } from "@schematichq/schematic-components/elements";
+
+<Unsubscribe variant="link" />
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `variant` | `"button"` | `"button"` or `"link"` for the trigger. |
+| `onCancelled` | | Called after the cancellation is scheduled. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for the trigger and dialog by key. |
+
+## Rules the component enforces
+
+When self-service downgrade is turned off for the plan, the trigger renders the contact-sales action instead, with the URL you configured. When a company is over the usage a lower plan allows, the dialog explains what to reduce first. Both come from the server, so a hand-built cancel flow gets the same answers.
+
+## Markup
+
+```html
+<button class="schematic-link-button schematic-unsubscribe__trigger">Cancel subscription</button>
+<div class="schematic-dialog schematic-unsubscribe__dialog" role="dialog">
+  <h2 class="schematic-dialog__title">Cancel your subscription?</h2>
+  <p class="schematic-unsubscribe__body">Your plan stays active until Aug 15, 2026.</p>
+  <button class="schematic-cta schematic-cta--outline">Keep plan</button>
+  <button class="schematic-cta schematic-unsubscribe__confirm">Cancel subscription</button>
+</div>
+```
+
+## Localizing it
+
+Keys: `unsubscribeTrigger`, `unsubscribeTitle`, `unsubscribeBody`, `unsubscribeKeep`, `unsubscribeConfirm`, `unsubscribeContactSales`, `unsubscribeOverLimit`, `retry`.
+
+## Build it yourself
+
+[`useUnsubscribe`](/components/build-your-own/hooks#useunsubscribe) returns `cancel`, and [`useCompany`](/components/build-your-own/hooks#usecompany) has the period end and the rules to show.

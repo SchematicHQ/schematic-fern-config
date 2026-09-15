@@ -1,0 +1,49 @@
+---
+title: Derivations and Formatting
+description: The pure functions that turn server facts into display models, and the Intl helpers behind them.
+slug: components/build-your-own/derivations
+---
+
+A derivation is a pure function from a hook's data to a display model: `(serverData, options) => ViewModel`. The drop-ins render from these, and they are exported from `@schematichq/schematic-components/elements` so your own JSX renders from the same answers. Every model carries the raw value beside the formatted text, and none of them assemble sentences, so wording and translation stay in your code.
+
+## The derivations
+
+| Derivation | Input | Returns |
+| --- | --- | --- |
+| `deriveInvoiceList(page, { locale, format? })` | `useInvoices` | `{ rows, count, hasMore }`; each row has `dateText`, `amountText`, `amountMinor`, `isCredit`, `status`, `url` |
+| `deriveUpcomingInvoice(invoice, { locale, format? })` | `useUpcomingInvoice` | `amountDueText`, `dueAt`, `balanceApplied`, `balanceRemaining`, `discounts[]`, each with raw values |
+| `derivePlanSummary(company, { locale })` | `useCompany` | plan name, `priceText`, `periodText`, add-on rows, usage charge rows, `notice` (kind and its dates) |
+| `deriveEntitlementRow(row, { locale })` | `useFeatureUsage` | `{ kind, featureName, quantityText?, priceText?, periodText?, tooltip? }` for the six value displays |
+| `deriveUsageMeter(row, { locale, warningThreshold? })` | `useFeatureUsage` | `{ used, limit, percent, state, detailText, resetsAtText, byUser? }` |
+| `deriveCreditUsage(balance, { locale })` | `useCreditBalances` | burndown numbers, `percent`, ledger rows with source and dates, `canBuyMore` |
+| `derivePaymentMethods(methods)` | `usePaymentMethods` | `brandText`, `last4`, `expiresText`, `isDefault`, `canRemove` per method |
+| `derivePricingTable(catalog, { period, currency, locale })` | `useCatalog` | `periods`, `currencies`, plan cards with `price`, `savingsPercent`, entitlement rows, and a `cta` (`upgrade`, `downgrade`, `current`, `custom`, with `disabledReason`) |
+
+Selection state such as the period toggle stays in your component; `derivePricingTable` takes the selection and returns the valid option sets, including the re-snap when a selection becomes invalid.
+
+### Overriding one field
+
+`format` replaces one formatter at a time and receives the raw value:
+
+```ts
+deriveInvoiceList(page, {
+  locale: "en-US",
+  format: { amount: (minor, currency) => myMoney(minor, currency) },
+});
+```
+
+## Formatting helpers
+
+| Helper | Does |
+| --- | --- |
+| `formatCurrency(minor, currency, { locale })` | Currency with zero-decimal handling and significant-digit switching for small unit prices |
+| `formatNumber(value, { locale })` | Grouped numbers |
+| `formatDate(iso, { locale })`, `formatShortDate(iso, { locale })` | Dates |
+| `formatConsumptionRate(rate, { locale })` | "2 credits per prompt" style rates |
+| `plural(count, singular, plural)` | Pluralization with the feature's own names |
+| `featureName(feature, count)` | Singular or plural feature name |
+| `resolveLocale(explicit?, provider?)`, `viewerLocale()` | The fallback chain the drop-ins use |
+
+## Tests travel with them
+
+The derivations carry the test suites the drop-ins are checked against, so a rendering rule that changes is caught before it reaches a page. Pin `@schematichq/schematic-components` to a minor to take those changes deliberately.

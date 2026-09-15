@@ -1,0 +1,56 @@
+---
+title: Plan Manager
+description: The company's current plan and add-ons with the notices that matter, and a change-plan action that opens Checkout.
+slug: components/drop-in/plan-manager
+---
+
+The company's current plan: name, price, active add-ons, usage-based charges, and the notice that matters right now (trialing, cancelling, on a custom plan, or scheduled to downgrade). The change-plan button opens [Checkout](/components/drop-in/checkout).
+
+![Plan manager](../../../assets/images/components/components-current-plan.png)
+
+## Usage
+
+```tsx
+import { PlanManager } from "@schematichq/schematic-components/elements";
+
+<PlanManager showAddOns />
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `showHeader` | `true` | The heading. |
+| `showDescription` | `true` | The plan description. |
+| `showAddOns` | `true` | Active add-ons under the plan. |
+| `showUsageCharges` | `true` | Usage-based entitlement prices. |
+| `showChangePlan` | `true` | The change-plan button. |
+| `onChangePlan` | opens `<Checkout/>` | Override the change-plan action with your own checkout. |
+| `headingLevel` | `2` | The heading's level. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key. |
+
+## Notices
+
+One notice shows at a time, in this order: trialing (with the trial end and the post-trial plan), will cancel (with the date), custom plan billing, scheduled downgrade (from, to, and when). Each notice comes from a fact on the company record, so the card and your own UI agree on what to say.
+
+## Markup
+
+```html
+<div class="schematic-card schematic-plan-manager" data-state="ready">
+  <div class="schematic-plan-manager__notice" data-notice="trialing">Trial ends Sep 30, 2026. Then Starter Plan.</div>
+  <div class="schematic-header"><h2 class="schematic-header__title">Current plan</h2></div>
+  <p class="schematic-plan-manager__name">Starter Plan</p>
+  <p class="schematic-plan-manager__price">$30.45 / month</p>
+  <ul class="schematic-plan-manager__add-ons"><li>Single Sign On <span>$15 / month</span></li></ul>
+  <button class="schematic-cta schematic-plan-manager__change">Change plan</button>
+</div>
+```
+
+## Localizing it
+
+Keys: `planManagerHeader`, `planManagerChange`, `planManagerAddOns`, `planManagerUsageCharges`, `planManagerNoticeTrial`, `planManagerNoticeCancel`, `planManagerNoticeCustom`, `planManagerNoticeDowngrade`, `retry`.
+
+## Build it yourself
+
+[`useCompany`](/components/build-your-own/hooks#usecompany) returns the plan, add-ons, and the notice facts; `derivePlanSummary` orders the notices and formats the price line.
