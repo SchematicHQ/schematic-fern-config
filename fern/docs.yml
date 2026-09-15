@@ -252,13 +252,61 @@ navigation:
             path: ./docs/pages/feature-management/overrides.mdx
           - page: Feature Types
             path: ./docs/pages/feature-management/feature-types.mdx
-      - section: Embed billing UI
+      - section: Components
         contents:
           - page: Overview
             path: ./docs/pages/components/overview.mdx
-          - section: Customer Portal
+          - page: Quickstart
+            path: ./docs/pages/components/quickstart.mdx
+          - page: Add it with an agent
+            path: ./docs/pages/components/skill.mdx
+          - section: Drop-in components
             contents:
               - page: Overview
+                path: ./docs/pages/components/drop-in/overview.mdx
+              - page: Checkout
+                path: ./docs/pages/components/drop-in/checkout.mdx
+              - page: Plan Manager
+                path: ./docs/pages/components/drop-in/plan-manager.mdx
+              - page: Credit Meter
+                path: ./docs/pages/components/drop-in/credit-meter.mdx
+              - page: Pricing Table
+                path: ./docs/pages/components/drop-in/pricing-table.mdx
+              - page: Feature Meter
+                path: ./docs/pages/components/drop-in/feature-meter.mdx
+              - page: Included Features
+                path: ./docs/pages/components/drop-in/included-features.mdx
+              - page: Upcoming Bill
+                path: ./docs/pages/components/drop-in/upcoming-bill.mdx
+              - page: Payment Methods
+                path: ./docs/pages/components/drop-in/payment-methods.mdx
+              - page: Invoices
+                path: ./docs/pages/components/drop-in/invoices.mdx
+              - page: Unsubscribe
+                path: ./docs/pages/components/drop-in/unsubscribe.mdx
+              - page: Styling and Theming
+                path: ./docs/pages/components/drop-in/styling.mdx
+              - page: Localization
+                path: ./docs/pages/components/drop-in/localization.mdx
+          - section: Build your own UI
+            contents:
+              - page: Overview
+                path: ./docs/pages/components/build-your-own/overview.mdx
+              - page: Session and Access Tokens
+                path: ./docs/pages/components/build-your-own/session.mdx
+              - page: Hooks Reference
+                path: ./docs/pages/components/build-your-own/hooks.mdx
+              - page: Derivations and Formatting
+                path: ./docs/pages/components/build-your-own/derivations.mdx
+              - page: Checkout API
+                path: ./docs/pages/components/build-your-own/checkout-api.mdx
+              - page: Checkout with Stripe Elements
+                path: ./docs/pages/components/build-your-own/checkout-with-stripe-elements.mdx
+              - page: Recipes
+                path: ./docs/pages/components/build-your-own/recipes.mdx
+          - section: Component builder
+            contents:
+              - page: Customer Portal
                 path: ./docs/pages/components/customer-portal.mdx
               - page: Create a Component
                 path: ./docs/pages/components/create-component.mdx
@@ -268,14 +316,8 @@ navigation:
                 path: ./docs/pages/components/element-library.mdx
               - page: Advanced Usage
                 path: ./docs/pages/components/advanced-usage.mdx
-              - page: Building Your Own Portal
-                path: ./docs/pages/components/headless-customer-portal.mdx
-          - section: Standalone Components
-            contents:
-              - page: Overview
-                path: ./docs/pages/components/standalone-components.mdx
-              - page: Pricing Table
-                path: ./docs/pages/components/pricing-table.mdx
+              - page: Migrate to Drop-in Components
+                path: ./docs/pages/components/builder/migrate.mdx
       - section: Integrate
         contents:
           - page: Overview
@@ -771,6 +813,15 @@ redirects:
     permanent: true
   - source: "/components"
     destination: "/components/overview"
+    permanent: true
+  - source: "/components/headless-customer-portal"
+    destination: "/components/build-your-own/overview"
+    permanent: true
+  - source: "/components/standalone-components"
+    destination: "/components/drop-in/pricing-table"
+    permanent: true
+  - source: "/components/pricing-table"
+    destination: "/components/drop-in/pricing-table"
     permanent: true
   - source: "/home/using-feature-flags"
     destination: "/feature-management/overview"
