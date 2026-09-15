@@ -13294,6 +13294,12 @@ components:
         failed_companies:
           type: integer
           format: int64
+        feature_id:
+          type: string
+          nullable: true
+        feature_plan_rollout_id:
+          type: string
+          nullable: true
         id:
           type: string
         next_due_at:
@@ -33131,9 +33137,12 @@ paths:
       tags:
         - planmigrations
       parameters:
+        - name: feature_id
+          in: query
+          schema:
+            type: string
         - name: plan_version_id
           in: query
-          required: true
           schema:
             type: string
         - name: status
@@ -33176,6 +33185,8 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      feature_id:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -33427,9 +33438,12 @@ paths:
       tags:
         - planmigrations
       parameters:
+        - name: feature_id
+          in: query
+          schema:
+            type: string
         - name: plan_version_id
           in: query
-          required: true
           schema:
             type: string
         - name: status
@@ -33468,6 +33482,8 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      feature_id:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
