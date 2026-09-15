@@ -2671,6 +2671,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
         expires_at:
           type: string
           description: >-
@@ -2701,6 +2702,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
       title: CheckAndReserveFlagRequestBody
     CheckAndReserveFlagResponseData:
       type: object
@@ -2796,6 +2798,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
         preflight:
           allOf:
             - $ref: '#/components/schemas/PreflightRequestBody'
@@ -2813,6 +2816,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
       title: CheckFlagRequestBody
     CheckFlagResponseData:
       type: object
@@ -14073,6 +14077,7 @@ components:
             Credits to hold for the operation. The full amount must be
             available; a partial hold is never taken
           format: double
+          maximum: 9999999999
         company_id:
           type: string
         credit_type_id:
