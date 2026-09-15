@@ -1,0 +1,86 @@
+---
+title: Invoices
+description: The company's invoice history as a card. A dated link to each hosted invoice and its amount, with credit notes in parentheses and an optional status column.
+slug: components/drop-in/invoices
+---
+
+The company's invoice history: a dated link to each hosted invoice and its amount, with credit notes in parentheses and an optional status column.
+
+![Invoices](../../../assets/images/components/components-invoices.png)
+
+## Usage
+
+```tsx
+import { Invoices } from "@schematichq/schematic-components/elements";
+
+<Invoices limit={3} showStatus query={{ includePending: true }} />
+```
+
+The component reads the session from the provider, fetches the first page, and shows how many invoices the company has beside the rows on screen.
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `limit` | `10` | Rows shown before "See more". |
+| `collapsible` | `true` | Collapse to `limit` rows; "Load more" appears once expanded. |
+| `showHeader` | `true` | The heading. |
+| `showDate`, `showAmount` | `true` | The date and amount columns. |
+| `showStatus` | `false` | A status chip per row. |
+| `headingLevel` | `2` | The heading's level, to fit your page outline. |
+| `query` | `{}` | Which rows the server returns, e.g. `{ includePending: true }`. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key; wins over the provider's. |
+
+`locale` falls back to the one configured on the provider, then to the viewer's language.
+
+## Paging and failures
+
+The endpoint answers with the rows for one window and how many invoices the query matches, so a card showing three of fourteen can say so. "Load more" weighs that count against the rows already loaded, with one rule on top: a page that comes back empty ends the list, whatever the count says.
+
+A failure with rows still on screen is reported under the table rather than replacing it. Only a failure with nothing to show takes over the card, with a Retry action.
+
+## Markup
+
+What the component renders, for a host styling it without `<SchematicStyles />`. The root's class list is the same in all three states; read `data-state` (`pending`, `error`, `ready`) to tell them apart. Each column's class sits on its header as well as its cells, so alignment is set once.
+
+```html
+<div class="schematic-card schematic-invoices" data-state="ready">
+  <div class="schematic-header">
+    <h2 class="schematic-header__title">Invoices</h2>
+    <span class="schematic-small schematic-muted schematic-invoices__count">3 of 14 invoices</span>
+  </div>
+  <table class="schematic-invoices__table">
+    <thead class="schematic-invoices__head">
+      <tr class="schematic-invoices__head-row">
+        <th class="schematic-invoices__column schematic-invoices__date" scope="col">Date</th>
+        <th class="schematic-invoices__column schematic-invoices__amount" scope="col">Amount</th>
+        <th class="schematic-invoices__column schematic-invoices__status" scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody class="schematic-invoices__body">
+      <tr class="schematic-invoices__row">
+        <td class="schematic-invoices__cell schematic-invoices__date"><a class="schematic-invoices__link">…</a></td>
+        <td class="schematic-invoices__cell schematic-invoices__amount"><span class="schematic-invoices__credit">($15.00)</span></td>
+        <td class="schematic-invoices__cell schematic-invoices__status"><span class="schematic-chip" data-status="paid">Paid</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="schematic-invoices__actions">
+    <button class="schematic-link-button schematic-invoices__see-more">See more</button>
+    <button class="schematic-link-button schematic-invoices__load-more">Load more</button>
+  </div>
+</div>
+```
+
+Chips render neutral; style them per status with `[data-status]`, whose value is the raw `InvoiceStatus`. The pending state renders a `schematic-skeleton` shaped like the card it becomes, and the error state renders a `schematic-status` row with a retry action.
+
+## Localizing it
+
+`locale` localizes the formatting; the words come from `strings` or from your `translate`. `strings={{ invoicesHeader: "Receipts" }}` renames the card with no i18n stack, and `translate={t}` on the provider routes every string through i18next.
+
+The keys this component renders: `invoicesHeader`, `invoicesCount`, `invoicesShowing`, `invoicesLoading`, `invoicesEmpty`, `invoicesDateColumn`, `invoicesAmountColumn`, `invoicesStatusColumn`, `invoicesSeeMore`, `invoicesSeeLess`, `invoicesLoadMore`, `invoicesCredit`, `invoicesUndated`, `retry`, and one per status: `invoiceStatusDraft`, `invoiceStatusOpen`, `invoiceStatusPaid`, `invoiceStatusUncollectible`, `invoiceStatusVoid`.
+
+## Build it yourself
+
+The same data is one hook away. [`useInvoices`](/components/build-your-own/hooks#useinvoices) returns the page and `loadMore`, and `deriveInvoiceList` turns it into rows with formatted text beside every raw value.

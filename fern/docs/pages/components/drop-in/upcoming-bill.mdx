@@ -1,0 +1,59 @@
+---
+title: Upcoming Bill
+description: The company's next bill as a card. What it will be charged and when, with the account balance and discounts that shaped the figure.
+slug: components/drop-in/upcoming-bill
+---
+
+The company's next bill: what it will be charged and when, with the account balance and discounts that shaped the figure.
+
+![Upcoming bill](../../../assets/images/components/components-upcoming-bill.png)
+
+## Usage
+
+```tsx
+import { UpcomingBill } from "@schematichq/schematic-components/elements";
+
+<UpcomingBill showDiscounts={false} />
+```
+
+The component renders nothing when there is nothing to bill: no subscription, or one that is ending. That is a loaded answer, not a loading state, so the page around it settles immediately.
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `showHeader` | `true` | The "Next bill due …" heading. |
+| `showAmount` | `true` | The estimated amount. |
+| `showBalance` | `true` | The applied and remaining balance rows. |
+| `showDiscounts` | `true` | A row per active discount. |
+| `headingLevel` | `2` | The heading's level, to fit your page outline. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key; wins over the provider's. |
+
+## What the numbers mean
+
+The server sends how much account balance the invoice consumes and how much survives, because those depend on billing-provider conventions no consumer should have to know. The component signs the applied balance (it comes off the bill) and formats each amount for the locale. Discounts are the active ones only, each with its code or coupon name and its value.
+
+## Markup
+
+```html
+<div class="schematic-card schematic-upcoming-bill" data-state="ready">
+  <div class="schematic-header">
+    <h2 class="schematic-header__title">Next bill due Aug 15, 2026</h2>
+  </div>
+  <p class="schematic-upcoming-bill__amount">$771.00</p>
+  <dl class="schematic-upcoming-bill__lines">
+    <div class="schematic-upcoming-bill__line" data-line="balance-applied"><dt>Applied balance</dt><dd>-$349.00</dd></div>
+    <div class="schematic-upcoming-bill__line" data-line="balance-remaining"><dt>Remaining balance</dt><dd>$398.00</dd></div>
+    <div class="schematic-upcoming-bill__line" data-line="discount"><dt>LAUNCH20</dt><dd>20% off</dd></div>
+  </dl>
+</div>
+```
+
+## Localizing it
+
+Keys: `upcomingBillHeader`, `upcomingBillHeaderUndated`, `upcomingBillAmount`, `upcomingBillBalanceApplied`, `upcomingBillBalanceRemaining`, `upcomingBillDiscount`, `upcomingBillDiscountForever`, `upcomingBillDiscountMonths`, `retry`.
+
+## Build it yourself
+
+[`useUpcomingInvoice`](/components/build-your-own/hooks#useupcominginvoice) returns the same shape, `null` included, and `deriveUpcomingInvoice` formats it with the raw value beside every line.

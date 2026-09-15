@@ -1,0 +1,82 @@
+---
+title: Checkout with Stripe Elements
+description: Build the cart in your own UI, take payment with Stripe's Payment Element, and let Schematic finalize the subscription.
+slug: components/build-your-own/checkout-with-stripe-elements
+---
+
+Build the cart experience yourself and take payment with Stripe's Payment Element, the payment UI your customers already know, with Link support. Schematic stays between your product and Stripe: it prices the cart, validates it, creates the subscription, and updates entitlements as soon as payment completes.
+
+<Warning>
+  Payment collection is an account setting, not reference code. Choosing Stripe Elements changes how Schematic processes payment for your account. Set it under Checkout Options before wiring this flow.
+</Warning>
+
+## The flow
+
+1. Your app builds the cart with `useCheckout().setSelections`, and every change re-prices on the server.
+2. Your app asks Schematic for a SetupIntent and renders Stripe's `<PaymentElement/>` with the client secret.
+3. Your app finalizes with the resulting payment method. Schematic validates the cart, creates or changes the subscription, and updates entitlements. You run no webhooks.
+
+## Recipe
+
+```tsx
+import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { useCatalog, useCheckout } from "@schematichq/schematic-react";
+import { derivePricingTable, formatCurrency } from "@schematichq/schematic-components/elements";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+export function Upgrade({ planId }) {
+  const checkout = useCheckout();
+  const [clientSecret, setClientSecret] = useState<string>();
+
+  useEffect(() => {
+    checkout
+      .setSelections({ planId, period: "month" })              // 1. cart, priced on the server
+      .then(() => checkout.createSetupIntent())                // 2. Stripe client secret
+      .then(({ clientSecret }) => setClientSecret(clientSecret));
+  }, [planId]);
+
+  if (!checkout.snapshot || !clientSecret) return <Skeleton />;
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <Summary snapshot={checkout.snapshot} />
+      <Elements stripe={stripePromise} options={{ clientSecret }}>
+        <PayForm checkout={checkout} />
+      </Elements>
+    </div>
+  );
+}
+
+function PayForm({ checkout }) {
+  const stripe = useStripe();
+  const elements = useElements();
+
+  async function pay() {
+    const { setupIntent, error } = await stripe.confirmSetup({ elements, redirect: "if_required" });
+    if (error) return;                                            // Stripe shows it inline
+    await checkout.finalize({ paymentMethodId: setupIntent.payment_method });  // 3. Schematic finalizes
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); pay(); }}>
+      <PaymentElement />
+      <button disabled={checkout.isPending}>
+        Pay {formatCurrency(checkout.snapshot.dueToday.amountMinor, checkout.snapshot.currency, { locale: "en-US" })}
+      </button>
+      {checkout.error && <p role="alert">{checkout.error.message}</p>}
+    </form>
+  );
+}
+```
+
+`Summary` renders `snapshot.lineItems`, `snapshot.proration`, and `snapshot.dueToday`, never a total of its own.
+
+## What stays enforced
+
+Downgrade protection, trial rules, bundle purchasing rules, currency availability, and tax collection all apply on the server, so a cart the rules reject comes back with `snapshot.validation` populated and finalize refuses it. Show the reasons; the customer fixes the cart, not the rule.
+
+## Saved payment methods
+
+`usePaymentMethods` lists what the company already has on file. Pass one of those ids to `finalize` to skip the Payment Element entirely for a returning customer.

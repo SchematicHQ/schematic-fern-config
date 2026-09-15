@@ -1,0 +1,67 @@
+---
+title: Migrate to Drop-in Components
+description: Move an embedded customer portal from the component builder to drop-in components, one card at a time.
+slug: components/builder/migrate
+---
+
+A portal embedded with `<SchematicEmbed/>` keeps working. When you want props instead of a builder, your own fonts and colors through CSS variables, or a custom card next to the standard ones, move to drop-in components. The layout and the elements are the same, so a migration is mostly a list of tags.
+
+## Before
+
+```tsx
+import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+
+<EmbedProvider accessToken={token}>
+  <SchematicEmbed id="cmpn_…" />
+</EmbedProvider>
+```
+
+## After
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  CreditMeter, FeatureMeter, IncludedFeatures, Invoices, PaymentMethods, PlanManager, SchematicStyles, UpcomingBill, Unsubscribe,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider publishableKey="pk_…" session={{ company: company.id, token: fetchAccessToken }}>
+  <SchematicStyles />
+  <PlanManager />
+  <IncludedFeatures />
+  <UpcomingBill />
+  <PaymentMethods />
+  <Invoices />
+  <FeatureMeter />
+  <CreditMeter />
+  <Unsubscribe variant="link" />
+</SchematicProvider>
+```
+
+## What maps to what
+
+| Builder element | Drop-in | Builder options become |
+| --- | --- | --- |
+| Current Plan | `<PlanManager/>` | `showDescription`, `showAddOns`, `showChangePlan` |
+| Included Features | `<IncludedFeatures/>` | `visibleFeatures`, `showIcons`, `showUsage`, `limit` |
+| Next Bill Due | `<UpcomingBill/>` | `showHeader`, `showAmount`, `showBalance` |
+| Payment Methods | `<PaymentMethods/>` | `allowAdd`, `allowRemove` |
+| Invoices | `<Invoices/>` | `limit`, `collapsible`, `showStatus` |
+| Metered Features | `<FeatureMeter/>` and `<CreditMeter/>` | `visibleFeatures`, `showResetDate`; `credits`, `showLedger` |
+| Unsubscribe Button | `<Unsubscribe/>` | `variant` |
+| Pricing Table | `<PricingTable/>` | `catalogId`, `showPeriodToggle`, `showAddOns` |
+| Checkout dialog | `<Checkout/>` | `stages`, `collectTaxId`, theme tokens |
+| Text, Button | your own JSX | |
+
+The builder's theme (fonts, colors, card style) becomes a block of `--schematic-*` overrides. The theme editor in the dashboard's Components tab reads your existing builder theme and emits that block.
+
+## Token exchange
+
+The token endpoint you already run keeps working. The provider takes it as a function instead of a string, and refreshes on its own:
+
+```tsx
+session={{ company: company.id, token: async () => (await fetch("/api/accessToken")).json() }}
+```
+
+## One card at a time
+
+Both providers can mount on the same page during a migration, so replace one element, ship, and continue. The drop-ins and the embed read the same data, so nothing changes for the customer between steps.

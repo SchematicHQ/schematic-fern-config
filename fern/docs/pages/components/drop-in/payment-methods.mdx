@@ -1,0 +1,60 @@
+---
+title: Payment Methods
+description: The cards and wallets a company has on file, with the default marked, and the add, remove, and make-default actions.
+slug: components/drop-in/payment-methods
+---
+
+The cards and wallets a company has on file, with the default marked. Customers add a method through a Stripe SetupIntent, remove one, or make one the default, all without leaving your page.
+
+![Payment method](../../../assets/images/components/components-payment-method.png)
+
+## Usage
+
+```tsx
+import { PaymentMethods } from "@schematichq/schematic-components/elements";
+
+<PaymentMethods allowAdd allowRemove />
+```
+
+Adding a method opens Stripe's Payment Element inside the card. Card, Apple Pay, and Google Pay show with their brand and last four digits.
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `allowAdd` | `true` | The add-method action. |
+| `allowRemove` | `true` | The remove and make-default actions. |
+| `showHeader` | `true` | The heading. |
+| `headingLevel` | `2` | The heading's level. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key. |
+
+## Rules the component enforces
+
+A company keeps at least one payment method while it has an active subscription, so the remove action hides on the last one. A method added while none is on file becomes the default. Removing the default promotes the next method. These rules are applied on the server, so a hand-built UI gets the same answers.
+
+## Markup
+
+```html
+<div class="schematic-card schematic-payment-methods" data-state="ready">
+  <div class="schematic-header">
+    <h2 class="schematic-header__title">Payment methods</h2>
+    <button class="schematic-cta schematic-cta--small schematic-payment-methods__add">Add</button>
+  </div>
+  <ul class="schematic-payment-methods__list">
+    <li class="schematic-payment-methods__row" data-default="true">
+      <span class="schematic-payment-methods__brand" data-brand="visa">Visa</span>
+      <span class="schematic-payment-methods__last4">···· 4242</span>
+      <span class="schematic-badge">Default</span>
+    </li>
+  </ul>
+</div>
+```
+
+## Localizing it
+
+Keys: `paymentMethodsHeader`, `paymentMethodsAdd`, `paymentMethodsRemove`, `paymentMethodsMakeDefault`, `paymentMethodsDefault`, `paymentMethodsExpires`, `paymentMethodsEmpty`, `retry`.
+
+## Build it yourself
+
+[`usePaymentMethods`](/components/build-your-own/hooks#usepaymentmethods) returns the methods plus `add`, `remove`, and `setDefault`; `derivePaymentMethods` gives you brand text, last four, expiry, and the default flag per row.
