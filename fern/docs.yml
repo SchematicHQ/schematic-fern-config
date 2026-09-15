@@ -661,6 +661,18 @@ logo:
 
 favicon: ./docs/assets/favicon.png
 
+# Every page shipped `twitter:card: summary_large_image` and no image tag at all, so a docs
+# link unfurled in Slack as a bare block of text. `og:dynamic` points each page at the card
+# Fern renders for it from its own section, title, description and URL over our logo and accent
+# color. That renderer is already live on this site, at
+# /api/fern-docs/og?slug=billing/credit-holds; until this flag is set nothing links to it.
+#
+# Leave `og:image` unset. A site-wide image applies to every page and takes precedence over the
+# per-page card, so setting one trades every page's own card for a single static one.
+metadata:
+  og:site_name: Schematic
+  og:dynamic: true
+
 js:
   - url: https://cmp.osano.com/LL1x08jRV8/3f6b67b8-77b6-4e78-ac68-a17bd1b6435e/osano.js
     strategy: beforeInteractive
