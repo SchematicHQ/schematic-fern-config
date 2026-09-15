@@ -1,0 +1,57 @@
+---
+title: Checkout
+description: The purchase flow as a drop-in. Plans, add-ons, seats, credit bundles, and payment, on the checkout API, themed to your brand.
+slug: components/drop-in/checkout
+---
+
+The purchase flow: plan selection, add-ons, seats and other pay-in-advance quantities, credit bundles, promo codes, custom fields, and payment, in one dialog. Plan Manager, Pricing Table, Credit Meter, and Feature Meter open it by default; you can open it from anything.
+
+## Usage
+
+```tsx
+import { Checkout, PlanManager } from "@schematichq/schematic-components/elements";
+import { useCheckout } from "@schematichq/schematic-react";
+
+// Mount it once. Drop-ins with a purchase action find it through the provider.
+<PlanManager />
+<Checkout />
+
+// Or open it yourself from any control.
+function UpgradeButton({ plan }) {
+  const { open } = useCheckout();
+  return <button onClick={() => open({ planId: plan.id, period: "month" })}>Upgrade</button>;
+}
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `stages` | all | Which stages to show, e.g. `["plan", "addons", "payment"]`. |
+| `initialSelections` | | Preselect a plan, add-ons, quantities, or bundles when opened without arguments. |
+| `promoCode` | | A promo code applied on open. |
+| `collectTaxId` | account setting | Ask for a tax ID at payment. |
+| `onComplete` | | Called with the new subscription after finalize. |
+| `onClose` | | Called when the customer dismisses the dialog. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for the dialog by key. |
+
+`open()` takes the same selections as `initialSelections`, plus `creditId` to start on a credit's bundles and `stage` to start on a later stage.
+
+## What happens under it
+
+The dialog is a persisted checkout. Opening it creates one, every change replaces its selections and re-prices on the server, and paying finalizes it. The totals on screen are the server's price snapshot, so what the customer sees is what Stripe charges. Purchase rules you set in Schematic (downgrade protection, trial rules, bundle purchasing, currency) are enforced on the server for the dialog and for any UI you build on the same API.
+
+Payment runs through Stripe's Payment Element inside the dialog, with the cards and wallets the company already has on file offered first. Entitlements update as soon as the subscription changes, without a webhook round trip.
+
+## Theming
+
+The dialog reads the same `--schematic-*` tokens as every other component, plus dialog-specific ones: `--schematic-dialog-background`, `--schematic-dialog-radius`, `--schematic-dialog-width`, `--schematic-sidebar-background`. The theme editor in the dashboard edits these tokens visually and emits the CSS block to paste.
+
+## Localizing it
+
+The dialog carries the largest string catalog: `checkoutStage*` for the stage names, `checkoutPlan*`, `checkoutAddOn*`, `checkoutUsage*`, `checkoutBundle*`, `checkoutPayment*`, `checkoutSummary*`, `checkoutPromo*`, `checkoutError*`. Pass `strings` for a rename or `translate` on the provider to route all of them through your i18n.
+
+## Build it yourself
+
+[`useCheckout`](/components/build-your-own/hooks#usecheckout) exposes the same persisted checkout as a hook, and [Checkout with Stripe Elements](/components/build-your-own/checkout-with-stripe-elements) shows a fully custom flow on it.

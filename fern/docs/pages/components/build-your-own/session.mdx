@@ -1,0 +1,96 @@
+---
+title: Session and Access Tokens
+description: How a company's billing state is read on its behalf. Minting temporary access tokens, the session identity, refresh, and server rendering.
+slug: components/build-your-own/session
+---
+
+Every hook and drop-in reads one company's own billing state, so it authenticates with a short-lived, company-scoped temporary access token rather than your publishable key. Your server mints the token with your secret key; the browser sees only the token.
+
+## Minting a token
+
+<Tabs>
+  <Tab title="Node.js">
+```typescript
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+export async function issueToken(companyId: string) {
+  const response = await client.accesstokens.issueTemporaryAccessToken({
+    resourceType: "company",
+    lookup: { id: companyId }, // the lookup matches how you key companies
+  });
+  return { token: response.data?.token, expiresAt: response.data?.expiredAt };
+}
+```
+  </Tab>
+  <Tab title="Python">
+```python
+response = client.accesstokens.issue_temporary_access_token(
+    resource_type="company",
+    lookup={"id": company_id},
+)
+token, expires_at = response.data.token, response.data.expired_at
+```
+  </Tab>
+  <Tab title="cURL">
+```bash
+curl -X POST https://api.schematichq.com/temporary-access-tokens \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resource_type": "company", "lookup": {"id": "acme-inc"}}'
+```
+  </Tab>
+</Tabs>
+
+Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
+
+## The session
+
+`session` on the provider says whose billing is being read and how:
+
+```tsx
+<SchematicProvider
+  publishableKey="pk_…"
+  session={{ company: company.id, user: user.id, token: fetchAccessToken }}
+>
+```
+
+Its identity is the `(company, user)` pair, because that is what a token is minted for: the same person reads one company's billing and then another's, and the same company is read by several people. A different pair drops every loaded resource and reads the new one's. The same pair with a different token is the same session with a fresh credential, so an inline `token: async () => …` costs nothing; rebuilding that closure every render is not a change.
+
+`user` is optional. Leave it out where your tokens are company-wide, and every reader of that company shares one session. State it where you mint per person; omitting it later is a different session, not the same one.
+
+### Three states
+
+| `session` | Meaning | What renders |
+| --- | --- | --- |
+| `{ company, user?, token }` | Signed in | Data for that pair |
+| `null` | Signed out | Every card empties, and nothing is read until a session returns |
+| `undefined` | Still finding out | Cards hold their loading state rather than reporting an error |
+
+Auth libraries often collapse the last two. Clerk reports `undefined` both while it loads and when nobody is signed in, so read `isLoaded` before deciding which you mean.
+
+### Token providers and refresh
+
+`token` is a string or a function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt }`; with an expiry the client refreshes ahead of it, and concurrent readers share one in-flight refresh.
+
+## Using the client directly
+
+Outside React, or in a framework of your own, the same session drives `SchematicBillingClient`:
+
+```ts
+import { SchematicBillingClient, SchematicSession } from "@schematichq/schematic-js";
+
+const session = new SchematicSession({ session: { company: "acme-inc", token: fetchAccessToken } });
+const billing = new SchematicBillingClient(session);
+
+const { invoices, count } = await billing.fetchInvoices({ limit: 12, offset: 0 });
+```
+
+`apiUrl` and `additionalHeaders` on the client route requests to a staging or self-hosted API; a provider built from a pre-built client inherits them.
+
+## Server rendering
+
+`fetchBillingData(client, { invoices: { includePending: true } })` returns an `initialData` bag the provider seeds from, so rows show on the first render even though auth usually resolves a render later. Pass the same query your component asks, or the seed answers a question nothing asked and the component fetches again.
+
+The seed records which company it fetched for. Rows stamped with a different company than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. Pass `locale` explicitly for a server-rendered page.

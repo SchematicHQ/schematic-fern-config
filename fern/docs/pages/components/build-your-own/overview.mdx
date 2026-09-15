@@ -1,0 +1,64 @@
+---
+title: Build Your Own UI
+description: The hooks, derivations, and checkout API behind the drop-in components, for building billing UI in your own design system.
+slug: components/build-your-own/overview
+---
+
+Everything a drop-in component shows is available to your own code, one layer down. Read the data with a hook, reduce it with a derivation, and render whatever you like. The drop-ins are built on exactly this surface, so anything they can show, you can show.
+
+## How it layers
+
+| Layer | Package | What it gives you |
+| --- | --- | --- |
+| Client | `@schematichq/schematic-js` | `SchematicBillingClient` and `SchematicSession`: the session, the requests, the generated types. Plain TypeScript, so Vue and Angular use it too. |
+| Hooks | `@schematichq/schematic-react` | `SchematicProvider` with `session`, and one hook per resource returning `{ data, error, isPending, refetch }`. |
+| Derivations | `@schematichq/schematic-components/elements` | Pure functions from server facts to a display model, plus `Intl` formatting helpers. |
+| Your JSX | your app | Reference code in shadcn/ui, Tailwind, and plain CSS, or a prompt for your agent. |
+
+## Shipped code and reference code
+
+The derivations are shipped code with tests, not copy-paste examples. The display decision trees behind them (which of six ways an entitlement value renders, how tiered pricing prices a quantity, how credits net across grants) are intricate and correctness-sensitive, and a copy would drift from the drop-ins the first time a rule changed. Import them.
+
+The JSX is reference code you own. Each [recipe](/components/build-your-own/recipes) is a complete component in three stacks; copy the one closest to yours and make it yours. The drop-ins are the maximal example of the same seam.
+
+## The recipe pattern
+
+```tsx
+import { useInvoices } from "@schematichq/schematic-react";
+import { deriveInvoiceList } from "@schematichq/schematic-components/elements";
+
+export function InvoiceHistory() {
+  const { data, error, isPending, refetch, loadMore } = useInvoices();   // 1. read
+  if (data === undefined) return error ? <Retry onClick={refetch} /> : <Skeleton />;
+
+  const list = deriveInvoiceList(data, { locale: "en-US" });            // 2. derive
+
+  return (                                                                // 3. render
+    <ul>
+      {list.rows.map((row) => <InvoiceRow key={row.id} {...row} />)}
+      {list.hasMore && <button disabled={isPending} onClick={loadMore}>Load more</button>}
+    </ul>
+  );
+}
+```
+
+Every derivation returns structured parts with the raw value beside the formatted text, not assembled sentences, so your wording and your translation stay in your code.
+
+## Mixing with drop-ins
+
+The hooks and the drop-ins share one provider and one cache, so a page can use both. A custom Plan Manager next to a drop-in `<Checkout/>` is a common shape: `useCheckout().open()` opens the same dialog the drop-ins use.
+
+<CardGroup cols={2}>
+  <Card title="Session and access tokens" href="/components/build-your-own/session">
+    Minting tokens, the session identity, refresh, and server rendering.
+  </Card>
+  <Card title="Hooks reference" href="/components/build-your-own/hooks">
+    Every hook, its signature, and what its data means.
+  </Card>
+  <Card title="Derivations and formatting" href="/components/build-your-own/derivations">
+    The pure functions and the Intl helpers.
+  </Card>
+  <Card title="Checkout API" href="/components/build-your-own/checkout-api">
+    The persisted checkout behind useCheckout and the drop-in.
+  </Card>
+</CardGroup>
