@@ -24,6 +24,23 @@ A hold supports four operations.
 
 The pattern corresponds to an authorization and capture on a payment card. Reserve authorizes an upper bound, extend raises that upper bound while the hold is open, commit captures the amount actually used, and release returns the remainder.
 
+## Leases and reservations
+
+Schematic has two kinds of holds: leases and reservations.
+
+| | Lease | Reservation |
+| --- | --- | --- |
+| Scope | One per company and credit type | One per operation, many open at once |
+| Sized for | A batch of work, topped up as it drains | The cost of a single operation |
+| Committed by | Track events carrying `lease_id`, one per operation | One track event carrying `reservation_id` |
+| Coordinated by | The Node and Python SDKs, through a cache shared across processes | The server, on each reserve |
+
+A lease is a batch of credits held for many operations. The Node and Python SDKs acquire one, allocate each request's share out of it locally, and decide a check without an API round trip. Use it for high-volume gating.
+
+A reservation is a server-side hold for one operation. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node or Python, or when the deployment cannot run DataStream.
+
+The sections below describe leases unless stated otherwise. See [Reservations](#reservations) for the per-operation hold.
+
 ## Balance values during a hold
 
 While a hold is open, a company's credit balance is reported as three values.
@@ -57,7 +74,7 @@ Because the hold is shared, its unspent portion is a shared budget rather than a
 
 **The work needs more than the hold covers.** The first agent commits 260 as before, leaving 140 unspent in the hold. The second agent's work turns out to need 300 rather than 90, so what the hold has left will not cover it.
 
-An agent reads the hold's unspent portion as `granted_amount` less `tracked_amount` on the reserve or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node SDK does this on its own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
+An agent reads the hold's unspent portion as `granted_amount` less `tracked_amount` on the reserve or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node and Python SDKs do this on their own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
 
 1. The second agent extends by 160, the shortfall between the 300 it needs and the 140 available. Only 100 credits are drawable, because the original reserve already took 400 of the company's 500. The hold grows to a `granted_amount` of 500, and the balance reports 0 remaining, 240 reserved, and 240 settled.
 2. Still needing 300 against the 240 the hold now has, the second agent extends again by 60. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
@@ -78,6 +95,8 @@ The operation still in flight sees three things.
 - It runs unprotected from the moment the hold closed, so the balance it was gating against is drawable again by anything else.
 
 Scope the hold to the batch of work instead. Reserve once with an `expires_at` covering the whole batch and a `requested_amount` sized for all of it, commit per operation, and release when nothing is left in flight. An open hold costs the reserved credits and nothing else, and [expiry](#expiry) returns them within about a minute if the process dies before it releases.
+
+Do not use a lease as a per-operation hold. Once a second operation for the same company and credit type overlaps the first, the second acquire returns the existing lease rather than adding to it, so the second operation is not covered, and the first release closes the lease while the second operation is still running. Use a [reservation](#reservations) instead. Each reservation is its own hold, and several can be open for the same company and credit type at once.
 
 ### Overdrawing a hold
 
@@ -132,17 +151,59 @@ A reserve for more than the balance can cover does not fail. It returns a hold f
 
 Read `granted_amount` rather than assuming the requested amount was granted. A caller that requested 1,000 and received 340 must size its work to 340.
 
+## Reservations
+
+A reservation is a hold for one operation. Taking it debits the full amount from the company's grants, and it closes when you report what the operation actually used.
+
+Take one with `POST /billing/credits/reservations`, passing the company, the credit type, and the amount.
+
+The debit happens under a row lock, so when two operations race for the last of a balance, exactly one succeeds. A balance that cannot cover the full amount returns a `402` and consumes nothing. Reservations are never partially funded, unlike leases; see [Partial funding](#partial-funding). Send an `idempotency_key` to make retries safe. The same key returns the original reservation, and the same key with a different company, credit type, or amount returns a `409`.
+
+Many reservations can be open at once for one company and credit type, alongside a lease if one exists. The company's reserved balance is the sum of every open hold.
+
+### Settling a reservation
+
+Settle a reservation by sending a normal track event with `reservation_id` set to the reservation's id. The first track carrying the id closes the reservation.
+
+- The tracked usage is recorded against the hold.
+- The unspent remainder returns to the grants it was drawn from.
+- Usage beyond the hold is billed as overage, which can push the balance negative.
+
+Send exactly one settling track. A second track carrying the same `reservation_id` falls through to a normal grant debit, because the reservation is already closed, so use the events API's [idempotency key](/playbooks/metering) when you retry. A track body accepts `lease_id` and `reservation_id`, and `lease_id` takes precedence when both are present. Send one or the other.
+
+The events pipeline settles asynchronously. Do not expect the balance or the reservation's `settled_amount` to reflect a track the moment you send it.
+
+### Releasing and expiry
+
+`PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole hold. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the row unchanged.
+
+`expires_at` defaults to one minute from now and may be at most one hour out. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. Size `expires_at` above the operation's expected duration plus a few seconds of margin. A track that arrives after expiry is still billed, as a normal grant debit.
+
+### Checking and reserving in one call
+
+`POST /flags/{key}/check-and-reserve` evaluates a flag exactly as a plain check does and, when the flag allows and the matched entitlement is credit metered, takes the reservation in the same call. One round trip decides whether the operation may run and holds what it will cost.
+
+The response is the normal check response with a `reservation` object added, carrying the hold's `id`, its `credits_reserved`, and the `event_subtype` your settling track should send.
+
+When the balance cannot fund the hold, the response is a `200` with `value` false and the reason `Insufficient credits`, rather than the `402` the reservations endpoint returns. A flag that denies, a feature that is not credit metered, and a credit whose ledger lives on an external billing provider all return the plain check result with no `reservation`, and you track usage as usual. The check is logged like any other.
+
+The endpoint requires a secret API key. Publishable keys cannot draw down a balance.
+
 ## Using an SDK
 
-The Node SDK implements holds directly and adds a client-side layer above them. It maintains one lease per company and credit type, then issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. Each concurrent operation gets its own slice of one lease, which is the coordination you would otherwise write yourself against a shared hold. This is the recommended approach for gating inference calls or agent runs. The Node SDK reference covers configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations).
+The Node and Python SDKs cover both kinds of hold in two modes, behind `client.check()` and `client.trackWithReservation()`, which Python spells `client.track_with_reservation()`.
 
-The other SDKs bind reserve, extend, and release to the API and send commits as track events, so with those you hold the lease yourself and coordinate concurrent operations against it as described in [Using the API](#using-the-api).
+**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It needs DataStream, so in Python it runs on the async client only. Use it for gating high volumes of inference calls or agent runs.
 
-Use the HTTP API directly where the unit of work is too long-lived for a per-request reservation, or where you are managing hold state outside an SDK.
+**Server mode** makes one check-and-reserve call per check and settles it with a track event. It needs neither DataStream nor Redis, and it is the only mode Python's synchronous client uses.
+
+The mode setting selects between them, `creditLeases.mode` in Node and `credit_leases.mode` in Python. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Both SDK references cover configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) and [Credit reservations](/developer_resources/sdks/python#credit-reservations).
+
+From the other SDKs, call the endpoints in [Using the API](#using-the-api) directly. For a per-operation hold, use [check and reserve](#checking-and-reserving-in-one-call), or take a reservation and settle it with a track event.
 
 ## Technical details
 
-The Node SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below are the Node SDK's.
+In client mode the SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below use the Node SDK's names.
 
 | Setting | Behavior | Default |
 | --- | --- | --- |
@@ -151,6 +212,8 @@ The Node SDK keeps one lease per company and credit type and carves per-request 
 | `lowWaterMark` | The lease extends in the background once its unspent portion falls below this fraction, so a check does not wait on an acquire | 0.25 |
 | `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
 | `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
+
+The Python SDK takes the same settings in snake_case, with durations in seconds: `default_lease_size`, `default_lease_duration`, `low_water_mark`, `default_reservation_ttl`, and `sweep_interval`.
 
 An `overrides` map sets any of these per credit type, keyed by credit type ID.
 
@@ -163,6 +226,8 @@ Two behaviors are worth understanding before changing the defaults.
 Lease and reservation state lives in the same shared cache as the SDK's flag and company data. Across several processes that cache has to be shared, or each process gates against a lease balance only it can see.
 
 ## Using the API
+
+### Lease endpoints
 
 Reserve credits with [Acquire credit lease](/api-reference/billing-credits/acquire-credit-lease):
 
@@ -209,17 +274,64 @@ curl -X PUT https://api.schematichq.com/billing/credits/lease/crlse_EXAMPLE01234
 
 To increase an open hold, [Extend credit lease](/api-reference/billing-credits/extend-credit-lease) accepts an `additional_amount` and an optional new `expires_at`.
 
+### Reservation endpoints
+
+Hold credits for a single operation with [Reserve credits](/api-reference/billing-credits/reserve-credits):
+
+```bash
+curl -X POST https://api.schematichq.com/billing/credits/reservations \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_id": "comp_EXAMPLE0123456789",
+    "credit_type_id": "bilcr_EXAMPLE0123456789",
+    "amount": 25,
+    "expires_at": "2026-01-01T00:00:30Z",
+    "idempotency_key": "job_EXAMPLE0123456789"
+  }'
+```
+
+`amount` must be positive. The full amount is held, or the request fails. `expires_at` is optional, defaults to one minute out, and may be at most one hour out. The response carries the reservation's `id`, its `reserved_amount`, the `settled_amount` recorded so far, and `released_at`, which is null while the hold is open.
+
+Settle the reservation with a track event carrying `reservation_id`:
+
+```bash
+curl -X POST https://api.schematichq.com/events \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_type": "track",
+    "body": {
+      "event": "inference_tokens",
+      "company": { "id": "comp_EXAMPLE0123456789" },
+      "reservation_id": "crlse_EXAMPLE0123456789",
+      "quantity": 18
+    }
+  }'
+```
+
+Cancel a reservation whose operation never ran with [Release credit reservation](/api-reference/billing-credits/release-credit-reservation), which takes no body:
+
+```bash
+curl -X PUT https://api.schematichq.com/billing/credits/reservations/crlse_EXAMPLE0123456789/release \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_API_KEY"
+```
+
+To check a flag and take the hold in one call, [Check and reserve flag](/api-reference/features/check-and-reserve-flag) accepts the body a check accepts plus `quantity`, `expires_at`, and `preflight`. `quantity` defaults to 1, and the hold is that many times the entitlement's consumption rate, unless `preflight.credit_cost` names the entitlement's credit, in which case that cost is held instead.
+
 ## Ledger entries
 
-Each operation is recorded in the [credit ledger](/use-cases/credit-ledger). Ledger entries carry a usage reason, and holds introduce two of them.
+Each operation is recorded in the [credit ledger](/use-cases/credit-ledger). Ledger entries carry a usage reason, and holds introduce four of them.
 
 | Usage reason | Recorded when |
 | --- | --- |
 | `lease_hold` | Credits are debited at reserve or extend |
 | `lease_release` | The unspent portion is returned at release, expiry, or sweep |
+| `reservation_hold` | A reservation is taken, and again when settling it bills overage |
+| `reservation_release` | A reservation's unspent remainder is returned at settle, release, or expiry |
 | `track` | Usage is committed, against a hold or otherwise |
 
-A hold that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied.
+A hold that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied. Reservation rows are kept after they settle or release, so the ledger still reconciles against them.
 
 ## Related
 
