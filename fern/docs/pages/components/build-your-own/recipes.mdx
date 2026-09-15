@@ -53,12 +53,12 @@ export default function BillingPage() {
 | Component | Hook | Derivation | Reference code |
 | --- | --- | --- | --- |
 | Plan Manager | `useCompany` | `derivePlanSummary` | `plan-manager.tsx` |
+| Credit Meter | `useCreditBalances` | `deriveCreditUsage` | `credit-meter.tsx` |
+| Feature Meter | `useFeatureUsage` | `deriveUsageMeter` | `feature-meter.tsx` |
 | Included Features | `useFeatureUsage` | `deriveEntitlementRow` | `included-features.tsx` |
 | Upcoming Bill | `useUpcomingInvoice` | `deriveUpcomingInvoice` | `upcoming-bill.tsx` |
 | Payment Methods | `usePaymentMethods` | `derivePaymentMethods` | `payment-methods.tsx` |
 | Invoices | `useInvoices` | `deriveInvoiceList` | `invoices.tsx` |
-| Feature Meter | `useFeatureUsage` | `deriveUsageMeter` | `feature-meter.tsx` |
-| Credit Meter | `useCreditBalances` | `deriveCreditUsage` | `credit-meter.tsx` |
 | Unsubscribe | `useUnsubscribe`, `useCompany` | | `unsubscribe.tsx` |
 
 Each file exists in shadcn/ui, Tailwind, and plain CSS in the dashboard's Components tab, and the shadcn versions run in the [DashAI example app](https://github.com/SchematicHQ/schematic-dashai).
