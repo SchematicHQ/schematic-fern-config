@@ -4,7 +4,15 @@ description: Install both packages, mint an access token on your server, wrap yo
 slug: components/quickstart
 ---
 
-Four steps take you from an empty page to a live invoice history for the signed-in company. The same setup serves every drop-in component and every hook.
+Four steps take you from an empty page to a live billing portal for the signed-in company. The same setup serves every drop-in component and every hook.
+
+<Note>
+  **Using an agent?** Paste this into Claude Code, Cursor, or Codex and it does the setup on this page:
+
+  ```text
+  Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+  ```
+</Note>
 
 ### 1. Install the packages
 
@@ -89,22 +97,34 @@ export function Providers({ children, company, user }) {
 
 `session` says whose billing is being read. Pass `null` when nobody is signed in and `undefined` while your auth is still resolving; [Session and access tokens](/components/build-your-own/session) explains why the three differ.
 
-### 4. Render a component, or a hook
+### 4. Render the portal, or a hook
 
 <Tabs>
   <Tab title="Drop-in">
 ```tsx
-import { Invoices, SchematicStyles } from "@schematichq/schematic-components/elements";
+import {
+  Checkout, CreditMeter, FeatureMeter, IncludedFeatures, Invoices,
+  PaymentMethods, PlanManager, SchematicStyles, UpcomingBill,
+} from "@schematichq/schematic-components/elements";
 
 export default function BillingPage() {
   return (
     <>
       <SchematicStyles />
+      <PlanManager />
+      <IncludedFeatures />
+      <UpcomingBill />
+      <PaymentMethods />
       <Invoices showStatus />
+      <FeatureMeter />
+      <CreditMeter />
+      <Checkout />
     </>
   );
 }
 ```
+
+Drop any card you do not need; each stands alone. `<Checkout />` mounts once and the other components open it.
   </Tab>
   <Tab title="Build your own">
 ```tsx
