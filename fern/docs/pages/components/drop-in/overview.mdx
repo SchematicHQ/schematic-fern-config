@@ -19,11 +19,22 @@ Drop-in components are React components from `@schematichq/schematic-components/
 | [Checkout](/components/drop-in/checkout) | The purchase flow |
 | [Unsubscribe](/components/drop-in/unsubscribe) | Cancel with confirmation |
 
+<Note>
+  **Using an agent?** Paste this into Claude Code, Cursor, or Codex and it does the setup on this page:
+
+  ```text
+  Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+  ```
+</Note>
+
 ## Setup
 
 ```tsx
 import { SchematicProvider } from "@schematichq/schematic-react";
-import { Invoices, PlanManager, SchematicStyles } from "@schematichq/schematic-components/elements";
+import {
+  Checkout, CreditMeter, FeatureMeter, IncludedFeatures, Invoices,
+  PaymentMethods, PlanManager, SchematicStyles, UpcomingBill,
+} from "@schematichq/schematic-components/elements";
 
 <SchematicProvider
   publishableKey="pk_…"
@@ -31,9 +42,17 @@ import { Invoices, PlanManager, SchematicStyles } from "@schematichq/schematic-c
 >
   <SchematicStyles />
   <PlanManager />
+  <IncludedFeatures />
+  <UpcomingBill />
+  <PaymentMethods />
   <Invoices />
+  <FeatureMeter />
+  <CreditMeter />
+  <Checkout />
 </SchematicProvider>;
 ```
+
+That is the whole customer portal. Drop any card you do not need; each stands alone. `<Checkout />` mounts once and the other components open it.
 
 Copy and formatting stay yours. `locale` on the provider formats every component through `Intl`, and each string resolves through `strings` on the component, then `strings` on the provider, then your `translate`, then the component's English. Nothing has to be configured, and renaming one string is one prop. See [Localization](/components/drop-in/localization).
 
