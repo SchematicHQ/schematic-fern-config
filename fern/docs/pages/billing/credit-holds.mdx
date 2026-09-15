@@ -33,11 +33,11 @@ Schematic has two kinds of holds: leases and reservations.
 | Scope | One per company and credit type | One per operation, many open at once |
 | Sized for | A batch of work, topped up as it drains | The cost of a single operation |
 | Committed by | Track events carrying `lease_id`, one per operation | One track event carrying `reservation_id` |
-| Coordinated by | The Node SDK, through a cache shared across processes | The server, on each reserve |
+| Coordinated by | The Node and Python SDKs, through a cache shared across processes | The server, on each reserve |
 
-A lease is a batch of credits held for many operations. The Node SDK acquires one, allocates each request's share out of it locally, and decides a check without an API round trip. Use it for high-volume gating.
+A lease is a batch of credits held for many operations. The Node and Python SDKs acquire one, allocate each request's share out of it locally, and decide a check without an API round trip. Use it for high-volume gating.
 
-A reservation is a server-side hold for one operation. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node, or when the deployment cannot run DataStream.
+A reservation is a server-side hold for one operation. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node or Python, or when the deployment cannot run DataStream.
 
 The sections below describe leases unless stated otherwise. See [Reservations](#reservations) for the per-operation hold.
 
@@ -74,7 +74,7 @@ Because the hold is shared, its unspent portion is a shared budget rather than a
 
 **The work needs more than the hold covers.** The first agent commits 260 as before, leaving 140 unspent in the hold. The second agent's work turns out to need 300 rather than 90, so what the hold has left will not cover it.
 
-An agent reads the hold's unspent portion as `granted_amount` less `tracked_amount` on the reserve or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node SDK does this on its own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
+An agent reads the hold's unspent portion as `granted_amount` less `tracked_amount` on the reserve or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node and Python SDKs do this on their own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
 
 1. The second agent extends by 160, the shortfall between the 300 it needs and the 140 available. Only 100 credits are drawable, because the original reserve already took 400 of the company's 500. The hold grows to a `granted_amount` of 500, and the balance reports 0 remaining, 240 reserved, and 240 settled.
 2. Still needing 300 against the 240 the hold now has, the second agent extends again by 60. Nothing is drawable, so the hold is returned unchanged at 500. This is not an error, and no exception is raised.
@@ -191,19 +191,19 @@ The endpoint requires a secret API key. Publishable keys cannot draw down a bala
 
 ## Using an SDK
 
-The Node SDK covers both kinds of hold behind `client.check()` and `client.trackWithReservation()`, in two modes.
+The Node and Python SDKs cover both kinds of hold in two modes, behind `client.check()` and `client.trackWithReservation()`, which Python spells `client.track_with_reservation()`.
 
-**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It needs DataStream and runs on Node only. Use it for gating high volumes of inference calls or agent runs.
+**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It needs DataStream, so in Python it runs on the async client only. Use it for gating high volumes of inference calls or agent runs.
 
-**Server mode** makes one check-and-reserve call per check and settles it with a track event. It needs neither DataStream nor Redis.
+**Server mode** makes one check-and-reserve call per check and settles it with a track event. It needs neither DataStream nor Redis, and it is the only mode Python's synchronous client uses.
 
-`creditLeases.mode` selects between them. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. The Node SDK reference covers configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations).
+The mode setting selects between them, `creditLeases.mode` in Node and `credit_leases.mode` in Python. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Both SDK references cover configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) and [Credit reservations](/developer_resources/sdks/python#credit-reservations).
 
 From the other SDKs, call the endpoints in [Using the API](#using-the-api) directly. For a per-operation hold, use [check and reserve](#checking-and-reserving-in-one-call), or take a reservation and settle it with a track event.
 
 ## Technical details
 
-In client mode the Node SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below are the Node SDK's.
+In client mode the SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below use the Node SDK's names.
 
 | Setting | Behavior | Default |
 | --- | --- | --- |
@@ -212,6 +212,8 @@ In client mode the Node SDK keeps one lease per company and credit type and carv
 | `lowWaterMark` | The lease extends in the background once its unspent portion falls below this fraction, so a check does not wait on an acquire | 0.25 |
 | `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
 | `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
+
+The Python SDK takes the same settings in snake_case, with durations in seconds: `default_lease_size`, `default_lease_duration`, `low_water_mark`, `default_reservation_ttl`, and `sweep_interval`.
 
 An `overrides` map sets any of these per credit type, keyed by credit type ID.
 
