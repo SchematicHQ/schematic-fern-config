@@ -5559,10 +5559,33 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly to have overage assessed each month and billed on its own
+            invoice, which is the point of the setting on annual plans. Only
+            applies to overage price behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when overage_billing_cadence is monthly,
+            and must match metric_period_month_reset so each window closes when
+            the allowance resets: billing_period_start for billing_cycle,
+            month_end for first_of_month. Defaults to the anchor that matches
+            the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -6492,10 +6515,33 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly to have overage assessed each month and billed on its own
+            invoice, which is the point of the setting on annual plans. Only
+            applies to overage price behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when overage_billing_cadence is monthly,
+            and must match metric_period_month_reset so each window closes when
+            the allowance resets: billing_period_start for billing_cycle,
+            month_end for first_of_month. Defaults to the anchor that matches
+            the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -7184,10 +7230,33 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly to have overage assessed each month and billed on its own
+            invoice, which is the point of the setting on annual plans. Only
+            applies to overage price behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when overage_billing_cadence is monthly,
+            and must match metric_period_month_reset so each window closes when
+            the allowance resets: billing_period_start for billing_cycle,
+            month_end for first_of_month. Defaults to the anchor that matches
+            the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -12483,6 +12552,24 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Null or
+            end_of_billing_period means the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Only
+            applies to overage price behavior.
+          nullable: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only meaningful when overage_billing_cadence is
+            monthly.
+          nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
         plan_id:
@@ -16605,10 +16692,33 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly to have overage assessed each month and billed on its own
+            invoice, which is the point of the setting on annual plans. Only
+            applies to overage price behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when overage_billing_cadence is monthly,
+            and must match metric_period_month_reset so each window closes when
+            the allowance resets: billing_period_start for billing_cycle,
+            month_end for first_of_month. Defaults to the anchor that matches
+            the reset.
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -17316,10 +17426,33 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly to have overage assessed each month and billed on its own
+            invoice, which is the point of the setting on annual plans. Only
+            applies to overage price behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly overage window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when overage_billing_cadence is monthly,
+            and must match metric_period_month_reset so each window closes when
+            the allowance resets: billing_period_start for billing_cycle,
+            month_end for first_of_month. Defaults to the anchor that matches
+            the reset.
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
