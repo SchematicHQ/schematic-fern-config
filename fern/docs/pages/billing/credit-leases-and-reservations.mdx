@@ -16,11 +16,11 @@ Schematic has two kinds: leases and reservations. They differ in where the gatin
 | Scope | One per company and credit type | One per operation, many open at once |
 | Sized for | A batch of work, topped up as it drains | The cost of a single operation |
 | Committed by | Track events carrying `lease_id`, one per operation | One track event carrying `reservation_id` |
-| Coordinated by | The Node and Python SDKs, through a cache shared across processes | The server, on each reserve |
+| Coordinated by | The backend SDK, through a cache shared across processes | The server, on each reserve |
 
-A lease is a batch of credits reserved for many operations, so the SDK does not have to ask the server whether enough credits remain before each one. The Node and Python SDKs acquire a lease once, then allocate each request's share out of it in local memory and decide the check there. The server is contacted only to acquire, extend, or release the lease and to record usage against it. Use a lease for high-volume gating, where a round trip per check would be too slow.
+A lease is a batch of credits reserved for many operations, so the SDK does not have to ask the server whether enough credits remain before each one. A backend SDK acquires a lease once, then allocates each request's share out of it in local memory and decide the check there. The server is contacted only to acquire, extend, or release the lease and to record usage against it. Use a lease for high-volume gating, where a round trip per check would be too slow.
 
-A reservation reserves credits on the server for one operation. Every reservation is a round trip. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node or Python, or when the deployment cannot run DataStream.
+A reservation reserves credits on the server for one operation. Every reservation is a round trip. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling the API directly rather than through a backend SDK, or when the deployment cannot run DataStream.
 
 ## Examples
 
@@ -37,7 +37,7 @@ Because the lease is shared, its unspent portion is a shared budget rather than 
 
 **The work needs more than the lease covers.** The first agent commits 260 as before, leaving 140 unspent in the lease. The second agent's work turns out to need 300 rather than 90, so what the lease has left will not cover it.
 
-An agent reads the lease's unspent portion as `granted_amount` less `tracked_amount` on the acquire or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The Node and Python SDKs do this on their own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
+An agent reads the lease's unspent portion as `granted_amount` less `tracked_amount` on the acquire or extend response, as `creditReserved` on the entitlement a check returns, or as the reserved value on the company's credit balance, and extends by the shortfall when its remaining work exceeds it. The backend SDKs do this on their own, extending in the background once the lease's unspent balance falls below a configured low-water mark.
 
 1. The second agent extends by 160, the shortfall between the 300 it needs and the 140 available. Only 100 credits are drawable, because the original acquire already took 400 of the company's 500. The lease grows to a `granted_amount` of 500, and the balance reports 0 remaining, 240 reserved, and 240 settled.
 2. Still needing 300 against the 240 the lease now has, the second agent extends again by 60. Nothing is drawable, so the lease is returned unchanged at 500. This is not an error, and no exception is raised.
@@ -207,19 +207,19 @@ The endpoint requires a secret API key. Publishable keys cannot draw down a bala
 
 ## Using an SDK
 
-The Node and Python SDKs support both leases and reservations through `check()` and `trackWithReservation()` (`track_with_reservation()` in Python), in two modes.
+The backend SDKs support both leases and reservations through their check and track-with-reservation methods, in two modes. Frontend SDKs do not take leases or reservations, because a publishable key cannot draw down a balance.
 
-**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It requires DataStream. In Python, that means the async client only. Use it for gating high volumes of inference calls or agent runs.
+**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It requires DataStream. Use it for gating high volumes of inference calls or agent runs.
 
-**Server mode** makes one check-and-reserve call per check and settles it with a track event. It requires neither DataStream nor Redis. Python's synchronous client always uses server mode.
+**Server mode** makes one check-and-reserve call per check and settles it with a track event. It requires neither DataStream nor Redis.
 
-Set the mode with `creditLeases.mode` in Node or `credit_leases.mode` in Python. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Configuration, failure behavior, and pre-warming are covered in [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) and [Credit reservations](/developer_resources/sdks/python#credit-reservations).
+Each SDK exposes a credit lease mode setting. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Each [SDK reference](/developer_resources/sdks/overview) covers configuration, failure behavior, and pre-warming.
 
-From the other SDKs, call the endpoints in [Using the API](#using-the-api) directly. For a single operation, use [check and reserve](#checking-and-reserving-in-one-call), or take a reservation and settle it with a track event.
+Without an SDK, call the endpoints in [Using the API](#using-the-api) directly. For a single operation, use [check and reserve](#checking-and-reserving-in-one-call), or take a reservation and settle it with a track event.
 
 ## Technical details
 
-In client mode the SDK keeps one lease per company and credit type and issues per-request reservations out of it. The tunable settings are the lease size, the lease and reservation lifetimes, and the top-up threshold. The settings below use the Node SDK's names.
+In client mode the SDK keeps one lease per company and credit type and issues per-request reservations out of it. The tunable settings are the lease size, the lease and reservation lifetimes, and the top-up threshold. The names below follow the SDK's naming conventions, so they vary in case between languages.
 
 | Setting | Behavior | Default |
 | --- | --- | --- |
@@ -228,8 +228,6 @@ In client mode the SDK keeps one lease per company and credit type and issues pe
 | `lowWaterMark` | The lease extends in the background once its unspent portion falls below this fraction, so a check does not wait on an acquire | 0.25 |
 | `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
 | `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
-
-The Python SDK uses the same settings in snake_case, with durations in seconds: `default_lease_size`, `default_lease_duration`, `low_water_mark`, `default_reservation_ttl`, and `sweep_interval`.
 
 An `overrides` map sets any of these per credit type, keyed by credit type ID.
 
