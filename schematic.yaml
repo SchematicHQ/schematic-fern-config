@@ -522,6 +522,7 @@ components:
       enum:
         - end_of_billing_period
         - monthly
+        - quarterly
     BillingCollectionMethod:
       type: string
       enum:
@@ -5566,9 +5567,11 @@ components:
             How often overage charges are assessed and invoiced. Defaults to
             end_of_billing_period, where the billing provider aggregates usage
             over the subscription's own period and bills it at period end. Set
-            to monthly to have overage assessed each month and billed on its own
-            invoice, which is the point of the setting on annual plans. Only
-            applies to overage price behavior.
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
           nullable: true
         overage_billing_product_id:
           type: string
@@ -5578,13 +5581,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only applies when overage_billing_cadence is monthly,
-            and must match metric_period_month_reset so each window closes when
-            the allowance resets: billing_period_start for billing_cycle,
-            month_end for first_of_month. Defaults to the anchor that matches
-            the reset.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
           nullable: true
         plan_id:
           type: string
@@ -5736,7 +5741,8 @@ components:
             - $ref: '#/components/schemas/BillingArrearsCadence'
           description: >-
             How often postpaid charges are closed and invoiced:
-            end_of_billing_period (the default) or monthly.
+            end_of_billing_period (the default) or monthly. Quarterly is not
+            available for postpaid charges.
           nullable: true
         auto_topup_amount:
           type: integer
@@ -6522,9 +6528,11 @@ components:
             How often overage charges are assessed and invoiced. Defaults to
             end_of_billing_period, where the billing provider aggregates usage
             over the subscription's own period and bills it at period end. Set
-            to monthly to have overage assessed each month and billed on its own
-            invoice, which is the point of the setting on annual plans. Only
-            applies to overage price behavior.
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
           nullable: true
         overage_billing_product_id:
           type: string
@@ -6534,13 +6542,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only applies when overage_billing_cadence is monthly,
-            and must match metric_period_month_reset so each window closes when
-            the allowance resets: billing_period_start for billing_cycle,
-            month_end for first_of_month. Defaults to the anchor that matches
-            the reset.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
           nullable: true
         plan_id:
           type: string
@@ -7237,9 +7247,11 @@ components:
             How often overage charges are assessed and invoiced. Defaults to
             end_of_billing_period, where the billing provider aggregates usage
             over the subscription's own period and bills it at period end. Set
-            to monthly to have overage assessed each month and billed on its own
-            invoice, which is the point of the setting on annual plans. Only
-            applies to overage price behavior.
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
           nullable: true
         overage_billing_product_id:
           type: string
@@ -7249,13 +7261,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only applies when overage_billing_cadence is monthly,
-            and must match metric_period_month_reset so each window closes when
-            the allowance resets: billing_period_start for billing_cycle,
-            month_end for first_of_month. Defaults to the anchor that matches
-            the reset.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
           nullable: true
         plan_id:
           type: string
@@ -12558,17 +12572,20 @@ components:
           description: >-
             How often overage charges are assessed and invoiced. Null or
             end_of_billing_period means the billing provider aggregates usage
-            over the subscription's own period and bills it at period end. Only
-            applies to overage price behavior.
+            over the subscription's own period and bills it at period end.
+            Monthly and quarterly mean Schematic assesses the overage each month
+            or quarter and bills it on its own invoice. Only applies to overage
+            price behavior.
           nullable: true
         overage_invoice_anchor:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only meaningful when overage_billing_cadence is
-            monthly.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end), which for a quarterly window means calendar
+            quarters. Only meaningful when overage_billing_cadence is monthly or
+            quarterly.
           nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
@@ -16046,8 +16063,9 @@ components:
             - $ref: '#/components/schemas/BillingArrearsCadence'
           description: >-
             How often postpaid charges are closed and invoiced:
-            end_of_billing_period (the default) or monthly. Send null to fall
-            back to the default.
+            end_of_billing_period (the default) or monthly. Quarterly is not
+            available for postpaid charges. Send null to fall back to the
+            default.
           nullable: true
         auto_topup_amount:
           type: integer
@@ -16699,9 +16717,11 @@ components:
             How often overage charges are assessed and invoiced. Defaults to
             end_of_billing_period, where the billing provider aggregates usage
             over the subscription's own period and bills it at period end. Set
-            to monthly to have overage assessed each month and billed on its own
-            invoice, which is the point of the setting on annual plans. Only
-            applies to overage price behavior.
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
           nullable: true
         overage_billing_product_id:
           type: string
@@ -16711,13 +16731,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only applies when overage_billing_cadence is monthly,
-            and must match metric_period_month_reset so each window closes when
-            the allowance resets: billing_period_start for billing_cycle,
-            month_end for first_of_month. Defaults to the anchor that matches
-            the reset.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
           nullable: true
         price_behavior:
           allOf:
@@ -17433,9 +17455,11 @@ components:
             How often overage charges are assessed and invoiced. Defaults to
             end_of_billing_period, where the billing provider aggregates usage
             over the subscription's own period and bills it at period end. Set
-            to monthly to have overage assessed each month and billed on its own
-            invoice, which is the point of the setting on annual plans. Only
-            applies to overage price behavior.
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
           nullable: true
         overage_billing_product_id:
           type: string
@@ -17445,13 +17469,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsAnchor'
           description: >-
-            Which boundary closes a monthly overage window: the subscription's
-            own recurrence (billing_period_start) or the calendar month
-            (month_end). Only applies when overage_billing_cadence is monthly,
-            and must match metric_period_month_reset so each window closes when
-            the allowance resets: billing_period_start for billing_cycle,
-            month_end for first_of_month. Defaults to the anchor that matches
-            the reset.
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
           nullable: true
         price_behavior:
           allOf:
