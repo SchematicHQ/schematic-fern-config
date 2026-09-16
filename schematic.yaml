@@ -9652,6 +9652,14 @@ components:
           type: string
           format: date-time
           nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the lease as it stands instead of growing it again. Keys
+            are unique per environment across every extend
+          nullable: true
+          maxLength: 255
       required:
         - additional_amount
       title: ExtendCreditLeaseRequestBody
