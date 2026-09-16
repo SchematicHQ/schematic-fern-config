@@ -220,8 +220,8 @@ navigation:
             contents:
               - page: Credit burndown
                 path: ./docs/pages/billing/credit-burndown.mdx
-              - page: Credit holds
-                path: ./docs/pages/billing/credit-holds.mdx
+              - page: Credit leases and reservations
+                path: ./docs/pages/billing/credit-leases-and-reservations.mdx
               - page: Seat and agent budgets
                 path: ./docs/pages/billing/seat-and-agent-budgets.mdx
               - link: Run credit-based billing
@@ -529,6 +529,7 @@ navigation:
               - DELETE /flags/{flag_id}
               - PUT /flags/{flag_id}/rules
               - POST /flags/{key}/check
+              - POST /flags/{key}/check-and-reserve
               - POST /flags/check
           - section: Entitlements
             contents:
@@ -569,6 +570,8 @@ navigation:
               - POST /billing/credits/lease
               - PUT /billing/credits/lease/{lease_id}/extend
               - PUT /billing/credits/lease/{lease_id}/release
+              - POST /billing/credits/reservations
+              - PUT /billing/credits/reservations/{reservation_id}/release
           - section: Account Members
             slug: accounts
             contents:
@@ -806,10 +809,13 @@ redirects:
     destination: "/billing/revenue-recognition"
     permanent: true
   - source: "/holds"
-    destination: "/billing/credit-holds"
+    destination: "/billing/credit-leases-and-reservations"
     permanent: true
   - source: "/credit-holds"
-    destination: "/billing/credit-holds"
+    destination: "/billing/credit-leases-and-reservations"
+    permanent: true
+  - source: "/billing/credit-holds"
+    destination: "/billing/credit-leases-and-reservations"
     permanent: true
   - source: "/usage-caps"
     destination: "/billing/seat-and-agent-budgets"

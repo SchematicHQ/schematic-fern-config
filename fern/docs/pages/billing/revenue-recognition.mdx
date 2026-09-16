@@ -9,7 +9,7 @@ Under credit-based pricing, cash arrives before delivery. A customer who buys 10
 
 Rev rec is not a reporting feature you should design on your own. Its output lands in audited financial statements, and it is examined again in diligence during a fundraise or an acquisition. An error is a misstatement rather than a rounding difference, it repeats every period until someone catches it, and correcting it can mean restating periods that are already closed. Credit pricing makes this harder than a flat subscription does, because delivery is spread across thousands of small draws and some of the credits are never drawn at all. Which treatment applies to your contracts is a determination for your accountants and auditors, and this page does not attempt to make it for you.
 
-What they need from engineering is measurement: a record of every grant, draw, hold, and expiry, with its price and timestamp attached, at a granularity their policy can be applied to. Schematic's credit ledger is that record. This page summarizes what ASC 606 asks for, documents what the ledger contains, states where the boundary with Stripe and your accounting system sits, and shows how to read the data out.
+What they need from engineering is measurement: a record of every grant, draw, reservation, and expiry, with its price and timestamp attached, at a granularity their policy can be applied to. Schematic's credit ledger is that record. This page summarizes what ASC 606 asks for, documents what the ledger contains, states where the boundary with Stripe and your accounting system sits, and shows how to read the data out.
 
 ## What ASC 606 requires
 
@@ -60,7 +60,7 @@ Credits granted as `free` or `adjustment` carry no consideration, so their consu
 
 A `usage` entry records delivery against an obligation. It carries the quantity, the feature that caused the draw, the grant it was drawn from, and the timestamp.
 
-Usage entries also carry a `usage_reason`. Ordinary consumption is `track`. Where [credit holds](/billing/credit-holds) are in use, `lease_hold` and `lease_release` entries record credits reserved and returned. A hold is an authorization rather than delivery, so credits reserved and released without being consumed are not revenue. Counting them as consumption recognizes revenue against work that was never performed.
+Usage entries also carry a `usage_reason`. Ordinary consumption is `track`. Where [credit leases and reservations](/billing/credit-leases-and-reservations) are in use, `lease_hold`, `lease_release`, `reservation_hold`, and `reservation_release` entries record credits reserved and returned. A reservation is an authorization rather than delivery, so credits reserved and released without being consumed are not revenue. Counting them as consumption recognizes revenue against work that was never performed.
 
 ### Write-offs
 
@@ -89,7 +89,7 @@ Each grant carries the fields a deferred revenue schedule line requires:
 | `quantity` | Credits granted |
 | `quantity_used` | Delivered to date |
 | `quantity_remaining` | Undelivered, still an obligation |
-| `settled` | The balance net of actual consumption, excluding open holds |
+| `settled` | The balance net of actual consumption, excluding reserved credits |
 | `grant_reason` | Whether consideration came with it |
 | `valid_from`, `expires_at` | The window the obligation lives in |
 | `zeroed_out_date`, `zeroed_out_reason` | When and why it ended early |
@@ -145,5 +145,5 @@ Teams closing the books on credit-based pricing read the ledger and the grant li
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) - grant expiry, rollover, and consumption order, all of which change the recognition pattern.
 - [Meter on a real-time credit ledger](/use-cases/credit-ledger) - why the ledger is transactional rather than a warehouse snapshot.
-- [Credit Holds](/billing/credit-holds) - why a reserved credit is not a delivered one.
+- [Credit Leases and Reservations](/billing/credit-leases-and-reservations) - why a reserved credit is not a delivered one.
 - [Stripe integration](/integrations/stripe) - what syncs to Stripe and what comes back.

@@ -561,7 +561,7 @@ Requirement lines drawn from the six:
   repeated failure.
 - A spend cap that pauses automatic refills once a period total is reached, set at company or user
   level.
-- An append-only ledger of grants, debits, holds, adjustments, and expirations, queryable per
+- An append-only ledger of grants, debits, reservations, adjustments, and expirations, queryable per
   company.
 - The ledger identifies which grant each consumed credit came from, so cost basis and breakage stay
   recoverable.
@@ -594,7 +594,7 @@ Requirement lines drawn from the six:
 - Concurrent draws against one balance that cannot race it negative.
 - A reserve, commit, release pattern for variable-cost actions: hold an upper bound, commit the
   actual, release the remainder automatically.
-- A configurable hold timeout per action type, so a short interactive action and a long batch job
+- A configurable reservation timeout per action type, so a short interactive action and a long batch job
   carry different windows.
 - Defined behavior during service degradation, configurable as fail-open or fail-closed per check or
   per customer segment.
