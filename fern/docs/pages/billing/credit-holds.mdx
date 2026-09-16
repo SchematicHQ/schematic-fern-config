@@ -191,19 +191,19 @@ The endpoint requires a secret API key. Publishable keys cannot draw down a bala
 
 ## Using an SDK
 
-The Node and Python SDKs cover both kinds of hold in two modes, behind `client.check()` and `client.trackWithReservation()`, which Python spells `client.track_with_reservation()`.
+The Node and Python SDKs support both kinds of holds through `check()` and `trackWithReservation()` (`track_with_reservation()` in Python), in two modes.
 
-**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It needs DataStream, so in Python it runs on the async client only. Use it for gating high volumes of inference calls or agent runs.
+**Client mode** maintains one lease per company and credit type and issues per-request reservations against that lease locally, so an individual check does not require an API round trip, and reservations are gated across processes through a shared cache. It requires DataStream. In Python, that means the async client only. Use it for gating high volumes of inference calls or agent runs.
 
-**Server mode** makes one check-and-reserve call per check and settles it with a track event. It needs neither DataStream nor Redis, and it is the only mode Python's synchronous client uses.
+**Server mode** makes one check-and-reserve call per check and settles it with a track event. It requires neither DataStream nor Redis. Python's synchronous client always uses server mode.
 
-The mode setting selects between them, `creditLeases.mode` in Node and `credit_leases.mode` in Python. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Both SDK references cover configuration, failure behavior, and pre-warming in detail; see [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) and [Credit reservations](/developer_resources/sdks/python#credit-reservations).
+Set the mode with `creditLeases.mode` in Node or `credit_leases.mode` in Python. The default is `auto`, which picks client mode when DataStream is enabled and server mode otherwise. Configuration, failure behavior, and pre-warming are covered in [Credit Leases and Reservations](/developer_resources/sdks/nodejs#credit-leases-and-reservations) and [Credit reservations](/developer_resources/sdks/python#credit-reservations).
 
 From the other SDKs, call the endpoints in [Using the API](#using-the-api) directly. For a per-operation hold, use [check and reserve](#checking-and-reserving-in-one-call), or take a reservation and settle it with a track event.
 
 ## Technical details
 
-In client mode the SDK keeps one lease per company and credit type and carves per-request reservations out of it, so what is worth tuning is how large the lease is, how long it and its reservations live, and when it is topped up. The settings below use the Node SDK's names.
+In client mode the SDK keeps one lease per company and credit type and issues per-request reservations out of it. The tunable settings are the lease size, the lease and reservation lifetimes, and the top-up threshold. The settings below use the Node SDK's names.
 
 | Setting | Behavior | Default |
 | --- | --- | --- |
@@ -213,7 +213,7 @@ In client mode the SDK keeps one lease per company and credit type and carves pe
 | `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
 | `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
 
-The Python SDK takes the same settings in snake_case, with durations in seconds: `default_lease_size`, `default_lease_duration`, `low_water_mark`, `default_reservation_ttl`, and `sweep_interval`.
+The Python SDK uses the same settings in snake_case, with durations in seconds: `default_lease_size`, `default_lease_duration`, `low_water_mark`, `default_reservation_ttl`, and `sweep_interval`.
 
 An `overrides` map sets any of these per credit type, keyed by credit type ID.
 
