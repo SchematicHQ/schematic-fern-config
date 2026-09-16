@@ -9,7 +9,7 @@ A company has 500 credits. Two agents start work at the same time, each needing 
 
 Leases and reservations prevent this. Both reserve credits from the company's balance before the work that consumes them runs, so the credits are debited when the work is authorized rather than when it completes. A balance read while work is in flight already accounts for that work. When the work finishes, the caller commits what was actually used, and the rest returns to the balance.
 
-Schematic has two kinds: leases and reservations.
+Schematic has two kinds: leases and reservations. They differ in where the gating decision is made. A lease moves a block of credits into the SDK, which then decides each check locally against that block. A reservation is one server call per operation.
 
 | | Lease | Reservation |
 | --- | --- | --- |
@@ -18,9 +18,9 @@ Schematic has two kinds: leases and reservations.
 | Committed by | Track events carrying `lease_id`, one per operation | One track event carrying `reservation_id` |
 | Coordinated by | The Node and Python SDKs, through a cache shared across processes | The server, on each reserve |
 
-A lease is a batch of credits reserved for many operations. The Node and Python SDKs acquire one, allocate each request's share out of it locally, and decide a check without an API round trip. Use it for high-volume gating.
+A lease is a batch of credits reserved for many operations, so the SDK does not have to ask the server whether enough credits remain before each one. The Node and Python SDKs acquire a lease once, then allocate each request's share out of it in local memory and decide the check there. The server is contacted only to acquire, extend, or release the lease and to record usage against it. Use a lease for high-volume gating, where a round trip per check would be too slow.
 
-A reservation is a server-side reserve for one operation. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node or Python, or when the deployment cannot run DataStream.
+A reservation reserves credits on the server for one operation. Every reservation is a round trip. You take it, run the work, and settle it with the usage you recorded. Use it when an operation takes seconds rather than milliseconds, such as an external lookup or an inference call, when you are calling from a language other than Node or Python, or when the deployment cannot run DataStream.
 
 ## Examples
 
@@ -102,7 +102,7 @@ Use settled for customer-facing balances. It changes only when work completes, n
 
 ## Leases
 
-The sections below describe leases. See [Reservations](#reservations) for the per-operation reserve.
+A lease lets the SDK gate many operations against credits it already has, instead of asking the server before each one. The sections below describe how a lease behaves on the server. See [Using an SDK](#using-an-sdk) for how the SDK draws on it locally, and [Reservations](#reservations) for the per-operation reserve.
 
 ### One lease per company and credit type
 
