@@ -331,7 +331,7 @@ curl -X PUT https://api.schematichq.com/billing/credits/reservations/crlse_EXAMP
   -H "X-Schematic-Api-Key: $SCHEMATIC_API_KEY"
 ```
 
-To check a flag and reserve credits in one call, [Check and reserve flag](/api-reference/features/check-and-reserve-flag) accepts the body a check accepts plus `quantity`, `expires_at`, and `preflight`. `quantity` defaults to 1, and the reserved amount is that many times the entitlement's consumption rate, unless `preflight.credit_cost` names the entitlement's credit, in which case that cost is reserved instead.
+To check a flag and reserve credits in one call, [Check and reserve flag](/api-reference/features/check-and-reserve-flag) accepts the body a check accepts plus `quantity`, `expires_at`, and `preflight`. The reserved amount is the entitlement's consumption rate times the units the request states: `quantity` when it is given, otherwise `preflight.event_usage.quantity` when its `event_subtype` is the entitlement's, otherwise `preflight.usage`, otherwise 1. `preflight.credit_cost` takes precedence over all of those: when it names the entitlement's credit, that cost is reserved as given. Pass an `idempotency_key` to make the call safe to retry: a second request with the same key returns the reservation the first one took instead of reserving again, even when the first hold has since lowered the balance.
 
 ## Ledger entries
 
