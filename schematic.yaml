@@ -139,6 +139,10 @@ components:
           type: string
         expires_at:
           type: string
+          description: >-
+            When the hold lapses if the lease is never released; defaults to
+            five minutes from now and may be at most one hour out. The unspent
+            hold is refunded on expiry
           format: date-time
           nullable: true
         requested_amount:
@@ -2688,20 +2692,29 @@ components:
             refunded on expiry
           format: date-time
           nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the original reservation instead of taking another hold
+          nullable: true
+          maxLength: 255
         preflight:
           allOf:
             - $ref: '#/components/schemas/PreflightRequestBody'
           description: >-
             Hypothetical usage to evaluate the flag against. When credit_cost
             names the entitlement's credit, that cost is what gets held;
-            otherwise the hold is quantity times the entitlement's consumption
-            rate
+            otherwise the hold is the entitlement's consumption rate times
+            quantity, or, when quantity is omitted, times the usage stated here
         quantity:
           type: number
           description: >-
-            Units of the feature the operation will consume; defaults to 1. Sets
-            the hold size together with the entitlement's consumption rate, and
-            is echoed back on the reservation for the settling track event
+            Units of the feature the operation will consume. Sets the hold size
+            together with the entitlement's consumption rate, and is echoed back
+            on the reservation for the settling track event. When it is omitted
+            the units come from preflight.event_usage.quantity, if that event
+            subtype is the entitlement's, else from preflight.usage, else 1
           format: double
           nullable: true
           maximum: 9999999999
@@ -9669,6 +9682,9 @@ components:
           maximum: 9999999999
         expires_at:
           type: string
+          description: >-
+            Pushes the lease's expiry out; may be at most one hour from now.
+            Leave unset to keep the expiry the lease already has
           format: date-time
           nullable: true
         idempotency_key:
