@@ -1242,6 +1242,39 @@ components:
         - id
         - provider_type
       title: BillingMeterResponseData
+    BillingPlanCreditGrantBillingMode:
+      type: string
+      enum:
+        - granted
+        - billed
+    BillingPlanCreditGrantPriceTierResponseData:
+      type: object
+      properties:
+        from:
+          type: integer
+          description: Lower bound of the tier, in credits per invoice (inclusive).
+          format: int64
+        per_unit_price:
+          type: integer
+          description: Price per credit in this tier, in the plan currency's smallest unit.
+          format: int64
+          nullable: true
+        per_unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit in this tier as a decimal, for rates below one
+            cent.
+          nullable: true
+        to:
+          type: integer
+          description: >-
+            Upper bound of the tier, in credits per invoice (inclusive). Null
+            marks the final, unbounded tier.
+          format: int64
+          nullable: true
+      required:
+        - from
+      title: BillingPlanCreditGrantPriceTierResponseData
     BillingPlanCreditGrantResetCadence:
       type: string
       enum:
@@ -1315,6 +1348,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed).
         can_buy_bundles:
           type: boolean
           description: >-
@@ -1411,6 +1451,20 @@ components:
             Decimal form of postpaid_rate_per_unit, for rates finer than one
             minor unit.
           nullable: true
+        price:
+          allOf:
+            - $ref: '#/components/schemas/BillingPriceResponseData'
+          description: >-
+            The Stripe price a billed grant bills through. Minted when the plan
+            version is published.
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits, cheapest bound first. Empty unless
+            billing_mode is billed and the credits are priced on tiers.
+          items:
+            $ref: '#/components/schemas/BillingPlanCreditGrantPriceTierResponseData'
+          maxItems: 1000
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -1435,6 +1489,27 @@ components:
           description: >-
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds.
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Set only when price_tiers is non-empty.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Set only when
+            billing_mode is billed and the credits are priced at one rate.
+          format: int64
+          nullable: true
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit.
+            Set only when billing_mode is billed and the rate is below one cent.
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -1453,6 +1528,8 @@ components:
         - auto_topup_self_service
         - rollover_percentage
         - postpaid_enabled
+        - billing_mode
+        - price_tiers
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -4136,6 +4213,11 @@ components:
         billing_credit_postpaid_rate_per_unit_decimal:
           type: string
           nullable: true
+        billing_mode:
+          $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+        billing_product_price_id:
+          type: string
+          nullable: true
         company_auto_topup_amount:
           type: integer
           format: int64
@@ -4210,6 +4292,8 @@ components:
             Credit.PluralName instead.
           nullable: true
           deprecated: true
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -4250,6 +4334,7 @@ components:
         - rollover_percentage
         - company_credit_amount
         - scaling
+        - billing_mode
         - created_at
         - updated_at
       title: CompanyPlanCreditGrantView
@@ -5807,6 +5892,15 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed). Billed is only available on custom plans. Defaults to
+            granted.
+          nullable: true
         can_buy_bundles:
           type: boolean
           description: >-
@@ -5893,6 +5987,18 @@ components:
             postpaid_rate_per_unit when both are set, matching how the credit's
             own price_per_unit_decimal behaves.
           nullable: true
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits on this grant, cheapest bound first,
+            the last tier unbounded. Give this instead of unit_price to charge a
+            rate that changes with the number of credits on the invoice.
+            Requires tier_mode.
+          items:
+            $ref: '#/components/schemas/CreditGrantPriceTierRequestBody'
+          nullable: true
+          maxItems: 20
+          minItems: 2
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -5917,6 +6023,29 @@ components:
           description: >-
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds. Defaults to fixed.
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Required with price_tiers.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Required when
+            billing_mode is billed, unless unit_price_decimal or price_tiers is
+            set.
+          format: int64
+          nullable: true
+          minimum: 0
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit,
+            for prices below one cent.
           nullable: true
       required:
         - reset_cadence
@@ -8047,6 +8176,30 @@ components:
         - reset_cadence
         - reset_start
       title: CreditGrantExpiryRequestBody
+    CreditGrantPriceTierRequestBody:
+      type: object
+      properties:
+        per_unit_price:
+          type: integer
+          description: Price per credit in this tier, in the plan currency's smallest unit.
+          format: int64
+          nullable: true
+          minimum: 0
+        per_unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit in this tier as a decimal in the plan currency's
+            smallest unit, for prices below one cent.
+          nullable: true
+        up_to:
+          type: integer
+          description: >-
+            Inclusive upper bound of this tier, counted in credits per invoice.
+            Null marks the final, unbounded tier.
+          format: int64
+          nullable: true
+          minimum: 1
+      title: CreditGrantPriceTierRequestBody
     CreditGrantSortOrder:
       type: string
       enum:
@@ -12287,6 +12440,11 @@ components:
         billing_credit_postpaid_rate_per_unit_decimal:
           type: string
           nullable: true
+        billing_mode:
+          $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+        billing_product_price_id:
+          type: string
+          nullable: true
         company_credit_amount:
           type: integer
           format: int64
@@ -12350,6 +12508,8 @@ components:
             Credit.PluralName instead.
           nullable: true
           deprecated: true
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -12390,6 +12550,7 @@ components:
         - rollover_percentage
         - company_credit_amount
         - scaling
+        - billing_mode
         - created_at
         - updated_at
       title: PlanCreditGrantView
@@ -16153,6 +16314,14 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed). Billed is only available on custom plans.
+          nullable: true
         can_buy_bundles:
           type: boolean
           description: >-
@@ -16234,6 +16403,17 @@ components:
             postpaid_rate_per_unit when both are set, matching how the credit's
             own price_per_unit_decimal behaves. Send null to clear it.
           nullable: true
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits on this grant, cheapest bound first,
+            the last tier unbounded. Sending it moves the grant off one rate per
+            credit. Requires tier_mode.
+          items:
+            $ref: '#/components/schemas/CreditGrantPriceTierRequestBody'
+          nullable: true
+          maxItems: 20
+          minItems: 2
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -16259,6 +16439,29 @@ components:
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds. Changing this re-issues the credits
             companies already hold for this grant.
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Required with price_tiers.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Required when
+            billing_mode is billed, unless unit_price_decimal or price_tiers is
+            set. Sending it moves a tiered grant back to one rate per credit.
+          format: int64
+          nullable: true
+          minimum: 0
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit,
+            for prices below one cent.
           nullable: true
       required:
         - reset_cadence
