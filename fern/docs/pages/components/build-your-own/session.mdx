@@ -72,7 +72,7 @@ Auth libraries often collapse the last two. Clerk reports `undefined` both while
 
 ### Token providers and refresh
 
-`token` is a string or a function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt }`; with an expiry the client refreshes ahead of it, and concurrent readers share one in-flight refresh.
+`token` is a string or a function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt, company, user }`. With an expiry the client stops reusing the token once it passes and mints again on the next request. Stating `company` or `user` lets the client check that the token it received is for the pair it asked for. Concurrent readers share one in-flight resolution.
 
 ## Using the client directly
 
