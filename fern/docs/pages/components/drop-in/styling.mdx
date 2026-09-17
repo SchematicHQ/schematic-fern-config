@@ -1,0 +1,78 @@
+---
+title: Styling and Theming
+description: Theme the drop-in components with CSS variables and color-scheme, or style their class names directly.
+slug: components/drop-in/styling
+---
+
+`<SchematicStyles />` injects one stylesheet for every drop-in component. It is driven by `--schematic-*` custom properties, follows your `color-scheme` for light and dark, and never wins a cascade against your own tokens.
+
+## Tokens
+
+| Token | Controls |
+| --- | --- |
+| `--schematic-accent`, `--schematic-accent-contrast` | Links, meters, the filled action |
+| `--schematic-primary`, `--schematic-primary-contrast` | Primary buttons |
+| `--schematic-background`, `--schematic-border`, `--schematic-card-divider` | Card surface |
+| `--schematic-text`, `--schematic-muted` | Text and secondary text |
+| `--schematic-danger`, `--schematic-warning`, `--schematic-meter-track` | Status colors and the meter track |
+| `--schematic-font-body`, `--schematic-font-heading` | Typefaces |
+| `--schematic-line-height`, `--schematic-line-height-heading` | Line heights |
+| `--schematic-radius`, `--schematic-shadow`, `--schematic-space`, `--schematic-card-padding` | Shape and spacing |
+
+## Light and dark
+
+The components follow `color-scheme`. Declare it wherever your theme is decided and they come with it, with no attribute of ours to toggle:
+
+```css
+:root {
+  color-scheme: light;
+}
+:root:where(.dark) {
+  color-scheme: dark;
+}
+```
+
+That is the whole contract. It works with a class-based switcher, with `color-scheme: light dark` to follow the OS, and with a page that is only ever one of the two. A host that themes without declaring `color-scheme` gets the light palette.
+
+## Overriding a token
+
+Set it anywhere, on `:root`, an ancestor, inside a cascade layer, at any specificity:
+
+```css
+:root {
+  --schematic-accent: var(--brand);
+  --schematic-radius: 12px;
+  --schematic-font-body: "Inter", sans-serif;
+}
+```
+
+The defaults are not declared in a rule; they are `var()` fallbacks inlined at each use. A fallback applies only when the property is set nowhere, so your value cannot lose a cascade to ours. A default declared on `:root` would beat a host's own `@layer base { :root }` tokens outright, because layer order resolves before specificity, and nothing about that failure would be visible.
+
+The cost is that `--schematic-*` is undefined until you set it, so your own CSS cannot read our defaults. `schematicTokensCss` is the palette as a `:root` block if you want them globally; import it deliberately, and put it where your own tokens can still win. `SCHEMATIC_TOKENS` is the same data as an object.
+
+Overriding `background` and `text` alone leaves a card looking half-themed; `border`, `card-divider`, and `shadow` carry the rest.
+
+## Styling the class names
+
+Skip the stylesheet and write your own against the class names. They are API, and each component's page shows the tree it renders.
+
+| Class | Where |
+| --- | --- |
+| `schematic-card` | Every component's root, with the component's own class. |
+| `schematic-header`, `schematic-header__title` | The heading row and the heading. |
+| `schematic-muted`, `schematic-small` | Secondary and smaller text. |
+| `schematic-chip`, `schematic-badge` | A short status label (`[data-status]`); a filled pill. |
+| `schematic-cta` | Filled action; `--outline` and `--small` modifiers. |
+| `schematic-link-button` | Inline text action ("See more", "Load more", "Try again"). |
+| `schematic-meter`, `schematic-meter__fill` | A usage or credit bar. |
+| `schematic-status`, `schematic-status__message`, `schematic-status__retry` | The error row that replaces a card's content. |
+| `schematic-status-note`, `schematic-error` | A failure reported under content that is still on screen; error text. |
+| `schematic-hidden` | Text read by assistive technology and never seen, such as a loading label. |
+| `schematic-skeleton`, `schematic-skeleton__heading`, `schematic-skeleton__row`, `schematic-skeleton__cell` | The pending placeholder; each cell names its column on `data-column`. |
+| `schematic-dialog` | Checkout and confirmation dialogs. |
+
+A component's root keeps the same class list in every state; `data-state` is `pending`, `error`, or `ready`. Every node a component renders carries at least one `schematic-` class, so no rule has to reach for a tag or a position.
+
+## The theme editor
+
+The Components tab in the dashboard edits these tokens visually against a live checkout and emits the CSS block to paste into your app. It writes exactly the overrides above and nothing else.

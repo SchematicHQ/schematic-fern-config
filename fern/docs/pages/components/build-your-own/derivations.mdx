@@ -1,0 +1,55 @@
+---
+title: Derivations and Formatting
+description: The pure functions that turn server facts into display models, and the Intl helpers behind them.
+slug: components/build-your-own/derivations
+---
+
+A derivation is a pure function from a hook's data to a display model: `(serverData, options) => ViewModel`. The drop-ins render from these, and they are exported from `@schematichq/schematic-components/elements` so your own JSX renders from the same answers. Every model carries the raw value beside the formatted text, and none of them assemble sentences, so wording and translation stay in your code.
+
+## The derivations
+
+| Derivation | Input | Returns |
+| --- | --- | --- |
+| `derivePlanSummary(company, { locale })` | `useCompany` | plan name, `priceText`, `periodText`, add-on rows, usage charge rows, `notice` (kind and its dates) |
+| `deriveCreditUsage(balance, { locale })` | `useCreditBalances` | burndown numbers, `percent`, ledger rows with source and dates, `canBuyMore` |
+| `derivePricingTable(catalog, { period, currency, locale })` | `useCatalog` | `periods`, `currencies`, plan cards with `price`, `savingsPercent`, entitlement rows, and a `cta` (`upgrade`, `downgrade`, `current`, `custom`, with `disabledReason`) |
+| `deriveUsageMeter(row, { locale, warningThreshold? })` | `useFeatureUsage` | `{ used, limit, percent, state, detailText, resetsAtText, byUser? }` |
+| `deriveEntitlementRow(row, { locale })` | `useFeatureUsage` | `{ kind, featureName, quantityText?, priceText?, periodText?, tooltip? }` for the six value displays |
+| `deriveUpcomingInvoice(invoice, { locale, format? })` | `useUpcomingInvoice` | `amountDueText`, `dueAt`, `balanceApplied`, `balanceRemaining`, `discounts[]`, each with raw values |
+| `derivePaymentMethods(methods)` | `usePaymentMethods` | `brandText`, `last4`, `expiresText`, `isDefault`, `canRemove` per method |
+| `deriveInvoiceList(page, { locale, format? })` | `useInvoices` | `{ rows, count, hasMore }`; each row has `id`, `date`, `dateText`, `amountMinor`, `currency`, `amountText`, `isCredit`, `status`, `url` |
+
+`deriveInvoiceList` formats each row the way the [Invoices component](/components/drop-in/invoices) does: the due date, or the created date when there is none, in the locale's long form such as "March 1, 2026"; the amount as absolute text with `isCredit` carrying the sign; `currency` upper-cased; and `url` reduced to `null` unless it is an `http` or `https` link. `date` is `null` rather than an Invalid Date when the timestamp is unusable, and `dateText` is then empty.
+
+Selection state such as the period toggle stays in your component; `derivePricingTable` takes the selection and returns the valid option sets, including the re-snap when a selection becomes invalid.
+
+### Overriding one field
+
+`format` replaces one formatter at a time and receives the raw value. The `amount` formatter receives the signed amount, unlike the default text, which is absolute:
+
+```ts
+deriveInvoiceList(page, {
+  locale: "en-US",
+  format: {
+    date: (date, locale) => date.toLocaleDateString(locale),
+    amount: (amountMinor, currency, locale) => myMoney(amountMinor, currency),
+  },
+});
+```
+
+## Formatting helpers
+
+| Helper | Does |
+| --- | --- |
+| `formatCurrency(amountMinor, currency, locale, options?)` | Currency with zero-decimal handling and significant-digit switching for small unit prices. `{ preserveSubUnitPrecision: false }` rounds to the currency's usual precision. |
+| `formatNumber(value, locale, options?)` | Grouped numbers, with `Intl.NumberFormat` options passed through |
+| `formatDate(date, locale, options?)`, `formatShortDate(date, locale)` | A `Date` as "August 21, 2026" or "8/21". Empty for an Invalid Date. |
+| `formatConsumptionRate(rate, locale)` | Rates readable down to ten decimal places |
+| `plural(locale, count, forms)` | Picks from `{ one?, other, … }` by the locale's plural category |
+| `featureName(feature, count, locale)` | Singular or plural feature name, using configured forms first |
+| `resolveLocale(locale?)`, `viewerLocale()` | The tag or `en-US` when it is absent or `Intl` rejects it; the browser language, if usable |
+| `httpStatus(error)` | The HTTP status behind a failed billing read, or `undefined` for anything that was not an HTTP response |
+
+## Tests travel with them
+
+The derivations carry the test suites the drop-ins are checked against, so a rendering rule that changes is caught before it reaches a page. Pin `@schematichq/schematic-components` to a minor to take those changes deliberately.

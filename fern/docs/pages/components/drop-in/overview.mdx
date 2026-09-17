@@ -1,0 +1,87 @@
+---
+title: Drop-in Components
+description: Code-first React components on the billing API. Import one, pass props, theme it with CSS variables.
+slug: components/drop-in/overview
+---
+
+Drop-in components are React components from `@schematichq/schematic-components/elements`. Each one reads one or two resources through the hooks in `@schematichq/schematic-react`, reduces them to a display model with a pure derivation, and renders with CSS-variable styling. You configure them with props, not a builder.
+
+| Component | What it shows |
+| --- | --- |
+| [Checkout](/components/drop-in/checkout) | The purchase flow |
+| [Plan Manager](/components/drop-in/plan-manager) | Current plan, add-ons, notices, change plan |
+| [Credit Meter](/components/drop-in/credit-meter) | Credit balances, grants, buy more |
+| [Pricing Table](/components/drop-in/pricing-table) | Plans and add-ons, public or company |
+| [Feature Meter](/components/drop-in/feature-meter) | Usage meters for metered features |
+| [Included Features](/components/drop-in/included-features) | Entitlements with limits and usage |
+| [Upcoming Bill](/components/drop-in/upcoming-bill) | The next bill, balance applied, discounts |
+| [Payment Methods](/components/drop-in/payment-methods) | Cards and wallets on file; add, remove, make default |
+| [Invoices](/components/drop-in/invoices) | Invoice history with links to hosted invoices |
+| [Unsubscribe](/components/drop-in/unsubscribe) | Cancel with confirmation |
+
+<Note>
+  **Using an agent?** Paste this into Claude Code, Cursor, or Codex and it does the setup on this page:
+
+  ```text
+  Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+  ```
+</Note>
+
+## Setup
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  Checkout, CreditMeter, FeatureMeter, IncludedFeatures, Invoices,
+  PaymentMethods, PlanManager, SchematicStyles, UpcomingBill,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider
+  publishableKey="pk_…"
+  session={{ company: company.id, token: fetchAccessToken }}
+>
+  <SchematicStyles />
+  <PlanManager />
+  <IncludedFeatures />
+  <UpcomingBill />
+  <PaymentMethods />
+  <Invoices />
+  <FeatureMeter />
+  <CreditMeter />
+  <Checkout />
+</SchematicProvider>;
+```
+
+That is the whole customer portal. Drop any card you do not need; each stands alone. `<Checkout />` mounts once and the other components open it.
+
+Copy and formatting stay yours. `locale` on the provider formats every component through `Intl`, and each string resolves through `strings` on the component, then `strings` on the provider, then your `translate`, then the component's English. Nothing has to be configured, and renaming one string is one prop. See [Localization](/components/drop-in/localization).
+
+The `./elements` entry is its own bundle and keeps React and both Schematic SDKs external, so the provider your app renders is the one the components read. `@schematichq/schematic-react` is a peer of this entry alone.
+
+## The session
+
+`session` says whose billing is being read and how. It has three states, and they mean different things:
+
+```tsx
+session={{ company: company.id, token: fetchAccessToken }}  // signed in
+session={null}                                              // signed out
+session={undefined}                                         // still finding out
+```
+
+The identity is the `(company, user)` pair, because that is what a token is minted for. `company` is your id for the company. `user` is optional: leave it out where your tokens are company-wide, and state it where you mint per person.
+
+`null` signs out. Every card empties, and nothing is read until a session returns. `undefined` says you do not know yet, which is what an auth resolving asynchronously renders first: the cards hold their loading state rather than reporting an error. Auth libraries often collapse the two, so read their loaded flag before deciding which you mean. [Session and access tokens](/components/build-your-own/session) covers token providers, refresh, and server rendering.
+
+## Before it can load
+
+The company endpoints are enabled per account. An account without them gets a 404 from every `/company/*` read, and because a 404 on the invoice history is not an answer (an empty history is a 200 with no rows), the component reports it as an error rather than showing an empty card. If a correctly configured page shows a component's unavailable message, such as "Invoices are not available for this account.", ask Schematic to enable company context for the account.
+
+A failure with nothing to show replaces a card's content with a short message and a "Try again" button. A failure with rows already on screen, such as a refetch or a later page, is reported under the rows instead. The message is the component's own copy rather than the error's text. In development the component also logs the underlying error to the console, so a missing provider or a refused request is diagnosable from the page.
+
+## Styling
+
+`<SchematicStyles />` injects one stylesheet driven by `--schematic-*` custom properties, follows your `color-scheme` for light and dark, and never wins a cascade against your own tokens. Or skip it and style the class names, which are API. [Styling and theming](/components/drop-in/styling) has the token list and the class contract.
+
+## Mixing with your own UI
+
+Every drop-in is built on the public hooks and derivations, so you can replace any one of them with your own component and keep the rest. A custom Plan Manager next to a drop-in `<Checkout/>` is a common shape. [Build your own UI](/components/build-your-own/overview) starts there.
