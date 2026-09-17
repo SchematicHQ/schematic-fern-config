@@ -8,14 +8,18 @@ Every hook returns a handle with the same shape and reads through the session on
 
 ```ts
 type ResourceHandle<T> = {
-  data: T | undefined;   // undefined until the first response lands
-  error: Error | null;
-  isPending: boolean;    // true while a request is on the wire
-  refetch(): Promise<void>;
+  data: T | undefined;      // undefined until the first successful load; retained across later errors
+  error: Error | undefined; // the latest failure; cleared by the next success
+  isPending: boolean;       // a request is in flight and nothing has arrived yet, or a refetch is running
+  refetch(): void;
 };
 ```
 
-The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data.
+The three states a component renders follow from those fields. `data === undefined && isPending` is the first load. `data === undefined && error` is a failure with nothing to show. `data !== undefined` is ready, and a set `error` alongside it is a failure to report without replacing what is there.
+
+Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
+
+The company endpoints answer 404 with the message "Not found" for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
 
 ## useCheckout
 
@@ -89,12 +93,66 @@ Cards and wallets on file with `brand`, `last4`, `expMonth`, `expYear`, `type`, 
 ## useInvoices
 
 ```ts
-function useInvoices(query?: { includePending?: boolean }): ResourceHandle<InvoicePage> & { loadMore(): Promise<void> };
+function useInvoices(query?: InvoiceQuery): ResourceHandle<InvoicePage> & { loadMore(): Promise<void> };
 
+type InvoiceQuery = { includePending?: boolean };
 type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
 ```
 
-The invoice history, paged. `count` is how many invoices the query matches on the server; `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. Each distinct query is its own list with its own paging. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `refetch` re-requests every page loaded so far.
+The invoice history, paged. `count` is how many invoices the query matches on the server, so a list showing four rows can say how many the company has. `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `isPending` is true while the page is on the wire, so a button can disable itself without awaiting anything, and clicking twice makes one request. `refetch` re-requests every page loaded so far, not only the first.
+
+`{ includePending: true }` includes unpaid invoices that are not yet due. Each distinct query is its own list with its own paging, so `useInvoices({ includePending: true })` and `useInvoices()` never share rows. The hook keys by value, so an inline object literal is fine.
+
+An empty history is a successful response with `count: 0`. A 404 surfaces on `error`, so a page cannot report "no invoices" over a real failure.
+
+Each `Invoice`:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | `string` | The invoice's identifier. |
+| `amountDue` | `number` | Signed, in the currency's minor units. A negative amount is a credit note. |
+| `currency` | `string` | ISO 4217 code as the billing provider reports it. |
+| `createdAt` | `Date` | When the invoice was created. |
+| `dueDate` | `Date \| null`, optional | When it is due, if the billing provider set one. |
+| `status` | `InvoiceStatus \| null`, optional | `draft`, `open`, `paid`, `uncollectible`, or `void`. |
+| `url` | `string \| null`, optional | The hosted invoice page, if there is one. |
+
+The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
+
+```tsx
+import { useInvoices } from "@schematichq/schematic-react";
+
+function InvoiceHistory() {
+  const { data, error, isPending, loadMore, refetch } = useInvoices();
+
+  if (data === undefined) {
+    return error ? <button onClick={refetch}>Retry</button> : <p>Loading…</p>;
+  }
+  if (data.invoices.length === 0) {
+    return <p>No invoices yet</p>;
+  }
+  return (
+    <>
+      <ul>
+        {data.invoices.map((invoice) => (
+          <li key={invoice.id}>
+            <a href={invoice.url ?? undefined}>
+              {(invoice.dueDate ?? invoice.createdAt).toLocaleDateString()}
+            </a>{" "}
+            {invoice.amountDue / 100} {invoice.currency.toUpperCase()}
+          </li>
+        ))}
+      </ul>
+      {data.hasMore && (
+        <button disabled={isPending} onClick={loadMore}>
+          Load more
+        </button>
+      )}
+      {error && <p role="alert">{error.message}</p>}
+    </>
+  );
+}
+```
 
 ## useUnsubscribe
 
@@ -103,6 +161,37 @@ function useUnsubscribe(): { cancel(): Promise<void>; isPending: boolean; error:
 ```
 
 Schedules the cancellation for the end of the period, with downgrade prevention applied on the server. `useCompany` reflects the scheduled cancellation on the next read.
+
+## useInvalidateBillingData
+
+```ts
+function useInvalidateBillingData(): () => void;
+```
+
+Returns a function that reloads every loaded billing resource while keeping its current data on screen. Call it after an action that changes what the company is billed for, such as a plan change through checkout.
+
+```tsx
+import { useInvalidateBillingData } from "@schematichq/schematic-react";
+
+function CheckoutButton() {
+  const invalidate = useInvalidateBillingData();
+  return <button onClick={async () => { await openCheckout(); invalidate(); }}>Upgrade</button>;
+}
+```
+
+## Testing and fixtures
+
+`BillingDataProvider` serves fixed data to the hooks with no network and no session, so a component can be rendered in a test or a story with the rows you choose.
+
+```tsx
+import { BillingDataProvider } from "@schematichq/schematic-react";
+
+<BillingDataProvider data={{ invoices: { invoices: [], count: 0, hasMore: false } }}>
+  <InvoiceHistory />
+</BillingDataProvider>;
+```
+
+A missing key reports as pending. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
 
 ## Flags and entitlement checks
 

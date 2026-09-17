@@ -74,7 +74,9 @@ The identity is the `(company, user)` pair, because that is what a token is mint
 
 ## Before it can load
 
-The company endpoints are enabled per account. An account without them gets a 404 from every `/company/*` read, and because a 404 on the invoice history is not an answer (an empty history is a 200 with no rows), the component reports it as an error rather than showing an empty card. If a correctly configured page shows `failed with status 404`, ask Schematic to enable company context for the account.
+The company endpoints are enabled per account. An account without them gets a 404 from every `/company/*` read, and because a 404 on the invoice history is not an answer (an empty history is a 200 with no rows), the component reports it as an error rather than showing an empty card. If a correctly configured page shows a component's unavailable message, such as "Invoices are not available for this account.", ask Schematic to enable company context for the account.
+
+A failure with nothing to show replaces a card's content with a short message and a "Try again" button. A failure with rows already on screen, such as a refetch or a later page, is reported under the rows instead. The message is the component's own copy rather than the error's text. In development the component also logs the underlying error to the console, so a missing provider or a refused request is diagnosable from the page.
 
 ## Styling
 

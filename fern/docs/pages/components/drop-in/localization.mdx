@@ -23,8 +23,10 @@ Copy and formatting are yours. `locale` formats every component through `Intl`, 
 Each component's page lists the keys it renders. The same keys on the provider apply everywhere:
 
 ```tsx
-<SchematicProvider strings={{ retry: "Try again" }} …>
+<SchematicProvider strings={{ retry: "Retry" }} …>
 ```
+
+An override can vary by count with i18next's plural suffixes, so `invoicesHeader_one` and `invoicesHeader_other` answer `1` and `14` with different words. Placeholders use the `{{name}}` form.
 
 ## Using your own i18n
 
@@ -43,7 +45,7 @@ function Providers({ children }) {
 }
 ```
 
-A key your catalog does not carry falls through to the component's English, so a partial translation ships safely. The key list is frozen per release; a rename is a deliberate, breaking change.
+A key your catalog does not carry falls through to the component's English, so a partial translation ships safely. The components pass a sentinel `defaultValue` so a miss is detectable even from a stack that answers every key. `onMissingString` on the provider reports each miss, so a mis-wired catalogue shows up in your logs rather than as English in a German page. The key list is frozen per release; a rename is a deliberate, breaking change.
 
 ## Server rendering
 

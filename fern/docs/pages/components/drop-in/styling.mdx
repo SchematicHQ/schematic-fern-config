@@ -63,11 +63,12 @@ Skip the stylesheet and write your own against the class names. They are API, an
 | `schematic-muted`, `schematic-small` | Secondary and smaller text. |
 | `schematic-chip`, `schematic-badge` | A short status label (`[data-status]`); a filled pill. |
 | `schematic-cta` | Filled action; `--outline` and `--small` modifiers. |
-| `schematic-link-button` | Inline text action ("See more", "Retry", "Load more"). |
+| `schematic-link-button` | Inline text action ("See more", "Load more", "Try again"). |
 | `schematic-meter`, `schematic-meter__fill` | A usage or credit bar. |
 | `schematic-status`, `schematic-status__message`, `schematic-status__retry` | The error row that replaces a card's content. |
-| `schematic-status-note` | A failure reported under content that is still on screen. |
-| `schematic-skeleton`, `schematic-skeleton__heading`, `schematic-skeleton__row`, `schematic-skeleton__cell` | The pending placeholder. |
+| `schematic-status-note`, `schematic-error` | A failure reported under content that is still on screen; error text. |
+| `schematic-hidden` | Text read by assistive technology and never seen, such as a loading label. |
+| `schematic-skeleton`, `schematic-skeleton__heading`, `schematic-skeleton__row`, `schematic-skeleton__cell` | The pending placeholder; each cell names its column on `data-column`. |
 | `schematic-dialog` | Checkout and confirmation dialogs. |
 
 A component's root keeps the same class list in every state; `data-state` is `pending`, `error`, or `ready`. Every node a component renders carries at least one `schematic-` class, so no rule has to reach for a tag or a position.
