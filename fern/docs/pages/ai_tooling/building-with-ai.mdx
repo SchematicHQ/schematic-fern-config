@@ -49,7 +49,7 @@ OAuth is the better default for every client that supports it. The connection ru
 
 Sign-in asks you two things, and both are fixed for the life of the connection. To change either, disconnect the server and connect again.
 
-**Which environment.** Each Schematic environment carries its own companies, plans, and features, so connecting to the wrong one gives you an assistant that reports an empty account.
+**Which environment.** Each Schematic environment carries its own companies, plans, and features, so connecting to the wrong one gives you an assistant that reports an empty account. When you work in several environments, [add the server once per environment](#connect-more-than-one-environment) and keep them side by side.
 
 **Read-only, or read and write.** Read-only is the right default. A write connection can never do more than you can do in the Schematic app yourself.
 
@@ -188,6 +188,31 @@ bearer_token_env_var = "SCHEMATIC_API_KEY"
 
 Read-only API keys can use only the read tools, which makes them a reasonable choice when you want an assistant that can look but not touch.
 
+### Connect more than one environment
+
+Every server entry in your client is a separate connection that signs in on its own, so you reach a second environment by adding the server again under a different name. Name each entry after the environment it points at, and you can see which account data an assistant is about to touch before you approve a tool call:
+
+```bash
+claude mcp add --transport http schematic-staging https://api.schematichq.com/mcp
+claude mcp add --transport http schematic-prod https://api.schematichq.com/mcp
+```
+
+Authenticate each entry separately and pick the matching environment at sign-in. Most clients prefix a server's tools with the entry name, so your assistant treats `schematic-staging` and `schematic-prod` as two different servers and can compare a plan across both in one conversation.
+
+API keys work the same way. Create a key in each environment and give each server entry its own:
+
+```toml
+[mcp_servers.schematic_staging]
+url = "https://api.schematichq.com/mcp"
+bearer_token_env_var = "SCHEMATIC_STAGING_API_KEY"
+
+[mcp_servers.schematic_prod]
+url = "https://api.schematichq.com/mcp"
+bearer_token_env_var = "SCHEMATIC_PROD_API_KEY"
+```
+
+Connect the production entry read-only unless you are deliberately making changes there. An assistant that can read both environments and write to neither still answers most of the questions you have.
+
 ## Check the connection
 
 Once your client lists Schematic as connected, ask it something you already know the answer to. A real answer confirms both the connection and the environment you picked at sign-in.
@@ -241,7 +266,7 @@ The prompts that create or change something need a read and write connection. Th
 
 ## Troubleshooting
 
-**The assistant returns no companies, or the wrong ones.** Your connection points at a different environment than the one you have open in the app. Each Schematic environment carries its own companies, plans, and features, so a connection to sandbox looks empty next to production data. Disconnect the server in your client, reconnect, and pick the environment deliberately at sign-in.
+**The assistant returns no companies, or the wrong ones.** Your connection points at a different environment than the one you have open in the app. Each Schematic environment carries its own companies, plans, and features, so a connection to sandbox looks empty next to production data. Disconnect the server in your client, reconnect, and pick the environment deliberately at sign-in. If you need both environments at hand, [add the server once per environment](#connect-more-than-one-environment) instead of reconnecting each time you switch.
 
 **A write tool returns a permission error.** Either you connected read-only, or your role in Schematic doesn't have write access. Reconnect and choose read and write. If that doesn't fix it, ask an admin to update your role.
 
