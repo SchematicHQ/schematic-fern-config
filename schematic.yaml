@@ -7038,6 +7038,10 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          format: int64
+          nullable: true
         url:
           type: string
           nullable: true
@@ -11425,6 +11429,10 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          format: int64
+          nullable: true
         url:
           type: string
           nullable: true
@@ -11494,6 +11502,14 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          description: >-
+            Amount after discounts and tax, before applying the customer
+            balance. Null when the provider has not reported it: rows synced
+            before the column existed, or pushed without one.
+          format: int64
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -16119,6 +16135,13 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          description: >-
+            Amount after discounts and tax, before applying the customer
+            balance. Null when the provider has not reported it.
+          format: int64
+          nullable: true
         updated_at:
           type: string
           format: date-time
