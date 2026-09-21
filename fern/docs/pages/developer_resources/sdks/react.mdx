@@ -140,6 +140,20 @@ const MyComponent = () => {
 
 *Note: `useSchematicIsPending` is checking if entitlement data has been loaded, typically via `identify`. It should, therefore, be used to wrap flag and entitlement checks, but never the initial call to `identify`.*
 
+### Usage warnings
+
+If a [usage warning](/feature-management/usage-warnings) is configured on the entitlement, the hook also returns `warningTiers`, so you can warn a customer before they hit a limit rather than after. Each tier is a `{ key, value }` pair in the entitlement's usage units, and the dashboard writes a single tier under the key `default`:
+
+```tsx
+const { featureUsage, warningTiers } = useSchematicEntitlement("my-flag-key");
+
+const warning = warningTiers?.find((tier) => tier.key === "default");
+const approachingLimit =
+    typeof featureUsage === "number" &&
+    typeof warning?.value === "number" &&
+    featureUsage >= warning.value;
+```
+
 ### Company plan information
 
 To access the current company's plan and trial status, you can use the `useSchematicPlan` hook:
