@@ -95,12 +95,4 @@ With `showAsLimit` on, usage meters, included feature usage details, the plan ma
 
 ## Usage warnings and webhooks
 
-Usage warnings do not drive webhooks. The `entitlement.limit.warning` event fires when usage reaches 80 percent of the entitlement's allocation, regardless of any usage warning set on the entitlement. There is no webhook that fires at the usage warning value. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) for the fixed thresholds each event uses.
-
-## Current limits
-
-- One usage warning per entitlement.
-- Plan entitlements only. Company overrides and credit grants do not carry a usage warning.
-- Not available on pay as you go or overage entitlements. On overage pricing the [soft limit](/billing/usage-based-billing#fixed-fee-with-overage) already marks where included usage ends.
-- The value is not validated against the limit.
-- Frontend SDK hooks do not return the value.
+The usage warning you set here and the `entitlement.limit.warning` webhook are separate mechanisms. The webhook fires at its own threshold, which you can read about in [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
