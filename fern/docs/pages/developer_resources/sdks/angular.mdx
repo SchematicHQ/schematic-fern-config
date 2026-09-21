@@ -206,6 +206,25 @@ export class EntitlementComponent {
 
 _Note: `isPending$` checks if entitlement data has been loaded, typically via `identify`. It should be used to wrap flag and entitlement checks, but never the initial call to `identify`._
 
+### Usage warnings
+
+If a [usage warning](/feature-management/usage-warnings) is configured on the entitlement, the emitted entitlement also carries `warningTiers`, so you can warn a customer before they hit a limit rather than after. Each tier is a `{ key, value }` pair in the entitlement's usage units, and the dashboard writes a single tier under the key `default`:
+
+```typescript
+approachingLimit$ = this.schematic.entitlement$("my-flag-key").pipe(
+  map((entitlement) => {
+    const warning = entitlement.warningTiers?.find(
+      (tier) => tier.key === "default",
+    );
+    return (
+      typeof entitlement.featureUsage === "number" &&
+      typeof warning?.value === "number" &&
+      entitlement.featureUsage >= warning.value
+    );
+  }),
+);
+```
+
 ### Checking plans
 
 Use `plan$` to get an Observable of the current plan information:

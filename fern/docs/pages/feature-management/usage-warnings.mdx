@@ -77,7 +77,110 @@ When a [flag check](/api-reference/features/check-flag) matches a feature entitl
 }
 ```
 
-Compare `feature_usage` to the tier value to decide whether the customer is approaching the limit. The frontend SDK hooks such as `useSchematicEntitlement` do not return the warning value yet.
+Compare `feature_usage` to the tier value to decide whether the customer is approaching the limit.
+
+### In a frontend SDK
+
+The frontend SDKs return the tiers as `warningTiers` on the entitlement, each a `{ key, value }` pair in the entitlement's usage units. The field is `undefined` when no warning is configured, so read the `default` key and compare it to `featureUsage`:
+
+<CodeBlocks>
+```tsx title="React"
+import { useSchematicEntitlement } from "@schematichq/schematic-react";
+
+const AiConversations = () => {
+  const { featureUsage, warningTiers } =
+    useSchematicEntitlement("ai-conversations");
+
+  const warning = warningTiers?.find((tier) => tier.key === "default");
+  const approachingLimit =
+    typeof featureUsage === "number" &&
+    typeof warning?.value === "number" &&
+    featureUsage >= warning.value;
+
+  return (
+    <>
+      {approachingLimit && (
+        <Banner>You have used {featureUsage} of your {warning.value} conversations.</Banner>
+      )}
+      <Conversations />
+    </>
+  );
+};
+```
+
+```vue title="Vue"
+<script setup lang="ts">
+import { computed } from "vue";
+import { useSchematicEntitlement } from "@schematichq/schematic-vue";
+
+const { featureUsage, warningTiers } =
+  useSchematicEntitlement("ai-conversations");
+
+const warning = computed(() =>
+  warningTiers.value?.find((tier) => tier.key === "default"),
+);
+const approachingLimit = computed(
+  () =>
+    typeof featureUsage.value === "number" &&
+    typeof warning.value?.value === "number" &&
+    featureUsage.value >= warning.value.value,
+);
+</script>
+
+<template>
+  <Banner v-if="approachingLimit">
+    You have used {{ featureUsage }} of your {{ warning!.value }} conversations.
+  </Banner>
+  <Conversations />
+</template>
+```
+
+```typescript title="Angular"
+import { Component, inject } from "@angular/core";
+import { map } from "rxjs";
+import { SchematicService } from "@schematichq/schematic-angular";
+
+@Component({
+  selector: "app-ai-conversations",
+  template: `
+    @if (approachingLimit$ | async) {
+      <app-banner />
+    }
+    <app-conversations />
+  `,
+})
+export class AiConversationsComponent {
+  private schematic = inject(SchematicService);
+  approachingLimit$ = this.schematic.entitlement$("ai-conversations").pipe(
+    map((entitlement) => {
+      const warning = entitlement.warningTiers?.find(
+        (tier) => tier.key === "default",
+      );
+      return (
+        typeof entitlement.featureUsage === "number" &&
+        typeof warning?.value === "number" &&
+        entitlement.featureUsage >= warning.value
+      );
+    }),
+  );
+}
+```
+
+```typescript title="JavaScript"
+const check = schematic.getFlagCheck("ai-conversations");
+const warning = check?.warningTiers?.find((tier) => tier.key === "default");
+
+if (
+  typeof check?.featureUsage === "number" &&
+  typeof warning?.value === "number" &&
+  check.featureUsage >= warning.value
+) {
+  showBanner(check.featureUsage, warning.value);
+}
+```
+</CodeBlocks>
+
+Requires `@schematichq/schematic-js` 1.8.0 or later, or the framework SDK version built on it.
 
 ### Show the warning value in components
 
