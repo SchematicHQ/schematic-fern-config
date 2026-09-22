@@ -9,6 +9,20 @@ A catalog is the set of plans, add ons, and credit bundles a customer can buy. C
 
 You build a second catalog when you need to sell a different lineup to different people out of the same account, without duplicating plans or branching your application code.
 
+## Use cases
+
+### Selling more than one product
+
+Once you sell two products, a single list of purchasable plans forces a compromise. Your AI plans and your analytics plans land in the same checkout, and you either show every customer everything or write conditional logic in your app to hide the half that does not apply.
+
+Give each product its own catalog and the choice goes away. Analytics customers open a portal backed by the analytics catalog and see analytics tiers. AI customers see AI tiers. A plan the two products share, such as a common enterprise tier, sits in both catalogs and still counts as one plan with one version history.
+
+### Selling to different buyers
+
+A two-sided marketplace charges its supply side and its demand side for different things, at different prices, often on different terms. Restaurants pay a commission on orders; diners pay for a membership. One pricing table cannot serve both.
+
+Build a catalog per side. Each side's portal points at its own catalog, and each buyer sees only the plans written for them. The settings that should not differ by side, such as your trial rules and plan change rules, stay shared across both catalogs, so the two sides behave consistently even though they buy different things.
+
 ## What moved
 
 Live Plans and Live Add Ons used to sit on the Catalog's Configuration tab, next to the initial plan, the fallback plan, and the trial rules. Those are two different jobs, and mixing them meant every change to what you sell also touched how subscriptions behave. They are now separated:
@@ -47,20 +61,6 @@ This is where a second catalog earns its keep. You embed one portal in your dash
 ## Catalogs are account-wide
 
 Like plans and features, catalogs are [account scoped rather than environment scoped](/developer_resources/environments#account-scoped-resources). A catalog you create carries the same name and the same ID in development, staging, and production, so you model a new product once and promote it without rebuilding it in each environment.
-
-## Use cases
-
-### Selling more than one product
-
-Once you sell two products, a single list of live plans forces a compromise. Your AI plans and your analytics plans land in the same checkout, and you either show every customer everything or write conditional logic in your app to hide the half that does not apply.
-
-Give each product its own catalog and the choice goes away. Analytics customers open a portal backed by the analytics catalog and see analytics tiers. AI customers see AI tiers. A plan the two products share, such as a common enterprise tier, sits in both catalogs and still counts as one plan with one version history.
-
-### Selling to different buyers
-
-A two-sided marketplace charges its supply side and its demand side for different things, at different prices, often on different terms. Restaurants pay a commission on orders; diners pay for a membership. One pricing table cannot serve both.
-
-Build a catalog per side. Each side's portal points at its own catalog, and each buyer sees only the plans written for them. Your trial rules, plan change rules, and checkout settings stay in one place under Lifecycle, so the two sides behave consistently even though they buy different things.
 
 ## Creating a catalog
 
