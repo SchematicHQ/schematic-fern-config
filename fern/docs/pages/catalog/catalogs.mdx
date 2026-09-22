@@ -1,0 +1,76 @@
+---
+title: Multiple Catalogs
+description: Build separate catalogs for different products or different buyers, and connect each one to the components that sell it.
+
+slug: catalog/catalogs
+---
+
+A catalog is the set of plans, add ons, and credit bundles a customer can buy. Checkout and the pricing table resolve against a catalog, so what you put in one is exactly what that customer sees and can purchase.
+
+You build a second catalog when you need to sell a different lineup to different people out of the same account, without duplicating plans or branching your application code.
+
+## Use cases
+
+### Selling more than one product
+
+Once you sell two products, a single list of purchasable plans forces a compromise. Your AI plans and your analytics plans land in the same checkout, and you either show every customer everything or write conditional logic in your app to hide the half that does not apply.
+
+Give each product its own catalog and the choice goes away. Analytics customers open a portal backed by the analytics catalog and see analytics tiers. AI customers see AI tiers. A plan the two products share, such as a common enterprise tier, sits in both catalogs and still counts as one plan with one version history.
+
+### Selling to different buyers
+
+A two-sided marketplace charges its supply side and its demand side for different things, at different prices, often on different terms. Restaurants pay a commission on orders; diners pay for a membership. One pricing table cannot serve both.
+
+Build a catalog per side. Each side's portal points at its own catalog, and each buyer sees only the plans written for them. The settings that should not differ by side, such as your trial rules and plan change rules, stay shared across both catalogs, so the two sides behave consistently even though they buy different things.
+
+## What moved
+
+Live Plans and Live Add Ons used to sit on the Catalog's Configuration tab, next to the initial plan, the fallback plan, and the trial rules. Those are two different jobs, and mixing them meant every change to what you sell also touched how subscriptions behave. They are now separated:
+
+| Where it lives | What it controls |
+| --- | --- |
+| **Products > Catalogs** | Which plans, add ons, and credit bundles are purchasable, and in what order they appear |
+| **Manage > Lifecycle** | Initial plan, fallback plan, trial rules and trial expiry, plan change rules, checkout settings, and component display settings |
+
+Lifecycle settings apply across every catalog, so a trial rule or a plan change rule you set once governs all of them. Catalog membership is the part you vary.
+
+## Your default catalog
+
+Schematic creates a catalog named **Default** for you and moves your existing Live Plans, Live Add Ons, and Live Credit Bundles into it. Every component in your account points at that catalog. Your customers see the same plans at the same prices as before, and you pick up a second catalog when you have a reason to, not because the change forced one on you.
+
+The default catalog is marked with a `DEFAULT` badge and cannot be deleted. Any catalog you create alongside it can be renamed or deleted freely.
+
+## What a catalog holds
+
+Each catalog has three sections:
+
+**Live Plans** are the plans your end users can subscribe to, upgrade to, or downgrade from. Each plan surfaces its [latest published version](/catalog/plans#plan-version-migrations), and companies already on a prior version stay there until you migrate them. Mark a plan **Custom** here to show a message like "Talk to us" in place of a price.
+
+**Live Add Ons** are the add ons a customer can attach to a subscription in checkout.
+
+**Live Credit Bundles** are the credit packs a customer can buy, each with its own price, credit amount, expiration, and plan compatibility.
+
+A plan can belong to more than one catalog. The **Plans** list has a Catalogs column showing every catalog each plan appears in, so you can see at a glance which of your products sells a given plan.
+
+## Connecting a catalog to a component
+
+Every component sells from exactly one catalog. Open a component in the Component Builder and choose its catalog from the dropdown in the top toolbar, beside the preview company selector. Checkout, the pricing table, and the plan picker inside that component then draw only on the plans in the catalog you chose.
+
+This is where a second catalog earns its keep. You embed one portal in your dashboard product and another in your AI product, point each at its own catalog, and each set of customers sees only the plans that apply to them.
+
+## Catalogs are account-wide
+
+Like plans and features, catalogs are [account scoped rather than environment scoped](/developer_resources/environments#account-scoped-resources). A catalog you create carries the same name and the same ID in development, staging, and production, so you model a new product once and promote it without rebuilding it in each environment.
+
+## Creating a catalog
+
+1. Navigate to **Products > Catalogs**
+2. Open the catalog dropdown at the top left and choose **New catalog**
+3. Give the catalog a name, add an optional description, and click **Create Catalog**
+4. Add plans, add ons, and credit bundles using **+ Add Plans**, **+ Add Add Ons**, and **+ Add Credit Bundles**
+5. Click **Save Changes**
+6. Open the component that should sell this lineup and point it at the new catalog
+
+<Info>
+Plans and add ons must be associated with Stripe products to be added to a catalog. If you use Schematic without Stripe, your components are read only and this step does not apply. See [Stripe](/integrations/stripe) for connecting your billing products.
+</Info>
