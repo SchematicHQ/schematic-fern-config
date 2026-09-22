@@ -15089,6 +15089,18 @@ components:
         - value
         - created_at
       title: RulesengineCompanyMetric
+    RulesengineComparableOperator:
+      type: string
+      title: RulesengineComparableOperator
+      enum:
+        - eq
+        - gt
+        - gte
+        - is_empty
+        - lt
+        - lte
+        - not_empty
+        - ne
     RulesengineCondition:
       type: object
       properties:
@@ -15125,7 +15137,7 @@ components:
           format: int64
           nullable: true
         operator:
-          $ref: '#/components/schemas/ComparableOperator'
+          $ref: '#/components/schemas/RulesengineComparableOperator'
         resource_ids:
           type: array
           items:
