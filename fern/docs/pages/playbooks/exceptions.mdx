@@ -13,6 +13,19 @@ In many scenarios customers might need features that don't come standard in a pr
 
 In Schematic, we call these "Company Overrides", and they can be applied individually to any company, or programmatically via our API. We'll cover both scenarios below.
 
+## Override or custom plan?
+
+An override and a [custom plan](/catalog/custom-plans) both give one company something its tier does not, so it is worth knowing which one a deal calls for before you start building. Pick based on how much of the deal differs from your catalog.
+
+| The deal | Use | Why |
+|---|---|---|
+| A standard plan plus one exception | A company override | The company stays on the tier, so later changes to that tier still reach them. |
+| An upgrade motion, where you want a customer to try the tier above theirs | A [time-limited override](#time-limited-overrides) | Turn the premium feature on for two weeks. If they don't move up, it expires on its own. |
+| A shape that differs throughout: bespoke pricing, a legacy contract, anything that doesn't map to your catalog | A [custom plan](/catalog/custom-plans) | The company gets its own negotiated plan and its own invoice, billed outside self-service checkout. |
+| Terms everyone should get | A [new plan version](/catalog/plans#creating-a-new-plan-version) | Publishing a version moves every company on the plan at once, instead of you applying the same override to each of them. |
+
+Staying on a standard plan buys the customer something concrete. When you publish a new version of that plan, they get it. A company on a custom plan versions on its own track, so you update them separately from the rest of your catalog.
+
 ## Applying an override in the Schematic UI
 
 1. Navigate to a company profile.

@@ -496,6 +496,7 @@ You can customize DataStream behavior via the `datastream_options` hash:
 | `replicator_mode` | `Boolean` | `false` | Enable replicator mode (see below) |
 | `replicator_health_url` | `String` | `http://localhost:8090/ready` | URL to poll for replicator health |
 | `replicator_health_interval` | `Integer` | 30 | Health check interval in seconds |
+| `max_frame_size` | `Integer` | 20971520 (20 MB) | Maximum size, in bytes, of a single incoming WebSocket frame |
 
 ```ruby
 require "schematichq"
@@ -508,6 +509,28 @@ client = Schematic::SchematicClient.new(
   }
 )
 ```
+
+### Frame size limit
+
+DataStream sends the full flag set as a single WebSocket frame on connect. If that
+frame exceeds the limit, the SDK cannot decode it and logs an error naming the
+limit; raise `max_frame_size` to accept a larger payload.
+
+```ruby
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  use_data_stream: true,
+  datastream_options: {
+    max_frame_size: 64 * 1024 * 1024 # 64 MB
+  }
+)
+```
+
+The underlying `websocket` gem stores this limit in a module-level global
+(`WebSocket.max_frame_size`), so it has no per-connection setting. The SDK leaves
+that global alone unless you pass `max_frame_size`, and when you do it only ever
+raises the limit, never lowers it, so it cannot shrink the ceiling for other
+WebSocket users in the same process.
 
 ## Replicator Mode
 

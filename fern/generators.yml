@@ -19,7 +19,7 @@ groups:
   python-sdk:
     generators:
       - name: fernapi/fern-python-sdk
-        version: 5.29.4
+        version: 5.30.2
         output:
           location: pypi
           package-name: schematichq
@@ -65,7 +65,7 @@ groups:
   ts-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
-        version: 3.91.0
+        version: 3.95.1
         api:
           settings:
             prefer-undiscriminated-unions-with-literals: true
@@ -107,6 +107,13 @@ groups:
               miniflare: "^4.20260421.0"
               redis: "^4.7.0"
               "@types/ws": "^8.18.1"
+            # Security pins for transitive deps. sharp comes from miniflare,
+            # which pins 0.35.2 (GHSA-rgj7-g3m4-5g8c). The merge is shallow,
+            # so this object replaces any generated resolutions; keep the
+            # full list here.
+            resolutions:
+              sharp: "^0.35.4"
+              undici: "7.29.0"
             scripts:
               build: node build.js
               build:legacy: tsc
@@ -124,7 +131,7 @@ groups:
   go-sdk:
     generators:
       - name: fernapi/fern-go-sdk
-        version: 1.57.12
+        version: 1.58.1
         github:
           repository: schematichq/schematic-go
           mode: pull-request
@@ -144,7 +151,7 @@ groups:
   java-sdk:
     generators:
       - name: fernapi/fern-java-sdk
-        version: 4.19.2
+        version: 4.19.3
         metadata:
           reference-url: "https://schematichq.com"
           author: "Schematic"
@@ -173,11 +180,12 @@ groups:
             - implementation com.dylibso.chicory:runtime:1.4.0
             - implementation com.dylibso.chicory:wasi:1.4.0
             - implementation redis.clients:jedis:5.2.0
+            - testImplementation com.github.codemonstur:embedded-redis:1.4.3
         smart-casing: false
   ruby-sdk:
     generators:
       - name: fernapi/fern-ruby-sdk
-        version: 1.24.0
+        version: 1.25.0
         output:
           location: rubygems
           package-name: schematichq

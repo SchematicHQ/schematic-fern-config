@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: vc8eb8df4
+  x-rules-engine-schema-version: v94b8f7a7
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -139,11 +139,16 @@ components:
           type: string
         expires_at:
           type: string
+          description: >-
+            When the hold lapses if the lease is never released; defaults to
+            five minutes from now and may be at most one hour out. The unspent
+            hold is refunded on expiry
           format: date-time
           nullable: true
         requested_amount:
           type: number
           format: double
+          maximum: 9999999999
       required:
         - company_id
         - credit_type_id
@@ -512,6 +517,17 @@ components:
         - started_at
         - url
       title: AuditLogResponseData
+    BillingArrearsAnchor:
+      type: string
+      enum:
+        - billing_period_start
+        - month_end
+    BillingArrearsCadence:
+      type: string
+      enum:
+        - end_of_billing_period
+        - monthly
+        - quarterly
     BillingCollectionMethod:
       type: string
       enum:
@@ -778,6 +794,9 @@ components:
         - billing_credit_auto_topup
         - free
         - plan
+        - postpaid_forgiven
+        - postpaid_overdraft
+        - postpaid_settlement
         - purchased
         - rollover
     BillingCreditGrantResponseData:
@@ -796,6 +815,12 @@ components:
         created_at:
           type: string
           format: date-time
+        credit_bundle_id:
+          type: string
+          description: >-
+            The catalog bundle this grant was issued from, when the company
+            bought one.
+          nullable: true
         credit_icon:
           type: string
           nullable: true
@@ -825,6 +850,19 @@ components:
           nullable: true
         plan_name:
           type: string
+          nullable: true
+        postpaid_charge_amount:
+          type: integer
+          description: What the postpaid charges costs, in the currency's minor unit.
+          format: int64
+          nullable: true
+        postpaid_charge_currency:
+          type: string
+          nullable: true
+        postpaid_charged_credits:
+          type: number
+          description: Credits consumed past a zero balance in the window still open.
+          format: double
           nullable: true
         price:
           $ref: '#/components/schemas/BillingPriceResponseData'
@@ -964,6 +1002,8 @@ components:
           nullable: true
         id:
           type: string
+        ledger_authority:
+          $ref: '#/components/schemas/BillingCreditLedgerAuthority'
         name:
           type: string
         plural_name:
@@ -986,6 +1026,7 @@ components:
         - default_expiry_unit
         - default_rollover_policy
         - burn_strategy
+        - ledger_authority
         - cost_editable
         - currency_prices
         - created_at
@@ -1201,6 +1242,39 @@ components:
         - id
         - provider_type
       title: BillingMeterResponseData
+    BillingPlanCreditGrantBillingMode:
+      type: string
+      enum:
+        - granted
+        - billed
+    BillingPlanCreditGrantPriceTierResponseData:
+      type: object
+      properties:
+        from:
+          type: integer
+          description: Lower bound of the tier, in credits per invoice (inclusive).
+          format: int64
+        per_unit_price:
+          type: integer
+          description: Price per credit in this tier, in the plan currency's smallest unit.
+          format: int64
+          nullable: true
+        per_unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit in this tier as a decimal, for rates below one
+            cent.
+          nullable: true
+        to:
+          type: integer
+          description: >-
+            Upper bound of the tier, in credits per invoice (inclusive). Null
+            marks the final, unbounded tier.
+          format: int64
+          nullable: true
+      required:
+        - from
+      title: BillingPlanCreditGrantPriceTierResponseData
     BillingPlanCreditGrantResetCadence:
       type: string
       enum:
@@ -1223,6 +1297,20 @@ components:
     BillingPlanCreditGrantResponseData:
       type: object
       properties:
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window. Only meaningful when
+            arrears_cadence is monthly.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced. Defaults to
+            end_of_billing_period.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -1260,6 +1348,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed).
         can_buy_bundles:
           type: boolean
           description: >-
@@ -1316,6 +1411,16 @@ components:
             The license whose quantity scales this grant. Set only when scaling
             is per_license.
           nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            A floor on the balance, not an allowance per invoice window:
+            consumption is denied once the balance would fall below minus this
+            figure, and stays denied until a new grant lands or the negative
+            balance is settled. Absent means no limit.
+          format: double
+          nullable: true
         plan:
           $ref: '#/components/schemas/PreviewObjectResponseData'
         plan_id:
@@ -1327,6 +1432,39 @@ components:
         plan_version_id:
           type: string
           nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance, accruing at
+            postpaid_rate_per_unit rather than being denied.
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past zero, in the currency's
+            minor unit. Defaults to the credit's own cost basis when postpaid is
+            enabled without one.
+          format: int64
+          nullable: true
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal form of postpaid_rate_per_unit, for rates finer than one
+            minor unit.
+          nullable: true
+        price:
+          allOf:
+            - $ref: '#/components/schemas/BillingPriceResponseData'
+          description: >-
+            The Stripe price a billed grant bills through. Minted when the plan
+            version is published.
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits, cheapest bound first. Empty unless
+            billing_mode is billed and the credits are priced on tiers.
+          items:
+            $ref: '#/components/schemas/BillingPlanCreditGrantPriceTierResponseData'
+          maxItems: 1000
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -1351,6 +1489,27 @@ components:
           description: >-
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds.
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Set only when price_tiers is non-empty.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Set only when
+            billing_mode is billed and the credits are priced at one rate.
+          format: int64
+          nullable: true
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit.
+            Set only when billing_mode is billed and the rate is below one cent.
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -1368,6 +1527,9 @@ components:
         - auto_topup_enabled
         - auto_topup_self_service
         - rollover_percentage
+        - postpaid_enabled
+        - billing_mode
+        - price_tiers
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
@@ -2589,6 +2751,143 @@ components:
         - none
         - one_time
         - recurring
+    CheckAndReserveFlagRequestBody:
+      type: object
+      properties:
+        company:
+          additionalProperties:
+            type: string
+            maxLength: 255
+          type: object
+          nullable: true
+          maxProperties: 100
+        expires_at:
+          type: string
+          description: >-
+            When the hold lapses if no track event settles it; defaults to one
+            minute from now and may be at most one hour out. The unspent hold is
+            refunded on expiry
+          format: date-time
+          nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the original reservation instead of taking another hold
+          nullable: true
+          maxLength: 255
+        preflight:
+          allOf:
+            - $ref: '#/components/schemas/PreflightRequestBody'
+          description: >-
+            Hypothetical usage to evaluate the flag against. When credit_cost
+            names the entitlement's credit, that cost is what gets held;
+            otherwise the hold is the entitlement's consumption rate times
+            quantity, or, when quantity is omitted, times the usage stated here
+        quantity:
+          type: number
+          description: >-
+            Units of the feature the operation will consume. Sets the hold size
+            together with the entitlement's consumption rate, and is echoed back
+            on the reservation for the settling track event. When it is omitted
+            the units come from preflight.event_usage.quantity, if that event
+            subtype is the entitlement's, else from preflight.usage, else 1
+          format: double
+          nullable: true
+          maximum: 9999999999
+        user:
+          additionalProperties:
+            type: string
+            maxLength: 255
+          type: object
+          nullable: true
+          maxProperties: 100
+      title: CheckAndReserveFlagRequestBody
+    CheckAndReserveFlagResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: If company keys were provided and matched a company, its ID
+          nullable: true
+        entitlement:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEntitlement'
+          description: If a feature entitlement rule was matched, its entitlement details
+        error:
+          type: string
+          description: If an error occurred while checking the flag, the error message
+          nullable: true
+        feature_allocation:
+          type: integer
+          description: 'Deprecated: Use Entitlement.Allocation instead.'
+          format: int64
+          nullable: true
+          deprecated: true
+        feature_usage:
+          type: integer
+          description: 'Deprecated: Use Entitlement.Usage instead.'
+          format: int64
+          nullable: true
+          deprecated: true
+        feature_usage_event:
+          type: string
+          description: 'Deprecated: Use Entitlement.EventName instead.'
+          nullable: true
+          deprecated: true
+        feature_usage_period:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
+          description: 'Deprecated: Use Entitlement.MetricPeriod instead.'
+          nullable: true
+          deprecated: true
+        feature_usage_reset_at:
+          type: string
+          description: 'Deprecated: Use Entitlement.MetricResetAt instead.'
+          format: date-time
+          nullable: true
+          deprecated: true
+        flag:
+          type: string
+          description: The key used to check the flag
+        flag_id:
+          type: string
+          description: If a flag was found, its ID
+          nullable: true
+        reason:
+          type: string
+          description: A human-readable explanation of the result
+        reservation:
+          allOf:
+            - $ref: '#/components/schemas/FlagCheckReservationResponseData'
+          description: >-
+            The hold taken on the company's credit balance for this operation,
+            when the flag allowed it and the feature is credit-metered. Settle
+            it by sending a track event carrying its ID as reservation_id; the
+            unspent hold is refunded at expires_at otherwise
+        rule_id:
+          type: string
+          description: If a rule was found, its ID
+          nullable: true
+        rule_type:
+          allOf:
+            - $ref: '#/components/schemas/RuleType'
+          description: If a rule was found, its type
+          nullable: true
+        user_id:
+          type: string
+          description: If user keys were provided and matched a user, its ID
+          nullable: true
+        value:
+          type: boolean
+          description: >-
+            A boolean flag check result; for feature entitlements, this
+            represents whether further consumption of the feature is permitted
+      required:
+        - flag
+        - reason
+        - value
+      title: CheckAndReserveFlagResponseData
     CheckFlagRequestBody:
       type: object
       properties:
@@ -2598,6 +2897,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
         preflight:
           allOf:
             - $ref: '#/components/schemas/PreflightRequestBody'
@@ -2615,6 +2915,7 @@ components:
             maxLength: 255
           type: object
           nullable: true
+          maxProperties: 100
       title: CheckFlagRequestBody
     CheckFlagResponseData:
       type: object
@@ -2778,6 +3079,8 @@ components:
           maxItems: 1000
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
+        company_can_trial_selected_plan:
+          type: boolean
         custom_checkout_fields:
           type: array
           items:
@@ -2792,6 +3095,8 @@ components:
           maxItems: 1000
         selected_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
+        selected_plan_already_trialed:
+          type: boolean
         selected_usage_based_entitlements:
           type: array
           items:
@@ -2800,6 +3105,8 @@ components:
         subscription:
           $ref: '#/components/schemas/CompanySubscriptionResponseData'
       required:
+        - company_can_trial_selected_plan
+        - selected_plan_already_trialed
         - active_add_ons
         - active_usage_based_entitlements
         - selected_usage_based_entitlements
@@ -3848,6 +4155,14 @@ components:
     CompanyPlanCreditGrantView:
       type: object
       properties:
+        billing_credit_arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          nullable: true
+        billing_credit_arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_auto_topup_amount:
           type: integer
           format: int64
@@ -3885,6 +4200,24 @@ components:
           nullable: true
         billing_credit_can_buy_bundles:
           type: boolean
+        billing_credit_overdraft_limit:
+          type: number
+          format: double
+          nullable: true
+        billing_credit_postpaid_enabled:
+          type: boolean
+        billing_credit_postpaid_rate_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_postpaid_rate_per_unit_decimal:
+          type: string
+          nullable: true
+        billing_mode:
+          $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+        billing_product_price_id:
+          type: string
+          nullable: true
         company_auto_topup_amount:
           type: integer
           format: int64
@@ -3959,6 +4292,8 @@ components:
             Credit.PluralName instead.
           nullable: true
           deprecated: true
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -3995,9 +4330,11 @@ components:
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
+        - billing_credit_postpaid_enabled
         - rollover_percentage
         - company_credit_amount
         - scaling
+        - billing_mode
         - created_at
         - updated_at
       title: CompanyPlanCreditGrantView
@@ -5328,10 +5665,37 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -5468,6 +5832,23 @@ components:
         apply_to_existing:
           type: boolean
           nullable: true
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when arrears_cadence is monthly; defaults
+            to billing_period_start.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced:
+            end_of_billing_period (the default) or monthly. Quarterly is not
+            available for postpaid charges.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -5511,6 +5892,15 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed). Billed is only available on custom plans. Defaults to
+            granted.
+          nullable: true
         can_buy_bundles:
           type: boolean
           description: >-
@@ -5553,11 +5943,62 @@ components:
             The license whose quantity scales this grant. Required when scaling
             is per_license.
           nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            It is a floor on the balance rather than an allowance per invoice
+            window: the balance may run down to minus this figure, and beyond it
+            the flag check denies the same way an exhausted balance does with
+            postpaid off. Nothing resets when an invoice window rolls, so a
+            company that reaches the limit stays denied until a new grant lands
+            or the negative balance is settled. Omit for no limit.
+          format: double
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
           type: string
           nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance. When false
+            (the default) the flag check denies once the balance is exhausted,
+            which is the existing behavior. When true, consumption continues and
+            accrues at postpaid_rate_per_unit, settled on arrears_cadence.
+            Intended for invoice-billed customers on net terms, who have no card
+            for auto top-up to charge.
+          nullable: true
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past a zero balance, in the
+            currency's minor unit. Optional: defaults to the credit's own cost
+            basis (price_per_unit) when postpaid_enabled is true.
+          format: int64
+          nullable: true
+          minimum: 0
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal string form of postpaid_rate_per_unit, for rates finer than
+            one minor unit (for example 0.0002). Takes precedence over
+            postpaid_rate_per_unit when both are set, matching how the credit's
+            own price_per_unit_decimal behaves.
+          nullable: true
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits on this grant, cheapest bound first,
+            the last tier unbounded. Give this instead of unit_price to charge a
+            rate that changes with the number of credits on the invoice.
+            Requires tier_mode.
+          items:
+            $ref: '#/components/schemas/CreditGrantPriceTierRequestBody'
+          nullable: true
+          maxItems: 20
+          minItems: 2
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -5582,6 +6023,29 @@ components:
           description: >-
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds. Defaults to fixed.
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Required with price_tiers.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Required when
+            billing_mode is billed, unless unit_price_decimal or price_tiers is
+            set.
+          format: int64
+          nullable: true
+          minimum: 0
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit,
+            for prices below one cent.
           nullable: true
       required:
         - reset_cadence
@@ -5774,6 +6238,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
         status:
           type: string
           nullable: true
@@ -5825,6 +6293,9 @@ components:
           minimum: 1
         company_id:
           type: string
+        credit_bundle_id:
+          type: string
+          nullable: true
         credit_id:
           type: string
         currency:
@@ -6199,10 +6670,37 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -6540,6 +7038,10 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          format: int64
+          nullable: true
         url:
           type: string
           nullable: true
@@ -6891,10 +7393,37 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
+          nullable: true
         plan_id:
           type: string
         plan_version_id:
@@ -7104,6 +7633,9 @@ components:
           type: integer
           format: int64
           nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
+          nullable: true
         trial_expiry_plan_id:
           type: string
           nullable: true
@@ -7284,6 +7816,10 @@ components:
     CreditCompanyGrantView:
       type: object
       properties:
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_bundle_id:
           type: string
           nullable: true
@@ -7343,6 +7879,28 @@ components:
           type: string
           nullable: true
         plural_name:
+          type: string
+          nullable: true
+        postpaid_charge_amount:
+          type: integer
+          format: int64
+          nullable: true
+        postpaid_charge_currency:
+          type: string
+          nullable: true
+        postpaid_charged_credits:
+          type: number
+          format: double
+          nullable: true
+        postpaid_period_end:
+          type: string
+          format: date-time
+          nullable: true
+        postpaid_rate:
+          type: integer
+          format: int64
+          nullable: true
+        postpaid_rate_decimal:
           type: string
           nullable: true
         price:
@@ -7542,6 +8100,10 @@ components:
         to_grant_id:
           type: string
           nullable: true
+        transfer_reason:
+          allOf:
+            - $ref: '#/components/schemas/CreditTransferReason'
+          nullable: true
         usage_event_id:
           type: string
           nullable: true
@@ -7618,6 +8180,30 @@ components:
         - reset_cadence
         - reset_start
       title: CreditGrantExpiryRequestBody
+    CreditGrantPriceTierRequestBody:
+      type: object
+      properties:
+        per_unit_price:
+          type: integer
+          description: Price per credit in this tier, in the plan currency's smallest unit.
+          format: int64
+          nullable: true
+          minimum: 0
+        per_unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit in this tier as a decimal in the plan currency's
+            smallest unit, for prices below one cent.
+          nullable: true
+        up_to:
+          type: integer
+          description: >-
+            Inclusive upper bound of this tier, counted in credits per invoice.
+            Null marks the final, unbounded tier.
+          format: int64
+          nullable: true
+          minimum: 1
+      title: CreditGrantPriceTierRequestBody
     CreditGrantSortOrder:
       type: string
       enum:
@@ -7663,6 +8249,54 @@ components:
         - created_at
         - updated_at
       title: CreditLeaseResponseData
+    CreditReservationResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          description: When the unspent hold is refunded if no track event settles it
+          format: date-time
+        id:
+          type: string
+        released_at:
+          type: string
+          description: >-
+            When the reservation was settled, released, or expired; null while
+            the hold is open
+          format: date-time
+          nullable: true
+        reserved_amount:
+          type: number
+          description: Credits held from the company's balance for the operation
+          format: double
+        settled_amount:
+          type: number
+          description: >-
+            Credits the settling track event recorded against the hold; zero
+            until settled. May exceed reserved_amount, in which case the overage
+            was debited from the balance, up to the overdraft limit when one is
+            set
+          format: double
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - company_id
+        - credit_type_id
+        - reserved_amount
+        - settled_amount
+        - expires_at
+        - created_at
+        - updated_at
+      title: CreditReservationResponseData
     CreditSpendPolicyResponseData:
       type: object
       properties:
@@ -7704,6 +8338,13 @@ components:
         - company
         - user
         - group
+    CreditTransferReason:
+      type: string
+      enum:
+        - overdraft_recovery
+        - postpaid_debt_moved
+        - postpaid_forgiven
+        - postpaid_paid
     CreditTransferResponseData:
       type: object
       properties:
@@ -7831,6 +8472,8 @@ components:
         - lease_release
         - manual_adjustment
         - reconciliation
+        - reservation_hold
+        - reservation_release
         - track
     CreditsAutoTopupCompanySummary:
       type: object
@@ -8882,6 +9525,11 @@ components:
           type: integer
           description: Optionally specify the quantity of the event
           format: int64
+        reservation_id:
+          type: string
+          description: >-
+            Credit reservation ID this track event settles. lease_id takes
+            precedence when both are set
         traits:
           type: object
           description: A map of trait names to trait values
@@ -8954,6 +9602,9 @@ components:
         quantity:
           type: integer
           format: int64
+        reservation_id:
+          type: string
+          nullable: true
         sent_at:
           type: string
           format: date-time
@@ -9105,6 +9756,9 @@ components:
         quantity:
           type: integer
           format: int64
+        reservation_id:
+          type: string
+          nullable: true
         sent_at:
           type: string
           format: date-time
@@ -9182,10 +9836,22 @@ components:
         additional_amount:
           type: number
           format: double
+          maximum: 9999999999
         expires_at:
           type: string
+          description: >-
+            Pushes the lease's expiry out; may be at most one hour from now.
+            Leave unset to keep the expiry the lease already has
           format: date-time
           nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the lease as it stands instead of growing it again. Keys
+            are unique per environment across every extend
+          nullable: true
+          maxLength: 255
       required:
         - additional_amount
       title: ExtendCreditLeaseRequestBody
@@ -10138,6 +10804,44 @@ components:
         - flags
         - plans
       title: FeatureView
+    FlagCheckReservationResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        consumption_rate:
+          type: number
+          description: Credits per unit of usage the hold was priced at
+          format: double
+        credit_type_id:
+          type: string
+        credits_reserved:
+          type: number
+          description: Credits held from the company's balance
+          format: double
+        event_subtype:
+          type: string
+          description: The event subtype the settling track event should carry
+          nullable: true
+        expires_at:
+          type: string
+          description: When the unspent hold is refunded if no track event settles it
+          format: date-time
+        id:
+          type: string
+        quantity_reserved:
+          type: number
+          description: Units of usage the hold covers, as requested
+          format: double
+      required:
+        - id
+        - company_id
+        - consumption_rate
+        - credits_reserved
+        - credit_type_id
+        - expires_at
+        - quantity_reserved
+      title: FlagCheckReservationResponseData
     FlagDetailResponseData:
       type: object
       properties:
@@ -10725,6 +11429,10 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          format: int64
+          nullable: true
         url:
           type: string
           nullable: true
@@ -10794,6 +11502,14 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          description: >-
+            Amount after discounts and tax, before applying the customer
+            balance. Null when the provider has not reported it: rows synced
+            before the column existed, or pushed without one.
+          format: int64
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -10842,6 +11558,7 @@ components:
       properties:
         api_key_id:
           type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -10852,6 +11569,8 @@ components:
           format: date-time
         id:
           type: string
+        issuer_type:
+          $ref: '#/components/schemas/TemporaryAccessTokenIssuerType'
         resource_type:
           $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         token:
@@ -10863,7 +11582,7 @@ components:
         - id
         - environment_id
         - resource_type
-        - api_key_id
+        - issuer_type
         - expired_at
         - created_at
         - updated_at
@@ -11679,6 +12398,14 @@ components:
     PlanCreditGrantView:
       type: object
       properties:
+        billing_credit_arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          nullable: true
+        billing_credit_arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          nullable: true
         billing_credit_auto_topup_amount:
           type: integer
           format: int64
@@ -11716,6 +12443,24 @@ components:
           nullable: true
         billing_credit_can_buy_bundles:
           type: boolean
+        billing_credit_overdraft_limit:
+          type: number
+          format: double
+          nullable: true
+        billing_credit_postpaid_enabled:
+          type: boolean
+        billing_credit_postpaid_rate_per_unit:
+          type: integer
+          format: int64
+          nullable: true
+        billing_credit_postpaid_rate_per_unit_decimal:
+          type: string
+          nullable: true
+        billing_mode:
+          $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+        billing_product_price_id:
+          type: string
+          nullable: true
         company_credit_amount:
           type: integer
           format: int64
@@ -11779,6 +12524,8 @@ components:
             Credit.PluralName instead.
           nullable: true
           deprecated: true
+        price:
+          $ref: '#/components/schemas/BillingPriceView'
         reset_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
@@ -11815,9 +12562,11 @@ components:
         - billing_credit_auto_topup_enabled
         - billing_credit_auto_topup_self_service
         - billing_credit_can_buy_bundles
+        - billing_credit_postpaid_enabled
         - rollover_percentage
         - company_credit_amount
         - scaling
+        - billing_mode
         - created_at
         - updated_at
       title: PlanCreditGrantView
@@ -12037,6 +12786,27 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Null or
+            end_of_billing_period means the billing provider aggregates usage
+            over the subscription's own period and bills it at period end.
+            Monthly and quarterly mean Schematic assesses the overage each month
+            or quarter and bills it on its own invoice. Only applies to overage
+            price behavior.
+          nullable: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end), which for a quarterly window means calendar
+            quarters. Only meaningful when overage_billing_cadence is monthly or
+            quarterly.
+          nullable: true
         plan:
           $ref: '#/components/schemas/PlanResponseData'
         plan_id:
@@ -12225,6 +12995,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
         trial_expiry_plan:
           $ref: '#/components/schemas/PlanGroupPlanDetailResponseData'
         trial_expiry_plan_id:
@@ -12241,6 +13013,7 @@ components:
       required:
         - add_ons
         - id
+        - trial_eligibility_per_plan
         - plans
         - ordered_plan_list
         - ordered_bundle_list
@@ -12501,6 +13274,8 @@ components:
           type: integer
           format: int64
           nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
         trial_expiry_plan_id:
           type: string
           nullable: true
@@ -12515,6 +13290,7 @@ components:
         - add_on_ids
         - plan_ids
         - ordered_add_on_ids
+        - trial_eligibility_per_plan
         - add_on_compatibilities
         - show_as_monthly_prices
         - show_credits
@@ -12847,6 +13623,12 @@ components:
         failed_companies:
           type: integer
           format: int64
+        feature_id:
+          type: string
+          nullable: true
+        feature_plan_rollout_id:
+          type: string
+          nullable: true
         id:
           type: string
         next_due_at:
@@ -13611,9 +14393,40 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
-    ReleaseCreditLeaseRequestBody:
+    ReserveCreditsRequestBody:
       type: object
-      title: ReleaseCreditLeaseRequestBody
+      properties:
+        amount:
+          type: number
+          description: >-
+            Credits to hold for the operation. The full amount must be
+            available; a partial hold is never taken
+          format: double
+          maximum: 9999999999
+        company_id:
+          type: string
+        credit_type_id:
+          type: string
+        expires_at:
+          type: string
+          description: >-
+            When the hold lapses if no track event settles it; defaults to one
+            minute from now and may be at most one hour out. The unspent hold is
+            refunded on expiry
+          format: date-time
+          nullable: true
+        idempotency_key:
+          type: string
+          description: >-
+            A caller-chosen key for safe retries: a second request with the same
+            key returns the original reservation instead of taking another hold
+          nullable: true
+          maxLength: 255
+      required:
+        - amount
+        - company_id
+        - credit_type_id
+      title: ReserveCreditsRequestBody
     RetryCustomPlanBillingRequestBody:
       type: object
       properties:
@@ -14093,7 +14906,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - vc8eb8df4
+        - v94b8f7a7
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -14165,6 +14978,10 @@ components:
           additionalProperties:
             type: number
             format: double
+          type: object
+        credit_postpaid:
+          additionalProperties:
+            $ref: '#/components/schemas/RulesengineCreditPostpaidConfig'
           type: object
         entitlements:
           type: array
@@ -14333,6 +15150,14 @@ components:
         - plan_version
         - trait
         - user
+    RulesengineCreditPostpaidConfig:
+      type: object
+      properties:
+        overdraft_limit:
+          type: number
+          format: double
+          nullable: true
+      title: RulesengineCreditPostpaidConfig
     RulesengineEntitlementValueType:
       type: string
       title: RulesengineEntitlementValueType
@@ -15114,6 +15939,11 @@ components:
         - tw_vat
         - us_ein
         - za_vat
+    TemporaryAccessTokenIssuerType:
+      type: string
+      enum:
+        - api_key
+        - pricing_roadmap
     TemporaryAccessTokenResourceType:
       type: string
       enum:
@@ -15123,6 +15953,7 @@ components:
       properties:
         api_key_id:
           type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -15133,6 +15964,8 @@ components:
           format: date-time
         id:
           type: string
+        issuer_type:
+          $ref: '#/components/schemas/TemporaryAccessTokenIssuerType'
         resource_type:
           $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
         updated_at:
@@ -15142,7 +15975,7 @@ components:
         - id
         - environment_id
         - resource_type
-        - api_key_id
+        - issuer_type
         - expired_at
         - created_at
         - updated_at
@@ -15302,6 +16135,13 @@ components:
         subtotal:
           type: integer
           format: int64
+        total:
+          type: integer
+          description: >-
+            Amount after discounts and tax, before applying the customer
+            balance. Null when the provider has not reported it.
+          format: int64
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -15436,6 +16276,24 @@ components:
         apply_to_existing:
           type: boolean
           nullable: true
+        arrears_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly arrears window: the subscription's
+            own recurrence (billing_period_start) or the calendar month
+            (month_end). Only applies when arrears_cadence is monthly; defaults
+            to billing_period_start. Send null to fall back to the default.
+          nullable: true
+        arrears_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often postpaid charges are closed and invoiced:
+            end_of_billing_period (the default) or monthly. Quarterly is not
+            available for postpaid charges. Send null to fall back to the
+            default.
+          nullable: true
         auto_topup_amount:
           type: integer
           format: int64
@@ -15479,6 +16337,14 @@ components:
           nullable: true
           maximum: 100
           minimum: 1
+        billing_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantBillingMode'
+          description: >-
+            Whether the credits are included in the plan price (granted) or
+            billed as their own subscription line at a price per credit
+            (billed). Billed is only available on custom plans.
+          nullable: true
         can_buy_bundles:
           type: boolean
           description: >-
@@ -15520,6 +16386,57 @@ components:
             The license whose quantity scales this grant. Cleared when the grant
             moves off per-license scaling.
           nullable: true
+        overdraft_limit:
+          type: number
+          description: >-
+            Optional limit on how far the balance may go below zero, in credits.
+            It is a floor on the balance rather than an allowance per invoice
+            window: the balance may run down to minus this figure, and beyond it
+            the flag check denies the same way an exhausted balance does with
+            postpaid off. Nothing resets when an invoice window rolls, so a
+            company that reaches the limit stays denied until a new grant lands
+            or the negative balance is settled. Send null to remove the limit.
+          format: double
+          nullable: true
+        postpaid_enabled:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance. When false
+            (the default) the flag check denies once the balance is exhausted,
+            which is the existing behavior. When true, consumption continues and
+            accrues at postpaid_rate_per_unit, settled on arrears_cadence.
+            Intended for invoice-billed customers on net terms, who have no card
+            for auto top-up to charge.
+          nullable: true
+        postpaid_rate_per_unit:
+          type: integer
+          description: >-
+            Amount charged per credit consumed past a zero balance, in the
+            currency's minor unit. Send null to clear it, in which case an
+            enabled grant falls back to the credit's own cost basis
+            (price_per_unit).
+          format: int64
+          nullable: true
+          minimum: 0
+        postpaid_rate_per_unit_decimal:
+          type: string
+          description: >-
+            Decimal string form of postpaid_rate_per_unit, for rates finer than
+            one minor unit (for example 0.0002). Takes precedence over
+            postpaid_rate_per_unit when both are set, matching how the credit's
+            own price_per_unit_decimal behaves. Send null to clear it.
+          nullable: true
+        price_tiers:
+          type: array
+          description: >-
+            Tier table pricing the credits on this grant, cheapest bound first,
+            the last tier unbounded. Sending it moves the grant off one rate per
+            credit. Requires tier_mode.
+          items:
+            $ref: '#/components/schemas/CreditGrantPriceTierRequestBody'
+          nullable: true
+          maxItems: 20
+          minItems: 2
         reset_cadence:
           $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
         reset_start:
@@ -15545,6 +16462,29 @@ components:
             Whether the grant is a fixed amount per company, or issued once per
             license the company holds. Changing this re-issues the credits
             companies already hold for this grant.
+          nullable: true
+        tier_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          description: >-
+            How price_tiers apply: volume prices every credit at the rate of the
+            tier the total lands in, graduated prices each tier's own credits at
+            its own rate. Required with price_tiers.
+          nullable: true
+        unit_price:
+          type: integer
+          description: >-
+            Price per credit in the plan currency's smallest unit. Required when
+            billing_mode is billed, unless unit_price_decimal or price_tiers is
+            set. Sending it moves a tiered grant back to one rate per credit.
+          format: int64
+          nullable: true
+          minimum: 0
+        unit_price_decimal:
+          type: string
+          description: >-
+            Price per credit as a decimal in the plan currency's smallest unit,
+            for prices below one cent.
           nullable: true
       required:
         - reset_cadence
@@ -16039,10 +16979,37 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -16244,6 +17211,9 @@ components:
         trial_days:
           type: integer
           format: int64
+          nullable: true
+        trial_eligibility_per_plan:
+          type: boolean
           nullable: true
         trial_expiry_plan_id:
           type: string
@@ -16747,10 +17717,37 @@ components:
         monthly_unit_price_decimal:
           type: string
           nullable: true
+        overage_billing_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsCadence'
+          description: >-
+            How often overage charges are assessed and invoiced. Defaults to
+            end_of_billing_period, where the billing provider aggregates usage
+            over the subscription's own period and bills it at period end. Set
+            to monthly or quarterly to have overage assessed each month or
+            quarter and billed on its own invoice, which is the point of the
+            setting on annual plans. A quarter charges each month's usage
+            against that month's allowance. Only applies to overage price
+            behavior.
+          nullable: true
         overage_billing_product_id:
           type: string
           nullable: true
           deprecated: true
+        overage_invoice_anchor:
+          allOf:
+            - $ref: '#/components/schemas/BillingArrearsAnchor'
+          description: >-
+            Which boundary closes a monthly or quarterly overage window: the
+            subscription's own recurrence (billing_period_start) or the calendar
+            month (month_end). Quarterly windows run in three-month blocks from
+            the billing period start, held to the subscription's own period, or
+            in calendar quarters at month_end. Only applies when
+            overage_billing_cadence is monthly or quarterly, and must match
+            metric_period_month_reset so each window closes when the allowance
+            resets: billing_period_start for billing_cycle, month_end for
+            first_of_month. Defaults to the anchor that matches the reset.
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -17248,6 +18245,9 @@ components:
     WebhookEventDetailResponseData:
       type: object
       properties:
+        attempt_count:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -17280,12 +18280,16 @@ components:
         - webhook_id
         - request_type
         - status
+        - attempt_count
         - created_at
         - updated_at
       title: WebhookEventDetailResponseData
     WebhookEventResponseData:
       type: object
       properties:
+        attempt_count:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -17316,6 +18320,7 @@ components:
         - webhook_id
         - request_type
         - status
+        - attempt_count
         - created_at
         - updated_at
       title: WebhookEventResponseData
@@ -19760,12 +20765,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReleaseCreditLeaseRequestBody'
-        required: true
       responses:
         '200':
           description: OK
@@ -20199,6 +21198,89 @@ paths:
                   - data
                   - params
                 title: CountBillingPlanCreditGrantsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/reservations:
+    post:
+      operationId: reserveCredits
+      summary: Reserve credits
+      tags:
+        - credits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveCreditsRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditReservationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReserveCreditsParams
+                required:
+                  - data
+                  - params
+                title: ReserveCreditsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/reservations/{reservation_id}/release:
+    put:
+      operationId: releaseCreditReservation
+      summary: Release credit reservation
+      tags:
+        - credits
+      parameters:
+        - name: reservation_id
+          in: path
+          description: reservation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditReservationResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReleaseCreditReservationParams
+                required:
+                  - data
+                  - params
+                title: ReleaseCreditReservationResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -29281,6 +30363,53 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /flags/{key}/check-and-reserve:
+    post:
+      operationId: checkAndReserveFlag
+      summary: Check and reserve flag
+      tags:
+        - features
+      parameters:
+        - name: key
+          in: path
+          description: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckAndReserveFlagRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckAndReserveFlagResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CheckAndReserveFlagParams
+                required:
+                  - data
+                  - params
+                title: CheckAndReserveFlagResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /flags/check:
     post:
       operationId: checkFlags
@@ -32442,9 +33571,12 @@ paths:
       tags:
         - planmigrations
       parameters:
+        - name: feature_id
+          in: query
+          schema:
+            type: string
         - name: plan_version_id
           in: query
-          required: true
           schema:
             type: string
         - name: status
@@ -32487,6 +33619,8 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      feature_id:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -32738,9 +33872,12 @@ paths:
       tags:
         - planmigrations
       parameters:
+        - name: feature_id
+          in: query
+          schema:
+            type: string
         - name: plan_version_id
           in: query
-          required: true
           schema:
             type: string
         - name: status
@@ -32779,6 +33916,8 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      feature_id:
+                        type: string
                       limit:
                         type: integer
                         description: Page limit (default 100)
@@ -32882,6 +34021,16 @@ paths:
             description: >-
               Exclude plans that are scoped to a company (custom plans assigned
               to a company)
+        - name: exclude_unused
+          in: query
+          description: >-
+            Exclude plans that nothing is using: no company is on the plan and
+            it has no draft version
+          schema:
+            type: boolean
+            description: >-
+              Exclude plans that nothing is using: no company is on the plan and
+              it has no draft version
         - name: for_fallback_plan
           in: query
           description: Filter for plans valid as fallback plans (not linked to billing)
@@ -32955,6 +34104,22 @@ paths:
           schema:
             type: boolean
             description: Include each plan's entitlements in the response
+        - name: with_published_version
+          in: query
+          description: Only return plans that have a published version
+          schema:
+            type: boolean
+            description: Only return plans that have a published version
+        - name: without_entitlement_for_include_drafts
+          in: query
+          description: >-
+            With without_entitlement_for, also treat an entitlement on a plan's
+            draft version as existing
+          schema:
+            type: boolean
+            description: >-
+              With without_entitlement_for, also treat an entitlement on a
+              plan's draft version as existing
         - name: without_entitlement_for
           in: query
           description: >-
@@ -33019,6 +34184,11 @@ paths:
                         description: >-
                           Exclude plans that are scoped to a company (custom
                           plans assigned to a company)
+                      exclude_unused:
+                        type: boolean
+                        description: >-
+                          Exclude plans that nothing is using: no company is on
+                          the plan and it has no draft version
                       for_fallback_plan:
                         type: boolean
                         description: >-
@@ -33074,11 +34244,19 @@ paths:
                       with_entitlements:
                         type: boolean
                         description: Include each plan's entitlements in the response
+                      with_published_version:
+                        type: boolean
+                        description: Only return plans that have a published version
                       without_entitlement_for:
                         type: string
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_entitlement_for_include_drafts:
+                        type: boolean
+                        description: >-
+                          With without_entitlement_for, also treat an
+                          entitlement on a plan's draft version as existing
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
@@ -33571,6 +34749,16 @@ paths:
             description: >-
               Exclude plans that are scoped to a company (custom plans assigned
               to a company)
+        - name: exclude_unused
+          in: query
+          description: >-
+            Exclude plans that nothing is using: no company is on the plan and
+            it has no draft version
+          schema:
+            type: boolean
+            description: >-
+              Exclude plans that nothing is using: no company is on the plan and
+              it has no draft version
         - name: for_fallback_plan
           in: query
           description: Filter for plans valid as fallback plans (not linked to billing)
@@ -33644,6 +34832,22 @@ paths:
           schema:
             type: boolean
             description: Include each plan's entitlements in the response
+        - name: with_published_version
+          in: query
+          description: Only return plans that have a published version
+          schema:
+            type: boolean
+            description: Only return plans that have a published version
+        - name: without_entitlement_for_include_drafts
+          in: query
+          description: >-
+            With without_entitlement_for, also treat an entitlement on a plan's
+            draft version as existing
+          schema:
+            type: boolean
+            description: >-
+              With without_entitlement_for, also treat an entitlement on a
+              plan's draft version as existing
         - name: without_entitlement_for
           in: query
           description: >-
@@ -33704,6 +34908,11 @@ paths:
                         description: >-
                           Exclude plans that are scoped to a company (custom
                           plans assigned to a company)
+                      exclude_unused:
+                        type: boolean
+                        description: >-
+                          Exclude plans that nothing is using: no company is on
+                          the plan and it has no draft version
                       for_fallback_plan:
                         type: boolean
                         description: >-
@@ -33759,11 +34968,19 @@ paths:
                       with_entitlements:
                         type: boolean
                         description: Include each plan's entitlements in the response
+                      with_published_version:
+                        type: boolean
+                        description: Only return plans that have a published version
                       without_entitlement_for:
                         type: string
                         description: >-
                           Filter out plans that already have a plan entitlement
                           for the specified feature ID
+                      without_entitlement_for_include_drafts:
+                        type: boolean
+                        description: >-
+                          With without_entitlement_for, also treat an
+                          entitlement on a plan's draft version as existing
                       without_paid_product_id:
                         type: boolean
                         description: Filter out plans that have a paid billing product ID
