@@ -1,6 +1,6 @@
 ---
 title: Concepts
-description: "Definitions of Schematic's core concepts, including features, flags, entitlements, plans, add ons, subscriptions, companies, keys, traits, usage, and credits, plus how an entitlement check resolves at runtime."
+description: "Definitions of Schematic's core concepts, including features, flags, entitlements, plans, add-ons, subscriptions, companies, keys, traits, usage, and credits, plus how an entitlement check resolves at runtime."
 slug: concepts
 ---
 
@@ -32,9 +32,9 @@ Flags support plan-based rules (automatically on for companies on a given plan),
 
 ## Entitlements
 
-An **entitlement** is what a plan or add on grants for a specific feature. It is the link between what a customer is paying for and what they can do.
+An **entitlement** is what a plan or add-on grants for a specific feature. It is the link between what a customer is paying for and what they can do.
 
-Entitlements follow the type of the feature they are attached to: simple on/off access, a limit drawn from a stored trait like seat count, or a meter against tracked usage such as API calls per month. When a company is on multiple plans or add ons, the most permissive entitlement across all of them applies.
+Entitlements follow the type of the feature they are attached to: simple on/off access, a limit drawn from a stored trait like seat count, or a meter against tracked usage such as API calls per month. When a company is on multiple plans or add-ons, the most permissive entitlement across all of them applies.
 
 On a metered entitlement you also pick how often the allowance resets: daily, weekly, or monthly. Daily and weekly allowances run from the day the company enrolled in the plan. For a monthly allowance you choose whether the month follows the company's billing period start date or the first of the calendar month, so a company that subscribes on March 15th can either get a month running March 15th to April 14th or reset with everyone else on April 1st. Credit grants carry their own separate cadences, covered in [Credit Lifecycle](/billing/credit-burndown#credit-lifecycle).
 
@@ -52,23 +52,23 @@ In Schematic, plans are versioned automatically, and updating an existing plan w
 
 A plan version moves through `draft`, `published`, and `archived` states, and a company is always on one specific version. When a new plan version is created, you can migrate all, some, or none of the current subscribers to the new version.
 
-## Add Ons
+## Add-ons
 
-An **add on** is an optional module a company can purchase alongside its plan. A company has exactly one plan but can have any number of add ons, which are most often used to sell functionality that increases the value of a core plan.
+An **add-on** is an optional module a company can purchase alongside its plan. A company has exactly one plan but can have any number of add-ons, which are most often used to sell functionality that increases the value of a core plan.
 
-Add ons carry their own entitlements. An add on entitlement can introduce a feature the plan doesn't include, or override a limit the plan already sets. Like plans, add ons are versioned, but they're versioned independently of the base plan, so publishing a new add on version only affects companies that have that add on.
+Add-ons carry their own entitlements. An add-on entitlement can introduce a feature the plan doesn't include, or override a limit the plan already sets. Like plans, add-ons are versioned, but they're versioned independently of the base plan, so publishing a new add-on version only affects companies that have that add-on.
 
 ## Subscriptions
 
-A **subscription** represents a company's current plan and add ons, along with the billing terms attached to them. Subscriptions are created through Schematic's checkout flow or synced in from your billing system, and Schematic keeps the company's plan assignment in step with the subscription as it changes.
+A **subscription** represents a company's current plan and add-ons, along with the billing terms attached to them. Subscriptions are created through Schematic's checkout flow or synced in from your billing system, and Schematic keeps the company's plan assignment in step with the subscription as it changes.
 
-Plans and add ons can each be tied to a Stripe billing product, which is what lets Schematic assign the correct plan and add ons when a subscription is created or changed.
+Plans and add-ons can each be tied to a Stripe billing product, which is what lets Schematic assign the correct plan and add-ons when a subscription is created or changed.
 
 ## Companies
 
 A **company** is the organization you're tracking and billing in Schematic, typically a customer account. Companies are the primary entity that plans, entitlements, and usage are attached to.
 
-Each company has a plan and optional add ons, entitlements derived from those plans, usage tracked over time, and a history of plan changes.
+Each company has a plan and optional add-ons, entitlements derived from those plans, usage tracked over time, and a history of plan changes.
 
 ## Users
 
@@ -127,7 +127,7 @@ Because Schematic creates and updates profiles by storing context and usage data
 
 ### How entitlement checks are evaluated
 
-You define features and their entitlements on plans and add ons, you implement flags in code that map to those features, and at runtime the check resolves entitlements into an allow or a deny.
+You define features and their entitlements on plans and add-ons, you implement flags in code that map to those features, and at runtime the check resolves entitlements into an allow or a deny.
 
 When you call the [check flag endpoint](/api-reference/features/check-flag), or use an SDK to check a feature, Schematic combines the company's plan entitlements with any company overrides and takes the most generous of those values. If that doesn't resolve to a result, it falls back to global rules such as trait or segment-based rules. If nothing matches, the check returns false and the feature is treated as disabled.
 

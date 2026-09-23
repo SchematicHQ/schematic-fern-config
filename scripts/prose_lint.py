@@ -20,6 +20,8 @@ RULES = [
     ("documents-a-gap", r"(?i)(does not yet|do not yet|not currently supported"
                         r"|does not currently support|Schematic does not support"
                         r"|does not ship|unshipped)"),
+    # Terminology: always "add-on", never "add on" or "addon" in prose.
+    ("add-on-spelling", r"\b[Aa]dd [Oo]ns?\b|(?<![\w/.`-])[Aa]ddons?\b(?![\w./`-])"),
 ]
 
 GENERATED = {"go.mdx", "java.mdx", "nodejs.mdx", "python.mdx", "ruby.mdx", "csharp.mdx"}

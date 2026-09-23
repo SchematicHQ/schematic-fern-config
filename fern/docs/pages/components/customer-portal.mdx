@@ -6,7 +6,7 @@ slug: components/customer-portal
 ---
 
 Schematic provides a customizable Customer Portal and checkout flow that allows your customers to easily complete common billing tasks like:
-1. Purchasing a plan or add on
+1. Purchasing a plan or add-on
 2. Upgrading, downgrading, or canceling their subscription
 3. View upcoming and past invoices
 4. Check current usage and entitlements
@@ -21,15 +21,15 @@ Additionally, Schematic provides a component builder so the content and styling 
 
 Schematic's checkout flow is a multi-step experience that handles the full subscription lifecycle, including subscription and plan changes. Depending on context, a customer may be:
 
-- **Subscribing for the first time** by selecting a plan, adding optional add ons, and entering payment
+- **Subscribing for the first time** by selecting a plan, adding optional add-ons, and entering payment
 - **Upgrading or downgrading** to a different plan, with proration handled automatically
-- **Adding or removing add ons** to adjust their subscription without changing their base plan
+- **Adding or removing add-ons** to adjust their subscription without changing their base plan
 - **Canceling** their subscription
 
 The checkout flow itself walks customers through up to four steps:
 
 1. **Choose a plan** from your available [live plans](/components/overview) (this step can be pre-selected or skipped programmatically)
-2. **Select add ons** to include with the chosen plan (optional)
+2. **Select add-ons** to include with the chosen plan (optional)
 3. **Purchase credits** for any credit-based features included in the plan (optional)
 4. **Enter or confirm a payment method** via Stripe's secure payment form
 5. **Review and confirm the order** to complete the transaction
@@ -38,7 +38,7 @@ The checkout flow itself walks customers through up to four steps:
 
 Stripe Checkout and Payment Links are great for one-time purchases and simple new subscriptions, but they weren't built to manage an ongoing subscription lifecycle inside a product. Schematic checkout is:
 
-**Full lifecycle, not just first purchase.** Stripe Checkout is primarily designed for new subscriptions. Schematic checkout handles upgrades, downgrades, add on changes, and cancellations all from the same component, with no additional code.
+**Full lifecycle, not just first purchase.** Stripe Checkout is primarily designed for new subscriptions. Schematic checkout handles upgrades, downgrades, add-on changes, and cancellations all from the same component, with no additional code.
 
 **Entitlements provisioned automatically.** When a customer completes a Schematic checkout, their feature flags and usage limits are updated immediately. There's no need to write webhook handlers to map Stripe events back to access control in your app.
 
@@ -70,7 +70,7 @@ Schematic checkout is configurable at several levels:
 
 **Live plans.** Within Schematic, you control which plans are available for customers to upgrade or downgrade to in Products > Configuration. Only plans mapped to Stripe products can be added as live plans.
 
-**Programmatic control.** Using the `initializeWithPlan` API, you can launch checkout from anywhere in your app (e.g., a paywall), pre-select a plan and add ons, and skip stages the customer doesn't need to see. See [Advanced Usage](/components/advanced-usage) for details.
+**Programmatic control.** Using the `initializeWithPlan` API, you can launch checkout from anywhere in your app (e.g., a paywall), pre-select a plan and add-ons, and skip stages the customer doesn't need to see. See [Advanced Usage](/components/advanced-usage) for details.
 
 **Tax collection.** Schematic supports Stripe Tax to collect billing address information and calculate taxes at checkout. This is configured under Products > Configuration. See [Advanced Usage](/components/advanced-usage) for details.
 

@@ -51,7 +51,7 @@ When determining if a plan change is an upgrade or downgrade, the following logi
 1. Both plans need to be paid (otherwise it's a subscribe/unsubscribe)
 2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
 3. If the new plan has a higher base price, it's an upgrade.
-4. If the new plan includes a new add on, it's an upgrade.
+4. If the new plan includes a new add-on, it's an upgrade.
 5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
 6. If the new plan includes the purchase of a credit bundle, it's an upgrade.
 
@@ -90,7 +90,7 @@ Under the hood, scheduled downgrades use Stripe's [subscription schedule](https:
 
 While a downgrade is scheduled, the customer continues to use their current plan with full access to all entitlements. However, certain actions are blocked until the downgrade takes effect or is canceled:
 
-- **Add on purchases** are blocked
+- **Add-on purchases** are blocked
 - **Pay-in-advance purchases** (e.g. seats) are blocked
 - **Credit purchases** are blocked
 
@@ -148,16 +148,16 @@ For a sales-led, invoiced deal, you can instead create a [custom plan](/catalog/
 
 **Self-service components**
 
-By embedding Schematic components in your application, you can allow your users to manage plans and add ons independently. Read more about components [here](/components/overview). Any changes made via a component will automatically sync with Stripe.
+By embedding Schematic components in your application, you can allow your users to manage plans and add-ons independently. Read more about components [here](/components/overview). Any changes made via a component will automatically sync with Stripe.
 
 Components allow users to:
 - Upgrade or downgrade plans
-- Add or remove add ons
+- Add or remove add-ons
 - Manage quantity for usage-based features
 
 **Within Stripe**
 
-If you prefer to make changes directly in Stripe, Schematic will automatically sync those updates and update plans, add ons, and entitlements.
+If you prefer to make changes directly in Stripe, Schematic will automatically sync those updates and update plans, add-ons, and entitlements.
 
 ### Not using Stripe
 

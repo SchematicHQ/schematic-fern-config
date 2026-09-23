@@ -5,7 +5,7 @@ description: Build separate catalogs for different products or different buyers,
 slug: catalog/catalogs
 ---
 
-A catalog is the set of plans, add ons, and credit bundles a customer can buy. Checkout and the pricing table resolve against a catalog, so what you put in one is exactly what that customer sees and can purchase.
+A catalog is the set of plans, add-ons, and credit bundles a customer can buy. Checkout and the pricing table resolve against a catalog, so what you put in one is exactly what that customer sees and can purchase.
 
 You build a second catalog when you need to sell a different lineup to different people out of the same account, without duplicating plans or branching your application code.
 
@@ -25,18 +25,18 @@ Build a catalog per side. Each side's portal points at its own catalog, and each
 
 ## What moved
 
-Live Plans and Live Add Ons used to sit on the Catalog's Configuration tab, next to the initial plan, the fallback plan, and the trial rules. Those are two different jobs, and mixing them meant every change to what you sell also touched how subscriptions behave. They are now separated:
+Live Plans and Live Add-ons used to sit on the Catalog's Configuration tab, next to the initial plan, the fallback plan, and the trial rules. Those are two different jobs, and mixing them meant every change to what you sell also touched how subscriptions behave. They are now separated:
 
 | Where it lives | What it controls |
 | --- | --- |
-| **Products > Catalogs** | Which plans, add ons, and credit bundles are purchasable, and in what order they appear |
+| **Products > Catalogs** | Which plans, add-ons, and credit bundles are purchasable, and in what order they appear |
 | **Manage > Lifecycle** | Initial plan, fallback plan, trial rules and trial expiry, plan change rules, checkout settings, and component display settings |
 
 Lifecycle settings apply across every catalog, so a trial rule or a plan change rule you set once governs all of them. Catalog membership is the part you vary.
 
 ## Your default catalog
 
-Schematic creates a catalog named **Default** for you and moves your existing Live Plans, Live Add Ons, and Live Credit Bundles into it. Every component in your account points at that catalog. Your customers see the same plans at the same prices as before, and you pick up a second catalog when you have a reason to, not because the change forced one on you.
+Schematic creates a catalog named **Default** for you and moves your existing Live Plans, Live Add-ons, and Live Credit Bundles into it. Every component in your account points at that catalog. Your customers see the same plans at the same prices as before, and you pick up a second catalog when you have a reason to, not because the change forced one on you.
 
 The default catalog is marked with a `DEFAULT` badge and cannot be deleted. Any catalog you create alongside it can be renamed or deleted freely.
 
@@ -46,7 +46,7 @@ Each catalog has three sections:
 
 **Live Plans** are the plans your end users can subscribe to, upgrade to, or downgrade from. Each plan surfaces its [latest published version](/catalog/plans#plan-version-migrations), and companies already on a prior version stay there until you migrate them. Mark a plan **Custom** here to show a message like "Talk to us" in place of a price.
 
-**Live Add Ons** are the add ons a customer can attach to a subscription in checkout.
+**Live Add-ons** are the add-ons a customer can attach to a subscription in checkout.
 
 **Live Credit Bundles** are the credit packs a customer can buy, each with its own price, credit amount, expiration, and plan compatibility.
 
@@ -67,10 +67,10 @@ Like plans and features, catalogs are [account scoped rather than environment sc
 1. Navigate to **Products > Catalogs**
 2. Open the catalog dropdown at the top left and choose **New catalog**
 3. Give the catalog a name, add an optional description, and click **Create Catalog**
-4. Add plans, add ons, and credit bundles using **+ Add Plans**, **+ Add Add Ons**, and **+ Add Credit Bundles**
+4. Add plans, add-ons, and credit bundles using **+ Add Plans**, **+ Add Add-ons**, and **+ Add Credit Bundles**
 5. Click **Save Changes**
 6. Open the component that should sell this lineup and point it at the new catalog
 
 <Info>
-Plans and add ons must be associated with Stripe products to be added to a catalog. If you use Schematic without Stripe, your components are read only and this step does not apply. See [Stripe](/integrations/stripe) for connecting your billing products.
+Plans and add-ons must be associated with Stripe products to be added to a catalog. If you use Schematic without Stripe, your components are read only and this step does not apply. See [Stripe](/integrations/stripe) for connecting your billing products.
 </Info>
