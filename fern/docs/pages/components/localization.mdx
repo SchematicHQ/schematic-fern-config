@@ -64,7 +64,7 @@ export function Billing({ accessToken, componentId, locale }) {
 
 `locale` takes a BCP 47 tag such as `it-IT` or `ja-JP`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes, so you can wire it straight to a language picker.
 
-The locale also sets how the components format numbers, currency, and dates. With `locale="it-IT"`, a price renders as `700.000 JPY` and a date as `21 novembre 2026`. The currency itself still comes from the customer's plan price, and only its formatting follows the locale.
+The locale also sets how the components format numbers, currency, and dates. With `locale="it-IT"`, a €49 price renders as `49,00 €` and a date as `21 novembre 2026`. The currency itself still comes from the customer's plan price, and only its formatting follows the locale.
 
 ## Use your own i18next instance
 
