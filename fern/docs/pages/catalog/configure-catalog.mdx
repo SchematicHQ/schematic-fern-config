@@ -1,6 +1,6 @@
 ---
 title: Configuring the Catalog
-description: Set the initial, fallback, and trial expiry plans, and choose which plans and add ons appear in checkout.
+description: Set the initial, fallback, and trial expiry plans, and choose which plans and add-ons appear in checkout.
 
 slug: catalog/configuration
 ---
@@ -8,9 +8,9 @@ slug: catalog/configuration
 The Configuration tab in the Catalog serves two purposes:
 
 1. To define subscription lifecycle rules when subscriptions change
-2. To define what plans or add ons should be user-facing and accessible via Schematic Components
+2. To define what plans or add-ons should be user-facing and accessible via Schematic Components
 
-Live Plans, Live Add Ons, and Plan Change Rules are only relevant if you are using Schematic with Stripe. In that case, selected plans and add ons will appear in Schematic Components and users will be able to manage their subscription directly. In all other cases, that configuration can be skipped and user-facing components will simply be read only with no option to manage subscriptions.
+Live Plans, Live Add-ons, and Plan Change Rules are only relevant if you are using Schematic with Stripe. In that case, selected plans and add-ons will appear in Schematic Components and users will be able to manage their subscription directly. In all other cases, that configuration can be skipped and user-facing components will simply be read only with no option to manage subscriptions.
 
 <img
 src="../../assets/images/catalog/configure-table.png"
@@ -71,13 +71,13 @@ Often, an enterprise plan will have custom pricing that cannot easily be display
 Custom plans are typically billed by having Stripe send the customer an invoice to pay. If those invoice emails aren't arriving, see [My customer didn't receive an invoice email](/integrations/stripe-troubleshooting#my-customer-didnt-receive-an-invoice-email). The most common cause is testing in a Stripe sandbox, which doesn't send customer emails by default.
 </Info>
 
-### Live Add Ons
+### Live Add-ons
 
-The add ons that your end users can select. If enabled, each add on included in Live Add ons will appear as an option in the checkout flow. Similar to Live Plans, Live Add Ons will always show the latest published version in checkout.
+The add-ons that your end users can select. If enabled, each add-on included in Live Add-ons will appear as an option in the checkout flow. Similar to Live Plans, Live Add-ons will always show the latest published version in checkout.
 
-Companies in Schematic may be assigned add ons that are not included here, but there will be no option to independently subscribe to them using Schematic Components.
+Companies in Schematic may be assigned add-ons that are not included here, but there will be no option to independently subscribe to them using Schematic Components.
 
-<Info>Live Add ons are limited to features that can be turned on or turned off (Boolean entitlements), but metered add ons are coming soon.</Info>
+<Info>Live Add-ons are limited to features that can be turned on or turned off (Boolean entitlements), but metered add-ons are coming soon.</Info>
 
 ### Trial Rules
 
@@ -93,10 +93,10 @@ The rules Schematic will validate subscription changes against (e.g. upgrade rul
 
 1. Navigate to **Products > Configuration**
 2. Choose a default plan that all companies will be assigned if they do not currently have a subscription (optional)
-3. Choose “Live Plans” and “Live Add Ons”
+3. Choose “Live Plans” and “Live Add-ons”
 4. Save changes
 
-<Info>Plans and add ons must be associated with Stripe Products to be added to Live Plans or Live Add Ons.</Info>
+<Info>Plans and add-ons must be associated with Stripe Products to be added to Live Plans or Live Add-ons.</Info>
 
 <img
 src="../../assets/images/catalog/catalog-config.png"

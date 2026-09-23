@@ -17,6 +17,9 @@ what the lint finds and opens a PR.
 hub-bullet format, `- [Link](/slug) — lowercase outcome sentence`, which is a sanctioned
 convention.
 
+**Write "add-on", never "add on" or "addon".** Use "Add-on" / "Add-ons" at the start of a
+sentence or in a title. Code identifiers like `addOnIds` and image filenames stay as they are.
+
 **No bolded term followed by a dash in a bullet.** `- **Trait** — each company's limit is read
 from a trait` puts punctuation where a verb belongs. Make the bolded term the subject of a real
 sentence: `- **Trait** reads each company's limit from a trait on their profile`. This covers the

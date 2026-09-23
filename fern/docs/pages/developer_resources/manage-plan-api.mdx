@@ -162,7 +162,7 @@ The company that pays for this subscription, when it is different from `company_
 </ParamField>
 
 <ParamField path="trial_end" type="datetime">
-An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain usage-based entitlements. Additionally, new add ons cannot be added when putting a company onto a trial.
+An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain usage-based entitlements. Additionally, new add-ons cannot be added when putting a company onto a trial.
 </ParamField>
 
 ### Finding price IDs
@@ -289,7 +289,7 @@ If you omit `add_on_selections` or `pay_in_advance_entitlements` (or send them e
 
 To add an add-on without changing anything else, you must re-send the current base plan, **all existing add-ons**, and **all existing pay-in-advance entitlements** alongside the new add-on.
 
-In the example below, the company is on the `pro` plan, has the `team-collab` add-on, and 10 user seats. We're adding the `priority-support` add-on. The existing `pro` plan, `team-collab` add on, and 10 seats are re-sent so they aren't removed.
+In the example below, the company is on the `pro` plan, has the `team-collab` add-on, and 10 user seats. We're adding the `priority-support` add-on. The existing `pro` plan, `team-collab` add-on, and 10 seats are re-sent so they aren't removed.
 
 ```json
 {

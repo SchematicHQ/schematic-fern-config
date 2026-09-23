@@ -1,6 +1,6 @@
 ---
 title: Stripe Integration Guide
-description: Map Schematic companies, plans, add ons, and prices onto their Stripe counterparts so the two-way sync avoids duplicates.
+description: Map Schematic companies, plans, add-ons, and prices onto their Stripe counterparts so the two-way sync avoids duplicates.
 
 slug: integrations/stripe-integration-guide
 ---
@@ -18,11 +18,11 @@ The end goal of setting up Stripe integration is that Schematic has the followin
 1. Schematic Company ↔ Stripe Customer
   - This is mapped via the `stripe_customer_id` trait on the company
   - This can be used to map to the company's Stripe Subscription as well
-2. Schematic Plan, Addons, and Prices ↔ Stripe product, Stripe price
+2. Schematic Plan, Add-ons, and Prices ↔ Stripe product, Stripe price
 
-### Schematic Plan, Addon, and Price Mapping
+### Schematic Plan, Add-on, and Price Mapping
 
-Schematic Plans, Addons, and Prices are mapped to Stripe's Products and prices. 
+Schematic Plans, Add-ons, and Prices are mapped to Stripe's Products and prices. 
 
 **Stripe → Schematic**
 
@@ -35,12 +35,12 @@ Upon setup of the Stripe Integration, all plans and prices are immediately impor
 The following Schematic concepts are synced to Stripe products/prices
 
 1. Schematic Plan → Stripe product + monthly/yearly price
-2. Schematic Addon → Stripe product + monthly/yearly/one-time price
+2. Schematic Add-on → Stripe product + monthly/yearly/one-time price
 3. Schematic Usage Based Entitlement → Stripe price
 
 When you setup one of these Schematic concepts, you are given the option to map these to an existing product/price in Stripe or to create a new product/price in Stripe to map to. 
 
-<Info>Because plans and add ons are [versioned](/catalog/plans#plan-versions), the base Stripe **product** is shared across all of a plan's versions, but **prices are version-specific**. When you publish a new version that changes pricing, Schematic creates new Stripe prices for that version and leaves the existing prices intact, so companies on older versions keep their current pricing until they are migrated.</Info>
+<Info>Because plans and add-ons are [versioned](/catalog/plans#plan-versions), the base Stripe **product** is shared across all of a plan's versions, but **prices are version-specific**. When you publish a new version that changes pricing, Schematic creates new Stripe prices for that version and leaves the existing prices intact, so companies on older versions keep their current pricing until they are migrated.</Info>
 
 ![Stripe New Product and Prices](../../assets/images/stripe/stripe-new-product-prices.png)
 
