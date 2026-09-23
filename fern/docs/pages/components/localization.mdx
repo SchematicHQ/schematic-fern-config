@@ -34,8 +34,7 @@ The English bundle is also exported as `schematicTranslationsEn` if you'd rather
 
 A few things to keep in mind while you translate:
 
-- Keep every `{{placeholder}}` exactly as written. The components fill in plan names, dates, prices, and quantities at render time, and you can move a placeholder anywhere in the sentence your language needs.
-- Some keys are short descriptions rather than the English text, such as `"Access to plan will end."`, whose value is `"Access to {{plan}} will end on {{date}}."`. Always translate the value.
+- Make sure to keep the `{{placeholders}}` in your translation. The components fill in plan names, dates, prices, and quantities at render time, and you can move a placeholder anywhere your language's word order needs. Translate from each value rather than its key, since some keys are shorthand that leave the placeholders out. `"Access to plan will end."` displays as `"Access to {{plan}} will end on {{date}}."`, so your translation needs both `{{plan}}` and `{{date}}`.
 - Plural strings use [i18next plural suffixes](https://www.i18next.com/translation-function/plurals). English has `_one` and `_other` forms, but your language may need different ones. Italian, for example, adds a `_many` form for exact millions. Provide whichever forms your language uses.
 - Ordinals such as "1st" and "22nd" are the `Ordinal_ordinal_*` keys, which follow the same rules using your language's ordinal forms.
 
