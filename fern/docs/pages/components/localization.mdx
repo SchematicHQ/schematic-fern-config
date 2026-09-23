@@ -61,7 +61,9 @@ export function Billing({ accessToken, componentId, locale }) {
 }
 ```
 
-`locale` takes a BCP 47 tag such as `it-IT` or `ja-JP`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes, so you can wire it straight to a language picker.
+`locale` takes a BCP 47 tag such as `it-IT` or `ja-JP`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes.
+
+Plan names, feature names, and descriptions come from your Schematic account and display exactly as you entered them in every locale, as does custom header text set in the component builder. A customer who switches to Italian sees Italian buttons, labels, and dates around your English plan names.
 
 The locale also sets how the components format numbers, currency, and dates. With `locale="it-IT"`, a €49 price renders as `49,00 €` and a date as `21 novembre 2026`. The currency itself still comes from the customer's plan price, and only its formatting follows the locale.
 
@@ -91,5 +93,3 @@ The components follow your instance's current language, so calling `i18n.changeL
 For each string, the components check your `i18n` instance first, then your `translations` bundle, then English. You can combine the two props, for example keeping most strings in your i18next setup and overriding a few with `translations`.
 
 The language comes from `locale` when you set it, then from your `i18n` instance's current language, and otherwise defaults to `en-US`.
-
-Text that comes from your Schematic account, such as plan names, feature names, and descriptions, displays exactly as you entered it. The same applies to custom header text set in the component builder.
