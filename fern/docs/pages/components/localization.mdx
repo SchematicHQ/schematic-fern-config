@@ -46,11 +46,11 @@ Pass your bundles to `translations`, keyed by language, and set `locale` to the 
 
 ```tsx
 import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+import { fr } from "./translations/fr";
 import { it } from "./translations/it";
-import { ja } from "./translations/ja";
 
 // Define this outside your component so it isn't recreated on every render.
-const translations = { it, ja };
+const translations = { fr, it };
 
 export function Billing({ accessToken, componentId, locale }) {
   return (
@@ -61,7 +61,7 @@ export function Billing({ accessToken, componentId, locale }) {
 }
 ```
 
-`locale` takes a BCP 47 tag such as `it-IT` or `ja-JP`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes.
+`locale` takes a BCP 47 tag such as `it-IT` or `fr-FR`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes.
 
 Plan names, feature names, and descriptions come from your Schematic account and display exactly as you entered them in every locale, as does custom header text set in the component builder. A customer who switches to Italian sees Italian buttons, labels, and dates around your English plan names.
 
