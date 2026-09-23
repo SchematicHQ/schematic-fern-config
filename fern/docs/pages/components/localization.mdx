@@ -1,0 +1,96 @@
+---
+title: Localization
+description: Translate Schematic components into your customers' languages and format prices and dates for their locale.
+
+slug: components/localization
+---
+
+Schematic components render in English with US formatting by default. If your customers use your app in another language, a checkout or customer portal that switches to English breaks the experience at the moment they're deciding to pay. You can supply your own translations and a locale to `EmbedProvider`, and every component inside it renders in that language.
+
+Localization requires `@schematichq/schematic-components` 3.0.0 or later.
+
+## Start from the English file
+
+Every string the components display lives in one English file:
+
+[`components/src/localization/en.ts`](https://github.com/SchematicHQ/schematic-js/blob/main/components/src/localization/en.ts)
+
+To add a language, copy that file into your app and replace each English value with your translation. Leave the keys alone, since the components look strings up by key.
+
+```ts
+import type { SchematicTranslations } from "@schematichq/schematic-components";
+
+export const it: SchematicTranslations = {
+  "Add new payment method": "Aggiungi un nuovo metodo di pagamento",
+  "Access to plan will end.": "L'accesso a {{plan}} terminerà il {{date}}.",
+  "Choose plan": "Scegli piano",
+  // ...
+};
+```
+
+Typing the bundle as `SchematicTranslations` makes your build fail on a misspelled key or a key that no longer exists, so a component update that renames a string shows up in your type check rather than as an English string in production.
+
+The English bundle is also exported as `schematicTranslationsEn` if you'd rather generate your starting file, or send it to a translation service, from code.
+
+A few things to keep in mind while you translate:
+
+- Keep every `{{placeholder}}` exactly as written. The components fill in plan names, dates, prices, and quantities at render time, and you can move a placeholder anywhere in the sentence your language needs.
+- Some keys are short descriptions rather than the English text, such as `"Access to plan will end."`, whose value is `"Access to {{plan}} will end on {{date}}."`. Always translate the value.
+- Plural strings use [i18next plural suffixes](https://www.i18next.com/translation-function/plurals). English has `_one` and `_other` forms, but your language may need different ones. Italian, for example, adds a `_many` form for exact millions. Provide whichever forms your language uses.
+- Ordinals such as "1st" and "22nd" are the `Ordinal_ordinal_*` keys, which follow the same rules using your language's ordinal forms.
+
+Any key you leave out falls back to English, so you can ship a partial translation and fill it in over time.
+
+## Pass translations to EmbedProvider
+
+Pass your bundles to `translations`, keyed by language, and set `locale` to the customer's language:
+
+```tsx
+import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+import { it } from "./translations/it";
+import { ja } from "./translations/ja";
+
+// Define this outside your component so it isn't recreated on every render.
+const translations = { it, ja };
+
+export function Billing({ accessToken, componentId, locale }) {
+  return (
+    <EmbedProvider translations={translations} locale={locale}>
+      <SchematicEmbed accessToken={accessToken} id={componentId} />
+    </EmbedProvider>
+  );
+}
+```
+
+`locale` takes a BCP 47 tag such as `it-IT` or `ja-JP`. A region tag uses its base language's bundle, so `it-IT` reads from the `it` bundle. The components re-render when `locale` changes, so you can wire it straight to a language picker.
+
+The locale also sets how the components format numbers, currency, and dates. With `locale="it-IT"`, a price renders as `700.000 JPY` and a date as `21 novembre 2026`. The currency itself still comes from the customer's plan price, and only its formatting follows the locale.
+
+## Use your own i18next instance
+
+If your app already uses [i18next](https://www.i18next.com/), pass your instance to `i18n` instead of managing a separate set of bundles. Add the component strings to your instance under the `schematic` namespace, which is exported as `SCHEMATIC_NAMESPACE`:
+
+```tsx
+import i18n from "i18next";
+import {
+  EmbedProvider,
+  SCHEMATIC_NAMESPACE,
+} from "@schematichq/schematic-components";
+import { it } from "./translations/it";
+
+i18n.addResourceBundle("it", SCHEMATIC_NAMESPACE, it);
+
+<EmbedProvider i18n={i18n}>
+  {/* ... */}
+</EmbedProvider>
+```
+
+The components follow your instance's current language, so calling `i18n.changeLanguage("it")` switches your app and the components together. The components keep their own i18next instance for English and never modify your instance's configuration or language.
+
+## How the components choose a string
+
+For each string, the components check your `i18n` instance first, then your `translations` bundle, then English. You can combine the two props, for example keeping most strings in your i18next setup and overriding a few with `translations`.
+
+The language comes from `locale` when you set it, then from your `i18n` instance's current language, and otherwise defaults to `en-US`.
+
+Text that comes from your Schematic account, such as plan names, feature names, and descriptions, displays exactly as you entered it. The same applies to custom header text set in the component builder.
