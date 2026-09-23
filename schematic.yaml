@@ -2644,6 +2644,14 @@ components:
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
+        currency:
+          type: string
+          description: >-
+            ISO 4217 currency this cart is being built in. Prices are still
+            selected by id; this records the intent, and a cart that prices in
+            another currency is reported as a problem.
+          nullable: true
+          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -2707,6 +2715,14 @@ components:
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
+        currency:
+          type: string
+          description: >-
+            ISO 4217 currency this cart is being built in. Prices are still
+            selected by id; this records the intent, and a cart that prices in
+            another currency is reported as a problem.
+          nullable: true
+          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -11735,6 +11751,13 @@ components:
           items:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
+        currency:
+          type: string
+          description: >-
+            ISO 4217 currency this change is being built in. Prices are still
+            selected by id; this records the intent.
+          nullable: true
+          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -14160,6 +14183,9 @@ components:
         amount_off:
           type: integer
           format: int64
+        currency:
+          type: string
+          description: ISO 4217 currency every amount in this block is denominated in.
         discount_amount:
           type: integer
           format: int64
@@ -14215,6 +14241,7 @@ components:
           maxItems: 1000
       required:
         - amount_off
+        - currency
         - discount_amount
         - discounts
         - due_now
