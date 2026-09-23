@@ -1,38 +1,71 @@
 ---
 title: Components Overview
-description: Quickly deploy customer portals and the standalone pricing table, using Schematic's embeddable UI components and component builder.
+description: Two ways to put billing UI in your app, both on one data layer. Drop in Schematic's components and theme them, or build your own on the hooks and checkout API.
 slug: components/overview
 ---
 
-Schematic's embeddable UI components are designed to deliver a consumer-grade purchasing experience to all of your end users. That includes the ability to manage subscriptions, view feature-level usage, and customize plans in your app, without building or maintaining any of it yourself.
+Schematic gives you two ways to put billing UI in your app. Both read one data layer, so you can mix them: a custom portal with a drop-in checkout is a normal setup.
 
-Components are drop-in components for React that can be easily configured and designed within Schematic, and quickly integrated natively into your application.
+<Note>
+  **Using an agent?** Paste this into Claude Code, Cursor, or Codex and it does the setup on this page:
 
-## Component Types
+  ```text
+  Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+  ```
+</Note>
 
-### Customer Portal
+<CardGroup cols={2}>
+  <Card title="Drop-in components" icon="fa-solid fa-cube" href="/components/drop-in/overview">
+    Import a component, pass a few props, done. Sensible defaults, your fonts and colors through CSS variables, light and dark for free.
+  </Card>
+  <Card title="Build your own UI" icon="fa-solid fa-code" href="/components/build-your-own/overview">
+    The same data the drop-ins read, as hooks and pure derivations. Copy the reference code into your design system, or point your agent at it.
+  </Card>
+</CardGroup>
 
-The Customer Portal is an authenticated, in-app component that gives your customers a self-service billing hub. It handles the full subscription lifecycle:
+## Which path?
 
-- Purchasing a plan or add on for the first time
-- Upgrading, downgrading, or canceling a subscription
-- Managing payment methods
-- Viewing upcoming and past invoices
-- Checking current usage and entitlements
+| | Drop-in components | Build your own UI |
+| --- | --- | --- |
+| You want | Billing UI working today, in Schematic's layout, with your colors and fonts. | Your own layout in your own design system, or an agent writing it for you. |
+| You write | A provider, a session, and one tag per card. | A hook call, a derivation, and the JSX. Reference code gets you most of the way. |
+| Styling | `--schematic-*` tokens, `color-scheme`, or your own CSS on stable class names. | Anything. The derivations return structured parts, not sentences. |
+| Checkout | `<Checkout/>`, opened by Plan Manager, Pricing Table, Credit Meter, and Feature Meter. | `useCheckout` on the checkout API. Take payment with Stripe Elements if you like. |
+| Frameworks | React. | React hooks. The client and derivations are plain TypeScript for Vue and Angular. |
 
-The Customer Portal integrates fully with Stripe and is scoped to a specific company, so each customer sees their own data. See the [Customer Portal](/components/customer-portal) page for details.
+## One setup for both
 
-### Standalone Pricing Table
+Every component and every hook reads from one provider. Your server mints a short-lived access token for the signed-in company, and the browser never sees your secret key.
 
-The Standalone Pricing Table is a public-facing component that can be embedded on a marketing or pricing page. It requires no authentication and shows your available plans and pricing to prospective customers. See the [Standalone Components](/components/standalone-components) page for details.
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
 
-## Component Builder
+<SchematicProvider
+  publishableKey="pk_…"
+  // Whose billing is being read: signed in, null for signed out, undefined while auth resolves.
+  session={{ company: company.id, user: user.id, token: fetchAccessToken }}
+>
+  {children}
+</SchematicProvider>
+```
 
-Components are fully customizable using Schematic's no-code Component Builder. You can choose which [elements](/components/element-library) appear (e.g. Current Plan, Invoices, Payment Methods, Usage Meters), control colors, fonts, and card styles, and preview how the component looks for any company in your account, all without touching code. Changes publish immediately without a deploy.
+The [Quickstart](/components/quickstart) walks through the token exchange and the first component, and [Add Schematic billing to your app](/components/skill) is the same setup written for an agent.
 
-## Getting Started
+## What's in the box
 
-To build and embed a component:
+| Component | Hook | Reads |
+| --- | --- | --- |
+| `<Checkout/>` | `useCheckout` | The persisted checkout |
+| `<PlanManager/>` | `useCompany` | Plan, add-ons, notices, change plan |
+| `<CreditMeter/>` | `useCreditBalances` | Balances and grants per credit, buy more |
+| `<PricingTable/>` | `useCatalog` | Plans and add-ons, public or company |
+| `<FeatureMeter/>` | `useFeatureUsage` | Meters for metered features |
+| `<IncludedFeatures/>` | `useFeatureUsage` | Entitlements and usage |
+| `<UpcomingBill/>` | `useUpcomingInvoice` | Next bill, balance, discounts |
+| `<PaymentMethods/>` | `usePaymentMethods` | Cards and wallets on file |
+| `<Invoices/>` | `useInvoices` | Invoice history, paged |
+| `<Unsubscribe/>` | `useUnsubscribe` | Cancel with your rules applied |
 
-1. [Create a Component](/components/create-component) — configure your catalog and build the component in Schematic
-2. [Add to Your App](/components/set-up) — install the library and embed it in your React application
+<Note>
+  Using the component builder? The embed keeps working on `@schematichq/schematic-components` 3.x. The builder pages live under [Component builder](/components/customer-portal), and [Migrate to drop-in components](/components/builder/migrate) covers the move when you are ready.
+</Note>

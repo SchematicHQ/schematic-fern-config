@@ -1,0 +1,67 @@
+---
+title: Checkout API
+description: A checkout is a persisted resource. Create it, replace its selections to re-price, and finalize it into a subscription. The drop-in, useCheckout, and a Stripe Elements flow all ride the same five routes.
+slug: components/build-your-own/checkout-api
+---
+
+A checkout is a resource on the temporary-access-token API. Create it, replace its selections (the PUT is the re-price), and finalize it into a subscription. `<Checkout/>`, `useCheckout`, and a [Stripe Elements flow](/components/build-your-own/checkout-with-stripe-elements) all ride the same five routes, so the totals a customer sees are always the server's.
+
+## Routes
+
+| Route | Purpose | Notes |
+| --- | --- | --- |
+| `POST /checkouts` | Create a checkout (`open`) | Company from the token. Best-effort initial pricing; an unpriceable cart is still persisted. |
+| `GET /checkouts/{id}` | Fetch a checkout | Selections, price snapshot, and `version`. Rehydrate on another device. |
+| `PUT /checkouts/{id}` | Replace selections and re-price | Body carries the cart and the last-seen `version`. 409 if it moved. |
+| `POST /checkouts/{id}/finalize` | Finalize into a subscription | Claims the version before any Stripe call. Returns the subscription. |
+| `GET /checkouts` | List the company's checkouts | |
+
+Request bodies carry the same selections the dialog builds: `planId`, `period`, `addOnIds`, `payInAdvance` quantities, `creditBundles`, `promoCode`, `customFieldValues`, `paymentMethodId`. Responses return the checkout with its `status`, `version`, `selections`, and `priceSnapshot`.
+
+## Lifecycle
+
+```text
+open checkout      POST /checkouts                              → { id, version: 1, status: "open" }
+change anything    PUT  /checkouts/{id}  (selections, version)  → { version: n+1, status: "priced", priceSnapshot }
+reopen later       GET  /checkouts/{id}                         → selections + server totals
+pay                POST /checkouts/{id}/finalize (version)      → subscription; entitlements update immediately
+```
+
+A checkout is `open` after create, `priced` after a successful PUT, and `completed` after finalize. Every edit is version-guarded, so two tabs cannot silently overwrite each other's cart. Expired and abandoned checkouts answer 409 to any write. A self-service token is always the company's own, so a checkout cannot name another payer.
+
+## The price snapshot
+
+`priceSnapshot` is what the dialog shows and what finalize charges: `dueToday`, the recurring total per period, proration lines, one line per selection, applied discounts, tax when collected, and `validation` with any rule the cart breaks (a downgrade blocked by usage, a bundle the plan does not allow, a currency the plan lacks). Render it; do not recompute it.
+
+## With useCheckout
+
+The hook wraps the routes with the version bookkeeping, the checkout-session header, and a single in-flight write, so your UI only sees selections in and a snapshot out:
+
+```tsx
+const checkout = useCheckout();
+
+await checkout.setSelections({
+  planId: plan.id,
+  period: "month",
+  addOnIds: [sso.id],
+  creditBundles: [{ bundleId: booster.id, quantity: 1 }],
+});
+// checkout.snapshot.dueToday, .recurring, .proration, .lineItems, .validation
+
+const { clientSecret } = await checkout.createSetupIntent();   // for your Payment Element
+await checkout.finalize({ paymentMethodId });                   // or let <Checkout/> do all of this
+```
+
+## With the client
+
+```ts
+const billing = new SchematicBillingClient(session);
+
+const draft = await billing.createCheckout({ planId: plan.id, period: "month" });
+const priced = await billing.updateCheckout(draft.id, { version: draft.version, planId: plan.id, addOnIds: [sso.id] });
+await billing.finalizeCheckout(priced.id, { version: priced.version, paymentMethodId });
+```
+
+## Sibling routes
+
+Read-model and account-management routes stay where they are and keep working alongside a checkout: `GET /company/*` for the portal, `POST /components/setup-intent` for saving a card outside a purchase, `DELETE /checkout/unsubscribe` for cancelling, and the payment-method routes. A fully migrated client drives its cart through `/checkouts` and reads everything else through the hooks.

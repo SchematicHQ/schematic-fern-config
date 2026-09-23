@@ -1,0 +1,189 @@
+---
+title: Add Schematic Billing to Your App
+description: An agent skill. Paste one line into Claude Code, Cursor, or Codex and the agent follows this page to add drop-in billing components, or your own UI on the hooks, to a React app.
+slug: components/skill
+---
+
+```text
+Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+```
+
+Paste that line into Claude Code, Cursor, Codex, or any agent that can fetch a URL. The agent reads this page as Markdown and does the steps below. Doing it by hand takes the same steps; the [Quickstart](/components/quickstart) walks a person through them.
+
+## Skill: add Schematic billing UI to a React app
+
+You are adding a customer billing portal to the user's app with Schematic. The portal shows the signed-in company's plan, features, usage, credits, upcoming bill, payment methods, and invoices, and lets them change plan, buy credits, and cancel through Schematic's checkout. Schematic owns the data and the purchase rules; the app owns where the portal lives and how it looks.
+
+### Ask the user first
+
+1. **Which path.** Drop-in components (import and theme; the default) or build your own UI (hooks plus reference code, for a design system that must match). Recommend drop-in unless they say otherwise. Both can mix on one page.
+2. **Framework and router.** Next.js App Router, Next.js Pages, Vite plus React Router, Remix. The token endpoint and provider placement follow from it.
+3. **How a request knows the current company.** The auth library (Clerk, Auth0, NextAuth, their own) and which field holds the company or organization id. Schematic's `company` is the id the app already uses for that company.
+4. **Environment variables.** Where `SCHEMATIC_SECRET_KEY` (server only) and `NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY` (or the framework's public-env equivalent) go. Never put the secret key in client code.
+5. **Where the billing page lives.** A route like `/settings/billing`, and whether it should also show a public pricing table.
+
+### 1. Install
+
+```sh
+npm install @schematichq/schematic-react @schematichq/schematic-components
+```
+
+Add `@stripe/react-stripe-js @stripe/stripe-js` when the page includes `<Checkout/>` or `<PaymentMethods/>`; they render Stripe's Payment Element.
+
+### 2. Mint access tokens on the server
+
+Components read a company's own billing state, so they authenticate with a short-lived, company-scoped temporary access token minted by the user's server with the secret key. Put the endpoint behind the app's own auth and resolve the company from the session, never from the request.
+
+```typescript
+// Next.js App Router: app/api/schematic/token/route.ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const schematic = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+export async function GET() {
+  const session = await getSession();                 // the app's auth
+  if (!session?.companyId) return new Response("Unauthorized", { status: 401 });
+
+  const response = await schematic.accesstokens.issueTemporaryAccessToken({
+    resourceType: "company",
+    lookup: { id: session.companyId },               // the app's company key
+  });
+  return Response.json({
+    token: response.data?.token,
+    expiresAt: response.data?.expiredAt,
+  });
+}
+```
+
+Other servers: the Node, Python, Go, Ruby, Java, C#, and PHP SDKs expose the same `issueTemporaryAccessToken` call, and the raw route is `POST https://api.schematichq.com/temporary-access-tokens` with the `X-Schematic-Api-Key` header. See [Session and access tokens](/components/build-your-own/session).
+
+### 3. Wrap the app in the provider
+
+One `SchematicProvider` above every page that shows billing UI. `session` says whose billing is being read.
+
+```tsx
+// app/providers.tsx (client component)
+"use client";
+import { SchematicProvider } from "@schematichq/schematic-react";
+
+async function fetchAccessToken() {
+  const response = await fetch("/api/schematic/token");
+  return response.json();                              // { token, expiresAt }
+}
+
+export function Providers({ children, company, user }) {
+  return (
+    <SchematicProvider
+      publishableKey={process.env.NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY}
+      session={
+        company === undefined
+          ? undefined                                  // auth still resolving: cards keep loading
+          : company === null
+            ? null                                     // signed out: cards empty
+            : { company: company.id, user: user?.id, token: fetchAccessToken }
+      }
+    >
+      {children}
+    </SchematicProvider>
+  );
+}
+```
+
+Map the auth library's states carefully: `undefined` while it loads, `null` when nobody is signed in, the pair when someone is. Clerk reports `undefined` for both loading and signed out, so read `isLoaded` first. Leave `user` out when tokens are company-wide.
+
+### 4a. Drop in the portal (default path)
+
+```tsx
+// app/settings/billing/page.tsx
+import {
+  Checkout,
+  CreditMeter,
+  FeatureMeter,
+  IncludedFeatures,
+  Invoices,
+  PaymentMethods,
+  PlanManager,
+  SchematicStyles,
+  UpcomingBill,
+  Unsubscribe,
+} from "@schematichq/schematic-components/elements";
+
+export default function BillingPage() {
+  return (
+    <>
+      <SchematicStyles />
+      <PlanManager />
+      <IncludedFeatures />
+      <UpcomingBill />
+      <PaymentMethods />
+      <Invoices showStatus />
+      <FeatureMeter />
+      <CreditMeter />
+      <Unsubscribe variant="link" />
+      <Checkout />
+    </>
+  );
+}
+```
+
+Render `<SchematicStyles />` once. Mount `<Checkout />` once anywhere under the provider; Plan Manager, Credit Meter, Feature Meter, and Pricing Table open it. Drop any component the user does not need; each stands alone. Props per component are on its page: [Invoices](/components/drop-in/invoices), [Upcoming Bill](/components/drop-in/upcoming-bill), [Payment Methods](/components/drop-in/payment-methods), [Included Features](/components/drop-in/included-features), [Plan Manager](/components/drop-in/plan-manager), [Credit Meter](/components/drop-in/credit-meter), [Feature Meter](/components/drop-in/feature-meter), [Pricing Table](/components/drop-in/pricing-table), [Checkout](/components/drop-in/checkout), [Unsubscribe](/components/drop-in/unsubscribe). Append `.md` to any of those URLs for Markdown.
+
+For a public pricing page, render `<PricingTable onSelectPlan={…} />` under a provider that has only the publishable key.
+
+### 4b. Build your own UI (when the user asks for it)
+
+One hook per resource, one derivation each, and the user's own JSX. Start from the [Recipes](/components/build-your-own/recipes) and the [Hooks reference](/components/build-your-own/hooks); adapt the reference code to the app's design system rather than copying it verbatim. Keep the derivations (`deriveInvoiceList`, `derivePlanSummary`, and the rest) as imports; they carry the display rules and their tests. For purchases, use `useCheckout` or mount the drop-in `<Checkout />` and call `useCheckout().open()`.
+
+### 5. Theme it
+
+Ask for the brand color and font, then set tokens once in the global stylesheet. Declare `color-scheme` where the app decides light and dark.
+
+```css
+:root {
+  --schematic-accent: #194bfb;
+  --schematic-font-body: "Inter", sans-serif;
+  --schematic-radius: 12px;
+  color-scheme: light;
+}
+:root:where(.dark) { color-scheme: dark; }
+```
+
+The full token list is on [Styling and Theming](/components/drop-in/styling). Do not override component internals with selectors; use the tokens or the documented class names.
+
+### 6. Verify
+
+Run the app, sign in as a company that has a subscription, and open the billing page. Every card renders, Plan Manager shows the plan, and Change plan opens Checkout.
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Every card reports `failed with status 404` | Company context is not enabled for the account | Ask Schematic to enable it |
+| Cards stay in the loading state | `session` is `undefined` | The auth mapping never resolves; check the loaded flag |
+| Cards are empty after sign-in | `session` is `null` | The mapping returns `null` for a signed-in user |
+| `A session is required to read data` | A hook rendered outside the provider | Move the provider above the route |
+| 401 on the token endpoint | Endpoint not behind auth, or the secret key is missing | Check `SCHEMATIC_SECRET_KEY` on the server |
+| Checkout totals differ from Stripe | The app computed totals itself | Render `snapshot` from `useCheckout`; never sum client-side |
+
+### Do not
+
+- Put the secret key or the token endpoint's logic in client code.
+- Wrap each component in its own provider, or pass tokens as props.
+- Copy the derivations into the app; import them.
+- Compute prices, proration, or credit math in the app.
+- Reach into components with CSS selectors on internal markup; use tokens and the documented class names.
+
+## Reference
+
+| Component | Hook | Page |
+| --- | --- | --- |
+| `<Checkout/>` | `useCheckout` | /components/drop-in/checkout |
+| `<PlanManager/>` | `useCompany` | /components/drop-in/plan-manager |
+| `<CreditMeter/>` | `useCreditBalances` | /components/drop-in/credit-meter |
+| `<PricingTable/>` | `useCatalog` | /components/drop-in/pricing-table |
+| `<FeatureMeter/>` | `useFeatureUsage` | /components/drop-in/feature-meter |
+| `<IncludedFeatures/>` | `useFeatureUsage` | /components/drop-in/included-features |
+| `<UpcomingBill/>` | `useUpcomingInvoice` | /components/drop-in/upcoming-bill |
+| `<PaymentMethods/>` | `usePaymentMethods` | /components/drop-in/payment-methods |
+| `<Invoices/>` | `useInvoices` | /components/drop-in/invoices |
+| `<Unsubscribe/>` | `useUnsubscribe` | /components/drop-in/unsubscribe |
+
+Feature flags and entitlement checks use the same provider: `useSchematicFlag`, `useSchematicEntitlement`, `useSchematicPlan`. See the [React SDK](/developer_resources/sdks/react).

@@ -1,0 +1,52 @@
+---
+title: Localization
+description: Format for a locale, rename any string with a prop, or route every string through your own translation function.
+slug: components/drop-in/localization
+---
+
+Copy and formatting are yours. `locale` formats every component through `Intl`, and each string resolves through `strings` on the component, then `strings` on the provider, then your `translate`, then the component's English. Nothing has to be configured, and renaming one string is one prop.
+
+## Formatting
+
+`locale` is a BCP 47 tag. Set it on the provider for every component, or on one component to override. Dates, amounts, numbers, and plurals go through `Intl` against it; a viewer's language is the fallback.
+
+```tsx
+<SchematicProvider locale="de-DE" …>
+```
+
+## Renaming a string
+
+```tsx
+<Invoices strings={{ invoicesHeader: "Receipts", invoicesSeeMore: "Show all" }} />
+```
+
+Each component's page lists the keys it renders. The same keys on the provider apply everywhere:
+
+```tsx
+<SchematicProvider strings={{ retry: "Retry" }} …>
+```
+
+An override can vary by count with i18next's plural suffixes, so `invoicesHeader_one` and `invoicesHeader_other` answer `1` and `14` with different words. Placeholders use the `{{name}}` form.
+
+## Using your own i18n
+
+Pass `translate` on the provider and every string routes through it with its key and its variables:
+
+```tsx
+import { useTranslation } from "react-i18next";
+
+function Providers({ children }) {
+  const { t } = useTranslation("schematic");
+  return (
+    <SchematicProvider translate={(key, vars) => t(key, vars)} …>
+      {children}
+    </SchematicProvider>
+  );
+}
+```
+
+A key your catalog does not carry falls through to the component's English, so a partial translation ships safely. The components pass a sentinel `defaultValue` so a miss is detectable even from a stack that answers every key. `onMissingString` on the provider reports each miss, so a mis-wired catalogue shows up in your logs rather than as English in a German page. The key list is frozen per release; a rename is a deliberate, breaking change.
+
+## Server rendering
+
+Pass `locale` explicitly for a server-rendered page. The viewer's language is not knowable on the server, so the components format in `en-US` until they mount and only then adopt it; a fixed locale gives matching markup on both sides rather than a hydration mismatch per row.
