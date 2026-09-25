@@ -58,6 +58,8 @@ Copy and formatting stay yours. `locale` on the provider formats every component
 
 The `./elements` entry is its own bundle and keeps React and both Schematic SDKs external, so the provider your app renders is the one the components read. `@schematichq/schematic-react` is a peer of this entry alone.
 
+Components that take a payment, such as Payment Methods and Checkout, render Stripe's Payment Element, so install `@stripe/stripe-js` and `@stripe/react-stripe-js` when you use them. Both are optional peers, loaded only when a payment form opens, so a page that never opens one never downloads Stripe.
+
 ## The session
 
 `session` says whose billing is being read and how. It has three states, and they mean different things:
