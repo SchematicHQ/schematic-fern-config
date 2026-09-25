@@ -15,8 +15,10 @@ slug: components/drop-in/styling
 | `--schematic-background`, `--schematic-border`, `--schematic-card-divider` | Card surface |
 | `--schematic-text`, `--schematic-muted` | Text and secondary text |
 | `--schematic-danger`, `--schematic-warning`, `--schematic-meter-track` | Status colors and the meter track |
-| `--schematic-font-body`, `--schematic-font-heading` | Typefaces |
+| `--schematic-font-body`, `--schematic-font-heading`, `--schematic-font-link` | Typefaces: body text, headings, and link actions |
 | `--schematic-line-height`, `--schematic-line-height-heading` | Line heights |
+| `--schematic-surface` | The tint behind the payment method pill |
+| `--schematic-backdrop` | The dialog backdrop, drawn over an 8px blur |
 | `--schematic-radius`, `--schematic-shadow`, `--schematic-space`, `--schematic-card-padding` | Shape and spacing |
 
 ## Light and dark
@@ -69,7 +71,8 @@ Skip the stylesheet and write your own against the class names. They are API, an
 | `schematic-status-note`, `schematic-error` | A failure reported under content that is still on screen; error text. |
 | `schematic-hidden` | Text read by assistive technology and never seen, such as a loading label. |
 | `schematic-skeleton`, `schematic-skeleton__heading`, `schematic-skeleton__row`, `schematic-skeleton__cell` | The pending placeholder; each cell names its column on `data-column`. |
-| `schematic-dialog` | Checkout and confirmation dialogs. |
+| `schematic-dialog`, `schematic-dialog__header`, `schematic-dialog__title`, `schematic-dialog__close`, `schematic-dialog__body` | Checkout, confirmation, and payment method dialogs. |
+| `schematic-icon`, `schematic-icon--<name>` | A glyph from the icon font, always `aria-hidden`: a brand mark, `close`, `chevron-down`, and the rest. |
 
 A component's root keeps the same class list in every state; `data-state` is `pending`, `error`, or `ready`. Every node a component renders carries at least one `schematic-` class, so no rule has to reach for a tag or a position.
 
