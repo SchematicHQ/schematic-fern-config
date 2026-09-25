@@ -28,7 +28,7 @@ You are adding a customer billing portal to the user's app with Schematic. The p
 npm install @schematichq/schematic-react @schematichq/schematic-components
 ```
 
-Add `@stripe/react-stripe-js @stripe/stripe-js` when the page includes `<Checkout/>` or `<PaymentMethods/>`; they render Stripe's Payment Element.
+`@stripe/react-stripe-js` and `@stripe/stripe-js` are peer dependencies of the components and render Stripe's Payment Element for `<Checkout/>` and `<PaymentMethods/>`. Most package managers install peers automatically; add them explicitly if yours does not.
 
 ### 2. Mint access tokens on the server
 
