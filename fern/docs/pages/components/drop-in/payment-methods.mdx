@@ -23,7 +23,7 @@ import {
 </SchematicProvider>;
 ```
 
-Adding a method renders Stripe's Payment Element, so install `@stripe/stripe-js` and `@stripe/react-stripe-js` beside the components. Both are optional peers, loaded only when someone opens the Add form, so a page that only shows the method on file never downloads Stripe. Without them the form reports that it could not load rather than crashing.
+Adding a method renders Stripe's Payment Element from `@stripe/stripe-js` and `@stripe/react-stripe-js`. Both are peer dependencies of the components, so your package manager installs them alongside. They load only when someone opens the Add form, so a page that only shows the method on file never downloads Stripe.
 
 ## Props
 
