@@ -26,15 +26,17 @@ Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All 
 
 To prepare:
 
-1. Take snapshots on a schedule with `schematic-export snapshot`, described in [Export your data](#export-your-data).
+1. Take snapshots on a schedule with `schematic-export all`, described in [Export your data](#export-your-data).
 2. If Schematic becomes unavailable, load the latest snapshot into Redis with `schematic-export restore`.
-3. Run your SDK in Replicator mode against that Redis instance.
+3. Start `schematic-export serve-health`. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
+4. Run your SDK in Replicator mode against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
 
 A restored snapshot behaves differently from a live Replicator in a few ways that change what you plan for:
 
 - Your SDK reads flags, companies, and users from Redis, so you need a Redis instance you control.
 - Flag rules, plans, and entitlements stay exactly as they were when the snapshot was taken.
-- Metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it.
+- Usage from `track` calls keeps counting in Redis, but metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it.
+- Pin your SDK version. The snapshot is stored in the format of the rules engine version it was taken with.
 - Client-side SDKs (JavaScript, React, and Vue) call the Schematic API directly, so when it's unreachable they return flag defaults.
 
 Set [flag defaults](/production_readiness/availability) in every SDK, client-side and backend. They decide what your app shows for any flag the snapshot doesn't cover and for every client-side check.
@@ -49,29 +51,28 @@ The source is at [github.com/SchematicHQ/schematic-export](https://github.com/Sc
 
 | Command | What it does |
 |---|---|
-| `export config` | Exports plans, plan versions, features, entitlements, add-ons, credits, companies, company overrides, and flags |
-| `export usage` | Exports events, plus current usage per company for each metered feature |
+| `all` | Runs `config`, `usage`, and `snapshot` together. Schedule this one. |
+| `config` | Exports plans, plan versions and their entitlements, add-ons, features, flags, credits, companies, company overrides, users, and billing product mappings |
+| `usage` | Exports events, plus current usage per company for each metered feature |
 | `snapshot` | Exports the flag, company, and user data your SDK reads in Replicator mode |
 | `restore` | Loads a snapshot into Redis, with no call to the Schematic API |
+| `serve-health` | Serves the Replicator health endpoint for a restored snapshot |
 
-Each command writes JSON to a local directory by default, or to an S3 path.
-
-{/* TODO: replace with the final commands and flags once the CLI ships. */}
+Each run writes JSON to a timestamped directory, locally or in S3, and updates `latest.json` to point at it. Every run logs the account and environment it's exporting, so check that line the first time you run with a new key.
 
 ```sh
 # Run nightly from cron or CI
-schematic-export export config --out s3://your-bucket/schematic
-schematic-export export usage --out s3://your-bucket/schematic
-schematic-export snapshot --out s3://your-bucket/schematic
+schematic-export all --out s3://your-bucket/schematic
 
 # Only if Schematic becomes unavailable
 schematic-export restore --from s3://your-bucket/schematic --redis redis://localhost:6379
+schematic-export serve-health --from s3://your-bucket/schematic --port 8090
 ```
 
 Create a [readonly secret API key](/api-reference/authentication#readonly-api-keys) for the export. A readonly key can make every request the export needs and can't change anything in your account.
 
 {/* TODO(eng): confirm event retention for the events API. */}
 
-The events API returns roughly the last 180 days of events. Keep every `export usage` output rather than overwriting it, so your archive holds events after they age out of the API.
+The events API returns about the last six months of events. Keep every run rather than deleting old ones, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
 
 {/* TODO(legal): contract terms (notice period, transition window) go here once the Cloud Services Agreement is updated. Do not publish commitments before then. */}
