@@ -82,13 +82,147 @@ The next bill: amount due, due date, the canonical period, active discounts, and
 
 ```ts
 function usePaymentMethods(): ResourceHandle<PaymentMethod[]> & {
-  add(): Promise<void>;                 // opens a Stripe SetupIntent and saves the result
+  setDefault(externalId: string): Promise<void>;
   remove(id: string): Promise<void>;
-  setDefault(id: string): Promise<void>;
+  isMutating: boolean;             // a write is in flight; distinct from isPending, which is the list loading
+  mutationError: Error | undefined; // the last write's failure; cleared when the next write starts
 };
 ```
 
-Cards and wallets on file with `brand`, `last4`, `expMonth`, `expYear`, `type`, and `isDefault`. The three actions apply the same rules the drop-in enforces: the last method stays while a subscription is active, and the default is always set.
+Every payment method on file. A company with none is a successful response with an empty list, so an empty `data` is a loaded answer. A 404 surfaces on `error`.
+
+`setDefault` and `remove` each reload the list once they land, and reject with the failure while also recording it on `mutationError`, so a component can await the promise or read the field, whichever it prefers. `setDefault` takes the method's `externalId`, the billing provider's id; `remove` takes Schematic's `id`.
+
+Each `PaymentMethod`:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | `string` | Schematic's identifier. `remove` takes this. |
+| `externalId` | `string` | The billing provider's identifier. `setDefault` takes this. |
+| `type` | `string` | The provider's payment method type, such as `card`, `us_bank_account`, `apple_pay`, or `link`. |
+| `isDefault` | `boolean` | The method the company is billed with: the subscription's own when it has one, else the customer's default. At most one is `true`, and none may be. |
+| `canRemove` | `boolean` | Whether `remove` would be accepted. `false` only for the last method while an active paid subscription needs it. |
+| `cardBrand`, `cardLast4`, `cardExpMonth`, `cardExpYear` | optional | The card behind a card, Apple Pay, or Google Pay method. |
+| `bankName`, `accountLast4` | optional | A bank account's bank and last four digits. |
+| `accountName`, `billingName`, `billingEmail` | optional | The names and email the provider supplied, such as the email behind a Link account. |
+
+The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
+
+The server decides both flags, so a component never re-derives the provider's rules. Removing the default promotes nothing; the list then has no default until someone sets one. A method added through a setup intent is not made the default by the server; call `setDefault` with its id once Stripe confirms it.
+
+```tsx
+import { usePaymentMethods } from "@schematichq/schematic-react";
+
+function Methods() {
+  const { data, isMutating, mutationError, remove, setDefault } = usePaymentMethods();
+  if (data === undefined) return <p>Loading…</p>;
+
+  return (
+    <>
+      <ul>
+        {data.map((method) => (
+          <li key={method.id}>
+            {method.cardBrand ?? method.type} {method.cardLast4 ?? method.accountLast4}
+            {method.isDefault ? (
+              " (default)"
+            ) : (
+              <button disabled={isMutating} onClick={() => setDefault(method.externalId).catch(() => {})}>
+                Set default
+              </button>
+            )}
+            {method.canRemove && (
+              <button disabled={isMutating} onClick={() => remove(method.id).catch(() => {})}>
+                Remove
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {mutationError && <p role="alert">{mutationError.message}</p>}
+    </>
+  );
+}
+```
+
+## useSetupIntent
+
+```ts
+function useSetupIntent(): { create(): Promise<SetupIntent> };
+
+type SetupIntent = {
+  setupIntentClientSecret?: string;
+  publishableKey?: string;         // the account's own Stripe key, for a direct account
+  schematicPublishableKey: string; // Schematic's key, for a connected account
+  accountId?: string;              // the connected account, when there is one
+};
+```
+
+Mints a Stripe SetupIntent for adding a payment method. Each call makes a new intent, because an intent is single-use. The hook holds no state; `create` rejects with the failure.
+
+Load Stripe with `schematicPublishableKey` and `stripeAccount: accountId` when `accountId` is set, else with `publishableKey`. Mount Stripe's Payment Element on the client secret, confirm the setup, then make the new method the default with `usePaymentMethods().setDefault`, which also reloads the list. [Checkout with Stripe Elements](/components/build-your-own/checkout-with-stripe-elements) walks through the Stripe side.
+
+```tsx
+import { usePaymentMethods, useSetupIntent, type SetupIntent } from "@schematichq/schematic-react";
+import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
+
+// A connected account is reached through Schematic's key with the account
+// named; a direct account uses its own key.
+function stripeFor(intent: SetupIntent): Promise<Stripe | null> {
+  return intent.accountId
+    ? loadStripe(intent.schematicPublishableKey, { stripeAccount: intent.accountId })
+    : loadStripe(intent.publishableKey ?? intent.schematicPublishableKey);
+}
+
+function AddPaymentMethod({ onDone }: { onDone: () => void }) {
+  const { create } = useSetupIntent();
+  // Stripe is loaded once per intent: <Elements> must keep the same promise.
+  const [ready, setReady] = useState<{ clientSecret: string; stripe: Promise<Stripe | null> }>();
+  useEffect(() => {
+    void create().then((intent) => {
+      if (intent.setupIntentClientSecret) {
+        setReady({ clientSecret: intent.setupIntentClientSecret, stripe: stripeFor(intent) });
+      }
+    });
+  }, [create]);
+
+  if (!ready) return <p>Loading…</p>;
+  return (
+    <Elements stripe={ready.stripe} options={{ clientSecret: ready.clientSecret }}>
+      <SaveForm onDone={onDone} />
+    </Elements>
+  );
+}
+
+function SaveForm({ onDone }: { onDone: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { setDefault } = usePaymentMethods();
+
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    if (!stripe || !elements) return;
+    const { setupIntent, error } = await stripe.confirmSetup({
+      elements,
+      confirmParams: { return_url: window.location.href },
+      redirect: "if_required",
+    });
+    const id = setupIntent?.payment_method;
+    if (!error && typeof id === "string") {
+      await setDefault(id); // the new method becomes the default, and the list reloads
+      onDone();
+    }
+  }
+
+  return (
+    <form onSubmit={save}>
+      <PaymentElement />
+      <button type="submit">Save payment method</button>
+    </form>
+  );
+}
+```
 
 ## useInvoices
 
@@ -191,7 +325,7 @@ import { BillingDataProvider } from "@schematichq/schematic-react";
 </BillingDataProvider>;
 ```
 
-A missing key reports as pending. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
+A missing key reports as pending. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, and `createSetupIntent` receive the calls `usePaymentMethods` and `useSetupIntent` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
 
 ## Flags and entitlement checks
 

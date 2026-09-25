@@ -16,10 +16,23 @@ A derivation is a pure function from a hook's data to a display model: `(serverD
 | `deriveUsageMeter(row, { locale, warningThreshold? })` | `useFeatureUsage` | `{ used, limit, percent, state, detailText, resetsAtText, byUser? }` |
 | `deriveEntitlementRow(row, { locale })` | `useFeatureUsage` | `{ kind, featureName, quantityText?, priceText?, periodText?, tooltip? }` for the six value displays |
 | `deriveUpcomingInvoice(invoice, { locale, format? })` | `useUpcomingInvoice` | `amountDueText`, `dueAt`, `balanceApplied`, `balanceRemaining`, `discounts[]`, each with raw values |
-| `derivePaymentMethods(methods)` | `usePaymentMethods` | `brandText`, `last4`, `expiresText`, `isDefault`, `canRemove` per method |
+| `derivePaymentMethods(methods, { locale, now? })` | `usePaymentMethods` | `{ rows, current, others, monthsToExpiration, expiryWarning }`; each row has `id`, `externalId`, `kind`, `label`, `icon`, `brand`, `type`, `last4`, `expiresShort`, `monthsToExpiration`, `expiry`, `isDefault`, `canRemove` |
 | `deriveInvoiceList(page, { locale, format? })` | `useInvoices` | `{ rows, count, hasMore }`; each row has `id`, `date`, `dateText`, `amountMinor`, `currency`, `amountText`, `isCredit`, `status`, `url` |
 
 `deriveInvoiceList` formats each row the way the [Invoices component](/components/drop-in/invoices) does: the due date, or the created date when there is none, in the locale's long form such as "March 1, 2026"; the amount as absolute text with `isCredit` carrying the sign; `currency` upper-cased; and `url` reduced to `null` unless it is an `http` or `https` link. `date` is `null` rather than an Invalid Date when the timestamp is unusable, and `dateText` is then empty.
+
+`derivePaymentMethods` lays the list out the way the [Payment Methods component](/components/drop-in/payment-methods) does:
+
+- **The default and the rest:** `current` is the default, or `null` when there is none. `others` is every other row, or all of them when there is no default.
+- **Expiry:** `expiryWarning` is `soon` when the default card has fewer than four months left, `expired` once its month has arrived, and `none` otherwise. Months count by calendar month and ignore the day, so a card expiring in August is two months away anywhere in June. `now` fixes the moment they are counted from, for a test or a server render.
+- **Kind and mark:** `kind` is `card`, `bank`, `wallet`, or `other`. `icon` names the Schematic icon font glyph: `visa`, `mastercard`, `amex`, or `credit` for other cards, `bank` for a US bank account, the wallet's own mark, and `generic-payment` otherwise. `expiresShort` is the card's "8/27".
+- **The label:** either `{ key }`, copy to translate such as `paymentMethodsCardEndingIn` for "Card ending in", or `{ text }`, a value the provider supplied such as a bank's name or the email behind a Link account. That keeps the translatable words in your strings.
+
+```ts
+const { current, others } = derivePaymentMethods(data, { locale: "en-US" });
+const name = (row: PaymentMethodRow) =>
+  row.label.key !== undefined ? t(row.label.key) : row.label.text;
+```
 
 Selection state such as the period toggle stays in your component; `derivePricingTable` takes the selection and returns the valid option sets, including the re-snap when a selection becomes invalid.
 

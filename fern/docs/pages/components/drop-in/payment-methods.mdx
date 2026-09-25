@@ -1,60 +1,174 @@
 ---
 title: Payment Methods
-description: The cards and wallets a company has on file, with the default marked, and the add, remove, and make-default actions.
+description: The company's payment method on file as a card, with a dialog to switch the default, remove a method, or add one through Stripe.
 slug: components/drop-in/payment-methods
 ---
 
-The cards and wallets a company has on file, with the default marked. Customers add a method through a Stripe SetupIntent, remove one, or make one the default, all without leaving your page.
+`PaymentMethods` renders the signed-in company's payment method on file. A pill names the default method, and a warning sits beside the heading when that card is about to expire. Edit opens a dialog where the other saved methods can be made the default or removed, and a new one added through Stripe. The card loads from the company billing API, so it needs a `session` on the provider as described in the [Drop-in components overview](/components/drop-in/overview#the-session).
 
 ![Payment method](../../../assets/images/components/components-payment-method.png)
 
 ## Usage
 
 ```tsx
-import { PaymentMethods } from "@schematichq/schematic-components/elements";
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  PaymentMethods,
+  SchematicStyles,
+} from "@schematichq/schematic-components/elements";
 
-<PaymentMethods allowAdd allowRemove />
+<SchematicProvider publishableKey={publishableKey} session={session}>
+  <SchematicStyles />
+  <PaymentMethods />
+</SchematicProvider>;
 ```
 
-Adding a method opens Stripe's Payment Element inside the card. Card, Apple Pay, and Google Pay show with their brand and last four digits.
+Adding a method renders Stripe's Payment Element, so install `@stripe/stripe-js` and `@stripe/react-stripe-js` beside the components. Both are optional peers, loaded only when someone opens the Add form, so a page that only shows the method on file never downloads Stripe. Without them the form reports that it could not load rather than crashing.
 
 ## Props
 
 | Prop | Default | Effect |
 | --- | --- | --- |
-| `allowAdd` | `true` | The add-method action. |
-| `allowRemove` | `true` | The remove and make-default actions. |
-| `showHeader` | `true` | The heading. |
-| `headingLevel` | `2` | The heading's level. |
-| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
-| `strings` | | Copy for this card by key. |
+| `showHeader` | `true` | The "Payment Details" heading, and the expiry warning beside it. |
+| `showExpiration` | `true` | The warning when the default card has fewer than four months left. |
+| `allowEdit` | `true` | The Edit (or Add) action on the pill, and the dialog behind it. `false` shows the method on file with no way to change it. |
+| `headingLevel` | `2` | The heading's level, `2` through `6`, so the card fits your page's outline. |
+| `checkoutSettings` | | What the Add form collects beyond the payment fields. See [Checkout settings](#checkout-settings). |
+| `checkoutPrefill` | | Values the Add form starts with. See [Checkout settings](#checkout-settings). |
+| `className` | | Added to the root alongside `schematic-card schematic-payment-methods`. |
+| `locale` | | BCP 47 tag for formatting and for Stripe's own labels. Falls back to the provider's `locale`, then the viewer's language. |
+| `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
 
-## Rules the component enforces
+## The card
 
-A company keeps at least one payment method while it has an active subscription, so the remove action hides on the last one. A method added while none is on file becomes the default. Removing the default promotes the next method. These rules are applied on the server, so a hand-built UI gets the same answers.
+The pill names the default method: "Card ending in 4242", "Apple Pay ending in 1881", a bank by its name and the account's last four digits, a Link account by its email. Each method wears its brand's mark before the label. With nothing on file the pill reads "No payment method added yet" and offers Add instead of Edit.
+
+When the default card has fewer than four months left, the header says "Expires in 2 mo", or "Expired" once its month has arrived.
+
+The default is whichever method the server marks: the subscription's own payment method when it has one, else the customer's default. A list with no default shows an empty pill until someone picks one.
+
+## The dialog
+
+Edit opens a modal titled "Edit payment details", closed by Escape, the backdrop, or the control in its header. It repeats the heading and the expiry warning, then the pill, with Remove in place of Edit. "Choose different payment method" unfolds the other methods, each with when a card expires ("Expires 8/27"), Set default, and a remove control. A full-width "Add new payment method" opens the form.
+
+Every action is disabled while a change is in flight. A change that lands leaves the dialog as it was over the refreshed list. One that fails is reported at the foot of the dialog, "Error updating payment method. Please try again." or "Error deleting payment method. Please try again.", with "Try again" to re-run it.
+
+## Adding a method
+
+The form mints a Stripe SetupIntent, mounts Stripe's Payment Element on it, and confirms the setup in place. The saved method becomes the default, and the dialog returns to it. "Save payment method" waits until Stripe calls the fields complete and reads "Loading" while it saves. "Select existing payment method" goes back without saving. With nothing on file the dialog opens straight onto the form.
+
+Stripe's own wording shows for a declined card or an invalid field. Any other failure reads "A problem occurred while saving your payment method." If the form cannot load, including when the browser blocks Stripe or its fields do not come up within ten seconds, it says so and suggests the browser's privacy settings may be the cause.
+
+Stripe's fields render in an iframe your CSS cannot reach, so the form themes them from the `--schematic-*` tokens as the browser resolves them, dark mode included.
+
+## Checkout settings
+
+`checkoutSettings` takes the same collect-email, collect-address, and collect-phone options you configure for checkout in Schematic, so you can pass them through as they are. `checkoutPrefill` supplies the values the form starts with:
+
+```tsx
+<PaymentMethods
+  checkoutSettings={{ collectEmail: true, collectAddress: true }}
+  checkoutPrefill={{ billingDetails: { email: user.email, name: user.name } }}
+/>
+```
+
+| Setting | Effect |
+| --- | --- |
+| `collectEmail` | A required "Email" field under Stripe's, filled from `billingDetails.email` until the customer types. Sent as the method's billing email. |
+| `collectAddress` | Stripe's billing address fields, with the name filled from `billingDetails.name`. Save waits for them to be complete. |
+| `collectPhone` | The same address fields with a phone number among them, not required to be complete. |
+
+The prefilled name is sent as the billing name whenever the address fields show. Each setting defaults to `false`.
+
+## Rules the server enforces
+
+- Any method can be removed, the default included, except the last one on an active paid subscription. Each method's `canRemove` says which, and the remove controls show only where it is `true`.
+- Removing the default promotes nothing. The company has no default until someone sets one.
+- A method added through the form becomes the default.
+
+These rules live on the server, so a hand-built UI gets the same answers from [`usePaymentMethods`](/components/build-your-own/hooks#usepaymentmethods).
+
+## Errors
+
+A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Payment methods are not available", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under a method already loaded, reads "Could not load payment methods". A refetch that fails with a method on screen is reported under it rather than replacing it.
+
+Neither message is the error's own text. In development the component logs the underlying error to the console beside the copy.
+
+## Icons
+
+The brand marks, the dialog's close control, and the chevron on "Choose different payment method" are glyphs from the Schematic icon font, which `<SchematicStyles />` inlines as a `data:` URL. If your Content Security Policy sets `font-src`, add `data:` to it, or the glyphs render empty. Every glyph is `aria-hidden` and sits beside its text, so a blocked font loses only the mark.
+
+If you replace `SchematicStyles` with your own sheet, render `<style>{iconsCss}</style>` once, exported from the same entry point. The icon package's own stylesheet names its rules differently and does not light the glyphs up.
+
+## Strings
+
+Every word the card renders resolves through `strings` on the component, then on the provider, then the provider's `translate`, then English. See [Localization](/components/drop-in/localization) for how the chain works. These are the keys:
+
+| Key | Default |
+| --- | --- |
+| `paymentMethodsHeader` | Payment Details |
+| `paymentMethodsLoading` | Loading payment methods, read by assistive technology while the skeleton shows |
+| `paymentMethodsEmpty` | No payment method added yet |
+| `paymentMethodsError`, `paymentMethodsUnavailable` | Could not load payment methods; Payment methods are not available |
+| `paymentMethodsEdit`, `paymentMethodsAdd` | Edit, Add |
+| `paymentMethodsExpiresInMonths`, `paymentMethodsExpired` | `Expires in {{months}} mo`, Expired |
+| `paymentMethodsCardEndingIn`, `paymentMethodsApplePayEndingIn`, `paymentMethodsGooglePayEndingIn` | Card ending in, Apple Pay ending in, Google Pay ending in |
+| `paymentMethodsApplePay`, `paymentMethodsGooglePay` | Apple Pay, Google Pay, when no card digits came with the wallet |
+| `paymentMethodsAmazonPayAccount`, `paymentMethodsCashAppAccount`, `paymentMethodsPayPalAccount`, `paymentMethodsLinkAccount` | Amazon Pay account, CashApp account, PayPal account, Link account, when the provider supplied no name or email |
+| `paymentMethodsBankAccount`, `paymentMethodsGeneric` | Bank account, Payment method |
+| `paymentMethodsDialogTitle`, `paymentMethodsClose` | Edit payment details, Close |
+| `paymentMethodsChooseDifferent`, `paymentMethodsExpires` | Choose different payment method, `Expires {{date}}` |
+| `paymentMethodsSetDefault`, `paymentMethodsRemove`, `paymentMethodsAddNew` | Set default, Remove, Add new payment method |
+| `paymentMethodsSelectExisting` | Select existing payment method |
+| `paymentMethodsFormLoading`, `paymentMethodsFormError`, `paymentMethodsSetupError` | Loading payment form, and the load and setup failures above |
+| `paymentMethodsEmail`, `paymentMethodsEmailPlaceholder` | Email, Enter email address |
+| `paymentMethodsSave`, `paymentMethodsSaving`, `paymentMethodsSaveError` | Save payment method, Loading, and the save failure above |
+| `paymentMethodsSetDefaultError`, `paymentMethodsRemoveError` | The two dialog failures above |
+| `retry` | Try again |
+
+`locale` is also handed to Stripe for the form's own labels.
+
+```tsx
+<PaymentMethods strings={{ paymentMethodsHeader: "Billing", paymentMethodsEdit: "Change" }} />
+```
 
 ## Markup
+
+This is what the card renders, for a host styling it without `SchematicStyles`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
 <div class="schematic-card schematic-payment-methods" data-state="ready">
   <div class="schematic-header">
-    <h2 class="schematic-header__title">Payment methods</h2>
-    <button class="schematic-cta schematic-cta--small schematic-payment-methods__add">Add</button>
+    <h2 class="schematic-header__title">Payment Details</h2>
+    <!-- when the default card expires within four months -->
+    <span class="schematic-small schematic-payment-methods__expiry-warning" data-expiry="soon">
+      Expires in 2 mo
+    </span>
   </div>
-  <ul class="schematic-payment-methods__list">
-    <li class="schematic-payment-methods__row" data-default="true">
-      <span class="schematic-payment-methods__brand" data-brand="visa">Visa</span>
-      <span class="schematic-payment-methods__last4">···· 4242</span>
-      <span class="schematic-badge">Default</span>
-    </li>
-  </ul>
+
+  <div class="schematic-payment-methods__current">
+    <span class="schematic-payment-methods__method" data-kind="card" data-brand="visa">
+      <i class="schematic-icon schematic-icon--visa schematic-payment-methods__icon" aria-hidden="true"></i>
+      <span class="schematic-payment-methods__label">Card ending in</span>
+      <span class="schematic-payment-methods__last4">4242</span>
+    </span>
+    <!-- "Add" when nothing is on file -->
+    <button class="schematic-link-button schematic-payment-methods__edit">Edit</button>
+  </div>
 </div>
 ```
 
-## Localizing it
+The dialog is a native `<dialog class="schematic-dialog schematic-payment-methods__dialog">` with a `schematic-dialog__header`, `schematic-dialog__title`, and `schematic-dialog__close`, then a `schematic-dialog__body`. Inside it:
 
-Keys: `paymentMethodsHeader`, `paymentMethodsAdd`, `paymentMethodsRemove`, `paymentMethodsMakeDefault`, `paymentMethodsDefault`, `paymentMethodsExpires`, `paymentMethodsEmpty`, `retry`.
+- **The pill:** carries `schematic-payment-methods__remove-current`.
+- **The toggle:** `schematic-payment-methods__choose` holds a `schematic-payment-methods__choose-label` and a `schematic-payment-methods__chevron`.
+- **The list:** `schematic-payment-methods__list` holds `schematic-payment-methods__row` items, each with `schematic-payment-methods__expires`, `schematic-payment-methods__set-default`, and `schematic-payment-methods__remove`.
+- **Add new:** `schematic-payment-methods__add-new`.
+- **The form:** `schematic-payment-methods__form`, whose `data-state` is `pending`, `error`, or `ready`, with `schematic-payment-methods__save`.
+- **A failed write:** `schematic-payment-methods__error`.
+
+The pending and error states follow the other cards: `data-state="pending"` with a `schematic-skeleton`, or `data-state="error"` with a `schematic-status` row.
 
 ## Build it yourself
 
-[`usePaymentMethods`](/components/build-your-own/hooks#usepaymentmethods) returns the methods plus `add`, `remove`, and `setDefault`; `derivePaymentMethods` gives you brand text, last four, expiry, and the default flag per row.
+[`usePaymentMethods`](/components/build-your-own/hooks#usepaymentmethods) returns the list with `setDefault` and `remove`. [`useSetupIntent`](/components/build-your-own/hooks#usesetupintent) mints the intent a Stripe form confirms. [`derivePaymentMethods`](/components/build-your-own/derivations) splits the list into the default and the others, with a label, brand mark, last four digits, and expiry per row.
