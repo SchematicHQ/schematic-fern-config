@@ -1,0 +1,138 @@
+---
+title: When Credits Run Out
+description: Choose whether a company is blocked, topped up automatically, left to top up itself, or billed in arrears when its credit balance reaches zero, and how credit bundles fit alongside each.
+
+slug: billing/when-credits-run-out
+---
+
+Every credit grant on a plan or add-on carries a **When credits run out** setting, and it decides what a customer hits at a zero balance. Pick the wrong one and you either cut off an enterprise account mid-workload or hand a self-serve customer a bill they never agreed to. The four options trade continuity against control over spend:
+
+| Policy | What happens at zero | Who decides to spend more | How extra usage is paid for |
+| --- | --- | --- | --- |
+| Block usage | Credit-metered features stop | You, by granting credits | Nothing extra is charged |
+| Automatic top-ups | A top-up is bought before the balance runs out | You, through the threshold and amount | Charged per top-up, in advance |
+| User-controlled top-ups | Features stop unless the company turned on auto top-up | The company | Charged per top-up, in advance |
+| Bill in arrears | Features keep working and the balance goes negative | Nobody, usage continues | Invoiced per credit after the fact |
+
+[Credit bundles](#credit-bundles) sit alongside all four. A company buys a bundle as a one-time purchase, and whether it can depends on the bundle, not on this setting.
+
+You'll find the setting in the credit grant form: open a plan or add-on in the Catalog, click "Add credit grant" or an existing grant, and look for **When credits run out** below the reset and expiration fields.
+
+## Block usage
+
+Block usage is the default. When a company's balance can no longer cover a use, the flag check for that feature returns false and your application stops the action.
+
+The check compares the balance against the full cost of the use, not against zero. A company holding 3 credits is denied a feature that costs 5, even though its balance is still positive.
+
+Access comes back when new credits arrive:
+
+- The plan grant resets on its next cycle.
+- The company buys a [credit bundle](#credit-bundles) that is available on its plan.
+- You add a grant yourself from the company's page, using **Add Credit Grant** on the credit balance table. The grant form lets you record the reason, such as "Free, promotional credit", and set how the credits expire.
+
+<Note>
+The flag check gates access, but a track event records usage that already happened. When a single track event consumes more than the balance holds, Schematic records it in full and the balance goes negative, and the next grant covers that shortfall before anything else. If the company holds only promotional credits, the part past zero is dropped instead. Check the flag before the work runs so the balance goes negative only when one use is larger than the check anticipated.
+</Note>
+
+When several workers or agents draw on one balance at once, checks alone let them overspend it between the check and the track. A [reservation](/billing/credit-leases-and-reservations) debits the credits up front and fails with a `402` when the balance cannot fund it in full.
+
+## Automatic top-ups
+
+Automatic top-ups buy credits on the company's behalf whenever its balance falls to a threshold you set, so a customer with a card on file never reaches zero. The company cannot change or turn off the top-up, which suits accounts where an interruption costs more than the extra spend, such as an enterprise customer running production workloads.
+
+You set three things:
+
+- **Top-up Threshold** is the number of credits remaining that triggers a purchase.
+- **Top-up Amount** is how many credits each top-up buys, priced at the credit type's cost basis.
+- **Top-up Grant Expiration** sets how long the purchased credits last.
+
+The credit type needs a per-unit price before either top-up policy can be chosen, because Schematic has nothing to charge without one.
+
+A top-up fires while Schematic processes a draw that leaves the balance at or below the threshold. A failed charge means the customer is about to be cut off, so subscribe to `auto.topup.hard.failure` before you rely on this policy. [Auto Top-Up](/billing/credit-burndown#auto-top-up) covers retries, the webhook payloads, and per-company settings.
+
+## User-controlled top-ups
+
+User-controlled top-ups hand the decision to the customer. A company turns auto top-up on or off itself, in checkout and in the customer portal, and can change the threshold and amount. The values you enter become its starting defaults, which is why the form labels them "(default)".
+
+A company that never turns auto top-up on behaves as it would under Block usage: its credit-metered features stop at zero until new credits arrive. Choose this policy for self-serve plans, where customers expect to control what they spend.
+
+## Bill in arrears
+
+Bill in arrears lets a company keep using credit-metered features after its balance reaches zero. Schematic prices each credit consumed past zero and invoices the total on a schedule you choose, so the customer is never blocked and never prepays for more than its plan includes. It fits customers on invoice and net terms, who have no card for a top-up to charge.
+
+| Field | What it sets |
+| --- | --- |
+| **Postpaid Rate** | The charge per credit consumed past zero. Defaults to the credit type's cost basis, and accepts fractions of a cent such as `0.0002`. |
+| **Invoice Charges** | **End of billing period** invoices when the subscription's own period closes. **Monthly** invoices each month, so an annual plan collects overage monthly rather than once a year. |
+| **Invoice On** | For monthly invoicing only. **Billing period start date** follows the subscription's anniversary each month, and **End of month** follows the calendar month. |
+| **Overdraft Limit** | How far the balance may go below zero, in credits, before the company is blocked. Leave it empty for no limit. |
+
+### How the charges are invoiced
+
+Schematic tracks the credits consumed past zero in each invoice window. Shortly after a window closes, it raises a standalone Stripe invoice for that window, separate from the subscription invoice, with one line such as "AI Tokens used past your balance: 1,200 AI Tokens at \$0.02 each".
+
+Stripe charges the invoice automatically when the customer has a payment method on file. Otherwise Stripe sends it to the customer, due in 30 days. Tax follows your catalog's tax collection setting.
+
+What happens next depends on the invoice:
+
+| Invoice outcome | Effect on the company's debt |
+| --- | --- |
+| Paid in full | The debt is cleared |
+| Voided in Stripe | The debt is forgiven |
+| Marked uncollectible | The status is recorded and the debt stays in place |
+
+### Overdraft limit
+
+The overdraft limit is a floor on the balance, not an allowance per window. It does not reset when an invoice window rolls over, so a company that reaches it stays blocked until its invoice is paid or voided, or until new credits arrive. Set one when you want a ceiling on how much unpaid usage a single account can build up between invoices.
+
+### Behavior to plan around
+
+- New credits do not pay down the debt. A plan reset, bundle purchase, or manual grant adds to what the company can spend, and the invoice still bills the full overage, so the customer is not charged twice for the same credits.
+- The debt survives plan changes and is still invoiced. When a subscription is cancelled, Schematic closes the open window right away and invoices it, and the company is blocked at zero from then on.
+- Billing in arrears needs an active subscription to cut invoice windows from. A company without one is blocked at zero, as it would be under Block usage.
+- A credit grant can bill in arrears or top up automatically, not both. Pick the one that matches how the customer pays.
+- Add-on credit grants support this policy too. When a company's base plan and an add-on both bill the same credit type in arrears, the base plan's rate and overdraft limit apply.
+- A credit whose usage is billed by an external provider cannot be billed in arrears, because that provider already bills its usage.
+
+The `credit.limit.reached` webhook fires when a company uses its full balance, which under this policy is the moment it starts accruing charges. Use it to tell the customer before the invoice does. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
+
+## Credit bundles
+
+A credit bundle is a fixed number of credits at a fixed price, such as 10,000 credits for \$90, that a company buys once through checkout or the customer portal. Bundles are how a customer on Block usage or User-controlled top-ups gets unblocked without waiting for the next reset, and how you offer volume discounts on larger purchases.
+
+Each bundle decides which plans can buy it. On the **Live Credit Bundles** list in your catalog configuration, each bundle reads "Compatible with all plans" by default. Click it to open **Plan Compatibility Settings** and choose the plans under **Compatible Plans**. The change applies everywhere the bundle is live. The customer portal shows a buy-more option on a credit balance when at least one live bundle for that credit is compatible with the company's plan.
+
+[Configure Credit Bundles](/billing/credit-burndown#5-configure-credit-bundles) walks through creating bundles and adding them to the catalog.
+
+## Choosing a policy
+
+- Choose **Block usage** for free plans and trials, where a customer who runs out should hit an upgrade prompt rather than a bill.
+- Choose **User-controlled top-ups** for self-serve paid plans, so customers decide how much to spend and can buy bundles when they need more.
+- Choose **Automatic top-ups** for accounts that pay by card and should never be interrupted.
+- Choose **Bill in arrears** for accounts on invoice terms, where usage should continue and be settled on the next invoice.
+
+A plan's policy applies to every company on it. When one account needs different treatment, such as an enterprise customer on invoice terms in a plan otherwise sold self-serve, a [custom plan](/catalog/guides-custom-plans) gives it its own credit grant and policy.
+
+## API fields
+
+The policy is not a single field in the API. The dashboard writes two fields on the [plan credit grant](/api-reference/billing-credits/create-plan-credit-grant), and the arrears settings sit alongside them.
+
+| Policy | `auto_topup_availability` | `postpaid_enabled` |
+| --- | --- | --- |
+| Block usage | `off` | `false` |
+| Automatic top-ups | `automatic` | `false` |
+| User-controlled top-ups | `user_controlled` | `false` |
+| Bill in arrears | `off` | `true` |
+
+| Dashboard field | API field | Values |
+| --- | --- | --- |
+| Top-up Threshold | `auto_topup_threshold_credits` | Integer, credits remaining |
+| Top-up Amount | `auto_topup_amount`, `auto_topup_amount_type` | Integer, with `auto_topup_amount_type` set to `credit` |
+| Postpaid Rate | `postpaid_rate_per_unit`, `postpaid_rate_per_unit_decimal` | In the currency's minor unit. The decimal form takes precedence when both are set |
+| Invoice Charges | `arrears_cadence` | `end_of_billing_period` or `monthly` |
+| Invoice On | `arrears_anchor` | `billing_period_start` or `month_end` |
+| Overdraft Limit | `overdraft_limit` | Credits, greater than 0. Omit for no limit |
+
+Plan compatibility for a bundle is `compatible_plan_ids` on the [credit bundle](/api-reference/billing-credits/update-credit-bundle-details). An empty list makes the bundle available on every plan.
+
+On a company's credit grants, charges past zero show up under three `grant_reason` values: `postpaid_overdraft` holds the negative balance, `postpaid_settlement` records a paid invoice, and `postpaid_forgiven` records a voided one.
