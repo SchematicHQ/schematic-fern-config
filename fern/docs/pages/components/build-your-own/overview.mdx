@@ -11,7 +11,7 @@ Everything a drop-in component shows is available to your own code, one layer do
 | Layer | Package | What it gives you |
 | --- | --- | --- |
 | Client | `@schematichq/schematic-js` | `SchematicBillingClient` and `SchematicSession`: the session, the requests, the generated types. Plain TypeScript, so Vue and Angular use it too. |
-| Hooks | `@schematichq/schematic-react` | `SchematicProvider` with `session`, and one hook per resource returning `{ data, error, isPending, refetch }`. |
+| Hooks | `@schematichq/schematic-react` | `SchematicProvider` with `session`, and one hook per resource returning `{ data, error, isPending, refetch }`. A resource you can change carries its writes on the same handle, such as `setDefault` and `remove` on `usePaymentMethods`, and an action with nothing to read, such as `useSetupIntent`, has a hook of its own. |
 | Derivations | `@schematichq/schematic-components/elements` | Pure functions from server facts to a display model, plus `Intl` formatting helpers. |
 | Your JSX | your app | Reference code in shadcn/ui, Tailwind, and plain CSS, or a prompt for your agent. |
 
