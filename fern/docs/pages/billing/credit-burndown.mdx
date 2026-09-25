@@ -241,7 +241,7 @@ These live on `BillingPlanCreditGrantResponseData`.
 | Grant Expiration: End of Billing Period, Next | `expiry_type` | `end_of_next_billing_period` |
 | Grant Expiration: No Expiry | `expiry_type` | `no_expiry` |
 | Credit Amount | `credit_amount` | Integer |
-| Buyers can purchase credit bundles | `can_buy_bundles` | Boolean |
+| Automatic or user-controlled top-ups | `auto_topup_availability`, `postpaid_enabled` | See [API fields](/billing/empty-credit-balances#api-fields) |
 
 Two things the API exposes that the dashboard does not:
 
@@ -258,6 +258,7 @@ These live on `BillingCreditBundleResponseData`.
 | Amount of credits | `quantity` |
 | Credit bundle price | `price`, `currency_prices` |
 | Expiry Type | `expiry_type`, `expiry_unit`, `expiry_unit_count` |
+| Compatible Plans | `compatible_plan_ids`. Empty means every plan |
 
 ### Credit type
 
@@ -331,13 +332,13 @@ That returns 10 credits to the balance through an adjustment grant, and those 10
 Auto top-up buys credits automatically when a customer's balance falls below a threshold, so they are not cut off mid-workflow. It is configured on the plan's credit grant, in the same form as the reset and expiry settings.
 
 <Note>
-The credit type needs a cost basis before top-ups can be turned on. Without a per-unit price there is nothing to charge, so **Top-up Availability** stays disabled and the form tells you a per-unit price is required.
+The credit type needs a cost basis before top-ups can be turned on. Without a per-unit price there is nothing to charge, so the top-up options are hidden and the form tells you the credit needs a per-unit price.
 </Note>
 
 1. Open the credit burndown plan you want to configure.
 2. Click "Add credit grant".
 3. Select the Credit Type and Credit Amount.
-4. Set **Top-up Availability** to Automatic or User-controlled, covered in [Who controls auto top-up](#who-controls-auto-top-up) below.
+4. Choose "Automatic top-ups" or "User-controlled top-ups" for what happens when credits run out, covered in [Who controls auto top-up](#who-controls-auto-top-up) below.
 
 ![Auto Top-Up](../../assets/images/billing/burndown-auto-top-up.png)
 
@@ -348,23 +349,20 @@ The credit type needs a cost basis before top-ups can be turned on. Without a pe
 
 ### Who controls auto top-up
 
-**Top-up Availability** decides both whether auto top-up runs and who operates it:
-
-| Setting | What happens |
+| Mode | What happens |
 | --- | --- |
-| Off | Companies cannot buy more credits or manage auto top-ups. Existing credits remain until they expire. |
-| Automatic | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
-| User-controlled | Companies turn auto top-up on themselves and buy more credits in checkout and through components. Your threshold and amount become their starting defaults. |
+| Automatic top-ups | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
+| User-controlled top-ups | Companies turn auto top-up on themselves in checkout and through components. Your threshold and amount become their starting defaults. |
 
 Choose User-controlled for self-serve plans where customers should manage their own refills, and Automatic when continuity matters more than customer control, such as an enterprise account that should never stop mid-workload. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both.
 
-**Buyers can purchase credit bundles** is a separate checkbox on the same grant, covering one-time [bundle](#5-configure-credit-bundles) purchases. It is independent of top-up availability, so you can let a customer buy credits on demand without letting them set up an automatic refill, or the reverse. Unchecked, the buy-more button is hidden and one-time bundle purchases are rejected.
+One-time [bundle](#5-configure-credit-bundles) purchases are set on each bundle rather than on the grant. A bundle's **Plan Compatibility Settings** choose which plans can buy it, and a company can buy any live bundle compatible with its plan regardless of the top-up policy. See [Credit bundles](/billing/empty-credit-balances#credit-bundles).
 
 ### Per-company exceptions
 
 Top-up settings live on the plan grant, so every company on that plan starts with the same threshold and amount. Individual companies can be given different values through the [API](/api-reference/billing-credits/list-company-grants), which is currently the only way to do it, as the dashboard has no per-company top-up control.
 
-Under User-controlled availability the customer changes their own threshold and amount, which covers many of the cases an override would otherwise handle.
+Under User-controlled top-ups the customer changes their own threshold and amount, which covers many of the cases an override would otherwise handle.
 
 ### Triggering an Auto Top-Up
 
