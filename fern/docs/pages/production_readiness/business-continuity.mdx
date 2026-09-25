@@ -1,0 +1,78 @@
+---
+title: Business Continuity
+description: Keep billing and flag checks running if Schematic shuts down or is acquired, using Stripe, Replicator snapshots, and scheduled exports.
+
+slug: production_readiness/business-continuity
+---
+
+Putting Schematic in your critical path is a real dependency, and it's reasonable to ask what happens if Schematic shuts down, or is acquired and the product is discontinued. This page covers what keeps running, what stops, and what to set up now so you can keep operating while you migrate.
+
+# Your billing stays in Stripe
+
+Your customers, subscriptions, payment methods, and invoices are stored in your own Stripe account. If Schematic becomes unavailable, Stripe keeps billing your existing subscriptions at their current prices.
+
+{/* TODO(eng): confirm the complete list of what Schematic drives into Stripe. */}
+
+Anything Schematic sends to Stripe stops when Schematic does, so you need a replacement for each of these before you migrate:
+
+- Usage that Schematic reports to Stripe for metered prices. Without it, metered charges stop accruing.
+- Plan changes, upgrades, and cancellations that customers make through Schematic checkout and the customer portal.
+
+# Keep flag checks running
+
+Backend SDKs in Replicator mode evaluate flags locally from Redis and never call the Schematic API. Normally the [Replicator](/developer_resources/sdks/cross-platform-features#replicator) container keeps Redis current. If Schematic becomes unavailable, you restore a snapshot into Redis and the SDK keeps evaluating flags from it.
+
+Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All Schematic SDKs are MIT licensed, so you can keep running and modifying them without Schematic.
+
+To prepare:
+
+1. Take snapshots on a schedule with `schematic-export all`, described in [Export your data](#export-your-data).
+2. If Schematic becomes unavailable, load the latest snapshot into Redis with `schematic-export restore`.
+3. Start `schematic-export serve-health`. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
+4. Run your SDK in Replicator mode against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
+
+A restored snapshot behaves differently from a live Replicator in a few ways that change what you plan for:
+
+- Your SDK reads flags, companies, and users from Redis, so you need a Redis instance you control.
+- Flag rules, plans, and entitlements stay exactly as they were when the snapshot was taken.
+- Usage from `track` calls keeps counting in Redis, but metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it.
+- Pin your SDK version. The snapshot is stored in the format of the rules engine version it was taken with.
+- Client-side SDKs (JavaScript, React, and Vue) call the Schematic API directly, so when it's unreachable they return flag defaults.
+
+Set [flag defaults](/production_readiness/availability) in every SDK, client-side and backend. They decide what your app shows for any flag the snapshot doesn't cover and for every client-side check.
+
+# Export your data
+
+`schematic-export` is an open-source CLI that exports your Schematic configuration and usage as JSON. Run it on a schedule now, from cron or CI. The export reads from the Schematic API, so once the API is unavailable the most recent export you ran is the one you have.
+
+{/* TODO: publish the repo and confirm the link. */}
+
+The source is at [github.com/SchematicHQ/schematic-export](https://github.com/SchematicHQ/schematic-export).
+
+| Command | What it does |
+|---|---|
+| `all` | Runs `config`, `usage`, and `snapshot` together. Schedule this one. |
+| `config` | Exports plans, plan versions and their entitlements, add-ons, features, flags, credits, companies, company overrides, users, and billing product mappings |
+| `usage` | Exports events, plus current usage per company for each metered feature |
+| `snapshot` | Exports the flag, company, and user data your SDK reads in Replicator mode |
+| `restore` | Loads a snapshot into Redis, with no call to the Schematic API |
+| `serve-health` | Serves the Replicator health endpoint for a restored snapshot |
+
+Each run writes JSON to a timestamped directory, locally or in S3, and updates `latest.json` to point at it. Every run logs the account and environment it's exporting, so check that line the first time you run with a new key.
+
+```sh
+# Run nightly from cron or CI
+schematic-export all --out s3://your-bucket/schematic
+
+# Only if Schematic becomes unavailable
+schematic-export restore --from s3://your-bucket/schematic --redis redis://localhost:6379
+schematic-export serve-health --from s3://your-bucket/schematic --port 8090
+```
+
+Create a [readonly secret API key](/api-reference/authentication#readonly-api-keys) for the export. A readonly key can make every request the export needs and can't change anything in your account.
+
+{/* TODO(eng): confirm event retention for the events API. */}
+
+The events API returns about the last six months of events. Keep every run rather than deleting old ones, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
+
+{/* TODO(legal): contract terms (notice period, transition window) go here once the Cloud Services Agreement is updated. Do not publish commitments before then. */}
