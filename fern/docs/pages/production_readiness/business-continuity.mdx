@@ -26,9 +26,9 @@ Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All 
 
 To prepare:
 
-1. Take snapshots on a schedule with `schematic-export all`, described in [Export your data](#export-your-data).
-2. If Schematic becomes unavailable, load the latest snapshot into Redis with `schematic-export restore`.
-3. Start `schematic-export serve-health`. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
+1. Take snapshots on a schedule with the `schematic-export` `all` command, described in [Export your data](#export-your-data).
+2. If Schematic becomes unavailable, load the latest snapshot into Redis with the `restore` command.
+3. Start the `serve-health` command. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
 4. Run your SDK in Replicator mode against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
 
 A restored snapshot behaves differently from a live Replicator in a few ways that change what you plan for:
@@ -47,7 +47,7 @@ Set [flag defaults](/production_readiness/availability) in every SDK, client-sid
 
 {/* TODO: publish the repo and confirm the link. */}
 
-The source is at [github.com/SchematicHQ/schematic-export](https://github.com/SchematicHQ/schematic-export).
+Clone it from [github.com/SchematicHQ/schematic-export](https://github.com/SchematicHQ/schematic-export), build it with `npm install && npm run build`, and run commands from the repo directory.
 
 | Command | What it does |
 |---|---|
@@ -62,11 +62,11 @@ Each run writes JSON to a timestamped directory, locally or in S3, and updates `
 
 ```sh
 # Run nightly from cron or CI
-schematic-export all --out s3://your-bucket/schematic
+node dist/cli.js all --out s3://your-bucket/schematic
 
 # Only if Schematic becomes unavailable
-schematic-export restore --from s3://your-bucket/schematic --redis redis://localhost:6379
-schematic-export serve-health --from s3://your-bucket/schematic --port 8090
+node dist/cli.js restore --from s3://your-bucket/schematic --redis redis://localhost:6379
+node dist/cli.js serve-health --from s3://your-bucket/schematic --port 8090
 ```
 
 Create a [readonly secret API key](/api-reference/authentication#readonly-api-keys) for the export. A readonly key can make every request the export needs and can't change anything in your account.
