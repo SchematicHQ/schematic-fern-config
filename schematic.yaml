@@ -4685,6 +4685,114 @@ components:
         - type
         - value
       title: CompanyTaxIDView
+    CompanyUserUsageMetricsResponseData:
+      type: object
+      properties:
+        end_time:
+          type: string
+          description: End of the usage window (exclusive)
+          format: date-time
+        features:
+          type: array
+          description: >-
+            Event-based features the company has user-attributed usage for in
+            the window; a feature with usage but no entitlement is still listed
+          items:
+            $ref: '#/components/schemas/FeatureResponseData'
+          maxItems: 1000
+        has_credits:
+          type: boolean
+          description: Whether the company consumed any credits in the window
+        start_time:
+          type: string
+          description: Start of the usage window
+          format: date-time
+      required:
+        - end_time
+        - features
+        - has_credits
+        - start_time
+      title: CompanyUserUsageMetricsResponseData
+    CompanyUserUsageResponseData:
+      type: object
+      properties:
+        end_time:
+          type: string
+          description: End of the usage window (exclusive)
+          format: date-time
+        rows:
+          type: array
+          description: This page of per-user consumption within the window, heaviest first
+          items:
+            $ref: '#/components/schemas/CompanyUserUsageRowResponseData'
+          maxItems: 1000
+        start_time:
+          type: string
+          description: Start of the usage window
+          format: date-time
+        top_user_share:
+          type: number
+          description: >-
+            The heaviest user's fraction (0-1) of consumption, measured across
+            every user in the window and not just this page
+          format: double
+        total:
+          type: number
+          description: >-
+            Consumption across every user in the window including unattributed,
+            not just this page
+          format: double
+        unattributed:
+          allOf:
+            - $ref: '#/components/schemas/CompanyUserUsageRowResponseData'
+          description: >-
+            Consumption from events sent without a user; not a user, so it is
+            excluded from rows and from the count, and returned on every page.
+            Null when the window has none
+      required:
+        - end_time
+        - rows
+        - start_time
+        - top_user_share
+        - total
+      title: CompanyUserUsageResponseData
+    CompanyUserUsageRowResponseData:
+      type: object
+      properties:
+        last_seen:
+          type: string
+          description: >-
+            When the user last used the feature within the window; null for the
+            credits metric, which aggregates balances rather than timestamped
+            events
+          format: date-time
+          nullable: true
+        share:
+          type: number
+          description: >-
+            This row's fraction (0-1) of consumption within the window,
+            including unattributed consumption
+          format: double
+        user:
+          allOf:
+            - $ref: '#/components/schemas/UserResponseData'
+          description: >-
+            The user the consumption is attributed to; null for consumption from
+            events sent without a user
+        user_id:
+          type: string
+          description: >-
+            The user the consumption is attributed to; null for unattributed
+            consumption
+          nullable: true
+        value:
+          type: number
+          description: The user's consumption of the metric within the window
+          format: double
+      required:
+        - share
+        - value
+      title: CompanyUserUsageRowResponseData
     ComparableOperator:
       type: string
       enum:
@@ -18231,6 +18339,11 @@ components:
         - feature_totals
         - start_time
       title: UserUsageDetailResponseData
+    UserUsageMetric:
+      type: string
+      enum:
+        - credits
+        - feature
     WarningTier:
       type: object
       properties:
@@ -35777,6 +35890,326 @@ paths:
                   - data
                   - params
                 title: GetUserUsageByCompanyResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user-usage-by-company/metrics:
+    get:
+      operationId: getCompanyUserUsageMetrics
+      summary: Get company user usage metrics
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          description: Company to list available metrics for
+          required: true
+          schema:
+            type: string
+            description: Company to list available metrics for
+        - name: end_time
+          in: query
+          description: End of the usage window (exclusive); defaults to now
+          schema:
+            type: string
+            description: End of the usage window (exclusive); defaults to now
+            format: date-time
+        - name: start_time
+          in: query
+          description: Start of the usage window; defaults to 30 days before the end
+          schema:
+            type: string
+            description: Start of the usage window; defaults to 30 days before the end
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyUserUsageMetricsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Company to list available metrics for
+                      end_time:
+                        type: string
+                        description: End of the usage window (exclusive); defaults to now
+                        format: date-time
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the usage window; defaults to 30 days before
+                          the end
+                        format: date-time
+                    title: GetCompanyUserUsageMetricsParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyUserUsageMetricsResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user-usage-by-company/users:
+    get:
+      operationId: listCompanyUserUsage
+      summary: List company user usage
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          description: Company to break usage down for
+          required: true
+          schema:
+            type: string
+            description: Company to break usage down for
+        - name: end_time
+          in: query
+          description: End of the usage window (exclusive); defaults to now
+          schema:
+            type: string
+            description: End of the usage window (exclusive); defaults to now
+            format: date-time
+        - name: feature_id
+          in: query
+          description: >-
+            The event-based feature to break down; required when metric is
+            feature
+          schema:
+            type: string
+            description: >-
+              The event-based feature to break down; required when metric is
+              feature
+        - name: metric
+          in: query
+          description: Which metric to break usage down by
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/UserUsageMetric'
+            description: Which metric to break usage down by
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+        - name: start_time
+          in: query
+          description: Start of the usage window; defaults to 30 days before the end
+          schema:
+            type: string
+            description: Start of the usage window; defaults to 30 days before the end
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyUserUsageResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Company to break usage down for
+                      end_time:
+                        type: string
+                        description: End of the usage window (exclusive); defaults to now
+                        format: date-time
+                      feature_id:
+                        type: string
+                        description: >-
+                          The event-based feature to break down; required when
+                          metric is feature
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      metric:
+                        allOf:
+                          - $ref: '#/components/schemas/UserUsageMetric'
+                        description: Which metric to break usage down by
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the usage window; defaults to 30 days before
+                          the end
+                        format: date-time
+                    title: ListCompanyUserUsageParams
+                required:
+                  - data
+                  - params
+                title: ListCompanyUserUsageResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user-usage-by-company/users/count:
+    get:
+      operationId: countCompanyUserUsage
+      summary: Count company user usage
+      tags:
+        - entitlements
+      parameters:
+        - name: company_id
+          in: query
+          description: Company to break usage down for
+          required: true
+          schema:
+            type: string
+            description: Company to break usage down for
+        - name: end_time
+          in: query
+          description: End of the usage window (exclusive); defaults to now
+          schema:
+            type: string
+            description: End of the usage window (exclusive); defaults to now
+            format: date-time
+        - name: feature_id
+          in: query
+          description: >-
+            The event-based feature to break down; required when metric is
+            feature
+          schema:
+            type: string
+            description: >-
+              The event-based feature to break down; required when metric is
+              feature
+        - name: metric
+          in: query
+          description: Which metric to break usage down by
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/UserUsageMetric'
+            description: Which metric to break usage down by
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+        - name: start_time
+          in: query
+          description: Start of the usage window; defaults to 30 days before the end
+          schema:
+            type: string
+            description: Start of the usage window; defaults to 30 days before the end
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                        description: Company to break usage down for
+                      end_time:
+                        type: string
+                        description: End of the usage window (exclusive); defaults to now
+                        format: date-time
+                      feature_id:
+                        type: string
+                        description: >-
+                          The event-based feature to break down; required when
+                          metric is feature
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      metric:
+                        allOf:
+                          - $ref: '#/components/schemas/UserUsageMetric'
+                        description: Which metric to break usage down by
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the usage window; defaults to 30 days before
+                          the end
+                        format: date-time
+                    title: CountCompanyUserUsageParams
+                required:
+                  - data
+                  - params
+                title: CountCompanyUserUsageResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
