@@ -14387,6 +14387,12 @@ components:
         proration_behavior:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
+          description: >-
+            How Stripe handles the price difference when companies are migrated.
+            With migration_strategy immediate, omitted means create_prorations.
+            With end_of_billing_period only none is accepted and means the same
+            as omitting it: the change lands on the renewal boundary, so there
+            is nothing to prorate. Not accepted with leave.
           nullable: true
         require_no_migration:
           type: boolean
