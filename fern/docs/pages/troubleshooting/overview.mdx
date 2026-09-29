@@ -29,6 +29,8 @@ Most broken-state reports involve Stripe, and the single deepest page is [Common
 
 - **[When Schematic creates a Stripe customer](/integrations/stripe-troubleshooting#when-does-schematic-create-a-customer-in-stripe)** — companies on free plans get no Stripe customer unless your Initial Plan carries a $0 price.
 - **[How companies map between Schematic and Stripe](/integrations/stripe-integration-guide#schematic-company-mapping)** — the keys that tie a Schematic company to a Stripe customer.
+- **[The company name differs between Schematic and Stripe](/integrations/stripe-sync-reference#company-names)** — Schematic sets the Stripe name only once, and a Stripe customer update overwrites the Schematic name, so rename in Stripe.
+- **[A change in Schematic never reached Stripe](/integrations/stripe-sync-reference#schematic-to-stripe)** — which records Schematic writes to Stripe, and which data stays in Schematic.
 - **[You are pointed at the wrong Stripe account](/integrations/stripe-integration-guide#prod-vs-dev-stripe-accounts)** — how prod and dev Stripe accounts line up with Schematic environments.
 - **[The subscription is past due, unpaid, or canceled](/integrations/stripe#subscription-statuses)** — what each Stripe subscription status does to the company's access in Schematic.
 - **[Where to see a company's Stripe data in Schematic](/integrations/stripe#viewing-company-data-in-schematic)** — the subscription, invoices, and payment method Schematic has on record.
