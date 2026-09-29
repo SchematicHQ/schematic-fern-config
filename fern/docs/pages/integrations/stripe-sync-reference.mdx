@@ -1,0 +1,77 @@
+---
+title: What Syncs Between Schematic and Stripe
+description: See which records Schematic writes to Stripe, which Stripe changes flow back into Schematic, and which data stays in Schematic.
+
+slug: integrations/stripe-sync-reference
+---
+
+Schematic and Stripe each own different parts of a customer's record, and the sync moves most fields in only one direction. If you edit a field on the side that doesn't own it, the edit either never reaches the other system or gets overwritten the next time that record changes. Check this page before you clean up customer data in bulk.
+
+## Company names
+
+Schematic writes the Stripe customer's name once, when it creates the customer, and never writes it again. Renaming a company in Schematic leaves the Stripe customer's name, and the name on its invoices, as it was.
+
+Name changes do flow the other way. Whenever a Stripe customer changes, Schematic copies the Stripe customer's name onto the matching company, unless the Stripe name is blank. A name you change only in Schematic is overwritten the next time anything on that Stripe customer changes, such as an address change or a new default payment method.
+
+To rename a company that has a Stripe customer, rename the customer in Stripe. The `customer.updated` webhook carries the new name into Schematic.
+
+## Schematic to Stripe
+
+| Stripe object | What Schematic writes | When |
+| --- | --- | --- |
+| Customer | Name, email, and `schematic_company_id` metadata. The email comes from the company key named `email`, if the company has one. | The first time the company needs a Stripe customer. See [when Stripe customers are created](/integrations/stripe#when-are-stripe-customers-created). |
+| Customer | Default payment method | When a customer adds a payment method in checkout, and when a Stripe customer has exactly one payment method attached and no default |
+| Customer | Billing email, phone, address, and tax IDs | When a customer enters billing details in checkout |
+| Customer | Email | When Schematic starts a subscription billed by sending an invoice |
+| Customer | Metadata | When a customer submits checkout with custom fields that store their values in Stripe |
+| Product | Plan or add-on name, and `controlled_by: schematichq` metadata | When you create a plan or add-on and choose to create a new Stripe product. After that, Schematic only archives the product, so renaming a plan leaves the Stripe product name as it was. |
+| Price | Amount, interval, and metadata including `controlled_by: schematichq` and the plan version | When you publish a plan version with new pricing. Schematic deactivates the prices when the version is archived. See [plan versions](/catalog/plans#plan-versions). |
+| Billing meter | A meter for the feature's event | When you add a usage-based price to a feature and Stripe has no meter for its event yet |
+| Subscription | Items, quantities, schedules, and cancellations | When a plan changes through checkout, the customer portal, Manage Plan, the API, or a plan version migration |
+| Meter event | Usage quantity for the company's Stripe customer | On each event for a feature mapped to a metered price. Events sent in [backfill mode](/playbooks/backfill-and-corrections#backfill) are not reported. |
+| Invoice | Line items for the purchase | When a customer buys a credit bundle, when you finalize a [custom plan](/developer_resources/custom-plans-api#what-lands-in-stripe), and when Schematic bills an amount it calculates outside the subscription, such as overage |
+| Subscription cancellation | Cancels the company's subscription | When you delete a company with "Cancel Stripe subscription upon deletion" on, or with `cancel_subscription: true` in the API. See [deleting companies](/integrations/stripe#deleting-companies-within-schematic). |
+
+### Subscription metadata
+
+Every subscription Schematic creates carries metadata that ties it back to Schematic. Reconciliation and reporting logic built on Stripe data can read these keys instead of looking the company up by Stripe customer.
+
+| Metadata key | Value |
+| --- | --- |
+| `schematic_company_id` | The company the subscription is for |
+| `schematic_plan_id` | The plan the subscription is for |
+| `schematic_plan_version_id` | The version of that plan |
+| `schematic_billing_entity_id` | The company paying for the subscription, present only when a billing entity pays |
+
+When a billing entity pays, the subscription sits on the billing entity's Stripe customer rather than the subscribing company's, so resolve the subscribing company from `schematic_company_id`. See [billing entities](/billing/billing-entities#on-the-billing-entity) for an example.
+
+## Stripe to Schematic
+
+Schematic listens to Stripe webhooks and applies each change as it arrives. The [Refresh data](/integrations/stripe-integration-guide#what-existing-after-setup) button on the Stripe integration page re-imports products and customers if you need to resync by hand.
+
+| Stripe object | Events | What Schematic does |
+| --- | --- | --- |
+| Customer | `customer.created`, `customer.updated` | Creates or updates the company whose `stripe_customer_id` key matches, and sets the company name from the Stripe name when it isn't blank. See [company mapping](/integrations/stripe-integration-guide#schematic-company-mapping). |
+| Customer | `customer.deleted` | Deletes Schematic's copy of the Stripe customer. The company stays in Schematic. |
+| Subscription | `customer.subscription.created`, `.updated`, `.deleted`, `.paused`, `.resumed`, `.trial_will_end`, `.pending_update_applied`, `.pending_update_expired` | Updates the company's subscription, plan, and entitlements. See [subscription statuses](/integrations/stripe#subscription-statuses) for how each status affects access. |
+| Subscription schedule | `subscription_schedule.created`, `.updated`, `.released`, `.canceled`, `.completed`, `.aborted`, `.expiring` | Updates the company's scheduled plan changes |
+| Product and price | `product.created`, `.updated`, `.deleted`, `price.created`, `.updated`, `.deleted` | Imports the product or price so you can map it to a plan, add-on, or feature |
+| Billing meter | `billing.meter.created`, `.updated` | Imports the meter so you can map it to a usage-based feature |
+| Invoice | `invoice.created`, `.updated`, `.paid`, `.voided`, `.marked_uncollectible`, `.deleted` | Updates the invoices shown in the customer portal. A paid invoice activates a custom plan set to activate on payment. |
+| Payment method | `payment_method.attached`, `.updated`, `.automatically_updated`, `.detached` | Updates the payment methods shown in checkout and the customer portal |
+| Coupon and promotion code | `coupon.created`, `.updated`, `.deleted`, `promotion_code.created`, `.updated` | Imports the discount so customers can enter it in checkout and you can apply it through the API |
+
+Schematic reads coupons and promotion codes from Stripe and never creates them, so create them in Stripe and they become available in Schematic. See [pre-filling a promotion code](/components/advanced-usage#pre-filling-checkout-fields) for applying one in checkout.
+
+## Data that stays in Schematic
+
+Schematic keeps the following data to itself, so reports and automations built on Stripe data don't see any of it:
+
+- Company keys, other than the `email` key Schematic reads once when it creates the Stripe customer
+- Company and user traits
+- Users
+- Features, flags, and entitlements
+- Overrides
+- Credit balances and grants. The purchase of a credit bundle is invoiced in Stripe, but the balance lives in Schematic.
+
+Use [webhooks](/integrations/webhooks) to send changes to this data to your own systems.

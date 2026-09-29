@@ -55,6 +55,12 @@ This is intentional: many teams prefer not to populate Stripe with free-tier use
 
 See [Initial Plan](/catalog/configuration#initial-plan) for configuration details.
 
+## I renamed a company in Schematic and the Stripe customer didn't change
+
+Schematic sets the Stripe customer's name once, when it creates the customer, and never updates it after that. Names flow from Stripe to Schematic instead, so a Stripe customer update overwrites a name you changed only in Schematic.
+
+Rename the customer in Stripe, and Schematic picks up the new name from the `customer.updated` webhook. See [What syncs between Schematic and Stripe](/integrations/stripe-sync-reference) for every field that moves in each direction.
+
 ## My customer didn't receive an invoice email
 
 Invoice and receipt emails are sent by **Stripe**, not by Schematic. When a company subscribes to a paid or custom plan, Schematic creates the subscription and Stripe handles billing, including emailing the invoice. If those emails aren't arriving, the cause is almost always one of the following, in order of how often we see it.
