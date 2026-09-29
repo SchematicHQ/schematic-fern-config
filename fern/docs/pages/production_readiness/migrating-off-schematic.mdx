@@ -26,12 +26,15 @@ Billing systems are complex, and running one is rarely the core of your business
 
 Your customers, subscriptions, and payment methods are stored in your own Stripe account. When you disconnect Schematic, Stripe keeps billing your existing subscriptions at their current prices. Current invoices, the usage already accrued on monetized entitlements such as pay-as-you-go and pay-in-advance, and each customer's trial state stay in Stripe as well.
 
-{/* TODO(eng): confirm the complete list of what Schematic drives into Stripe. */}
-
 Schematic also sends new data to Stripe on your behalf, and that stops when you disconnect. Put a replacement in place for each of these before you do:
 
 - Usage that Schematic reports to Stripe for metered prices. Without a replacement, new metered charges stop accruing.
-- Plan changes, upgrades, and cancellations that customers make through Schematic checkout and the customer portal.
+- Subscription changes. Schematic writes every plan change, upgrade, downgrade, and cancellation to Stripe, whether it starts in Schematic checkout, the customer portal, Manage Plan in the Schematic app, the API, or a plan version migration, including migrations you have scheduled.
+- New Stripe customers. Schematic creates the Stripe customer when a company checks out for the first time, so new signups need another path into Stripe.
+- Invoices that Schematic creates outside a subscription, for credit bundle purchases, custom plans, and overage.
+- Billing details and payment methods that customers enter in Schematic checkout.
+
+For every record Schematic writes to Stripe and every Stripe change it reads back, see [What syncs between Schematic and Stripe](/integrations/stripe-sync-reference).
 
 # What Schematic manages
 
