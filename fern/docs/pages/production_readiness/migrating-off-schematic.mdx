@@ -20,7 +20,7 @@ Schematic builds on Stripe's billing platform and extends it with a product cata
 | Limit enforcement in your app | Schematic |
 | Checkout and the customer portal | Schematic |
 
-Billing systems are complex, and running one is rarely the core of your business. We built Schematic to keep that work off your team's plate. If you choose to leave, the Stripe pieces keep running, and your team takes on replacing the Schematic pieces you use. This page covers how to cut over without your customers seeing a change in billing or in what your app lets them do.
+Billing systems are complex, and running one is rarely the core of your business. We built Schematic to keep that work off your team's plate. If you choose to leave, the billing pieces keep running in Stripe, and your team takes on replacing the Schematic pieces you use. This page covers how to cut over without your customers seeing a change in billing or in what your app lets them do.
 
 # What stays in Stripe
 
@@ -74,30 +74,42 @@ Create a [readonly secret API key](/api-reference/authentication#readonly-api-ke
 
 The events API returns about the last six months of events. If you want a longer usage history in your new system, run `all` on a schedule from cron or CI and keep every run, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
 
-## Optional: serve a static copy of your entitlements
+## Keep entitlement checks running during the cutover
 
-Replacing every entitlement check takes engineering time, and your app has to keep working while your team builds the replacement. As part of your cutover plan, you can use Schematic's open-source tools to serve a static copy of your plan entitlements after your account closes. The copy keeps your app making the same decisions it made on the day you took it, which buys your team time to finish the new system. Your team still has to build that system.
+Replacing every entitlement check takes engineering time, and your app has to keep making the right decisions while your team builds the replacement. Schematic's open-source tools let your backend keep serving the entitlements your customers have today, so you cut over on your own schedule. The copy they serve is a bridge to your new system, and your team still builds the system itself.
 
-The static copy has hard limits, so plan your replacement timeline around them:
+### Run Replicator
 
-- Flag rules, plans, and entitlements stay frozen as of the snapshot, and nothing you change afterward reaches your app.
-- Usage from `track` calls keeps counting, but metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it until your replacement takes over.
-- Your team runs and maintains the Redis instance and the health endpoint the SDK reads from.
-- Only backend SDKs in Replicator mode (Go, Node.js, Python, Java, and C#) can read the copy. Client-side SDKs (JavaScript, React, and Vue) call the Schematic API directly, so after your account closes they return [flag defaults](/production_readiness/availability). Move client-side checks to your new system first.
-- Your SDK version stays pinned, because the snapshot is stored in the format of the rules engine version it was taken with.
+[Replicator](/developer_resources/sdks/cross-platform-features#replicator) keeps a complete copy of your flag, company, and user data in a Redis instance you host. Backend SDKs in [Replicator mode](/developer_resources/sdks/nodejs#replicator-mode) evaluate flags from that copy without calling the Schematic API, so if you already run Replicator, your app keeps making the same decisions after your account closes. If you don't run it yet, set it up well before your cutover date.
 
-If you decide to use it:
+{/* TODO(eng): confirm SDKs keep reading the Replicator cache once the Replicator can no longer reach Schematic, including what its health endpoint reports. */}
+
+Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All Schematic SDKs are MIT licensed, so you can keep running and modifying them after you leave.
+
+### Plan around a static copy
+
+Once your account closes, the copy in Redis stops changing. It works well as a short bridge, and your team plans the replacement timeline around how it behaves:
+
+- Flag rules, plans, and entitlements stay as they were when your account closed, and changes you make afterward belong in your new system.
+- Companies and users you add after that point aren't in the copy, so move new signups to your new system first.
+- Usage from `track` calls keeps counting in Redis, but metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it until your new system takes over.
+- Client-side SDKs (JavaScript, React, and Vue) call the Schematic API directly, so after your account closes they return [flag defaults](/production_readiness/availability). Move client-side checks to your new system before then.
+- Your SDK version stays pinned, because the copy is stored in the format of the rules engine version that wrote it.
+
+### Restore the cache from a snapshot
+
+The `snapshot` command in `schematic-export` captures the same data Replicator keeps in Redis. Keep a recent snapshot as a backup, so your team can rebuild the cache after your account closes if the Redis instance is lost, or if you weren't running Replicator.
 
 1. Take a final snapshot with the `schematic-export` `all` command, described in [Export your data](#export-your-data), before your account closes.
 2. Load the snapshot into Redis with the `restore` command.
-3. Start the `serve-health` command. It stands in for the [Replicator's](/developer_resources/sdks/cross-platform-features#replicator) health endpoint, which tells your SDK the cache is ready and which cache version to read.
-4. Run your SDK in [Replicator mode](/developer_resources/sdks/nodejs#replicator-mode) against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
+3. Start the `serve-health` command. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
+4. Run your SDK in Replicator mode against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
 
 ```sh
 # Before your account closes: take the final export and snapshot
 node dist/cli.js all --out s3://your-bucket/schematic
 
-# After your account closes: load the snapshot and serve the health endpoint
+# When you need to rebuild the cache: load the snapshot and serve the health endpoint
 node dist/cli.js restore --from s3://your-bucket/schematic --redis redis://localhost:6379
 node dist/cli.js serve-health --from s3://your-bucket/schematic --port 8090
 ```
@@ -136,7 +148,7 @@ If you're leaving Stripe as well, Stripe can transfer your customers' card data 
 
 # How Schematic supports your migration
 
-We're sorry to see you go, and we'd like to hear what led to the decision. Once you've made it, we want your migration to go smoothly, because a billing mistake during a cutover lands on your customers. Here's what we provide:
+We're sorry to see you go, and we'd like to hear what led to the decision. Once you've made it, we want your migration to go smoothly, with your customers never noticing the switch. Here's what we provide:
 
 {/* TODO(legal): the 90-day notice isn't in the Cloud Services Agreement yet. Confirm the commitment and its scope before publishing. */}
 
