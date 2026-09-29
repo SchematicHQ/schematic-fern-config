@@ -7,11 +7,44 @@ slug: components/localization
 
 Schematic components render in English with US formatting by default. If your customers use your app in another language, a checkout or customer portal that switches to English breaks the experience at the moment they're deciding to pay. You can supply your own translations and a locale to `EmbedProvider`, and every component inside it renders in that language.
 
-Localization requires `@schematichq/schematic-components` 3.0.0 or later.
+Localization requires `@schematichq/schematic-components` 2.26.0 or later.
+
+## Use the Italian translation
+
+Schematic ships an Italian translation of every component string, exported as `schematicTranslationsIt` in 2.30.0 and later. Pass it to `translations` under `it`:
+
+```tsx
+import {
+  EmbedProvider,
+  SchematicEmbed,
+  schematicTranslationsIt,
+} from "@schematichq/schematic-components";
+
+// Define this outside your component so it isn't recreated on every render.
+const translations = { it: schematicTranslationsIt };
+
+export function Billing({ accessToken, componentId }) {
+  return (
+    <EmbedProvider translations={translations} locale="it-IT">
+      <SchematicEmbed accessToken={accessToken} id={componentId} />
+    </EmbedProvider>
+  );
+}
+```
+
+The translation uses the informal "tu" and keeps "Add-on" and "Billing" in English. To reword a string, spread the bundle and override its key:
+
+```ts
+const translations = {
+  it: { ...schematicTranslationsIt, "Cancel subscription": "Disdici" },
+};
+```
+
+If you don't import `schematicTranslationsIt`, your bundler leaves it out of your build.
 
 ## Start from the English file
 
-Every string the components display lives in one English file:
+For any other language, start from the English file, which holds every string the components display:
 
 [`components/src/localization/en.ts`](https://github.com/SchematicHQ/schematic-js/blob/main/components/src/localization/en.ts)
 
@@ -20,10 +53,10 @@ To add a language, copy that file into your app and replace each English value w
 ```ts
 import type { SchematicTranslations } from "@schematichq/schematic-components";
 
-export const it: SchematicTranslations = {
-  "Add new payment method": "Aggiungi un nuovo metodo di pagamento",
-  "Access to plan will end.": "L'accesso a {{plan}} terminerà il {{date}}.",
-  "Choose plan": "Scegli piano",
+export const de: SchematicTranslations = {
+  "Add new payment method": "Neue Zahlungsmethode hinzufügen",
+  "Access to plan will end.": "Der Zugriff auf {{plan}} endet am {{date}}.",
+  "Choose plan": "Plan auswählen",
   // ...
 };
 ```
@@ -45,12 +78,16 @@ Any key you leave out falls back to English, so you can ship a partial translati
 Pass your bundles to `translations`, keyed by language, and set `locale` to the customer's language:
 
 ```tsx
-import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+import {
+  EmbedProvider,
+  SchematicEmbed,
+  schematicTranslationsIt,
+} from "@schematichq/schematic-components";
+import { de } from "./translations/de";
 import { fr } from "./translations/fr";
-import { it } from "./translations/it";
 
 // Define this outside your component so it isn't recreated on every render.
-const translations = { fr, it };
+const translations = { de, fr, it: schematicTranslationsIt };
 
 export function Billing({ accessToken, componentId, locale }) {
   return (
@@ -76,10 +113,10 @@ import i18n from "i18next";
 import {
   EmbedProvider,
   SCHEMATIC_NAMESPACE,
+  schematicTranslationsIt,
 } from "@schematichq/schematic-components";
-import { it } from "./translations/it";
 
-i18n.addResourceBundle("it", SCHEMATIC_NAMESPACE, it);
+i18n.addResourceBundle("it", SCHEMATIC_NAMESPACE, schematicTranslationsIt);
 
 <EmbedProvider i18n={i18n}>
   {/* ... */}
