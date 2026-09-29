@@ -80,9 +80,7 @@ Replacing every entitlement check takes engineering time, and your app has to ke
 
 ### Run Replicator
 
-[Replicator](/developer_resources/sdks/cross-platform-features#replicator) keeps a complete copy of your flag, company, and user data in a Redis instance you host. Backend SDKs in [Replicator mode](/developer_resources/sdks/nodejs#replicator-mode) evaluate flags from that copy without calling the Schematic API, so if you already run Replicator, your app keeps making the same decisions after your account closes. If you don't run it yet, set it up well before your cutover date.
-
-{/* TODO(eng): confirm SDKs keep reading the Replicator cache once the Replicator can no longer reach Schematic, including what its health endpoint reports. */}
+[Replicator](/developer_resources/sdks/cross-platform-features#replicator) keeps a complete copy of your flag, company, and user data in a Redis instance you host. Backend SDKs in [Replicator mode](/developer_resources/sdks/nodejs#replicator-mode) evaluate flags from that copy without calling the Schematic API. After your account closes, the Replicator keeps its copy in Redis, and your SDKs keep evaluating flags and counting usage from `track` calls against it, so your app keeps making the same decisions. If you don't run Replicator yet, set it up well before your cutover date.
 
 Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All Schematic SDKs are MIT licensed, so you can keep running and modifying them after you leave.
 
