@@ -916,6 +916,66 @@ All fields live on `core.CreditLeaseConfig`. Everything below `DefaultReservatio
 | `RedisKeyPrefix` | `string` | `schematic:` | Key prefix for lease and reservation keys. Matches the Node and Python SDKs. |
 | `Overrides` | `map[string]core.CreditLeaseOverride` | none | Per-credit-type overrides of the four knobs above, keyed by credit type ID. A nil field keeps the client-wide default. |
 
+## OpenTelemetry
+
+The SDK can record OpenTelemetry spans for the work it does — flag checks, identifies, tracks and credit holds. Each span sits under whichever span is already on the `context.Context` you pass in.
+
+Spans record the *names* of the keys you look companies and users up by, never the values, so emails and internal account IDs stay out of your traces.
+
+Tracing is off by default, since spans cost money at most vendors. Turn it on with `option.WithTracing()`, which uses the OpenTelemetry setup your application already has:
+
+```go
+client := schematicclient.NewSchematicClient(
+  option.WithAPIKey(apiKey),
+  option.WithTracing(),
+)
+```
+
+To send Schematic's spans to a particular provider instead, name it with `option.WithTracerProvider`. That turns tracing on by itself, so you do not need both:
+
+```go
+client := schematicclient.NewSchematicClient(
+  option.WithAPIKey(apiKey),
+  option.WithTracerProvider(provider),
+)
+```
+
+### HTTP requests
+
+The SDK does not trace the HTTP requests underneath its calls. Pass a client you have already set up for tracing and it will, nested under the Schematic span that made the request:
+
+```go
+import (
+  "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+  "go.opentelemetry.io/otel"
+  "go.opentelemetry.io/otel/propagation"
+)
+
+// Without this, trace context is not attached to outgoing requests and your
+// trace stops at your app.
+otel.SetTextMapPropagator(propagation.TraceContext{})
+
+client := schematicclient.NewSchematicClient(
+  option.WithAPIKey(apiKey),
+  option.WithTracing(),
+  option.WithHTTPClient(&http.Client{
+    Transport: otelhttp.NewTransport(http.DefaultTransport),
+  }),
+)
+```
+
+### Redis
+
+DataStream caches and credit lease state can be stored in Redis. Pass a client you have already set up for tracing and those commands are traced the same way:
+
+```go
+client := schematicclient.NewSchematicClient(
+  option.WithAPIKey(apiKey),
+  option.WithTracing(),
+  option.WithDatastream(option.WithRedisClient(tracedRedisClient)),
+)
+```
+
 ## Errors
 
 Structured error types are returned from API calls that return non-success status codes. For example,
