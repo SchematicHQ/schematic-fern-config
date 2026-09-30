@@ -70,9 +70,7 @@ node dist/cli.js all --out s3://your-bucket/schematic
 
 Create a [readonly secret API key](/api-reference/authentication#readonly-api-keys) for the export. A readonly key can make every request the export needs and can't change anything in your account.
 
-{/* TODO(eng): confirm event retention for the events API. */}
-
-The events API returns about the last six months of events. If you want a longer usage history in your new system, run `all` on a schedule from cron or CI and keep every run, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
+The events API returns the last 365 days of events. If you want a longer usage history in your new system, run `all` on a schedule from cron or CI and keep every run, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
 
 ## Keep entitlement checks running during the cutover
 
