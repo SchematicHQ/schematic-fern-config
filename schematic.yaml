@@ -2378,6 +2378,10 @@ components:
         captured_at:
           type: string
           format: date-time
+        context_signature:
+          type: string
+        context_signature_checked:
+          type: boolean
         event_id:
           type: string
           nullable: true
@@ -9378,6 +9382,8 @@ components:
           type: string
         name:
           type: string
+        require_context_signature:
+          type: boolean
         updated_at:
           type: string
           format: date-time
@@ -9385,6 +9391,7 @@ components:
         - id
         - name
         - environment_type
+        - require_context_signature
         - created_at
         - updated_at
         - api_keys
@@ -9418,6 +9425,8 @@ components:
           type: string
         name:
           type: string
+        require_context_signature:
+          type: boolean
         updated_at:
           type: string
           format: date-time
@@ -9425,6 +9434,7 @@ components:
         - id
         - name
         - environment_type
+        - require_context_signature
         - created_at
         - updated_at
       title: EnvironmentResponseData
@@ -16996,6 +17006,9 @@ components:
           nullable: true
           maxLength: 256
           minLength: 1
+        require_context_signature:
+          type: boolean
+          nullable: true
       title: UpdateEnvironmentRequestBody
     UpdateFeatureRequestBody:
       type: object
