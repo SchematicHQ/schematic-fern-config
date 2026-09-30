@@ -1,0 +1,148 @@
+---
+title: Migrating Off Schematic
+description: Move billing, flag checks, and your Schematic data to another billing system.
+
+slug: production_readiness/migrating-off-schematic
+---
+
+Schematic builds on Stripe's billing platform and extends it with a product catalog, entitlement management, credits, and limit enforcement, so one system covers everything from what a customer pays to what your app lets them do. A billing system on its own, including Stripe Billing, covers the first set of pieces below. Schematic adds the second.
+
+| Piece | Handled by |
+|---|---|
+| Subscriptions and recurring charges | Billing |
+| Payment methods and payment collection | Billing |
+| Invoices | Billing |
+| Charges for metered and pay-in-advance entitlements | Billing |
+| Trials | Billing |
+| Your catalog of plans, add-ons, features, and entitlements | Schematic |
+| Credit ledger and credit balances | Schematic |
+| Historical usage events | Schematic |
+| Limit enforcement in your app | Schematic |
+| Checkout and the customer portal | Schematic |
+
+Billing systems are complex, and running one is rarely the core of your business. We built Schematic to keep that work off your team's plate. If you choose to leave, the billing pieces keep running in Stripe, and your team takes on replacing the Schematic pieces you use. This page covers how to cut over without your customers seeing a change in billing or in what your app lets them do.
+
+# What stays in Stripe
+
+Your customers, subscriptions, and payment methods are stored in your own Stripe account. When you disconnect Schematic, Stripe keeps billing your existing subscriptions at their current prices. Current invoices, the usage already accrued on monetized entitlements such as pay-as-you-go and pay-in-advance, and each customer's trial state stay in Stripe as well.
+
+Schematic also sends new data to Stripe on your behalf, and that stops when you disconnect. Put a replacement in place for each of these before you do:
+
+- Usage that Schematic reports to Stripe for metered prices. Without a replacement, new metered charges stop accruing.
+- Subscription changes. Schematic writes every plan change, upgrade, downgrade, and cancellation to Stripe, whether it starts in Schematic checkout, the customer portal, Manage Plan in the Schematic app, the API, or a plan version migration, including migrations you have scheduled.
+- New Stripe customers. Schematic creates the Stripe customer when a company checks out for the first time, so new signups need another path into Stripe.
+- Invoices that Schematic creates outside a subscription, for credit bundle purchases, custom plans, and overage.
+- Billing details and payment methods that customers enter in Schematic checkout.
+
+For every record Schematic writes to Stripe and every Stripe change it reads back, see [What syncs between Schematic and Stripe](/integrations/stripe-sync-reference).
+
+# What Schematic manages
+
+Four pieces live in Schematic rather than Stripe, so you export them and recreate them in your new system:
+
+- Your catalog of plans, plan versions, add-ons, features, and the entitlements that connect them, including per-company overrides.
+- The credit ledger, including credit definitions, grants, and each company's current balance.
+- Historical usage, meaning the events your app sent to Schematic.
+- Feature and limit enforcement, meaning the checks your app makes before letting a company use a feature.
+
+## Export your data
+
+`schematic-export` is an open-source CLI that exports your catalog, credits, and usage as JSON, ready to load into your new system. The export reads from the Schematic API, so run your final export while your account is still active.
+
+Clone it from [github.com/SchematicHQ/schematic-export](https://github.com/SchematicHQ/schematic-export), build it with `npm install && npm run build`, and run commands from the repo directory.
+
+| Command | What it does |
+|---|---|
+| `all` | Runs `config`, `usage`, and `snapshot` together |
+| `config` | Exports plans, plan versions and their entitlements, add-ons, features, flags, credits, companies, company overrides, users, and billing product mappings |
+| `usage` | Exports events, plus current usage and credit balances per company for each metered feature |
+| `snapshot` | Exports the flag, company, and user data your SDK reads in Replicator mode |
+| `restore` | Loads a snapshot into Redis, with no call to the Schematic API |
+| `serve-health` | Serves the Replicator health endpoint for a restored snapshot |
+
+Each run writes JSON to a timestamped directory, locally or in S3, and updates `latest.json` to point at it. Every run logs the account and environment it's exporting, so check that line the first time you run with a new key.
+
+```sh
+node dist/cli.js all --out s3://your-bucket/schematic
+```
+
+Create a [readonly secret API key](/api-reference/authentication#readonly-api-keys) for the export. A readonly key can make every request the export needs and can't change anything in your account.
+
+The events API returns the last 365 days of events. If you want a longer usage history in your new system, run `all` on a schedule from cron or CI and keep every run, so your archive holds events after they age out of the API. Use `--since` on `all` or `usage` to export only recent events on each run.
+
+## Keep entitlement checks running during the cutover
+
+Replacing every entitlement check takes engineering time, and your app has to keep making the right decisions while your team builds the replacement. Schematic's open-source tools let your backend keep serving the entitlements your customers have today, so you cut over on your own schedule. The copy they serve is a bridge to your new system, and your team still builds the system itself.
+
+### Run Replicator
+
+[Replicator](/developer_resources/sdks/cross-platform-features#replicator) keeps a complete copy of your flag, company, and user data in a Redis instance you host. Backend SDKs in [Replicator mode](/developer_resources/sdks/nodejs#replicator-mode) evaluate flags from that copy without calling the Schematic API. After your account closes, the Replicator keeps its copy in Redis, and your SDKs keep evaluating flags and counting usage from `track` calls against it, so your app keeps making the same decisions. If you don't run Replicator yet, set it up well before your cutover date. The [Replicator README](https://github.com/SchematicHQ/schematic-replicator#readme) covers deployment, configuration, and its health endpoints.
+
+Replicator mode is available in the Go, Node.js, Python, Java, and C# SDKs. All Schematic SDKs are MIT licensed, so you can keep running and modifying them after you leave.
+
+### Plan around a static copy
+
+Once your account closes, the copy in Redis stops changing. It works well as a short bridge, and your team plans the replacement timeline around how it behaves:
+
+- Flag rules, plans, and entitlements stay as they were when your account closed, and changes you make afterward belong in your new system.
+- Companies and users you add after that point aren't in the copy, so move new signups to your new system first.
+- Usage from `track` calls keeps counting in Redis, but metered limits don't reset at the start of a new period, so a company that hits a monthly limit stays at it until your new system takes over.
+- Client-side SDKs (JavaScript, React, and Vue) call the Schematic API directly, so after your account closes they return [flag defaults](/production_readiness/availability). Move client-side checks to your new system before then.
+- Your SDK version stays pinned, because the copy is stored in the format of the rules engine version that wrote it.
+
+### Restore the cache from a snapshot
+
+The `snapshot` command in `schematic-export` captures the same data Replicator keeps in Redis. Keep a recent snapshot as a backup, so your team can rebuild the cache after your account closes if the Redis instance is lost, or if you weren't running Replicator.
+
+1. Take a final snapshot with the `schematic-export` `all` command, described in [Export your data](#export-your-data), before your account closes.
+2. Load the snapshot into Redis with the `restore` command.
+3. Start the `serve-health` command. It stands in for the Replicator's health endpoint, which tells your SDK the cache is ready and which cache version to read.
+4. Run your SDK in Replicator mode against that Redis instance, with `replicatorHealthURL` pointing at `serve-health`.
+
+```sh
+# Before your account closes: take the final export and snapshot
+node dist/cli.js all --out s3://your-bucket/schematic
+
+# When you need to rebuild the cache: load the snapshot and serve the health endpoint
+node dist/cli.js restore --from s3://your-bucket/schematic --redis redis://localhost:6379
+node dist/cli.js serve-health --from s3://your-bucket/schematic --port 8090
+```
+
+Then point your SDK at the restored Redis instance and the `serve-health` endpoint. In Node.js:
+
+```ts
+import { createClient } from "redis";
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const redisClient = createClient({ url: "redis://localhost:6379" });
+await redisClient.connect();
+
+const client = new SchematicClient({
+  apiKey: process.env.SCHEMATIC_API_KEY,
+  useDataStream: true,
+  dataStream: {
+    replicatorMode: true,
+    redisClient,
+    replicatorHealthURL: "http://localhost:8090/ready",
+  },
+});
+
+// Evaluated from the restored snapshot, with no call to the Schematic API
+const hasAccess = await client.checkFlag(
+  { company: { id: "your-company-id" } },
+  "some-flag-key",
+);
+```
+
+If you restored with a custom `--prefix`, set the same value as `redisKeyPrefix` in the SDK. The other backend SDKs take the same settings under their own names. See each SDK's Replicator mode section.
+
+# Moving off Stripe
+
+If you're leaving Stripe as well, Stripe can transfer your customers' card data to another PCI-compliant payment processor. See Stripe's guide to [requesting a payment data export](https://docs.stripe.com/get-started/data-migrations/pan-export). Stripe doesn't include subscriptions or payment history in that export, so pull those from the Stripe API or Dashboard.
+
+# How Schematic supports your migration
+
+We're sorry to see you go, and we'd like to hear what led to the decision. Once you've made it, we want your migration to go smoothly, with your customers never noticing the switch. Here's what we provide:
+
+- The `schematic-export` CLI, which automates exporting your catalog, credit ledger, and usage history.
+- Advisory support, included in your plan, to review your cutover and help you avoid billing mistakes along the way. Email `support@schematichq.com` or reach us in your shared Slack channel to start.
