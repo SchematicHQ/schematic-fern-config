@@ -127,7 +127,7 @@ const client = new SchematicClient({
   dataStream: {
     replicatorMode: true,
     redisClient,
-    replicatorHealthURL: "http://localhost:8090/health",
+    replicatorHealthURL: "http://localhost:8090/ready",
   },
 });
 
