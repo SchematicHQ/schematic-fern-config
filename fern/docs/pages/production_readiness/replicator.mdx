@@ -22,14 +22,14 @@ The Replicator is published as a multi-architecture image (`linux/amd64` and `li
 | Docker Hub | [`getschematic/schematic-replicator`](https://hub.docker.com/r/getschematic/schematic-replicator) |
 | Amazon ECR Public | [`public.ecr.aws/n5h3a7j9/schematic-replicator`](https://gallery.ecr.aws/n5h3a7j9/schematic-replicator) |
 
-Each release is tagged with its full version (`0.2.7`), its minor version (`0.2`), its major version (`0`), and `latest`. Pin a full or minor version in production so a new release only reaches you when you choose to upgrade.
+Each release is tagged with its full version (`0.2.7`), its minor version (`0.2`), its major version (`0`), and `latest`. In production, pin a full version (`0.2.7`) so a new release only reaches you when you choose to upgrade. A minor version tag (`0.2`, as in the examples below) moves with each patch release, so it picks up fixes automatically the next time the image is pulled.
 
 | Property | Value |
 |---|---|
 | Base image | Alpine Linux |
 | User | Non-root (UID/GID `65534`, `nobody`) |
 | Port | `8090` (health endpoints; set with `HEALTH_PORT`) |
-| Filesystem | Writes nothing to disk, so it runs with a read-only root filesystem |
+| Filesystem | Writes nothing to disk, so it can run with a read-only root filesystem (`--read-only` in Docker, `readOnlyRootFilesystem: true` in Kubernetes) |
 | Supply chain | Every image is published with SBOM and build provenance attestations |
 
 # Quick start
@@ -73,6 +73,7 @@ A starting instance that finds the lease held waits up to `WRITER_LOCK_ACQUIRE_T
 - Use a deployment strategy that stops the old instance before or while the new one waits. On Kubernetes, use `strategy: Recreate`: the default `RollingUpdate` waits for the new pod to become ready before stopping the old one, which never happens while the old pod holds the lease.
 - On platforms that drain and stop the old task once the new one passes a liveness check (for example, Amazon ECS with a load balancer health check on `/health`), a rolling deploy hands the lease over within the acquire timeout.
 - For high availability, run Redis in a highly available configuration and let your orchestrator restart a failed Replicator promptly. Do not run several Replicators against the same Redis.
+- To run more than one Replicator, for example one per Schematic environment, give each its own Redis, or its own `REDIS_DB` on a single-node Redis, and point each environment's SDKs at the matching one. Changing `WRITER_LOCK_KEY` does not separate them: every Replicator writes the same `schematic:` keys, so two Replicators in one Redis database overwrite each other's data.
 
 ## Docker Compose
 
@@ -240,7 +241,7 @@ The Replicator is configured entirely through environment variables. Durations u
 |---|---|---|
 | `WRITER_LOCK_TTL` | `15s` | Lease duration, renewed every third of the TTL. A longer TTL tolerates more missed renewals but delays takeover after a crash. |
 | `WRITER_LOCK_ACQUIRE_TIMEOUT` | `5m` | How long a starting instance waits for the lease before exiting. |
-| `WRITER_LOCK_KEY` | `schematic:datastream:writer_lock` | Redis key holding the lease. Change it only to run independent Replicators against separate keyspaces in one Redis. |
+| `WRITER_LOCK_KEY` | `schematic:datastream:writer_lock` | Redis key holding the lease. Leave it at the default. Changing it does not let two Replicators share a Redis database; see [One writer per Redis](#one-writer-per-redis). |
 | `WRITER_LOCK_DISABLED` | `false` | Skips the lease. Only for instances that never write the cache; setting this on a second writer causes the corruption the lease prevents. |
 
 ## Initial load and reconnects
