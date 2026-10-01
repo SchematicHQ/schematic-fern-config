@@ -1,0 +1,343 @@
+---
+title: Replicator
+description: Deploy and configure the Schematic Replicator container, which keeps a complete copy of your flag, company, and user data in a Redis you host.
+
+slug: production_readiness/replicator
+---
+
+Replicator is a container you run in your own infrastructure. It holds a connection to Schematic's datastream, loads all of your flag, company, and user data into a Redis instance you host, and keeps that copy current in real time. Backend SDKs in Replicator mode then evaluate flags from Redis without calling the Schematic API, so flag checks stay fast and keep working if Schematic is unreachable.
+
+Setting it up takes three pieces:
+
+1. A Redis instance (single node or cluster) that both the Replicator and your application can reach.
+2. The Replicator container, configured with your Schematic API key and Redis address.
+3. Your backend SDK, configured for Replicator mode and pointed at the same Redis. See your SDK's page: [Go](/developer_resources/sdks/go#replicator-mode), [Node.js](/developer_resources/sdks/nodejs#replicator-mode), [Python](/developer_resources/sdks/python#replicator-mode), [Java](/developer_resources/sdks/java#replicator-mode), [C#](/developer_resources/sdks/csharp#replicator-mode), or [Ruby](/developer_resources/sdks/ruby#replicator-mode).
+
+# Image
+
+The Replicator is published as a multi-architecture image (`linux/amd64` and `linux/arm64`) to two registries:
+
+| Registry | Image |
+|---|---|
+| Docker Hub | [`getschematic/schematic-replicator`](https://hub.docker.com/r/getschematic/schematic-replicator) |
+| Amazon ECR Public | [`public.ecr.aws/n5h3a7j9/schematic-replicator`](https://gallery.ecr.aws/n5h3a7j9/schematic-replicator) |
+
+Each release is tagged with its full version (`0.2.7`), its minor version (`0.2`), its major version (`0`), and `latest`. In production, pin a full version (`0.2.7`) so a new release only reaches you when you choose to upgrade. A minor version tag (`0.2`, as in the examples below) moves with each patch release, so it picks up fixes automatically the next time the image is pulled.
+
+| Property | Value |
+|---|---|
+| Base image | Alpine Linux |
+| User | Non-root (UID/GID `65534`, `nobody`) |
+| Port | `8090` (health endpoints; set with `HEALTH_PORT`) |
+| Filesystem | Writes nothing to disk, so it can run with a read-only root filesystem (`--read-only` in Docker, `readOnlyRootFilesystem: true` in Kubernetes) |
+| Supply chain | Every image is published with SBOM and build provenance attestations |
+
+# Quick start
+
+```bash
+docker run -d \
+  --name schematic-replicator \
+  --restart unless-stopped \
+  -p 8090:8090 \
+  -e SCHEMATIC_API_KEY="your-api-key" \
+  -e REDIS_ADDR="your-redis-host:6379" \
+  getschematic/schematic-replicator:0.2
+
+# Liveness
+curl http://localhost:8090/health
+
+# Readiness: returns 200 once connected to the datastream
+curl http://localhost:8090/ready
+```
+
+The Replicator exits at startup if it cannot connect to Redis, so make sure Redis is reachable from the container first. It also needs outbound HTTPS access to two hosts:
+
+- `api.schematichq.com`, for the initial load of companies and users.
+- `datastream.schematichq.com`, for the datastream WebSocket (`wss://`).
+
+<Warning>
+Use a **secret** (backend) API key for `SCHEMATIC_API_KEY`, and the key for the environment whose data you want replicated. Store it in your platform's secret manager rather than in plain configuration.
+</Warning>
+
+# Deployment
+
+## One writer per Redis
+
+Exactly **one** Replicator instance may write to a given Redis. A second writer would double-write the cache and corrupt the cursor the Replicator uses to resume after a reconnect.
+
+The Replicator enforces this with a lease in Redis. An instance acquires the lease at startup, renews it while it runs, and releases it on shutdown. A crashed instance's lease expires after `WRITER_LOCK_TTL` (15 seconds by default) so a replacement can take over.
+
+A starting instance that finds the lease held waits up to `WRITER_LOCK_ACQUIRE_TIMEOUT` (5 minutes by default) for it to be released, then exits with an error. While it waits, `/health` returns `200` and `/ready` returns `503`. In practice:
+
+- Run **one replica** per Redis.
+- Use a deployment strategy that stops the old instance before or while the new one waits. On Kubernetes, use `strategy: Recreate`: the default `RollingUpdate` waits for the new pod to become ready before stopping the old one, which never happens while the old pod holds the lease.
+- On platforms that drain and stop the old task once the new one passes a liveness check (for example, Amazon ECS with a load balancer health check on `/health`), a rolling deploy hands the lease over within the acquire timeout.
+- For high availability, run Redis in a highly available configuration and let your orchestrator restart a failed Replicator promptly. Do not run several Replicators against the same Redis.
+- To run more than one Replicator, for example one per Schematic environment, give each its own Redis, or its own `REDIS_DB` on a single-node Redis, and point each environment's SDKs at the matching one. Changing `WRITER_LOCK_KEY` does not separate them: every Replicator writes the same `schematic:` keys, so two Replicators in one Redis database overwrite each other's data.
+
+## Docker Compose
+
+Runs the Replicator alongside a Redis instance:
+
+```yaml
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  schematic-replicator:
+    image: getschematic/schematic-replicator:0.2
+    restart: unless-stopped
+    depends_on:
+      - redis
+    ports:
+      - "8090:8090"
+    environment:
+      SCHEMATIC_API_KEY: ${SCHEMATIC_API_KEY}
+      REDIS_ADDR: redis:6379
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  redis-data:
+```
+
+## Kubernetes
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: schematic-replicator
+spec:
+  replicas: 1 # one writer per Redis
+  strategy:
+    type: Recreate # the old pod must release the lease before the new one starts
+  selector:
+    matchLabels:
+      app: schematic-replicator
+  template:
+    metadata:
+      labels:
+        app: schematic-replicator
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+      containers:
+        - name: replicator
+          image: getschematic/schematic-replicator:0.2
+          ports:
+            - containerPort: 8090
+          env:
+            - name: SCHEMATIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: schematic-secret
+                  key: api-key
+            - name: REDIS_ADDR
+              value: "redis:6379"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8090
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8090
+            initialDelaySeconds: 5
+            periodSeconds: 10
+```
+
+Add resource requests and limits based on the usage you observe. Memory use grows with the number of companies and users, and with the buffer sizes in [Performance tuning](#performance-tuning).
+
+# Health checks
+
+| Endpoint | Purpose | Status codes |
+|---|---|---|
+| `GET /health` | Liveness: the process is running. It does not re-check Redis or the datastream. | Always `200` while the process is up. |
+| `GET /ready` | Readiness: connected to the datastream and subscribed to updates. | `200` when ready; `503` while connecting or waiting for the writer lease. |
+
+In the default asynchronous loading mode, `/ready` returns `200` as soon as the datastream subscription is set up, while companies and users are still loading in the background (see [Initial load and reconnects](#initial-load-and-reconnects)). With `USE_ASYNC_LOADING=false`, it waits for the full load.
+
+Both endpoints return the same JSON shape:
+
+```json
+{
+  "status": "healthy",
+  "ready": true,
+  "connected": true,
+  "components": {
+    "datastream": "ready",
+    "redis": "connected"
+  },
+  "cache_version": "3f9a1c2e",
+  "timestamp": "2026-10-01T10:00:00Z"
+}
+```
+
+`components.datastream` on `/ready` is `ready`, `connected_loading` (connected, still setting up), or `disconnected`; on `/health` it is `connected`, `disconnected`, or `unknown` (still starting). `status` is always `healthy` and `components.redis` is always `connected`; use the status code, not these fields, to judge health. `cache_version` is an 8-character hash that forms the version segment of the Redis keys the Replicator writes (see [Redis key layout](#redis-key-layout)).
+
+The image has no HTTP client installed. For a container-level health check, use the binary's built-in probe, which exits `0` when the endpoint returns `200` and respects `HEALTH_PORT`:
+
+```bash
+docker exec schematic-replicator /app/schematic-datastream-replicator healthcheck         # /health
+docker exec schematic-replicator /app/schematic-datastream-replicator healthcheck /ready
+```
+
+```yaml
+# Docker Compose / Swarm
+healthcheck:
+  test: ["CMD", "/app/schematic-datastream-replicator", "healthcheck"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 10s
+```
+
+# Configuration
+
+The Replicator is configured entirely through environment variables. Durations use Go's format: `500ms`, `45s`, `30m`, `1h30m`.
+
+## Core
+
+| Variable | Default | Description |
+|---|---|---|
+| `SCHEMATIC_API_KEY` | **Required** | Your Schematic secret API key. |
+| `SCHEMATIC_API_URL` | `https://api.schematichq.com` | Schematic API base URL. |
+| `SCHEMATIC_DATASTREAM_URL` | Derived from the API URL | Datastream WebSocket URL. By default `https://api.schematichq.com` becomes `wss://datastream.schematichq.com/datastream`: the scheme becomes `wss`, a leading `api.` becomes `datastream.`, and the path is `/datastream`. |
+| `CACHE_TTL` | Unlimited | How long cached entries live. `0s` means unlimited. Your SDK's cache TTL should match this value. |
+| `CACHE_CLEANUP_INTERVAL` | `1h` | How often stale entries from previous cache versions are removed. `0s` disables cleanup, which is not recommended with an unlimited TTL. |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error`. |
+| `HEALTH_PORT` | `8090` | Port for the health endpoints. |
+
+## Redis
+
+| Variable | Default | Description |
+|---|---|---|
+| `REDIS_ADDR` | `localhost:6379` | Address of a single Redis node. |
+| `REDIS_PASSWORD` | None | Redis password. Applies to both single-node and cluster mode. |
+| `REDIS_DB` | `0` | Database number. Single-node only. |
+| `REDIS_TLS` | `false` | Set to `true` to connect over TLS. |
+| `REDIS_CLUSTER_MODE` | `false` | Set to `true` to connect to a Redis Cluster using `REDIS_CLUSTER_ADDRS`. |
+| `REDIS_CLUSTER_ADDRS` | None | Comma-separated cluster node addresses, such as `redis-1:6379,redis-2:6379,redis-3:6379`. Only used when `REDIS_CLUSTER_MODE=true`. |
+| `REDIS_ENABLE_MAINTENANCE_NOTIFICATIONS` | `false` | Set to `true` to enable maintenance notifications on Redis Cloud or Redis Enterprise. |
+
+## Writer lease
+
+| Variable | Default | Description |
+|---|---|---|
+| `WRITER_LOCK_TTL` | `15s` | Lease duration, renewed every third of the TTL. A longer TTL tolerates more missed renewals but delays takeover after a crash. |
+| `WRITER_LOCK_ACQUIRE_TIMEOUT` | `5m` | How long a starting instance waits for the lease before exiting. |
+| `WRITER_LOCK_KEY` | `schematic:datastream:writer_lock` | Redis key holding the lease. Leave it at the default. Changing it does not let two Replicators share a Redis database; see [One writer per Redis](#one-writer-per-redis). |
+| `WRITER_LOCK_DISABLED` | `false` | Skips the lease. Only for instances that never write the cache; setting this on a second writer causes the corruption the lease prevents. |
+
+## Initial load and reconnects
+
+By default the Replicator loads all companies and users from the Schematic API in the background, so the datastream connects quickly. It saves its position in the datastream to Redis, so after a reconnect or a restart it resumes from the last message it processed instead of reloading everything. A full reload happens only on a first start against an empty Redis, or when the saved position is too old to resume from.
+
+| Variable | Default | Description |
+|---|---|---|
+| `USE_ASYNC_LOADING` | `true` | Set to `false` for the legacy synchronous mode, which blocks on a full load at startup and does a full reload on every reconnect. Only suitable for small datasets. |
+| `ASYNC_LOADER_PAGE_SIZE` | `100` | Records requested per page during the initial load. |
+| `ASYNC_LOADER_MAX_CONCURRENT_REQUESTS` | `5` | Concurrent API requests during the initial load. |
+| `ASYNC_LOADER_RATE_LIMIT_RPS` | `10` | Maximum API requests per second during the initial load. |
+| `ASYNC_LOADER_CIRCUIT_BREAKER_THRESHOLD` | `5` | Consecutive API failures during the initial load before its circuit breaker opens and further page requests fail immediately. |
+| `ASYNC_LOADER_CIRCUIT_BREAKER_TIMEOUT` | `30s` | How long the initial load's circuit breaker stays open before allowing requests again. |
+
+## Connection keepalive
+
+The Replicator pings the datastream to keep the WebSocket open through load balancers and proxies with idle timeouts.
+
+| Variable | Default | Description |
+|---|---|---|
+| `WS_PING_INTERVAL` | `30s` | How often to send a ping. |
+| `WS_PONG_WAIT` | `40s` | How long to wait for a pong before treating the connection as dead. Should be longer than `WS_PING_INTERVAL`. |
+
+The defaults suit an idle timeout of 60 seconds, which is common for cloud load balancers. For a 30-second idle timeout, use `WS_PING_INTERVAL=15s` and `WS_PONG_WAIT=25s`. For 120 seconds or more, `50s` and `60s` reduce traffic.
+
+## Performance tuning
+
+These control how updates from the datastream are batched and written to Redis. The defaults favor low latency and suit most deployments.
+
+| Variable | Default | Description |
+|---|---|---|
+| `NUM_WORKERS` | CPU cores, between 2 and 16 | Workers processing company updates, and the same number processing user updates. Flags use a single worker. |
+| `BATCH_SIZE` | `5` | Updates written to Redis per batch. |
+| `BATCH_TIMEOUT` | `10ms` | Maximum wait before writing a partial batch. |
+| `COMPANY_CHANNEL_SIZE` | `200` | Buffered company updates per worker. |
+| `USER_CHANNEL_SIZE` | `200` | Buffered user updates per worker. |
+| `FLAGS_CHANNEL_SIZE` | `50` | Buffered flag updates. |
+| `CIRCUIT_BREAKER_THRESHOLD` | `3` | Consecutive Redis write failures before the circuit breaker opens. |
+| `CIRCUIT_BREAKER_TIMEOUT` | `15s` | How long the circuit breaker stays open before retrying Redis. |
+
+Starting points for different environments:
+
+| Setting | Small / low resource | High traffic, low latency | High throughput |
+|---|---|---|---|
+| `NUM_WORKERS` | `2` | `8` | `16` |
+| `BATCH_SIZE` | `3` | `5` | `20` |
+| `BATCH_TIMEOUT` | `5ms` | `10ms` | `50ms` |
+| `COMPANY_CHANNEL_SIZE` | `50` | `500` | `1000` |
+| `USER_CHANNEL_SIZE` | `50` | `500` | `1000` |
+| `FLAGS_CHANNEL_SIZE` | `25` | `100` | `200` |
+| `CIRCUIT_BREAKER_THRESHOLD` | `3` | `5` | `3` |
+| `CIRCUIT_BREAKER_TIMEOUT` | `15s` | `15s` | `30s` |
+
+Smaller batches and shorter timeouts lower latency; larger ones raise throughput. Reduce channel sizes if memory is constrained; total buffering is roughly `NUM_WORKERS` × (`COMPANY_CHANNEL_SIZE` + `USER_CHANNEL_SIZE`).
+
+<Warning>
+While the circuit breaker is open, updates arriving from the datastream are **dropped**, not queued, so Redis falls behind. They are not lost for good: the Replicator's saved position never moves past an update it failed to apply, so the next reconnect or restart replays them, and if too many build up it starts a full reload on its own. If you see `Circuit breaker open, dropping` in the logs, fix the Redis problem, then restart the Replicator to catch up immediately.
+</Warning>
+
+## Tracing
+
+The Replicator can export traces over OTLP to any compatible collector or backend, such as the OpenTelemetry Collector, Datadog, Jaeger, or Honeycomb. Tracing is off until an endpoint is set, and it uses the standard [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/):
+
+| Variable | Default | Description |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | None (tracing off) | Collector base URL, such as `http://otel-collector:4318`. |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | `http/protobuf` or `grpc`. |
+| `OTEL_EXPORTER_OTLP_HEADERS` | None | Comma-separated `key=value` headers, for backends that authenticate with a header. |
+| `OTEL_SERVICE_NAME` | `schematic-replicator` | Service name on every span. |
+| `OTEL_RESOURCE_ATTRIBUTES` | None | Comma-separated `key=value` attributes added to every span, such as `deployment.environment=prod`. |
+
+The Replicator emits one trace per batch of updates: a root span (`replicate company`, `replicate user`, or `replicate flags`) with a child span for each Redis write or delete. Every span carries `replicator.entity` and `replicator.batch.size`. A batch dropped because the circuit breaker is open is recorded as a failed span with `replicator.circuit_breaker.open`. All spans are sampled; configure sampling in your collector.
+
+# Redis key layout
+
+The Replicator writes, and SDKs in Replicator mode read, these keys. `<version>` is the `cache_version` reported by `/health`.
+
+| Data | Key |
+|---|---|
+| Flag | `schematic:flags:<version>:<flag key, lowercased>` |
+| Company by ID | `schematic:company:<version>:<company id>` |
+| Company by key | `schematic:company:<version>:<key name, lowercased>:<value, lowercased>` |
+| User by ID | `schematic:user:<version>:<user id>` |
+| User by key | `schematic:user:<version>:<key name, lowercased>:<value, lowercased>` |
+
+The `schematic:` prefix is fixed. If your SDK's Redis cache is configured with a different prefix, it will never find these keys and will silently fall back to calling the Schematic API. Leave the SDK's prefix at its default.
+
+# Troubleshooting
+
+**The container exits immediately.** Check the logs with `docker logs schematic-replicator`. The two most common causes are a missing `SCHEMATIC_API_KEY` and an unreachable Redis.
+
+**The container exits after a few minutes with "Could not acquire writer lock".** Another Replicator is holding the lease on this Redis. Make sure only one instance runs, and on Kubernetes use `strategy: Recreate`. See [One writer per Redis](#one-writer-per-redis).
+
+**`/ready` stays at `503`.** Check the logs first: the Replicator may be waiting for the writer lease (see above). Otherwise `components.datastream` is usually `disconnected`, which means the API key is wrong or the container cannot reach `datastream.schematichq.com` over `wss://`.
+
+**The connection drops every 30 or 60 seconds.** A load balancer or proxy is closing idle connections. Lower `WS_PING_INTERVAL` and `WS_PONG_WAIT`; see [Connection keepalive](#connection-keepalive).
+
+**Your SDK still calls the Schematic API.** Confirm the SDK is in Replicator mode, can reach the Replicator's `/ready` endpoint, uses the same Redis, and uses the default key prefix. Set `LOG_LEVEL=debug` on the Replicator to log each batch it writes to Redis.
