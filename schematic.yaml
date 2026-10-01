@@ -2,7 +2,7 @@ info:
   title: Schematic API
   version: '0.1'
   description: Schematic API
-  x-rules-engine-schema-version: v94b8f7a7
+  x-rules-engine-schema-version: vf4a06160
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -149,6 +149,12 @@ components:
           type: number
           format: double
           maximum: 9999999999
+        user_id:
+          type: string
+          description: >-
+            The user drawing the hold, so a user-scope spend policy applies to
+            it
+          nullable: true
       required:
         - company_id
         - credit_type_id
@@ -3047,6 +3053,15 @@ components:
           description: >-
             Lease-aware credit balances keyed by credit ID, covering every
             credit type the company holds a balance in
+        credit_spend_policies:
+          type: array
+          description: >-
+            Credit spend policies binding the evaluated company and user.
+            Advisory: the flag values do not reflect them, since a check names
+            no draw amount. Only actors carrying a policy have any
+          items:
+            $ref: '#/components/schemas/CreditSpendPolicy'
+          maxItems: 1000
         flags:
           type: array
           items:
@@ -8446,6 +8461,52 @@ components:
         - created_at
         - updated_at
       title: CreditReservationResponseData
+    CreditSpendPolicy:
+      type: object
+      properties:
+        consumed:
+          type: number
+          description: How much of the limit is already spent in the current period
+          format: double
+        credit_id:
+          type: string
+          description: The credit the policy limits
+        id:
+          type: string
+          description: The ID of the policy
+        kind:
+          type: string
+          description: How the limit is applied
+        label:
+          type: string
+          description: The name the account gave the policy
+          nullable: true
+        limit:
+          type: number
+          description: The ceiling, in credits
+          format: double
+        resets_at:
+          type: string
+          description: >-
+            For a windowed limit, when the current period ends and consumed no
+            longer applies
+          format: date-time
+          nullable: true
+        scope:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendPolicyScope'
+          description: Whether the policy limits the company or one user
+        window:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindow'
+          description: For a windowed limit, the period it accumulates over
+      required:
+        - id
+        - credit_id
+        - kind
+        - scope
+        - limit
+      title: CreditSpendPolicy
     CreditSpendPolicyResponseData:
       type: object
       properties:
@@ -8487,6 +8548,20 @@ components:
         - company
         - user
         - group
+    CreditSpendWindow:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: How many units make up one period
+          format: int64
+        unit:
+          type: string
+          description: The period the limit accumulates over
+      required:
+        - unit
+        - count
+      title: CreditSpendWindow
     CreditTransferReason:
       type: string
       enum:
@@ -10010,6 +10085,12 @@ components:
             are unique per environment across every extend
           nullable: true
           maxLength: 255
+        user_id:
+          type: string
+          description: >-
+            The user drawing the top-up, so a user-scope spend policy applies to
+            it
+          nullable: true
       required:
         - additional_amount
       title: ExtendCreditLeaseRequestBody
@@ -15086,7 +15167,7 @@ components:
         value is always the current version.
       title: RulesEngineSchemaVersion
       enum:
-        - v94b8f7a7
+        - vf4a06160
         - placeholder-for-fern-compatibility
     RulesengineCheckFlagResult:
       type: object
@@ -15163,6 +15244,11 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/RulesengineCreditPostpaidConfig'
           type: object
+        credit_spend_policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineCreditSpendPolicy'
+          maxItems: 1000
         entitlements:
           type: array
           items:
@@ -15350,6 +15436,73 @@ components:
           format: double
           nullable: true
       title: RulesengineCreditPostpaidConfig
+    RulesengineCreditSpendPolicy:
+      type: object
+      properties:
+        consumed:
+          type: number
+          description: How much of the limit is already spent in the current period
+          format: double
+        credit_id:
+          type: string
+          description: The credit the policy limits
+        id:
+          type: string
+          description: The ID of the policy
+        kind:
+          type: string
+          description: How the limit is applied
+        label:
+          type: string
+          description: The name the account gave the policy
+          nullable: true
+        limit:
+          type: number
+          description: The ceiling, in credits
+          format: double
+        resets_at:
+          type: string
+          description: >-
+            For a windowed limit, when the current period ends and consumed no
+            longer applies
+          format: date-time
+          nullable: true
+        scope:
+          allOf:
+            - $ref: '#/components/schemas/RulesengineCreditSpendPolicyScope'
+          description: Whether the policy limits the company or one user
+        window:
+          allOf:
+            - $ref: '#/components/schemas/RulesengineCreditSpendWindow'
+          description: For a windowed limit, the period it accumulates over
+      required:
+        - id
+        - credit_id
+        - kind
+        - scope
+        - limit
+      title: RulesengineCreditSpendPolicy
+    RulesengineCreditSpendPolicyScope:
+      type: string
+      title: RulesengineCreditSpendPolicyScope
+      enum:
+        - company
+        - user
+        - group
+    RulesengineCreditSpendWindow:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: How many units make up one period
+          format: int64
+        unit:
+          type: string
+          description: The period the limit accumulates over
+      required:
+        - unit
+        - count
+      title: RulesengineCreditSpendWindow
     RulesengineEntitlementValueType:
       type: string
       title: RulesengineEntitlementValueType
@@ -15644,6 +15797,11 @@ components:
       properties:
         account_id:
           type: string
+        credit_spend_policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulesengineCreditSpendPolicy'
+          maxItems: 1000
         environment_id:
           type: string
         id:
