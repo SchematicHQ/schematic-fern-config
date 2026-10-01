@@ -7260,6 +7260,21 @@ components:
         proration_behavior:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
+          description: >-
+            How Stripe handles the price difference when companies are migrated.
+            With strategy immediate, omitted means create_prorations. With
+            end_of_billing_period only none is accepted and means the same as
+            omitting it: the change lands on the renewal boundary, so there is
+            nothing to prorate. With scheduled any value is accepted and omitted
+            means none.
+          nullable: true
+        scheduled_at:
+          type: string
+          description: >-
+            When every company moves, for strategy scheduled. Must be in the
+            future; the migration runs within about a minute of this time. Not
+            accepted with other strategies.
+          format: date-time
           nullable: true
         strategy:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
@@ -8884,6 +8899,14 @@ components:
             The billing period renewal date pinned when the subscription
             started, when one was set. When no invoice exists yet, the first
             invoice is raised on this date.
+          format: date-time
+          nullable: true
+        billing_start_date:
+          type: string
+          description: >-
+            The date the contract term starts, when the operator pinned one. A
+            past date was backdated onto the subscription so the first period
+            runs from the contract date rather than from finalization.
           format: date-time
           nullable: true
         company_id:
@@ -13902,6 +13925,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/MigrationProrationBehavior'
           nullable: true
+        scheduled_at:
+          type: string
+          format: date-time
+          nullable: true
         skipped_companies:
           type: integer
           format: int64
@@ -13947,6 +13974,7 @@ components:
         - end_of_billing_period
         - immediate
         - leave
+        - scheduled
     PlanVersionResponseData:
       type: object
       properties:
@@ -14548,6 +14576,15 @@ components:
             on a first publish that starts a subscription.
           format: date-time
           nullable: true
+        billing_start_date:
+          type: string
+          description: >-
+            The date the contract term starts. A past date backdates the
+            subscription so the first invoice covers the term from this date to
+            the renewal date. Requires billing_cycle_anchor. Only honored on a
+            first publish that starts a subscription.
+          format: date-time
+          nullable: true
         coupon_external_id:
           type: string
           nullable: true
@@ -14594,13 +14631,22 @@ components:
             With migration_strategy immediate, omitted means create_prorations.
             With end_of_billing_period only none is accepted and means the same
             as omitting it: the change lands on the renewal boundary, so there
-            is nothing to prorate. Not accepted with leave.
+            is nothing to prorate. With scheduled any value is accepted and
+            omitted means none. Not accepted with leave.
           nullable: true
         require_no_migration:
           type: boolean
           description: >-
             Refuse the publish if any company would be migrated onto the new
             version
+          nullable: true
+        scheduled_at:
+          type: string
+          description: >-
+            When every company moves, for migration_strategy scheduled. Must be
+            in the future; the migration runs within about a minute of this
+            time. Not accepted with other strategies.
+          format: date-time
           nullable: true
         send_invoice:
           type: boolean
@@ -14700,6 +14746,16 @@ components:
           description: >-
             The date the subscription's billing period renews on. Only honored
             when the retry creates a subscription.
+          format: date-time
+          nullable: true
+        billing_start_date:
+          type: string
+          description: >-
+            The date the contract term starts. A past date backdates the
+            subscription so the first invoice covers the term from this date to
+            the renewal date. Requires billing_cycle_anchor. When both are
+            omitted, the term pinned at finalize is reissued. Only honored when
+            the retry creates a subscription.
           format: date-time
           nullable: true
         customer_email:
