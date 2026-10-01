@@ -4459,6 +4459,11 @@ components:
             $ref: '#/components/schemas/PlanEntitlementResponseData'
           nullable: true
           maxItems: 1000
+        estimated_totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/EstimatedPlanTotal'
+          maxItems: 1000
         features:
           type: array
           items:
@@ -4908,6 +4913,8 @@ components:
           type: boolean
         show_credits:
           type: boolean
+        show_estimated_total:
+          type: boolean
         show_feature_description:
           type: boolean
         show_hard_limit:
@@ -4921,6 +4928,7 @@ components:
         - show_credits
         - show_feature_description
         - show_hard_limit
+        - show_estimated_total
         - show_period_toggle
         - show_zero_price_as_free
       title: ComponentDisplaySettings
@@ -5177,6 +5185,8 @@ components:
           type: boolean
         show_credits:
           type: boolean
+        show_estimated_total:
+          type: boolean
         show_feature_description:
           type: boolean
         show_hard_limit:
@@ -5190,6 +5200,7 @@ components:
         - show_credits
         - show_feature_description
         - show_hard_limit
+        - show_estimated_total
         - show_period_toggle
         - show_zero_price_as_free
       title: ComponentSettingsResponseData
@@ -7795,6 +7806,8 @@ components:
           type: boolean
         show_credits:
           type: boolean
+        show_estimated_total:
+          type: boolean
         show_feature_description:
           type: boolean
         show_hard_limit:
@@ -7838,6 +7851,7 @@ components:
         - show_credits
         - show_feature_description
         - show_hard_limit
+        - show_estimated_total
         - show_period_toggle
         - show_zero_price_as_free
         - sync_customer_billing_details
@@ -9574,6 +9588,21 @@ components:
         - timestamp
         - usage
       title: EnvironmentUsagePointResponseData
+    EstimatedPlanTotal:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        period:
+          $ref: '#/components/schemas/PlanPriceCadence'
+      required:
+        - amount
+        - currency
+        - period
+      title: EstimatedPlanTotal
     EventBody:
       type: object
       oneOf:
@@ -17613,6 +17642,8 @@ components:
           type: boolean
         show_credits:
           type: boolean
+        show_estimated_total:
+          type: boolean
         show_feature_description:
           type: boolean
         show_hard_limit:
@@ -17656,6 +17687,7 @@ components:
         - show_credits
         - show_feature_description
         - show_hard_limit
+        - show_estimated_total
         - show_period_toggle
         - show_zero_price_as_free
         - sync_customer_billing_details
