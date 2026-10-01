@@ -52,7 +52,7 @@ Each process keeps its own copy unless you point the SDK at Redis, which shares 
 
 ### Replicator
 
-[Replicator](https://github.com/schematicHQ/schematic-replicator) is for infrastructure that needs a higher level of availability and reliability. It proactively caches all of your customers' entitlement state in a durable cache in your own system, such as Redis, and the Schematic SDKs serve flag checks from that cache. If Schematic has a service disruption, your app keeps serving entitlement state from data that is already in your network.
+[Replicator](/production_readiness/replicator) is for infrastructure that needs a higher level of availability and reliability. It proactively caches all of your customers' entitlement state in a durable cache in your own system, such as Redis, and the Schematic SDKs serve flag checks from that cache. If Schematic has a service disruption, your app keeps serving entitlement state from data that is already in your network.
 
 Replicator is a container you run alongside your app. It loads every flag, company, and user in your environment into Redis, then holds a WebSocket to Schematic and writes each change as it arrives. The SDK runs in Replicator mode, reads from Redis, and evaluates checks locally. Because every company is already loaded, even the first check for a company is served locally.
 
@@ -84,7 +84,7 @@ Event tracking runs separately from the core API. Schematic writes every event i
 
 - [Availability](/production_readiness/availability) — compare how each setup behaves during a Schematic interruption
 - [SDKs](/developer_resources/sdks/overview) — install and configure the frontend and backend SDKs for your language
-- [Replicator on GitHub](https://github.com/schematicHQ/schematic-replicator) — deploy and configure the Replicator container and its Redis
+- [Replicator](/production_readiness/replicator) — deploy and configure the Replicator container and its Redis
 - [Authentication](/api-reference/authentication) — decide which key belongs in your frontend and which stays on your server
 - [Metering](/playbooks/metering) — send usage events with idempotency keys so retries never double count
 - [Credit Leases and Reservations](/billing/credit-leases-and-reservations) — keep concurrent workers from overspending one credit balance

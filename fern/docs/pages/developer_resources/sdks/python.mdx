@@ -829,7 +829,7 @@ asyncio.run(main())
 
 ### Replicator Mode
 
-When running the [`schematic-datastream-replicator`](https://github.com/schematichq/schematic-datastream-replicator) service, configure the client to operate in **Replicator Mode**. The replicator holds the single WebSocket connection to Schematic and populates a shared cache; SDK instances read from that cache and evaluate flags locally without opening their own WebSocket connections.
+When running the [Replicator](/production_readiness/replicator) service, configure the client to operate in **Replicator Mode**. The replicator holds the single WebSocket connection to Schematic and populates a shared cache; SDK instances read from that cache and evaluate flags locally without opening their own WebSocket connections.
 
 **Replicator Mode requires a shared cache** (e.g. Redis) so the SDK can read data written by the external replicator process. Configure the cache slots on `DataStreamConfig` exactly as in the Redis example above.
 

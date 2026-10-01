@@ -449,7 +449,7 @@ Schematic schematic = Schematic.builder()
 
 ## Replicator Mode
 
-Replicator mode is designed for environments where a separate process (the [schematic-datastream-replicator](https://github.com/SchematicHQ/schematic-datastream-replicator)) manages the WebSocket connection and populates a shared Redis cache. The SDK reads from that cache and evaluates flags locally without establishing its own WebSocket connection.
+Replicator mode is designed for environments where a separate process (the [Replicator](/production_readiness/replicator)) manages the WebSocket connection and populates a shared Redis cache. The SDK reads from that cache and evaluates flags locally without establishing its own WebSocket connection.
 
 ### Requirements
 
