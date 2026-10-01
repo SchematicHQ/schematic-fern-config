@@ -3056,9 +3056,10 @@ components:
         credit_spend_policies:
           type: array
           description: >-
-            Credit spend policies binding the evaluated company and user.
-            Advisory: the flag values do not reflect them, since a check names
-            no draw amount. Only actors carrying a policy have any
+            Credit spend policies binding the evaluated company and user; empty
+            when none bind. Each response carries the whole set, so replace any
+            previously received set with it. Advisory: the flag values do not
+            reflect them, since a check names no draw amount
           items:
             $ref: '#/components/schemas/CreditSpendPolicy'
           maxItems: 1000
@@ -3071,6 +3072,7 @@ components:
           $ref: '#/components/schemas/DatastreamCompanyPlan'
       required:
         - flags
+        - credit_spend_policies
       title: CheckFlagsResponseData
     CheckoutBundlePurchaseBehavior:
       type: string
