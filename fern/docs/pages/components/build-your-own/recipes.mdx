@@ -1,0 +1,135 @@
+---
+title: Recipes
+description: Complete reference components for the customer portal, the credit wallet, and a pricing page, in shadcn/ui, Tailwind, and plain CSS.
+slug: components/build-your-own/recipes
+---
+
+Each recipe is a complete component built on the hooks and derivations, in three stacks. Copy the one closest to yours into your codebase and make it yours; the Components tab in the dashboard has the same code with a live preview and an AI prompt per component.
+
+## Customer portal
+
+One page, one hook per resource, each section loading and retrying on its own:
+
+```tsx
+import { useCompany, useCreditBalances, useFeatureUsage, useInvoices, usePaymentMethods, useUpcomingInvoice } from "@schematichq/schematic-react";
+import { PlanManager } from "@/components/schematic/plan-manager";
+import { IncludedFeatures } from "@/components/schematic/included-features";
+import { UpcomingBill } from "@/components/schematic/upcoming-bill";
+import { PaymentMethods } from "@/components/schematic/payment-methods";
+import { Invoices } from "@/components/schematic/invoices";
+import { FeatureMeter } from "@/components/schematic/feature-meter";
+import { CreditMeter } from "@/components/schematic/credit-meter";
+
+function Section({ handle, children }) {
+  if (handle.isPending) return <Skeleton className="h-40" />;
+  if (handle.error) return <Retry message={handle.error.message} onClick={handle.refetch} />;
+  return children(handle.data);
+}
+
+export default function BillingPage() {
+  const company = useCompany();
+  const features = useFeatureUsage();
+  const credits = useCreditBalances();
+  const upcoming = useUpcomingInvoice();
+  const paymentMethods = usePaymentMethods();
+  const invoices = useInvoices({ includePending: true });
+
+  return (
+    <div className="space-y-4">
+      <Section handle={company}>{(data) => <PlanManager company={data} />}</Section>
+      <Section handle={features}>{(data) => <IncludedFeatures features={data} />}</Section>
+      <Section handle={upcoming}>{(data) => <UpcomingBill bill={data} />}</Section>
+      <Section handle={paymentMethods}>{(data) => <PaymentMethods paymentMethods={data} />}</Section>
+      <Section handle={invoices}>{(page) => <Invoices page={page} onLoadMore={invoices.loadMore} />}</Section>
+      <Section handle={features}>{(data) => <FeatureMeter features={data} />}</Section>
+      <Section handle={credits}>{(data) => <CreditMeter balances={data} />}</Section>
+    </div>
+  );
+}
+```
+
+### The components
+
+| Component | Hook | Derivation | Reference code |
+| --- | --- | --- | --- |
+| Plan Manager | `useCompany` | `derivePlanSummary` | `plan-manager.tsx` |
+| Credit Meter | `useCreditBalances` | `deriveCreditUsage` | `credit-meter.tsx` |
+| Feature Meter | `useFeatureUsage` | `deriveUsageMeter` | `feature-meter.tsx` |
+| Included Features | `useFeatureUsage` | `deriveEntitlementRow` | `included-features.tsx` |
+| Upcoming Bill | `useUpcomingInvoice` | `deriveUpcomingInvoice` | `upcoming-bill.tsx` |
+| Payment Methods | `usePaymentMethods` | `derivePaymentMethods` | `payment-methods.tsx` |
+| Invoices | `useInvoices` | `deriveInvoiceList` | `invoices.tsx` |
+| Unsubscribe | `useUnsubscribe`, `useCompany` | | `unsubscribe.tsx` |
+
+Each file exists in shadcn/ui, Tailwind, and plain CSS in the dashboard's Components tab, and the shadcn versions run in the [DashAI example app](https://github.com/SchematicHQ/schematic-dashai).
+
+## Credit wallet
+
+```tsx
+import { useCreditBalances, useCheckout } from "@schematichq/schematic-react";
+import { deriveCreditUsage } from "@schematichq/schematic-components/elements";
+
+export function Wallet() {
+  const { data, isPending, error, refetch } = useCreditBalances();
+  const { open } = useCheckout();
+  if (isPending) return <Skeleton className="h-40" />;
+  if (error) return <Retry onClick={refetch} />;
+
+  return data.map((balance) => {
+    const credit = deriveCreditUsage(balance, { locale: "en-US" });
+    return (
+      <section key={balance.creditId}>
+        <h3>{credit.name}</h3>
+        <Meter percent={credit.percent} />
+        <p>{credit.remainingText} of {credit.totalText} remaining</p>
+        {credit.canBuyMore && <button onClick={() => open({ creditId: balance.creditId })}>Buy more</button>}
+      </section>
+    );
+  });
+}
+```
+
+## Pricing page
+
+A public page needs only the publishable key. Selection state lives in your component; the derivation returns the valid option sets:
+
+```tsx
+import { useState } from "react";
+import { useCatalog } from "@schematichq/schematic-react";
+import { derivePricingTable } from "@schematichq/schematic-components/elements";
+
+export function Pricing() {
+  const { data, isPending, error, refetch } = useCatalog();
+  const [period, setPeriod] = useState("month");
+  const [currency, setCurrency] = useState("usd");
+  if (isPending) return <Skeleton className="h-80" />;
+  if (error) return <Retry onClick={refetch} />;
+
+  const table = derivePricingTable(data, { period, currency, locale: "en-US" });
+
+  return (
+    <>
+      <PeriodToggle options={table.periods} value={period} onChange={setPeriod} />
+      <div className="grid md:grid-cols-3">
+        {table.plans.map((plan) => (
+          <PlanCard key={plan.id} plan={plan} onSelect={() => router.push(`/signup?plan=${plan.id}&period=${period}`)} />
+        ))}
+      </div>
+    </>
+  );
+}
+```
+
+Inside the portal, the same component under a session marks the current plan and hands `onSelect` to `useCheckout().open`.
+
+## Implement with AI
+
+Every recipe has a prompt in the dashboard's Components tab. The shape of each:
+
+```text
+Add an "Invoices" section to my app's billing page using Schematic.
+- The app is wrapped in <SchematicProvider publishableKey session={{ company, user, token }}>.
+- Fetch with useInvoices(query?) → { data: InvoicePage, error, isPending, refetch, loadMore }.
+- Reference implementation: https://docs.schematichq.com/components/build-your-own/recipes (adapt to our design system).
+- Handle isPending with skeletons and error with a retry button.
+```
