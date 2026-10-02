@@ -8215,6 +8215,7 @@ components:
           nullable: true
         billing_credit_id:
           type: string
+          nullable: true
         company:
           $ref: '#/components/schemas/CompanyLedgerResponseData'
         company_id:
@@ -8223,6 +8224,9 @@ components:
           $ref: '#/components/schemas/BillingCreditLedgerResponseData'
         credit_name:
           type: string
+        currency:
+          type: string
+          nullable: true
         environment_id:
           type: string
         event_at:
@@ -8275,6 +8279,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        kind:
+          $ref: '#/components/schemas/CreditLedgerEntryKind'
         plan_id:
           type: string
           nullable: true
@@ -8316,15 +8322,18 @@ components:
         - event_at
         - event_id
         - event_type
+        - kind
         - source_id
-        - billing_credit_id
         - company_id
         - environment_id
       title: CreditEventLedgerResponseData
     CreditEventType:
       type: string
       enum:
+        - adjustment
+        - charge
         - grant
+        - settlement
         - transfer
         - usage
         - zero_out
@@ -8444,6 +8453,16 @@ components:
         - created_at
         - updated_at
       title: CreditLeaseResponseData
+    CreditLedgerEntryKind:
+      type: string
+      enum:
+        - adjustment
+        - charge
+        - drawdown
+        - grant
+        - settlement
+        - transfer
+        - zero_out
     CreditReservationResponseData:
       type: object
       properties:
