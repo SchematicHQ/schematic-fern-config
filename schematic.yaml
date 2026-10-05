@@ -6689,17 +6689,33 @@ components:
           maxLength: 255
         max_per_draw:
           type: number
-          description: The largest number of credits a single draw may spend.
+          description: >-
+            The largest number of credits a single draw may spend. Set either
+            this or window_amount.
           format: double
+          nullable: true
         user_id:
           type: string
           description: >-
             The user the cap applies to. Set exactly one of company_id and
             user_id.
           nullable: true
+        window_amount:
+          type: number
+          description: >-
+            The number of credits the company or user may spend in one window.
+            Set either this or max_per_draw.
+          format: double
+          nullable: true
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          description: >-
+            The window that window_amount applies to: one UTC hour or one UTC
+            day. Required with window_amount.
+          nullable: true
       required:
         - billing_credit_id
-        - max_per_draw
       title: CreateCreditSpendPolicyRequestBody
     CreateCustomPlanBundlePlanRequestBody:
       type: object
@@ -8565,9 +8581,23 @@ components:
         company_id:
           type: string
           nullable: true
+        consumed:
+          type: number
+          description: >-
+            Credits spent in the current window. Set only by the usage route,
+            and only for a window cap.
+          format: double
+          nullable: true
         created_at:
           type: string
           format: date-time
+        headroom:
+          type: number
+          description: >-
+            Credits left in the current window. Set only by the usage route, and
+            only for a window cap.
+          format: double
+          nullable: true
         id:
           type: string
         label:
@@ -8577,6 +8607,13 @@ components:
           type: number
           format: double
           nullable: true
+        resets_at:
+          type: string
+          description: >-
+            When the current window ends. Set only by the usage route, and only
+            for a window cap.
+          format: date-time
+          nullable: true
         scope_type:
           $ref: '#/components/schemas/CreditSpendPolicyScope'
         updated_at:
@@ -8585,10 +8622,22 @@ components:
         user_id:
           type: string
           nullable: true
+        window_amount:
+          type: number
+          format: double
+          nullable: true
+        window_count:
+          type: integer
+          format: int64
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          nullable: true
       required:
         - id
         - billing_credit_id
         - scope_type
+        - window_count
         - created_at
         - updated_at
       title: CreditSpendPolicyResponseData
@@ -8612,6 +8661,12 @@ components:
         - unit
         - count
       title: CreditSpendWindow
+    CreditSpendWindowUnit:
+      type: string
+      enum:
+        - hour
+        - day
+        - billing_period
     CreditTransferReason:
       type: string
       enum:
@@ -17240,6 +17295,14 @@ components:
           type: number
           format: double
           nullable: true
+        window_amount:
+          type: number
+          format: double
+          nullable: true
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          nullable: true
       title: UpdateCreditSpendPolicyRequestBody
     UpdateEntitlementReqCommon:
       type: object
@@ -22165,6 +22228,71 @@ paths:
                   - data
                   - params
                 title: CountCreditSpendPoliciesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/spend-policies/usage:
+    get:
+      operationId: getCreditSpendPolicyUsage
+      summary: Get credit spend policy usage
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: user_ids
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                    title: GetCreditSpendPolicyUsageResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      user_ids:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 100
+                    title: GetCreditSpendPolicyUsageParams
+                required:
+                  - data
+                  - params
+                title: GetCreditSpendPolicyUsageResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
