@@ -1,0 +1,109 @@
+---
+title: Rolling Out a Feature to Multiple Plans
+description: Add a feature to many plans in one pass, set the entitlement and migration for each plan, and track every plan's migration from the feature.
+slug: catalog/guides/feature-rollout
+---
+
+A new feature usually belongs on more than one plan. Without a rollout, you open each plan, add the entitlement, publish the draft, and choose a migration, so a five-plan catalog takes five trips through the [publish flow](/catalog/guides/plan-versions).
+
+A feature rollout covers all of those plans in one pass. You select the plans, set the entitlement and the migration for each one, review the new plan versions, and publish them together.
+
+## Start a rollout
+
+Open the feature and go to its **Entitlements** tab. Above the plan entitlements table, the **Roll out to plans** card has a **Roll out feature** button. The feature's 3-dot menu has the same action as **Roll out feature to plans**. Both appear while at least one plan is missing the feature.
+
+You need the **Plan Entitlements** and **Plan Versions** [permissions](/production_readiness/roles-and-permissions) to build a rollout, and **Plans & Add-ons** to publish it.
+
+The rollout saves your choices each time you move between steps. If you close it, the button reads **Resume rollout** and takes you back to the step you left. A feature has one open rollout at a time, so finish or discard the current one before you start another. **Discard rollout**, in the top bar, deletes the selected plans and settings and leaves the plans themselves unchanged.
+
+## Step 1: Select plans
+
+The first step, "Select plans to roll out to", lists the plans that do not have the feature, with each plan's price and company count. Tick the plans you want, or use the checkbox on the **Standard Plans** header to select all of them. The line under the list counts the plans you selected and the companies on them.
+
+The list covers standard plans. Add-ons and custom plans take the feature from their own pages.
+
+A plan that already has a draft in progress carries a pill such as "Draft V4 (publish manually)". That draft holds changes you have not published, so the rollout adds the feature to it and leaves the publishing to you. You publish the draft from the plan page and choose its migration there.
+
+## Step 2: Configure plans
+
+The second step lists the selected plans on the left and shows the open plan's settings on the right, in two cards: **Entitlement** and **Migration**.
+
+### Entitlement
+
+The **Entitlement** card is the same form you use when you add a feature to a single plan, so each plan can charge for the feature differently. One plan can include it and another can bill it as pay as you go.
+
+Once a plan's entitlement is valid, a banner offers to copy it. **Apply to all** fills in every plan you have not opened yet. It copies the entitlement only, so migration settings stay per plan. If the entitlement adds a price, free and trial plans are skipped and left for you to configure.
+
+Opening a plan accepts the entitlement it shows. **Continue** stays disabled until you have opened every plan and each entitlement is valid for its plan. An entitlement copied to a plan that bills in another currency, for example, is marked "Not valid for this plan" until you enter its prices.
+
+### Migration
+
+The **Migration** card decides what happens to the companies already on the plan. Each plan gets its own answers to three questions.
+
+"When should companies migrate?" sets the timing.
+
+| Option | What happens |
+| --- | --- |
+| Immediately | The default. Companies migrate as soon as the migration starts, and subscriptions update mid-cycle. |
+| At End of Billing Period | Each company migrates when its own billing period renews, with no mid-cycle billing changes. Companies without an active subscription migrate right away. |
+
+"How should billing changes be handled?" appears when companies migrate immediately. It applies only if the new version changes what those companies pay.
+
+| Option | What happens |
+| --- | --- |
+| Prorate on the next invoice | The default. The prorated difference is added to each customer's next scheduled invoice. |
+| Prorate and invoice immediately | Each customer is charged or credited the prorated difference as soon as they migrate. |
+| Don't prorate | Each customer finishes the period they have already paid for, and the new price first applies at their next renewal. |
+
+"Which companies migrate to the new version?" sets who moves. The first and last labels show the plan's company count.
+
+| Option | What happens |
+| --- | --- |
+| Migrate all companies | The default. Every company on the plan moves to the new version. |
+| Choose which companies migrate | A searchable list of the plan's companies opens. The companies you untick stay on the current version, up to 1,000 per plan. |
+| Keep all companies on the current version | No company migrates, and the new version is used for new checkouts only. |
+
+A rollout migrates companies from the plan's current published version. Companies you kept on an older version stay where they are.
+
+For a plan with a draft in progress, the **Migration** card tells you to publish the draft from the plan page and configure its migration there.
+
+## Step 3: Review changes
+
+The third step, "Review changes", shows one row per plan with the version change (for example V3 to V4), the entitlement the plan gains, its migration, and its company count. Hover a row to read the full summary for that plan.
+
+Check the totals under the table, then click **Publish**. Each new version goes live as soon as it publishes and replaces the prior version in checkout and in catalog configuration. A rollout never leaves these versions as drafts.
+
+## Step 4: Publish
+
+Publishing runs in the background, plan by plan. A plan with many companies can take a few minutes, and you can close the window while the rollout keeps going.
+
+The results screen lists each plan with its version and a status:
+
+| Status | Meaning |
+| --- | --- |
+| Waiting to publish | The plan is queued. |
+| Publishing… | The plan's new version is publishing now. |
+| Published | The new version is live. The status also reports the migration, such as "Published · migrating 12 of 40 companies" or "Published · migration scheduled". |
+| Merged into draft (publish from the plan page) | The plan had a draft, and the feature was added to it. |
+| Skipped (already entitled) | Someone added the feature to this plan while the rollout was open. |
+| Failed | The plan did not publish. The error appears under the status. |
+
+If a plan fails, click **Retry failed plans**, and fix the plan first when the error points to it. Plans that already published keep their new versions. Discarding the rollout at this point stops the remaining plans and rolls nothing back.
+
+When the rollout finishes, **View migrations** opens the feature's **Migrations** tab.
+
+## Track migrations
+
+The **Migrations** tab on the feature lists every migration its rollouts started, one row per plan, with the status, progress, strategy, and scheduled date. Click a row to see each company's progress and retry the companies that failed.
+
+Migrations set to the end of the billing period stay pending until each company renews. To move one sooner or call it off, open that plan's own **Migrations** tab and choose **Complete Migration Right Now** or **Cancel Scheduled Migration** from the row's menu.
+
+Above the table, **Rollouts** lists the feature's rollouts by status: Draft, Publishing, Needs attention, Completed, or Discarded. Each open rollout has a button to pick it back up, labeled **Resume**, **Continue publishing**, or **Review failures** to match its status. Completed and discarded rollouts fold behind a link that shows past rollouts, and a completed one keeps a **View results** button.
+
+The tab shows migrations started by rollouts of this feature. A migration you start from a plan's own publish flow appears on that plan's **Migrations** tab.
+
+## Learn more
+
+- [Rolling Out New Plan Versions](/catalog/guides/plan-versions) for publishing one plan's draft and migrating its subscribers
+- [Plans](/catalog/plans#plan-versions) for how versions, drafts, and migrations work
+- [Custom Plans](/catalog/custom-plans) for adding a feature to one company's negotiated plan

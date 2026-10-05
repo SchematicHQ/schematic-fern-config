@@ -221,6 +221,61 @@ Every grant records its source. The **Companies** tab on a credit type lists eac
 | Rollover | Carried forward from a previous period |
 | Adjustment | Returned by a refund |
 
+## Billed credit grants
+
+A plan's credit grant is included in the plan price by default, so the invoice has a line for the plan and none for the credits. On a [custom plan](/catalog/custom-plans) you can bill the grant instead. The credits get their own price and their own invoice line next to the plan, which fits a deal that quotes credits as a line item.
+
+Open the credit grant on the custom plan and set **Billing**:
+
+| Billing | What happens |
+| --- | --- |
+| Granted: included in the plan price | The default. Credits are part of the plan price and do not appear on the invoice. |
+| Billed: charged per credit as its own line | The credits are billed in advance on the plan's billing period and appear on the invoice as their own line, on the credit type's Stripe product. |
+
+A billed grant has four requirements:
+
+- The plan is a custom plan with a monthly, quarterly, or yearly price, which the credits bill alongside.
+- The credit type has a cost basis. Schematic bills the line on the credit type's Stripe product, and the credit type gets that product when you give it a price.
+- **Reset** is Monthly, Quarterly, or Yearly.
+- The grant is a fixed amount for the company. Choosing Billed turns off the per-license scaling described in [Seat and Agent Budgets](/billing/seat-and-agent-budgets).
+
+### How the invoice quantity is calculated
+
+The grant keeps its own reset cadence, and billing follows the plan's billing period. Each invoice bills every credit the grant issues during that period, so the quantity is the **Credit Amount** multiplied by the number of resets in one billing period.
+
+A grant of 1,000 credits a month on a yearly plan bills 12,000 credits on each yearly invoice. With a **Price per Credit** of \$1.00, the form confirms the line as 12,000 credits × \$1.00, or \$12,000 per year. The company still receives 1,000 credits at each monthly reset.
+
+The quantity has to come out as a whole number. A yearly grant of 1,200 credits on a monthly plan bills 100 credits a month. A yearly grant of 1,000 does not split into twelve equal invoices, so the form asks you to adjust the amount or the reset cadence.
+
+### Per credit and tiered pricing
+
+**Pricing** sets how that quantity is priced:
+
+| Pricing | What you enter |
+| --- | --- |
+| Per credit: one rate | The default. One **Price per Credit**, in the plan's currency. |
+| Tiered: rate changes with quantity | A **Tier Mode**, and a tier table with a **First Credit**, **Last Credit**, and **Price per Credit** for each tier. |
+
+Tiers are read against the invoice quantity, which the form shows in the read-only **Credits Priced per Invoice** field. In the example above that is 12,000 credits, the yearly total, and changing the credit amount, the reset cadence, or the plan's billing period changes it. A tier table needs at least two tiers, and the last tier has no upper bound.
+
+**Tier Mode** sets how the tiers combine:
+
+| Tier Mode | How the total is calculated |
+| --- | --- |
+| Graduated: each tier priced on its own | The default. The credits inside each tier are charged at that tier's rate. |
+| Volume: one rate for every credit | Every credit is charged at the rate of the tier the total lands in. |
+
+Take 12,000 credits per invoice and three tiers: \$1.00 for credits 1 to 5,000, \$0.90 for 5,001 to 10,000, and \$0.80 above that.
+
+| Tier Mode | Calculation | Invoice total |
+| --- | --- | --- |
+| Graduated | 5,000 × \$1.00 + 5,000 × \$0.90 + 2,000 × \$0.80 | \$11,100 |
+| Volume | 12,000 × \$0.80 | \$9,600 |
+
+Under the tier table, the form shows the same breakdown and the effective rate per credit, which is \$0.925 for the graduated example.
+
+Each billed grant is one item on the company's Stripe subscription, priced on its credit type's product. A plan that bills two credit types carries two credit lines.
+
 ## App settings and their API fields
 
 Everything above is configurable through the API as well. The dashboard uses friendlier labels than the underlying fields, and in a few places one control maps to more than one field, so this table is the translation.
@@ -241,12 +296,18 @@ These live on `BillingPlanCreditGrantResponseData`.
 | Grant Expiration: End of Billing Period, Next | `expiry_type` | `end_of_next_billing_period` |
 | Grant Expiration: No Expiry | `expiry_type` | `no_expiry` |
 | Credit Amount | `credit_amount` | Integer |
+| Billing | `billing_mode` | `granted` or `billed`. Defaults to `granted`, and `billed` is accepted on custom plans only |
+| Price per Credit | `unit_price`, `unit_price_decimal` | The price in the plan currency's smallest unit. Send `unit_price_decimal` instead for a rate below one cent |
+| Pricing: Tiered | `price_tiers` | 2 to 20 tiers, sent instead of `unit_price`. Each tier has an `up_to` and a `per_unit_price` or `per_unit_price_decimal`, and the last tier's `up_to` is null |
+| Tier Mode | `tier_mode` | `graduated` or `volume`. Required with `price_tiers` |
 | Automatic or user-controlled top-ups | `auto_topup_availability`, `postpaid_enabled` | See [API fields](/billing/empty-credit-balances#api-fields) |
 
 Two things the API exposes that the dashboard does not:
 
 - `expiry_type` also accepts `end_of_trial`, which expires credits when the company's trial ends. There is no dashboard control for it.
 - `expiry_unit` also accepts `billing_periods`, so a duration can be counted in billing periods rather than days. The dashboard only offers days.
+
+A [billed grant](#billed-credit-grants) also returns `price`, the Stripe price it bills through, and each tier in `price_tiers` comes back with `from` and `to` bounds counted in credits per invoice.
 
 ### Credit bundle
 
