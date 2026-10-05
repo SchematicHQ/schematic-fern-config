@@ -367,6 +367,147 @@ end
 client.close
 ```
 
+### Credit Leases and Reservations
+
+For features metered by credit burndown (e.g. inference tokens), `check` reserves credits for the work about to run and `track_with_reservation` settles the reservation with actual usage. The SDK gates in one of two modes:
+
+- **Client mode** acquires a **lease**, a tranche of credits held against the company's balance, and carves a per-request **reservation** out of it locally, so a check needs no API call. It requires [DataStream](#datastream) (or [Replicator Mode](#replicator-mode)) and, across multiple processes, a shared Redis so every instance gates against the same lease.
+- **Server mode** makes one `check-and-reserve` API call per check. No lease, no Redis, no local state.
+
+`credit_leases[:mode]` defaults to `:auto`: client when DataStream is enabled, server otherwise. Client mode suits high-throughput gating; server mode suits low-volume checks and operations that run for seconds.
+
+Durations are in milliseconds, as in the other Schematic SDKs.
+
+#### Setup
+
+The `redis` gem is not a dependency; pass a client you already have.
+
+```ruby
+require "redis"
+require "schematichq"
+
+redis_client = Redis.new(url: "redis://localhost:6379")
+
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  use_data_stream: true,
+  datastream_options: {
+    redis_client: redis_client # also backs lease and reservation state
+  },
+  credit_leases: {
+    default_lease_size: 10_000,           # credits requested per lease
+    default_lease_duration: 5 * 60 * 1000, # lease lifetime (ms)
+    default_reservation_ttl: 60 * 1000     # how long a reservation is held if no track settles it (ms)
+  }
+)
+```
+
+Set `credit_leases[:redis_client]` to keep lease state in a different Redis than the DataStream cache.
+
+Server mode needs only a TTL:
+
+```ruby
+client = Schematic::SchematicClient.new(
+  api_key: ENV["SCHEMATIC_API_KEY"],
+  credit_leases: {
+    default_reservation_ttl: 60 * 1000 # how long the server holds the credits if no track settles them (ms, max 1 hour)
+  }
+)
+```
+
+Only `mode` and `default_reservation_ttl` apply in server mode; the SDK warns at startup if a client-only option is set.
+
+#### Checking and tracking
+
+```ruby
+# Reserve up to max_tokens for this operation.
+result = client.check(
+  "inference",
+  company: { "id" => "your-company-id" },
+  usage: max_tokens,                  # upper bound for this operation
+  event_subtype: "inference_tokens"   # the metered event
+)
+raise "credit balance exceeded" unless result.allowed?
+
+inference = run_inference(...)
+
+# Report actual usage; the unused slice of the reservation is refunded.
+if result.reservation
+  client.track_with_reservation(result.reservation, inference.tokens_used)
+else
+  client.track({
+    event: "inference_tokens",
+    company: { "id" => "your-company-id" },
+    quantity: inference.tokens_used
+  })
+end
+```
+
+A check can allow without reserving credits (the feature is not credit-metered, `usage` is 0, or the check failed open), and that usage still has to be tracked.
+
+Without `credit_leases` configured, or without a `usage`, `check` falls through to a plain flag check with no reservation. `usage` is still sent as a preflight, locally or to the API, so the verdict accounts for what the call is about to spend. Preflighted verdicts are not cached.
+
+`usage` may be fractional. A client-mode reservation is sized in whole event units, `ceil(usage) x consumption_rate`, and a settle debits the lease by `ceil(actual) x consumption_rate`, so the local ledger moves by exactly what the track event bills. The reservation still records the fractional quantity the caller declared. Everything on the wire rounds up with the debit: the track event's quantity, a server-mode reservation, and the preflight quantity, whether it goes to the API or the local engine.
+
+`result.entitlement` is a symbol-keyed hash with the field names of `Schematic::Types::FeatureEntitlement`, the same in both modes.
+
+An unsettled reservation expires after `default_reservation_ttl` and its credits return to the lease. A late settle still bills the usage (the track event carries a deterministic idempotency key, so it never double-bills) but does not re-debit the local lease, so set `default_reservation_ttl` above the longest expected gap between `check` and `track_with_reservation`.
+
+#### Pre-warming
+
+Pre-warm leases when the user is identified, so a session's first check does not wait on a lease acquire:
+
+```ruby
+client.identify(
+  {
+    keys: { "user_id" => "your-user-id" },
+    company: { keys: { "id" => "your-company-id" } }
+  },
+  prewarm: ["credit-type-id"] # credit type IDs to acquire leases for
+)
+```
+
+Or call `client.prewarm(credit_type_ids, company:)` directly. Both are no-ops in server mode.
+
+Pre-warming resolves the company the way the server does: it looks the keys up first, whatever they are named, and only when nothing matches does it read a value carrying Schematic's `comp_` prefix as the company id.
+
+#### Failure behavior
+
+A check that cannot be gated (API unreachable, Redis down, lease exhausted) fails closed by default. Override per check:
+
+```ruby
+result = client.check(
+  "inference",
+  company: { "id" => "your-company-id" },
+  usage: max_tokens,
+  event_subtype: "inference_tokens",
+  on_acquire_failure: :fail_open
+)
+```
+
+In server mode, a check that times out after the server has already reserved leaves those credits reserved until the TTL expires, so keep `default_reservation_ttl` short there.
+
+In client mode, `:fail_open` still evaluates the flag's rules with the credit balance assumed sufficient, so plan targeting and all non-credit conditions apply and only the credit gate is bypassed. In server mode it returns the flag's default value, which is `false` unless you pass `default_value` or configure a `flag_defaults` entry.
+
+`default_value` also applies when a check falls back to a plain flag check and that check fails. Pass a boolean or a callable.
+
+`check` accepts `timeout_ms`, but no timeout is configurable yet: the generated HTTP transport ignores per-request timeouts and the client exposes no setting. The option is carried on the request so it takes effect once the transport reads it.
+
+#### Configuration options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `mode` | `:client`, `:server`, `:auto` | `:auto` | Where credits are reserved; `:auto` picks client when DataStream is enabled, server otherwise |
+| `default_reservation_ttl` | `Integer` | 60000 (60 seconds) | How long an unsettled reservation is held (ms) |
+| `default_lease_duration` | `Integer` | 300000 (5 minutes) | (client mode) Lease lifetime (ms) |
+| `default_lease_size` | `Numeric` | 10000 | (client mode) Credits requested per lease acquire or extend |
+| `low_water_mark` | `Float` | 0.25 | (client mode) Extend in the background when the lease balance dips below this fraction |
+| `sweep_interval_ms` | `Integer` | 1000 | (client mode) Sweep interval for expired reservations (ms) |
+| `prewarm_resolve_timeout_ms` | `Integer` | 5000 | (client mode) How long `prewarm` waits for a freshly identified company to surface (ms); 0 resolves from the DataStream cache only |
+| `redis_client` | Redis client | `datastream_options[:redis_client]` | (client mode) Redis client for lease and reservation state |
+| `redis_key_prefix` | `String` | `datastream_options[:redis_key_prefix]` | (client mode) Key prefix for lease and reservation keys |
+| `overrides` | `Hash` | none | (client mode) Per-credit-type overrides of the above, keyed by credit type ID |
+
 ### Other API operations
 
 The Schematic API supports many operations beyond these, accessible via the API modules on the client: `accounts`, `billing`, `companies`, `credits`, `entitlements`, `events`, `features`, and `plans`.

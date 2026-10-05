@@ -169,6 +169,153 @@ user.put("user_id", "your-user-id");
 boolean flagValue = schematic.checkFlag("some-flag-key", company, user);
 ```
 
+`checkFlagWithEntitlement` answers the same question and hands back the whole result: the value, the reason the rules engine gave, and the matched entitlement.
+
+## Credit Leases and Reservations
+
+For features metered by credit burndown (inference tokens, for example), `check` reserves credits for the work about to run and `trackWithReservation` settles the reservation with the actual usage. The SDK gates in one of two modes:
+
+- **Client mode** acquires a **lease**, a tranche of credits held against the company's balance, and carves a per-request **reservation** out of it locally, so a check needs no API call. It requires [DataStream](#datastream) (or [Replicator Mode](#replicator-mode)) and, across multiple processes, a shared Redis so every instance gates against the same lease.
+- **Server mode** makes one check-and-reserve API call per check. No lease, no Redis, no local state.
+
+`mode` defaults to `AUTO`: client when DataStream is enabled, server otherwise. Client mode suits high-throughput gating; server mode suits low-volume checks and operations that run for seconds.
+
+### Setup
+
+```java
+import com.schematic.api.Schematic;
+import com.schematic.api.credits.CreditLeaseConfig;
+import com.schematic.api.datastream.DatastreamOptions;
+import java.time.Duration;
+import redis.clients.jedis.JedisPooled;
+
+JedisPooled redisClient = new JedisPooled("localhost", 6379);
+
+Schematic schematic = Schematic.builder()
+    .apiKey("YOUR_API_KEY")
+    .datastreamOptions(DatastreamOptions.builder().build())
+    .creditLeases(CreditLeaseConfig.builder()
+        .defaultLeaseSize(10000)                            // credits requested per lease
+        .defaultLeaseDuration(Duration.ofMinutes(5))        // lease lifetime
+        .defaultReservationTtl(Duration.ofSeconds(60))      // how long a reservation is held if no track settles it
+        .redisClient(redisClient)                           // lease and reservation state
+        .build())
+    .build();
+```
+
+Leases reuse the Redis client the DataStream cache is configured with, if there is one. The example above configures DataStream without a Redis cache, so it passes `redisClient` explicitly. Set it whenever the DataStream cache is local, or when lease state should live in a different Redis from the cache. With no Redis on either side the SDK falls back to per-process in-memory state, which gates one process only and warns at startup.
+
+Server mode needs only a TTL:
+
+```java
+import com.schematic.api.Schematic;
+import com.schematic.api.credits.CreditLeaseConfig;
+import java.time.Duration;
+
+Schematic schematic = Schematic.builder()
+    .apiKey("YOUR_API_KEY")
+    .creditLeases(CreditLeaseConfig.builder()
+        .defaultReservationTtl(Duration.ofSeconds(60))      // just under an hour at most, which is as far out as the API will reserve credits
+        .build())
+    .build();
+```
+
+Only `mode` and `defaultReservationTtl` apply in server mode; the client warns at startup if a client-only option is set.
+
+### Checking and tracking
+
+```java
+import com.schematic.api.credits.CheckOptions;
+import com.schematic.api.credits.CheckResult;
+import java.util.HashMap;
+import java.util.Map;
+
+Map<String, String> company = new HashMap<>();
+company.put("id", "your-company-id");
+
+// Reserve up to maxTokens for this operation.
+CheckResult result = schematic.check("inference", company, null, CheckOptions.builder()
+    .usage(maxTokens)                      // upper bound for this operation
+    .eventSubtype("inference_tokens")      // the metered event
+    .build());
+if (!result.isAllowed()) {
+    throw new IllegalStateException("credit balance exceeded");
+}
+
+long tokensUsed = runInference();
+
+// Report the actual usage; the unused slice of the reservation is refunded.
+if (result.getReservation() != null) {
+    schematic.trackWithReservation(result.getReservation(), tokensUsed);
+} else {
+    schematic.track("inference_tokens", company, null, null, tokensUsed);
+}
+```
+
+A check can allow without reserving credits, when the feature is not credit-metered, when `usage` is 0, or when the check failed open, and that usage still has to be tracked.
+
+`usage` may be fractional, but credits are always sized in whole event units: a client-mode reservation records the fractional quantity, while the credits it reserves and the debit its settle makes are both `ceil(usage) x consumption rate`, so the local ledger moves by exactly what the track event bills. The integer fields on the wire round up for the same reason: the preflight quantity and the quantity a track event bills, so a partial unit is never billed as none.
+
+`usage` still gates a check that reserves nothing: it is sent as a preflight, locally or to the API, so the verdict accounts for what the call is about to spend. Preflighted verdicts are not cached.
+
+`CheckOptions.timeout` bounds every call a check waits on: the check-and-reserve call in server mode, the REST flag check a check can fall back to, and the client-mode lease acquire and extend. Lease calls are shared between concurrent checks, and a check that joins one somebody else opened waits no longer than its own timeout before giving up and taking its failure path, leaving that call running for the checks still on it. Background top-ups keep the client's own timeout.
+
+An unsettled reservation expires after `defaultReservationTtl` and its credits return to the lease. A late settle still bills the usage, since the track event carries a deterministic idempotency key that keeps it from double-billing, but it does not re-debit the local lease. Set `defaultReservationTtl` above the longest expected gap between the check and the settle.
+
+### Pre-warming
+
+Warm leases when the user is identified, so a session's first check does not wait on a lease acquire:
+
+```java
+import com.schematic.api.IdentifyOptions;
+import com.schematic.api.types.EventBodyIdentifyCompany;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+Map<String, String> userKeys = new HashMap<>();
+userKeys.put("user_id", "your-user-id");
+
+Map<String, String> companyKeys = new HashMap<>();
+companyKeys.put("id", "your-company-id");
+
+schematic.identify(
+    userKeys,
+    EventBodyIdentifyCompany.builder().keys(companyKeys).build(),
+    "Your User",
+    null,
+    IdentifyOptions.builder()
+        .prewarm(Collections.singletonList("credit-type-id"))
+        .build());
+```
+
+Identifying with a prewarm flushes the event buffer first, so the server has the company before the warm-up asks for a lease against it. That makes it a session-start call, not one to put on every event.
+
+Or call `schematic.prewarm(companyKeys, creditTypeIds)` directly. Both are no-ops in server mode.
+
+Pre-warming resolves the company the way the server does: it looks the keys up first, whatever they are named, and only when nothing matches does it read a value carrying Schematic's `comp_` prefix as the company id.
+
+### Failure behavior
+
+In server mode, a check that times out after the server has already reserved leaves those credits reserved until the TTL expires, so keep `defaultReservationTtl` short there.
+
+A check that cannot gate, because the API is unreachable, Redis is down, or the lease is exhausted, fails closed by default. Override it per check:
+
+```java
+import com.schematic.api.credits.CheckOptions;
+import com.schematic.api.credits.OnAcquireFailure;
+
+CheckOptions options = CheckOptions.builder()
+    .usage(maxTokens)
+    .eventSubtype("inference_tokens")
+    .onAcquireFailure(OnAcquireFailure.FAIL_OPEN)
+    .build();
+```
+
+In client mode `FAIL_OPEN` still evaluates the flag's rules with the credit balance assumed sufficient, so plan targeting and every non-credit condition apply and only the credit gate is bypassed. In server mode it returns the flag's default value, which is false unless the check passes `defaultValue` or the client configures a flag default.
+
+See [Credit Lease Options](#credit-lease-options) for the full set of options.
+
 ## Webhook Verification
 
 Schematic can send webhooks to notify your application of events. To ensure the security of these webhooks, Schematic signs each request using HMAC-SHA256. The Java SDK provides utility functions to verify these signatures.
@@ -280,6 +427,23 @@ Schematic schematic = Schematic.builder()
     .flagDefaults(flagDefaults)
     .build();
 ```
+
+### Credit Lease Options
+
+Set with `creditLeases(CreditLeaseConfig.builder()...build())`. Per-credit-type overrides take a `CreditLeaseOverride` under `override(creditTypeId, ...)`.
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `mode` | `CreditLeaseMode` | `AUTO` | Where credits are reserved; `AUTO` picks client when DataStream is enabled, server otherwise |
+| `defaultReservationTtl` | `Duration` | 60 seconds | How long an unsettled reservation is held |
+| `defaultLeaseDuration` | `Duration` | 5 minutes | (client mode) Lease lifetime |
+| `defaultLeaseSize` | `double` | 10000 | (client mode) Credits requested per lease acquire or extend |
+| `lowWaterMark` | `double` | 0.25 | (client mode) Extend in the background when the lease balance dips below this fraction |
+| `sweepInterval` | `Duration` | 1 second | (client mode) How often expired reservations are swept |
+| `prewarmResolveTimeout` | `Duration` | 5 seconds | (client mode) How long `prewarm` waits for a freshly identified company to surface; zero resolves from the DataStream cache only |
+| `redisClient` | `JedisPooled` | the DataStream cache's client | (client mode) Redis client for lease and reservation state |
+| `redisKeyPrefix` | `String` | the DataStream cache's prefix | (client mode) Key prefix for lease and reservation keys |
+| `overrides` | `Map<String, CreditLeaseOverride>` | none | (client mode) Per-credit-type overrides of `defaultLeaseDuration`, `defaultReservationTtl`, `defaultLeaseSize` and `lowWaterMark`, keyed by credit type id |
 
 ### Offline Mode
 
@@ -449,7 +613,7 @@ Schematic schematic = Schematic.builder()
 
 ## Replicator Mode
 
-Replicator mode is designed for environments where a separate process (the [Replicator](/production_readiness/replicator)) manages the WebSocket connection and populates a shared Redis cache. The SDK reads from that cache and evaluates flags locally without establishing its own WebSocket connection.
+Replicator mode is designed for environments where a separate process (the [schematic-datastream-replicator](https://github.com/SchematicHQ/schematic-datastream-replicator)) manages the WebSocket connection and populates a shared Redis cache. The SDK reads from that cache and evaluates flags locally without establishing its own WebSocket connection.
 
 ### Requirements
 
