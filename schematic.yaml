@@ -4158,6 +4158,15 @@ components:
           items:
             $ref: '#/components/schemas/CompanyOverrideNoteResponseData'
           maxItems: 1000
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Absent when the entitlement prices requests
+            only.
         rule_id:
           type: string
           nullable: true
@@ -5732,6 +5741,15 @@ components:
         description:
           type: string
           maxLength: 1024
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature; defaults to track, and
+            cannot change after creation. Inference is only valid on event
+            features: their event_subtype matches the event label on inference
+            events, and they meter through credits only.
+          nullable: true
         event_subtype:
           type: string
           nullable: true
@@ -5878,6 +5896,21 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         quarterly_metered_price_id:
           type: string
           nullable: true
@@ -6530,6 +6563,21 @@ components:
         note:
           type: string
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         value_bool:
           type: boolean
           nullable: true
@@ -6901,6 +6949,21 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         quarterly_metered_price_id:
           type: string
           nullable: true
@@ -7001,6 +7064,21 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         value_bool:
           type: boolean
           nullable: true
@@ -7109,6 +7187,15 @@ components:
         description:
           type: string
           maxLength: 1024
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature; defaults to track, and
+            cannot change after creation. Inference is only valid on event
+            features: their event_subtype matches the event label on inference
+            events, and they meter through credits only.
+          nullable: true
         event_subtype:
           type: string
           nullable: true
@@ -7643,6 +7730,21 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         quarterly_metered_price_id:
           type: string
           nullable: true
@@ -8022,6 +8124,26 @@ components:
         - quantity
         - total
       title: CreditBundlePurchaseResponseData
+    CreditBurnBreakdownLine:
+      type: object
+      properties:
+        credits:
+          type: number
+          format: double
+        key:
+          type: string
+        quantity:
+          type: number
+          format: double
+        rate:
+          type: number
+          format: double
+      required:
+        - credits
+        - key
+        - quantity
+        - rate
+      title: CreditBurnBreakdownLine
     CreditCompanyGrantView:
       type: object
       properties:
@@ -8234,6 +8356,15 @@ components:
         billing_credit_id:
           type: string
           nullable: true
+        burn_breakdown:
+          type: array
+          description: >-
+            The part of the draw this row covers: one line per priced quantity,
+            including the request line, summing to the row amount. Set on
+            inference-driven draws only.
+          items:
+            $ref: '#/components/schemas/CreditBurnBreakdownLine'
+          maxItems: 1000
         company:
           $ref: '#/components/schemas/CompanyLedgerResponseData'
         company_id:
@@ -8800,6 +8931,7 @@ components:
     CreditUsageReason:
       type: string
       enum:
+        - inference
         - lease_hold
         - lease_release
         - manual_adjustment
@@ -10601,6 +10733,14 @@ components:
           format: date-time
         description:
           type: string
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature. Track features are metered
+            by track events; inference features are metered by inference events
+            whose event label matches event_subtype, and meter through credits
+            only.
         event_subtype:
           type: string
           nullable: true
@@ -10665,6 +10805,7 @@ components:
         - name
         - description
         - feature_type
+        - event_source
         - icon
         - created_at
         - updated_at
@@ -10806,6 +10947,11 @@ components:
         - feature_key
         - value_type
       title: FeatureEntitlement
+    FeatureEventSource:
+      type: string
+      enum:
+        - inference
+        - track
     FeatureInPlanResponseData:
       type: object
       properties:
@@ -10816,6 +10962,14 @@ components:
           format: date-time
         description:
           type: string
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature. Track features are metered
+            by track events; inference features are metered by inference events
+            whose event label matches event_subtype, and meter through credits
+            only.
         event_subtype:
           type: string
           nullable: true
@@ -10878,6 +11032,7 @@ components:
         - name
         - description
         - feature_type
+        - event_source
         - icon
         - created_at
         - updated_at
@@ -10921,6 +11076,14 @@ components:
           format: date-time
         description:
           type: string
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature. Track features are metered
+            by track events; inference features are metered by inference events
+            whose event label matches event_subtype, and meter through credits
+            only.
         event_subtype:
           type: string
           nullable: true
@@ -10969,6 +11132,7 @@ components:
         - name
         - description
         - feature_type
+        - event_source
         - icon
         - created_at
         - updated_at
@@ -11251,6 +11415,8 @@ components:
           format: date-time
         description:
           type: string
+        event_source:
+          $ref: '#/components/schemas/FeatureEventSource'
         event_subtype:
           type: string
           nullable: true
@@ -11304,6 +11470,7 @@ components:
         - name
         - description
         - feature_type
+        - event_source
         - icon
         - created_at
         - updated_at
@@ -13367,6 +13534,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Absent when the entitlement prices requests
+            only.
         rule_id:
           type: string
         rule_id_usage_exceeded:
@@ -17310,6 +17486,21 @@ components:
         note:
           type: string
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         value_bool:
           type: boolean
           nullable: true
@@ -17467,6 +17658,21 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         value_bool:
           type: boolean
           nullable: true
@@ -17520,6 +17726,13 @@ components:
           type: string
           nullable: true
           maxLength: 1024
+        event_source:
+          allOf:
+            - $ref: '#/components/schemas/FeatureEventSource'
+          description: >-
+            Which event stream meters this feature. It is fixed at creation: an
+            update that changes it is rejected.
+          nullable: true
         event_subtype:
           type: string
           nullable: true
@@ -17722,6 +17935,21 @@ components:
           nullable: true
           deprecated: true
           maxItems: 100
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            Credits per unit of the quantity (per token for inference features),
+            keyed by quantity key. Inference features may price input_tokens,
+            output_tokens, cached_input_tokens, cache_creation_input_tokens and
+            reasoning_tokens; reasoning_tokens is priced on top of
+            output_tokens, so leave its rate at zero for providers that count
+            reasoning inside output. Omit to leave the schedule as it is; send
+            null to clear it.
+          nullable: true
+          maxProperties: 5
         quarterly_metered_price_id:
           type: string
           nullable: true
