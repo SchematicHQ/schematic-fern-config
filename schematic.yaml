@@ -15039,6 +15039,12 @@ components:
         activation_strategy:
           allOf:
             - $ref: '#/components/schemas/CustomPlanActivationStrategy'
+          description: >-
+            When the company gets the plan. On a custom-plan republish,
+            on_payment is only accepted when the amendment is invoiced today
+            (migration_strategy immediate, proration_behavior always_invoice,
+            collection_method send_invoice): the company stays on its current
+            version until that invoice is paid.
           nullable: true
         address:
           $ref: '#/components/schemas/CustomerBillingAddress'
@@ -15058,8 +15064,24 @@ components:
             first publish that starts a subscription.
           format: date-time
           nullable: true
+        collection_method:
+          allOf:
+            - $ref: '#/components/schemas/BillingCollectionMethod'
+          description: >-
+            How the invoice a custom-plan republish raises today is collected.
+            send_invoice (the default) issues it for the company to pay;
+            charge_automatically charges the default payment method straight
+            away. Only accepted on a custom-plan republish with
+            migration_strategy immediate and proration_behavior always_invoice.
+          nullable: true
         coupon_external_id:
           type: string
+          description: >-
+            A Stripe coupon to apply. On a custom-plan republish it discounts
+            the amendment invoice and is only used when that invoice is raised
+            today; it must exist in Stripe. It is attached to the subscription,
+            so a repeating or forever coupon also discounts the renewals that
+            follow.
           nullable: true
           maxLength: 255
         custom_field_values:
@@ -15074,6 +15096,11 @@ components:
           maxLength: 255
         days_until_due:
           type: integer
+          description: >-
+            Payment terms in days. On a custom-plan republish they apply to the
+            amendment invoice only, leave the subscription's renewal terms
+            unchanged, and are only used when that invoice is raised today and
+            sent rather than charged. Defaults to the subscription's terms.
           format: int64
           nullable: true
           maximum: 365
