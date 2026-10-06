@@ -3267,6 +3267,82 @@ components:
         - required
         - stripe_metadata_key
       title: CheckoutFieldWithValue
+    CheckoutProblemCode:
+      type: string
+      enum:
+        - add_on_requires_billed_plan
+        - billing_cycle_anchor_conflicts_with_trial
+        - billing_cycle_anchor_must_be_future
+        - credit_bundle_incompatible
+        - currency_mismatch
+        - discount_ineligible
+        - free_first_period_activates_on_payment
+        - invoice_email_required
+        - invoiced_subscription_conflicts_with_trial
+        - opt_in_required
+        - payment_method_required
+        - plan_unavailable
+        - price_unavailable
+        - prorate_first_period_without_anchor
+        - provider_rejected
+        - selection_invalid
+        - trial_end_must_be_future
+        - trial_end_too_far
+        - usage_over_limit
+    CheckoutProblemResponseData:
+      type: object
+      properties:
+        blocking:
+          type: boolean
+          description: Whether completing the checkout would be refused while this stands.
+        bundle_id:
+          type: string
+          nullable: true
+        code:
+          $ref: '#/components/schemas/CheckoutProblemCode'
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          description: The currency this problem is about, when it is about one.
+        detail:
+          type: string
+          description: >-
+            Diagnostic detail for operators, including what the billing provider
+            said. Never shown to a customer.
+        feature_id:
+          type: string
+          nullable: true
+        field_id:
+          type: string
+          nullable: true
+        message:
+          type: string
+          description: >-
+            What is wrong, in words safe for anyone allowed to read the
+            checkout.
+        payment_method_id:
+          type: string
+          nullable: true
+        plan_id:
+          type: string
+          nullable: true
+        price_id:
+          type: string
+          nullable: true
+        source:
+          $ref: '#/components/schemas/CheckoutProblemSource'
+      required:
+        - blocking
+        - code
+        - message
+        - source
+      title: CheckoutProblemResponseData
+    CheckoutProblemSource:
+      type: string
+      enum:
+        - provider
+        - requirement
+        - validation
     CheckoutSettingsResponseData:
       type: object
       properties:
@@ -12333,8 +12409,15 @@ components:
     ManagePlanPreviewResponseResponseData:
       type: object
       properties:
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutProblemResponseData'
+          maxItems: 1000
         subscription_change_preview:
           $ref: '#/components/schemas/PreviewSubscriptionChangeResponseData'
+      required:
+        - problems
       title: ManagePlanPreviewResponseResponseData
     ManagePlanRequest:
       type: object
@@ -12478,11 +12561,20 @@ components:
     ManagePlanResponseResponseData:
       type: object
       properties:
+        checkout_id:
+          type: string
+          nullable: true
         company:
           $ref: '#/components/schemas/CompanyDetailResponseData'
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutProblemResponseData'
+          maxItems: 1000
         success:
           type: boolean
       required:
+        - problems
         - success
       title: ManagePlanResponseResponseData
     MarkCustomPlanBillingPaidRequestBody:
@@ -14805,6 +14897,11 @@ components:
           type: string
           format: date-time
           deprecated: true
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutProblemResponseData'
+          maxItems: 1000
         promo_code_applied:
           type: boolean
           deprecated: true
@@ -14837,6 +14934,7 @@ components:
         - is_scheduled_downgrade
         - opt_in_required
         - payment_method_required
+        - problems
         - usage_violations
       title: PreviewSubscriptionChangeResponseData
     PreviewSubscriptionDiscountResponseData:
