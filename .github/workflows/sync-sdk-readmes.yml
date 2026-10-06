@@ -63,7 +63,7 @@ jobs:
               'Review the diff against the upstream READMEs before merging: whatever landed in an SDK repo lands on the docs site.' \
               > /tmp/pr-body.md
 
-            gh pr create --draft \
+            gh pr create \
               --head "$BRANCH" \
               --base main \
               --title "chore(docs): sync SDK pages with their repo READMEs" \
