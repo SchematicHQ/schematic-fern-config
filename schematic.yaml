@@ -549,7 +549,8 @@ components:
           format: int64
           nullable: true
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         duration:
           type: string
@@ -835,7 +836,8 @@ components:
         credit_name:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         expires_at:
           type: string
@@ -863,7 +865,8 @@ components:
           format: int64
           nullable: true
         postpaid_charge_currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         postpaid_charged_credits:
           type: number
@@ -1152,7 +1155,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         expired_at:
           type: string
           format: date-time
@@ -1543,7 +1546,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         external_price_id:
           type: string
         id:
@@ -1595,7 +1598,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         id:
           type: string
         interval:
@@ -1745,7 +1748,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         environment_id:
           type: string
         external_id:
@@ -1874,7 +1877,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         id:
           type: string
         interval:
@@ -1959,8 +1962,7 @@ components:
           maximum: 9999999999999
           minimum: 50
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         interval:
           type: string
           maxLength: 255
@@ -2143,7 +2145,8 @@ components:
         coupon_name:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         customer_facing_code:
           type: string
@@ -2202,7 +2205,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         default_payment_method_id:
@@ -2279,7 +2282,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         default_payment_method_id:
@@ -2655,13 +2658,13 @@ components:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           description: >-
             ISO 4217 currency this cart is being built in. Prices are still
             selected by id; this records the intent, and a cart that prices in
             another currency is reported as a problem.
           nullable: true
-          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -2726,13 +2729,13 @@ components:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           description: >-
             ISO 4217 currency this cart is being built in. Prices are still
             selected by id; this records the intent, and a cart that prices in
             another currency is reported as a problem.
           nullable: true
-          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -3085,9 +3088,9 @@ components:
         company_id:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
-          maxLength: 3
         selected_plan_id:
           type: string
           nullable: true
@@ -3310,7 +3313,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         default_payment_method_id:
@@ -3534,7 +3537,7 @@ components:
         company:
           $ref: '#/components/schemas/CompanyResponseData'
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         discounts:
@@ -4643,7 +4646,7 @@ components:
         cancel_at_period_end:
           type: boolean
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         discounts:
@@ -5575,9 +5578,9 @@ components:
           type: integer
           format: int64
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
-          maxLength: 3
         duration:
           type: string
           maxLength: 50
@@ -5639,7 +5642,7 @@ components:
             - $ref: '#/components/schemas/BillingCreditBurnStrategy'
           nullable: true
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         currency_prices:
           type: array
           items:
@@ -5787,7 +5790,8 @@ components:
           format: double
           nullable: true
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -6224,8 +6228,7 @@ components:
         billing_scheme:
           $ref: '#/components/schemas/BillingPriceScheme'
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         external_account_id:
           type: string
           maxLength: 255
@@ -6358,8 +6361,7 @@ components:
           type: string
           nullable: true
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
           maxLength: 255
@@ -6463,9 +6465,9 @@ components:
         credit_id:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
-          maxLength: 3
         expires_at:
           type: string
           format: date-time
@@ -6573,9 +6575,9 @@ components:
           type: integer
           format: int64
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
-          maxLength: 3
         duration:
           type: string
           maxLength: 50
@@ -6629,8 +6631,7 @@ components:
         credit_id:
           type: string
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         currency_prices:
           type: array
           items:
@@ -6815,7 +6816,8 @@ components:
           format: double
           nullable: true
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -7186,8 +7188,7 @@ components:
           type: string
           maxLength: 32
         currency:
-          type: string
-          maxLength: 16
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
           maxLength: 255
@@ -7557,7 +7558,8 @@ components:
           format: double
           nullable: true
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -7973,7 +7975,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         price:
           $ref: '#/components/schemas/BillingPriceView'
       required:
@@ -7983,8 +7985,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         price_per_unit:
           type: integer
           format: int64
@@ -8000,7 +8001,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -8051,7 +8052,8 @@ components:
         credit_name:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         exhausted_at:
           type: string
@@ -8094,7 +8096,8 @@ components:
           format: int64
           nullable: true
         postpaid_charge_currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         postpaid_charged_credits:
           type: number
@@ -8184,7 +8187,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         price:
           $ref: '#/components/schemas/BillingPriceView'
       required:
@@ -8194,8 +8197,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         price_per_unit:
           type: integer
           format: int64
@@ -8211,7 +8213,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         price:
           $ref: '#/components/schemas/BillingPriceResponseData'
       required:
@@ -8241,7 +8243,8 @@ components:
         credit_name:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         environment_id:
           type: string
@@ -8922,12 +8925,148 @@ components:
         - id
         - name
       title: CreditsWebhookCreditSummary
+    Currency:
+      type: string
+      enum:
+        - aed
+        - afn
+        - all
+        - amd
+        - ang
+        - aoa
+        - ars
+        - aud
+        - awg
+        - azn
+        - bam
+        - bbd
+        - bdt
+        - bif
+        - bmd
+        - bnd
+        - bob
+        - brl
+        - bsd
+        - bwp
+        - byn
+        - bzd
+        - cad
+        - cdf
+        - chf
+        - clp
+        - cny
+        - cop
+        - crc
+        - cve
+        - czk
+        - djf
+        - dkk
+        - dop
+        - dzd
+        - egp
+        - etb
+        - eur
+        - fjd
+        - fkp
+        - gbp
+        - gel
+        - gip
+        - gmd
+        - gnf
+        - gtq
+        - gyd
+        - hkd
+        - hnl
+        - htg
+        - huf
+        - idr
+        - ils
+        - inr
+        - isk
+        - jmd
+        - jpy
+        - kes
+        - kgs
+        - khr
+        - kmf
+        - krw
+        - kyd
+        - kzt
+        - lak
+        - lbp
+        - lkr
+        - lrd
+        - lsl
+        - mad
+        - mdl
+        - mga
+        - mkd
+        - mmk
+        - mnt
+        - mop
+        - mur
+        - mvr
+        - mwk
+        - mxn
+        - myr
+        - mzn
+        - nad
+        - ngn
+        - nio
+        - nok
+        - npr
+        - nzd
+        - pab
+        - pen
+        - pgk
+        - php
+        - pkr
+        - pln
+        - pyg
+        - qar
+        - ron
+        - rsd
+        - rub
+        - rwf
+        - sar
+        - sbd
+        - scr
+        - sek
+        - sgd
+        - shp
+        - sle
+        - sos
+        - srd
+        - std
+        - szl
+        - thb
+        - tjs
+        - top
+        - try
+        - ttd
+        - twd
+        - tzs
+        - uah
+        - ugx
+        - usd
+        - uyu
+        - uzs
+        - vnd
+        - vuv
+        - wst
+        - xaf
+        - xcd
+        - xcg
+        - xof
+        - xpf
+        - yer
+        - zar
+        - zmw
     CurrencyPriceRequestBody:
       type: object
       properties:
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         monthly_price_tiers:
           type: array
           items:
@@ -9281,7 +9420,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         monthly_price:
           $ref: '#/components/schemas/BillingPriceView'
         quarterly_price:
@@ -9669,7 +9808,7 @@ components:
           type: integer
           format: int64
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         period:
           $ref: '#/components/schemas/PlanPriceCadence'
       required:
@@ -11764,8 +11903,7 @@ components:
           type: string
           maxLength: 32
         currency:
-          type: string
-          maxLength: 16
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
           maxLength: 255
@@ -11834,7 +11972,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         due_date:
@@ -12086,12 +12224,12 @@ components:
             $ref: '#/components/schemas/UpdateCreditBundleRequestBody'
           maxItems: 100
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           description: >-
             ISO 4217 currency this change is being built in. Prices are still
             selected by id; this records the intent.
           nullable: true
-          maxLength: 3
         custom_field_values:
           type: array
           items:
@@ -12103,6 +12241,14 @@ components:
           format: int64
           nullable: true
           maximum: 365
+        paid_outside_stripe:
+          type: boolean
+          description: >-
+            If true, the first invoice is recorded in Stripe as paid outside
+            Stripe and the company gets the plan straight away. Requires
+            collection_method to be send_invoice, and the invoice is not
+            emailed. Defaults to false.
+          nullable: true
         pay_in_advance_entitlements:
           type: array
           items:
@@ -12235,7 +12381,7 @@ components:
           type: integer
           format: int64
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
       required:
         - amount
         - currency
@@ -12977,8 +13123,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
-          maxLength: 3
+          $ref: '#/components/schemas/Currency'
         monthly_price:
           type: integer
           format: int64
@@ -13006,7 +13151,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         monthly_price:
           $ref: '#/components/schemas/BillingPriceResponseData'
         one_time_price:
@@ -14512,7 +14657,8 @@ components:
         coupon_name:
           type: string
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         customer_facing_code:
           type: string
@@ -14552,7 +14698,8 @@ components:
           type: integer
           format: int64
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           description: ISO 4217 currency every amount in this block is denominated in.
         discount_amount:
           type: integer
@@ -16102,7 +16249,7 @@ components:
       type: object
       properties:
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         effective_after:
           type: string
           format: date-time
@@ -16642,7 +16789,7 @@ components:
           type: string
           format: date-time
         currency:
-          type: string
+          $ref: '#/components/schemas/Currency'
         customer_external_id:
           type: string
         due_date:
@@ -17497,7 +17644,8 @@ components:
           format: double
           nullable: true
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -17947,7 +18095,8 @@ components:
         charge_type:
           $ref: '#/components/schemas/ChargeType'
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -18254,7 +18403,8 @@ components:
           maximum: 9999999999999
           minimum: 50
         currency:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Currency'
           nullable: true
         currency_prices:
           type: array
@@ -23058,9 +23208,9 @@ paths:
           in: query
           description: Filter for prices in a specific currency (e.g. usd, eur)
           schema:
-            type: string
+            allOf:
+              - $ref: '#/components/schemas/Currency'
             description: Filter for prices in a specific currency (e.g. usd, eur)
-            maxLength: 3
         - name: for_initial_plan
           in: query
           description: Filter for prices valid for initial plans (free prices only)
@@ -23192,11 +23342,11 @@ paths:
                     description: Input parameters
                     properties:
                       currency:
-                        type: string
+                        allOf:
+                          - $ref: '#/components/schemas/Currency'
                         description: >-
                           Filter for prices in a specific currency (e.g. usd,
                           eur)
-                        maxLength: 3
                       for_initial_plan:
                         type: boolean
                         description: >-
@@ -23373,9 +23523,9 @@ paths:
           in: query
           description: Filter for prices in a specific currency (e.g. usd, eur)
           schema:
-            type: string
+            allOf:
+              - $ref: '#/components/schemas/Currency'
             description: Filter for prices in a specific currency (e.g. usd, eur)
-            maxLength: 3
         - name: for_initial_plan
           in: query
           description: Filter for prices valid for initial plans (free prices only)
@@ -23507,11 +23657,11 @@ paths:
                     description: Input parameters
                     properties:
                       currency:
-                        type: string
+                        allOf:
+                          - $ref: '#/components/schemas/Currency'
                         description: >-
                           Filter for prices in a specific currency (e.g. usd,
                           eur)
-                        maxLength: 3
                       for_initial_plan:
                         type: boolean
                         description: >-
