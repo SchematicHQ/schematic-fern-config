@@ -9291,6 +9291,12 @@ components:
           nullable: true
         id:
           type: string
+        migration_id:
+          type: string
+          description: >-
+            The plan version migration this amendment invoice belongs to. Null
+            for a first publish or a plan assigned through Manage Plan.
+          nullable: true
         paid_at:
           type: string
           format: date-time
@@ -9299,8 +9305,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanBillingSource'
           description: >-
-            The flow that created this billing record: a custom plan, or a
-            standard plan assigned by invoice through Manage Plan.
+            The flow that created this billing record: a custom plan's first
+            publish, an amendment of a live custom plan, or a standard plan
+            assigned by invoice through Manage Plan.
         plan_id:
           type: string
         prorate_first_period:
@@ -12888,6 +12895,7 @@ components:
     PlanBillingSource:
       type: string
       enum:
+        - amendment
         - custom_plan
         - manage_plan
     PlanBundleAction:
@@ -27743,14 +27751,16 @@ paths:
         - name: plan_billing_source
           in: query
           description: >-
-            Filter by the flow that created the billing record. Defaults to
-            custom_plan.
+            Filter by the flow that created the billing record: custom_plan for
+            a first publish, amendment for a republish, manage_plan for a
+            standard plan assigned by invoice. Defaults to custom_plan.
           schema:
             allOf:
               - $ref: '#/components/schemas/PlanBillingSource'
             description: >-
-              Filter by the flow that created the billing record. Defaults to
-              custom_plan.
+              Filter by the flow that created the billing record: custom_plan
+              for a first publish, amendment for a republish, manage_plan for a
+              standard plan assigned by invoice. Defaults to custom_plan.
         - name: status
           in: query
           description: Filter by billing status
@@ -27822,8 +27832,10 @@ paths:
                         allOf:
                           - $ref: '#/components/schemas/PlanBillingSource'
                         description: >-
-                          Filter by the flow that created the billing record.
-                          Defaults to custom_plan.
+                          Filter by the flow that created the billing record:
+                          custom_plan for a first publish, amendment for a
+                          republish, manage_plan for a standard plan assigned by
+                          invoice. Defaults to custom_plan.
                       plan_id:
                         type: string
                         description: Filter by plan ID
