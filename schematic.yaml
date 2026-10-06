@@ -2095,6 +2095,14 @@ components:
         - orb
         - schematic
         - stripe
+    BillingSettingsResponseData:
+      type: object
+      properties:
+        default_provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
+      title: BillingSettingsResponseData
     BillingStrategy:
       type: string
       enum:
@@ -17353,6 +17361,14 @@ components:
         - reset_cadence
         - reset_start
       title: UpdateBillingPlanCreditGrantRequestBody
+    UpdateBillingSettingsRequestBody:
+      type: object
+      properties:
+        default_provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          nullable: true
+      title: UpdateBillingSettingsRequestBody
     UpdateCatalogConfigurationRequestBody:
       type: object
       properties:
@@ -24516,6 +24532,77 @@ paths:
                   - data
                   - params
                 title: UpdateCompanyBillingProfileResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/settings:
+    get:
+      operationId: getBillingSettings
+      summary: Get billing settings
+      tags:
+        - billing
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSettingsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetBillingSettingsParams
+                required:
+                  - data
+                  - params
+                title: GetBillingSettingsResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: updateBillingSettings
+      summary: Update billing settings
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBillingSettingsRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingSettingsResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateBillingSettingsParams
+                required:
+                  - data
+                  - params
+                title: UpdateBillingSettingsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
