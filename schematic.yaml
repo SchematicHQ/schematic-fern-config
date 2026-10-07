@@ -8483,6 +8483,11 @@ components:
           format: date-time
         event_id:
           type: string
+        event_ids:
+          type: array
+          items:
+            type: string
+          maxItems: 1000
         event_type:
           $ref: '#/components/schemas/CreditEventType'
         expiry_type:
@@ -8575,6 +8580,7 @@ components:
         - source_id
         - company_id
         - environment_id
+        - event_ids
       title: CreditEventLedgerResponseData
     CreditEventType:
       type: string
@@ -13085,6 +13091,7 @@ components:
     PlanChangeAction:
       type: string
       enum:
+        - amendment
         - checkout
         - company_upsert
         - fallback_plan
@@ -13096,6 +13103,14 @@ components:
         - plan_version_migration
         - quickstart
         - subscription_change
+    PlanChangeAmendmentStatus:
+      type: string
+      enum:
+        - applied
+        - cancelled
+        - failed
+        - scheduled
+        - skipped
     PlanChangeBasePlanAction:
       type: string
       enum:
@@ -13120,6 +13135,19 @@ components:
           items:
             $ref: '#/components/schemas/PlanSnapshotView'
           maxItems: 1000
+        amendment_status:
+          allOf:
+            - $ref: '#/components/schemas/PlanChangeAmendmentStatus'
+          description: >-
+            Set when the action is amendment. A custom plan amendment records
+            one plan change per status: scheduled when it is finalized for a
+            later date, then applied when the company moves to the new version,
+            cancelled when the scheduled change is called off, or failed or
+            skipped when its migration ends without moving the company (an
+            error, or the company was no longer on the version the amendment
+            started from). Only an applied amendment changed the company's plan
+            version.
+          nullable: true
         api_key:
           $ref: '#/components/schemas/ApiKeyResponseData'
         audit_log:
@@ -13160,6 +13188,13 @@ components:
             True when this change moved the company to a different version of
             the same plan (e.g. a plan version migration) rather than to a
             different plan.
+        migration_id:
+          type: string
+          description: >-
+            The plan version migration that carries this change. Set on
+            amendment plan changes, where it ties the scheduled, applied and
+            cancelled records of one amendment together.
+          nullable: true
         previous_base_plan:
           $ref: '#/components/schemas/PlanSnapshotView'
         previous_base_plan_version:
