@@ -5342,6 +5342,11 @@ components:
           nullable: true
         operator:
           $ref: '#/components/schemas/ComparableOperator'
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
         resource_ids:
           type: array
           items:
@@ -5480,6 +5485,11 @@ components:
           nullable: true
         operator:
           $ref: '#/components/schemas/ComparableOperator'
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
         resource_unspecified_ids:
           type: array
           items:
@@ -5603,6 +5613,11 @@ components:
           items:
             $ref: '#/components/schemas/GenericPreviewObject'
           maxItems: 1000
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
         resource_unspecified_ids:
           type: array
           items:
@@ -11007,6 +11022,16 @@ components:
             whether that monthly reset is based on the calendar month or a
             billing cycle
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            credit cost per unit of each quantity an event carries, keyed by
+            quantity key (per token for inference features). Absent when the
+            entitlement prices requests only
         soft_limit:
           type: integer
           description: >-
@@ -16040,6 +16065,11 @@ components:
           nullable: true
         operator:
           $ref: '#/components/schemas/RulesengineComparableOperator'
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
         resource_ids:
           type: array
           items:
@@ -16277,6 +16307,16 @@ components:
             whether that monthly reset is based on the calendar month or a
             billing cycle
           nullable: true
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: >-
+            If the company has a credit-based entitlement for this feature, the
+            credit cost per unit of each quantity an event carries, keyed by
+            quantity key (per token for inference features). Absent when the
+            entitlement prices requests only
         soft_limit:
           type: integer
           description: >-
