@@ -14391,6 +14391,14 @@ components:
       enum:
         - plan
         - add_on
+    PlanVersionBillingProductChangeResponseData:
+      type: object
+      properties:
+        new:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+        old:
+          $ref: '#/components/schemas/BillingProductDetailResponseData'
+      title: PlanVersionBillingProductChangeResponseData
     PlanVersionCompanyMigrationResponseData:
       type: object
       properties:
@@ -14460,6 +14468,139 @@ components:
         - in_progress
         - pending
         - skipped
+    PlanVersionCreditGrantChangeResponseData:
+      type: object
+      properties:
+        change_type:
+          $ref: '#/components/schemas/PlanVersionDiffChangeType'
+        changed_fields:
+          type: array
+          description: For a changed grant, the fields that differ.
+          items:
+            type: string
+          maxItems: 1000
+        credit_id:
+          type: string
+        new:
+          $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+        old:
+          $ref: '#/components/schemas/BillingPlanCreditGrantResponseData'
+      required:
+        - change_type
+        - changed_fields
+        - credit_id
+      title: PlanVersionCreditGrantChangeResponseData
+    PlanVersionDiffChangeType:
+      type: string
+      enum:
+        - added
+        - changed
+        - removed
+    PlanVersionDiffPriceCadence:
+      type: string
+      enum:
+        - monthly
+        - one_time
+        - quarterly
+        - yearly
+    PlanVersionDiffResponseData:
+      type: object
+      properties:
+        billing_product:
+          allOf:
+            - $ref: '#/components/schemas/PlanVersionBillingProductChangeResponseData'
+          description: >-
+            Set when the version's billing product changed; null when it is the
+            same on both versions.
+        credit_grants:
+          type: array
+          description: Credit grants added, removed, or changed, keyed by credit.
+          items:
+            $ref: '#/components/schemas/PlanVersionCreditGrantChangeResponseData'
+          maxItems: 1000
+        entitlements:
+          type: array
+          description: Entitlements added, removed, or changed, keyed by feature.
+          items:
+            $ref: '#/components/schemas/PlanVersionEntitlementChangeResponseData'
+          maxItems: 1000
+        from:
+          allOf:
+            - $ref: '#/components/schemas/PlanVersionResponseData'
+          description: >-
+            The version compared against. Null when the plan has no published
+            version, in which case everything on the target version is reported
+            as added.
+        has_billing_changes:
+          type: boolean
+          description: >-
+            Whether moving a subscription from the compared version to this one
+            changes its billing.
+        plan_fields:
+          type: array
+          description: >-
+            Plan-level fields that changed: name, description, icon, and
+            charge_type. When the plan has no version to compare against, every
+            field with a value is listed with an empty old value, including
+            charge_type on a free plan.
+          items:
+            $ref: '#/components/schemas/PlanVersionFieldChangeResponseData'
+          maxItems: 1000
+        prices:
+          type: array
+          description: Base prices that changed, one entry per currency and cadence.
+          items:
+            $ref: '#/components/schemas/PlanVersionPriceChangeResponseData'
+          maxItems: 1000
+        to:
+          allOf:
+            - $ref: '#/components/schemas/PlanVersionResponseData'
+          description: The version being compared.
+      required:
+        - credit_grants
+        - entitlements
+        - has_billing_changes
+        - plan_fields
+        - prices
+      title: PlanVersionDiffResponseData
+    PlanVersionEntitlementChangeResponseData:
+      type: object
+      properties:
+        change_type:
+          $ref: '#/components/schemas/PlanVersionDiffChangeType'
+        changed_fields:
+          type: array
+          description: >-
+            For a changed entitlement, the fields that differ. usage_quantity is
+            the committed quantity of a pay-in-advance entitlement.
+          items:
+            type: string
+          maxItems: 1000
+        feature_id:
+          type: string
+        new:
+          $ref: '#/components/schemas/PlanEntitlementResponseData'
+        old:
+          $ref: '#/components/schemas/PlanEntitlementResponseData'
+      required:
+        - change_type
+        - changed_fields
+        - feature_id
+      title: PlanVersionEntitlementChangeResponseData
+    PlanVersionFieldChangeResponseData:
+      type: object
+      properties:
+        field:
+          type: string
+        new:
+          type: string
+        old:
+          type: string
+      required:
+        - field
+        - new
+        - old
+      title: PlanVersionFieldChangeResponseData
     PlanVersionMigrationPreviewCompanyResponseData:
       type: object
       properties:
@@ -14598,6 +14739,21 @@ components:
         - immediate
         - leave
         - scheduled
+    PlanVersionPriceChangeResponseData:
+      type: object
+      properties:
+        cadence:
+          $ref: '#/components/schemas/PlanVersionDiffPriceCadence'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        new:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+        old:
+          $ref: '#/components/schemas/BillingPriceResponseData'
+      required:
+        - cadence
+        - currency
+      title: PlanVersionPriceChangeResponseData
     PlanVersionResponseData:
       type: object
       properties:
@@ -36418,6 +36574,61 @@ paths:
                 title: DeletePlanVersionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/version/{plan_version_id}/diff:
+    get:
+      operationId: getPlanVersionDiff
+      summary: Get plan version diff
+      tags:
+        - plans
+      parameters:
+        - name: plan_version_id
+          in: path
+          description: plan_version_id
+          required: true
+          schema:
+            type: string
+        - name: against
+          in: query
+          description: >-
+            The version to compare against. Defaults to the plan's published
+            version.
+          schema:
+            type: string
+            description: >-
+              The version to compare against. Defaults to the plan's published
+              version.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionDiffResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      against:
+                        type: string
+                        description: >-
+                          The version to compare against. Defaults to the plan's
+                          published version.
+                    title: GetPlanVersionDiffParams
+                required:
+                  - data
+                  - params
+                title: GetPlanVersionDiffResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
