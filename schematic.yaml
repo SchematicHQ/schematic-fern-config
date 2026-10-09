@@ -2467,6 +2467,12 @@ components:
     CatalogConfigOrderedPlan:
       type: object
       properties:
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigPlanCredit'
+          nullable: true
+          maxItems: 50
         entitlements:
           type: array
           items:
@@ -2481,6 +2487,11 @@ components:
     CatalogConfigOrderedPlanResponseData:
       type: object
       properties:
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogConfigPlanCreditResponseData'
+          maxItems: 1000
         entitlements:
           type: array
           items:
@@ -2491,7 +2502,30 @@ components:
       required:
         - plan_id
         - entitlements
+        - credits
       title: CatalogConfigOrderedPlanResponseData
+    CatalogConfigPlanCredit:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        visible:
+          type: boolean
+          nullable: true
+      required:
+        - credit_id
+      title: CatalogConfigPlanCredit
+    CatalogConfigPlanCreditResponseData:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        visible:
+          type: boolean
+      required:
+        - credit_id
+        - visible
+      title: CatalogConfigPlanCreditResponseData
     CatalogConfigurationResponseData:
       type: object
       properties:
@@ -4554,6 +4588,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credit_visibility:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCreditVisibility'
+          maxItems: 1000
         credits:
           type: array
           items:
@@ -9261,6 +9300,17 @@ components:
         - grant_ids
         - quantity
       title: CreditsCreditPurchaseSuccess
+    CreditsInPlan:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        visible:
+          type: boolean
+          nullable: true
+      required:
+        - credit_id
+      title: CreditsInPlan
     CreditsWebhookCompanySummary:
       type: object
       properties:
@@ -12974,6 +13024,12 @@ components:
     OrderedPlansInGroup:
       type: object
       properties:
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditsInPlan'
+          nullable: true
+          maxItems: 50
         entitlements:
           type: array
           items:
@@ -13590,6 +13646,28 @@ components:
         - created_at
         - updated_at
       title: PlanCreditGrantView
+    PlanCreditOrder:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        visible:
+          type: boolean
+      required:
+        - credit_id
+        - visible
+      title: PlanCreditOrder
+    PlanCreditVisibility:
+      type: object
+      properties:
+        credit_id:
+          type: string
+        visible:
+          type: boolean
+      required:
+        - credit_id
+        - visible
+      title: PlanCreditVisibility
     PlanCurrencyPriceRequestBody:
       type: object
       properties:
@@ -14216,6 +14294,11 @@ components:
     PlanGroupPlanEntitlementsOrder:
       type: object
       properties:
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCreditOrder'
+          maxItems: 1000
         entitlements:
           type: array
           items:
@@ -14226,6 +14309,7 @@ components:
           type: string
       required:
         - plan_id
+        - credits
       title: PlanGroupPlanEntitlementsOrder
     PlanGroupResponseData:
       type: object
@@ -15001,6 +15085,11 @@ components:
         created_at:
           type: string
           format: date-time
+        credit_visibility:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanCreditVisibility'
+          maxItems: 1000
         credits:
           type: array
           items:
