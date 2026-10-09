@@ -14624,9 +14624,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanVersionResponseData'
           description: >-
-            The version compared against. Null when the plan has no published
-            version, in which case everything on the target version is reported
-            as added.
+            The version compared against, or null when the plan has no published
+            version.
         has_billing_changes:
           type: boolean
           description: >-
@@ -14636,9 +14635,7 @@ components:
           type: array
           description: >-
             Plan-level fields that changed: name, description, icon, and
-            charge_type. When the plan has no version to compare against, every
-            field with a value is listed with an empty old value, including
-            charge_type on a free plan.
+            charge_type.
           items:
             $ref: '#/components/schemas/PlanVersionFieldChangeResponseData'
           maxItems: 1000
