@@ -8172,6 +8172,102 @@ components:
       type: string
       enum:
         - credit
+    CreditBalanceEventResponseData:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        event_type:
+          $ref: '#/components/schemas/CreditEventType'
+        grant_id:
+          type: string
+          nullable: true
+        grant_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantReason'
+          nullable: true
+        plan_id:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        zeroed_out_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
+          nullable: true
+      required:
+        - amount
+        - event_type
+        - timestamp
+      title: CreditBalanceEventResponseData
+    CreditBalanceFeatureConsumptionResponseData:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+      required:
+        - amount
+        - feature_id
+        - feature_name
+      title: CreditBalanceFeatureConsumptionResponseData
+    CreditBalancePointResponseData:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+        consumed:
+          type: number
+          description: Credits drawn during this day, as a positive number
+          format: double
+        consumed_by_feature:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBalanceFeatureConsumptionResponseData'
+          maxItems: 1000
+        timestamp:
+          type: string
+          description: Start of the UTC day this point covers
+          format: date-time
+      required:
+        - balance
+        - consumed
+        - consumed_by_feature
+        - timestamp
+      title: CreditBalancePointResponseData
+    CreditBalanceTimeSeriesResponseData:
+      type: object
+      properties:
+        balance_points:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBalancePointResponseData'
+          maxItems: 1000
+        billing_credit_id:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditBalanceEventResponseData'
+          maxItems: 1000
+        external:
+          type: boolean
+          description: >-
+            True when an external provider owns this credit's ledger, in which
+            case Schematic has no history to report and the series is empty
+      required:
+        - balance_points
+        - billing_credit_id
+        - events
+        - external
+      title: CreditBalanceTimeSeriesResponseData
     CreditBundleCurrencyPrice:
       type: object
       properties:
@@ -21104,6 +21200,72 @@ paths:
                 title: ListCompanyCreditBalancesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/credits/balance-timeseries:
+    get:
+      operationId: getCreditBalanceTimeSeries
+      summary: Get credit balance time series
+      tags:
+        - credits
+      parameters:
+        - name: billing_credit_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditBalanceTimeSeriesResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                      company_id:
+                        type: string
+                      end_time:
+                        type: string
+                        format: date-time
+                      start_time:
+                        type: string
+                        format: date-time
+                    title: GetCreditBalanceTimeSeriesParams
+                required:
+                  - data
+                  - params
+                title: GetCreditBalanceTimeSeriesResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
