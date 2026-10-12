@@ -1214,6 +1214,258 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingInvoiceDetailResponseData:
+      type: object
+      properties:
+        amount_paid:
+          type: integer
+          format: int64
+        amount_remaining:
+          type: integer
+          format: int64
+        collection_state:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceCollectionState'
+          description: The collector's report on payment. Null on a draft.
+          nullable: true
+        collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
+        company_id:
+          type: string
+        contract_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          $ref: '#/components/schemas/Currency'
+        document_state:
+          $ref: '#/components/schemas/InvoiceDocumentState'
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalized_at:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingInvoiceLineResponseData'
+          maxItems: 1000
+        number:
+          type: string
+          nullable: true
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        settlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingInvoiceSettlementResponseData'
+          maxItems: 1000
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        subtotal:
+          type: integer
+          format: int64
+        terms:
+          allOf:
+            - $ref: '#/components/schemas/BillingInvoiceTermsResponseData'
+          description: >-
+            The contract's terms, copied when the invoice was finalized. Null on
+            a draft.
+        total:
+          type: integer
+          format: int64
+      required:
+        - amount_paid
+        - amount_remaining
+        - company_id
+        - contract_id
+        - created_at
+        - currency
+        - document_state
+        - id
+        - period_end
+        - period_start
+        - status
+        - subtotal
+        - total
+        - lines
+        - settlements
+      title: BillingInvoiceDetailResponseData
+    BillingInvoiceLineResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: In minor units of the invoice's currency.
+          format: int64
+        charge_ids:
+          type: array
+          description: The charges this line sums.
+          items:
+            type: string
+          maxItems: 1000
+        id:
+          type: string
+        kind:
+          $ref: '#/components/schemas/InvoiceLineKind'
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+        subscription_line_id:
+          type: string
+          nullable: true
+        taxable:
+          type: boolean
+        unit_amount:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - amount
+        - charge_ids
+        - id
+        - kind
+        - taxable
+      title: BillingInvoiceLineResponseData
+    BillingInvoiceResponseData:
+      type: object
+      properties:
+        amount_paid:
+          type: integer
+          format: int64
+        amount_remaining:
+          type: integer
+          format: int64
+        collection_state:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceCollectionState'
+          description: The collector's report on payment. Null on a draft.
+          nullable: true
+        collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
+        company_id:
+          type: string
+        contract_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          $ref: '#/components/schemas/Currency'
+        document_state:
+          $ref: '#/components/schemas/InvoiceDocumentState'
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalized_at:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        number:
+          type: string
+          nullable: true
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        subtotal:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+      required:
+        - amount_paid
+        - amount_remaining
+        - company_id
+        - contract_id
+        - created_at
+        - currency
+        - document_state
+        - id
+        - period_end
+        - period_start
+        - status
+        - subtotal
+        - total
+      title: BillingInvoiceResponseData
+    BillingInvoiceSettlementResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        collector:
+          $ref: '#/components/schemas/Collector'
+        id:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        settled_at:
+          type: string
+          format: date-time
+      required:
+        - amount
+        - collector
+        - id
+        - settled_at
+      title: BillingInvoiceSettlementResponseData
+    BillingInvoiceTermsResponseData:
+      type: object
+      properties:
+        collection_method:
+          $ref: '#/components/schemas/BillingCollectionMethod'
+        collector:
+          $ref: '#/components/schemas/Collector'
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+        payment_gating:
+          $ref: '#/components/schemas/PaymentGating'
+        purchase_order:
+          type: string
+          nullable: true
+      required:
+        - collection_method
+        - collector
+        - payment_gating
+      title: BillingInvoiceTermsResponseData
     BillingLinkedResourceResponseData:
       type: object
       properties:
@@ -3562,6 +3814,12 @@ components:
       required:
         - type
       title: ClerkIntegrationConfig
+    Collector:
+      type: string
+      enum:
+        - external
+        - stripe_invoice
+        - stripe_payments
     CompanyBillingAddressView:
       type: object
       properties:
@@ -12362,6 +12620,31 @@ components:
         - type
         - updated_at
       title: IntegrationsResponseData
+    InvoiceCollectionState:
+      type: string
+      enum:
+        - exported
+        - paid
+        - partially_paid
+        - past_due
+        - payment_failed
+        - queued
+        - sent
+    InvoiceDocumentState:
+      type: string
+      enum:
+        - credited
+        - draft
+        - finalized
+        - void
+    InvoiceLineKind:
+      type: string
+      enum:
+        - adjustment
+        - purchase
+        - reconciliation
+        - subscription
+        - true_up
     InvoiceRequestBody:
       type: object
       properties:
@@ -12797,6 +13080,36 @@ components:
     MarkCustomPlanBillingPaidRequestBody:
       type: object
       title: MarkCustomPlanBillingPaidRequestBody
+    MarkInvoicePaidRequestBody:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: >-
+            Amount paid, in minor units of the invoice's currency. Leave empty
+            to mark the whole remaining amount as paid.
+          format: int64
+          nullable: true
+          minimum: 1
+        idempotency_key:
+          type: string
+          description: A retry with the same key records the payment once.
+          maxLength: 255
+        reference:
+          type: string
+          description: >-
+            A note that identifies the payment, such as a bank transfer
+            reference.
+          nullable: true
+          maxLength: 255
+        settled_at:
+          type: string
+          description: When the payment arrived. Defaults to now.
+          format: date-time
+          nullable: true
+      required:
+        - idempotency_key
+      title: MarkInvoicePaidRequestBody
     MeterRequestBody:
       type: object
       properties:
@@ -13041,6 +13354,11 @@ components:
       required:
         - plan_id
       title: OrderedPlansInGroup
+    PaymentGating:
+      type: string
+      enum:
+        - keep_serving
+        - revoke_after
     PaymentMethodRequestBody:
       type: object
       properties:
@@ -33246,6 +33564,387 @@ paths:
                   - data
                   - params
                 title: UninstallIntegrationResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices:
+    get:
+      operationId: listNativeInvoices
+      summary: List native invoices
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: contract_id
+          in: query
+          schema:
+            type: string
+        - name: document_state
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceDocumentState'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BillingInvoiceResponseData'
+                    title: ListNativeInvoicesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      contract_id:
+                        type: string
+                      document_state:
+                        $ref: '#/components/schemas/InvoiceDocumentState'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: ListNativeInvoicesParams
+                required:
+                  - data
+                  - params
+                title: ListNativeInvoicesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}:
+    get:
+      operationId: getNativeInvoice
+      summary: Get native invoice
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetNativeInvoiceParams
+                required:
+                  - data
+                  - params
+                title: GetNativeInvoiceResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/export:
+    get:
+      operationId: exportNativeInvoice
+      summary: Export native invoice
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: >-
+                Indicates whether the content is expected to be displayed inline
+                by the client or treated as an attachment to be downloaded.
+              schema:
+                type: string
+                example: attachment; filename="file.csv"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/finalize:
+    post:
+      operationId: finalizeNativeInvoice
+      summary: Finalize native invoice
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: FinalizeNativeInvoiceParams
+                required:
+                  - data
+                  - params
+                title: FinalizeNativeInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/mark-paid:
+    post:
+      operationId: markNativeInvoicePaid
+      summary: Mark native invoice paid
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkInvoicePaidRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: MarkNativeInvoicePaidParams
+                required:
+                  - data
+                  - params
+                title: MarkNativeInvoicePaidResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/void:
+    post:
+      operationId: voidNativeInvoice
+      summary: Void native invoice
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: VoidNativeInvoiceParams
+                required:
+                  - data
+                  - params
+                title: VoidNativeInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/count:
+    get:
+      operationId: countNativeInvoices
+      summary: Count native invoices
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: query
+          schema:
+            type: string
+        - name: contract_id
+          in: query
+          schema:
+            type: string
+        - name: document_state
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceDocumentState'
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      company_id:
+                        type: string
+                      contract_id:
+                        type: string
+                      document_state:
+                        $ref: '#/components/schemas/InvoiceDocumentState'
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                    title: CountNativeInvoicesParams
+                required:
+                  - data
+                  - params
+                title: CountNativeInvoicesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
