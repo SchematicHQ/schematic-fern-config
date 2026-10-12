@@ -203,6 +203,12 @@ components:
         - stripe_app
         - system
         - temporary_access_token
+    AmendmentProrationLandsOn:
+      type: string
+      enum:
+        - immediate_invoice
+        - next_invoice
+        - none
     ApiError:
       type: object
       properties:
@@ -16014,6 +16020,192 @@ components:
         - excluded_company_ids
         - migration_strategy
       title: PublishPlanVersionRequestBody
+    PublishPreviewPayInAdvanceResponseData:
+      type: object
+      properties:
+        committed_quantity:
+          type: integer
+          format: int64
+        current_quantity:
+          type: integer
+          description: Null when the subscription has no item for the feature.
+          format: int64
+          nullable: true
+        effective_quantity:
+          type: integer
+          description: >-
+            The quantity after finalizing. Finalizing raises an item to the
+            committed quantity and never lowers it. Zero when the subscription
+            will hold no item for the feature.
+          format: int64
+        feature_id:
+          type: string
+      required:
+        - committed_quantity
+        - effective_quantity
+        - feature_id
+      title: PublishPreviewPayInAdvanceResponseData
+    PublishPreviewPaymentMethodResponseData:
+      type: object
+      properties:
+        card_brand:
+          type: string
+          nullable: true
+        card_last4:
+          type: string
+          nullable: true
+        has_default:
+          type: boolean
+        payment_method_type:
+          type: string
+          nullable: true
+      required:
+        - has_default
+      title: PublishPreviewPaymentMethodResponseData
+    PublishPreviewProrationLineResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        description:
+          type: string
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        price_external_id:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+          format: int64
+      required:
+        - amount
+        - description
+        - period_end
+        - period_start
+        - quantity
+      title: PublishPreviewProrationLineResponseData
+    PublishPreviewResponseData:
+      type: object
+      properties:
+        billing_email:
+          type: string
+          nullable: true
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
+        current_period_end:
+          type: string
+          format: date-time
+          nullable: true
+        current_period_start:
+          type: string
+          format: date-time
+          nullable: true
+        default_collection_method:
+          allOf:
+            - $ref: '#/components/schemas/BillingCollectionMethod'
+          description: >-
+            How the amendment invoice is collected when the publish request
+            leaves collection_method out.
+        default_days_until_due:
+          type: integer
+          description: >-
+            Payment terms the amendment invoice gets when the publish request
+            leaves days_until_due out.
+          format: int64
+        default_send_invoice:
+          type: boolean
+          description: >-
+            Whether the amendment invoice is emailed when the publish request
+            leaves send_invoice out.
+        effective_at:
+          type: string
+          description: >-
+            When the company moves to the new version. Null when no date can be
+            named yet: the company's only subscription is in dunning or
+            scheduled to cancel.
+          format: date-time
+          nullable: true
+        has_billing_changes:
+          type: boolean
+        immediate_invoice_amount:
+          type: integer
+          description: >-
+            What the amendment's own invoice bills, in cents, when lands_on is
+            immediate_invoice, after discounts and tax. Includes pending invoice
+            items Stripe adds to the same invoice. Negative for a downgrade:
+            Stripe raises a credit invoice with nothing due, and the credit goes
+            to the customer's balance against later invoices.
+          format: int64
+          nullable: true
+        lands_on:
+          $ref: '#/components/schemas/AmendmentProrationLandsOn'
+        next_invoice_amount:
+          type: integer
+          description: >-
+            The next renewal invoice with the change applied, in cents, before
+            any customer balance is applied. A downgrade invoiced now leaves a
+            credit on that balance, so the amount due can be lower. Null when
+            the change is not priced: it lands at the end of the period, or on a
+            date without proration.
+          format: int64
+          nullable: true
+        next_invoice_at:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        pay_in_advance:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublishPreviewPayInAdvanceResponseData'
+          maxItems: 1000
+        payment_method:
+          $ref: '#/components/schemas/PublishPreviewPaymentMethodResponseData'
+        proration_charge:
+          type: integer
+          description: Sum of the positive proration lines, in cents.
+          format: int64
+        proration_credit:
+          type: integer
+          description: Sum of the negative proration lines, in cents.
+          format: int64
+        proration_lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublishPreviewProrationLineResponseData'
+          maxItems: 1000
+        proration_total:
+          type: integer
+          description: proration_charge plus proration_credit, in cents, before tax.
+          format: int64
+        will_update_subscription:
+          type: boolean
+        would_fail:
+          type: boolean
+      required:
+        - default_collection_method
+        - default_days_until_due
+        - default_send_invoice
+        - has_billing_changes
+        - lands_on
+        - pay_in_advance
+        - payment_method
+        - proration_charge
+        - proration_credit
+        - proration_lines
+        - proration_total
+        - will_update_subscription
+        - would_fail
+      title: PublishPreviewResponseData
     QuickstartResp:
       type: object
       properties:
@@ -37661,6 +37853,53 @@ paths:
                   - data
                   - params
                 title: PublishPlanVersionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /plans/version/{plan_version_id}/publish-preview:
+    post:
+      operationId: previewPublishPlanVersion
+      summary: Preview publish plan version
+      tags:
+        - plans
+      parameters:
+        - name: plan_version_id
+          in: path
+          description: plan_version_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishPlanVersionRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PublishPreviewResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PreviewPublishPlanVersionParams
+                required:
+                  - data
+                  - params
+                title: PreviewPublishPlanVersionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
