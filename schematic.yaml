@@ -13110,7 +13110,9 @@ components:
           maxLength: 255
         settled_at:
           type: string
-          description: When the payment arrived. Defaults to now.
+          description: >-
+            When the payment arrived. Defaults to now, and cannot be in the
+            future.
           format: date-time
           nullable: true
       required:
