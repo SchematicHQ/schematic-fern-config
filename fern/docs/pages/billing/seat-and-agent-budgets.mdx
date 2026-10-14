@@ -78,10 +78,15 @@ The **Usage by user** table on a company's **Usage** tab, below the Events table
 
 Above the table, **Total usage** is the company's total for the window, **Active users** is how many of the company's users consumed anything in it, and **Top user** is the largest single actor's share.
 
+## Limiting what one actor spends
+
+Reporting tells you who spent the pool after the fact. To stop one user or agent from spending more than their share in the first place, add a usage control policy for that user. A policy caps their spend per hour, per day, or per request, and Schematic refuses their checks and holds past the limit while the rest of the company keeps working. See [Usage Controls](/billing/usage-controls).
+
 ## Related
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) - credit types, grants, balances, and expiry.
 - [Credit Leases and Reservations](/billing/credit-leases-and-reservations) - keeping concurrent actors from overdrawing one balance.
+- [Usage Controls](/billing/usage-controls) - capping how fast a company or one user can spend credits.
 - [Spend & Usage Controls](/billing/spend-controls) - the limits and top-up settings the pool sits inside.
 - [Seat Based Billing Models](/billing/seat-based-billing) - billing the seats themselves.
 - [Identify users and companies](/quickstart/identifying-users) - getting actors into Schematic in the first place.
