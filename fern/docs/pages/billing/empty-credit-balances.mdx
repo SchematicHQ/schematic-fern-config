@@ -1,5 +1,5 @@
 ---
-title: Handling Empty Credit Balances
+title: Handling Empty Credit Balances and Overage
 description: Choose whether a company is blocked, topped up automatically, left to top up itself, or billed in arrears when its credit balance reaches zero, and how credit bundles fit alongside each.
 
 slug: billing/empty-credit-balances
@@ -34,7 +34,7 @@ Access comes back when new credits arrive:
 The flag check gates access, but a track event records usage that already happened. When a single track event consumes more than the balance holds, Schematic records it in full and the balance goes negative, and the next grant covers that shortfall before anything else. If the company holds only promotional credits, the part past zero is dropped instead. Check the flag before the work runs so the balance goes negative only when one use is larger than the check anticipated.
 </Note>
 
-When several workers or agents draw on one balance at once, checks alone let them overspend it between the check and the track. A [reservation](/billing/credit-leases-and-reservations) debits the credits up front and fails with a `402` when the balance cannot fund it in full.
+When several workers or agents draw on one balance at once, checks alone let them overspend it between the check and the track. Reserve the credits when you check, so the balance reflects work in flight. See [Prevent Overspend](/billing/prevent-overspend).
 
 ## Automatic top-ups
 
@@ -48,7 +48,7 @@ You set three things:
 
 The credit type needs a per-unit price before either top-up policy can be chosen, because Schematic has nothing to charge without one.
 
-A top-up fires while Schematic processes a draw that leaves the balance at or below the threshold. A failed charge means the customer is about to be cut off, so subscribe to `auto.topup.hard.failure` before you rely on this policy. [Auto Top-Up](/billing/credit-burndown#auto-top-up) covers retries, the webhook payloads, and per-company settings.
+A top-up fires while Schematic processes a draw that leaves the balance at or below the threshold. A failed charge means the customer is about to be cut off, so subscribe to `auto.topup.hard.failure` before you rely on this policy. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) covers setup, retries, the webhook payloads, and per-company settings.
 
 ## User-controlled top-ups
 
@@ -98,11 +98,7 @@ The `credit.limit.reached` webhook fires when a company uses its full balance, w
 
 ## Credit bundles
 
-A credit bundle is a fixed number of credits at a fixed price, such as 10,000 credits for \$90, that a company buys once through checkout or the customer portal. Bundles are how a customer on Block usage or User-controlled top-ups gets unblocked without waiting for the next reset, and how you offer volume discounts on larger purchases.
-
-Each bundle decides which plans can buy it. On the **Live Credit Bundles** list in your catalog configuration, each bundle reads "Compatible with all plans" by default. Click it to open **Plan Compatibility Settings** and choose the plans under **Compatible Plans**. The change applies everywhere the bundle is live. The customer portal shows a buy-more option on a credit balance when at least one live bundle for that credit is compatible with the company's plan.
-
-[Configure Credit Bundles](/billing/credit-burndown#5-configure-credit-bundles) walks through creating bundles and adding them to the catalog.
+A credit bundle is a fixed number of credits at a fixed price that a company buys once through checkout or the customer portal. Bundles are how a customer on Block usage or User-controlled top-ups gets unblocked without waiting for the next reset. Each bundle chooses which plans can buy it, independent of the credit grant's policy. See [Credit bundles](/billing/credit-bundles-and-top-ups#credit-bundles).
 
 ## Choosing a policy
 

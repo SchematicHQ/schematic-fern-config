@@ -1,6 +1,6 @@
 ---
 title: Credit Burndown Billing Model
-description: Set up credit types, credit based features, credit bundles, and auto top-up so customers draw down a credit balance.
+description: Set up credit types, plan credit grants, consumption rates, and bundles so customers draw down a prepaid credit balance.
 
 slug: billing/credit-burndown
 ---
@@ -126,6 +126,8 @@ The finished bundles:
 
 ![Create Credit Bundle 2](../../assets/images/billing/burndown-create-credit-bundle-2.png)
 
+Plan compatibility, expiry, and how customers buy bundles are covered in [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups).
+
 <Info>The price you set on a bundle is the basis for recognizing revenue from those credits.</Info>
 
 <Info>Your new plan starts as an unpublished **draft** (version 1), and everything above edits that draft. Open the plan and click **Publish version** in the banner before customers can use it. This is the plan's first version, so there are no existing subscribers to migrate. See [Plan Versions](/catalog/plans#plan-versions).</Info>
@@ -216,7 +218,7 @@ Every grant records its source. The **Companies** tab on a credit type lists eac
 | Source | Origin |
 | --- | --- |
 | Plan | Included with the company's plan |
-| Bundle | Purchased directly or by [auto top-up](#auto-top-up) |
+| Bundle | Purchased directly or by [auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) |
 | Free, promotional credit | Granted manually |
 | Rollover | Carried forward from a previous period |
 | Adjustment | Returned by a refund |
@@ -300,7 +302,7 @@ These live on `BillingPlanCreditGrantResponseData`.
 | Price per Credit | `unit_price`, `unit_price_decimal` | The price in the plan currency's smallest unit. Send `unit_price_decimal` instead for a rate below one cent |
 | Pricing: Tiered | `price_tiers` | 2 to 20 tiers, sent instead of `unit_price`. Each tier has an `up_to` and a `per_unit_price` or `per_unit_price_decimal`, and the last tier's `up_to` is null |
 | Tier Mode | `tier_mode` | `graduated` or `volume`. Required with `price_tiers` |
-| Automatic or user-controlled top-ups | `auto_topup_availability`, `postpaid_enabled` | See [API fields](/billing/empty-credit-balances#api-fields) |
+| Automatic or user-controlled top-ups | `auto_topup_availability`, `postpaid_enabled` | See [Handling Empty Credit Balances](/billing/empty-credit-balances#api-fields) |
 
 Two things the API exposes that the dashboard does not:
 
@@ -311,15 +313,7 @@ A [billed grant](#billed-credit-grants) also returns `price`, the Stripe price i
 
 ### Credit bundle
 
-These live on `BillingCreditBundleResponseData`.
-
-| App control | API field |
-| --- | --- |
-| Name of the credit bundle | `name` |
-| Amount of credits | `quantity` |
-| Credit bundle price | `price`, `currency_prices` |
-| Expiry Type | `expiry_type`, `expiry_unit`, `expiry_unit_count` |
-| Compatible Plans | `compatible_plan_ids`. Empty means every plan |
+The bundle fields, including plan compatibility, are listed in [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups#credit-bundle).
 
 ### Credit type
 
@@ -390,50 +384,11 @@ That returns 10 credits to the balance through an adjustment grant, and those 10
 
 ## Auto Top-Up
 
-Auto top-up buys credits automatically when a customer's balance falls below a threshold, so they are not cut off mid-workflow. It is configured on the plan's credit grant, in the same form as the reset and expiry settings.
+Auto top-up buys credits automatically when a company's balance falls below a threshold, so customers are not cut off mid-workflow. You turn it on in the plan's credit grant, and choose whether you or the customer controls it. See [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups#auto-top-up) for setup, retries, and the webhook events.
 
-<Note>
-The credit type needs a cost basis before top-ups can be turned on. Without a per-unit price there is nothing to charge, so the top-up options are hidden and the form tells you the credit needs a per-unit price.
-</Note>
+## Enforcing the balance
 
-1. Open the credit burndown plan you want to configure.
-2. Click "Add credit grant".
-3. Select the Credit Type and Credit Amount.
-4. Choose "Automatic top-ups" or "User-controlled top-ups" for what happens when credits run out, covered in [Who controls auto top-up](#who-controls-auto-top-up) below.
-
-![Auto Top-Up](../../assets/images/billing/burndown-auto-top-up.png)
-
-5. **Top-up Threshold** is the balance that triggers a purchase, given as a number of credits remaining rather than a percentage. The balance it checks counts all plan grants, purchased grants, and promotional grants.
-6. **Top-up Amount** is how many credits get bought. The cost follows the credit type's cost basis and appears in the confirmation below.
-7. **Top-up Grant Expiration** sets the expiry policy for the purchased credits. Auto top-up grants offer Duration and No Expiry only, not the billing period options. A 1 year duration is a good default, long enough for customers to use the credits and short enough to keep revenue recognition simple.
-8. Review the confirmation showing the final cost, threshold, and expiration, then click "Create plan grant".
-
-### Who controls auto top-up
-
-| Mode | What happens |
-| --- | --- |
-| Automatic top-ups | Companies on this plan grant receive a top-up automatically when they reach the threshold. Buyers cannot change it. |
-| User-controlled top-ups | Companies turn auto top-up on themselves in checkout and through components. Your threshold and amount become their starting defaults. |
-
-Choose User-controlled for self-serve plans where customers should manage their own refills, and Automatic when continuity matters more than customer control, such as an enterprise account that should never stop mid-workload. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both.
-
-One-time [bundle](#5-configure-credit-bundles) purchases are set on each bundle rather than on the grant. A bundle's **Plan Compatibility Settings** choose which plans can buy it, and a company can buy any live bundle compatible with its plan regardless of the top-up policy. See [Credit bundles](/billing/empty-credit-balances#credit-bundles).
-
-### Per-company exceptions
-
-Top-up settings live on the plan grant, so every company on that plan starts with the same threshold and amount. Individual companies can be given different values through the [API](/api-reference/billing-credits/list-company-grants), which is currently the only way to do it, as the dashboard has no per-company top-up control.
-
-Under User-controlled top-ups the customer changes their own threshold and amount, which covers many of the cases an override would otherwise handle.
-
-### Triggering an Auto Top-Up
-
-An auto top-up fires while processing an event that draws from a credit balance, when that balance is at or below the threshold. If several events arrive close together, only one top-up is purchased.
-
-If a top-up purchase fails, Schematic retries the next time the balance is drawn from.
-
-Three webhook events report the outcome of each attempt: `auto.topup.success`, `auto.topup.hard.failure`, and `auto.topup.retry.exceeded`. A hard failure carries the Stripe error code when the failure originated there, which is what lets you tell a declined card apart from a missing payment method. Subscribe to them under Settings > Integrations > Webhooks, and see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers#auto-topup-events) for the full payloads.
-
-Because a failing top-up means a customer is about to be cut off, wiring `auto.topup.hard.failure` to an internal alert and a customer-facing email is worth doing before you turn auto top-up on. See [Spend and usage controls](/billing/spend-controls) for how auto top-up fits with the other limits available to you.
+A flag check on a credit burndown feature returns false once the balance cannot cover the next use, so your app stops the action. That check prices one use at a time. When agents or parallel workers draw on one balance, or one action can cost far more than a single unit, size each check and reserve credits before the work runs. See [Prevent Overspend](/billing/prevent-overspend).
 
 ## Accessing Credit Information via API
 

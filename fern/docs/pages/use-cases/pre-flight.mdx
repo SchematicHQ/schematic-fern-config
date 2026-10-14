@@ -14,7 +14,9 @@ That uncertainty has become a procurement issue, not just a UX one. When Microso
 
 ## How Schematic fits in
 
-Schematic exposes a pre-flight cost endpoint that returns a cost estimate, the customer's current balance, and their plan state for a given action. You can render "this will cost about 15-20 credits, you have 312 remaining" right in your product before the customer runs it, so they act with confidence instead of fear. The same check is a natural upsell moment: when a customer is short, you can offer credits or an upgrade in the flow rather than failing the action.
+Before the customer runs the action, your server checks the feature with the action's size attached, such as the maximum number of steps an agent run can take. Schematic answers whether the company can afford it, counting its credit balance and any per-request or daily limits, and returns the feature's consumption rate and the company's current balance in the same response. Multiply the size by the rate and you can render "this will cost up to 20 credits, you have 312 remaining" next to the button.
+
+When the customer is short, the same check tells you why, so you can offer a credit bundle or an upgrade in the flow rather than failing the action. When they go ahead, reserve the credits as the action starts, so another run cannot spend them before this one finishes.
 
 ## What it looks like
 
@@ -24,10 +26,12 @@ The balance a pre-flight check reads against, 54 credits remaining across the gr
 
 ## Configure it
 
-- [Credit Burndown Billing Model](/billing/credit-burndown) — the credit balance and consumption rates a pre-flight check reads against.
-- [Customer Portal and Checkout Flow](/components/customer-portal) — surface balance and add-credit paths in-product.
+- [Credit Burndown Billing Model](/billing/credit-burndown) — the credit balance and consumption rates a preview is priced from.
+- [Usage Controls](/billing/usage-controls) — per-request and daily limits a preview checks against.
+- [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups) — what to offer a customer who is short.
 
 ## Implement it
 
-- [Accessing credit information via API](/billing/credit-burndown#accessing-credit-information-via-api) — read balances and grants before an action runs.
-- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) — react as customers approach their balance.
+- [Size every check](/billing/prevent-overspend#size-every-check) — pass the action's size with the check and show its cost.
+- [Reserve before the work runs](/billing/prevent-overspend#reserve-before-the-work-runs) — hold the credits once the customer commits.
+- [Preflight checks](/feature-management/flags#preflight-checks) — the full preflight reference.

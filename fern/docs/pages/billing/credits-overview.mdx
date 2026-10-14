@@ -1,0 +1,38 @@
+---
+title: Credit Billing
+description: Sell a prepaid credit balance, refill it with bundles and auto top-up, bill overage, and keep agents and parallel workers from overspending it.
+
+slug: billing/credits
+---
+
+Customers on a credit model buy a balance up front, and every feature they use draws it down at its own rate. You price many features against one metric, customers prepay instead of waiting for an invoice, and they buy more when they run low.
+
+Credit billing has two halves. The billing half decides how credits are granted, sold, and invoiced. The control half decides how a balance is spent, so a fleet of agents running in parallel cannot burn through it faster than anyone intended. Both halves read and write the same real-time [credit ledger](/use-cases/credit-ledger), so the balance a check enforces is the balance the customer sees.
+
+## Grant and sell credits
+
+- [Credit Burndown Billing Model](/billing/credit-burndown) walks through creating a credit type, granting credits on a plan, and setting what each feature costs, then covers reset, rollover, expiry, and the order credits are spent in.
+- [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups) lets customers buy more credits once or refill automatically when the balance runs low.
+- [Handling Empty Credit Balances and Overage](/billing/empty-credit-balances) decides what happens at zero: block usage, top up, or keep going and bill the overage in arrears.
+- [Seat and Agent Budgets](/billing/seat-and-agent-budgets) scales a company's credits with the seats it holds and reports consumption per user and per agent.
+- [Billed credit grants](/billing/credit-burndown#billed-credit-grants) put a contract's credits on their own invoice line, priced per credit or in tiers.
+
+## Control how credits are spent
+
+- [Prevent Overspend](/billing/prevent-overspend) is where to start when agents or parallel workers share a balance. It sizes each check before the work runs, reserves the credits, and caps the size and rate of spending.
+- [Usage Controls](/billing/usage-controls) caps how many credits a company or one user can spend per request, per hour, or per day.
+- [Credit Leases and Reservations](/billing/credit-leases-and-reservations) is the reference for holding credits while work is in flight, with every endpoint and SDK setting.
+
+## Account for credits
+
+- [Revenue Recognition Data](/billing/revenue-recognition) gives your accounting team the grant, draw, and expiry records ASC 606 needs.
+- [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers) fires as a balance runs low, runs out, or is topped up.
+
+## How a credit is spent
+
+1. A plan grant, bundle, top-up, or promotional grant adds credits to the company's balance.
+2. Before an action runs, your server checks the feature with the action's size. Schematic refuses the check when the balance or a usage control cannot cover it, and reserves the credits when it can.
+3. The action runs, and your server tracks what it actually used. The reservation settles at that amount, and anything unused returns to the balance.
+4. When the balance runs low, a top-up or a bundle refills it. At zero, the credit grant's policy blocks usage or bills it in arrears.
+
+Steps 2 and 3 are what keep the balance accurate when many actions run at once. A plain check followed by a track also works, one action at a time. See [Prevent Overspend](/billing/prevent-overspend) for why parallel work needs the reservation.
