@@ -7157,8 +7157,9 @@ components:
         company_id:
           type: string
           description: >-
-            The company the cap applies to. Set exactly one of company_id and
-            user_id.
+            The company the cap applies in. Alone, it caps the whole company.
+            With user_id, it caps that user's spend in this company. Required
+            with user_id when the user belongs to more than one company.
           nullable: true
         label:
           type: string
@@ -7174,8 +7175,8 @@ components:
         user_id:
           type: string
           description: >-
-            The user the cap applies to. Set exactly one of company_id and
-            user_id.
+            The user the cap applies to. The user must belong to company_id, and
+            with no company_id, to exactly one company.
           nullable: true
         window_amount:
           type: number
@@ -9194,6 +9195,10 @@ components:
     CreditSpendPolicy:
       type: object
       properties:
+        company_id:
+          type: string
+          description: For a user policy, the company it applies in
+          nullable: true
         consumed:
           type: number
           description: How much of the limit is already spent in the current period
@@ -9244,6 +9249,7 @@ components:
           type: string
         company_id:
           type: string
+          description: The company the policy applies in
           nullable: true
         consumed:
           type: number
@@ -9285,6 +9291,7 @@ components:
           format: date-time
         user_id:
           type: string
+          description: For a user policy, the user whose spend in the company it limits
           nullable: true
         window_amount:
           type: number
@@ -17105,6 +17112,10 @@ components:
     RulesengineCreditSpendPolicy:
       type: object
       properties:
+        company_id:
+          type: string
+          description: For a user policy, the company it applies in
+          nullable: true
         consumed:
           type: number
           description: How much of the limit is already spent in the current period
