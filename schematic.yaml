@@ -4009,17 +4009,28 @@ components:
           nullable: true
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
+        collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
         company_id:
           type: string
         created_at:
           type: string
           format: date-time
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
         days_until_due:
           type: integer
           format: int64
           nullable: true
         environment_id:
           type: string
+        gating_days:
+          type: integer
+          format: int64
         id:
           type: string
         is_default:
@@ -4027,6 +4038,12 @@ components:
         name:
           type: string
           nullable: true
+        overdraft_limit:
+          type: integer
+          format: int64
+          nullable: true
+        payment_gating:
+          $ref: '#/components/schemas/PaymentGating'
         payment_method_id:
           type: string
           nullable: true
@@ -4036,6 +4053,9 @@ components:
           nullable: true
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
+        purchase_order:
+          type: string
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -4045,8 +4065,10 @@ components:
         - company_id
         - created_at
         - environment_id
+        - gating_days
         - id
         - is_default
+        - payment_gating
         - provider_type
         - updated_at
       title: CompanyBillingProfileResponseData
