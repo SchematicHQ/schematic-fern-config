@@ -28985,19 +28985,40 @@ paths:
           schema:
             type: string
             description: Filter by plan ID
+        - name: plan_version_id
+          in: query
+          description: Filter by the plan version the billing record was created for
+          schema:
+            type: string
+            description: Filter by the plan version the billing record was created for
         - name: plan_billing_source
           in: query
           description: >-
             Filter by the flow that created the billing record: custom_plan for
             a first publish, amendment for a republish, manage_plan for a
-            standard plan assigned by invoice. Defaults to custom_plan.
+            standard plan assigned by invoice. Defaults to custom_plan unless
+            plan_billing_sources is set.
           schema:
             allOf:
               - $ref: '#/components/schemas/PlanBillingSource'
             description: >-
               Filter by the flow that created the billing record: custom_plan
               for a first publish, amendment for a republish, manage_plan for a
-              standard plan assigned by invoice. Defaults to custom_plan.
+              standard plan assigned by invoice. Defaults to custom_plan unless
+              plan_billing_sources is set.
+        - name: plan_billing_sources
+          in: query
+          description: >-
+            Filter by multiple billing sources. Takes precedence over
+            plan_billing_source.
+          schema:
+            type: array
+            description: >-
+              Filter by multiple billing sources. Takes precedence over
+              plan_billing_source.
+            items:
+              $ref: '#/components/schemas/PlanBillingSource'
+            maxItems: 3
         - name: status
           in: query
           description: Filter by billing status
@@ -29072,10 +29093,24 @@ paths:
                           Filter by the flow that created the billing record:
                           custom_plan for a first publish, amendment for a
                           republish, manage_plan for a standard plan assigned by
-                          invoice. Defaults to custom_plan.
+                          invoice. Defaults to custom_plan unless
+                          plan_billing_sources is set.
+                      plan_billing_sources:
+                        type: array
+                        description: >-
+                          Filter by multiple billing sources. Takes precedence
+                          over plan_billing_source.
+                        items:
+                          $ref: '#/components/schemas/PlanBillingSource'
+                        maxItems: 3
                       plan_id:
                         type: string
                         description: Filter by plan ID
+                      plan_version_id:
+                        type: string
+                        description: >-
+                          Filter by the plan version the billing record was
+                          created for
                       status:
                         allOf:
                           - $ref: '#/components/schemas/CustomPlanBillingStatus'
