@@ -4053,6 +4053,18 @@ components:
     CompanyCreditBalance:
       type: object
       properties:
+        overdraft_limit:
+          type: number
+          description: >-
+            For a postpaid credit, how far below zero the balance may run.
+            Absent when the credit is not postpaid or postpaid has no limit
+          format: double
+          nullable: true
+        postpaid:
+          type: boolean
+          description: >-
+            Whether consumption may continue past a zero balance. When true and
+            overdraft_limit is absent, the balance has no floor
         remaining:
           type: number
           description: >-
@@ -4070,6 +4082,7 @@ components:
             reserved)
           format: double
       required:
+        - postpaid
         - remaining
         - reserved
         - settled
