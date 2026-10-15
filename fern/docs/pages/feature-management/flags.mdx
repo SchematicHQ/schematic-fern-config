@@ -20,3 +20,42 @@ For example, if a company is a part of a beta cohort, you can asynchronously upd
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowFullScreen
 ></iframe>
+## Preflight checks
+
+A flag check answers whether a company has access right now. A **preflight** answers whether an action would be allowed if it ran. Pass the size of the action with the check, and Schematic evaluates the flag as if that usage had already been recorded. A company one use short of its limit comes back false for an action that needs two. Nothing is consumed or reserved, so you still track the usage when the action finishes.
+
+Run preflights from your server, on a check for a single flag. The multi-flag check endpoints reject them, because one action's size would land on every flag's limits.
+
+```typescript
+const result = await client.checkFlagWithEntitlement(
+  { company: { id: "northwind" } },
+  "bulk-export",
+  { eventUsage: { eventSubtype: "rows_exported", quantity: rowCount } },
+);
+```
+
+Calling the API directly, pass the same inputs in `preflight` on [Check flag](/api-reference/features/check-flag).
+
+| Input | What it simulates |
+| --- | --- |
+| `usage` | A quantity applied to every numeric condition the flag evaluates |
+| `event_usage` | A quantity of one event subtype, applied only to conditions that measure that subtype |
+| `credit_cost` | A cost in credits, keyed by credit type ID, for when you have already worked out the cost |
+
+Each condition takes the most specific input that applies to it:
+
+| Condition | Inputs, highest precedence first |
+| --- | --- |
+| Credit balance | `credit_cost` for that credit, then `event_usage` when the subtype matches, then `usage` |
+| Event-based limit | `event_usage` when the subtype matches, then `usage` |
+| Trait-based limit, such as seats | `usage` |
+
+A flag with no numeric condition, such as an on/off entitlement, evaluates the same with or without a preflight.
+
+Three behaviors to plan around:
+
+- **Only the flag value is simulated.** The entitlement and usage figures in the response are the company's current ones, not the figures after the action.
+- **Preflighted checks skip the flag check cache.** The answer depends on the size you sent, so the SDKs neither serve it from nor write it to their local cache.
+- **The size is whatever you send.** An undersized value can let through a check the real size would fail. Work out the size on your server from the action you are about to run, never from a value a browser passed you.
+
+For credit-metered features, a preflight is one of several controls that keep agents and parallel workers inside a balance. See [Prevent Overspend](/billing/prevent-overspend).

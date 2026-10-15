@@ -127,6 +127,8 @@ const { track } = useSchematicEvents();
 
 `track` is fire and forget on the client. Report the same event from your backend instead when the action can happen outside a browser session, or when you cannot trust the client to report honestly. See [usage-based billing](/billing/usage-based-billing) for how allowances, overages, and resets are configured.
 
+If the feature spends credits and agents or background jobs run it, check and track from your backend. Your server can pass the size of each action with the check and reserve the credits before the work starts, so runs in parallel cannot spend the same balance twice. See [Prevent Overspend](/billing/prevent-overspend).
+
 ## 5. Render a component
 
 Components such as the Customer Portal and Checkout are configured in the dashboard and dropped into your app by ID. Because they let a customer change their own billing, rendering one needs a temporary access token scoped to a single company, and that token requires a secret key. Issue it on your server and never ship the secret key to the client.

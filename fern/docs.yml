@@ -221,30 +221,44 @@ navigation:
                 href: /billing/usage-based-billing#volume-pricing
               - link: Graduated pricing
                 href: /billing/usage-based-billing#graduated-pricing
-          - section: Credits
-            contents:
-              - page: Credit burndown
-                path: ./docs/pages/billing/credit-burndown.mdx
-              - page: Handling empty credit balances
-                path: ./docs/pages/billing/empty-credit-balances.mdx
-              - page: Credit leases and reservations
-                path: ./docs/pages/billing/credit-leases-and-reservations.mdx
-              - page: Seat and agent budgets
-                path: ./docs/pages/billing/seat-and-agent-budgets.mdx
-              - page: Usage controls
-                path: ./docs/pages/billing/usage-controls.mdx
-              - link: Run credit-based billing
-                href: /use-cases/credit-billing
-              - link: Real-time ledger & holds
-                href: /use-cases/credit-ledger
+          - link: Credit billing
+            href: /billing/credits
           - page: Spend & Usage Controls
             path: ./docs/pages/billing/spend-controls.mdx
-          - page: Revenue Recognition Data
-            path: ./docs/pages/billing/revenue-recognition.mdx
           - page: Seat Based Billing Models
             path: ./docs/pages/billing/seat-based-billing.mdx
           - page: Billing Entities
             path: ./docs/pages/billing/billing-entities.mdx
+      - section: Credit billing
+        contents:
+          - page: Overview
+            path: ./docs/pages/billing/credits-overview.mdx
+          - section: Grant and sell credits
+            contents:
+              - page: Credit burndown
+                path: ./docs/pages/billing/credit-burndown.mdx
+              - page: Bundles and auto top-up
+                path: ./docs/pages/billing/credit-bundles-and-top-ups.mdx
+              - page: Empty balances and overage
+                path: ./docs/pages/billing/empty-credit-balances.mdx
+              - page: Seat and agent budgets
+                path: ./docs/pages/billing/seat-and-agent-budgets.mdx
+          - section: Control spend
+            contents:
+              - page: Prevent overspend
+                path: ./docs/pages/billing/prevent-overspend.mdx
+              - page: Usage controls
+                path: ./docs/pages/billing/usage-controls.mdx
+              - page: Leases and reservations
+                path: ./docs/pages/billing/credit-leases-and-reservations.mdx
+              - link: Preflight checks
+                href: /feature-management/flags#preflight-checks
+          - page: Revenue recognition data
+            path: ./docs/pages/billing/revenue-recognition.mdx
+          - link: Run credit-based billing
+            href: /use-cases/credit-billing
+          - link: Real-time ledger & holds
+            href: /use-cases/credit-ledger
       - section: Enforce entitlements
         contents:
           - page: Overview
@@ -828,7 +842,7 @@ redirects:
     destination: "/billing/overview"
     permanent: true
   - source: "/credits"
-    destination: "/billing/credit-burndown"
+    destination: "/billing/credits"
     permanent: true
   - source: "/credit-burndown"
     destination: "/billing/credit-burndown"
@@ -841,6 +855,15 @@ redirects:
     permanent: true
   - source: "/rev-rec"
     destination: "/billing/revenue-recognition"
+    permanent: true
+  - source: "/credit-billing"
+    destination: "/billing/credits"
+    permanent: true
+  - source: "/overspend"
+    destination: "/billing/prevent-overspend"
+    permanent: true
+  - source: "/auto-top-up"
+    destination: "/billing/credit-bundles-and-top-ups"
     permanent: true
   - source: "/holds"
     destination: "/billing/credit-leases-and-reservations"

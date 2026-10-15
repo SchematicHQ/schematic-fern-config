@@ -1,0 +1,160 @@
+---
+title: Prevent Overspend
+description: Stop parallel agents, oversized actions, and runaway loops from overrunning a credit balance with preflight checks, reservations, and usage controls.
+
+slug: billing/prevent-overspend
+---
+
+An AI agent can make hundreds of model calls a minute, and one customer can run dozens of agents at once. Every one of them draws on the same credit balance. If your integration checks the flag before an action and tracks usage after it, the balance is only enforced one action at a time, and agents running in parallel walk straight past it.
+
+A company with 1,000 credits starts six agent runs at once, each budgeted at up to 200 credits. Each run checks the flag, sees 1,000 credits, and starts. Between them they can spend 1,200 credits against a balance of 1,000, and nothing in a plain check could have stopped it, because none of the six had tracked anything yet when the others checked.
+
+Schematic closes that gap and the others like it from your backend. Each control below stops a different way a balance gets overrun, and they stack.
+
+| What goes wrong | Example | Control |
+| --- | --- | --- |
+| Parallel work spends the same credits twice | Six concurrent runs each see the full balance | [Reserve before the work runs](#reserve-before-the-work-runs) |
+| One action is far larger than a check assumes | A bulk job that costs 5,000 credits passes a check sized for one unit | [Size every check](#size-every-check) and a [per-draw limit](#cap-the-size-and-rate-of-spend) |
+| A loop spends a month of credits in an afternoon | A retrying agent burns through the balance before anyone notices | [An hourly or daily limit](#cap-the-size-and-rate-of-spend) |
+| One user or agent drains a shared pool | One heavy user empties the balance for the rest of the team | [A per-user limit](#cap-the-size-and-rate-of-spend) |
+| Usage keeps going past zero | A billed-in-arrears account builds up unpaid usage | [An overdraft limit](#decide-what-happens-at-zero) |
+
+Everything on this page runs on your server with a secret API key. The examples use the [Node.js SDK](/developer_resources/sdks/nodejs). The other backend SDKs support the same checks and reservations, and each [SDK reference](/developer_resources/sdks/overview) shows its method names.
+
+## Size every check
+
+A plain flag check asks whether the company has access right now. For a credit-metered feature, it prices the check at one unit of the feature's consumption rate. A company with 10 credits left passes a check for an action that will cost 5,000.
+
+Pass the size of the action with the check, and Schematic evaluates the flag as if that usage had already happened. This is a **preflight**. Nothing is reserved or consumed, and your app still tracks usage when the work finishes.
+
+```typescript
+const result = await client.checkFlagWithEntitlement(
+  {
+    company: { id: "northwind" },
+    user: { user_id: "research-agent" },
+  },
+  "deep-research",
+  {
+    eventUsage: { eventSubtype: "research_steps", quantity: maxSteps },
+  },
+);
+
+if (!result.value) {
+  return showLimitMessage(result.reason);
+}
+```
+
+Size the preflight as an upper bound for the work. The SDK rounds a fractional quantity up, so a check never passes on less usage than the action records.
+
+| Input | Use it when |
+| --- | --- |
+| `creditCost` | You already know the cost in credits. Keyed by credit type ID, and it takes precedence over the other two |
+| `eventUsage` | You know the quantity and the event subtype it is recorded under. Schematic applies the consumption rate |
+| `usage` | You know the quantity but not the subtype. It applies to every numeric condition the flag evaluates |
+
+The same check gives you what you need to show the customer the price before they commit. The entitlement in the response carries the feature's `consumptionRate` and the company's balance, so the estimate is the quantity times the rate:
+
+```typescript
+const rate = result.entitlement?.consumptionRate ?? 0;
+const balance = result.entitlement?.creditSettled ?? 0;
+
+const label = `Up to ${maxSteps * rate} credits. You have ${balance} left.`;
+```
+
+Read `creditSettled` for anything a customer sees. It changes only when work completes, so it holds steady while other runs have credits reserved. Only the flag value reflects the preflight. The entitlement figures in the response are the company's current balance, not the balance after the action.
+
+Preflight values are whatever the caller sends, and an undersized value can let through a check that the real size would fail. Compute the size on your server from the work you are about to run, never from a value a browser passed you.
+
+Preflight is not limited to credits. It works against any numeric limit a flag evaluates, including event-based allowances and trait-based limits such as seats. See [Preflight checks](/feature-management/flags#preflight-checks).
+
+## Reserve before the work runs
+
+A preflight tells you whether the action fits the balance now. It does not stop five other runs from using the same credits before this one finishes. To close that gap, reserve the credits when you check.
+
+Configure `creditLeases` on the client, and `check` takes a reservation whenever you pass `usage` and the feature is credit-metered. The reserved credits leave the drawable balance at check time, so the next run to check sees what this one is about to spend. When the work finishes, settle the reservation with what it actually used, and the rest goes back to the balance.
+
+```typescript
+const client = new SchematicClient({
+  apiKey: process.env.SCHEMATIC_API_KEY,
+  creditLeases: {
+    defaultReservationTTL: 10 * 60 * 1000,
+  },
+});
+
+const result = await client.check(
+  {
+    company: { id: "northwind" },
+    user: { user_id: "research-agent" },
+  },
+  "deep-research",
+  { usage: maxSteps, eventSubtype: "research_steps" },
+);
+
+if (!result.allowed) {
+  return showLimitMessage(result.reason);
+}
+
+const run = await runAgent(/* ... */);
+
+if (result.reservation) {
+  await client.trackWithReservation(result.reservation, run.stepsUsed);
+} else {
+  await client.track({
+    event: "research_steps",
+    company: { id: "northwind" },
+    user: { user_id: "research-agent" },
+    quantity: run.stepsUsed,
+  });
+}
+```
+
+Back to the six runs against 1,000 credits. With reservations, the first five each reserve 200 and start. The sixth is refused, because the five open reservations hold the whole balance. As each run settles, its unused credits return, and a later check can use them.
+
+A few things to plan around:
+
+- **A reservation is all or nothing.** A check is refused when the balance cannot fund the full amount, and nothing is consumed.
+- **Set the reservation lifetime above your longest run.** An unsettled reservation expires after `defaultReservationTTL`, 60 seconds by default, and its credits return to the balance. Without DataStream the API holds a reservation for at most one hour. A settle that arrives late still bills the usage once.
+- **Track what the check did not reserve.** A check allows without a reservation when the feature is not credit-metered or the check failed open, and that usage still has to be tracked.
+- **A check that cannot reserve fails closed.** When the API is unreachable or the balance cannot be reserved against, `allowed` is false. Pass `onAcquireFailure: "fail-open"` on a check where a denial is worse than letting the work through. Without DataStream, fail-open returns the flag's default value, so pass `defaultValue: true` with it.
+
+Without DataStream, the SDK makes one `check-and-reserve` call to the API per check. With DataStream enabled, it holds a block of credits locally and reserves out of it, so a check needs no network round trip. Across several processes, that mode needs a shared Redis so every process reserves against the same block. Calling the API without an SDK, use [check and reserve](/billing/credit-leases-and-reservations#checking-and-reserving-in-one-call) and settle with a track event that carries the `reservation_id`. [Credit Leases and Reservations](/billing/credit-leases-and-reservations) covers both modes and every endpoint.
+
+### Long-running and multi-step work
+
+A reservation covers one operation and settles on the first track. For a workflow with several steps, or a batch job you can estimate up front, acquire a **lease** for the whole job instead. You commit usage after each step as its cost becomes known, extend the lease if the job needs more than the estimate, and release what is left at the end. See [Leases](/billing/credit-leases-and-reservations#leases).
+
+## Cap the size and rate of spend
+
+A balance limits how much a company spends in total. [Usage controls](/billing/usage-controls) limit how fast it spends, and who spends it. Add policies on the company's **Entitlements** tab under **Usage Control**, or through the API.
+
+| Policy | What it stops |
+| --- | --- |
+| **Per draw** | Any single request larger than the limit, however much the company has left |
+| **Hourly** or **Daily** | Spending past the limit in the current period, so one runaway loop cannot drain a month of credits |
+| **One user** | One person or agent spending past their share, while the rest of the company keeps working |
+
+Policies stack, and a check has to fit every one that applies as well as the balance. A refused check returns false with a reason that names the policy, such as `A draw of 2000 credits exceeds the company limit of 500 credits per request`, and your app handles it the same way it handles an empty balance.
+
+A per-draw limit can only refuse a request whose size it knows. A check with no preflight is priced at a single unit, so it almost never trips a per-draw limit. Pass the size on every check for a feature that has one, whether through a preflight or a reservation.
+
+A per-user limit counts only the draws attributed to that user, so send `user` with every check and track an agent makes. Give each agent its own user rather than sharing one across a fleet. See [Seat and Agent Budgets](/billing/seat-and-agent-budgets#attributing-draws-to-an-actor).
+
+## Decide what happens at zero
+
+Every credit grant has a policy for an empty balance. Block usage stops credit-metered features at zero. Automatic and user-controlled top-ups buy more credits before the balance runs out. Bill in arrears lets usage continue and invoices it afterward.
+
+Under bill in arrears, set an **Overdraft Limit** on the credit grant. It caps how far the balance can go below zero before the company is blocked, which caps how much unpaid usage one account can build up between invoices. See [Handling Empty Credit Balances](/billing/empty-credit-balances).
+
+## Warn before the limit
+
+Two webhook events fire as a company draws down its balance: `credit.limit.warning` at 80% and `credit.limit.reached` at 100%. Wire both to an internal alert and to a message the customer sees, so a stopped agent is never the first sign of a problem. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
+
+To show customers their own limits, [Check flags](/api-reference/features/check-flags) returns the usage control policies that apply to a company and user in `credit_spend_policies`, with how much each has spent in the current period and when it resets.
+
+## Related
+
+- [Credit Leases and Reservations](/billing/credit-leases-and-reservations) covers how reservations and leases hold credits, every endpoint, and the SDK settings.
+- [Usage Controls](/billing/usage-controls) covers per-draw, hourly, daily, and per-user policies.
+- [Preflight checks](/feature-management/flags#preflight-checks) covers preflight against any numeric limit, not just credits.
+- [Seat and Agent Budgets](/billing/seat-and-agent-budgets) covers attributing draws to users and agents and reporting on them.
+- [Handling Empty Credit Balances](/billing/empty-credit-balances) covers what happens when the balance reaches zero.
