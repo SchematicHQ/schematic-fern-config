@@ -1509,6 +1509,169 @@ components:
         - id
         - provider_type
       title: BillingMeterResponseData
+    BillingNativeSubscriptionChangeResponseData:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/SubscriptionChangeAction'
+        effective_at:
+          type: string
+          format: date-time
+        line:
+          allOf:
+            - $ref: '#/components/schemas/BillingNativeSubscriptionLineResponseData'
+          description: The line added, or the line removed. Null on a cancellation.
+        replaces:
+          allOf:
+            - $ref: '#/components/schemas/BillingNativeSubscriptionLineResponseData'
+          description: The line a replacement ends. Null unless the action is replace.
+      required:
+        - action
+        - effective_at
+      title: BillingNativeSubscriptionChangeResponseData
+    BillingNativeSubscriptionLineResponseData:
+      type: object
+      properties:
+        anchor:
+          type: string
+          format: date-time
+        anchor_day:
+          type: integer
+          description: The day of the month the line's periods start on.
+          format: int64
+        base:
+          type: boolean
+          description: Whether the subscription takes its billing period from this line.
+        cadence_count:
+          type: integer
+          format: int64
+        cadence_unit:
+          $ref: '#/components/schemas/BillingProductPriceInterval'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        current_period_end:
+          type: string
+          description: Null on a line that hasn't started.
+          format: date-time
+          nullable: true
+        current_period_start:
+          type: string
+          description: Null on a line that hasn't started.
+          format: date-time
+          nullable: true
+        effective_from:
+          type: string
+          format: date-time
+        effective_to:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        kind:
+          $ref: '#/components/schemas/LineKind'
+        quantity:
+          type: integer
+          format: int64
+        source_id:
+          type: string
+          description: The plan, add-on or plan credit grant the line compiles from.
+        source_name:
+          type: string
+          description: The name of the plan, add-on or credit the line compiles from.
+          nullable: true
+        source_plan_type:
+          allOf:
+            - $ref: '#/components/schemas/PlanType'
+          description: Set when the line compiles from a plan or add-on.
+          nullable: true
+        taxable:
+          type: boolean
+        tiers_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          nullable: true
+        timing:
+          $ref: '#/components/schemas/ChargeTiming'
+        unit_amount:
+          type: integer
+          description: In minor units. Null on a rate line or a tiered price.
+          format: int64
+          nullable: true
+      required:
+        - anchor
+        - anchor_day
+        - base
+        - cadence_count
+        - cadence_unit
+        - currency
+        - effective_from
+        - id
+        - kind
+        - quantity
+        - source_id
+        - taxable
+        - timing
+      title: BillingNativeSubscriptionLineResponseData
+    BillingNativeSubscriptionResponseData:
+      type: object
+      properties:
+        cancel_at:
+          type: string
+          format: date-time
+          nullable: true
+        company_id:
+          type: string
+        currency:
+          $ref: '#/components/schemas/Currency'
+        id:
+          type: string
+        lines:
+          type: array
+          description: The lines in effect now.
+          items:
+            $ref: '#/components/schemas/BillingNativeSubscriptionLineResponseData'
+          maxItems: 1000
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        scheduled_changes:
+          type: array
+          description: Changes that take effect later, earliest first.
+          items:
+            $ref: '#/components/schemas/BillingNativeSubscriptionChangeResponseData'
+          maxItems: 1000
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        statement:
+          allOf:
+            - $ref: '#/components/schemas/BillingStatementResponseData'
+          description: >-
+            The charges not yet invoiced on the company's contract. Null when
+            the company has no billing profile.
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+        terms:
+          allOf:
+            - $ref: '#/components/schemas/BillingInvoiceTermsResponseData'
+          description: >-
+            The contract terms in force. Null when the company has no billing
+            profile.
+      required:
+        - company_id
+        - currency
+        - id
+        - lines
+        - period_end
+        - period_start
+        - scheduled_changes
+        - status
+      title: BillingNativeSubscriptionResponseData
     BillingPlanCreditGrantBillingMode:
       type: string
       enum:
@@ -2361,6 +2524,72 @@ components:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
       title: BillingSettingsResponseData
+    BillingStatementLineResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: In minor units of the statement's currency.
+          format: int64
+        kind:
+          $ref: '#/components/schemas/InvoiceLineKind'
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+        subscription_line_id:
+          type: string
+          nullable: true
+        unit_amount:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - amount
+        - kind
+      title: BillingStatementLineResponseData
+    BillingStatementResponseData:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementLineResponseData'
+          maxItems: 1000
+        period_end:
+          type: string
+          description: >-
+            When the statement was read; it keeps growing until the period
+            closes.
+          format: date-time
+        period_start:
+          type: string
+          description: The earliest open charge, or period_end when there is none.
+          format: date-time
+        subtotal:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+      required:
+        - currency
+        - lines
+        - period_end
+        - period_start
+        - subtotal
+        - total
+      title: BillingStatementResponseData
     BillingStrategy:
       type: string
       enum:
@@ -3073,6 +3302,11 @@ components:
         - pay_in_advance
         - skip_trial
       title: ChangeSubscriptionRequestBody
+    ChargeTiming:
+      type: string
+      enum:
+        - in_advance
+        - in_arrears
     ChargeType:
       type: string
       enum:
@@ -12984,6 +13218,12 @@ components:
         - is_soft_limit
         - limit_source
       title: LimitTimeSeriesPointResponseData
+    LineKind:
+      type: string
+      enum:
+        - allowance
+        - capacity
+        - rate
     ManagePlanPreviewResponseResponseData:
       type: object
       properties:
@@ -17942,6 +18182,13 @@ components:
         - publishable
         - secret
       title: StripeSandboxKeysResponseData
+    SubscriptionChangeAction:
+      type: string
+      enum:
+        - add
+        - cancel
+        - remove
+        - replace
     SubscriptionStatus:
       type: string
       enum:
@@ -27191,6 +27438,45 @@ paths:
                 title: UpdateCompanyBillingDetailsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/native-subscription:
+    get:
+      operationId: getCompanyNativeSubscription
+      summary: Get company native subscription
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingNativeSubscriptionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCompanyNativeSubscriptionParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyNativeSubscriptionResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
