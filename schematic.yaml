@@ -34480,6 +34480,50 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/pdf:
+    get:
+      operationId: downloadNativeInvoicePDF
+      summary: Download native invoice PDF
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: >-
+                Indicates whether the content is expected to be displayed inline
+                by the client or treated as an attachment to be downloaded.
+              schema:
+                type: string
+                example: attachment; filename="file.pdf"
+        '302':
+          description: Found
+          headers:
+            Location:
+              description: A short-lived URL the file can be downloaded from.
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /invoices/{invoice_id}/void:
     post:
       operationId: voidNativeInvoice
