@@ -35,7 +35,10 @@ const result = await client.checkFlagWithEntitlement(
   },
   "deep-research",
   {
-    eventUsage: { eventSubtype: "research_steps", quantity: maxSteps },
+    eventUsage: {
+      eventSubtype: "research_steps",
+      quantity: maxSteps,
+    },
   },
 );
 
@@ -52,26 +55,29 @@ Size the preflight as an upper bound for the work. The SDK rounds a fractional q
 | `eventUsage` | You know the quantity and the event subtype it is recorded under. Schematic applies the consumption rate |
 | `usage` | You know the quantity but not the subtype. It applies to every numeric condition the flag evaluates |
 
+Preflight values are whatever the caller sends, and an undersized value can let through a check that the real size would fail. Compute the size on your server from the work you are about to run, never from a value a browser passed you.
+
+Preflight is not limited to credits. It works against any numeric limit a flag evaluates, including event-based allowances and trait-based limits such as seats. See [Preflight Checks](/feature-management/preflight-checks).
+
+### Show the cost before the customer commits
+
 The same check gives you what you need to show the customer the price before they commit. The entitlement in the response carries the feature's `consumptionRate` and the company's balance, so the estimate is the quantity times the rate:
 
 ```typescript
 const rate = result.entitlement?.consumptionRate ?? 0;
 const balance = result.entitlement?.creditSettled ?? 0;
 
-const label = `Up to ${maxSteps * rate} credits. You have ${balance} left.`;
+const estimate = maxSteps * rate;
+const label = `Up to ${estimate} credits. You have ${balance} left.`;
 ```
 
 Read `creditSettled` for anything a customer sees. It changes only when work completes, so it holds steady while other runs have credits reserved. Only the flag value reflects the preflight. The entitlement figures in the response are the company's current balance, not the balance after the action.
-
-Preflight values are whatever the caller sends, and an undersized value can let through a check that the real size would fail. Compute the size on your server from the work you are about to run, never from a value a browser passed you.
-
-Preflight is not limited to credits. It works against any numeric limit a flag evaluates, including event-based allowances and trait-based limits such as seats. See [Preflight checks](/feature-management/flags#preflight-checks).
 
 ## Reserve before the work runs
 
 A preflight tells you whether the action fits the balance now. It does not stop five other runs from using the same credits before this one finishes. To close that gap, reserve the credits when you check.
 
-Configure `creditLeases` on the client, and `check` takes a reservation whenever you pass `usage` and the feature is credit-metered. The reserved credits leave the drawable balance at check time, so the next run to check sees what this one is about to spend. When the work finishes, settle the reservation with what it actually used, and the rest goes back to the balance.
+`check` is the reservation-aware form of `checkFlagWithEntitlement`. It takes the size as `usage` and `eventSubtype`, builds the same preflight from them, and reports its verdict in `allowed`. Configure `creditLeases` on the client, and `check` takes a reservation whenever you pass `usage` and the feature is credit-metered. The reserved credits leave the drawable balance at check time, so the next run to check sees what this one is about to spend. When the work finishes, settle the reservation with what it actually used, and the rest goes back to the balance.
 
 ```typescript
 const client = new SchematicClient({
@@ -117,7 +123,7 @@ A few things to plan around:
 - **Track what the check did not reserve.** A check allows without a reservation when the feature is not credit-metered or the check failed open, and that usage still has to be tracked.
 - **A check that cannot reserve fails closed.** When the API is unreachable or the balance cannot be reserved against, `allowed` is false. Pass `onAcquireFailure: "fail-open"` on a check where a denial is worse than letting the work through. Without DataStream, fail-open returns the flag's default value, so pass `defaultValue: true` with it.
 
-Without DataStream, the SDK makes one `check-and-reserve` call to the API per check. With DataStream enabled, it holds a block of credits locally and reserves out of it, so a check needs no network round trip. Across several processes, that mode needs a shared Redis so every process reserves against the same block. Calling the API without an SDK, use [check and reserve](/billing/credit-leases-and-reservations#checking-and-reserving-in-one-call) and settle with a track event that carries the `reservation_id`. [Credit Leases and Reservations](/billing/credit-leases-and-reservations) covers both modes and every endpoint.
+Without DataStream, the SDK makes one `check-and-reserve` call to the API per check. With DataStream enabled, it holds a block of credits locally and reserves out of it, so a check needs no network round trip. [Credit Leases and Reservations](/billing/credit-leases-and-reservations) covers both modes, the shared Redis that local mode needs across processes, and how to [check and reserve](/billing/credit-leases-and-reservations#checking-and-reserving-in-one-call) without an SDK.
 
 ### Long-running and multi-step work
 
@@ -139,6 +145,8 @@ A per-draw limit can only refuse a request whose size it knows. A check with no 
 
 A per-user limit counts only the draws attributed to that user, so send `user` with every check and track an agent makes. Give each agent its own user rather than sharing one across a fleet. See [Seat and Agent Budgets](/billing/seat-and-agent-budgets#attributing-draws-to-an-actor).
 
+To show customers their own limits, [Check flags](/api-reference/features/check-flags) returns the usage control policies that apply to a company and user in `credit_spend_policies`, with how much each has spent in the current period and when it resets.
+
 ## Decide what happens at zero
 
 Every credit grant has a policy for an empty balance. Block usage stops credit-metered features at zero. Automatic and user-controlled top-ups buy more credits before the balance runs out. Bill in arrears lets usage continue and invoices it afterward.
@@ -149,12 +157,10 @@ Under bill in arrears, set an **Overdraft Limit** on the credit grant. It caps h
 
 Two webhook events fire as a company draws down its balance: `credit.limit.warning` at 80% and `credit.limit.reached` at 100%. Wire both to an internal alert and to a message the customer sees, so a stopped agent is never the first sign of a problem. See [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers).
 
-To show customers their own limits, [Check flags](/api-reference/features/check-flags) returns the usage control policies that apply to a company and user in `credit_spend_policies`, with how much each has spent in the current period and when it resets.
-
 ## Related
 
 - [Credit Leases and Reservations](/billing/credit-leases-and-reservations) covers how reservations and leases hold credits, every endpoint, and the SDK settings.
 - [Usage Controls](/billing/usage-controls) covers per-draw, hourly, daily, and per-user policies.
-- [Preflight checks](/feature-management/flags#preflight-checks) covers preflight against any numeric limit, not just credits.
+- [Preflight Checks](/feature-management/preflight-checks) covers preflight against any numeric limit, not just credits.
 - [Seat and Agent Budgets](/billing/seat-and-agent-budgets) covers attributing draws to users and agents and reporting on them.
 - [Handling Empty Credit Balances](/billing/empty-credit-balances) covers what happens when the balance reaches zero.
