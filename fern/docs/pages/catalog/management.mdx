@@ -69,15 +69,15 @@ For usage-based features, Schematic will carry over usage from the current plan 
 
 ### Preventing Downgrades
 
-Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is configured in the Catalog configuration tab and is turned on by default.
+Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is the **Prevent downgrades when over the limit** setting under [Plan Change Rules](/catalog/lifecycle#plan-change-rules), and it is turned on by default.
 
-Additionally, you can require customers reach out to you before they can downgrade to a plan (preventing self-service downgrades). This is configured in the Catalog configuration tab and is turned off by default.
+Additionally, you can require customers reach out to you before they can downgrade to a plan (preventing self-service downgrades). This is the **Disallow self-service downgrades** setting in the same section, and it is turned off by default.
 
 ### Scheduled Downgrades
 
 If this setting is selected, when a customer downgrades their plan, the downgrade is scheduled for the end of the current billing period rather than applied immediately. The customer retains full access to their current plan until the billing period ends, and no proration or credits are applied.
 
-This behavior is controlled by the setting under the **On downgrade** section of the Catalog configuration tab. The available options are:
+This behavior is controlled by the **Billing Rule** under **On Downgrade** in [Plan Change Rules](/catalog/lifecycle#plan-change-rules). The available options are:
 
 - **Schedule downgrade for end of billing period, no credits applied** takes effect at the end of the current billing period. The customer keeps their current entitlements until then.
 - **Downgrade immediately, apply credit for next period** (default) applies the downgrade right away and gives the customer a prorated credit for the remainder of their billing period.

@@ -13,7 +13,7 @@ This is a **replace-style (PUT-like) API**, not a patch. The request body repres
 
 - An add-on omitted from `add_on_selections` will be **removed** from the company.
 - A pay-in-advance entitlement (e.g. user seats) omitted from `pay_in_advance_entitlements` will be **removed**, dropping the company's quantity to zero.
-- A base plan omitted (or set to `null`) will be **cleared**, falling back to the [default plan](/catalog/configuration#fallback-plan) if one is configured.
+- A base plan omitted (or set to `null`) will be **cleared**, falling back to the [default plan](/catalog/lifecycle#fallback-plan) if one is configured.
 
 When upgrading or making any change, you almost always want to **read the company's current state first** and re-send the existing add-ons and pay-in-advance entitlements alongside whatever you're changing. See [Common patterns](#common-patterns) for examples.
 
@@ -55,7 +55,7 @@ When specifying a base plan or add-on:
 
 ### Default (fallback) plan
 
-If you clear all plans from a company (by omitting `base_plan_id`), Schematic will assign the configured [default/fallback plan](/catalog/configuration#fallback-plan) if one exists.
+If you clear all plans from a company (by omitting `base_plan_id`), Schematic will assign the configured [default/fallback plan](/catalog/lifecycle#fallback-plan) if one exists.
 
 ### Proration
 
@@ -116,7 +116,7 @@ The ID of the company whose plan you want to manage.
 </ParamField>
 
 <ParamField path="base_plan_id" type="string">
-The plan to assign as the company's base plan. Omit or set to `null` to clear the base plan (the company will fall back to the [default plan](/catalog/configuration#fallback-plan) if one is configured).
+The plan to assign as the company's base plan. Omit or set to `null` to clear the base plan (the company will fall back to the [default plan](/catalog/lifecycle#fallback-plan) if one is configured).
 </ParamField>
 
 <ParamField path="base_plan_price_id" type="string">

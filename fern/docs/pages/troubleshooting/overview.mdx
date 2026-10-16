@@ -13,7 +13,7 @@ Most broken-state reports involve Stripe, and the single deepest page is [Common
 - **[No Change Plan button in the customer portal](/integrations/stripe-troubleshooting#no-change-plan-button-in-schematic-customer-portal-component)** — usually there are no Live Plans for the customer to switch to.
 - **[Unable to change a plan from the Schematic app](/integrations/stripe-troubleshooting#unable-to-change-plan-in-schematic-app)** — the company has no payment method on file in Stripe, so the change is blocked.
 - **[Which plan changes are allowed, and where](/integrations/stripe-troubleshooting#plan-change-flows)** — the matrix of what works self-serve through a component versus through Manage Plan in the app.
-- **[Live Plans configuration](/catalog/configuration#live-plans)** — the catalog setting that decides which plans a customer can see and select.
+- **[Live Plans configuration](/catalog/catalogs#live-plans)** — the catalog setting that decides which plans a customer can see and select. Check that the plan is in the catalog the customer's component [sells from](/catalog/catalogs#connecting-a-catalog-to-a-component).
 - **[The downgrade applied later than expected](/catalog/managing-company-plans#scheduled-downgrades)** — downgrades are scheduled to the end of the billing period rather than applied on the spot.
 - **[The proration amount looks wrong](/catalog/managing-company-plans#upgradedowngrade-logic)** — how Schematic classifies a change as an upgrade or a downgrade, which determines both timing and proration.
 
@@ -42,7 +42,7 @@ Most broken-state reports involve Stripe, and the single deepest page is [Common
 - **[The override quietly expired](/feature-management/overrides#time-limited-overrides)** — time-limited overrides stop applying when they lapse, with no other signal.
 - **[The company key doesn't match](/developer_resources/key_management)** — a check made against a key Schematic doesn't recognize resolves against no company at all.
 - **[You are checking against the wrong environment](/developer_resources/environments)** — API keys are environment-scoped, so a staging key evaluates staging plans and staging companies.
-- **[The trial expired](/catalog/configuration#trial-expiry-plan)** — the plan a company lands on once its trial ends, and what that plan entitles.
+- **[The trial expired](/catalog/lifecycle#trial-expiry-plan)** — the plan a company lands on once its trial ends, and what that plan entitles.
 - **[The SDK returned a cached or fallback value](/developer_resources/sdks/cross-platform-features#local-caching)** — backend SDKs cache locally, and fall back to configured defaults when they cannot reach Schematic.
 
 ## Usage counts look wrong
