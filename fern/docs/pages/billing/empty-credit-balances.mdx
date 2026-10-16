@@ -14,6 +14,8 @@ When a company's credit balance reaches zero, what happens next depends on how y
 | User-controlled top-ups | Features stop unless the company turned on auto top-up | The company | Charged per top-up, in advance |
 | Bill in arrears | Features keep working and the balance goes negative | Nobody, usage continues | Invoiced per credit after the fact |
 
+Bill in arrears is the overage path for credits. The customer keeps working past zero and pays for the extra on the next invoice.
+
 [Credit bundles](#credit-bundles) sit alongside all four. A company buys a bundle as a one-time purchase, and whether it can depends on the bundle, not on the credit grant.
 
 You choose between them in the credit grant form: open a plan or add-on in the Catalog, then click "Add credit grant" or an existing grant.
@@ -58,7 +60,7 @@ A company that never turns auto top-up on behaves as it would under Block usage:
 
 ## Bill in arrears
 
-Bill in arrears lets a company keep using credit-metered features after its balance reaches zero. Schematic prices each credit consumed past zero and invoices the total on a schedule you choose, so the customer is never blocked and never prepays for more than its plan includes. It fits customers on invoice and net terms, who have no card for a top-up to charge.
+Bill in arrears lets a company keep using credit-metered features after its balance reaches zero. The usage past zero is overage. Schematic prices each credit of it and invoices the total on a schedule you choose, so the customer is never blocked and never prepays for more than its plan includes. It fits customers on invoice and net terms, who have no card for a top-up to charge.
 
 | Field | What it sets |
 | --- | --- |
@@ -107,7 +109,7 @@ A credit bundle is a fixed number of credits at a fixed price that a company buy
 - Choose **Automatic top-ups** for accounts that pay by card and should never be interrupted.
 - Choose **Bill in arrears** for accounts on invoice terms, where usage should continue and be settled on the next invoice.
 
-A plan's policy applies to every company on it. When one account needs different treatment, such as an enterprise customer on invoice terms in a plan otherwise sold self-serve, a [custom plan](/catalog/guides-custom-plans) gives it its own credit grant and policy.
+A plan's policy applies to every company on it. When one account needs different treatment, such as an enterprise customer on invoice terms in a plan otherwise sold self-serve, a [custom plan](/catalog/guides/custom-plans) gives it its own credit grant and policy.
 
 ## API fields
 

@@ -105,6 +105,8 @@ The finished plan:
 
 ![Add Feature 5](../../assets/images/billing/burndown-add-feature-5.png)
 
+Once a feature has a consumption rate, a flag check on it returns false when the balance cannot cover the next use, so your app stops the action. That check prices one use at a time. When agents or parallel workers draw on one balance, or one action can cost far more than a single unit, size each check and reserve credits before the work runs. See [Prevent Overspend](/billing/prevent-overspend).
+
 ### 5. Configure Credit Bundles
 
 Bundles are what customers buy when their plan allowance runs out. We'll set these to never expire so customers can keep using credit-based features after the plan balance is gone, though bundles can carry an expiry window instead.
@@ -385,10 +387,6 @@ That returns 10 credits to the balance through an adjustment grant, and those 10
 ## Auto Top-Up
 
 Auto top-up buys credits automatically when a company's balance falls below a threshold, so customers are not cut off mid-workflow. You turn it on in the plan's credit grant, and choose whether you or the customer controls it. See [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups#auto-top-up) for setup, retries, and the webhook events.
-
-## Enforcing the balance
-
-A flag check on a credit burndown feature returns false once the balance cannot cover the next use, so your app stops the action. That check prices one use at a time. When agents or parallel workers draw on one balance, or one action can cost far more than a single unit, size each check and reserve credits before the work runs. See [Prevent Overspend](/billing/prevent-overspend).
 
 ## Accessing Credit Information via API
 

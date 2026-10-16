@@ -63,7 +63,7 @@ The credit type needs a cost basis before top-ups can be turned on. Without a pe
 | Automatic top-ups | Companies on this plan receive a top-up automatically when they reach the threshold. They cannot change or turn it off. |
 | User-controlled top-ups | Companies turn auto top-up on themselves in checkout and the customer portal. Your threshold and amount become their starting defaults. |
 
-Choose User-controlled for self-serve plans where customers manage their own refills. Choose Automatic when continuity matters more than customer control, such as an enterprise account running production workloads. Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both. A company that never turns it on is blocked at zero, as it would be under Block usage.
+Under User-controlled the Top-up Threshold and Top-up Amount fields are labeled "(default)", because the customer can change both. Which mode fits a plan is a policy decision, covered in [Choosing a policy](/billing/empty-credit-balances#choosing-a-policy).
 
 ### Per-company settings
 
@@ -97,13 +97,7 @@ Update plan compatibility with [Update credit bundle details](/api-reference/bil
 
 ### Auto top-up
 
-These live on the [plan credit grant](/api-reference/billing-credits/create-plan-credit-grant).
-
-| Dashboard field | API field | Values |
-| --- | --- | --- |
-| Automatic or User-controlled top-ups | `auto_topup_availability` | `automatic` or `user_controlled`. `off` turns top-ups off |
-| Top-up Threshold | `auto_topup_threshold_credits` | Integer, credits remaining |
-| Top-up Amount | `auto_topup_amount`, `auto_topup_amount_type` | Integer, with `auto_topup_amount_type` set to `credit` |
+Three fields on the [plan credit grant](/api-reference/billing-credits/create-plan-credit-grant) configure top-ups: `auto_topup_availability`, `auto_topup_threshold_credits`, and `auto_topup_amount`. They are listed with the other empty-balance policy fields in [Handling Empty Credit Balances](/billing/empty-credit-balances#api-fields).
 
 A grant bought by auto top-up carries `grant_reason` `billing_credit_auto_topup`, and a bundle purchase carries `purchased`. See [Grant sources](/billing/credit-burndown#grant-sources).
 
