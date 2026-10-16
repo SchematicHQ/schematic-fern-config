@@ -25,12 +25,14 @@ Steps 2 and 3 are what keep the balance accurate when many actions run at once. 
 - [Handling Empty Credit Balances and Overage](/billing/empty-credit-balances) decides what happens at zero: block usage, top up, or keep going and bill the overage in arrears.
 - [Seat and Agent Budgets](/billing/seat-and-agent-budgets) scales a company's credits with the seats it holds and reports consumption per user and per agent.
 - [Billed credit grants](/billing/credit-burndown#billed-credit-grants) put a contract's credits on their own invoice line, priced per credit or in tiers.
+- [Run credit-based billing](/use-cases/credit-billing) shows the model from the customer's side, with the balance they see and the grants behind it.
 
 ## Control spend
 
 - [Prevent Overspend](/billing/prevent-overspend) is where to start when agents or parallel workers share a balance. It sizes each check before the work runs, reserves the credits, and caps the size and rate of spending.
 - [Usage Controls](/billing/usage-controls) caps how many credits a company or one user can spend per request, per hour, or per day.
 - [Credit Leases and Reservations](/billing/credit-leases-and-reservations) is the reference for holding credits while work is in flight, with every endpoint and SDK setting.
+- [Meter on a real-time credit ledger](/use-cases/credit-ledger) explains why enforcement needs a transactional ledger rather than a warehouse snapshot.
 
 ## Account for credits
 
