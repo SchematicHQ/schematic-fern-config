@@ -3327,9 +3327,9 @@ components:
         expires_at:
           type: string
           description: >-
-            When the hold lapses if no track event settles it; defaults to one
-            minute from now and may be at most one hour out. The unspent hold is
-            refunded on expiry
+            When the hold lapses if no track or inference event settles it;
+            defaults to one minute from now and may be at most one hour out. The
+            unspent hold is refunded on expiry
           format: date-time
           nullable: true
         idempotency_key:
@@ -3345,9 +3345,11 @@ components:
           description: >-
             Hypothetical usage to evaluate the flag against. When credit_cost
             names the entitlement's credit, that cost is what gets held;
+            otherwise, when event_quantities names the entitlement's event
+            subtype, the hold is that event priced at the entitlement's
+            consumption rate and quantity rates, and quantity is ignored;
             otherwise the hold is the entitlement's consumption rate times
-            quantity, or, when quantity is omitted, times the usage stated here.
-            event_quantities is not supported here and is rejected
+            quantity, or, when quantity is omitted, times the usage stated here
         quantity:
           type: number
           description: >-
@@ -3355,7 +3357,9 @@ components:
             together with the entitlement's consumption rate, and is echoed back
             on the reservation for the settling track event. When it is omitted
             the units come from preflight.event_usage.quantity, if that event
-            subtype is the entitlement's, else from preflight.usage, else 1
+            subtype is the entitlement's, else from preflight.usage, else 1.
+            Ignored when preflight.event_quantities names the entitlement's
+            event subtype, whose quantity is used instead
           format: double
           nullable: true
           maximum: 9999999999
@@ -3427,8 +3431,8 @@ components:
           description: >-
             The hold taken on the company's credit balance for this operation,
             when the flag allowed it and the feature is credit-metered. Settle
-            it by sending a track event carrying its ID as reservation_id; the
-            unspent hold is refunded at expires_at otherwise
+            it by sending a track or inference event carrying its ID as
+            reservation_id; the unspent hold is refunded at expires_at otherwise
         rule_id:
           type: string
           description: If a rule was found, its ID
@@ -10954,6 +10958,11 @@ components:
             Total number of input tokens for the inference request, including
             those served from and written to a prompt cache
           format: int64
+        lease_id:
+          type: string
+          description: >-
+            Credit lease ID this inference event's credit burn is redeeming
+            against
         operation:
           type: string
           description: The inference operation; defaults to 'chat'
@@ -10975,6 +10984,11 @@ components:
           type: integer
           description: Number of requests represented by this event; defaults to 1
           format: int64
+        reservation_id:
+          type: string
+          description: >-
+            Credit reservation ID this inference event's credit burn settles.
+            lease_id takes precedence when both are set
         response_model:
           type: string
           description: The model that served the inference response
@@ -12357,11 +12371,15 @@ components:
           format: double
         event_subtype:
           type: string
-          description: The event subtype the settling track event should carry
+          description: >-
+            The event subtype the settling track event should carry, or the
+            event name of a settling inference event
           nullable: true
         expires_at:
           type: string
-          description: When the unspent hold is refunded if no track event settles it
+          description: >-
+            When the unspent hold is refunded if no track or inference event
+            settles it
           format: date-time
         id:
           type: string
@@ -15906,8 +15924,7 @@ components:
             it to preflight an inference call by its request and token counts.
             Applies only to credit balance conditions whose event subtype
             matches, where it takes precedence over event_usage and usage;
-            credit_cost for the same credit still wins. Not supported on
-            check-and-reserve
+            credit_cost for the same credit still wins
         event_usage:
           allOf:
             - $ref: '#/components/schemas/PreflightEventUsageRequestBody'
