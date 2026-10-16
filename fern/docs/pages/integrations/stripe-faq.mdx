@@ -11,9 +11,9 @@ We've compiled a list of common pitfalls that we've seen in the wild. If you're 
 
 ![No change plan button](../../assets/images/stripe/stripe-faq-no-change-plan-button.png)
 
-The most common reason a customer can't change plans is that there are no live plans that they can switch to. Live Plans can be configured in Products > Configuration > Live Plans (see screenshot below). Be sure to "Save Changes" on this page for the changes to take effect.
+The most common reason a customer can't change plans is that there are no live plans that they can switch to. Live Plans are set per catalog in **Products > Catalogs** (see screenshot below), and each component sells from one catalog, so check the catalog the component points at. Be sure to click **Save Changes** on this page for the changes to take effect. See [Catalogs](/catalog/catalogs) for details.
 
-![Update live plans](../../assets/images/stripe/stripe-faq-update-live-plans.png)
+![Live Plans in the Default catalog](../../assets/images/catalog/catalogs.png)
 
 ## Unable to change plan in Schematic app
 
@@ -51,9 +51,9 @@ Within the schematic app, there are a few cases in which a plan can't be changed
 
 Schematic only creates a customer record in Stripe when a company is subscribed to a Stripe-enabled plan, meaning a plan with a price configured, even if that price is $0. Companies on free plans with no Stripe-linked price will exist in Schematic but will not have a corresponding Stripe customer.
 
-This is intentional: many teams prefer not to populate Stripe with free-tier users. However, if you want every new company to immediately have a Stripe customer provisioned, you can configure your **Initial Plan** (in Products > Configuration) to use a plan with a $0 price. This ensures all new companies are enrolled in a Stripe subscription from the moment they are created in Schematic.
+This is intentional: many teams prefer not to populate Stripe with free-tier users. However, if you want every new company to immediately have a Stripe customer provisioned, you can configure your **Initial Plan** (in **Manage > Lifecycle**) to use a plan with a $0 price. This ensures all new companies are enrolled in a Stripe subscription from the moment they are created in Schematic.
 
-See [Initial Plan](/catalog/configuration#initial-plan) for configuration details.
+See [Initial Plan](/catalog/lifecycle#initial-plan) for configuration details.
 
 ## I renamed a company in Schematic and the Stripe customer didn't change
 

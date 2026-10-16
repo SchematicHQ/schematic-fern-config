@@ -6,20 +6,26 @@ description: The Catalog is where plans and add-ons are defined, including their
 
 The Catalog in Schematic is where plans and add-ons are defined, including their entitlements and subscription lifecycle. Schematic makes it easy to implement common pricing patterns, such as:
 
-1. [Starting new customers on a free plan](/catalog/configuration#initial-plan)
+1. [Starting new customers on a free plan](/catalog/lifecycle#initial-plan)
 2. [Trials of paid plans](/catalog/trials)
-3. [Reverse Trials (where customers start on a trial of a paid plan)](/catalog/configuration#initial-plan)
+3. [Reverse Trials (where customers start on a trial of a paid plan)](/catalog/lifecycle#initial-plan)
 4. [Seat based plans](/billing/seat-based-billing)
 5. [Usage based plans](/billing/usage-based-billing)
 6. [Credit based plans](/billing/credit-burndown)
 7. Hybrid plans, combining seats and usage based billing
 8. 3 or 4-tier Good, Better, Best pricing
 
-You can also associate Catalog items to Stripe products directly to:
+## Catalogs
+
+A [catalog](/catalog/catalogs) is the set of plans, add-ons, and credit bundles a customer can buy. Every component sells from one catalog, so checkout and the pricing table show exactly the lineup you put in it. Most accounts sell from the single Default catalog. If you sell more than one product, or sell to different kinds of buyers, build a catalog for each and point each component at its own.
+
+![The Plans list, showing which catalogs sell each plan](../../assets/images/catalog/plans-catalogs-column.png)
+
+The rules that apply across every catalog, such as the plan new companies start on, how trials behave, and what happens on an upgrade or downgrade, live in [Lifecycle settings](/catalog/lifecycle).
+
+## Stripe
+
+You can associate Catalog items to Stripe products directly to:
 - Synchronize company subscriptions between the products
 - Automatically provision entitlements in your application when a subscription is updated
 - Enable billing elements in Schematic Components, including to power checkout, subscription management (invoices, payment method, upgrade, downgrade, expand), and cancellation
-
-<img
-src="../../assets/images/catalog/catalog.png"
-/>
