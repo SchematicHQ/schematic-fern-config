@@ -1,0 +1,61 @@
+---
+title: Feature Meter
+description: Usage meters for event- and trait-based features, with unit prices, overage, reset dates, and an upgrade prompt that opens Checkout.
+slug: components/drop-in/feature-meter
+---
+
+Usage meters for a company's metered features: progress against the limit, the unit price for pay-as-you-go and overage, when the period resets, and an upgrade prompt on over-limit meters that opens [Checkout](/components/drop-in/checkout). Per-seat features break usage down by user.
+
+## Usage
+
+```tsx
+import { FeatureMeter } from "@schematichq/schematic-components/elements";
+
+<FeatureMeter showResetDate showUsageByUser />
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `visibleFeatures` | all metered | Feature keys to meter, in order. |
+| `showResetDate` | `true` | When the usage period resets. |
+| `showUsageByUser` | `false` | Per-user breakdown for per-seat features. |
+| `showUpgrade` | `true` | The upgrade prompt on over-limit meters. |
+| `warningThreshold` | `0.8` | Fraction of the limit at which a meter turns to its warning state. |
+| `headingLevel` | `2` | The heading's level. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key. |
+
+## How each meter reads
+
+| Price behavior | The meter shows |
+| --- | --- |
+| none | `usage of limit` with a bar; unlimited features show usage alone |
+| pay in advance | the purchased quantity as the limit |
+| pay as you go | usage and the per-unit price |
+| overage | usage against the included amount, then the overage price |
+| tiered | usage and the tier it falls in |
+
+Each meter carries a state (`ok`, `warning`, `over`) as `data-state` on its row, so you can color it without recomputing anything.
+
+## Markup
+
+```html
+<div class="schematic-card schematic-feature-meter" data-state="ready">
+  <div class="schematic-header"><h2 class="schematic-header__title">Usage</h2></div>
+  <section class="schematic-feature-meter__row" data-feature="seats" data-state="warning">
+    <p class="schematic-feature-meter__name">User Seats</p>
+    <div class="schematic-meter"><div class="schematic-meter__fill" style="width: 75%"></div></div>
+    <p class="schematic-feature-meter__summary">3 of 4 · resets Aug 12</p>
+  </section>
+</div>
+```
+
+## Localizing it
+
+Keys: `featureMeterHeader`, `featureMeterUsage`, `featureMeterUnlimited`, `featureMeterPerUnit`, `featureMeterOverage`, `featureMeterResets`, `featureMeterUpgrade`, `featureMeterByUser`, `retry`.
+
+## Build it yourself
+
+[`useFeatureUsage`](/components/build-your-own/hooks#usefeatureusage) returns the rows; `deriveUsageMeter` turns each into used, limit, percent, state, and reset text.

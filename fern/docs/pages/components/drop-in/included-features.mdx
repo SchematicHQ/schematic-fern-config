@@ -1,0 +1,58 @@
+---
+title: Included Features
+description: The features a company has access to on its plan, with limits and usage.
+slug: components/drop-in/included-features
+---
+
+The features a company has access to on its plan, with the value of each entitlement: on or off, a limit with usage against it, unlimited, or a value read from a trait.
+
+![Included features](../../../assets/images/components/components-included-features.png)
+
+## Usage
+
+```tsx
+import { IncludedFeatures } from "@schematichq/schematic-components/elements";
+
+<IncludedFeatures limit={6} visibleFeatures={["seats", "projects", "api-calls"]} />
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `limit` | `6` | Rows shown before "See all". |
+| `visibleFeatures` | all | Feature keys to show, in order. |
+| `showIcons` | `true` | Feature icons. |
+| `showUsage` | `true` | Usage beside limited features. |
+| `showHeader` | `true` | The heading. |
+| `headingLevel` | `2` | The heading's level. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key. |
+
+## How each row reads
+
+The value column follows the entitlement: a check for boolean features, `3 of 4 seats` for a numeric limit with usage, `Unlimited` for no limit, and the trait's value for trait-based limits. Metered features with a price behavior show their unit price too; the fuller meter lives in [Feature Meter](/components/drop-in/feature-meter).
+
+## Markup
+
+```html
+<div class="schematic-card schematic-included-features" data-state="ready">
+  <div class="schematic-header"><h2 class="schematic-header__title">Included features</h2></div>
+  <ul class="schematic-included-features__list">
+    <li class="schematic-included-features__row" data-kind="numeric">
+      <span class="schematic-included-features__icon"></span>
+      <span class="schematic-included-features__name">User Seats</span>
+      <span class="schematic-included-features__value">3 of 4 seats</span>
+    </li>
+  </ul>
+  <button class="schematic-link-button schematic-included-features__see-all">See all</button>
+</div>
+```
+
+## Localizing it
+
+Keys: `includedFeaturesHeader`, `includedFeaturesUnlimited`, `includedFeaturesUsage`, `includedFeaturesSeeAll`, `includedFeaturesSeeLess`, `retry`.
+
+## Build it yourself
+
+[`useFeatureUsage`](/components/build-your-own/hooks#usefeatureusage) returns every entitlement row, and `deriveEntitlementRow` resolves the value display into structured parts.

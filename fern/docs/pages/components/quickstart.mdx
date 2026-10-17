@@ -1,0 +1,167 @@
+---
+title: Components Quickstart
+description: Install both packages, mint an access token on your server, wrap your app in the provider, and render the first component or hook.
+slug: components/quickstart
+---
+
+Four steps take you from an empty page to a live billing portal for the signed-in company. The same setup serves every drop-in component and every hook.
+
+<Note>
+  **Using an agent?** Paste this into Claude Code, Cursor, or Codex and it does the setup on this page:
+
+  ```text
+  Add Schematic billing to my app: docs.schematichq.com/components/skill.md
+  ```
+</Note>
+
+### 1. Install the packages
+
+```sh
+npm install @schematichq/schematic-react @schematichq/schematic-components
+```
+
+The React package carries the provider and the hooks. The components package carries the drop-ins and the derivations the reference code uses.
+
+### 2. Mint access tokens on your server
+
+Components read a company's own billing state, so they authenticate with a short-lived, company-scoped temporary access token. Your server issues it with your secret key; the browser only ever sees the token.
+
+<Tabs>
+  <Tab title="Node.js">
+```typescript
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+// GET /api/accessToken, behind your own auth
+export async function GET() {
+  const session = await getSession();
+  const response = await client.accesstokens.issueTemporaryAccessToken({
+    resourceType: "company",
+    lookup: { id: session.companyId }, // your company keys
+  });
+  return Response.json({
+    accessToken: response.data?.token,
+    expiredAt: response.data?.expiredAt,
+  });
+}
+```
+  </Tab>
+  <Tab title="Python">
+```python
+from schematic import Schematic
+
+client = Schematic(api_key=os.environ["SCHEMATIC_SECRET_KEY"])
+
+def access_token(company_id: str):
+    response = client.accesstokens.issue_temporary_access_token(
+        resource_type="company",
+        lookup={"id": company_id},
+    )
+    return {"accessToken": response.data.token, "expiredAt": response.data.expired_at}
+```
+  </Tab>
+  <Tab title="Go">
+```go
+resp, err := client.Accesstokens.IssueTemporaryAccessToken(ctx, &schematicgo.IssueTemporaryAccessTokenRequestBody{
+    ResourceType: "company",
+    Lookup:       map[string]string{"id": companyID},
+})
+```
+  </Tab>
+</Tabs>
+
+### 3. Wrap your app in the provider
+
+```tsx
+// app/providers.tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+
+async function fetchAccessToken() {
+  const response = await fetch("/api/accessToken");
+  const { accessToken, expiredAt } = await response.json();
+  return { token: accessToken, expiresAt: expiredAt };
+}
+
+export function Providers({ children, company, user }) {
+  return (
+    <SchematicProvider
+      publishableKey={process.env.NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY}
+      session={{ company: company.id, user: user.id, token: fetchAccessToken }}
+    >
+      {children}
+    </SchematicProvider>
+  );
+}
+```
+
+`session` says whose billing is being read. Pass `null` when nobody is signed in and `undefined` while your auth is still resolving; [Session and access tokens](/components/build-your-own/session) explains why the three differ.
+
+### 4. Render the portal, or a hook
+
+<Tabs>
+  <Tab title="Drop-in">
+```tsx
+import {
+  Checkout, CreditMeter, FeatureMeter, IncludedFeatures, Invoices,
+  PaymentMethods, PlanManager, SchematicStyles, UpcomingBill,
+} from "@schematichq/schematic-components/elements";
+
+export default function BillingPage() {
+  return (
+    <>
+      <SchematicStyles />
+      <PlanManager />
+      <IncludedFeatures />
+      <UpcomingBill />
+      <PaymentMethods />
+      <Invoices showStatus />
+      <FeatureMeter />
+      <CreditMeter />
+      <Checkout />
+    </>
+  );
+}
+```
+
+Drop any card you do not need; each stands alone. `<Checkout />` mounts once and the other components open it.
+  </Tab>
+  <Tab title="Build your own">
+```tsx
+import { useInvoices } from "@schematichq/schematic-react";
+import { deriveInvoiceList } from "@schematichq/schematic-components/elements";
+
+export function InvoiceHistory() {
+  const { data, loadMore } = useInvoices();
+  if (data === undefined) return null;
+
+  const list = deriveInvoiceList(data, { locale: "en-US" });
+  return (
+    <ul>
+      {list.rows.map((row) => (
+        <li key={row.id}>
+          <a href={row.url ?? undefined}>{row.dateText}</a> {row.amountText}
+        </li>
+      ))}
+      {list.hasMore && <button onClick={loadMore}>Load more</button>}
+    </ul>
+  );
+}
+```
+  </Tab>
+</Tabs>
+
+<Info>
+  The company endpoints answer 404 for an account that has not enabled them. If a correctly configured page reports `failed with status 404`, ask Schematic to enable company context for your account.
+</Info>
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Drop-in components" href="/components/drop-in/overview">
+    Every component, its props, and how to theme it.
+  </Card>
+  <Card title="Build your own UI" href="/components/build-your-own/overview">
+    Hooks, derivations, the checkout API, and reference code.
+  </Card>
+</CardGroup>

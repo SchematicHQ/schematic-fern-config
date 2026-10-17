@@ -1,0 +1,55 @@
+---
+title: Credit Meter
+description: A company's credit balances as a burndown per credit, with the grants behind each balance and a buy-more action that opens Checkout.
+slug: components/drop-in/credit-meter
+---
+
+A company's credit balances: a burndown per credit, the grants behind each balance with their source and expiry, the auto top-up policy, and a buy-more action that opens [Checkout](/components/drop-in/checkout) on that credit's bundles.
+
+## Usage
+
+```tsx
+import { CreditMeter } from "@schematichq/schematic-components/elements";
+
+<CreditMeter showLedger />
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `credits` | all | Credit ids to show, in order. |
+| `showLedger` | `true` | The expandable grant list under each balance. |
+| `showBuyMore` | `true` | The buy-more action when bundles are on offer. |
+| `showAutoTopUp` | `true` | The auto top-up policy when the plan grants one. |
+| `onBuyMore` | opens `<Checkout/>` | Override the buy-more action with your own purchase flow. |
+| `headingLevel` | `2` | The heading's level. |
+| `className`, `locale` | | Root class; BCP 47 tag for formatting. |
+| `strings` | | Copy for this card by key. |
+
+## What the ledger shows
+
+Each grant carries its source (the plan, a purchased bundle, a manual grant), how much of it is used, and when it expires or resets. Expired and fully used grants leave the ledger on the server, so the list is only what still counts. Buy more respects the bundle purchase rules and plan compatibility you set in Schematic.
+
+## Markup
+
+```html
+<div class="schematic-card schematic-credit-meter" data-state="ready">
+  <div class="schematic-header"><h2 class="schematic-header__title">Credits</h2></div>
+  <section class="schematic-credit-meter__credit" data-credit="ai-credits">
+    <p class="schematic-credit-meter__name">AI credits</p>
+    <div class="schematic-meter"><div class="schematic-meter__fill" style="width: 62%"></div></div>
+    <p class="schematic-credit-meter__summary">3,100 of 5,000 remaining</p>
+    <ul class="schematic-credit-meter__ledger"><li data-source="plan">Starter Plan · 4,000 · resets Oct 1</li></ul>
+    <button class="schematic-cta schematic-cta--outline schematic-credit-meter__buy">Buy more</button>
+  </section>
+</div>
+```
+
+## Localizing it
+
+Keys: `creditMeterHeader`, `creditMeterRemaining`, `creditMeterBuyMore`, `creditMeterLedgerShow`, `creditMeterLedgerHide`, `creditMeterSourcePlan`, `creditMeterSourceBundle`, `creditMeterSourceManual`, `creditMeterResets`, `creditMeterExpires`, `creditMeterAutoTopUp`, `retry`.
+
+## Build it yourself
+
+[`useCreditBalances`](/components/build-your-own/hooks#usecreditbalances) returns balances grouped per credit with their grants; `deriveCreditUsage` computes the burndown and formats the ledger rows.
