@@ -168,28 +168,32 @@ navigation:
             path: ./docs/pages/catalog/management.mdx
           - page: Custom Plans
             path: ./docs/pages/catalog/custom-plans.mdx
-          - section: Configuring the Catalog
-            path: ./docs/pages/catalog/configure-catalog.mdx
+          - section: Catalogs
+            path: ./docs/pages/catalog/catalogs.mdx
             contents:
-              - link: Initial Plan
-                href: /catalog/configuration#initial-plan
-              - link: Fallback Plan
-                href: /catalog/configuration#fallback-plan
-              - link: Trial Expiry Plan
-                href: /catalog/configuration#trial-expiry-plan
               - link: Live Plans
-                href: /catalog/configuration#live-plans
-              - link: Custom Plans
-                href: /catalog/configuration#custom-plans
+                href: /catalog/catalogs#live-plans
               - link: Live Add-ons
-                href: /catalog/configuration#live-add-ons
-              - link: Trial Rules
-                href: /catalog/configuration#trial-rules
+                href: /catalog/catalogs#live-add-ons
+              - link: Live Credit Bundles
+                href: /catalog/catalogs#live-credit-bundles
+              - link: Connecting a Component
+                href: /catalog/catalogs#connecting-a-catalog-to-a-component
+          - section: Lifecycle Settings
+            path: ./docs/pages/catalog/lifecycle.mdx
+            contents:
+              - link: Fallback Plan
+                href: /catalog/lifecycle#fallback-plan
+              - link: Initial Plan
+                href: /catalog/lifecycle#initial-plan
+              - link: Trials
+                href: /catalog/lifecycle#trials
+              - link: Component Display Settings
+                href: /catalog/lifecycle#component-display-settings
+              - link: Checkout Settings
+                href: /catalog/lifecycle#checkout-settings
               - link: Plan Change Rules
-                href: /catalog/configuration#plan-change-rules
-              - page: Multiple Catalogs
-                path: ./docs/pages/catalog/catalogs.mdx
-                hidden: true
+                href: /catalog/lifecycle#plan-change-rules
           - page: Add-ons
             path: ./docs/pages/catalog/add-ons.mdx
           - page: Trials
@@ -724,6 +728,9 @@ analytics:
 css: ./styles.css
 
 redirects:
+  - source: "/catalog/configuration"
+    destination: "/catalog/lifecycle"
+    permanent: true
   - source: "/for-developers"
     destination: "/building-with-ai"
     permanent: true
