@@ -491,7 +491,7 @@ In client mode, `:fail_open` still evaluates the flag's rules with the credit ba
 
 `default_value` also applies when a check falls back to a plain flag check and that check fails. Pass a boolean or a callable.
 
-`check` accepts `timeout_ms`, but no timeout is configurable yet: the generated HTTP transport ignores per-request timeouts and the client exposes no setting. The option is carried on the request so it takes effect once the transport reads it.
+`check` accepts `timeout_ms`, which bounds each attempt of the API calls the check makes (retries still apply) and how long it waits on a lease acquire or extend already in flight.
 
 #### Configuration options
 
