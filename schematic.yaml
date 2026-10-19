@@ -1943,6 +1943,16 @@ components:
         updated_at:
           type: string
           format: date-time
+        warning_tiers:
+          type: array
+          description: >-
+            Usage-warning thresholds, in credits remaining in the company's
+            balance, highest first. Schematic sends a
+            credit.usage_warning_reached webhook when the balance drops to each
+            one. Empty when none are set.
+          items:
+            $ref: '#/components/schemas/BillingPlanCreditGrantWarningTierResponseData'
+          maxItems: 1000
       required:
         - id
         - credit_id
@@ -1960,9 +1970,28 @@ components:
         - postpaid_enabled
         - billing_mode
         - price_tiers
+        - warning_tiers
         - created_at
         - updated_at
       title: BillingPlanCreditGrantResponseData
+    BillingPlanCreditGrantWarningTierResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: integer
+          description: >-
+            Credits remaining in the company's balance at which this warning is
+            reached.
+          format: int64
+      required:
+        - id
+        - key
+        - value
+      title: BillingPlanCreditGrantWarningTierResponseData
     BillingPriceResponseData:
       type: object
       properties:
@@ -6949,6 +6978,20 @@ components:
             Price per credit as a decimal in the plan currency's smallest unit,
             for prices below one cent.
           nullable: true
+        warning_tiers:
+          type: array
+          description: >-
+            Usage-warning thresholds, in credits remaining in the company's
+            balance (grant, rollover, top-ups and bundles together). Each value
+            must be below the grant amount, and values must be unique. Schematic
+            sends a credit.usage_warning_reached webhook once when the balance
+            drops to each threshold, and again after the balance rises back
+            above it. Omit to leave the thresholds as they are; send an empty
+            list to remove them. At most 5.
+          items:
+            $ref: '#/components/schemas/PlanCreditGrantWarningTierRequestBody'
+          nullable: true
+          maxItems: 5
       required:
         - reset_cadence
         - reset_start
@@ -10445,6 +10488,7 @@ components:
       type: string
       enum:
         - company_override
+        - plan_credit_grant
         - plan_entitlement
         - unknown
     EntitlementValueType:
@@ -14308,6 +14352,25 @@ components:
         - created_at
         - updated_at
       title: PlanCreditGrantView
+    PlanCreditGrantWarningTierRequestBody:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Identifier for the threshold, unique within the grant.
+          maxLength: 255
+        value:
+          type: integer
+          description: >-
+            Credits remaining in the company's balance at which the warning is
+            reached.
+          format: int64
+          maximum: 9999999999
+          minimum: 1
+      required:
+        - key
+        - value
+      title: PlanCreditGrantWarningTierRequestBody
     PlanCreditOrder:
       type: object
       properties:
@@ -18860,6 +18923,20 @@ components:
             Price per credit as a decimal in the plan currency's smallest unit,
             for prices below one cent.
           nullable: true
+        warning_tiers:
+          type: array
+          description: >-
+            Usage-warning thresholds, in credits remaining in the company's
+            balance (grant, rollover, top-ups and bundles together). Each value
+            must be below the grant amount, and values must be unique. Schematic
+            sends a credit.usage_warning_reached webhook once when the balance
+            drops to each threshold, and again after the balance rises back
+            above it. Omit to leave the thresholds as they are; send an empty
+            list to remove them. At most 5.
+          items:
+            $ref: '#/components/schemas/PlanCreditGrantWarningTierRequestBody'
+          nullable: true
+          maxItems: 5
       required:
         - reset_cadence
         - reset_start
@@ -20815,6 +20892,7 @@ components:
         - credit.limit.reached
         - credit.limit.warning
         - credit.purchase.success
+        - credit.usage_warning_reached
         - entitlement.limit.reached
         - entitlement.limit.warning
         - entitlement.soft_limit.reached
