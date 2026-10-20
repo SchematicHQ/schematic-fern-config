@@ -59,6 +59,8 @@ If the balance had been 20 rather than 100, the reservation would have failed wi
 
 If a second worker takes its own reservation for 25 while the first is open, it gets a separate reservation. The balance reports 50 remaining and 50 reserved. Each settles independently.
 
+With [inference pricing](/billing/inference-pricing), the worker settles the reservation with the call's inference event instead of a track event: it sends `reservation_id` in the event body, and Schematic prices the call from its token counts. When the worker [sends inference as OpenTelemetry spans](/billing/inference-pricing-opentelemetry), it sets `schematic.reservation_id` on the model call's span.
+
 ### A multi-step workflow
 
 A three-step document workflow estimated at 900 credits acquires a lease for that amount up front, then commits after each step as that step's actual cost becomes known:
@@ -351,6 +353,7 @@ A lease that reserved 400 and consumed 350 produces three sets of entries: the 4
 
 - [Prevent Overspend](/billing/prevent-overspend) - where reservations fit alongside sized checks and usage controls.
 - [Credit Burndown Billing Model](/billing/credit-burndown) - credit types, grants, balances, and expiry.
+- [Inference Pricing](/billing/inference-pricing) - settle a reservation from an inference event, or from a span with [OpenTelemetry](/billing/inference-pricing-opentelemetry).
 - [Meter on a real-time credit ledger](/use-cases/credit-ledger) - why enforcement needs a transactional ledger rather than a warehouse snapshot.
 - [Spend & Usage Controls](/billing/spend-controls) - the limits and top-up settings a balance sits inside.
 - [Creating a metered feature](/playbooks/metering) - sending the usage events that commit against a lease or reservation.

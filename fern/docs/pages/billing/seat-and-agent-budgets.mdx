@@ -61,6 +61,8 @@ await client.track({
 });
 ```
 
+An [inference event](/billing/inference-pricing) attributes its burn the same way, from its `user` field. With [OpenTelemetry](/billing/inference-pricing-opentelemetry), set `schematic.user.<key>` on the model call's span.
+
 If `user` is omitted, the draw is still billed to the company correctly, but it is recorded as unattributed and reported in the Unattributed row rather than against an actor. Treat `user` as required on any event caused by a person or an agent.
 
 Attribution is carried through to the [credit ledger](/use-cases/credit-ledger), so ledger entries identify the actor as well as the action.

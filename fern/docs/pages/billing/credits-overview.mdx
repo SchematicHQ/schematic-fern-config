@@ -21,6 +21,8 @@ Steps 2 and 3 are what keep the balance accurate when many actions run at once. 
 ## Grant and sell credits
 
 - [Credit Burndown Billing Model](/billing/credit-burndown) walks through creating a credit type, granting credits on a plan, and setting what each feature costs, then covers reset, rollover, expiry, and the order credits are spent in.
+- [Inference Pricing](/billing/inference-pricing) burns credits for each LLM call at rates you set per request and per token type, from an inference event your app sends after the call.
+- [Inference Pricing with OpenTelemetry](/billing/inference-pricing-opentelemetry) burns the same credits from the OpenTelemetry spans your model calls already emit.
 - [Credit Bundles and Auto Top-Up](/billing/credit-bundles-and-top-ups) lets customers buy more credits once or refill automatically when the balance runs low.
 - [Handling Empty Credit Balances and Overage](/billing/empty-credit-balances) decides what happens at zero: block usage, top up, or keep going and bill the overage in arrears.
 - [Seat and Agent Budgets](/billing/seat-and-agent-budgets) scales a company's credits with the seats it holds and reports consumption per user and per agent.

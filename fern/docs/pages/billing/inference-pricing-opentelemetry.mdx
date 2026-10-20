@@ -1,0 +1,178 @@
+---
+title: Inference Pricing with OpenTelemetry
+description: Burn credits for each LLM call by exporting its OpenTelemetry span to Schematic, with no tracking call after each request.
+
+slug: billing/inference-pricing-opentelemetry
+---
+
+[Inference pricing](/billing/inference-pricing) burns credits for every model call at rates you set per request and per token type. Your app can report each call by posting an inference event after it, but that means a tracking call next to every model request, and one more place to get the token math wrong.
+
+If your app already traces its model calls with OpenTelemetry, you can point an exporter at Schematic instead. Schematic turns each model-call span into an inference event, reading the token counts from the standard `gen_ai.*` attributes your instrumentation already sets. The Anthropic TypeScript SDK emits these spans on its own once you register a tracer provider, so a Claude app needs no instrumentation library at all.
+
+The pricing side is the same for both paths. Set up your credit type, inference features and plan rates as described in [Set up pricing in Schematic](/billing/inference-pricing#set-up-pricing-in-schematic), then send spans as described here.
+
+## How it works
+
+1. Your app calls a model. Its instrumentation records a span with the provider, model and token counts.
+2. You add the company, and the event name of the feature to bill, as `schematic.*` attributes on that span.
+3. An OTLP exporter sends the span to `https://c.schematichq.com/v1/traces` with your secret API key.
+4. Schematic derives one inference event from the span and burns credits from it, exactly as it would for an inference event you posted.
+
+## Point an exporter at Schematic
+
+Schematic accepts OTLP over HTTP, as protobuf or JSON, gzip-compressed or not. Authenticate with a **secret** API key in the `X-Schematic-Api-Key` header. An export with a publishable key is rejected with a `401`.
+
+| Setting | Value |
+|---|---|
+| Endpoint | `https://c.schematichq.com/v1/traces` |
+| Header | `X-Schematic-Api-Key: <your secret key>` |
+| Protocol | `http/protobuf` or `http/json` |
+
+Most OpenTelemetry SDKs read these from the standard environment variables:
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://c.schematichq.com/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_HEADERS=X-Schematic-Api-Key=sch_your_secret_key
+OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+```
+
+Schematic derives events only from model-call spans and spans you tag with an event name, so you can export whole traces and the rest of each trace bills nothing.
+
+## Tag spans with the company and event name
+
+Schematic reads who to bill and which feature to bill from attributes on the span:
+
+| Attribute | Required | Description |
+|---|---|---|
+| `schematic.company.<key>` | Yes | The company, by any key you use in identify calls. `schematic.company.id=acme` finds the company whose `id` key is `acme` |
+| `schematic.user.<key>` | No | The user who made the request, by any user key. Attributes the burn to that user |
+| `schematic.event` | To burn credits | The event name of the inference feature to bill |
+| `schematic.reservation_id` | No | Settles a credit reservation, see [Reserve credits for a call](#reserve-credits-for-a-call) |
+| `schematic.lease_id` | No | Commits the burn against a credit lease |
+
+Schematic reads each `schematic.company.*` and `schematic.user.*` attribute from the span first, then from the span's resource. A process that serves a single company, such as an agent running on the customer's behalf, can set the company once as a resource attribute instead of on every span.
+
+A model-call span with no company is rejected, and Schematic reports the rejection in the export response. A span with a company but no `schematic.event` is still stored and costed, but it burns no credits.
+
+The hard part is getting these attributes onto a span your instrumentation creates. Your code never holds the span, so it can't call `setAttribute` on it. The usual answer is to put the attributes on the active OpenTelemetry context around the model call, and copy them onto each span as it starts with a span processor. The next section shows that processor.
+
+<Warning>Do not carry these attributes in W3C baggage. OpenTelemetry's default propagators send baggage as an HTTP header on outgoing requests, including the ones your SDK makes to the model provider, so your company and user ids would leave with every call.</Warning>
+
+## Set up the Anthropic TypeScript SDK
+
+`@anthropic-ai/sdk` creates an `anthropic.messages.create` span for every Messages API call once a global tracer provider is registered. The span carries the provider, the requested and served model, and token counts that already include cache reads and writes, the way Schematic counts them.
+
+Install the OpenTelemetry SDK and the OTLP exporter:
+
+```bash
+npm install @opentelemetry/api @opentelemetry/sdk-trace @opentelemetry/context-async-hooks @opentelemetry/exporter-trace-otlp-proto
+```
+
+Then register a tracer provider before your app makes its first model call. In Next.js, call this from `register()` in `instrumentation.ts`.
+
+```typescript title="tracing.ts"
+import { context, createContextKey, trace } from "@opentelemetry/api";
+import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { BatchSpanProcessor, TracerProvider, type SpanProcessor } from "@opentelemetry/sdk-trace";
+
+const SCHEMATIC = createContextKey("schematic");
+
+// Runs fn with the company, user and event name its model calls bill to.
+export function withSchematic<T>(attributes: Record<string, string>, fn: () => T): T {
+  return context.with(context.active().setValue(SCHEMATIC, attributes), fn);
+}
+
+// Copies those attributes onto each model-call span as it starts.
+const tagModelCalls: SpanProcessor = {
+  onStart(span, parentContext) {
+    const attributes = parentContext.getValue(SCHEMATIC) as Record<string, string> | undefined;
+    if (attributes && span.attributes["gen_ai.operation.name"] === "chat") span.setAttributes(attributes);
+  },
+  onEnd() {},
+  forceFlush: async () => {},
+  shutdown: async () => {},
+};
+
+export function registerTracing() {
+  const exporter = new OTLPTraceExporter({
+    url: "https://c.schematichq.com/v1/traces",
+    headers: { "X-Schematic-Api-Key": process.env.SCHEMATIC_SECRET_KEY! },
+  });
+
+  context.setGlobalContextManager(new AsyncLocalStorageContextManager().enable());
+  trace.setGlobalTracerProvider(
+    new TracerProvider({ spanProcessors: [tagModelCalls, new BatchSpanProcessor({ exporter })] }),
+  );
+}
+```
+
+The SDK sets `gen_ai.operation.name` when it starts a span, so `tagModelCalls` tags only the `chat` spans of real model calls. Wrapper spans such as a tool runner's `invoke_agent` span stay untagged, which matters because a non-model span that carries `schematic.event` becomes a separate event (see [Which spans become inference events](#which-spans-become-inference-events)). The context manager keeps the context that `withSchematic` sets active across every `await` inside its callback.
+
+If you already run a tracer provider, add `tagModelCalls` and the Schematic exporter's `BatchSpanProcessor` to its `spanProcessors` instead of registering a second provider.
+
+Wrap each model call in `withSchematic`:
+
+```typescript
+const message = await withSchematic(
+  {
+    "schematic.company.id": companyId,
+    "schematic.user.id": userId,
+    "schematic.event": "support-chat",
+  },
+  () => anthropic.messages.create({ model, max_tokens: 1024, messages }),
+);
+```
+
+For a streamed call, wrap the call that starts the stream. The SDK ends the span when your code reads the stream to the end or closes it, and the span carries the usage from the final message. A stream your code stops reading without closing never ends its span, so nothing is exported for it.
+
+A workflow that makes several calls for one feature can wrap the whole workflow in one `withSchematic` call, and every model call inside it bills to the same company and event name.
+
+## Which spans become inference events
+
+Schematic picks a reader for each batch of spans by the batch's instrumentation scope. Every scope without a reader of its own is read by the OpenTelemetry GenAI semantic conventions, which most LLM instrumentation follows.
+
+A span counts as a model call when its `gen_ai.operation.name` is `chat`, `text_completion`, `embeddings` or `generate_content`. Agent and tool spans such as `invoke_agent` and `execute_tool` are skipped, even when they carry rolled-up token totals, so an agent loop never counts the same tokens twice.
+
+| Inference event field | Span attribute |
+|---|---|
+| `provider` | `gen_ai.provider.name`, or `gen_ai.system` |
+| `request_model` | `gen_ai.request.model` |
+| `response_model` | `gen_ai.response.model`, or `gen_ai.request.model` when the response model is missing |
+| `input_tokens` | `gen_ai.usage.input_tokens`, or `gen_ai.usage.prompt_tokens` |
+| `output_tokens` | `gen_ai.usage.output_tokens`, or `gen_ai.usage.completion_tokens` |
+| `cached_input_tokens` | `gen_ai.usage.cache_read.input_tokens` |
+| `cache_creation_input_tokens` | `gen_ai.usage.cache_creation.input_tokens`, or `gen_ai.usage.cache_write.input_tokens` |
+
+A model-call span needs a provider, a model and both token counts. One missing any of them is rejected.
+
+The semantic conventions count cache reads and cache writes inside `gen_ai.usage.input_tokens`, which is how Schematic counts them, so Schematic uses the span's input count as it is. If your instrumentation passes through a provider's raw count instead, such as Anthropic's `usage.input_tokens`, which leaves out cached tokens, the uncached part of each prompt goes unbilled. See [Count input tokens the way Schematic does](/billing/inference-pricing#count-input-tokens-the-way-schematic-does).
+
+Reasoning tokens bill at your output rate, because the GenAI conventions count them inside `gen_ai.usage.output_tokens`. Leave the reasoning rate on the plan at 0.
+
+<Warning>Use one instrumentation per provider. If you also install a vendor or OpenLLMetry instrumentation for the Anthropic SDK, every call produces two model-call spans and burns credits twice. Turn the SDK's own spans off with `new Anthropic({ openTelemetry: false })` or `ANTHROPIC_OPEN_TELEMETRY=false` if you keep the other one.</Warning>
+
+A span that carries `schematic.event` but is not a model call becomes a [track event](/feature-management/tracking-usage) for that event name, with a quantity from `schematic.quantity`, or 1 when it is unset. That lets you meter non-model work from your traces too, and it's why the processor above tags model-call spans only.
+
+## Reserve credits for a call
+
+To hold credits before a long or concurrent call runs, take a reservation as described in [Leases and reservations](/billing/credit-leases-and-reservations), then pass its id to `withSchematic` as `schematic.reservation_id` alongside the company and event name. The inference event the span becomes settles the reservation, and the unspent credits return to the balance. Set `schematic.lease_id` instead to commit the call against a lease.
+
+## Check that it works
+
+Make a model call as a company on the plan, then:
+
+1. Open **Events**. The inference event appears with the company, event name and token counts from the span.
+2. Open the company and click **View Ledger** under **Credit Balance**. Each call appears as an inference burn on your credit type, with its burn breakdown.
+
+If nothing arrives, read the export response. When Schematic rejects a span, it answers with an OTLP partial success that gives the number of rejected spans and the reason, such as a missing company or missing token counts. The JavaScript exporter logs it as a warning through OpenTelemetry's diagnostic logger, which stays silent until you register one with `diag.setLogger`.
+
+Each event's idempotency key is the span's trace id and span id, so an exporter that retries a batch never bills a call twice.
+
+If the event arrives but nothing burns, run through the checklist in [Inference Pricing](/billing/inference-pricing#check-that-it-works).
+
+## Related
+
+- [Inference Pricing](/billing/inference-pricing) sets up the credit type, inference features and per-token rates, and covers posting inference events directly.
+- [Leases and reservations](/billing/credit-leases-and-reservations) hold credits before a call runs, then settle the hold from the span.
+- [Seat and Agent Budgets](/billing/seat-and-agent-budgets) reports burns per user, from `schematic.user.*` on each span.
