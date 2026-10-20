@@ -36,23 +36,7 @@ OTEL_EXPORTER_OTLP_TRACES_HEADERS=X-Schematic-Api-Key=sch_your_secret_key
 OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
 ```
 
-If your traces already go through an OpenTelemetry Collector, add Schematic as a second exporter so your existing backend keeps receiving everything:
-
-```yaml title="otel-collector.yaml"
-exporters:
-  otlphttp/schematic:
-    traces_endpoint: https://c.schematichq.com/v1/traces
-    headers:
-      X-Schematic-Api-Key: ${env:SCHEMATIC_SECRET_KEY}
-
-service:
-  pipelines:
-    traces/schematic:
-      receivers: [otlp]
-      exporters: [otlphttp/schematic]
-```
-
-Schematic derives events only from model-call spans and spans you tag with an event name, so the rest of a trace bills nothing. Sending only model-call spans keeps your export small.
+Schematic derives events only from model-call spans and spans you tag with an event name, so you can export whole traces and the rest of each trace bills nothing.
 
 ## Tag spans with the company and event name
 
@@ -87,49 +71,28 @@ npm install @opentelemetry/api @opentelemetry/sdk-trace @opentelemetry/context-a
 Then register a tracer provider before your app makes its first model call. In Next.js, call this from `register()` in `instrumentation.ts`.
 
 ```typescript title="tracing.ts"
-import { context, createContextKey, trace, type Context } from "@opentelemetry/api";
+import { context, createContextKey, trace } from "@opentelemetry/api";
 import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { BatchSpanProcessor, TracerProvider, type ReadableSpan, type Span, type SpanProcessor } from "@opentelemetry/sdk-trace";
+import { BatchSpanProcessor, TracerProvider, type SpanProcessor } from "@opentelemetry/sdk-trace";
 
-const SCHEMATIC_ATTRIBUTES = createContextKey("schematic.attributes");
-const MODEL_CALL_OPERATIONS = new Set(["chat", "text_completion", "embeddings", "generate_content"]);
+const SCHEMATIC = createContextKey("schematic");
 
 // Runs fn with the company, user and event name its model calls bill to.
 export function withSchematic<T>(attributes: Record<string, string>, fn: () => T): T {
-  return context.with(context.active().setValue(SCHEMATIC_ATTRIBUTES, attributes), fn);
+  return context.with(context.active().setValue(SCHEMATIC, attributes), fn);
 }
 
-class SchematicSpanProcessor implements SpanProcessor {
-  constructor(private readonly next: SpanProcessor) {}
-
-  // Copy the attributes from the context onto each span as it starts.
-  onStart(span: Span, parentContext: Context) {
-    const attributes = parentContext.getValue(SCHEMATIC_ATTRIBUTES) as Record<string, string> | undefined;
-    if (attributes) span.setAttributes(attributes);
-    this.next.onStart(span, parentContext);
-  }
-
-  // The Anthropic SDK names cache writes gen_ai.usage.cache_write.input_tokens.
-  onEnding(span: Span) {
-    const cacheWrite = span.attributes["gen_ai.usage.cache_write.input_tokens"];
-    if (cacheWrite !== undefined) span.setAttribute("gen_ai.usage.cache_creation.input_tokens", cacheWrite);
-    this.next.onEnding?.(span);
-  }
-
-  // Export model-call spans only.
-  onEnd(span: ReadableSpan) {
-    if (MODEL_CALL_OPERATIONS.has(String(span.attributes["gen_ai.operation.name"]))) this.next.onEnd(span);
-  }
-
-  forceFlush() {
-    return this.next.forceFlush();
-  }
-
-  shutdown() {
-    return this.next.shutdown();
-  }
-}
+// Copies those attributes onto each model-call span as it starts.
+const tagModelCalls: SpanProcessor = {
+  onStart(span, parentContext) {
+    const attributes = parentContext.getValue(SCHEMATIC) as Record<string, string> | undefined;
+    if (attributes && span.attributes["gen_ai.operation.name"] === "chat") span.setAttributes(attributes);
+  },
+  onEnd() {},
+  forceFlush: async () => {},
+  shutdown: async () => {},
+};
 
 export function registerTracing() {
   const exporter = new OTLPTraceExporter({
@@ -139,20 +102,14 @@ export function registerTracing() {
 
   context.setGlobalContextManager(new AsyncLocalStorageContextManager().enable());
   trace.setGlobalTracerProvider(
-    new TracerProvider({
-      spanProcessors: [new SchematicSpanProcessor(new BatchSpanProcessor({ exporter }))],
-    }),
+    new TracerProvider({ spanProcessors: [tagModelCalls, new BatchSpanProcessor({ exporter })] }),
   );
 }
 ```
 
-The processor does three jobs:
+The SDK sets `gen_ai.operation.name` when it starts a span, so `tagModelCalls` tags only the `chat` spans of real model calls. Wrapper spans such as a tool runner's `invoke_agent` span stay untagged, which matters because a non-model span that carries `schematic.event` becomes a separate event (see [Which spans become inference events](#which-spans-become-inference-events)). The context manager keeps the context that `withSchematic` sets active across every `await` inside its callback.
 
-- `onStart` copies the attributes that `withSchematic` put on the context onto the span. The context manager keeps that context active across every `await` inside the callback.
-- `onEnding` copies the cache write count to `gen_ai.usage.cache_creation.input_tokens`, the attribute Schematic reads it from. Without it, cache writes bill at your input rate instead of your cache creation rate.
-- `onEnd` passes only model-call spans to the exporter. Spans from your web framework or HTTP client never reach Schematic, and a wrapper span that inherited `schematic.event` can't be read as a separate event.
-
-`onEnding` is part of `@opentelemetry/sdk-trace` 3.0 and later. If you already run a tracer provider, add `SchematicSpanProcessor` to its `spanProcessors` next to your existing ones rather than registering a second provider.
+If you already run a tracer provider, add `tagModelCalls` and the Schematic exporter's `BatchSpanProcessor` to its `spanProcessors` instead of registering a second provider.
 
 Wrap each model call in `withSchematic`:
 
@@ -185,7 +142,7 @@ A span counts as a model call when its `gen_ai.operation.name` is `chat`, `text_
 | `input_tokens` | `gen_ai.usage.input_tokens`, or `gen_ai.usage.prompt_tokens` |
 | `output_tokens` | `gen_ai.usage.output_tokens`, or `gen_ai.usage.completion_tokens` |
 | `cached_input_tokens` | `gen_ai.usage.cache_read.input_tokens` |
-| `cache_creation_input_tokens` | `gen_ai.usage.cache_creation.input_tokens` |
+| `cache_creation_input_tokens` | `gen_ai.usage.cache_creation.input_tokens`, or `gen_ai.usage.cache_write.input_tokens` |
 
 A model-call span needs a provider, a model and both token counts. One missing any of them is rejected.
 
@@ -195,24 +152,11 @@ Reasoning tokens bill at your output rate, because the GenAI conventions count t
 
 <Warning>Use one instrumentation per provider. If you also install a vendor or OpenLLMetry instrumentation for the Anthropic SDK, every call produces two model-call spans and burns credits twice. Turn the SDK's own spans off with `new Anthropic({ openTelemetry: false })` or `ANTHROPIC_OPEN_TELEMETRY=false` if you keep the other one.</Warning>
 
-A span that carries `schematic.event` but is not a model call becomes a [track event](/feature-management/tracking-usage) for that event name, with a quantity from `schematic.quantity`, or 1 when it is unset. That lets you meter non-model work from your traces too, and it's the reason to export only the spans you mean to bill.
+A span that carries `schematic.event` but is not a model call becomes a [track event](/feature-management/tracking-usage) for that event name, with a quantity from `schematic.quantity`, or 1 when it is unset. That lets you meter non-model work from your traces too, and it's why the processor above tags model-call spans only.
 
 ## Reserve credits for a call
 
-To hold credits before a long or concurrent call runs, take a reservation as described in [Leases and reservations](/billing/credit-leases-and-reservations), then put its id on the span with the other attributes:
-
-```typescript
-const message = await withSchematic(
-  {
-    "schematic.company.id": companyId,
-    "schematic.event": "support-chat",
-    "schematic.reservation_id": reservation.id,
-  },
-  () => anthropic.messages.create({ model, max_tokens: 1024, messages }),
-);
-```
-
-The inference event the span becomes settles the reservation, and the unspent credits return to the balance. Set `schematic.lease_id` instead to commit the call against a lease.
+To hold credits before a long or concurrent call runs, take a reservation as described in [Leases and reservations](/billing/credit-leases-and-reservations), then pass its id to `withSchematic` as `schematic.reservation_id` alongside the company and event name. The inference event the span becomes settles the reservation, and the unspent credits return to the balance. Set `schematic.lease_id` instead to commit the call against a lease.
 
 ## Check that it works
 
@@ -221,13 +165,7 @@ Make a model call as a company on the plan, then:
 1. Open **Events**. The inference event appears with the company, event name and token counts from the span.
 2. Open the company and click **View Ledger** under **Credit Balance**. Each call appears as an inference burn on your credit type, with its burn breakdown.
 
-If nothing arrives, read the export response. When Schematic rejects a span, it answers with an OTLP partial success that gives the number of rejected spans and the reason, such as a missing company or missing token counts. The JavaScript exporter reports it through OpenTelemetry's diagnostic logger, which stays silent until you turn it on:
-
-```typescript
-import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
-
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.WARN);
-```
+If nothing arrives, read the export response. When Schematic rejects a span, it answers with an OTLP partial success that gives the number of rejected spans and the reason, such as a missing company or missing token counts. The JavaScript exporter logs it as a warning through OpenTelemetry's diagnostic logger, which stays silent until you register one with `diag.setLogger`.
 
 Each event's idempotency key is the span's trace id and span id, so an exporter that retries a batch never bills a call twice.
 
