@@ -7622,6 +7622,10 @@ components:
           maxItems: 100
         plan:
           $ref: '#/components/schemas/CreateCustomPlanBundlePlanRequestBody'
+        renewal_policy:
+          allOf:
+            - $ref: '#/components/schemas/RenewalPolicy'
+          nullable: true
       required:
         - billing_product
         - entitlements
@@ -8457,6 +8461,10 @@ components:
           maxItems: 100
         plan:
           $ref: '#/components/schemas/CreatePlanRequestBody'
+        renewal_policy:
+          allOf:
+            - $ref: '#/components/schemas/RenewalPolicy'
+          nullable: true
       required:
         - plan
         - entitlements
@@ -15787,6 +15795,8 @@ components:
           nullable: true
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        renewal_policy:
+          $ref: '#/components/schemas/RenewalPolicy'
         status:
           $ref: '#/components/schemas/PlanVersionStatus'
         updated_at:
@@ -15803,6 +15813,7 @@ components:
         - id
         - name
         - plan_type
+        - renewal_policy
         - status
         - updated_at
         - version
@@ -16775,6 +16786,12 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
+    RenewalPolicy:
+      type: string
+      enum:
+        - auto_renew
+        - expire_to_default
+        - hold_with_grace
     ReserveCreditsRequestBody:
       type: object
       properties:
@@ -19501,6 +19518,10 @@ components:
           $ref: '#/components/schemas/UpdatePlanRequestBody'
         plan_version_id:
           type: string
+          nullable: true
+        renewal_policy:
+          allOf:
+            - $ref: '#/components/schemas/RenewalPolicy'
           nullable: true
       required:
         - entitlements
