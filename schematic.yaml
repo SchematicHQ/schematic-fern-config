@@ -39962,6 +39962,17 @@ paths:
           in: query
           schema:
             type: string
+        - name: source_event_id
+          in: query
+          description: >-
+            Return only entries drawn by this track or inference event. Pass the
+            event ID that POST /events returned for it.
+          schema:
+            type: string
+            description: >-
+              Return only entries drawn by this track or inference event. Pass
+              the event ID that POST /events returned for it.
+            maxLength: 255
         - name: start_time
           in: query
           schema:
@@ -40024,6 +40035,13 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      source_event_id:
+                        type: string
+                        description: >-
+                          Return only entries drawn by this track or inference
+                          event. Pass the event ID that POST /events returned
+                          for it.
+                        maxLength: 255
                       start_time:
                         type: string
                     title: ListCreditEventLedgerParams
@@ -40033,6 +40051,45 @@ paths:
                 title: ListCreditEventLedgerResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v2/billing/credits/ledger/{ledger_entry_id}:
+    get:
+      operationId: getCreditEventLedgerEntry
+      summary: Get credit event ledger entry
+      tags:
+        - credits
+      parameters:
+        - name: ledger_entry_id
+          in: path
+          description: ledger_entry_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditEventLedgerResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCreditEventLedgerEntryParams
+                required:
+                  - data
+                  - params
+                title: GetCreditEventLedgerEntryResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -40069,6 +40126,17 @@ paths:
           in: query
           schema:
             type: string
+        - name: source_event_id
+          in: query
+          description: >-
+            Return only entries drawn by this track or inference event. Pass the
+            event ID that POST /events returned for it.
+          schema:
+            type: string
+            description: >-
+              Return only entries drawn by this track or inference event. Pass
+              the event ID that POST /events returned for it.
+            maxLength: 255
         - name: start_time
           in: query
           schema:
@@ -40127,6 +40195,13 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
+                      source_event_id:
+                        type: string
+                        description: >-
+                          Return only entries drawn by this track or inference
+                          event. Pass the event ID that POST /events returned
+                          for it.
+                        maxLength: 255
                       start_time:
                         type: string
                     title: CountCreditEventLedgerParams
