@@ -1,0 +1,178 @@
+---
+title: Inference Pricing
+description: Burn credits for each LLM call at per-token rates, from an inference event your app sends after every model request.
+
+slug: billing/inference-pricing
+---
+
+Every call your AI features make costs you by the token, and providers price input, output, cached input and cache writes differently. If you charge customers a flat rate per request, a long prompt and a one-line question cost them the same while costing you very different amounts.
+
+With inference pricing, your app sends Schematic one inference event per model call, carrying the token counts the provider reported. Schematic burns credits from the company's balance at rates you set per request and per token type, and records every burn in the credit ledger with a line for each token type. Because you set the rates per plan, you can track your own costs closely and keep your margin when you switch models.
+
+## How it works
+
+1. Your app calls a model, then sends an inference event with the company, the model, and the token counts.
+2. The event's `event` label matches it to an **inference feature**: an event-based feature whose event source is inference events.
+3. The company's plan gives that feature a credit burndown entitlement with a rate per request and a rate per token type.
+4. Schematic multiplies each count by its rate, draws the total from the company's credit balance, and writes the draw to the credit ledger.
+
+Inference features meter through credits. Each feature's entitlement is either credit burndown, which bills it, or unlimited, which grants access without billing it.
+
+## Set up pricing in Schematic
+
+This guide uses one AI feature, a support chat, priced in a credit type where one credit is worth one cent. If you have several AI features, repeat steps 2 and 3 for each. Giving each its own feature lets you set different rates when they run on different models.
+
+### 1. Create a credit type
+
+If you already sell credits, reuse that credit type. Otherwise create one as described in [Credit Burndown](/billing/credit-burndown), and give the plan a credit grant so companies on it start each period with a balance.
+
+Choose a credit value that keeps token rates readable. At one cent per credit, a model that costs \$2 per million input tokens works out to 0.0002 credits per input token.
+
+### 2. Create an inference feature
+
+Create a feature with the type **Event**, then set its event source to **Inference events**. The event name you give the feature is the label your app sends in the `event` field of each inference event, for example `support-chat`. An event without a matching label is still recorded, but it burns no credits.
+
+<Warning>Screenshot needed: feature overlay with event source set to Inference events and the event name filled in.</Warning>
+
+### 3. Add the feature to a plan with token rates
+
+Open the plan, add the feature, and choose **Credit burndown** against your credit type. Set a credit rate per request and a rate for each token type you want to price.
+
+| Rate | What it prices | Example, one credit = 1¢ |
+|---|---|---|
+| Per request | Each model call, whatever its size | 0 |
+| Input tokens | Prompt tokens that were neither read from nor written to a cache | 0.0002 |
+| Output tokens | Generated tokens, including any reasoning the provider counts in output | 0.001 |
+| Cached input tokens | Prompt tokens read from the provider's prompt cache | 0.00002 |
+| Cache creation input tokens | Prompt tokens written to the provider's prompt cache | 0.00025 |
+| Reasoning tokens | Reasoning tokens, priced on top of output tokens | 0 |
+
+The example rates follow a model that costs \$2 per million input tokens, \$10 per million output tokens, \$0.20 per million cache reads, and \$2.50 per million cache writes, so each call burns roughly what it costs. Multiply them to add your margin.
+
+Leave the reasoning rate at 0 for Anthropic and OpenAI models. Both count reasoning tokens inside output tokens, so a reasoning rate charges those tokens twice. A per-request rate of 0 is fine as long as at least one token rate is above 0.
+
+As you set rates, the form previews what a sample call burns, so you can check the numbers before you publish.
+
+<Warning>Screenshot needed: plan entitlement with credit burndown, per-request rate, token rate rows, and the burn preview.</Warning>
+
+Publish the plan and put a company on it. A company burns credits only when its plan includes the feature and it has a credit balance.
+
+## Send inference events
+
+Send one inference event after each model call completes, with a **secret** API key. Publishable keys cannot send inference events.
+
+<CodeBlocks>
+```bash title="cURL"
+curl -X POST https://api.schematichq.com/events \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_type": "inference",
+    "body": {
+      "company": { "id": "acme" },
+      "user": { "id": "user-42" },
+      "event": "support-chat",
+      "provider": "anthropic",
+      "request_model": "claude-sonnet-5-5",
+      "response_model": "claude-sonnet-5-5",
+      "input_tokens": 2667,
+      "cached_input_tokens": 2259,
+      "cache_creation_input_tokens": 404,
+      "output_tokens": 104
+    }
+  }'
+```
+
+```typescript title="TypeScript (Anthropic)"
+const message = await anthropic.messages.create({
+  model: "claude-sonnet-5-5",
+  max_tokens: 1024,
+  messages,
+});
+
+const usage = message.usage;
+const cacheRead = usage.cache_read_input_tokens ?? 0;
+const cacheWrite = usage.cache_creation_input_tokens ?? 0;
+
+await fetch("https://api.schematichq.com/events", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-Schematic-Api-Key": process.env.SCHEMATIC_SECRET_KEY!,
+  },
+  body: JSON.stringify({
+    event_type: "inference",
+    body: {
+      company: { id: companyId },
+      user: { id: userId },
+      event: "support-chat",
+      provider: "anthropic",
+      request_model: "claude-sonnet-5-5",
+      response_model: message.model,
+      input_tokens: usage.input_tokens + cacheRead + cacheWrite,
+      cached_input_tokens: cacheRead,
+      cache_creation_input_tokens: cacheWrite,
+      output_tokens: usage.output_tokens,
+    },
+  }),
+});
+```
+</CodeBlocks>
+
+Sending the event after the response reaches your user keeps Schematic off the request path. If your model call streams, send the event once the stream finishes, from the usage on the final message.
+
+### Event fields
+
+| Field | Required | Description |
+|---|---|---|
+| `company` | Yes | Keys that identify the company, the same keys you use in identify calls |
+| `user` | No | Keys that identify the user who made the request |
+| `event` | To burn credits | The label that matches the event to an inference feature |
+| `provider` | Yes | The model provider, for example `anthropic` or `openai` |
+| `response_model` | Yes | The model that served the call, as the provider's response reports it |
+| `request_model` | No | The model you asked for |
+| `input_tokens` | Yes | Every prompt token, **including** cache reads and cache writes |
+| `cached_input_tokens` | No | The part of `input_tokens` read from a prompt cache |
+| `cache_creation_input_tokens` | No | The part of `input_tokens` written to a prompt cache |
+| `output_tokens` | Yes | Generated tokens |
+| `reasoning_tokens` | No | Reasoning tokens, priced at the reasoning rate on top of output |
+| `requests` | No | How many calls this event covers. Defaults to 1 |
+| `reservation_id` | No | Settles a credit reservation, see [Leases and reservations](/billing/credit-leases-and-reservations) |
+
+### Count input tokens the way Schematic does
+
+Schematic treats `input_tokens` as the whole prompt, and `cached_input_tokens` and `cache_creation_input_tokens` as parts of it. When it burns credits, it subtracts the two cache counts from `input_tokens` and prices the remainder at the input rate, so every prompt token is priced once, at the rate for how it was served.
+
+Providers report these numbers differently, so map them before you send:
+
+| Schematic field | Anthropic Messages API | OpenAI Responses API |
+|---|---|---|
+| `input_tokens` | `input_tokens + cache_read_input_tokens + cache_creation_input_tokens` | `input_tokens` |
+| `cached_input_tokens` | `cache_read_input_tokens` | `input_tokens_details.cached_tokens` |
+| `cache_creation_input_tokens` | `cache_creation_input_tokens` | omit |
+| `output_tokens` | `output_tokens` | `output_tokens` |
+
+Anthropic's `input_tokens` covers only the uncached part of the prompt. If you send it as is, Schematic subtracts the cache counts from a number that never contained them, and the uncached tokens go unbilled.
+
+Send `response_model` from the response rather than the model you requested. They differ when a request uses a model alias or a fallback model serves it.
+
+## Check that it works
+
+Make a model call as a company on the plan, then:
+
+1. Open **Events** and find the inference event. Its body shows the counts your app sent.
+2. Open the company and go to its credit ledger. The call appears as a draw on your credit type. Expand it to see a line for each quantity that burned credits, such as input tokens (uncached), cached input and output, with the count, the rate and the credits for each.
+
+<Warning>Screenshot needed: credit ledger row expanded to the per-token breakdown.</Warning>
+
+If the event arrives but nothing burns, check these in order:
+
+- The event's `event` label matches the feature's event name exactly.
+- The company's plan includes the feature as credit burndown, and the plan version is published.
+- The company has a credit balance in that credit type.
+
+## Related
+
+- [Credit Burndown](/billing/credit-burndown) covers credit types, grants and bundles.
+- [Leases and reservations](/billing/credit-leases-and-reservations) hold credits before a long or concurrent call runs, then settle the hold with the inference event.
+- [Preflight checks](/feature-management/preflight-checks) check whether a company can afford a call before you make it.
