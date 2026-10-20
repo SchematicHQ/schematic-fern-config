@@ -44,6 +44,34 @@ groups:
                 - LocalCache
                 - Schematic
                 - SchematicConfig
+          # schematic-python's pyproject.toml is generated from this config (not
+          # fernignored) so `fern generate --version` bumps the package version.
+          extra_dependencies:
+            websockets:
+              version: ">=10.0"
+              optional: true
+            wasmtime:
+              version: ">=19.0.0"
+              optional: true
+          extra_dev_dependencies:
+            redis: ">=5.0,<6"
+            fakeredis:
+              version: "^2.38.0"
+              extras: ["lua"]
+          extras:
+            datastream: ["websockets", "wasmtime"]
+            rulesengine: ["wasmtime"]
+          # Appended verbatim to the end of pyproject.toml, after [tool.poetry] is
+          # closed, so the wasm include must use array-of-tables syntax: an inline
+          # `include = [...]` would land in the last table instead.
+          pyproject_toml: |
+            [[tool.poetry.include]]
+            path = "src/schematic/datastream/wasm/*.wasm"
+            format = ["sdist", "wheel"]
+
+            [[tool.mypy.overrides]]
+            module = "redis.*"
+            ignore_missing_imports = true
         smart-casing: false
   csharp-sdk:
     generators:
