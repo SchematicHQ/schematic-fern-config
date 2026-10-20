@@ -10249,6 +10249,14 @@ components:
         days_until_due:
           type: integer
           format: int64
+        end_date:
+          type: string
+          description: >-
+            When a custom plan that doesn't renew ends: the renewal the
+            subscription stops on and the company moves to the default plan.
+            Null for a plan that renews.
+          format: date-time
+          nullable: true
         external_invoice_id:
           type: string
           nullable: true
