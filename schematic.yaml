@@ -1232,7 +1232,9 @@ components:
         collection_state:
           allOf:
             - $ref: '#/components/schemas/InvoiceCollectionState'
-          description: The collector's report on payment. Null on a draft.
+          description: >-
+            The collector's report on payment. Null on a draft and on a Stripe
+            invoice.
           nullable: true
         collector:
           allOf:
@@ -1242,16 +1244,27 @@ components:
           type: string
         contract_id:
           type: string
+          description: Null on a Stripe invoice.
+          nullable: true
         created_at:
           type: string
           format: date-time
         currency:
           $ref: '#/components/schemas/Currency'
         document_state:
-          $ref: '#/components/schemas/InvoiceDocumentState'
+          allOf:
+            - $ref: '#/components/schemas/InvoiceDocumentState'
+          description: Null on a Stripe invoice.
+          nullable: true
         due_at:
           type: string
           format: date-time
+          nullable: true
+        external_id:
+          type: string
+          description: >-
+            The billing provider's invoice ID. Null on an invoice Schematic
+            issued.
           nullable: true
         finalized_at:
           type: string
@@ -1269,10 +1282,16 @@ components:
           nullable: true
         period_end:
           type: string
+          description: Null on a Stripe invoice.
           format: date-time
+          nullable: true
         period_start:
           type: string
+          description: Null on a Stripe invoice.
           format: date-time
+          nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         settlements:
           type: array
           items:
@@ -1280,6 +1299,19 @@ components:
           maxItems: 1000
         status:
           $ref: '#/components/schemas/InvoiceStatus'
+        subscription_external_id:
+          type: string
+          description: >-
+            The billing provider's subscription ID. Null on an invoice Schematic
+            issued.
+          nullable: true
+        subscription_id:
+          type: string
+          description: >-
+            The Schematic subscription the invoice's lines bill for. Null on a
+            Stripe invoice, which links its subscription through
+            subscription_external_id.
+          nullable: true
         subtotal:
           type: integer
           format: int64
@@ -1288,21 +1320,24 @@ components:
             - $ref: '#/components/schemas/BillingInvoiceTermsResponseData'
           description: >-
             The contract's terms, copied when the invoice was finalized. Null on
-            a draft.
+            a draft and on a Stripe invoice.
         total:
           type: integer
           format: int64
+        url:
+          type: string
+          description: >-
+            The billing provider's hosted invoice page. Null on an invoice
+            Schematic issued.
+          nullable: true
       required:
         - amount_paid
         - amount_remaining
         - company_id
-        - contract_id
         - created_at
         - currency
-        - document_state
         - id
-        - period_end
-        - period_start
+        - provider_type
         - status
         - subtotal
         - total
@@ -1322,6 +1357,12 @@ components:
           items:
             type: string
           maxItems: 1000
+        description:
+          type: string
+          description: >-
+            What the line bills for: the product, plan, add-on or credit. Null
+            when the line has no subscription line behind it.
+          nullable: true
         id:
           type: string
         kind:
@@ -1366,7 +1407,9 @@ components:
         collection_state:
           allOf:
             - $ref: '#/components/schemas/InvoiceCollectionState'
-          description: The collector's report on payment. Null on a draft.
+          description: >-
+            The collector's report on payment. Null on a draft and on a Stripe
+            invoice.
           nullable: true
         collector:
           allOf:
@@ -1376,16 +1419,27 @@ components:
           type: string
         contract_id:
           type: string
+          description: Null on a Stripe invoice.
+          nullable: true
         created_at:
           type: string
           format: date-time
         currency:
           $ref: '#/components/schemas/Currency'
         document_state:
-          $ref: '#/components/schemas/InvoiceDocumentState'
+          allOf:
+            - $ref: '#/components/schemas/InvoiceDocumentState'
+          description: Null on a Stripe invoice.
+          nullable: true
         due_at:
           type: string
           format: date-time
+          nullable: true
+        external_id:
+          type: string
+          description: >-
+            The billing provider's invoice ID. Null on an invoice Schematic
+            issued.
           nullable: true
         finalized_at:
           type: string
@@ -1398,29 +1452,44 @@ components:
           nullable: true
         period_end:
           type: string
+          description: Null on a Stripe invoice.
           format: date-time
+          nullable: true
         period_start:
           type: string
+          description: Null on a Stripe invoice.
           format: date-time
+          nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
         status:
           $ref: '#/components/schemas/InvoiceStatus'
+        subscription_external_id:
+          type: string
+          description: >-
+            The billing provider's subscription ID. Null on an invoice Schematic
+            issued.
+          nullable: true
         subtotal:
           type: integer
           format: int64
         total:
           type: integer
           format: int64
+        url:
+          type: string
+          description: >-
+            The billing provider's hosted invoice page. Null on an invoice
+            Schematic issued.
+          nullable: true
       required:
         - amount_paid
         - amount_remaining
         - company_id
-        - contract_id
         - created_at
         - currency
-        - document_state
         - id
-        - period_end
-        - period_start
+        - provider_type
         - status
         - subtotal
         - total
@@ -34328,8 +34397,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /invoices:
     get:
-      operationId: listNativeInvoices
-      summary: List native invoices
+      operationId: listBillingInvoices
+      summary: List billing invoices
       tags:
         - billing
       parameters:
@@ -34345,6 +34414,38 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/InvoiceDocumentState'
+        - name: past_due
+          in: query
+          description: >-
+            Only open invoices with an amount left to pay whose due date has
+            passed.
+          schema:
+            type: boolean
+            description: >-
+              Only open invoices with an amount left to pay whose due date has
+              passed.
+        - name: provider_type
+          in: query
+          description: >-
+            Only invoices from this billing provider. Leave empty for invoices
+            from Schematic and Stripe.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BillingProviderType'
+            description: >-
+              Only invoices from this billing provider. Leave empty for invoices
+              from Schematic and Stripe.
+        - name: q
+          in: query
+          description: Search by invoice number, provider invoice ID or company name.
+          schema:
+            type: string
+            description: Search by invoice number, provider invoice ID or company name.
+            maxLength: 512
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceStatus'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -34375,7 +34476,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/BillingInvoiceResponseData'
-                    title: ListNativeInvoicesResponseData
+                    title: ListBillingInvoicesResponseData
                     maxItems: 250
                   params:
                     type: object
@@ -34399,11 +34500,30 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
-                    title: ListNativeInvoicesParams
+                      past_due:
+                        type: boolean
+                        description: >-
+                          Only open invoices with an amount left to pay whose
+                          due date has passed.
+                      provider_type:
+                        allOf:
+                          - $ref: '#/components/schemas/BillingProviderType'
+                        description: >-
+                          Only invoices from this billing provider. Leave empty
+                          for invoices from Schematic and Stripe.
+                      q:
+                        type: string
+                        description: >-
+                          Search by invoice number, provider invoice ID or
+                          company name.
+                        maxLength: 512
+                      status:
+                        $ref: '#/components/schemas/InvoiceStatus'
+                    title: ListBillingInvoicesParams
                 required:
                   - data
                   - params
-                title: ListNativeInvoicesResponse
+                title: ListBillingInvoicesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -34416,8 +34536,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /invoices/{invoice_id}:
     get:
-      operationId: getNativeInvoice
-      summary: Get native invoice
+      operationId: getBillingInvoice
+      summary: Get billing invoice
       tags:
         - billing
       parameters:
@@ -34440,11 +34560,11 @@ paths:
                   params:
                     type: object
                     description: Input parameters
-                    title: GetNativeInvoiceParams
+                    title: GetBillingInvoiceParams
                 required:
                   - data
                   - params
-                title: GetNativeInvoiceResponse
+                title: GetBillingInvoiceResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -34537,8 +34657,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /invoices/{invoice_id}/mark-paid:
     post:
-      operationId: markNativeInvoicePaid
-      summary: Mark native invoice paid
+      operationId: markBillingInvoicePaid
+      summary: Mark billing invoice paid
       tags:
         - billing
       parameters:
@@ -34567,11 +34687,11 @@ paths:
                   params:
                     type: object
                     description: Input parameters
-                    title: MarkNativeInvoicePaidParams
+                    title: MarkBillingInvoicePaidParams
                 required:
                   - data
                   - params
-                title: MarkNativeInvoicePaidResponse
+                title: MarkBillingInvoicePaidResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -34669,8 +34789,8 @@ paths:
           $ref: '#/components/responses/ServerError'
   /invoices/count:
     get:
-      operationId: countNativeInvoices
-      summary: Count native invoices
+      operationId: countBillingInvoices
+      summary: Count billing invoices
       tags:
         - billing
       parameters:
@@ -34686,6 +34806,38 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/InvoiceDocumentState'
+        - name: past_due
+          in: query
+          description: >-
+            Only open invoices with an amount left to pay whose due date has
+            passed.
+          schema:
+            type: boolean
+            description: >-
+              Only open invoices with an amount left to pay whose due date has
+              passed.
+        - name: provider_type
+          in: query
+          description: >-
+            Only invoices from this billing provider. Leave empty for invoices
+            from Schematic and Stripe.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BillingProviderType'
+            description: >-
+              Only invoices from this billing provider. Leave empty for invoices
+              from Schematic and Stripe.
+        - name: q
+          in: query
+          description: Search by invoice number, provider invoice ID or company name.
+          schema:
+            type: string
+            description: Search by invoice number, provider invoice ID or company name.
+            maxLength: 512
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceStatus'
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -34736,11 +34888,30 @@ paths:
                         description: Page offset (default 0)
                         format: int64
                         example: '0'
-                    title: CountNativeInvoicesParams
+                      past_due:
+                        type: boolean
+                        description: >-
+                          Only open invoices with an amount left to pay whose
+                          due date has passed.
+                      provider_type:
+                        allOf:
+                          - $ref: '#/components/schemas/BillingProviderType'
+                        description: >-
+                          Only invoices from this billing provider. Leave empty
+                          for invoices from Schematic and Stripe.
+                      q:
+                        type: string
+                        description: >-
+                          Search by invoice number, provider invoice ID or
+                          company name.
+                        maxLength: 512
+                      status:
+                        $ref: '#/components/schemas/InvoiceStatus'
+                    title: CountBillingInvoicesParams
                 required:
                   - data
                   - params
-                title: CountNativeInvoicesResponse
+                title: CountBillingInvoicesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
