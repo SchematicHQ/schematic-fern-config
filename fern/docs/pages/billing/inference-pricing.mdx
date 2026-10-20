@@ -53,7 +53,9 @@ The example rates below assume **one credit is worth one cent (\$0.01)**. At tha
 
 At one cent per credit, these rates match a model that costs \$2 per million input tokens, \$10 per million output tokens, \$0.20 per million cache reads, and \$2.50 per million cache writes, so each call burns roughly what it costs you. Multiply them to add your margin.
 
-Leave the reasoning rate at 0 and count reasoning as output, as the provider samples below do. A consumption rate of 0 bills on tokens only, which works as long as at least one token rate is above 0. Leave a token rate blank to charge nothing for that token type.
+The **consumption rate** is a flat number of credits burned for every model call, on top of the token rates. Leave it at 0 to bill on tokens alone. Set it above 0 to charge for each call whatever its size, which is how you add a fixed per-call markup or cover per-request costs that token counts miss, such as tool calls or retrieval. At one cent per credit, a consumption rate of 0.5 adds half a cent to every call.
+
+Leave the reasoning rate at 0 and count reasoning as output, as the provider samples below do. Leave a token rate blank to charge nothing for that token type.
 
 Below the rates, the form shows what a recent call to the feature burns at the rates you entered, line by line, so you can check the numbers before you publish.
 
