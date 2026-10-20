@@ -38,9 +38,11 @@ Create a feature with the type **Event-based**. In the **Event** section, set **
 
 ### 3. Add the feature to a plan with token rates
 
-Open the plan, add the feature, and set **Monetization Type** to **Credit burndown** against your credit type. Then fill in the rates.
+Open the plan, add the feature, and set **Monetization Type** to **Credit burndown** against your credit type. Then fill in the rates, each in credits.
 
-| Field | What it prices | Example, one credit = 1¢ |
+The example rates below assume **one credit is worth one cent (\$0.01)**. At that value, a rate of 0.0002 credits per token costs the customer \$0.000002 per token, or \$2 per million tokens. If your credit is worth something else, divide each dollar price by your credit's value to get its rate.
+
+| Field | What it prices | Example rate (1 credit = \$0.01) |
 |---|---|---|
 | Consumption rate | Each model call, whatever its size | 0 |
 | Input tokens | Prompt tokens that were neither read from nor written to a cache | 0.0002 |
@@ -49,7 +51,7 @@ Open the plan, add the feature, and set **Monetization Type** to **Credit burndo
 | Cache creation input tokens | Prompt tokens written to the provider's prompt cache | 0.00025 |
 | Reasoning tokens | Reasoning tokens, priced on top of output tokens | 0 |
 
-The example rates follow a model that costs \$2 per million input tokens, \$10 per million output tokens, \$0.20 per million cache reads, and \$2.50 per million cache writes, so each call burns roughly what it costs. Multiply them to add your margin.
+At one cent per credit, these rates match a model that costs \$2 per million input tokens, \$10 per million output tokens, \$0.20 per million cache reads, and \$2.50 per million cache writes, so each call burns roughly what it costs you. Multiply them to add your margin.
 
 Leave the reasoning rate at 0 and count reasoning as output, as the provider samples below do. A consumption rate of 0 bills on tokens only, which works as long as at least one token rate is above 0. Leave a token rate blank to charge nothing for that token type.
 
