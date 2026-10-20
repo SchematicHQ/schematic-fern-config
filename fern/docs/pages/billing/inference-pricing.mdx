@@ -30,17 +30,19 @@ Choose a credit value that keeps token rates readable. At one cent per credit, a
 
 ### 2. Create an inference feature
 
-Create a feature with the type **Event**, then set its event source to **Inference events**. The event name you give the feature is the label your app sends in the `event` field of each inference event, for example `support-chat`. An event without a matching label is still recorded, but it burns no credits.
+Create a feature with the type **Event-based**. In the **Event** section, set **Event Source** to **Inference events**, then enter an **Inference Event Label**, for example `support-chat`. Your app sends this label in the `event` field of each inference event. An event without a matching label is still recorded, but it burns no credits.
 
-<Warning>Screenshot needed: feature overlay with event source set to Inference events and the event name filled in.</Warning>
+The event source is fixed once the feature exists, so choose it when you create the feature.
+
+![Event source set to inference events, with an inference event label](../../assets/images/billing/inference-feature-event-source.png)
 
 ### 3. Add the feature to a plan with token rates
 
-Open the plan, add the feature, and choose **Credit burndown** against your credit type. Set a credit rate per request and a rate for each token type you want to price.
+Open the plan, add the feature, and set **Monetization Type** to **Credit burndown** against your credit type. Then fill in the rates.
 
-| Rate | What it prices | Example, one credit = 1¢ |
+| Field | What it prices | Example, one credit = 1¢ |
 |---|---|---|
-| Per request | Each model call, whatever its size | 0 |
+| Consumption rate | Each model call, whatever its size | 0 |
 | Input tokens | Prompt tokens that were neither read from nor written to a cache | 0.0002 |
 | Output tokens | Generated tokens, including any reasoning the provider counts in output | 0.001 |
 | Cached input tokens | Prompt tokens read from the provider's prompt cache | 0.00002 |
@@ -49,11 +51,11 @@ Open the plan, add the feature, and choose **Credit burndown** against your cred
 
 The example rates follow a model that costs \$2 per million input tokens, \$10 per million output tokens, \$0.20 per million cache reads, and \$2.50 per million cache writes, so each call burns roughly what it costs. Multiply them to add your margin.
 
-Leave the reasoning rate at 0 for Anthropic and OpenAI models. Both count reasoning tokens inside output tokens, so a reasoning rate charges those tokens twice. A per-request rate of 0 is fine as long as at least one token rate is above 0.
+Leave the reasoning rate at 0 and count reasoning as output, as the provider samples below do. A consumption rate of 0 bills on tokens only, which works as long as at least one token rate is above 0. Leave a token rate blank to charge nothing for that token type.
 
-As you set rates, the form previews what a sample call burns, so you can check the numbers before you publish.
+Below the rates, the form shows what a recent call to the feature burns at the rates you entered, line by line, so you can check the numbers before you publish.
 
-<Warning>Screenshot needed: plan entitlement with credit burndown, per-request rate, token rate rows, and the burn preview.</Warning>
+![Token rates with a burn preview of a recent call](../../assets/images/billing/inference-token-rates.png)
 
 Publish the plan and put a company on it. A company burns credits only when its plan includes the feature and it has a credit balance.
 
@@ -61,7 +63,6 @@ Publish the plan and put a company on it. A company burns credits only when its 
 
 Send one inference event after each model call completes, with a **secret** API key. Publishable keys cannot send inference events.
 
-<CodeBlocks>
 ```bash title="cURL"
 curl -X POST https://api.schematichq.com/events \
   -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
@@ -83,43 +84,7 @@ curl -X POST https://api.schematichq.com/events \
   }'
 ```
 
-```typescript title="TypeScript (Anthropic)"
-const message = await anthropic.messages.create({
-  model: "claude-sonnet-5-5",
-  max_tokens: 1024,
-  messages,
-});
-
-const usage = message.usage;
-const cacheRead = usage.cache_read_input_tokens ?? 0;
-const cacheWrite = usage.cache_creation_input_tokens ?? 0;
-
-await fetch("https://api.schematichq.com/events", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-Schematic-Api-Key": process.env.SCHEMATIC_SECRET_KEY!,
-  },
-  body: JSON.stringify({
-    event_type: "inference",
-    body: {
-      company: { id: companyId },
-      user: { id: userId },
-      event: "support-chat",
-      provider: "anthropic",
-      request_model: "claude-sonnet-5-5",
-      response_model: message.model,
-      input_tokens: usage.input_tokens + cacheRead + cacheWrite,
-      cached_input_tokens: cacheRead,
-      cache_creation_input_tokens: cacheWrite,
-      output_tokens: usage.output_tokens,
-    },
-  }),
-});
-```
-</CodeBlocks>
-
-Sending the event after the response reaches your user keeps Schematic off the request path. If your model call streams, send the event once the stream finishes, from the usage on the final message.
+Sending the event after the response reaches your user keeps Schematic off the request path. If your model call streams, send the event once the stream finishes, from the usage on the final response.
 
 ### Event fields
 
@@ -127,14 +92,14 @@ Sending the event after the response reaches your user keeps Schematic off the r
 |---|---|---|
 | `company` | Yes | Keys that identify the company, the same keys you use in identify calls |
 | `user` | No | Keys that identify the user who made the request |
-| `event` | To burn credits | The label that matches the event to an inference feature |
-| `provider` | Yes | The model provider, for example `anthropic` or `openai` |
+| `event` | To burn credits | The inference event label of the feature to bill |
+| `provider` | Yes | The model provider, for example `anthropic`, `openai` or `gcp.gemini` |
 | `response_model` | Yes | The model that served the call, as the provider's response reports it |
 | `request_model` | No | The model you asked for |
 | `input_tokens` | Yes | Every prompt token, **including** cache reads and cache writes |
 | `cached_input_tokens` | No | The part of `input_tokens` read from a prompt cache |
 | `cache_creation_input_tokens` | No | The part of `input_tokens` written to a prompt cache |
-| `output_tokens` | Yes | Generated tokens |
+| `output_tokens` | Yes | Generated tokens, including reasoning |
 | `reasoning_tokens` | No | Reasoning tokens, priced at the reasoning rate on top of output |
 | `requests` | No | How many calls this event covers. Defaults to 1 |
 | `reservation_id` | No | Settles a credit reservation, see [Leases and reservations](/billing/credit-leases-and-reservations) |
@@ -143,31 +108,114 @@ Sending the event after the response reaches your user keeps Schematic off the r
 
 Schematic treats `input_tokens` as the whole prompt, and `cached_input_tokens` and `cache_creation_input_tokens` as parts of it. When it burns credits, it subtracts the two cache counts from `input_tokens` and prices the remainder at the input rate, so every prompt token is priced once, at the rate for how it was served.
 
-Providers report these numbers differently, so map them before you send:
+OpenAI and Gemini report input the same way. Anthropic's Messages API reports `input_tokens` as only the uncached part of the prompt, so add the two cache counts to it before you send. If you send Anthropic's number as is, Schematic subtracts cache counts from a number that never contained them, and the uncached tokens go unbilled.
 
-| Schematic field | Anthropic Messages API | OpenAI Responses API |
-|---|---|---|
-| `input_tokens` | `input_tokens + cache_read_input_tokens + cache_creation_input_tokens` | `input_tokens` |
-| `cached_input_tokens` | `cache_read_input_tokens` | `input_tokens_details.cached_tokens` |
-| `cache_creation_input_tokens` | `cache_creation_input_tokens` | omit |
-| `output_tokens` | `output_tokens` | `output_tokens` |
+| Schematic field | Anthropic Messages API | OpenAI Responses API | OpenAI Chat Completions | Gemini API |
+|---|---|---|---|---|
+| `input_tokens` | `input_tokens` + `cache_read_input_tokens` + `cache_creation_input_tokens` | `input_tokens` | `prompt_tokens` | `promptTokenCount` |
+| `cached_input_tokens` | `cache_read_input_tokens` | `input_tokens_details.cached_tokens` | `prompt_tokens_details.cached_tokens` | `cachedContentTokenCount` |
+| `cache_creation_input_tokens` | `cache_creation_input_tokens` | omit | omit | omit |
+| `output_tokens` | `output_tokens` | `output_tokens` | `completion_tokens` | `candidatesTokenCount` + `thoughtsTokenCount` |
+| `response_model` | `model` | `model` | `model` | `modelVersion` |
 
-Anthropic's `input_tokens` covers only the uncached part of the prompt. If you send it as is, Schematic subtracts the cache counts from a number that never contained them, and the uncached tokens go unbilled.
+Anthropic and OpenAI count reasoning inside output already. Gemini reports thinking separately in `thoughtsTokenCount` and bills it as output, so add it to `output_tokens`.
 
 Send `response_model` from the response rather than the model you requested. They differ when a request uses a model alias or a fallback model serves it.
+
+### Provider samples
+
+Each sample makes one call, then sends the event with this helper:
+
+```typescript title="sendInferenceEvent.ts"
+export async function sendInferenceEvent(body: Record<string, unknown>) {
+  await fetch("https://api.schematichq.com/events", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Schematic-Api-Key": process.env.SCHEMATIC_SECRET_KEY!,
+    },
+    body: JSON.stringify({ event_type: "inference", body }),
+  });
+}
+```
+
+<CodeBlocks>
+```typescript title="Anthropic"
+const message = await anthropic.messages.create({ model, max_tokens: 1024, messages });
+
+const usage = message.usage;
+const cacheRead = usage.cache_read_input_tokens ?? 0;
+const cacheWrite = usage.cache_creation_input_tokens ?? 0;
+
+await sendInferenceEvent({
+  company: { id: companyId },
+  event: "support-chat",
+  provider: "anthropic",
+  request_model: model,
+  response_model: message.model,
+  input_tokens: usage.input_tokens + cacheRead + cacheWrite,
+  cached_input_tokens: cacheRead,
+  cache_creation_input_tokens: cacheWrite,
+  output_tokens: usage.output_tokens,
+});
+```
+
+```typescript title="OpenAI"
+const response = await openai.responses.create({ model, input });
+
+const usage = response.usage!;
+
+await sendInferenceEvent({
+  company: { id: companyId },
+  event: "support-chat",
+  provider: "openai",
+  request_model: model,
+  response_model: response.model,
+  input_tokens: usage.input_tokens,
+  cached_input_tokens: usage.input_tokens_details?.cached_tokens ?? 0,
+  output_tokens: usage.output_tokens,
+});
+```
+
+```typescript title="Gemini"
+const response = await ai.models.generateContent({ model, contents });
+
+const usage = response.usageMetadata!;
+
+await sendInferenceEvent({
+  company: { id: companyId },
+  event: "support-chat",
+  provider: "gcp.gemini",
+  request_model: model,
+  response_model: response.modelVersion ?? model,
+  input_tokens: usage.promptTokenCount ?? 0,
+  cached_input_tokens: usage.cachedContentTokenCount ?? 0,
+  output_tokens: (usage.candidatesTokenCount ?? 0) + (usage.thoughtsTokenCount ?? 0),
+});
+```
+</CodeBlocks>
+
+## Chat and one-shot features
+
+Chat and other multi-turn features resend the same system prompt and conversation on every turn. With prompt caching on, a provider charges a fraction of the input price to read that repeated prompt, and on Anthropic a premium to write it the first time. Most of a chat turn's prompt arrives as cached input or cache creation, so a chat feature needs rates for both, alongside input and output.
+
+When a cache entry expires between turns, the next turn reads nothing from the cache. On Anthropic that turn writes the prompt to the cache again and reports it as cache creation, so it burns at the cache creation rate. OpenAI and Gemini report no cache creation tokens, so on those providers the same tokens arrive as ordinary input.
+
+One-shot features such as classification, extraction or a single summary send a different, often short prompt each time. They rarely repeat a prompt long enough to cache, so their events carry input and output only, and those two rates cover them.
 
 ## Check that it works
 
 Make a model call as a company on the plan, then:
 
-1. Open **Events** and find the inference event. Its body shows the counts your app sent.
-2. Open the company and go to its credit ledger. The call appears as a draw on your credit type. Expand it to see a line for each quantity that burned credits, such as input tokens (uncached), cached input and output, with the count, the rate and the credits for each.
+1. Open **Events**. The inference event appears with the counts your app sent.
+2. Open the company and click **View Ledger** under **Credit Balance**. Each call appears as an inference burn on your credit type.
+3. Click a row to open the credit event. Its **Burn Breakdown** lists each quantity that burned credits, with its count, rate and credits, and **Source Event** links back to the inference event.
 
-<Warning>Screenshot needed: credit ledger row expanded to the per-token breakdown.</Warning>
+![A credit event with its burn breakdown](../../assets/images/billing/inference-burn-breakdown.png)
 
 If the event arrives but nothing burns, check these in order:
 
-- The event's `event` label matches the feature's event name exactly.
+- The event's `event` label matches the feature's inference event label exactly.
 - The company's plan includes the feature as credit burndown, and the plan version is published.
 - The company has a credit balance in that credit type.
 
