@@ -67,6 +67,8 @@ Publish the plan and put a company on it. A company burns credits only when its 
 
 Send one inference event after each model call completes, with a **secret** API key. Publishable keys cannot send inference events.
 
+If your app already traces its model calls with OpenTelemetry, or calls Claude through the Anthropic TypeScript SDK, you can export those spans to Schematic instead of posting an event after every call. See [Inference Pricing with OpenTelemetry](/billing/inference-pricing-opentelemetry).
+
 ```bash title="cURL"
 curl -X POST https://api.schematichq.com/events \
   -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
@@ -225,6 +227,7 @@ If the event arrives but nothing burns, check these in order:
 
 ## Related
 
+- [Inference Pricing with OpenTelemetry](/billing/inference-pricing-opentelemetry) sends each model call as an OpenTelemetry span instead of an inference event.
 - [Credit Burndown](/billing/credit-burndown) covers credit types, grants and bundles.
 - [Leases and reservations](/billing/credit-leases-and-reservations) hold credits before a long or concurrent call runs, then settle the hold with the inference event.
 - [Preflight checks](/feature-management/preflight-checks) check whether a company can afford a call before you make it.
