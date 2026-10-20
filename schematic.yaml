@@ -10947,10 +10947,10 @@ components:
     EventBody:
       type: object
       oneOf:
-        - $ref: '#/components/schemas/EventBodyTrack'
-        - $ref: '#/components/schemas/EventBodyFlagCheck'
-        - $ref: '#/components/schemas/EventBodyIdentify'
         - $ref: '#/components/schemas/EventBodyInference'
+        - $ref: '#/components/schemas/EventBodyFlagCheck'
+        - $ref: '#/components/schemas/EventBodyTrack'
+        - $ref: '#/components/schemas/EventBodyIdentify'
       title: EventBody
     EventBodyFlagCheck:
       type: object
@@ -16682,6 +16682,14 @@ components:
             When the company moves to the new version. Null when no date can be
             named yet: the company's only subscription is in dunning or
             scheduled to cancel.
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          description: >-
+            When the subscription ends instead of renewing once the amendment is
+            finalized: the end date moved back to a renewal, or the end it
+            already has. Null when it renews.
           format: date-time
           nullable: true
         has_billing_changes:
