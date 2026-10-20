@@ -3920,6 +3920,9 @@ components:
         - custom_field_required
         - discount_ineligible
         - downgrade_not_permitted
+        - end_date_must_be_future
+        - end_date_needs_new_subscription
+        - end_date_not_after_renewal_date
         - free_first_period_activates_on_payment
         - invoice_email_required
         - invoiced_subscription_conflicts_with_trial
@@ -16494,6 +16497,17 @@ components:
           format: int64
           nullable: true
           maximum: 365
+        end_date:
+          type: string
+          description: >-
+            When a custom plan that doesn't renew ends: the company moves to the
+            default plan then, and no renewal invoice is raised. Required when
+            the version's renewal_policy is expire_to_default, and refused
+            otherwise. Moved back to the last renewal on or before it, which
+            must leave at least one whole billing period. Only honored on a
+            first publish that starts a subscription.
+          format: date-time
+          nullable: true
         excluded_company_ids:
           type: array
           items:
@@ -16858,6 +16872,14 @@ components:
           format: int64
           nullable: true
           maximum: 365
+        end_date:
+          type: string
+          description: >-
+            When a plan that doesn't renew ends. Moved back to the last renewal
+            on or before it. When omitted, the end date set at finalize is
+            reissued. Only honored when the retry creates a subscription.
+          format: date-time
+          nullable: true
         prorate_first_period:
           type: boolean
           description: >-
