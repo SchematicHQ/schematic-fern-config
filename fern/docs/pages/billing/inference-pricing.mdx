@@ -12,7 +12,7 @@ With inference pricing, your app sends Schematic one inference event per model c
 ## How it works
 
 1. Your app calls a model, then sends an inference event with the company, the model, and the token counts.
-2. The event's `event` label matches it to an **inference feature**: an event-based feature whose event source is inference events.
+2. The event's name, in its `event` field, matches it to an **inference feature**: an event-based feature whose event source is inference events.
 3. The company's plan gives that feature a credit burndown entitlement with a rate per request and a rate per token type.
 4. Schematic multiplies each count by its rate, draws the total from the company's credit balance, and writes the draw to the credit ledger.
 
@@ -30,11 +30,11 @@ Choose a credit value that keeps token rates readable. At one cent per credit, a
 
 ### 2. Create an inference feature
 
-Create a feature with the type **Event-based**. In the **Event** section, set **Event Source** to **Inference events**. Under **Inference Event Label**, type a label such as `support-chat` and choose **Create event**, or pick a label your app already sends. Your app sends this label in the `event` field of each inference event. An event without a matching label is still recorded, but it burns no credits.
+Create a feature with the type **Event-based**. In the **Event** section, set **Event Source** to **Inference events**. In the **Inference Event Label** field, type an event name such as `support-chat` and choose **Create event**, or pick an event name your app already sends. Your app sends this name in the `event` field of each inference event. An event without a matching name is still recorded, but it burns no credits.
 
 The event source is fixed once the feature exists, so choose it when you create the feature.
 
-![Event source set to inference events, with an inference event label](../../assets/images/billing/inference-feature-event-source.png)
+![Event source set to inference events, with an event name](../../assets/images/billing/inference-feature-event-source.png)
 
 ### 3. Add the feature to a plan with token rates
 
@@ -92,7 +92,7 @@ Sending the event after the response reaches your user keeps Schematic off the r
 |---|---|---|
 | `company` | Yes | Keys that identify the company, the same keys you use in identify calls |
 | `user` | No | Keys that identify the user who made the request |
-| `event` | To burn credits | The inference event label of the feature to bill |
+| `event` | To burn credits | The event name of the feature to bill |
 | `provider` | Yes | The model provider, for example `anthropic`, `openai` or `gcp.gemini` |
 | `response_model` | Yes | The model that served the call, as the provider's response reports it |
 | `request_model` | No | The model you asked for |
@@ -215,7 +215,7 @@ Make a model call as a company on the plan, then:
 
 If the event arrives but nothing burns, check these in order:
 
-- The event's `event` label matches the feature's inference event label exactly.
+- The `event` field matches the feature's event name exactly.
 - The company's plan includes the feature as credit burndown, and the plan version is published.
 - The company has a credit balance in that credit type.
 
