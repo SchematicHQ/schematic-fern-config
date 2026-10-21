@@ -3035,6 +3035,33 @@ components:
       required:
         - events
       title: CaptureRawEventBatch
+    CatalogBundleCurrencyPriceResponseData:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        unit_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+      required:
+        - currency
+      title: CatalogBundleCurrencyPriceResponseData
+    CatalogCapabilitiesResponseData:
+      type: object
+      properties:
+        badge_visibility:
+          type: boolean
+          description: >-
+            Whether the consumer may hide the 'powered by Schematic' badge (the
+            account's badge-hideable entitlement); false means the badge must be
+            shown.
+        checkout:
+          type: boolean
+      required:
+        - badge_visibility
+        - checkout
+      title: CatalogCapabilitiesResponseData
     CatalogConfigOrderedBundle:
       type: object
       properties:
@@ -3199,6 +3226,145 @@ components:
       required:
         - credit_bundle_ids
       title: CatalogCreditBundleIDsResponseData
+    CatalogCreditBundleResponseData:
+      type: object
+      properties:
+        bundle_type:
+          $ref: '#/components/schemas/BillingCreditBundleType'
+        compatible_plan_ids:
+          type: array
+          description: >-
+            The plans whose companies may purchase this bundle. Null means
+            compatible with every plan.
+          items:
+            type: string
+          nullable: true
+          maxItems: 1000
+        credit_icon:
+          type: string
+          nullable: true
+        credit_id:
+          type: string
+        credit_name:
+          type: string
+        credit_plural_name:
+          type: string
+          nullable: true
+        credit_singular_name:
+          type: string
+          nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogBundleCurrencyPriceResponseData'
+          maxItems: 1000
+        expiry_type:
+          $ref: '#/components/schemas/BillingCreditExpiryType'
+        expiry_unit:
+          $ref: '#/components/schemas/BillingCreditExpiryUnit'
+        expiry_unit_count:
+          type: integer
+          format: int64
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        quantity:
+          type: integer
+          description: >-
+            Credits granted per purchase; null means the buyer chooses a custom
+            quantity priced via unit_price.
+          format: int64
+          nullable: true
+        unit_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+      required:
+        - bundle_type
+        - credit_id
+        - credit_name
+        - currency_prices
+        - expiry_type
+        - expiry_unit
+        - id
+        - name
+      title: CatalogCreditBundleResponseData
+    CatalogCreditGrantResponseData:
+      type: object
+      properties:
+        company_credit_amount:
+          type: integer
+          description: Flat credit amount granted to the company regardless of scaling.
+          format: int64
+        credit_amount:
+          type: integer
+          description: >-
+            Credits granted; for per_license scaling this is the amount per
+            license unit.
+          format: int64
+        credit_icon:
+          type: string
+          nullable: true
+        credit_id:
+          type: string
+        credit_name:
+          type: string
+        credit_plural_name:
+          type: string
+          nullable: true
+        credit_singular_name:
+          type: string
+          nullable: true
+        id:
+          type: string
+        license_id:
+          type: string
+          nullable: true
+        reset_cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingPlanCreditGrantResetCadence'
+          nullable: true
+        scaling:
+          $ref: '#/components/schemas/PlanCreditGrantScaling'
+      required:
+        - company_credit_amount
+        - credit_amount
+        - credit_id
+        - credit_name
+        - id
+        - scaling
+      title: CatalogCreditGrantResponseData
+    CatalogCurrencyPricesResponseData:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        monthly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        one_time_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        quarterly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        yearly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+      required:
+        - currency
+      title: CatalogCurrencyPricesResponseData
+    CatalogCustomPlanCTAResponseData:
+      type: object
+      properties:
+        cta_text:
+          type: string
+          nullable: true
+        cta_url:
+          type: string
+          nullable: true
+        price_text:
+          type: string
+          nullable: true
+      title: CatalogCustomPlanCTAResponseData
     CatalogDerivedFeatureResponseData:
       type: object
       properties:
@@ -3224,6 +3390,249 @@ components:
       required:
         - features
       title: CatalogDerivedFeaturesResponseData
+    CatalogDetailResponseData:
+      type: object
+      properties:
+        capabilities:
+          $ref: '#/components/schemas/CatalogCapabilitiesResponseData'
+        custom_plan_cta:
+          allOf:
+            - $ref: '#/components/schemas/CatalogCustomPlanCTAResponseData'
+          description: >-
+            Present when the catalog offers a custom plan; absent when custom
+            plans are hidden.
+        default_currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          description: >-
+            ISO 4217 currency of every top-level price slot; currency_prices
+            carries the others.
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        pricing_model:
+          type: string
+          nullable: true
+        pricing_url:
+          type: string
+          nullable: true
+      required:
+        - capabilities
+        - default_currency
+        - id
+        - name
+      title: CatalogDetailResponseData
+    CatalogEntitlementResponseData:
+      type: object
+      properties:
+        consumption_rate:
+          type: number
+          description: >-
+            Credits consumed per unit of usage, for credit-burndown
+            entitlements.
+          format: double
+          nullable: true
+        credit_equivalent_limit:
+          type: integer
+          description: >-
+            How many units of usage the plan's fixed included credit grants
+            cover (⌊granted credits ÷ consumption rate⌋). Null when there is no
+            fixed grant or the grant scales per license.
+          format: int64
+          nullable: true
+        credit_icon:
+          type: string
+          nullable: true
+        credit_id:
+          type: string
+          nullable: true
+        credit_name:
+          type: string
+          nullable: true
+        credit_plural_name:
+          type: string
+          nullable: true
+        credit_singular_name:
+          type: string
+          nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCurrencyPricesResponseData'
+          maxItems: 1000
+        feature_description:
+          type: string
+        feature_icon:
+          type: string
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+        feature_plural_name:
+          type: string
+          nullable: true
+        feature_singular_name:
+          type: string
+          nullable: true
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
+        license_id:
+          type: string
+          nullable: true
+        metered_monthly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metered_quarterly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metered_yearly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metric_period:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
+          nullable: true
+        metric_period_month_reset:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
+          nullable: true
+        price_behavior:
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
+          nullable: true
+        soft_limit:
+          type: integer
+          format: int64
+          nullable: true
+        value_bool:
+          type: boolean
+          nullable: true
+        value_numeric:
+          type: integer
+          format: int64
+          nullable: true
+        value_type:
+          $ref: '#/components/schemas/EntitlementValueType'
+        warning_threshold:
+          type: integer
+          description: The default warning-tier value, when configured.
+          format: int64
+          nullable: true
+      required:
+        - currency_prices
+        - feature_description
+        - feature_icon
+        - feature_id
+        - feature_name
+        - feature_type
+        - value_type
+      title: CatalogEntitlementResponseData
+    CatalogPlanEntitlementResponseData:
+      type: object
+      properties:
+        consumption_rate:
+          type: number
+          description: >-
+            Credits consumed per unit of usage, for credit-burndown
+            entitlements.
+          format: double
+          nullable: true
+        credit_equivalent_limit:
+          type: integer
+          description: >-
+            How many units of usage the plan's fixed included credit grants
+            cover (⌊granted credits ÷ consumption rate⌋). Null when there is no
+            fixed grant or the grant scales per license.
+          format: int64
+          nullable: true
+        credit_icon:
+          type: string
+          nullable: true
+        credit_id:
+          type: string
+          nullable: true
+        credit_name:
+          type: string
+          nullable: true
+        credit_plural_name:
+          type: string
+          nullable: true
+        credit_singular_name:
+          type: string
+          nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCurrencyPricesResponseData'
+          maxItems: 1000
+        feature_description:
+          type: string
+        feature_icon:
+          type: string
+        feature_id:
+          type: string
+        feature_name:
+          type: string
+        feature_plural_name:
+          type: string
+          nullable: true
+        feature_singular_name:
+          type: string
+          nullable: true
+        feature_type:
+          $ref: '#/components/schemas/FeatureType'
+        id:
+          type: string
+        license_id:
+          type: string
+          nullable: true
+        metered_monthly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metered_quarterly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metered_yearly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        metric_period:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriod'
+          nullable: true
+        metric_period_month_reset:
+          allOf:
+            - $ref: '#/components/schemas/MetricPeriodMonthReset'
+          nullable: true
+        price_behavior:
+          allOf:
+            - $ref: '#/components/schemas/EntitlementPriceBehavior'
+          nullable: true
+        soft_limit:
+          type: integer
+          format: int64
+          nullable: true
+        value_bool:
+          type: boolean
+          nullable: true
+        value_numeric:
+          type: integer
+          format: int64
+          nullable: true
+        value_type:
+          $ref: '#/components/schemas/EntitlementValueType'
+        warning_threshold:
+          type: integer
+          description: The default warning-tier value, when configured.
+          format: int64
+          nullable: true
+      required:
+        - currency_prices
+        - feature_description
+        - feature_icon
+        - feature_id
+        - feature_name
+        - feature_type
+        - value_type
+        - id
+      title: CatalogPlanEntitlementResponseData
     CatalogPlanIDsResponseData:
       type: object
       properties:
@@ -3235,6 +3644,152 @@ components:
       required:
         - plan_ids
       title: CatalogPlanIDsResponseData
+    CatalogPlanResponseData:
+      type: object
+      properties:
+        available_periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanPriceCadence'
+          maxItems: 1000
+        billing_strategy:
+          $ref: '#/components/schemas/BillingStrategy'
+        charge_type:
+          $ref: '#/components/schemas/ChargeType'
+        compatible_plan_ids:
+          type: array
+          description: >-
+            For add-ons, the plans this add-on may be purchased with. Null means
+            compatible with every plan.
+          items:
+            type: string
+          nullable: true
+          maxItems: 1000
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCurrencyPricesResponseData'
+          maxItems: 1000
+        description:
+          type: string
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogPlanEntitlementResponseData'
+          maxItems: 1000
+        icon:
+          type: string
+        id:
+          type: string
+        included_credit_grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCreditGrantResponseData'
+          maxItems: 1000
+        is_trialable:
+          type: boolean
+        monthly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        name:
+          type: string
+        one_time_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        quarterly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+        trial_days:
+          type: integer
+          format: int64
+          nullable: true
+        yearly_price:
+          $ref: '#/components/schemas/CatalogPriceResponseData'
+      required:
+        - available_periods
+        - billing_strategy
+        - charge_type
+        - currency_prices
+        - description
+        - entitlements
+        - icon
+        - id
+        - included_credit_grants
+        - is_trialable
+        - name
+      title: CatalogPlanResponseData
+    CatalogPriceResponseData:
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        id:
+          type: string
+        interval:
+          $ref: '#/components/schemas/BillingProductPriceInterval'
+        interval_count:
+          type: integer
+          format: int64
+        overage_unit_price_decimal:
+          type: string
+          description: Per-unit price of the final tier, precomputed for overage display.
+          nullable: true
+        package_size:
+          type: integer
+          description: >-
+            Units covered per priced package; a price of $10 with package_size
+            1000 charges $10 per 1000 units.
+          format: int64
+        price:
+          type: integer
+          format: int64
+        price_decimal:
+          type: string
+          nullable: true
+        price_tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogPriceTierResponseData'
+          maxItems: 1000
+        scheme:
+          $ref: '#/components/schemas/BillingPriceScheme'
+        tiers_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          nullable: true
+      required:
+        - currency
+        - id
+        - interval
+        - interval_count
+        - package_size
+        - price
+        - price_tiers
+        - scheme
+      title: CatalogPriceResponseData
+    CatalogPriceTierResponseData:
+      type: object
+      properties:
+        flat_price:
+          type: integer
+          format: int64
+          nullable: true
+        from:
+          type: integer
+          description: Lower bound of the tier (inclusive).
+          format: int64
+        per_unit_price:
+          type: integer
+          format: int64
+          nullable: true
+        per_unit_price_decimal:
+          type: string
+          nullable: true
+        to:
+          type: integer
+          description: Upper bound of the tier (inclusive); null means unbounded.
+          format: int64
+          nullable: true
+      required:
+        - from
+      title: CatalogPriceTierResponseData
     CatalogResponseData:
       type: object
       properties:
@@ -16411,6 +16966,60 @@ components:
       enum:
         - create_prorations
         - invoice_immediately
+    PublicCatalogResponseData:
+      type: object
+      properties:
+        add_ons:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogPlanResponseData'
+          maxItems: 1000
+        capabilities:
+          $ref: '#/components/schemas/CatalogCapabilitiesResponseData'
+        credit_bundles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCreditBundleResponseData'
+          maxItems: 1000
+        custom_plan_cta:
+          allOf:
+            - $ref: '#/components/schemas/CatalogCustomPlanCTAResponseData'
+          description: >-
+            Present when the catalog offers a custom plan; absent when custom
+            plans are hidden.
+        default_currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          description: >-
+            ISO 4217 currency of every top-level price slot; currency_prices
+            carries the others.
+        description:
+          type: string
+          nullable: true
+        id:
+          type: string
+        name:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogPlanResponseData'
+          maxItems: 1000
+        pricing_model:
+          type: string
+          nullable: true
+        pricing_url:
+          type: string
+          nullable: true
+      required:
+        - capabilities
+        - default_currency
+        - id
+        - name
+        - add_ons
+        - credit_bundles
+        - plans
+      title: PublicCatalogResponseData
     PublicPlansResponseData:
       type: object
       properties:
@@ -38760,6 +39369,77 @@ paths:
                 title: PreviewPublishPlanVersionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /public/catalog:
+    get:
+      operationId: getPublicCatalog
+      summary: Get public catalog
+      tags:
+        - catalogs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PublicCatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPublicCatalogParams
+                required:
+                  - data
+                  - params
+                title: GetPublicCatalogResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /public/catalogs/{catalog_id}:
+    get:
+      operationId: getPublicCatalogByID
+      summary: Get public catalog by ID
+      tags:
+        - catalogs
+      parameters:
+        - name: catalog_id
+          in: path
+          description: catalog_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PublicCatalogResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetPublicCatalogByIDParams
+                required:
+                  - data
+                  - params
+                title: GetPublicCatalogByIDResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
