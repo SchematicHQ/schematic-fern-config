@@ -234,11 +234,15 @@ With no `start_time` and `end_time`, the period is the company's current billing
 - `by_model`, the cost and event count per provider and response model.
 - `unpriced_event_count`, the events with no known cost. They add nothing to `costs`, so a count above 0 means the real cost is higher than reported. Send `cost` on those events to close the gap.
 
+To find which models those are across every company, call [List unpriced inference models](/api-reference/events/list-unpriced-inference-models), or ask the Schematic MCP server, which answers with its `list_unpriced_inference_models` tool. It lists each provider and model whose events went unpriced, with the event count and when they were first and last seen, covering the last 30 days unless you pass `start_time` and `end_time`.
+
+In the app, the inference event and the credit ledger entry it burned each show the call's **Cost**, with whether it came from the cost you sent or the model's list price. An event with no cost reads **Unpriced**, never \$0.00.
+
 ## Check that it works
 
 Make a model call as a company on the plan, then:
 
-1. Open **Events**. The inference event appears with the counts your app sent.
+1. Open **Events**. The inference event appears with the counts your app sent. Open it, and its **Cost** row shows what the call cost you.
 2. Open the company and click **View Ledger** under **Credit Balance**. Each call appears as an inference burn on your credit type.
 3. Click a row to open the credit event. Its **Burn Breakdown** lists each quantity that burned credits, with its count, rate and credits, and **Source Event** links back to the inference event.
 
