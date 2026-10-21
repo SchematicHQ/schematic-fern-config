@@ -304,28 +304,49 @@ Once the cancellation lands, `useCompany` reloads with a cancellation date, `can
 
 ## Pricing page
 
-A public page needs only the publishable key. Selection state lives in your component; the derivation returns the valid option sets:
+The same component serves a public page and a signed-in one. Signed out, `useCatalog` reads the public catalog with the publishable key and every card's `action` is `null`; signed in, it reads the company's view and each card's `action` says what the company can do with it. Selection state lives in your component, and the derivation returns what the catalog offers:
 
 ```tsx
 import { useState } from "react";
-import { useCatalog } from "@schematichq/schematic-react";
-import { derivePricingTable } from "@schematichq/schematic-components/elements";
+import { useCatalog, useCompany } from "@schematichq/schematic-react";
+import { derivePricingTable, type PricingPeriod } from "@schematichq/schematic-components/elements";
 
-export function Pricing() {
-  const { data, isPending, error, refetch } = useCatalog();
-  const [period, setPeriod] = useState("month");
-  const [currency, setCurrency] = useState("usd");
-  if (isPending) return <Skeleton className="h-80" />;
-  if (error) return <Retry onClick={refetch} />;
+export function Pricing({ onSelect }: { onSelect: (planId: string, period: PricingPeriod | null) => void }) {
+  const catalog = useCatalog();
+  const company = useCompany();
+  const [period, setPeriod] = useState<PricingPeriod>();
+  const [currency, setCurrency] = useState<string>();
+  if (catalog.data === undefined) {
+    return catalog.error ? <button onClick={catalog.refetch}>Retry</button> : <div className="skeleton" />;
+  }
 
-  const table = derivePricingTable(data, { period, currency, locale: "en-US" });
+  const table = derivePricingTable(catalog.data, {
+    locale: "en-US",
+    period,
+    currency,
+    company: catalog.data.source === "company" ? company.data : undefined,
+  });
 
   return (
     <>
-      <PeriodToggle options={table.periods} value={period} onChange={setPeriod} />
+      <PeriodToggle options={table.periods} value={table.period} onChange={setPeriod} />
+      <CurrencyPicker options={table.currencies} value={table.currency} onChange={setCurrency} />
       <div className="grid md:grid-cols-3">
         {table.plans.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} onSelect={() => router.push(`/signup?plan=${plan.id}&period=${period}`)} />
+          <article key={plan.id}>
+            <h3>{plan.name}</h3>
+            <p>{plan.price.kind === "amount" ? plan.price.amount : plan.price.kind}</p>
+            {plan.action?.kind === "current" ? (
+              <p>Current plan</p>
+            ) : (
+              <button
+                disabled={plan.action?.kind === "overLimit" || plan.action?.kind === "unavailable"}
+                onClick={() => onSelect(plan.id, plan.period)}
+              >
+                Choose plan
+              </button>
+            )}
+          </article>
         ))}
       </div>
     </>
@@ -333,7 +354,12 @@ export function Pricing() {
 }
 ```
 
-Inside the portal, the same component under a session marks the current plan and hands `onSelect` to `useCheckout().open`.
+Render from `table.period` and `table.currency` rather than your own state: when the catalog does not offer what you asked for, the derivation falls back and says which it chose. On a public page, `onSelect` sends the visitor to sign up. Signed in, mount `CheckoutLauncherProvider` above it and open Checkout from `onSelect`:
+
+```tsx
+const { open } = useCheckoutLauncher();
+<Pricing onSelect={(planId, period) => open({ selection: { planId, period: period ?? undefined } })} />
+```
 
 ## Implement with AI
 
