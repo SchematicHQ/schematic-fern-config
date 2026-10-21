@@ -26,7 +26,7 @@ Each component's page lists the keys it renders. The same keys on the provider a
 <SchematicProvider strings={{ retry: "Retry" }} …>
 ```
 
-An override can vary by count with i18next's plural suffixes, so `invoicesHeader_one` and `invoicesHeader_other` answer `1` and `14` with different words. Placeholders use the `{{name}}` form.
+A key that takes a count can vary by it with i18next's plural suffixes, so `upcomingBillDiscountRepeating_one` and `upcomingBillDiscountRepeating_other` answer `1` and `14` with different words. Plural forms in your overrides follow the resolved locale's rules. Placeholders use the `{{name}}` form.
 
 ## Using your own i18n
 
@@ -45,7 +45,7 @@ function Providers({ children }) {
 }
 ```
 
-A key your catalog does not carry falls through to the component's English, so a partial translation ships safely. The components pass a sentinel `defaultValue` so a miss is detectable even from a stack that answers every key. `onMissingString` on the provider reports each miss, so a mis-wired catalogue shows up in your logs rather than as English in a German page. The key list is frozen per release; a rename is a deliberate, breaking change.
+A key your catalog does not carry falls through to the component's English, so a partial translation ships safely. The components pass a sentinel `defaultValue` so a miss is detectable even from a stack that answers every key. `onMissingString` on the provider reports each miss, so a mis-wired catalogue shows up in your logs rather than as English in a German page. The key list is frozen per release, so a rename is a deliberate, breaking change. `DEFAULT_STRINGS`, exported from `@schematichq/schematic-components/elements`, is the English catalog as a plain resource bundle you can register with i18next.
 
 ## Server rendering
 

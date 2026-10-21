@@ -16,7 +16,7 @@ Schematic gives you two ways to put billing UI in your app. Both read one data l
 
 <CardGroup cols={2}>
   <Card title="Drop-in components" icon="fa-solid fa-cube" href="/components/drop-in/overview">
-    Import a component, pass a few props, done. Sensible defaults, your fonts and colors through CSS variables, light and dark for free.
+    Import a component and pass a few props. Your fonts and colors go in through CSS variables, and light and dark follow your page's `color-scheme`.
   </Card>
   <Card title="Build your own UI" icon="fa-solid fa-code" href="/components/build-your-own/overview">
     The same data the drop-ins read, as hooks and pure derivations. Copy the reference code into your design system, or point your agent at it.
@@ -30,12 +30,18 @@ Schematic gives you two ways to put billing UI in your app. Both read one data l
 | You want | Billing UI working today, in Schematic's layout, with your colors and fonts. | Your own layout in your own design system, or an agent writing it for you. |
 | You write | A provider, a session, and one tag per card. | A hook call, a derivation, and the JSX. Reference code gets you most of the way. |
 | Styling | `--schematic-*` tokens, `color-scheme`, or your own CSS on stable class names. | Anything. The derivations return structured parts, not sentences. |
-| Checkout | `<Checkout/>`, opened by Plan Manager, Pricing Table, Credit Meter, and Feature Meter. | `useCheckout` on the checkout API. Take payment with Stripe Elements if you like. |
-| Frameworks | React. | React hooks. The client and derivations are plain TypeScript for Vue and Angular. |
+| Checkout | `<Checkout/>`, opened through `useCheckoutLauncher()` from the handlers on Plan Manager, Credit Usage, Metered Features, and Unsubscribe Button. | `useCheckout` on the checkout API. Take payment with Stripe Elements if you like. |
+| Frameworks | React. | React hooks from `@schematichq/schematic-react`. The billing client in `@schematichq/schematic-js` is plain TypeScript for any framework. |
 
 ## One setup for both
 
-Every component and every hook reads from one provider. Your server mints a short-lived access token for the signed-in company, and the browser never sees your secret key.
+Install the React SDK and the components package. `@stripe/stripe-js` and `@stripe/react-stripe-js` are peers of the components, used by the add-card form in Payment Methods.
+
+```sh
+npm install @schematichq/schematic-react @schematichq/schematic-components @stripe/stripe-js @stripe/react-stripe-js
+```
+
+Every component and every hook reads from one provider. Your server mints a short-lived access token for the signed-in company with your secret key, so the key never reaches the browser.
 
 ```tsx
 import { SchematicProvider } from "@schematichq/schematic-react";
@@ -53,19 +59,21 @@ The [Quickstart](/components/quickstart) walks through the token exchange and th
 
 ## What's in the box
 
-| Component | Hook | Reads |
+Each component imports from `@schematichq/schematic-components/elements` and renders on its own, so a page shows only the cards you place on it.
+
+| Component | Hooks | Shows |
 | --- | --- | --- |
 | `<Checkout/>` | `useCheckout` | The persisted checkout |
-| `<PlanManager/>` | `useCompany` | Plan, add-ons, notices, change plan |
-| `<CreditMeter/>` | `useCreditBalances` | Balances and grants per credit, buy more |
+| [`<PlanManager/>`](/components/drop-in/plan-manager) | `useCompany`, `useFeatureUsage`, `useCreditBalances` | Plan, price, add-ons, usage-based charges, plan credits, and notices like a trial ending or a scheduled downgrade |
 | `<PricingTable/>` | `useCatalog` | Plans and add-ons, public or company |
-| `<FeatureMeter/>` | `useFeatureUsage` | Meters for metered features |
-| `<IncludedFeatures/>` | `useFeatureUsage` | Entitlements and usage |
-| `<UpcomingBill/>` | `useUpcomingInvoice` | Next bill, balance, discounts |
-| `<PaymentMethods/>` | `usePaymentMethods` | Cards and wallets on file |
-| `<Invoices/>` | `useInvoices` | Invoice history, paged |
-| `<Unsubscribe/>` | `useUnsubscribe` | Cancel with your rules applied |
+| [`<IncludedFeatures/>`](/components/drop-in/included-features) | `useFeatureUsage` | Every entitlement on the plan, with usage against its limit |
+| [`<MeteredFeatures/>`](/components/drop-in/metered-features) | `useFeatureUsage`, `useFeatureUserUsage` | A meter per metered feature, its price and tiers, and usage by user |
+| [`<CreditUsage/>`](/components/drop-in/credit-usage) | `useCreditBalances`, `useCreditUserUsage` | Balance per credit, the grants behind it, auto top-up, and usage by user |
+| [`<UpcomingBill/>`](/components/drop-in/upcoming-bill) | `useUpcomingInvoice` | The next bill's amount and date, account balance, and discounts |
+| [`<PaymentMethods/>`](/components/drop-in/payment-methods) | `usePaymentMethods`, `useSetupIntent` | The default method on file and an expiry warning, with an Edit dialog to add, switch, or remove methods |
+| [`<Invoices/>`](/components/drop-in/invoices) | `useInvoices` | Invoice history, paged, with a link to each hosted invoice |
+| [`<UnsubscribeButton/>`](/components/drop-in/unsubscribe-button) | `useCompany`, `useFeatureUsage`, `useUnsubscribe` | A cancel button that confirms, then cancels at the end of the period |
 
 <Note>
-  Using the component builder? The embed keeps working on `@schematichq/schematic-components` 3.x. The builder pages live under [Component builder](/components/customer-portal), and [Migrate to drop-in components](/components/builder/migrate) covers the move when you are ready.
+  Using the component builder? Builder components keep working, and they ship in the same `@schematichq/schematic-components` package as the drop-ins. The builder pages live under [Component builder](/components/customer-portal), and [Migrate to drop-in components](/components/builder/migrate) covers the move when you are ready.
 </Note>

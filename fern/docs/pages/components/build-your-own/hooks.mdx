@@ -4,22 +4,24 @@ description: One hook per billing resource from @schematichq/schematic-react. Si
 slug: components/build-your-own/hooks
 ---
 
-Every hook returns a handle with the same shape and reads through the session on `SchematicProvider`:
+Every read hook returns a handle with the same shape and reads through the session on `SchematicProvider`:
 
 ```ts
-type ResourceHandle<T> = {
+interface ResourceHandle<T> {
   data: T | undefined;      // undefined until the first successful load; retained across later errors
   error: Error | undefined; // the latest failure; cleared by the next success
   isPending: boolean;       // a request is in flight and nothing has arrived yet, or a refetch is running
-  refetch(): void;
-};
+  refetch: () => void;
+}
 ```
 
 The three states a component renders follow from those fields. `data === undefined && isPending` is the first load. `data === undefined && error` is a failure with nothing to show. `data !== undefined` is ready, and a set `error` alongside it is a failure to report without replacing what is there.
 
 Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
 
-The company endpoints answer 404 with the message "Not found" for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
+The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
+
+The hooks are also re-exported from `@schematichq/schematic-components/elements`, so a file that imports a derivation can take its hook from the same place. Timestamps on every resource arrive as `Date` objects.
 
 ## useCheckout
 
@@ -44,15 +46,18 @@ A persisted checkout. `open` shows the drop-in dialog. `setSelections` creates t
 function useCompany(): ResourceHandle<Company>;
 ```
 
-The company's current plan and add-ons with their prices in the canonical period, the subscription facts that drive notices (`trialEnd`, `postTrialPlan`, `cancelAt`, `cancelAtPeriodEnd`, `scheduledDowngrade`), the current period end, and the purchase rules that apply to it (self-service downgrade, contact-sales URL). Timestamps are RFC 3339.
+The company and what it is subscribed to, read from `GET /company`:
 
-## useCreditBalances
+| Field | Meaning |
+| --- | --- |
+| `id`, `name` | The company. |
+| `plan` | The current plan: `id`, `name`, `description`, `price` in minor units, `period`, and `includedCreditIds`. Absent when the company has no plan. |
+| `addOns` | Each add-on the company holds, in the same shape as `plan`. |
+| `subscription` | `status`, `currency`, `period`, `periodEnd`, `nextBillAt`, `trialEnd`, `cancelAt`, and `cancelAtPeriodEnd`. Absent when the company has none, and when it has several. |
+| `scheduledDowngrade` | `fromPlanId`, `fromPlanName`, `toPlanId`, and `toPlanName` for a downgrade that takes effect at period end. |
+| `customPlanBilling` | The newest pending custom plan invoice: `planId`, `planName`, `dueAt`, `invoiceUrl`, and `activationStrategy`. |
 
-```ts
-function useCreditBalances(): ResourceHandle<CreditBalance[]>;
-```
-
-Balances grouped by credit: identity and names, `total`, `used`, `remaining`, `resetsAt` or `expiresAt`, the auto top-up policy, and `grants[]` with a source enum (`plan`, `bundle`, `manual`), related names, quantities, and dates. Expired and fully used grants leave the list on the server.
+[Plan Manager](/components/drop-in/plan-manager) and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) read this.
 
 ## useCatalog
 
@@ -68,7 +73,59 @@ Plans, add-ons, and credit bundles with prices per period and currency, tier sha
 function useFeatureUsage(): ResourceHandle<FeatureUsage[]>;
 ```
 
-One row per entitlement: feature identity and names, `valueType` and `valueNumeric`, `usage`, `effectiveLimit`, `percentUsed`, `isUnlimited`, `priceBehavior` with its per-period prices and tiers, `softLimit`, the credit reference and `creditEquivalentLimit` for credit-burndown features, the usage period and its reset, and per-user usage for per-seat features. Included Features and Feature Meter both read this.
+One row per feature the company is entitled to, read from `GET /company/usage`. An empty list is a loaded answer that means the company is entitled to nothing.
+
+| Field | Meaning |
+| --- | --- |
+| `featureId`, `featureName`, `featureDescription`, `featureIcon` | The feature, with `featureSingularName` and `featurePluralName` where they are configured. |
+| `featureType` | `boolean`, `event`, `trait`, or `license`. |
+| `access` | Whether the company has access to the feature. |
+| `entitlementType` | `plan_entitlement` or `company_override`. Only an override carries `expiresAt`. |
+| `valueType`, `valueNumeric`, `valueBool` | The entitlement's value: `boolean`, `numeric`, `unlimited`, `trait`, or `credit`. |
+| `allocation`, `usage`, `softLimit`, `warningThreshold` | The limit, the usage against it, an overage's soft limit, and the warning threshold. |
+| `priceBehavior` | `pay_in_advance`, `pay_as_you_go`, `overage`, `tier`, or `credit_burndown`. |
+| `price`, `currentCost` | The metered price the company is billed at, tiers included, and what the feature costs at that price. |
+| `metricPeriod`, `metricPeriodMonthReset`, `resetsAt` | The usage period and when it next resets. |
+| `creditId`, `creditName`, `consumptionRate` | The credit a credit-burndown feature draws on, and how much one use costs. |
+| `perLicenseCreditGrants` | The plan's per-license credit grants, on a license feature. |
+
+[Included Features](/components/drop-in/included-features), [Metered Features](/components/drop-in/metered-features), and [Plan Manager](/components/drop-in/plan-manager) all read this, so a page showing all three makes one request.
+
+## useFeatureUserUsage
+
+```ts
+function useFeatureUserUsage(featureId: string): ResourceHandle<FeatureUserUsage>;
+```
+
+One event-based feature's usage by user over its metric period, read from `GET /company/usage/:feature_id/users`. `users` holds the heaviest users, each with `userId`, `name`, `usage`, `share`, and `lastSeen`. `count` is how many users there are in all, `total` is the period's usage, `startTime` and `endTime` bound the period, and `unattributed` is usage from events sent without a user. A feature that is not an event-based entitlement of the company answers 404.
+
+## useCreditBalances
+
+```ts
+function useCreditBalances(): ResourceHandle<CreditBalanceEntry[]>;
+```
+
+One balance per credit, read from `GET /company/credits`. An empty list is a loaded answer that means the company holds no credits and its plan draws on none.
+
+| Field | Meaning |
+| --- | --- |
+| `creditId`, `creditName`, `creditDescription`, `creditIcon` | The credit, with `creditSingularName` and `creditPluralName` where they are configured. |
+| `total`, `used`, `remaining` | Across live grants, so `total` is `used` plus `remaining`. |
+| `resetsAt`, `expiresAt` | When the balance resets or runs out. |
+| `purchasable` | Whether a bundle of the credit is on offer to the company's plan. |
+| `autoTopup` | `enabled`, `selfService`, `amount`, and `thresholdCredits`. |
+| `composition` | How a per-license plan grant adds up per period: `licenseQuantity`, `perLicenseAmount`, `fixedQuantity`, `total`, `period`, and `renewsAt`. |
+| `grants` | Live grants, newest first, each with `grantReason`, `quantity`, `quantityUsed`, `quantityRemaining`, `createdAt`, `resetsAt` or `expiresAt`, and the plan or bundle behind it. |
+
+A credit the plan draws on that the company holds none of is listed with a zero balance and no grants. Expired and fully used grants leave the list on the server.
+
+## useCreditUserUsage
+
+```ts
+function useCreditUserUsage(creditId: string): ResourceHandle<CreditUserUsage>;
+```
+
+One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds the heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty.
 
 ## useUpcomingInvoice
 
@@ -76,22 +133,86 @@ One row per entitlement: feature identity and names, `valueType` and `valueNumer
 function useUpcomingInvoice(): ResourceHandle<UpcomingInvoice | null>;
 ```
 
-The next bill: amount due, due date, the canonical period, active discounts, and `customerBalanceApplied` and `customerBalanceRemaining` computed on the server. `null` is a loaded answer that means nothing to bill; only `undefined` means the resource has not loaded.
+The next bill: `amountDue` and `subtotal` in minor units, `currency`, `dueDate`, the active `discounts`, and `customerBalanceApplied` and `customerBalanceRemaining` computed on the server. `null` is a loaded answer that means nothing to bill; only `undefined` means the resource has not loaded.
+
+## useInvoices
+
+```ts
+function useInvoices(query?: InvoiceQuery): ResourceHandle<InvoicePage> & { loadMore: () => Promise<void> };
+
+type InvoiceQuery = { includePending?: boolean };
+type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
+```
+
+The invoice history, paged. `count` is how many invoices the query matches on the server, so a list showing four rows can say how many the company has. `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `isPending` is true while the page is on the wire, so a button can disable itself without awaiting anything, and clicking twice makes one request. `refetch` re-requests every page loaded so far, not only the first.
+
+`{ includePending: true }` includes unpaid invoices that are not yet due. Each distinct query is its own list with its own paging, so `useInvoices({ includePending: true })` and `useInvoices()` never share rows. The hook keys by value, so an inline object literal is fine.
+
+An empty history is a successful response with `count: 0`. A 404 surfaces on `error`, so a page cannot report "no invoices" over a real failure.
+
+Each `Invoice`:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | `string` | The invoice's identifier. |
+| `amountDue` | `number` | Signed, in the currency's minor units. A negative amount is a credit note. |
+| `currency` | `string` | Lowercase ISO 4217 code, such as `usd`. |
+| `createdAt` | `Date` | When the invoice was created. |
+| `dueDate` | `Date \| null`, optional | When it is due, if the billing provider set one. |
+| `status` | `InvoiceStatus \| null`, optional | `draft`, `open`, `paid`, `uncollectible`, or `void`. |
+| `url` | `string \| null`, optional | The hosted invoice page, if there is one. |
+
+The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
+
+```tsx
+import { useInvoices } from "@schematichq/schematic-react";
+
+function InvoiceHistory() {
+  const { data, error, isPending, loadMore, refetch } = useInvoices();
+
+  if (data === undefined) {
+    return error ? <button onClick={refetch}>Retry</button> : <p>Loading…</p>;
+  }
+  if (data.invoices.length === 0) {
+    return <p>No invoices yet</p>;
+  }
+  return (
+    <>
+      <ul>
+        {data.invoices.map((invoice) => (
+          <li key={invoice.id}>
+            <a href={invoice.url ?? undefined}>
+              {(invoice.dueDate ?? invoice.createdAt).toLocaleDateString()}
+            </a>{" "}
+            {invoice.amountDue / 100} {invoice.currency.toUpperCase()}
+          </li>
+        ))}
+      </ul>
+      {data.hasMore && (
+        <button disabled={isPending} onClick={loadMore}>
+          Load more
+        </button>
+      )}
+      {error && <p role="alert">{error.message}</p>}
+    </>
+  );
+}
+```
 
 ## usePaymentMethods
 
 ```ts
 function usePaymentMethods(): ResourceHandle<PaymentMethod[]> & {
-  setDefault(externalId: string): Promise<void>;
-  remove(id: string): Promise<void>;
-  isMutating: boolean;             // a write is in flight; distinct from isPending, which is the list loading
+  setDefault: (externalId: string) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  isMutating: boolean;              // a write is in flight; distinct from isPending, which is the list loading
   mutationError: Error | undefined; // the last write's failure; cleared when the next write starts
 };
 ```
 
 Every payment method on file. A company with none is a successful response with an empty list, so an empty `data` is a loaded answer. A 404 surfaces on `error`.
 
-`setDefault` and `remove` each reload the list once they land, and reject with the failure while also recording it on `mutationError`, so a component can await the promise or read the field, whichever it prefers. `setDefault` takes the method's `externalId`, the billing provider's id; `remove` takes Schematic's `id`.
+`setDefault` and `remove` each reload the list once they land, and reject with the failure while also recording it on `mutationError`, so a component can await the promise or read the field, whichever it prefers. A write's failure never lands on `error`, which stays the list's own. `setDefault` takes the method's `externalId`, the billing provider's id; `remove` takes Schematic's `id`.
 
 Each `PaymentMethod`:
 
@@ -147,13 +268,13 @@ function Methods() {
 ## useSetupIntent
 
 ```ts
-function useSetupIntent(): { create(): Promise<SetupIntent> };
+function useSetupIntent(): { create: () => Promise<SetupIntent> };
 
 type SetupIntent = {
-  setupIntentClientSecret?: string;
-  publishableKey?: string;         // the account's own Stripe key, for a direct account
+  setupIntentClientSecret?: string | null;
+  publishableKey?: string | null;  // the account's own Stripe key, for a direct account
   schematicPublishableKey: string; // Schematic's key, for a connected account
-  accountId?: string;              // the connected account, when there is one
+  accountId?: string | null;       // the connected account, when there is one
 };
 ```
 
@@ -165,7 +286,7 @@ Load Stripe with `schematicPublishableKey` and `stripeAccount: accountId` when `
 import { usePaymentMethods, useSetupIntent, type SetupIntent } from "@schematichq/schematic-react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 // A connected account is reached through Schematic's key with the account
 // named; a direct account uses its own key.
@@ -200,7 +321,7 @@ function SaveForm({ onDone }: { onDone: () => void }) {
   const elements = useElements();
   const { setDefault } = usePaymentMethods();
 
-  async function save(event: React.FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault();
     if (!stripe || !elements) return;
     const { setupIntent, error } = await stripe.confirmSetup({
@@ -224,77 +345,36 @@ function SaveForm({ onDone }: { onDone: () => void }) {
 }
 ```
 
-## useInvoices
+## useUnsubscribe
 
 ```ts
-function useInvoices(query?: InvoiceQuery): ResourceHandle<InvoicePage> & { loadMore(): Promise<void> };
-
-type InvoiceQuery = { includePending?: boolean };
-type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
+function useUnsubscribe(): {
+  unsubscribe: () => Promise<void>;
+  isMutating: boolean;              // the cancellation is in flight
+  mutationError: Error | undefined; // the last attempt's failure; cleared when the next one starts
+};
 ```
 
-The invoice history, paged. `count` is how many invoices the query matches on the server, so a list showing four rows can say how many the company has. `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `isPending` is true while the page is on the wire, so a button can disable itself without awaiting anything, and clicking twice makes one request. `refetch` re-requests every page loaded so far, not only the first.
-
-`{ includePending: true }` includes unpaid invoices that are not yet due. Each distinct query is its own list with its own paging, so `useInvoices({ includePending: true })` and `useInvoices()` never share rows. The hook keys by value, so an inline object literal is fine.
-
-An empty history is a successful response with `count: 0`. A 404 surfaces on `error`, so a page cannot report "no invoices" over a real failure.
-
-Each `Invoice`:
-
-| Field | Type | Meaning |
-| --- | --- | --- |
-| `id` | `string` | The invoice's identifier. |
-| `amountDue` | `number` | Signed, in the currency's minor units. A negative amount is a credit note. |
-| `currency` | `string` | ISO 4217 code as the billing provider reports it. |
-| `createdAt` | `Date` | When the invoice was created. |
-| `dueDate` | `Date \| null`, optional | When it is due, if the billing provider set one. |
-| `status` | `InvoiceStatus \| null`, optional | `draft`, `open`, `paid`, `uncollectible`, or `void`. |
-| `url` | `string \| null`, optional | The hosted invoice page, if there is one. |
-
-The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
+Sets the company's subscription to cancel at the end of its billing period. Once it lands, whichever of the company, the upcoming invoice, and the credit balances are loaded reload, so `useCompany` shows the cancellation date on its next render. `unsubscribe` rejects with the failure and records it on `mutationError`. The server refuses when the company has no subscription, when the subscription is already set to cancel, or when another Stripe app manages it.
 
 ```tsx
-import { useInvoices } from "@schematichq/schematic-react";
+import { useCompany, useUnsubscribe } from "@schematichq/schematic-react";
 
-function InvoiceHistory() {
-  const { data, error, isPending, loadMore, refetch } = useInvoices();
+function CancelLink() {
+  const { data: company } = useCompany();
+  const { unsubscribe, isMutating, mutationError } = useUnsubscribe();
+  if (!company?.subscription || company.subscription.cancelAt) return null;
 
-  if (data === undefined) {
-    return error ? <button onClick={refetch}>Retry</button> : <p>Loading…</p>;
-  }
-  if (data.invoices.length === 0) {
-    return <p>No invoices yet</p>;
-  }
   return (
     <>
-      <ul>
-        {data.invoices.map((invoice) => (
-          <li key={invoice.id}>
-            <a href={invoice.url ?? undefined}>
-              {(invoice.dueDate ?? invoice.createdAt).toLocaleDateString()}
-            </a>{" "}
-            {invoice.amountDue / 100} {invoice.currency.toUpperCase()}
-          </li>
-        ))}
-      </ul>
-      {data.hasMore && (
-        <button disabled={isPending} onClick={loadMore}>
-          Load more
-        </button>
-      )}
-      {error && <p role="alert">{error.message}</p>}
+      <button disabled={isMutating} onClick={() => unsubscribe().catch(() => {})}>
+        Cancel at period end
+      </button>
+      {mutationError && <p role="alert">{mutationError.message}</p>}
     </>
   );
 }
 ```
-
-## useUnsubscribe
-
-```ts
-function useUnsubscribe(): { cancel(): Promise<void>; isPending: boolean; error: Error | null };
-```
-
-Schedules the cancellation for the end of the period, with downgrade prevention applied on the server. `useCompany` reflects the scheduled cancellation on the next read.
 
 ## useInvalidateBillingData
 
@@ -302,14 +382,14 @@ Schedules the cancellation for the end of the period, with downgrade prevention 
 function useInvalidateBillingData(): () => void;
 ```
 
-Returns a function that reloads every loaded billing resource while keeping its current data on screen. Call it after an action that changes what the company is billed for, such as a plan change through checkout.
+Returns a function that reloads every loaded billing resource while keeping its current data on screen. Call it after an action that changes what the company is billed for, such as a plan change your own backend makes.
 
 ```tsx
 import { useInvalidateBillingData } from "@schematichq/schematic-react";
 
-function CheckoutButton() {
+function UpgradeButton({ changePlan }: { changePlan: () => Promise<void> }) {
   const invalidate = useInvalidateBillingData();
-  return <button onClick={async () => { await openCheckout(); invalidate(); }}>Upgrade</button>;
+  return <button onClick={async () => { await changePlan(); invalidate(); }}>Upgrade</button>;
 }
 ```
 
@@ -325,7 +405,7 @@ import { BillingDataProvider } from "@schematichq/schematic-react";
 </BillingDataProvider>;
 ```
 
-A missing key reports as pending. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, and `createSetupIntent` receive the calls `usePaymentMethods` and `useSetupIntent` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
+`data` takes a value per resource: `company`, `featureUsage`, `creditBalances`, `upcomingInvoice`, `paymentMethods`, and `invoices`. A missing key reports as pending. `featureUserUsage` and `creditUserUsage` take the per-user breakdowns keyed by feature or credit id. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, `createSetupIntent`, and `unsubscribe` receive the calls `usePaymentMethods`, `useSetupIntent`, and `useUnsubscribe` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
 
 ## Flags and entitlement checks
 

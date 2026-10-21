@@ -25,10 +25,10 @@ You are adding a customer billing portal to the user's app with Schematic. The p
 ### 1. Install
 
 ```sh
-npm install @schematichq/schematic-react @schematichq/schematic-components
+npm install @schematichq/schematic-react @schematichq/schematic-components @schematichq/schematic-typescript-node @stripe/stripe-js @stripe/react-stripe-js
 ```
 
-`@stripe/react-stripe-js` and `@stripe/stripe-js` are peer dependencies of the components and render Stripe's Payment Element for `<Checkout/>` and `<PaymentMethods/>`. Most package managers install peers automatically; add them explicitly if yours does not.
+`@schematichq/schematic-typescript-node` runs on the server only. The two Stripe packages are peers of the components and render Stripe's Payment Element for `<Checkout/>` and `<PaymentMethods/>`; the components load them only when a payment form opens.
 
 ### 2. Mint access tokens on the server
 
@@ -45,17 +45,16 @@ export async function GET() {
   if (!session?.companyId) return new Response("Unauthorized", { status: 401 });
 
   const response = await schematic.accesstokens.issueTemporaryAccessToken({
-    resourceType: "company",
-    lookup: { id: session.companyId },               // the app's company key
+    lookup: { id: session.companyId },               // a company key configured in Schematic
   });
   return Response.json({
-    token: response.data?.token,
-    expiresAt: response.data?.expiredAt,
+    token: response.data.token,
+    expiresAt: response.data.expiredAt,
   });
 }
 ```
 
-Other servers: the Node, Python, Go, Ruby, Java, C#, and PHP SDKs expose the same `issueTemporaryAccessToken` call, and the raw route is `POST https://api.schematichq.com/temporary-access-tokens` with the `X-Schematic-Api-Key` header. See [Session and access tokens](/components/build-your-own/session).
+Other servers: the Python, Go, Ruby, Java, and C# SDKs expose the same call under `accesstokens`. Without an SDK, send `POST https://api.schematichq.com/temporary-access-tokens` with the secret key in the `X-Schematic-Api-Key` header and a body of `{"resource_type": "company", "lookup": {"id": "…"}}`; the token is at `data.token` and its expiry at `data.expired_at`. See [Session and access tokens](/components/build-your-own/session).
 
 ### 3. Wrap the app in the provider
 
@@ -96,43 +95,44 @@ Map the auth library's states carefully: `undefined` while it loads, `null` when
 ```tsx
 // app/settings/billing/page.tsx
 import {
-  Checkout,
-  CreditMeter,
-  FeatureMeter,
-  IncludedFeatures,
-  Invoices,
-  PaymentMethods,
-  PlanManager,
-  SchematicStyles,
-  UpcomingBill,
-  Unsubscribe,
+  CheckoutLauncherProvider, CreditUsage, IncludedFeatures, Invoices, MeteredFeatures,
+  PaymentMethods, PlanManager, SchematicStyles, UnsubscribeButton, UpcomingBill,
+  useCheckoutLauncher,
 } from "@schematichq/schematic-components/elements";
 
 export default function BillingPage() {
   return (
-    <>
+    <CheckoutLauncherProvider>
       <SchematicStyles />
-      <PlanManager />
+      <Portal />
+    </CheckoutLauncherProvider>
+  );
+}
+
+function Portal() {
+  const { open } = useCheckoutLauncher();
+  return (
+    <>
+      <PlanManager onChangePlan={() => open()} />
       <IncludedFeatures />
+      <MeteredFeatures onAddMore={() => open({ steps: { initial: "usage" } })} />
+      <CreditUsage onBuyMore={() => open({ steps: { initial: "credits" } })} />
       <UpcomingBill />
       <PaymentMethods />
-      <Invoices showStatus />
-      <FeatureMeter />
-      <CreditMeter />
-      <Unsubscribe variant="link" />
-      <Checkout />
+      <Invoices />
+      <UnsubscribeButton onManagePlan={() => open()} />
     </>
   );
 }
 ```
 
-Render `<SchematicStyles />` once. Mount `<Checkout />` once anywhere under the provider; Plan Manager, Credit Meter, Feature Meter, and Pricing Table open it. Drop any component the user does not need; each stands alone. Props per component are on its page: [Invoices](/components/drop-in/invoices), [Upcoming Bill](/components/drop-in/upcoming-bill), [Payment Methods](/components/drop-in/payment-methods), [Included Features](/components/drop-in/included-features), [Plan Manager](/components/drop-in/plan-manager), [Credit Meter](/components/drop-in/credit-meter), [Feature Meter](/components/drop-in/feature-meter), [Pricing Table](/components/drop-in/pricing-table), [Checkout](/components/drop-in/checkout), [Unsubscribe](/components/drop-in/unsubscribe). Append `.md` to any of those URLs for Markdown.
+Render `<SchematicStyles />` once. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add more, Buy more, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`. Drop any component the user does not need; each stands alone. Props per component are on its page: [Plan Manager](/components/drop-in/plan-manager), [Pricing Table](/components/drop-in/pricing-table), [Checkout](/components/drop-in/checkout), [Included Features](/components/drop-in/included-features), [Metered Features](/components/drop-in/metered-features), [Credit Usage](/components/drop-in/credit-usage), [Upcoming Bill](/components/drop-in/upcoming-bill), [Payment Methods](/components/drop-in/payment-methods), [Invoices](/components/drop-in/invoices), [Unsubscribe Button](/components/drop-in/unsubscribe-button). Append `.md` to any of those URLs for Markdown.
 
 For a public pricing page, render `<PricingTable onSelectPlan={…} />` under a provider that has only the publishable key.
 
 ### 4b. Build your own UI (when the user asks for it)
 
-One hook per resource, one derivation each, and the user's own JSX. Start from the [Recipes](/components/build-your-own/recipes) and the [Hooks reference](/components/build-your-own/hooks); adapt the reference code to the app's design system rather than copying it verbatim. Keep the derivations (`deriveInvoiceList`, `derivePlanSummary`, and the rest) as imports; they carry the display rules and their tests. For purchases, use `useCheckout` or mount the drop-in `<Checkout />` and call `useCheckout().open()`.
+One hook per resource, one derivation each, and the user's own JSX. The hooks come from `@schematichq/schematic-react` and the derivations from `@schematichq/schematic-components/elements`. Start from the [Hooks reference](/components/build-your-own/hooks) and adapt the code to the app's design system rather than copying it verbatim. Keep the derivations (`derivePlanManager`, `deriveIncludedFeatures`, `deriveMeteredFeatures`, `deriveCreditUsage`, `deriveUpcomingInvoice`, `derivePaymentMethods`, `deriveInvoiceList`, `deriveUnsubscribe`) as imports; they carry the display rules and their tests. For writes, use the handles: `usePaymentMethods()` returns `setDefault` and `remove`, `useSetupIntent()` starts adding a card, and `useUnsubscribe()` returns `unsubscribe`. For purchases, use `useCheckout` or mount `CheckoutLauncherProvider` and call `useCheckoutLauncher().open()`.
 
 ### 5. Theme it
 
@@ -152,14 +152,14 @@ The full token list is on [Styling and Theming](/components/drop-in/styling). Do
 
 ### 6. Verify
 
-Run the app, sign in as a company that has a subscription, and open the billing page. Every card renders, Plan Manager shows the plan, and Change plan opens Checkout.
+Run the app, sign in as a company that has a subscription, and open the billing page. Every card renders, Plan Manager shows the plan, and Change plan opens Checkout through the launcher.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | Every card reports `failed with status 404` | Company context is not enabled for the account | Ask Schematic to enable it |
 | Cards stay in the loading state | `session` is `undefined` | The auth mapping never resolves; check the loaded flag |
 | Cards are empty after sign-in | `session` is `null` | The mapping returns `null` for a signed-in user |
-| `A session is required to read data` | A hook rendered outside the provider | Move the provider above the route |
+| `Schematic billing hooks need a SchematicProvider with a session…` | A component rendered outside the provider, or the provider has no `publishableKey` | Move the provider above the route and pass the publishable key |
 | 401 on the token endpoint | Endpoint not behind auth, or the secret key is missing | Check `SCHEMATIC_SECRET_KEY` on the server |
 | Checkout totals differ from Stripe | The app computed totals itself | Render `snapshot` from `useCheckout`; never sum client-side |
 
@@ -173,17 +173,17 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 
 ## Reference
 
-| Component | Hook | Page |
-| --- | --- | --- |
-| `<Checkout/>` | `useCheckout` | /components/drop-in/checkout |
-| `<PlanManager/>` | `useCompany` | /components/drop-in/plan-manager |
-| `<CreditMeter/>` | `useCreditBalances` | /components/drop-in/credit-meter |
-| `<PricingTable/>` | `useCatalog` | /components/drop-in/pricing-table |
-| `<FeatureMeter/>` | `useFeatureUsage` | /components/drop-in/feature-meter |
-| `<IncludedFeatures/>` | `useFeatureUsage` | /components/drop-in/included-features |
-| `<UpcomingBill/>` | `useUpcomingInvoice` | /components/drop-in/upcoming-bill |
-| `<PaymentMethods/>` | `usePaymentMethods` | /components/drop-in/payment-methods |
-| `<Invoices/>` | `useInvoices` | /components/drop-in/invoices |
-| `<Unsubscribe/>` | `useUnsubscribe` | /components/drop-in/unsubscribe |
+| Component | Hooks | Derivation | Page |
+| --- | --- | --- | --- |
+| `<Checkout/>` | `useCheckout` | | /components/drop-in/checkout |
+| `<PlanManager/>` | `useCompany`, `useFeatureUsage`, `useCreditBalances` | `derivePlanManager` | /components/drop-in/plan-manager |
+| `<PricingTable/>` | `useCatalog` | | /components/drop-in/pricing-table |
+| `<IncludedFeatures/>` | `useFeatureUsage` | `deriveIncludedFeatures` | /components/drop-in/included-features |
+| `<MeteredFeatures/>` | `useFeatureUsage`, `useFeatureUserUsage` | `deriveMeteredFeatures` | /components/drop-in/metered-features |
+| `<CreditUsage/>` | `useCreditBalances`, `useCreditUserUsage` | `deriveCreditUsage` | /components/drop-in/credit-usage |
+| `<UpcomingBill/>` | `useUpcomingInvoice` | `deriveUpcomingInvoice` | /components/drop-in/upcoming-bill |
+| `<PaymentMethods/>` | `usePaymentMethods`, `useSetupIntent` | `derivePaymentMethods` | /components/drop-in/payment-methods |
+| `<Invoices/>` | `useInvoices` | `deriveInvoiceList` | /components/drop-in/invoices |
+| `<UnsubscribeButton/>` | `useCompany`, `useFeatureUsage`, `useUnsubscribe` | `deriveUnsubscribe` | /components/drop-in/unsubscribe-button |
 
 Feature flags and entitlement checks use the same provider: `useSchematicFlag`, `useSchematicEntitlement`, `useSchematicPlan`. See the [React SDK](/developer_resources/sdks/react).

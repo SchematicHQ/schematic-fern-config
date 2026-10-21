@@ -32,7 +32,7 @@ Adding a method renders Stripe's Payment Element from `@stripe/stripe-js` and `@
 | `showHeader` | `true` | The "Payment Details" heading, and the expiry warning beside it. |
 | `showExpiration` | `true` | The warning when the default card has fewer than four months left. |
 | `allowEdit` | `true` | The Edit (or Add) action on the pill, and the dialog behind it. `false` shows the method on file with no way to change it. |
-| `headingLevel` | `2` | The heading's level, `2` through `6`, so the card fits your page's outline. |
+| `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
 | `checkoutSettings` | | What the Add form collects beyond the payment fields. See [Checkout settings](#checkout-settings). |
 | `checkoutPrefill` | | Values the Add form starts with. See [Checkout settings](#checkout-settings). |
 | `className` | | Added to the root alongside `schematic-card schematic-payment-methods`. |
@@ -160,7 +160,7 @@ This is what the card renders, for a host styling it without `SchematicStyles`. 
 
 The dialog is a native `<dialog class="schematic-dialog schematic-payment-methods__dialog">` with a `schematic-dialog__header`, `schematic-dialog__title`, and `schematic-dialog__close`, then a `schematic-dialog__body`. Inside it:
 
-- **The pill:** carries `schematic-payment-methods__remove-current`.
+- **The pill:** its Remove button carries `schematic-payment-methods__remove-current`.
 - **The toggle:** `schematic-payment-methods__choose` holds a `schematic-payment-methods__choose-label` and a `schematic-payment-methods__chevron`.
 - **The list:** `schematic-payment-methods__list` holds `schematic-payment-methods__row` items, each with `schematic-payment-methods__expires`, `schematic-payment-methods__set-default`, and `schematic-payment-methods__remove`.
 - **Add new:** `schematic-payment-methods__add-new`.

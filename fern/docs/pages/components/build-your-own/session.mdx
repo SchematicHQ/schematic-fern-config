@@ -17,18 +17,22 @@ const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY })
 
 export async function issueToken(companyId: string) {
   const response = await client.accesstokens.issueTemporaryAccessToken({
-    resourceType: "company",
     lookup: { id: companyId }, // the lookup matches how you key companies
   });
-  return { token: response.data?.token, expiresAt: response.data?.expiredAt };
+  return { token: response.data.token, expiresAt: response.data.expiredAt };
 }
 ```
   </Tab>
   <Tab title="Python">
 ```python
+import os
+
+from schematic import Schematic
+
+client = Schematic(os.environ["SCHEMATIC_SECRET_KEY"])
+
 response = client.accesstokens.issue_temporary_access_token(
-    resource_type="company",
-    lookup={"id": company_id},
+    lookup={"id": company_id},  # the lookup matches how you key companies
 )
 token, expires_at = response.data.token, response.data.expired_at
 ```
@@ -43,7 +47,7 @@ curl -X POST https://api.schematichq.com/temporary-access-tokens \
   </Tab>
 </Tabs>
 
-Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
+The SDKs fill in the `company` resource type themselves; a raw request states it as `resource_type`. Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
 
 ## The session
 
@@ -72,7 +76,15 @@ Auth libraries often collapse the last two. Clerk reports `undefined` both while
 
 ### Token providers and refresh
 
-`token` is a string or a function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt, company, user }`. With an expiry the client stops reusing the token once it passes and mints again on the next request. Stating `company` or `user` lets the client check that the token it received is for the pair it asked for. Concurrent readers share one in-flight resolution.
+`token` is a string or an async function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt, company, user }`. With an expiry the client stops reusing the token once it passes and mints again on the next request. Stating `company` or `user` lets the client check that the token it received is for the pair it asked for. Concurrent readers share one in-flight resolution.
+
+```ts
+async function fetchAccessToken() {
+  const response = await fetch("/api/schematic-token", { method: "POST" });
+  const { token, expiresAt } = await response.json();
+  return { token, expiresAt };
+}
+```
 
 ## Using the client directly
 
@@ -87,10 +99,29 @@ const billing = new SchematicBillingClient(session);
 const { invoices, count } = await billing.fetchInvoices({ limit: 12, offset: 0 });
 ```
 
-`apiUrl` and `additionalHeaders` on the client route requests to a staging or self-hosted API; a provider built from a pre-built client inherits them.
+The client has one method per resource (`fetchCompany`, `fetchFeatureUsage`, `fetchCreditBalances`, `fetchUpcomingInvoice`, `fetchPaymentMethods`, `fetchInvoices`) and the writes the hooks call (`updatePaymentMethod`, `deletePaymentMethod`, `createSetupIntent`, `cancelSubscription`). `apiUrl` and `additionalHeaders` in its options route requests to a staging or self-hosted API. Pass a client you built as `billingClient` on `SchematicProvider`, and the hooks read through it.
 
 ## Server rendering
 
-`fetchBillingData(client, { invoices: { includePending: true } })` returns an `initialData` bag the provider seeds from, so rows show on the first render even though auth usually resolves a render later. Pass the same query your component asks, or the seed answers a question nothing asked and the component fetches again.
+`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render even though auth usually resolves a render later. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
 
-The seed records which company it fetched for. Rows stamped with a different company than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. Pass `locale` explicitly for a server-rendered page.
+```tsx
+import { SchematicBillingClient, fetchBillingData } from "@schematichq/schematic-js";
+
+const client = new SchematicBillingClient({ session: { company: company.id, token } });
+const initialData = await fetchBillingData(client, {
+  names: ["upcomingInvoice", "invoices"],
+  invoices: { includePending: true },
+});
+
+<SchematicProvider
+  publishableKey="pk_…"
+  session={{ company: company.id, token: fetchAccessToken }}
+  initialData={initialData}
+  locale="en-US"
+>
+```
+
+Pass the same invoice query your component asks, or the seed answers a question nothing asked and the component fetches again. A resource that fails on the server is left out of the bag rather than thrown, and the client loads it as usual. For a page of drop-ins, `billingResources(UpcomingBill, Invoices)` from `@schematichq/schematic-components/elements` collects the names each one reads.
+
+The seed records which company it fetched for. Rows stamped with a different company than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. State the session on the first client render, since a stamped seed waits for its session before it paints. Pass `locale` explicitly for a server-rendered page, so the server and the browser format dates and amounts the same way.

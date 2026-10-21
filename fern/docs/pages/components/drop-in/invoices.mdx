@@ -31,8 +31,8 @@ import {
 | `collapsible` | `true` | Collapse to `limit` rows behind "See more". |
 | `showHeader` | `true` | The "Invoices" heading. |
 | `showDate`, `showAmount` | `true` | The date and the amount on each row. |
-| `headingLevel` | `2` | The heading's level, `2` through `6`, so the card fits your page's outline. |
-| `query` | `{}` | Which rows the server returns. `{ includePending: true }` includes unpaid invoices that are not yet due. |
+| `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
+| `query` | | Which rows the server returns. `{ includePending: true }` includes unpaid invoices that are not yet due. |
 | `className` | | Added to the root alongside `schematic-card schematic-invoices`. |
 | `locale` | | BCP 47 tag for date and currency formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
@@ -100,8 +100,8 @@ This is what the component renders, for a host styling it without `SchematicStyl
 
   <div class="schematic-invoices__actions">
     <button class="schematic-link-button schematic-invoices__see-more" aria-expanded="false">
-      <span class="schematic-invoices__chevron" aria-hidden="true"></span>
-      See more
+      <i class="schematic-icon schematic-icon--chevron-down schematic-chevron schematic-invoices__chevron" aria-hidden="true"></i>
+      <span class="schematic-link-button__label">See more</span>
     </button>
     <!-- once every loaded row is showing and the server has more -->
     <button class="schematic-link-button schematic-invoices__load-more">Load more</button>
