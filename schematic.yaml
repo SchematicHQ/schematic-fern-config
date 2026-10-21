@@ -1251,6 +1251,12 @@ components:
           format: date-time
         currency:
           $ref: '#/components/schemas/Currency'
+        discount:
+          type: integer
+          description: >-
+            What discounts took off the subtotal, in minor units of the
+            invoice's currency. Zero on an invoice Schematic issued.
+          format: int64
         document_state:
           allOf:
             - $ref: '#/components/schemas/InvoiceDocumentState'
@@ -1279,6 +1285,12 @@ components:
           maxItems: 1000
         number:
           type: string
+          nullable: true
+        pdf_url:
+          type: string
+          description: >-
+            The billing provider's PDF of the invoice. Null on an invoice
+            Schematic issued, which downloads its PDF from this API.
           nullable: true
         period_end:
           type: string
@@ -1315,6 +1327,10 @@ components:
         subtotal:
           type: integer
           format: int64
+        tax:
+          type: integer
+          description: In minor units of the invoice's currency.
+          format: int64
         terms:
           allOf:
             - $ref: '#/components/schemas/BillingInvoiceTermsResponseData'
@@ -1341,8 +1357,10 @@ components:
         - status
         - subtotal
         - total
+        - discount
         - lines
         - settlements
+        - tax
       title: BillingInvoiceDetailResponseData
     BillingInvoiceLineResponseData:
       type: object
@@ -1363,8 +1381,14 @@ components:
             What the line bills for: the product, plan, add-on or credit. Null
             when the line has no subscription line behind it.
           nullable: true
+        external_id:
+          type: string
+          description: The billing provider's line ID. Null on an invoice Schematic issued.
+          nullable: true
         id:
           type: string
+          description: Null on a Stripe invoice line.
+          nullable: true
         kind:
           $ref: '#/components/schemas/InvoiceLineKind'
         period_end:
@@ -1391,7 +1415,6 @@ components:
       required:
         - amount
         - charge_ids
-        - id
         - kind
         - taxable
       title: BillingInvoiceLineResponseData
@@ -1504,6 +1527,8 @@ components:
           $ref: '#/components/schemas/Collector'
         id:
           type: string
+          description: Null on a payment Stripe recorded.
+          nullable: true
         reference:
           type: string
           nullable: true
@@ -1513,7 +1538,6 @@ components:
       required:
         - amount
         - collector
-        - id
         - settled_at
       title: BillingInvoiceSettlementResponseData
     BillingInvoiceTermsResponseData:
