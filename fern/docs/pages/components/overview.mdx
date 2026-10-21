@@ -65,7 +65,7 @@ Each component imports from `@schematichq/schematic-components/elements` and ren
 | --- | --- | --- |
 | `<Checkout/>` | `useCheckout` | The persisted checkout |
 | [`<PlanManager/>`](/components/drop-in/plan-manager) | `useCompany`, `useFeatureUsage`, `useCreditBalances` | Plan, price, add-ons, usage-based charges, plan credits, and notices like a trial ending or a scheduled downgrade |
-| `<PricingTable/>` | `useCatalog` | Plans and add-ons, public or company |
+| [`<PricingTable/>`](/components/drop-in/pricing-table) | `useCatalog`, `useCompany` | Plans and add-ons, public or company |
 | [`<IncludedFeatures/>`](/components/drop-in/included-features) | `useFeatureUsage` | Every entitlement on the plan, with usage against its limit |
 | [`<MeteredFeatures/>`](/components/drop-in/metered-features) | `useFeatureUsage`, `useFeatureUserUsage` | A meter per metered feature, its price and tiers, and usage by user |
 | [`<CreditUsage/>`](/components/drop-in/credit-usage) | `useCreditBalances`, `useCreditUserUsage` | Balance per credit, the grants behind it, auto top-up, and usage by user |

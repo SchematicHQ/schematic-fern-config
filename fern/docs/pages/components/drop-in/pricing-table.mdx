@@ -1,10 +1,10 @@
 ---
 title: Pricing Table
-description: Plans and add-ons with a period toggle and currency picker. Works on a public page with a publishable key, or inside the portal with the company's current plan marked.
+description: Plans and add-ons with a period toggle and currency picker. Works on a public page with a publishable key, or signed in with the company's current plan marked.
 slug: components/drop-in/pricing-table
 ---
 
-Plans and add-ons with a period toggle, a currency picker, entitlement summaries, and a select-plan action that opens [Checkout](/components/drop-in/checkout). On a public page it needs only your publishable key. Inside the portal, with a session, it marks the current plan and knows which changes are valid.
+Plans and add-ons with a period toggle, a currency picker, included credits, and entitlement summaries. On a page nobody has signed in to it needs only your publishable key. Signed in, it marks the company's current plan and holds back the plans the company cannot move to. The table opens nothing itself: each card's action calls `onSelectPlan`, which can open [Checkout](/components/drop-in/checkout) or send a visitor to sign up.
 
 ![Pricing table](../../../assets/images/components/components-standalone-pricing-table.png)
 
@@ -18,14 +18,41 @@ import { PricingTable, SchematicStyles } from "@schematichq/schematic-components
 
 <SchematicProvider publishableKey="pk_…">
   <SchematicStyles />
-  <PricingTable onSelectPlan={(plan, period) => router.push(`/signup?plan=${plan.id}&period=${period}`)} />
+  <PricingTable
+    onSelectPlan={({ id, period }) => router.push(`/signup?plan=${id}&period=${period ?? ""}`)}
+  />
 </SchematicProvider>
 ```
   </Tab>
   <Tab title="In the portal">
 ```tsx
-// Under a provider with a session, select plan opens <Checkout/> for the company.
-<PricingTable showAddOns />
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  CheckoutLauncherProvider,
+  PricingTable,
+  SchematicStyles,
+  useCheckoutLauncher,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider publishableKey={publishableKey} session={session}>
+  <SchematicStyles />
+  <CheckoutLauncherProvider>
+    <Plans />
+  </CheckoutLauncherProvider>
+</SchematicProvider>;
+
+function Plans() {
+  const { open } = useCheckoutLauncher();
+  return (
+    <PricingTable
+      onSelectPlan={({ kind, id, period, currency }) =>
+        kind === "plan"
+          ? open({ selection: { planId: id, period: period ?? undefined, currency } })
+          : open({ steps: { initial: "addOns" } })
+      }
+    />
+  );
+}
 ```
   </Tab>
 </Tabs>
@@ -34,39 +61,114 @@ import { PricingTable, SchematicStyles } from "@schematichq/schematic-components
 
 | Prop | Default | Effect |
 | --- | --- | --- |
-| `catalogId` | the environment's default | Which catalog to show. |
-| `showPeriodToggle` | `true` | Monthly and yearly toggle, when both exist. |
-| `showCurrencyPicker` | `true` | Currency picker, when plans carry more than one. |
-| `showAddOns` | `true` | Add-on cards under the plans. |
-| `showFeatureDescriptions` | `false` | Feature descriptions under each entitlement. |
-| `onSelectPlan` | opens `<Checkout/>` | Override the select-plan action. Required on a public page. |
+| `catalogId` | | The catalog to show; the environment's when absent. |
+| `onSelectPlan` | | A card's action calls this with the selection. |
+| `callToActionUrl`, `callToActionTarget` | | A card's action links here when there is no `onSelectPlan`. |
+| `period`, `defaultPeriod` | | The period shown, `month`, `quarter`, or `year`, controlled or initial. |
+| `onPeriodChange` | | Called when the reader picks a period. |
+| `currency`, `defaultCurrency` | | The currency shown, lowercase, controlled or initial. |
+| `onCurrencyChange` | | Called when the reader picks a currency. |
+| `showHeader` | `true` | "Plans" and "Add-ons" above their cards. |
+| `showPlans` | `true` | The plans and the custom plan. |
+| `showAddOns` | `true` | The add-ons. |
+| `showPeriodToggle` | `true` | The period toggle, when there is more than one period. |
+| `showCurrencySelector` | `true` | The currency picker, when there is more than one currency. |
+| `showDescription` | `true` | Each card's description. |
+| `showEntitlements` | `true` | Each card's features. |
+| `showFeatureIcons` | `true` | Each feature's and credit's icon. |
+| `showFeatureDescriptions` | `false` | Each feature's description. |
+| `showInclusionText` | `true` | "Everything in {plan}, plus" above each plan's features but the first. |
+| `showCredits` | `true` | Each plan's included credits, and the credits per use on its features. |
+| `showZeroPriceAsFree` | `false` | A plan priced at zero reads "Free". |
+| `showHardLimit` | `false` | An info tip with the hard limit on features billed past it. |
+| `showWarningThresholdAsLimit` | `false` | An entitlement's warning threshold in place of its limit. |
+| `headingLevel` | `2` | The level of "Plans" and "Add-ons"; card names sit one below. |
 | `className`, `locale` | | Root class; BCP 47 tag for formatting. |
-| `strings` | | Copy for this card by key. |
+| `strings` | | Copy for this table by key; wins over the provider's. |
+
+`onSelectPlan` receives the card the reader chose, priced as it was shown:
+
+```ts
+interface PricingTableSelection {
+  kind: "plan" | "addOn";
+  id: string;                                  // the plan's or add-on's id
+  priceId: string | null;                      // the price the card shows
+  period: "month" | "quarter" | "year" | null; // null for a one-time add-on
+  currency: string;
+  trialDays: number | null;                    // a trial the plan offers
+}
+```
+
+Without `onSelectPlan`, `callToActionUrl` makes each action a link; without either, cards have no action. The custom plan links to the catalog's own URL, and a blocked downgrade to the account's. Each card shows four features before "See all". When `onSelectPlan` opens a checkout that changes the plan without leaving the page, call the function [`useInvalidateBillingData`](/components/build-your-own/hooks#useinvalidatebillingdata) returns once it is done, and the table reloads with the new current plan.
 
 ## Public and company modes
 
-The table follows the credential on the provider. With a publishable key alone it reads the public catalog: plans, add-ons, and prices, loaded fast and with no customer data. With a session it reads the company's view of the same catalog, which adds `current` to the plan they are on and `valid` to each change the purchase rules allow. Plans that lack the selected currency stay hidden, and the period toggle only offers periods the catalog prices.
+The table reads the catalog through [`useCatalog`](/components/build-your-own/hooks#usecatalog), which follows the session on the provider. With no session, or before your auth resolves, it reads the public catalog with the provider's publishable key: plans, add-ons, and prices, with no customer data, and every card's action is "Choose plan". Once a session starts it swaps to the company's view of the same catalog, which says which plan is current and which changes the purchase rules allow.
+
+In company mode the table also reads the company, for the period its subscription bills in: the table opens on that period, and the current plan is marked current only in it. A company that fails to load costs only that. Each card's action follows the company's standing:
+
+| Action | Shows when |
+| --- | --- |
+| "Current plan" | The company's plan in the period shown. No button. |
+| "Choose plan" | Any other plan, filled above the current plan and outlined below it. |
+| "Remove add-on", "Change add-on" | An add-on the company holds, in this period or another. |
+| "Over plan limit" | The company's usage is over a limit the plan would set. Disabled, with the features named. |
+| The account's downgrade text | A downgrade the account does not allow in self-service. Links to the account's URL. |
+| Disabled "Choose plan" | The company cannot check out. |
+
+In either mode, a card with prices but none in the selected currency is left out, and a recurring one with none in the selected period. The period toggle offers only the periods the catalog prices, months before quarters before years, and a one-time add-on is priced once.
+
+A 404 reads "Plans are not available for this account.", because that status means the account is not enabled for catalogs. Every other failure reads "Plans could not be loaded." with "Try again".
+
+Server-rendered, prefetch with `fetchBillingData(client, { names: billingResources(PricingTable) })`. A resource the client cannot read, the company's view with no session or the public catalog with no key, is left out rather than failing the page.
 
 ## Markup
 
+This is what the component renders, for a host styling it without `SchematicStyles`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
+
 ```html
-<div class="schematic-card schematic-pricing-table" data-state="ready" data-mode="company">
-  <div class="schematic-pricing-table__toggle" role="tablist">…</div>
-  <div class="schematic-pricing-table__plans">
-    <article class="schematic-pricing-table__plan" data-current="true" data-valid="true">
-      <h3 class="schematic-pricing-table__plan-name">Starter</h3>
-      <p class="schematic-pricing-table__price">$30 / month</p>
-      <ul class="schematic-pricing-table__entitlements">…</ul>
-      <button class="schematic-cta schematic-pricing-table__select">Current plan</button>
-    </article>
+<div class="schematic-element schematic-pricing-table" data-state="ready">
+  <div class="schematic-pricing-table__header">
+    <h2 class="schematic-pricing-table__heading">Plans</h2>
+    <div class="schematic-pricing-table__controls">
+      <select class="schematic-select" aria-label="Currency">…</select>
+      <div class="schematic-toggle" role="group" aria-label="Billing period">
+        <button class="schematic-toggle__option" aria-pressed="true">Billed monthly</button>
+        <button class="schematic-toggle__option" aria-pressed="false">Billed yearly</button>
+      </div>
+    </div>
   </div>
+  <ul class="schematic-pricing-table__plans" aria-label="Plans">
+    <li class="schematic-card schematic-plan-card schematic-plan-card--active" data-plan-id="plan_…">
+      <div class="schematic-plan-card__header">
+        <h3 class="schematic-plan-card__name">Starter</h3>
+        <p class="schematic-plan-card__description">…</p>
+        <div class="schematic-plan-card__price">$30.00<sub class="schematic-plan-card__period">/mo</sub></div>
+        <ul class="schematic-plan-card__credits">…</ul>
+        <span class="schematic-badge schematic-plan-card__badge">Active</span>
+      </div>
+      <div class="schematic-plan-card__body">
+        <ul class="schematic-plan-card__entitlements">
+          <li class="schematic-plan-card__inclusion">Everything in Free, plus</li>
+          <li class="schematic-plan-card__entitlement">…</li>
+        </ul>
+        <button class="schematic-link-button schematic-plan-card__show-all" aria-expanded="false">…</button>
+        <div class="schematic-plan-card__current">Current plan</div>
+      </div>
+    </li>
+    <li class="schematic-card schematic-plan-card schematic-plan-card--custom">…</li>
+  </ul>
+  <h2 class="schematic-pricing-table__heading">Add-ons</h2>
+  <ul class="schematic-pricing-table__plans" aria-label="Add-ons">…</ul>
 </div>
 ```
 
+Every other card ends in a `schematic-plan-card__action` holding a `schematic-cta` button, or a link with `callToActionUrl`. While loading, the root carries `data-state="pending"` and `aria-busy="true"` with a `schematic-skeleton`; on a failure with nothing to show, `data-state="error"` and a `schematic-status` row.
+
 ## Localizing it
 
-Keys: `pricingTableMonthly`, `pricingTableYearly`, `pricingTableSavings`, `pricingTableCurrent`, `pricingTableSelect`, `pricingTableUpgrade`, `pricingTableDowngrade`, `pricingTableContactSales`, `pricingTableUsageBased`, `pricingTableFree`, `pricingTableAddOns`, `retry`.
+The table's copy is under `pricingTable*`, among them `pricingTablePlans`, `pricingTableAddOns`, `pricingTableBilledMonthly`, `pricingTableBilledQuarterly`, `pricingTableBilledYearly`, `pricingTableChoosePlan`, `pricingTableChooseAddOn`, `pricingTableChangeAddOn`, `pricingTableRemoveAddOn`, `pricingTableCurrentPlan`, `pricingTableOverLimit`, `pricingTableActive`, `pricingTableTrialLeft`, `pricingTableUsageBased`, `pricingTableFree`, `pricingTableCustomPlan`, `pricingTableEverythingIn`, `pricingTableSeeAll`, `pricingTableError`, and `pricingTableUnavailable`. It shares `usageUnits`, `usagePerUnit`, `usagePerPackage`, `usageUnlimited`, and the tier and hard-limit tips with the usage components, the period names `periodDay` through `periodYear` and their `*Short` suffixes, and `retry`. See [Localization](/components/drop-in/localization) for how the chain works.
 
 ## Build it yourself
 
-[`useCatalog`](/components/build-your-own/hooks#usecatalog) returns the catalog in either mode; `derivePricingTable` takes your period and currency selection and returns the cards plus the valid option sets.
+[`useCatalog`](/components/build-your-own/hooks#usecatalog) returns the catalog in either mode, tagged with its `source`. [`derivePricingTable`](/components/build-your-own/derivations#pricing-table) takes your period and currency selection, and the company when signed in, and returns the periods and currencies on offer, a card per plan and add-on with its price and action, and the custom plan. The [pricing page recipe](/components/build-your-own/recipes#pricing-page) puts them together.

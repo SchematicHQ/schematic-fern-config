@@ -17,7 +17,7 @@ interface ResourceHandle<T> {
 
 The three states a component renders follow from those fields. `data === undefined && isPending` is the first load. `data === undefined && error` is a failure with nothing to show. `data !== undefined` is ready, and a set `error` alongside it is a failure to report without replacing what is there.
 
-Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
+Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead, apart from [`useCatalog`](#usecatalog), which reads the public catalog meanwhile. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
 
 The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
 
@@ -62,10 +62,18 @@ The company and what it is subscribed to, read from `GET /company`:
 ## useCatalog
 
 ```ts
-function useCatalog(options?: { catalogId?: string }): ResourceHandle<Catalog>;
+function useCatalog(options?: { catalogId?: string }): ResourceHandle<CatalogView>;
+
+type CatalogView =
+  | { source: "company"; catalog: Catalog }
+  | { source: "public"; catalog: PublicCatalog };
 ```
 
-Plans, add-ons, and credit bundles with prices per period and currency, tier shapes, and entitlement summaries. The mode follows the credential: a publishable key alone reads the public catalog; a session reads the company's view, which adds `current` to the plan they are on and `valid` (with a reason when false) to each change the purchase rules allow.
+Plans, add-ons, and credit bundles with prices per period and currency, tier shapes, and entitlement summaries, for the environment's catalog or the one `catalogId` names. The hook keys by value, so an inline object literal is fine.
+
+The source follows the session. With a session it reads the company's view from `GET /catalog/view` (or `/catalogs/:catalog_id/view`), which adds each plan's and add-on's standing: `current`, `valid` with an `invalidReason` and `usageViolations` when false, and `companyCanTrial`, plus `capabilities.checkout` for whether the company can check out at all. With no session, or while the session is still `undefined`, it reads `GET /public/catalog` (or `/public/catalogs/:catalog_id`) with the provider's publishable key, so unlike the other hooks it does not wait on your auth. A session starting swaps the public catalog for the company's view. `data.source` says which one you have; the public catalog carries no standing, so check it before reading `current` or `valid`.
+
+A 404 from either means the account is not enabled for catalogs. The [Pricing Table](/components/drop-in/pricing-table) reads this, and [`derivePricingTable`](/components/build-your-own/derivations#pricing-table) takes it whole.
 
 ## useFeatureUsage
 
