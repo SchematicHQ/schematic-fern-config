@@ -109,6 +109,8 @@ Sending the event after the response reaches your user keeps Schematic off the r
 | `reasoning_tokens` | No | Reasoning tokens, priced at the reasoning rate on top of output |
 | `requests` | No | How many calls this event covers. Defaults to 1 |
 | `reservation_id` | No | Settles a credit reservation, see [Leases and reservations](/billing/credit-leases-and-reservations) |
+| `cost` | No | What the call cost you, as a decimal string such as `"0.01245"` with up to 8 decimal places. Takes the place of the list price, see [Track what calls cost you](#track-what-calls-cost-you) |
+| `currency` | No | The lowercase ISO 4217 code of `cost`, such as `usd`. Defaults to `usd` |
 
 ### Count input tokens the way Schematic does
 
@@ -208,6 +210,29 @@ Chat and other multi-turn features resend the same system prompt and conversatio
 When a cache entry expires between turns, the next turn reads nothing from the cache. On Anthropic that turn writes the prompt to the cache again and reports it as cache creation, so it burns at the cache creation rate. OpenAI and Gemini report no cache creation tokens, so on those providers the same tokens arrive as ordinary input.
 
 One-shot features such as classification, extraction or a single summary send a different, often short prompt each time. They rarely repeat a prompt long enough to cache, so their events carry input and output only, and those two rates cover them.
+
+## Track what calls cost you
+
+Apart from the credits it burns, every inference event records what the call cost you, so you can check that your rates cover your model spend. An event takes its cost from the first of these that applies:
+
+1. The `cost` your app sent, in the event's `currency`. Send it when you know the exact amount, such as a negotiated rate or a cost your model gateway reports.
+2. Schematic's list price for the event's `provider` and `response_model` at the time of the call. Schematic keeps list prices in USD for Anthropic and OpenAI models, and applies them to the token counts the same way the credit burn applies your rates.
+3. Neither, and the event is unpriced. That happens for models Schematic has no list price for, including every Gemini model, and for an event that names a currency other than `usd` without sending a cost.
+
+When a list price changes or Schematic corrects one, Schematic reprices the events it already priced at the old rate. An event that carried its own cost keeps it. Cost never changes the credits an event burns.
+
+To read a company's cost for a period, call [Get company inference cost](/api-reference/companies/get-company-inference-cost), or ask the Schematic MCP server, which answers with its `get_company_inference_cost` tool:
+
+```bash title="cURL"
+curl https://api.schematichq.com/companies/comp_xxxxxxxx/inference-cost \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+```
+
+With no `start_time` and `end_time`, the period is the company's current billing period, or the current calendar month when it has no subscription. To read another period, pass both, at most 366 days apart. The response gives:
+
+- `costs`, the summed cost per currency. Schematic never converts between currencies, so events in two currencies come back as two entries.
+- `by_model`, the cost and event count per provider and response model.
+- `unpriced_event_count`, the events with no known cost. They add nothing to `costs`, so a count above 0 means the real cost is higher than reported. Send `cost` on those events to close the gap.
 
 ## Check that it works
 
