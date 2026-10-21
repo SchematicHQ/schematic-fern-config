@@ -1220,6 +1220,48 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingInvoiceAddressResponseData:
+      type: object
+      properties:
+        city:
+          type: string
+        country:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: string
+        postal_code:
+          type: string
+        state:
+          type: string
+      required:
+        - city
+        - country
+        - line1
+        - line2
+        - postal_code
+        - state
+      title: BillingInvoiceAddressResponseData
+    BillingInvoiceBillingDetailsResponseData:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/BillingInvoiceAddressResponseData'
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        tax_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingInvoiceTaxIDResponseData'
+          maxItems: 1000
+      required:
+        - tax_ids
+      title: BillingInvoiceBillingDetailsResponseData
     BillingInvoiceDetailResponseData:
       type: object
       properties:
@@ -1540,9 +1582,26 @@ components:
         - collector
         - settled_at
       title: BillingInvoiceSettlementResponseData
+    BillingInvoiceTaxIDResponseData:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/TaxIdType'
+        value:
+          type: string
+      required:
+        - type
+        - value
+      title: BillingInvoiceTaxIDResponseData
     BillingInvoiceTermsResponseData:
       type: object
       properties:
+        billing_details:
+          allOf:
+            - $ref: '#/components/schemas/BillingInvoiceBillingDetailsResponseData'
+          description: >-
+            Who invoices are addressed to. On an invoice, these are the details
+            copied when it was finalized. Null when the contract holds none.
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
         collector:
@@ -9012,6 +9071,8 @@ components:
           type: string
           nullable: true
           maxLength: 4
+        customer_billing_details:
+          $ref: '#/components/schemas/PaymentMethodBillingDetailsRequestBody'
         customer_external_id:
           type: string
           maxLength: 255
@@ -14415,6 +14476,20 @@ components:
       enum:
         - keep_serving
         - revoke_after
+    PaymentMethodBillingDetailsRequestBody:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/CustomerBillingAddress'
+        email:
+          type: string
+          nullable: true
+          maxLength: 255
+        phone:
+          type: string
+          nullable: true
+          maxLength: 255
+      title: PaymentMethodBillingDetailsRequestBody
     PaymentMethodRequestBody:
       type: object
       properties:
@@ -16222,7 +16297,16 @@ components:
           type: boolean
         note:
           type: string
+          description: >-
+            The message of the first blocking note, or of the first note when
+            none is blocking. Kept for clients that read a single note; prefer
+            notes.
           nullable: true
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanVersionMigrationPreviewNoteResponseData'
+          maxItems: 1000
         plan_version_id_from:
           type: string
           nullable: true
@@ -16234,9 +16318,29 @@ components:
         - company_id
         - has_billing_changes
         - has_custom_pricing
+        - notes
         - will_update_subscription
         - would_fail
       title: PlanVersionMigrationPreviewCompanyResponseData
+    PlanVersionMigrationPreviewNoteResponseData:
+      type: object
+      properties:
+        blocking:
+          type: boolean
+          description: Whether this note predicts that the company's migration would fail.
+        code:
+          allOf:
+            - $ref: '#/components/schemas/MigrationErrorCode'
+          description: >-
+            The error code the company's migration would fail or be skipped
+            with. Null for a note that is only informational.
+          nullable: true
+        message:
+          type: string
+      required:
+        - blocking
+        - message
+      title: PlanVersionMigrationPreviewNoteResponseData
     PlanVersionMigrationPreviewResponseData:
       type: object
       properties:
