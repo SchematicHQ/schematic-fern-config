@@ -17,56 +17,81 @@ Four steps take you from an empty page to a live billing portal for the signed-i
 ### 1. Install the packages
 
 ```sh
-npm install @schematichq/schematic-react @schematichq/schematic-components
+npm install @schematichq/schematic-react @schematichq/schematic-components @stripe/stripe-js @stripe/react-stripe-js
 ```
 
-The React package carries the provider and the hooks. The components package carries the drop-ins and the derivations the reference code uses.
+The React package carries the provider and the hooks. The components package carries the drop-ins and the derivations the reference code uses. The two Stripe packages are peers of the components; Checkout and Payment Methods load them when a payment form opens.
 
 ### 2. Mint access tokens on your server
 
-Components read a company's own billing state, so they authenticate with a short-lived, company-scoped temporary access token. Your server issues it with your secret key; the browser only ever sees the token.
+Components read a company's own billing state, so they authenticate with a short-lived, company-scoped temporary access token. Your server issues it with your secret key; the browser only ever sees the token. Put the endpoint behind your own auth and resolve the company from the signed-in session, never from the request.
 
 <Tabs>
   <Tab title="Node.js">
 ```typescript
+// GET /api/accessToken
 import { SchematicClient } from "@schematichq/schematic-typescript-node";
 
 const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
 
-// GET /api/accessToken, behind your own auth
 export async function GET() {
-  const session = await getSession();
+  const session = await getSession(); // your own auth
+  if (!session?.companyId) return new Response("Unauthorized", { status: 401 });
+
   const response = await client.accesstokens.issueTemporaryAccessToken({
-    resourceType: "company",
-    lookup: { id: session.companyId }, // your company keys
+    lookup: { id: session.companyId }, // a company key configured in Schematic
   });
   return Response.json({
-    accessToken: response.data?.token,
-    expiredAt: response.data?.expiredAt,
+    token: response.data.token,
+    expiresAt: response.data.expiredAt,
   });
 }
 ```
   </Tab>
   <Tab title="Python">
 ```python
+import os
+
 from schematic import Schematic
 
-client = Schematic(api_key=os.environ["SCHEMATIC_SECRET_KEY"])
+client = Schematic(os.environ["SCHEMATIC_SECRET_KEY"])
 
-def access_token(company_id: str):
+def access_token(company_id: str) -> dict:
     response = client.accesstokens.issue_temporary_access_token(
-        resource_type="company",
         lookup={"id": company_id},
     )
-    return {"accessToken": response.data.token, "expiredAt": response.data.expired_at}
+    return {
+        "token": response.data.token,
+        "expiresAt": response.data.expired_at.isoformat(),
+    }
 ```
   </Tab>
   <Tab title="Go">
 ```go
+import (
+    "os"
+
+    schematicgo "github.com/schematichq/schematic-go"
+    schematicclient "github.com/schematichq/schematic-go/client"
+    "github.com/schematichq/schematic-go/option"
+)
+
+client := schematicclient.NewSchematicClient(option.WithAPIKey(os.Getenv("SCHEMATIC_SECRET_KEY")))
+
 resp, err := client.Accesstokens.IssueTemporaryAccessToken(ctx, &schematicgo.IssueTemporaryAccessTokenRequestBody{
     ResourceType: "company",
     Lookup:       map[string]string{"id": companyID},
 })
+// resp.Data.Token and resp.Data.ExpiredAt go back to the browser as token and expiresAt.
+```
+  </Tab>
+  <Tab title="cURL">
+```bash
+curl -X POST https://api.schematichq.com/temporary-access-tokens \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resource_type": "company", "lookup": {"id": "acme-inc"}}'
+# The token is at data.token and its expiry at data.expired_at.
 ```
   </Tab>
 </Tabs>
@@ -75,12 +100,12 @@ resp, err := client.Accesstokens.IssueTemporaryAccessToken(ctx, &schematicgo.Iss
 
 ```tsx
 // app/providers.tsx
+"use client";
 import { SchematicProvider } from "@schematichq/schematic-react";
 
 async function fetchAccessToken() {
   const response = await fetch("/api/accessToken");
-  const { accessToken, expiredAt } = await response.json();
-  return { token: accessToken, expiresAt: expiredAt };
+  return response.json(); // { token, expiresAt }
 }
 
 export function Providers({ children, company, user }) {
@@ -95,7 +120,7 @@ export function Providers({ children, company, user }) {
 }
 ```
 
-`session` says whose billing is being read. Pass `null` when nobody is signed in and `undefined` while your auth is still resolving; [Session and access tokens](/components/build-your-own/session) explains why the three differ.
+`session` says whose billing is being read. Pass `null` when nobody is signed in and `undefined` while your auth is still resolving; [Session and access tokens](/components/build-your-own/session) explains why the three differ. Leave `user` out when your tokens are company-wide.
 
 ### 4. Render the portal, or a hook
 
@@ -103,28 +128,38 @@ export function Providers({ children, company, user }) {
   <Tab title="Drop-in">
 ```tsx
 import {
-  Checkout, CreditMeter, FeatureMeter, IncludedFeatures, Invoices,
-  PaymentMethods, PlanManager, SchematicStyles, UpcomingBill,
+  CheckoutLauncherProvider, CreditUsage, IncludedFeatures, Invoices, MeteredFeatures,
+  PaymentMethods, PlanManager, SchematicStyles, UnsubscribeButton, UpcomingBill,
+  useCheckoutLauncher,
 } from "@schematichq/schematic-components/elements";
 
 export default function BillingPage() {
   return (
-    <>
+    <CheckoutLauncherProvider>
       <SchematicStyles />
-      <PlanManager />
+      <Portal />
+    </CheckoutLauncherProvider>
+  );
+}
+
+function Portal() {
+  const { open } = useCheckoutLauncher();
+  return (
+    <>
+      <PlanManager onChangePlan={() => open()} />
       <IncludedFeatures />
+      <MeteredFeatures onAddMore={() => open({ steps: { initial: "usage" } })} />
+      <CreditUsage onBuyMore={() => open({ steps: { initial: "credits" } })} />
       <UpcomingBill />
       <PaymentMethods />
-      <Invoices showStatus />
-      <FeatureMeter />
-      <CreditMeter />
-      <Checkout />
+      <Invoices />
+      <UnsubscribeButton onManagePlan={() => open()} />
     </>
   );
 }
 ```
 
-Drop any card you do not need; each stands alone. `<Checkout />` mounts once and the other components open it.
+Render `<SchematicStyles />` once and drop any card you do not need; each stands alone. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add more, Buy more, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`.
   </Tab>
   <Tab title="Build your own">
 ```tsx

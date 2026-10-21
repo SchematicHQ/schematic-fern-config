@@ -1,93 +1,306 @@
 ---
 title: Recipes
-description: Complete reference components for the customer portal, the credit wallet, and a pricing page, in shadcn/ui, Tailwind, and plain CSS.
+description: Complete reference components for a customer portal, a credit wallet, cancellation, and a pricing page, built on the hooks and derivations.
 slug: components/build-your-own/recipes
 ---
 
-Each recipe is a complete component built on the hooks and derivations, in three stacks. Copy the one closest to yours into your codebase and make it yours; the Components tab in the dashboard has the same code with a live preview and an AI prompt per component.
+Each recipe is a complete component built on the hooks and derivations, styled with nothing but class names you supply. Copy the one closest to what you need into your codebase and restyle it.
 
 ## Customer portal
 
-One page, one hook per resource, each section loading and retrying on its own:
+One page, one hook per resource, each section loading and retrying on its own. `Section` handles the pending and failed states once, so each card only renders data:
 
 ```tsx
-import { useCompany, useCreditBalances, useFeatureUsage, useInvoices, usePaymentMethods, useUpcomingInvoice } from "@schematichq/schematic-react";
-import { PlanManager } from "@/components/schematic/plan-manager";
-import { IncludedFeatures } from "@/components/schematic/included-features";
-import { UpcomingBill } from "@/components/schematic/upcoming-bill";
-import { PaymentMethods } from "@/components/schematic/payment-methods";
-import { Invoices } from "@/components/schematic/invoices";
-import { FeatureMeter } from "@/components/schematic/feature-meter";
-import { CreditMeter } from "@/components/schematic/credit-meter";
+import type { ReactNode } from "react";
+import {
+  useCompany,
+  useCreditBalances,
+  useFeatureUsage,
+  useInvoices,
+  usePaymentMethods,
+  useUpcomingInvoice,
+  type ResourceHandle,
+} from "@schematichq/schematic-react";
+import {
+  deriveInvoiceList,
+  deriveMeteredFeatures,
+  derivePaymentMethods,
+  derivePlanManager,
+  deriveUpcomingInvoice,
+  useTranslator,
+} from "@schematichq/schematic-components/elements";
 
-function Section({ handle, children }) {
-  if (handle.isPending) return <Skeleton className="h-40" />;
-  if (handle.error) return <Retry message={handle.error.message} onClick={handle.refetch} />;
-  return children(handle.data);
+const locale = "en-US";
+
+function Section<T>({ handle, children }: { handle: ResourceHandle<T>; children: (data: T) => ReactNode }) {
+  if (handle.data !== undefined) return <>{children(handle.data)}</>;
+  if (handle.error) {
+    return (
+      <div role="alert">
+        {handle.error.message} <button onClick={handle.refetch}>Retry</button>
+      </div>
+    );
+  }
+  return <div className="skeleton" />;
+}
+
+function Plan() {
+  const company = useCompany();
+  const featureUsage = useFeatureUsage();
+  const creditBalances = useCreditBalances();
+  return (
+    <Section handle={company}>
+      {(companyData) => (
+        <Section handle={featureUsage}>
+          {(usageData) => (
+            <Section handle={creditBalances}>
+              {(creditData) => {
+                const view = derivePlanManager(
+                  { company: companyData, featureUsage: usageData, creditBalances: creditData },
+                  { locale },
+                );
+                const price = view.plan?.price;
+                return (
+                  <section>
+                    <h2>{view.plan?.name ?? "No plan"}</h2>
+                    {price?.kind === "amount" && <p>{price.amount}{price.period && ` / ${price.period}`}</p>}
+                    {view.notice?.kind === "canceled" && <p>Access ends {view.notice.date}</p>}
+                    <ul>
+                      {view.addOns.map((addOn) => <li key={addOn.id}>{addOn.name}</li>)}
+                    </ul>
+                  </section>
+                );
+              }}
+            </Section>
+          )}
+        </Section>
+      )}
+    </Section>
+  );
+}
+
+function Usage() {
+  const featureUsage = useFeatureUsage();
+  return (
+    <Section handle={featureUsage}>
+      {(features) => (
+        <section>
+          {deriveMeteredFeatures(features, { locale }).map((row) => (
+            <div key={row.featureId}>
+              <h3>{row.name}</h3>
+              {row.meter && (
+                <>
+                  <progress max={row.meter.total} value={row.meter.value} data-tone={row.meter.tone} />
+                  <p>{row.meter.valueText} of {row.meter.totalText}</p>
+                </>
+              )}
+              {row.resetsAt && <p>Resets {row.resetsAt}</p>}
+            </div>
+          ))}
+        </section>
+      )}
+    </Section>
+  );
+}
+
+function NextBill() {
+  const upcoming = useUpcomingInvoice();
+  return (
+    <Section handle={upcoming}>
+      {(invoice) => {
+        if (invoice === null) return <p>Nothing to bill</p>;
+        const bill = deriveUpcomingInvoice(invoice, { locale });
+        return (
+          <section>
+            <h2>Next bill{bill.dueAt && ` due ${bill.dueAt.text}`}</h2>
+            <p>{bill.amountDueText}</p>
+            {bill.discounts.map((discount, i) => (
+              <p key={i}>{discount.code ?? discount.couponName}: {discount.valueText} off</p>
+            ))}
+          </section>
+        );
+      }}
+    </Section>
+  );
+}
+
+function PaymentMethod() {
+  const t = useTranslator();
+  const paymentMethods = usePaymentMethods();
+  return (
+    <Section handle={paymentMethods}>
+      {(methods) => {
+        const { current, expiryWarning } = derivePaymentMethods(methods, { locale });
+        if (current === null) return <p>No payment method on file</p>;
+        const label = current.label.key !== undefined ? t(current.label.key) : current.label.text;
+        return (
+          <section>
+            <p>{label} {current.last4} {current.expiresShort}</p>
+            {expiryWarning !== "none" && <p role="alert">This card {expiryWarning === "expired" ? "has expired" : "expires soon"}</p>}
+          </section>
+        );
+      }}
+    </Section>
+  );
+}
+
+function Invoices() {
+  const invoices = useInvoices({ includePending: true });
+  return (
+    <Section handle={invoices}>
+      {(page) => {
+        const list = deriveInvoiceList(page, { locale });
+        return (
+          <section>
+            <ul>
+              {list.rows.map((row) => (
+                <li key={row.id}>
+                  {row.url ? <a href={row.url}>{row.dateText}</a> : row.dateText}{" "}
+                  {row.isCredit ? `(${row.amountText})` : row.amountText}
+                </li>
+              ))}
+            </ul>
+            {list.hasMore && (
+              <button disabled={invoices.isPending} onClick={invoices.loadMore}>Load more</button>
+            )}
+          </section>
+        );
+      }}
+    </Section>
+  );
 }
 
 export default function BillingPage() {
-  const company = useCompany();
-  const features = useFeatureUsage();
-  const credits = useCreditBalances();
-  const upcoming = useUpcomingInvoice();
-  const paymentMethods = usePaymentMethods();
-  const invoices = useInvoices({ includePending: true });
-
   return (
     <div className="space-y-4">
-      <Section handle={company}>{(data) => <PlanManager company={data} />}</Section>
-      <Section handle={features}>{(data) => <IncludedFeatures features={data} />}</Section>
-      <Section handle={upcoming}>{(data) => <UpcomingBill bill={data} />}</Section>
-      <Section handle={paymentMethods}>{(data) => <PaymentMethods paymentMethods={data} />}</Section>
-      <Section handle={invoices}>{(page) => <Invoices page={page} onLoadMore={invoices.loadMore} />}</Section>
-      <Section handle={features}>{(data) => <FeatureMeter features={data} />}</Section>
-      <Section handle={credits}>{(data) => <CreditMeter balances={data} />}</Section>
+      <Plan />
+      <Usage />
+      <NextBill />
+      <PaymentMethod />
+      <Invoices />
     </div>
   );
 }
 ```
 
-### The components
+`useTranslator` resolves a payment method's label key to the provider's `strings` or `translate`, falling back to the English copy, so the label follows the same overrides as the drop-ins.
 
-| Component | Hook | Derivation | Reference code |
-| --- | --- | --- | --- |
-| Plan Manager | `useCompany` | `derivePlanSummary` | `plan-manager.tsx` |
-| Credit Meter | `useCreditBalances` | `deriveCreditUsage` | `credit-meter.tsx` |
-| Feature Meter | `useFeatureUsage` | `deriveUsageMeter` | `feature-meter.tsx` |
-| Included Features | `useFeatureUsage` | `deriveEntitlementRow` | `included-features.tsx` |
-| Upcoming Bill | `useUpcomingInvoice` | `deriveUpcomingInvoice` | `upcoming-bill.tsx` |
-| Payment Methods | `usePaymentMethods` | `derivePaymentMethods` | `payment-methods.tsx` |
-| Invoices | `useInvoices` | `deriveInvoiceList` | `invoices.tsx` |
-| Unsubscribe | `useUnsubscribe`, `useCompany` | | `unsubscribe.tsx` |
+### What each drop-in reads
 
-Each file exists in shadcn/ui, Tailwind, and plain CSS in the dashboard's Components tab, and the shadcn versions run in the [DashAI example app](https://github.com/SchematicHQ/schematic-dashai).
+Each drop-in is the fullest version of a section like the ones above. Its page documents every prop, and the [hooks](/components/build-your-own/hooks) and [derivations](/components/build-your-own/derivations) pages document the data underneath.
+
+| Drop-in | Hooks | Derivation |
+| --- | --- | --- |
+| [Plan Manager](/components/drop-in/plan-manager) | `useCompany`, `useFeatureUsage`, `useCreditBalances` | `derivePlanManager` |
+| [Included Features](/components/drop-in/included-features) | `useFeatureUsage` | `deriveIncludedFeatures` |
+| [Metered Features](/components/drop-in/metered-features) | `useFeatureUsage`, `useFeatureUserUsage` | `deriveMeteredFeatures` |
+| [Credit Usage](/components/drop-in/credit-usage) | `useCreditBalances`, `useCreditUserUsage` | `deriveCreditUsage` |
+| [Upcoming Bill](/components/drop-in/upcoming-bill) | `useUpcomingInvoice` | `deriveUpcomingInvoice` |
+| [Payment Methods](/components/drop-in/payment-methods) | `usePaymentMethods`, `useSetupIntent` | `derivePaymentMethods` |
+| [Invoices](/components/drop-in/invoices) | `useInvoices` | `deriveInvoiceList` |
+| [Unsubscribe Button](/components/drop-in/unsubscribe-button) | `useCompany`, `useFeatureUsage`, `useUnsubscribe` | `deriveUnsubscribe` |
+
+The Components page in the Schematic dashboard has reference code for each drop-in in shadcn/ui, Tailwind, and plain CSS.
 
 ## Credit wallet
 
+Each credit with what is left, its grants, and the people spending it. Buy more opens Checkout on its credits step, so render it under a `CheckoutLauncherProvider`:
+
 ```tsx
-import { useCreditBalances, useCheckout } from "@schematichq/schematic-react";
-import { deriveCreditUsage } from "@schematichq/schematic-components/elements";
+import {
+  deriveCreditUsage,
+  useCheckoutLauncher,
+  useCreditBalances,
+  useCreditUserUsage,
+} from "@schematichq/schematic-components/elements";
 
 export function Wallet() {
-  const { data, isPending, error, refetch } = useCreditBalances();
-  const { open } = useCheckout();
-  if (isPending) return <Skeleton className="h-40" />;
-  if (error) return <Retry onClick={refetch} />;
+  const { data, error, refetch } = useCreditBalances();
+  const { open } = useCheckoutLauncher();
+  if (data === undefined) {
+    return error ? <button onClick={refetch}>Retry</button> : <div className="skeleton" />;
+  }
 
-  return data.map((balance) => {
-    const credit = deriveCreditUsage(balance, { locale: "en-US" });
-    return (
-      <section key={balance.creditId}>
-        <h3>{credit.name}</h3>
-        <Meter percent={credit.percent} />
-        <p>{credit.remainingText} of {credit.totalText} remaining</p>
-        {credit.canBuyMore && <button onClick={() => open({ creditId: balance.creditId })}>Buy more</button>}
-      </section>
-    );
-  });
+  return (
+    <>
+      {deriveCreditUsage(data, { locale: "en-US" }).map((credit) => (
+        <section key={credit.creditId}>
+          <h3>{credit.name}</h3>
+          <p>{credit.remaining.amount} {credit.remaining.units} remaining</p>
+          <ul>
+            {credit.ledger.map((grant) => (
+              <li key={grant.id}>
+                {grant.amount} {grant.item} ({grant.kind}), {grant.createdAt}
+                {grant.date && `, ${grant.date.kind} ${grant.date.text}`}
+              </li>
+            ))}
+          </ul>
+          {credit.ledger.length > 0 && <TopSpenders creditId={credit.creditId} />}
+          {credit.purchasable && <button onClick={() => open({ steps: { initial: "credits" } })}>Buy more</button>}
+        </section>
+      ))}
+    </>
+  );
+}
+
+function TopSpenders({ creditId }: { creditId: string }) {
+  const { data } = useCreditUserUsage(creditId);
+  if (data === undefined || data.users.length === 0) return null;
+  return (
+    <ol>
+      {data.users.map((user) => (
+        <li key={user.userId}>
+          {user.name ?? user.userId}: {user.used}
+        </li>
+      ))}
+    </ol>
+  );
 }
 ```
+
+`purchasable` is true only when a bundle of the credit is on offer to the company's plan, so the button shows where there is something to buy.
+
+## Cancel at period end
+
+A cancel button with a confirmation that says when access ends and what the customer stops paying for:
+
+```tsx
+import { useState } from "react";
+import {
+  deriveUnsubscribe,
+  useCompany,
+  useFeatureUsage,
+  useUnsubscribe,
+} from "@schematichq/schematic-components/elements";
+
+export function CancelSubscription() {
+  const company = useCompany();
+  const featureUsage = useFeatureUsage();
+  const { unsubscribe, isMutating, mutationError } = useUnsubscribe();
+  const [confirming, setConfirming] = useState(false);
+  if (company.data === undefined || featureUsage.data === undefined) return null;
+
+  const view = deriveUnsubscribe(company.data, featureUsage.data, { locale: "en-US" });
+  if (!view.canUnsubscribe) return null;
+
+  if (!confirming) return <button onClick={() => setConfirming(true)}>Cancel subscription</button>;
+  return (
+    <div role="dialog" aria-label="Cancel subscription">
+      <p>You keep access until {view.accessEndsOn}.</p>
+      {view.plan && <p>{view.plan.name} {view.plan.price}</p>}
+      {view.addOns.map((addOn) => <p key={addOn.id}>{addOn.name} {addOn.price}</p>)}
+      <p>Total {view.total} per {view.period}</p>
+      <button disabled={isMutating} onClick={() => unsubscribe().then(() => setConfirming(false), () => {})}>
+        Confirm cancellation
+      </button>
+      <button onClick={() => setConfirming(false)}>Keep my plan</button>
+      {mutationError && <p role="alert">{mutationError.message}</p>}
+    </div>
+  );
+}
+```
+
+Once the cancellation lands, `useCompany` reloads with a cancellation date, `canUnsubscribe` turns false, and the button disappears.
 
 ## Pricing page
 
@@ -124,12 +337,13 @@ Inside the portal, the same component under a session marks the current plan and
 
 ## Implement with AI
 
-Every recipe has a prompt in the dashboard's Components tab. The shape of each:
+The Components page in the dashboard has a prompt for each drop-in. The shape of each:
 
 ```text
 Add an "Invoices" section to my app's billing page using Schematic.
 - The app is wrapped in <SchematicProvider publishableKey session={{ company, user, token }}>.
-- Fetch with useInvoices(query?) → { data: InvoicePage, error, isPending, refetch, loadMore }.
+- Fetch with useInvoices(query?) from @schematichq/schematic-react → { data: InvoicePage, error, isPending, refetch, loadMore }.
+- Format rows with deriveInvoiceList(data, { locale }) from @schematichq/schematic-components/elements.
 - Reference implementation: https://docs.schematichq.com/components/build-your-own/recipes (adapt to our design system).
 - Handle isPending with skeletons and error with a retry button.
 ```
