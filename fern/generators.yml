@@ -57,10 +57,10 @@ groups:
             redis: ">=5.0,<6"
             fakeredis:
               version: "^2.38.0"
-              extras: ["lua"]
+              extras: [ "lua" ]
           extras:
-            datastream: ["websockets", "wasmtime"]
-            rulesengine: ["wasmtime"]
+            datastream: [ "websockets", "wasmtime" ]
+            rulesengine: [ "wasmtime" ]
           # Appended verbatim to the end of pyproject.toml, after [tool.poetry] is
           # closed, so the wasm include must use array-of-tables syntax: an inline
           # `include = [...]` would land in the last table instead.
@@ -76,7 +76,7 @@ groups:
   csharp-sdk:
     generators:
       - name: fernapi/fern-csharp-sdk
-        version: 2.92.3
+        version: 2.92.4
         github:
           repository: schematichq/schematic-csharp
           mode: pull-request
