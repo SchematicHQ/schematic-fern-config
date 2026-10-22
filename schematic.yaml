@@ -4357,6 +4357,12 @@ components:
       enum:
         - individual
         - quantity
+    CheckoutChargeTiming:
+      type: string
+      enum:
+        - at_renewal
+        - none
+        - now
     CheckoutDataRequestBody:
       type: object
       properties:
@@ -16974,6 +16980,19 @@ components:
           allOf:
             - $ref: '#/components/schemas/Currency'
           description: ISO 4217 currency every amount in this block is denominated in.
+        customer_balance_applied:
+          type: integer
+          description: >-
+            What the company's stored credit covers of this invoice, in minor
+            units.
+          format: int64
+        customer_balance_remaining:
+          type: integer
+          description: >-
+            Credit left on the company's balance after this invoice, in minor
+            units: what it did not consume, plus what a total below zero adds,
+            which the provider applies to later invoices.
+          format: int64
         discount_amount:
           type: integer
           format: int64
@@ -17006,6 +17025,13 @@ components:
           type: string
           format: date-time
           nullable: true
+        proration_detail:
+          allOf:
+            - $ref: '#/components/schemas/PreviewSubscriptionProrationResponseData'
+          description: >-
+            The proration itemized in the cart's terms, by plan and price. Null
+            when the change prorates nothing. upcoming_invoice_line_items stays
+            as the billing provider reported it.
         tax_amount:
           type: integer
           format: int64
@@ -17030,6 +17056,8 @@ components:
       required:
         - amount_off
         - currency
+        - customer_balance_applied
+        - customer_balance_remaining
         - discount_amount
         - discounts
         - due_now
@@ -17043,6 +17071,86 @@ components:
         - tax_require_billing_details
         - total_per_billing_period
       title: PreviewSubscriptionFinanceResponseData
+    PreviewSubscriptionProrationLineResponseData:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: In minor units of the block's currency; negative on a credit.
+          format: int64
+        kind:
+          $ref: '#/components/schemas/ProrationLineKind'
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        plan_id:
+          type: string
+          description: >-
+            The plan or add-on in the cart the price belongs to. Null for a
+            price the subscription carries outside the cart.
+          nullable: true
+        price_id:
+          type: string
+          description: >-
+            The Schematic price. Null when the provider priced something
+            Schematic does not carry.
+          nullable: true
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - amount
+        - kind
+      title: PreviewSubscriptionProrationLineResponseData
+    PreviewSubscriptionProrationResponseData:
+      type: object
+      properties:
+        billed_at:
+          type: string
+          description: >-
+            When the proration is charged: the change for now, the period's end
+            for at_renewal. Null when nothing is charged.
+          format: date-time
+          nullable: true
+        charge:
+          type: integer
+          description: Sum of the charge lines, in minor units, before tax.
+          format: int64
+        credit:
+          type: integer
+          description: 'Sum of the credit lines, in minor units, before tax: zero or below.'
+          format: int64
+        currency:
+          $ref: '#/components/schemas/Currency'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewSubscriptionProrationLineResponseData'
+          maxItems: 1000
+        timing:
+          allOf:
+            - $ref: '#/components/schemas/CheckoutChargeTiming'
+          description: >-
+            When the proration is charged: now, at_renewal, or none when it nets
+            to nothing.
+        total:
+          type: integer
+          description: credit plus charge, before tax. Equals proration.
+          format: int64
+      required:
+        - charge
+        - credit
+        - currency
+        - lines
+        - timing
+        - total
+      title: PreviewSubscriptionProrationResponseData
     PreviewSubscriptionUpcomingInvoiceLineItems:
       type: object
       properties:
@@ -17070,6 +17178,11 @@ components:
       enum:
         - create_prorations
         - invoice_immediately
+    ProrationLineKind:
+      type: string
+      enum:
+        - charge
+        - credit
     PublicCatalogResponseData:
       type: object
       properties:
