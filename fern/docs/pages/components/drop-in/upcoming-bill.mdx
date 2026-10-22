@@ -44,11 +44,11 @@ The applied balance row shows when this bill draws on the account balance, and t
 
 Every active discount lists under one "Discount" label with its promo code as a chip, or with no chip when the coupon has none. A repeating discount says how long it lasts, as in "20% off for next 3 months".
 
-When there is nothing to bill, because the company has never subscribed, its trial will cancel, or the billing provider has no upcoming invoice to preview, the card reads "No upcoming invoice". That is a loaded answer from the server, so the card settles rather than holding its skeleton.
+When there is nothing to bill, such as before a first subscription or for a trial that will cancel, the card reads "No upcoming invoice". That is a loaded answer from the server, so the card settles rather than holding its skeleton.
 
 ## Errors
 
-A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Your upcoming invoice is not available for this account.", because that status means the bill cannot be read: the account is not enabled for the company billing endpoints, the subscription has lapsed or ended, the company has more than one subscription, or the billing provider does not know the customer. Every other failure, and a 404 under a bill already loaded, reads "There was a problem retrieving your upcoming invoice." A refetch that fails with a bill on screen is reported under it rather than replacing it.
+A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Your upcoming invoice is not available for this account.", because that status means the bill cannot be read, such as when the account is not enabled for the company billing endpoints or the subscription has ended. Every other failure, and a 404 under a bill already loaded, reads "There was a problem retrieving your upcoming invoice." A refetch that fails with a bill on screen is reported under it rather than replacing it.
 
 Neither message is the error's own text. In development the component logs the underlying error to the console beside the copy.
 

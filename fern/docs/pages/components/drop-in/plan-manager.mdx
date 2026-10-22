@@ -74,16 +74,16 @@ Under the plan, each section has a label you can hide with `showLabels`:
 
 - Add-ons lists each held add-on at its price, per the plan's period, or once for a one-time add-on.
 - Usage-based lists each feature with a price behavior: its limit or the quantity paid for, its unit or package price, its credits per use, and what an allocation paid in advance costs. Tiered features carry a tooltip with every tier's price.
-- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used once any is. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
+- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
 - Top-ups, Credit bundles, and Promotional credits list the company's auto top-up, purchased, and free grants, a row per bundle (or per grant outside one), newest first.
 
-Each credit section shows three rows, then "See all (N)", where N counts every row in the section. `showCredits={false}` hides every credit section.
+Each credit section shows three rows, then "See all" for the rest. `showCredits={false}` hides every credit section.
 
 ## Errors
 
 A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Your plan is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under a plan already loaded, reads "There was a problem retrieving your plan." A refetch that fails with the plan on screen is reported under it rather than replacing it. In development the component logs the underlying error to the console beside the copy.
 
-Credits that fail to load cost only the credit sections. The rest of the card renders, and a "There was a problem retrieving your credits." row with "Try again" stands in their place, and a skeleton holds that place while the retry runs. A credits refetch that fails with the credit sections on screen keeps them, and the same message shows under the card.
+Credits that fail to load cost only the credit sections. The rest of the card renders, and a "There was a problem retrieving your credits." row with "Try again" stands in their place.
 
 ## Strings
 
