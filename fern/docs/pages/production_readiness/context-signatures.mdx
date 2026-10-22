@@ -1,0 +1,227 @@
+---
+title: Context Signatures
+description: Sign each browser session's company and user on your backend so a copied publishable key cannot query or send events for other companies.
+
+slug: production_readiness/context-signatures
+---
+
+A publishable key identifies your environment, not a company. Anyone who copies it out of your frontend can check flags or send events for any company in that environment by changing the company keys in the request. With context signatures turned on, Schematic accepts a publishable-key request only when it carries a signature from your backend over the exact company and user keys in that request.
+
+## How it works
+
+Your backend already holds the secret API key that pairs with your publishable key. When the browser SDK needs to make requests for a company and user, it asks your backend to sign that context. Your backend confirms the context belongs to the signed-in user, signs it with HMAC-SHA256 using the secret key, and returns the signature. The SDK sends it in the `X-Schematic-Context-Sig` header, and Schematic recomputes the signature against the request's company and user keys.
+
+The signature covers only the company and user keys, not the rest of the request. One signature therefore covers every flag check and event the SDK sends for that context until it expires, and the SDK asks your backend for a new one shortly before then.
+
+Requests authenticated with a secret key are never checked, so your server-side SDKs keep working unchanged.
+
+Schematic checks publishable-key requests to these endpoints:
+
+| Endpoint | When the signature is missing or wrong |
+| --- | --- |
+| `POST /flags/check` and `POST /flags/{key}/check` | `401` |
+| The flag WebSocket, `/flags/bootstrap` | Connection closed with code `4001` |
+| `POST /events` and `POST /event-batch` | `401` |
+| Event capture, `c.schematichq.com/e` and `/batch` | Accepted with `200`, then stored as a failed event |
+
+`POST /flags/check-bulk` accepts secret keys only, so it never needs a signature. [Embedded components](/components/overview) authenticate with access tokens rather than the publishable key and are unaffected.
+
+## Turn it on
+
+Schematic turns context signatures on for one environment at a time. To turn them on, email `support@schematichq.com` with the environment IDs. Turning them off again takes effect immediately.
+
+While an environment does not require signatures, Schematic accepts every publishable-key request and ignores any signature on it, valid or not. Your signer gets no feedback until the requirement is on, so test it in a development environment first. See [Roll out](#roll-out).
+
+## Sign the context on your backend
+
+Add an endpoint the browser can call with a context. The SDK sends the context it is about to use, in the same shape you pass to `identify` or `setContext`:
+
+```json
+{ "company": { "id": "comp_123" }, "user": { "id": "user_456" } }
+```
+
+<Warning>
+Check the context against your own session before you sign it. An endpoint that signs whatever the browser sends lets anyone get a valid signature for any company, which removes the protection entirely.
+</Warning>
+
+The signature is built in four steps:
+
+```
+canonical = the context as JSON, object keys sorted at every level, no whitespace, no HTML escaping
+payload   = canonical + "." + iat + "." + exp
+sig       = base64url(HMAC-SHA256(secret_api_key, payload)), with no padding
+signature = iat + "." + exp + "." + sig
+```
+
+`iat` and `exp` are Unix timestamps in seconds. Schematic accepts a signature from 60 seconds before `iat` until 60 seconds after `exp`. A 10-minute lifetime works well. A shorter one shortens how long a leaked signature stays usable, and costs one more call to your endpoint per session each time it expires.
+
+Sign exactly the keys the SDK will send. Leave `company` or `user` out of the signed object when the SDK leaves it out of the request, and keep every value the same JSON type, so a string ID stays a string.
+
+<CodeBlocks>
+```js title="Node.js"
+import crypto from "node:crypto";
+
+function canonicalize(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
+  return `{${Object.keys(value)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`)
+    .join(",")}}`;
+}
+
+function signContext(secretApiKey, context, ttlSeconds = 600) {
+  const signed = {};
+  if (context.company) signed.company = context.company;
+  if (context.user) signed.user = context.user;
+
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = iat + ttlSeconds;
+  const payload = `${canonicalize(signed)}.${iat}.${exp}`;
+  const sig = crypto
+    .createHmac("sha256", secretApiKey)
+    .update(payload)
+    .digest("base64url");
+  return `${iat}.${exp}.${sig}`;
+}
+
+app.post("/api/schematic/sign", requireSession, (req, res) => {
+  const { company, user } = req.body;
+  if (company?.id !== req.session.companyId || user?.id !== req.session.userId) {
+    return res.status(403).end();
+  }
+  const signature = signContext(process.env.SCHEMATIC_SECRET_KEY, { company, user });
+  res.json({ signature });
+});
+```
+
+```go title="Go"
+import (
+	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"time"
+)
+
+// context holds the "company" and "user" keys maps. encoding/json sorts map keys,
+// so a map gives the canonical key order without extra work.
+func signContext(secretAPIKey string, context map[string]map[string]string, ttl time.Duration) (string, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(context); err != nil {
+		return "", err
+	}
+	canonical := bytes.TrimRight(buf.Bytes(), "\n")
+
+	iat := time.Now().Unix()
+	exp := iat + int64(ttl.Seconds())
+	payload := fmt.Sprintf("%s.%d.%d", canonical, iat, exp)
+
+	mac := hmac.New(sha256.New, []byte(secretAPIKey))
+	mac.Write([]byte(payload))
+	sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+	return fmt.Sprintf("%d.%d.%s", iat, exp, sig), nil
+}
+```
+
+```python title="Python"
+import base64
+import hashlib
+import hmac
+import json
+import time
+
+
+def sign_context(secret_api_key: str, context: dict, ttl_seconds: int = 600) -> str:
+    signed = {k: context[k] for k in ("company", "user") if context.get(k)}
+    canonical = json.dumps(signed, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    iat = int(time.time())
+    exp = iat + ttl_seconds
+    payload = f"{canonical}.{iat}.{exp}".encode()
+
+    digest = hmac.new(secret_api_key.encode(), payload, hashlib.sha256).digest()
+    sig = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+    return f"{iat}.{exp}.{sig}"
+```
+</CodeBlocks>
+
+Sign with the secret half of the API key whose publishable half your frontend uses. Schematic also accepts a signature from any other active secret key in the same environment, so you can rotate without an outage: create a new API key, switch your backend to sign with its secret, switch your frontend to its publishable key, and delete the old API key once no browser is still using the old publishable key.
+
+## Pass signatures to the browser SDK
+
+Upgrade `@schematichq/schematic-js` to the latest version and pass `getContextSignature` when you create the client. The SDK calls it with the context it is about to use and expects the signature string back.
+
+<CodeBlocks>
+```ts title="JavaScript"
+import { Schematic } from "@schematichq/schematic-js";
+
+const schematic = new Schematic("api_pub_...", {
+  getContextSignature: async (context) => {
+    const res = await fetch("/api/schematic/sign", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(context),
+    });
+    const { signature } = await res.json();
+    return signature;
+  },
+});
+```
+
+```tsx title="React"
+import { SchematicProvider } from "@schematichq/schematic-react";
+
+<SchematicProvider
+  publishableKey="api_pub_..."
+  getContextSignature={async (context) => {
+    const res = await fetch("/api/schematic/sign", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(context),
+    });
+    const { signature } = await res.json();
+    return signature;
+  }}
+>
+  <App />
+</SchematicProvider>
+```
+</CodeBlocks>
+
+The SDK caches one signature per context and requests a new one 60 seconds before it expires. Concurrent requests for the same context share a single call to your function. If your function throws, the SDK logs a warning and sends the request without a signature, which Schematic rejects once the environment requires one.
+
+## Roll out
+
+Once an environment requires signatures, Schematic rejects every publishable-key request that lacks a valid one, including requests from browser tabs still running your previous frontend build. Roll out in this order:
+
+1. Ship the signing endpoint and the `getContextSignature` option everywhere you use the publishable key.
+2. Ask Schematic to turn on signatures in a development environment, then exercise flag checks and events there. Check that events arrive as successful, not only that flags load.
+3. Give the new frontend time to replace the old one in your users' open sessions.
+4. Ask Schematic to turn on signatures in production.
+
+## Troubleshooting
+
+Flag checks and the WebSocket fail loudly. A `401` carries one of these messages:
+
+| Message | Cause |
+| --- | --- |
+| `Context signature required for this environment` | The request had no `X-Schematic-Context-Sig` header. Usually `getContextSignature` is missing or threw. |
+| `Context signature invalid` | The signature does not match the request's company and user keys under any active secret key in the environment. |
+| `Context signature expired` | The current time is more than 60 seconds past `exp`. |
+| `Context signature not yet valid; check the signing clock` | Your backend's clock is more than 60 seconds ahead of Schematic's. |
+
+Events fail quietly. The SDK sends events to the capture endpoint, which accepts them with a `200` and checks the signature later, so a signing problem shows up as failed events in Schematic rather than as an error in the browser. If flags work but events go missing, look for failed events first.
+
+A signature that works for some sessions and fails for others usually means your backend signs a different context than the SDK sends in some cases. Look for these:
+
+- Your backend signs only `company`, but after sign-in the SDK sends `user` as well.
+- Your backend signs a numeric ID (`888`) while the SDK sends a string (`"888"`). These produce different JSON and different signatures.
+- Your JSON encoder escapes `<`, `>`, and `&`, or non-ASCII characters, so names containing them sign differently. Go's `json.Marshal` and Python's default `json.dumps` both do one of these.
+- The signature uses standard base64 (`+`, `/`, `=`) instead of base64url without padding.
