@@ -146,11 +146,11 @@ Pay-in-advance quantities (e.g. user seats). Each entry requires a `price_id` an
 </ParamField>
 
 <ParamField path="coupon_external_id" type="string">
-A Stripe coupon ID to apply to the subscription.
+A Stripe coupon ID to apply to the subscription. On an existing subscription, omitting this field keeps whatever discount the subscription already has, and sending one replaces the subscription's discounts with what you send in this request.
 </ParamField>
 
 <ParamField path="promo_code" type="string">
-A promotional code to apply.
+A Stripe promotion code to apply to the subscription. On an existing subscription, omitting this field keeps whatever discount the subscription already has, and sending one replaces the subscription's discounts with what you send in this request.
 </ParamField>
 
 <ParamField path="payment_method_external_id" type="string">
@@ -163,6 +163,38 @@ The company that pays for this subscription, when it is different from `company_
 
 <ParamField path="trial_end" type="datetime">
 An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain usage-based entitlements. Additionally, new add-ons cannot be added when putting a company onto a trial.
+</ParamField>
+
+<ParamField path="collection_method" type="string">
+How the subscription is paid. `charge_automatically` (the default) charges the payment method on file. `send_invoice` raises a Stripe invoice with payment terms instead, so the customer pays from the invoice. Invoicing can only be set up when starting a new subscription; sending `send_invoice` for a company that already has an active subscription returns a `400`. An invoiced subscription cannot start with `trial_end`. See [Invoicing a subscription](#invoicing-a-subscription).
+</ParamField>
+
+<ParamField path="billing_email" type="string">
+The address Stripe sends the invoice to. Required when `collection_method` is `send_invoice`, unless the company's Stripe customer already has an email address, which is used when this field is omitted.
+</ParamField>
+
+<ParamField path="days_until_due" type="integer">
+Payment terms for an invoiced subscription: the number of days after the invoice date that payment is due, from 1 to 365. Defaults to the terms saved on the company's billing profile, or `30` if it has none. Only applies when `collection_method` is `send_invoice`.
+</ParamField>
+
+<ParamField path="billing_cycle_anchor" type="datetime">
+An ISO 8601 timestamp for the date the subscription renews on, for example the renewal date in a signed order form. Must be in the future, and cannot be combined with `trial_end`. Only honored when starting a new subscription; sending it for a company that already has an active subscription returns a `400`. The time between the subscription starting and this date becomes a shortened first period, and `prorate_first_period` decides whether that period is billed.
+</ParamField>
+
+<ParamField path="prorate_first_period" type="boolean">
+Whether the shortened first period created by `billing_cycle_anchor` is billed. Defaults to `true`, which bills that period pro rata straight away. Set it to `false` to make the period free: no invoice is raised until the anchor date, and the first invoice covers the first full period. Only applies alongside `billing_cycle_anchor`; sending it without one returns a `400`.
+</ParamField>
+
+<ParamField path="paid_outside_stripe" type="boolean">
+Set to `true` when the customer has already paid outside Stripe, for example by bank transfer against a quote. Schematic finalizes the first invoice without emailing it, records it in Stripe as paid out of band, and the company gets the plan straight away. Requires `collection_method` to be `send_invoice`. Cannot be combined with `activate_on_payment`, with `prorate_first_period: false`, or with `credit_bundles`. Defaults to `false`.
+</ParamField>
+
+<ParamField path="activate_on_payment" type="boolean">
+If `true`, the company only gets the plan once the first invoice is paid, and keeps whatever plan and add-ons it has today until then. Only applies when `collection_method` is `send_invoice`. Cannot be combined with `prorate_first_period: false`, because a free first period raises no invoice to pay, or with `credit_bundles`, because credits are granted immediately. Defaults to `false`. Read [Activation on payment](#activation-on-payment) before turning this on: an invoice that goes past due cancels the subscription.
+</ParamField>
+
+<ParamField path="send_invoice" type="boolean">
+Whether Stripe emails the invoice to `billing_email` when it is finalized. Set it to `false` when you send invoices from your own system and only need Stripe to track the payment. Only applies when `collection_method` is `send_invoice`. Defaults to `true`.
 </ParamField>
 
 ### Finding price IDs
@@ -328,6 +360,59 @@ To change just one pay-in-advance quantity, you still need to re-send the full p
 }
 ```
 
+## Invoicing a subscription
+
+By default a new subscription is charged to the payment method on file. For a sales-led deal, set `collection_method` to `send_invoice` and Schematic raises a Stripe invoice with payment terms instead. Invoicing can only be set up when the subscription starts, so a company that already has an active subscription needs that subscription cancelled first.
+
+### Invoiced plan with net terms
+
+The request below puts a company on the Enterprise plan with 25 seats, invoiced on net 45 terms. Stripe emails the invoice to the billing contact, the company gets the plan straight away, and the subscription renews a year from today.
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_enterprise",
+  "base_plan_price_id": "bprice_enterprise_annual",
+  "add_on_selections": [],
+  "pay_in_advance_entitlements": [
+    { "price_id": "bprice_seats", "quantity": 25 }
+  ],
+  "collection_method": "send_invoice",
+  "billing_email": "ap@example.com",
+  "days_until_due": 45
+}
+```
+
+Omit `days_until_due` to use the terms on the company's billing profile, or 30 days if it has none.
+
+### Customer who has already paid
+
+Some deals are paid before the subscription exists, for example by bank transfer against a quote, with a renewal date fixed in the order form. The request below starts the subscription today, pins the renewal date with `billing_cycle_anchor`, and makes the time until then free with `prorate_first_period: false`. Stripe raises no invoice until the renewal date, and that first invoice covers the first full period.
+
+```json
+{
+  "company_id": "comp_abc123",
+  "base_plan_id": "plan_enterprise",
+  "base_plan_price_id": "bprice_enterprise_annual",
+  "add_on_selections": [],
+  "pay_in_advance_entitlements": [],
+  "collection_method": "send_invoice",
+  "billing_email": "ap@example.com",
+  "billing_cycle_anchor": "2027-01-01T00:00:00Z",
+  "prorate_first_period": false
+}
+```
+
+When finance reconciles from Stripe and the payment needs to show up there, `paid_outside_stripe: true` is the better fit: Schematic raises the first invoice, records it as paid out of band without emailing it, and the company gets the plan straight away. It cannot be combined with `prorate_first_period: false`, because a free first period raises no invoice to mark paid.
+
+### Activation on payment
+
+Add `activate_on_payment: true` to an invoiced request to hold the plan back until the first invoice is paid. Until then the company keeps whatever plan and add-ons it has today.
+
+<Warning>
+If the invoice goes past due before it is paid, Schematic cancels the subscription and voids the invoice, and the company never receives the plan. Leave `activate_on_payment` off for customers who need a grace period after the due date. Without it the company gets the plan when the subscription starts, and an overdue invoice follows your Stripe settings for late invoices instead.
+</Warning>
+
 ## Error cases
 
 The Manage Plan API validates the full request before applying any changes. If validation fails, the entire request is rejected and the company's state is left untouched. Common error cases include:
@@ -338,6 +423,9 @@ The Manage Plan API validates the full request before applying any changes. If v
 - **Price specified for non-billing add-on**: You cannot specify a `price_id` for an add-on that is not linked to a billing product. Omit the `price_id` for these add-ons.
 - **Plan not found or not available to company**: The base plan or an add-on does not exist, or the company is not eligible for it (e.g. it's restricted by a [plan audience](/catalog/managing-company-plans#plan-audiences-advanced)).
 - **Billing entity on an existing subscription**: `billing_entity_id` can only be set when a subscription is created. Sending it for a company that already has an active subscription returns `billing entity can only be set when starting a new subscription`. The billing entity must also already have a Stripe customer.
+- **Invoice terms on an existing subscription**: `collection_method: send_invoice` and `billing_cycle_anchor` can only be set when a subscription is created. Sending either for a company that already has an active subscription returns `400`. Cancel the existing subscription first to start a new one on invoice.
+- **Conflicting invoice terms**: Trials cannot be combined with `collection_method: send_invoice` or `billing_cycle_anchor`. `prorate_first_period` needs `billing_cycle_anchor`, and `prorate_first_period: false` cannot be combined with `activate_on_payment` or `paid_outside_stripe`, since a free first period raises no invoice before the renewal date. Any two of `paid_outside_stripe`, `activate_on_payment`, and `credit_bundles` together are rejected. Each conflict returns a `400` naming the problem.
+- **Missing billing email**: An invoiced subscription needs a `billing_email`, or a Stripe customer that already has one. Without either, the request returns `A billing email is required to send an invoice.`
 - **Stripe errors**: Any error returned by Stripe during the subscription update (e.g. payment method declined, customer not found, currency mismatch) will be surfaced back to you. The Schematic state is rolled back if the Stripe call fails.
 
 For all errors, the response will include a descriptive message indicating what went wrong. We recommend using [`POST /manage-plan/preview`](#preview-manage-plan) before applying changes in production flows so users can be shown the financial impact and any validation issues up front.
