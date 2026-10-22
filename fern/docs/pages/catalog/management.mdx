@@ -11,6 +11,7 @@ This doc covers
 - [Company initiated plan changes](#company-initiated-plan-changes)
 - [Automatically assigning plans to companies](#ways-to-assign-plans-to-companies)
 - [Manually changing a company's plan](#changing-plans)
+- [Invoicing a new subscription](#invoicing-a-new-subscription)
 
 ## Company initiated plan changes
 
@@ -142,7 +143,7 @@ You can manage a company's plan directly on the company profile page in Schemati
 
 <Info>If you're having trouble, see the [Stripe FAQ](/integrations/stripe-troubleshooting) for more information.</Info>
 
-For a sales-led, invoiced deal, you can instead create a [custom plan](/catalog/custom-plans) for the company from the 3-dot menu on its profile, giving that one company negotiated pricing and entitlements without affecting your standard plans.
+When you start a new subscription here, you can bill it by invoice instead of charging a card. See [Invoicing a new subscription](#invoicing-a-new-subscription). When a sales-led deal needs its own pricing or entitlements, create a [custom plan](/catalog/custom-plans) for the company from the 3-dot menu on its profile instead, giving that one company negotiated terms without affecting your standard plans.
 
 ![Manage plan](../../assets/images/catalog/management-manage-plan.png)
 
@@ -188,3 +189,47 @@ You can uses traits to explicitly assign companies to plans. If you update those
 For example:
 - Adding custom attributes that correspond to explicit plan assignments (e.g. a Plan trait that has values for legacy, basic, standard, and pro)
 - Updating a company's usage or attributes so they move into a new plan based on that attribute (e.g. a Geography trait)
+
+## Invoicing a new subscription
+
+Sales-led customers usually pay by invoice on net terms, and asking them for a card they never intend to use stalls the deal. When you start a subscription from the **Manage Plan** panel, you can bill it by invoice and keep the company on a plan from your catalog. When the deal needs its own pricing or entitlements, use a [custom plan](/catalog/custom-plans) instead.
+
+The payment fields appear when the company has no active subscription and you pick a plan that is linked to a Stripe product. How a subscription is paid is set when it starts, so to move a company that already has a subscription onto invoicing, cancel that subscription and start a new one.
+
+### Choosing how the subscription is paid
+
+**Payment method** offers three options:
+
+| Option | What happens |
+|--------|--------------|
+| **Charge payment method** | Stripe charges the card or other payment method on file. |
+| **Send an invoice** | Stripe emails an invoice to the **Billing email** with the **Payment terms** you pick, from Net 7 to Net 60. Leave **Payment terms** empty for Net 30. |
+| **Paid outside of Stripe** | Use this when the customer has already paid, for example by bank transfer against a quote. Schematic records the first invoice in Stripe as paid without emailing it, and the company gets the plan straight away. |
+
+If the company has a billing profile, the panel starts on the profile's payment method and says so under the field. **Paid outside of Stripe** only asks for a billing email when the company's Stripe customer has none, because Stripe needs one to issue the invoice even though nobody receives it.
+
+### Deciding when the company gets the plan
+
+With **Send an invoice**, **Plan activation** decides when the company gets the plan and its add-ons:
+
+- **Activate immediately** gives the company the plan when the subscription starts. The invoice stays open until it is paid, and an overdue invoice follows your Stripe settings for late payments.
+- **Activate when the invoice is paid** keeps the company on its current plan and add-ons until the invoice is paid.
+
+<Warning>
+If an invoice under **Activate when the invoice is paid** goes past due, Schematic cancels the subscription and voids the invoice, and the company never receives the plan. Choose **Activate immediately** for customers who need a grace period after the due date.
+</Warning>
+
+The panel locks **Plan activation** to **Activate immediately** when you add a credit bundle, because the credits are granted right away, and when the first period is free, because no invoice is raised until the renewal date.
+
+### Setting the renewal date
+
+Order forms often name a renewal date, such as the first of the year, that falls on a different day from the one the subscription starts. **Billing period renewal date** sets the day the subscription renews on, and it renews on that day every period after. This field is available for any new paid subscription, invoiced or not.
+
+The time between today and the renewal date becomes a shortened first period, and **Bill the First Period** decides whether the customer pays for it:
+
+- **On** (the default) raises a prorated invoice now, covering today up to the renewal date.
+- **Off** makes that period free, and no invoice is raised until the renewal date. Turn it off when the customer has already paid for the time until renewal.
+
+**Paid outside of Stripe** disappears from **Payment method** while the first period is free, because there is no invoice to record as paid. Once a subscription exists, the panel shows its renewal date read-only, and changing it means cancelling and restarting the subscription.
+
+To set up the same terms from code, see [Invoicing a subscription](/developer_resources/manage-plan-api#invoicing-a-subscription) in the Manage Plan API.
