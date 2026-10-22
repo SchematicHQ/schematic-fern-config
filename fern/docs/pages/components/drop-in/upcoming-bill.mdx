@@ -32,7 +32,7 @@ import {
 | `showBalance` | `true` | The applied and remaining balance rows. |
 | `showDiscounts` | `true` | The discount row, one line per active discount. |
 | `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
-| `className` | | Added to the root alongside `schematic-card schematic-upcoming-bill`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-upcoming-bill`. |
 | `locale` | | BCP 47 tag for currency and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
 
@@ -44,11 +44,11 @@ The applied balance row shows when this bill draws on the account balance, and t
 
 Every active discount lists under one "Discount" label with its promo code as a chip, or with no chip when the coupon has none. A repeating discount says how long it lasts, as in "20% off for next 3 months".
 
-When there is nothing to bill, because the company has never subscribed or its trial will cancel, the card reads "No upcoming invoice". That is a loaded answer from the server, so the card settles rather than holding its skeleton.
+When there is nothing to bill, because the company has never subscribed, its trial will cancel, or the billing provider has no upcoming invoice to preview, the card reads "No upcoming invoice". That is a loaded answer from the server, so the card settles rather than holding its skeleton.
 
 ## Errors
 
-A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Your upcoming invoice is not available for this account.", because that status means the bill cannot be read: the account is not enabled for the company billing endpoints, the subscription has lapsed or ended, or the billing provider does not know the customer. Every other failure, and a 404 under a bill already loaded, reads "There was a problem retrieving your upcoming invoice." A refetch that fails with a bill on screen is reported under it rather than replacing it.
+A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Your upcoming invoice is not available for this account.", because that status means the bill cannot be read: the account is not enabled for the company billing endpoints, the subscription has lapsed or ended, the company has more than one subscription, or the billing provider does not know the customer. Every other failure, and a 404 under a bill already loaded, reads "There was a problem retrieving your upcoming invoice." A refetch that fails with a bill on screen is reported under it rather than replacing it.
 
 Neither message is the error's own text. In development the component logs the underlying error to the console beside the copy.
 
@@ -80,7 +80,7 @@ Every word the card renders resolves through `strings` on the component, then on
 This is what the component renders, for a host styling it without `SchematicStyles`. The root's class list is the same in every state, and `data-state` tells them apart. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-card schematic-upcoming-bill" data-state="ready">
+<div class="schematic-element schematic-card schematic-upcoming-bill" data-state="ready">
   <!-- omitted for a bill with no due date -->
   <div class="schematic-header">
     <h2 class="schematic-header__title">Next bill due September 30, 2026</h2>
@@ -117,7 +117,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
   <p class="schematic-muted schematic-upcoming-bill__empty">No upcoming invoice</p>
 
   <!-- a failure with the bill still on screen -->
-  <p class="schematic-status-note schematic-error">…</p>
+  <p class="schematic-status-note schematic-error" role="alert">…</p>
 </div>
 ```
 

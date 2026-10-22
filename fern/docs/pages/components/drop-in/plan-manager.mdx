@@ -33,9 +33,9 @@ import {
 | `showPrice` | `true` | The plan's price. |
 | `showAddOns` | `true` | The add-ons the company holds. |
 | `showUsageBased` | `true` | The usage-based features and their prices. |
-| `showCredits` | `true` | Every credit section, and the credits per use on credit-burning features. |
+| `showCredits` | `true` | Every credit section, and the credit-burning features under Usage-based. |
 | `showLabels` | `true` | Each section's label. |
-| `showZeroPriceAsFree` | `false` | A plan priced at zero reads "Free". |
+| `showZeroPriceAsFree` | `false` | A plan priced at zero with no usage-based features reads "Free". |
 | `showHardLimit` | `false` | An info tip with the hard limit on features billed past it. |
 | `showWarningThresholdAsLimit` | `false` | An entitlement's warning threshold in place of its limit, where one is set. |
 | `onChangePlan` | | "Change plan" calls this. |
@@ -43,7 +43,7 @@ import {
 | `onEditAutoTopup` | | "Edit" on the auto top-up settings calls this. |
 | `editAutoTopupUrl`, `editAutoTopupTarget` | | "Edit" links here when there is no `onEditAutoTopup`. |
 | `headingLevel` | `2` | The plan name's heading level, `1` through `6`. |
-| `className` | | Added to the root alongside `schematic-plan-manager`. |
+| `className` | | Added to the root alongside `schematic-element schematic-plan-manager`. |
 | `locale` | | BCP 47 tag for number, currency, and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this component by key. Wins over the provider's `strings` and `translate`. |
 
@@ -74,16 +74,16 @@ Under the plan, each section has a label you can hide with `showLabels`:
 
 - Add-ons lists each held add-on at its price, per the plan's period, or once for a one-time add-on.
 - Usage-based lists each feature with a price behavior: its limit or the quantity paid for, its unit or package price, its credits per use, and what an allocation paid in advance costs. Tiered features carry a tooltip with every tier's price.
-- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
-- Top-ups, Credit bundles, and Promotional credits list the company's other grants, a row per bundle, newest first.
+- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used once any is. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
+- Top-ups, Credit bundles, and Promotional credits list the company's auto top-up, purchased, and free grants, a row per bundle (or per grant outside one), newest first.
 
-Each credit section shows three rows, then "See all" for the rest. `showCredits={false}` hides every credit section.
+Each credit section shows three rows, then "See all (N)", where N counts every row in the section. `showCredits={false}` hides every credit section.
 
 ## Errors
 
-A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Your plan is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure reads "There was a problem retrieving your plan." In development the component logs the underlying error to the console beside the copy.
+A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Your plan is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under a plan already loaded, reads "There was a problem retrieving your plan." A refetch that fails with the plan on screen is reported under it rather than replacing it. In development the component logs the underlying error to the console beside the copy.
 
-Credits that fail to load cost only the credit sections. The rest of the card renders, and a "There was a problem retrieving your credits." row with "Try again" stands in their place.
+Credits that fail to load cost only the credit sections. The rest of the card renders, and a "There was a problem retrieving your credits." row with "Try again" stands in their place, and a skeleton holds that place while the retry runs. A credits refetch that fails with the credit sections on screen keeps them, and the same message shows under the card.
 
 ## Strings
 
@@ -125,7 +125,7 @@ Every word the component renders resolves through `strings` on the component, th
 | `planManagerSeeAll`, `planManagerHideAll` | `See all ({{total}})`, Hide all |
 | `retry` | Try again |
 
-The usage-based rows share `usagePerUse`, `usageHardLimitLabel`, `usageHardLimit`, `usageTieredPricingLabel`, `usageTiersVolume`, and `usageTiersGraduated` with the usage components. Prices take the `periodMonthShort`, `periodQuarterShort`, and `periodYearShort` suffixes, and credit lines name the full period with `periodDay` through `periodYear`.
+The usage-based rows share `usagePerUse`, `usageHardLimitLabel`, `usageHardLimit`, `usageTieredPricingLabel`, `usageTiersVolume`, and `usageTiersGraduated` with the usage components. Prices and the per-license breakdown under a credit take the `periodMonthShort`, `periodQuarterShort`, and `periodYearShort` suffixes, and the credit lines name the full period with `periodDay` through `periodYear`.
 
 ```tsx
 <PlanManager strings={{ planManagerChangePlan: "See plans", planManagerAddOns: "Extras" }} />
@@ -136,7 +136,7 @@ The usage-based rows share `usagePerUse`, `usageHardLimitLabel`, `usageHardLimit
 This is what the component renders, for a host styling it without `SchematicStyles`. The notice sits above the card, inside the root. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-plan-manager" data-state="ready">
+<div class="schematic-element schematic-plan-manager" data-state="ready">
   <div class="schematic-plan-manager__notice" data-kind="trial" role="status">
     <p class="schematic-plan-manager__notice-title">Trial ends in 5 days</p>
     <!-- cancellation, custom plan billing, and downgrade notices -->
@@ -174,10 +174,15 @@ This is what the component renders, for a host styling it without `SchematicStyl
             <span class="schematic-plan-manager__item">1,000 AI credits per month</span>
             <span class="schematic-muted schematic-small schematic-plan-manager__used">400 used</span>
           </div>
+          <!-- a per-license grant -->
+          <span class="schematic-muted schematic-small">12 Seats × 10 + 100 = 220 AI credits/mo</span>
         </li>
       </ul>
       <!-- more than three rows -->
-      <button class="schematic-link-button schematic-plan-manager__see-all" aria-expanded="false">…</button>
+      <button class="schematic-link-button schematic-plan-manager__see-all" aria-expanded="false">
+        <i class="schematic-icon schematic-icon--chevron-down schematic-chevron" aria-hidden="true"></i>
+        <span class="schematic-link-button__label">See all (4)</span>
+      </button>
       <div class="schematic-plan-manager__auto-topup">
         <div class="schematic-plan-manager__auto-topup-lines">
           <span class="schematic-plan-manager__item">Auto top-up</span>
@@ -186,6 +191,9 @@ This is what the component renders, for a host styling it without `SchematicStyl
         <button class="schematic-cta schematic-cta--small schematic-cta--ghost schematic-plan-manager__edit">Edit</button>
       </div>
     </section>
+
+    <!-- Top-ups, Credit bundles, and Promotional credits: sections of plain
+         .schematic-plan-manager__row items, an item and its __used figure -->
 
     <!-- a <button> with onChangePlan, an <a> with changePlanUrl -->
     <a class="schematic-cta schematic-plan-manager__change-plan" href="/billing/plans">Change plan</a>
@@ -197,4 +205,4 @@ While loading, the root carries `data-state="pending"` and `aria-busy="true"`, w
 
 ## Build it yourself
 
-[`useCompany`](/components/build-your-own/hooks#usecompany) returns the plan, add-ons, subscription state, scheduled downgrade, and pending custom plan billing. With [`useFeatureUsage`](/components/build-your-own/hooks#usefeatureusage) and [`useCreditBalances`](/components/build-your-own/hooks#usecreditbalances), [`derivePlanManager`](/components/build-your-own/derivations) turns them into the notice, the plan and its price, the add-ons, the usage-based rows, and the credit sections.
+[`useCompany`](/components/build-your-own/hooks#usecompany) returns the plan, add-ons, subscription state, scheduled downgrade, and pending custom plan billing. With [`useFeatureUsage`](/components/build-your-own/hooks#usefeatureusage) and [`useCreditBalances`](/components/build-your-own/hooks#usecreditbalances), [`derivePlanManager`](/components/build-your-own/derivations#plan-manager) turns them into the notice, the plan and its price, the add-ons, the usage-based rows, and the credit sections.

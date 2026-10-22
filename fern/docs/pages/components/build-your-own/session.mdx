@@ -47,7 +47,7 @@ curl -X POST https://api.schematichq.com/temporary-access-tokens \
   </Tab>
 </Tabs>
 
-The SDKs fill in the `company` resource type themselves; a raw request states it as `resource_type`. Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
+The Node.js and Python SDKs fill in the `company` resource type themselves; the Go SDK and a raw request state it as `resource_type`. Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
 
 ## The session
 
@@ -72,7 +72,9 @@ Its identity is the `(company, user)` pair, because that is what a token is mint
 | `null` | Signed out | Every card empties, and nothing is read until a session returns |
 | `undefined` | Still finding out | Cards hold their loading state rather than reporting an error |
 
-Auth libraries often collapse the last two. Clerk reports `undefined` both while it loads and when nobody is signed in, so read `isLoaded` before deciding which you mean.
+`useCatalog` is the exception: under `null` or `undefined` it reads the public catalog with the publishable key, so a pricing page renders before anyone signs in.
+
+Auth libraries can blur these. Clerk's `useAuth` reports its ids as `undefined` while it loads and `null` when nobody is signed in, but its `orgId` is also `null` for a signed-in user with no active organization, so check `isSignedIn` before reading a missing `orgId` as signed out.
 
 ### Token providers and refresh
 
@@ -99,11 +101,11 @@ const billing = new SchematicBillingClient(session);
 const { invoices, count } = await billing.fetchInvoices({ limit: 12, offset: 0 });
 ```
 
-The client has one method per resource (`fetchCompany`, `fetchFeatureUsage`, `fetchCreditBalances`, `fetchUpcomingInvoice`, `fetchPaymentMethods`, `fetchInvoices`) and the writes the hooks call (`updatePaymentMethod`, `deletePaymentMethod`, `createSetupIntent`, `cancelSubscription`). `apiUrl` and `additionalHeaders` in its options route requests to a staging or self-hosted API. Pass a client you built as `billingClient` on `SchematicProvider`, and the hooks read through it.
+The client has one method per resource (`fetchCatalog`, `fetchPublicCatalog`, `fetchCompany`, `fetchFeatureUsage`, `fetchFeatureUserUsage`, `fetchCreditBalances`, `fetchCreditUserUsage`, `fetchUpcomingInvoice`, `fetchPaymentMethods`, `fetchInvoices`, `fetchTaxIds`) and the writes the hooks call (`updatePaymentMethod`, `deletePaymentMethod`, `createSetupIntent`, `cancelSubscription`, `updateTaxId`). `fetchPublicCatalog` reads with the `publishableKey` in its options, and `apiUrl` and `additionalHeaders` route requests to a staging or self-hosted API. Pass a client you built as `billingClient` on `SchematicProvider`, and the hooks read through it.
 
 ## Server rendering
 
-`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render even though auth usually resolves a render later. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
+`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render, provided that render states the session; its `token` can still be an async function that resolves later. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
 
 ```tsx
 import { SchematicBillingClient, fetchBillingData } from "@schematichq/schematic-js";
@@ -124,4 +126,4 @@ const initialData = await fetchBillingData(client, {
 
 Pass the same invoice query your component asks, or the seed answers a question nothing asked and the component fetches again. A resource that fails on the server is left out of the bag rather than thrown, and the client loads it as usual. For a page of drop-ins, `billingResources(UpcomingBill, Invoices)` from `@schematichq/schematic-components/elements` collects the names each one reads.
 
-The seed records which company it fetched for. Rows stamped with a different company than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. State the session on the first client render, since a stamped seed waits for its session before it paints. Pass `locale` explicitly for a server-rendered page, so the server and the browser format dates and amounts the same way.
+The seed records which `(company, user)` pair it fetched for. Rows stamped with a different pair than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. State the session on the first client render, since a stamped seed waits for its session before it paints. Pass `locale` explicitly for a server-rendered page, so the server and the browser format dates and amounts the same way.

@@ -35,7 +35,7 @@ import {
 | `onBuyMore` | | "Buy More" calls this with the credit's balance entry. |
 | `buyMoreUrl`, `buyMoreTarget` | | "Buy More" links here when there is no `onBuyMore`. |
 | `headingLevel` | `2` | The heading's level, `1` through `6`. Each credit's name sits one level below while the heading shows, and takes the level itself when it does not. |
-| `className` | | Added to the root alongside `schematic-credit-usage`. |
+| `className` | | Added to the root alongside `schematic-element schematic-credit-usage`. |
 | `locale` | | BCP 47 tag for number and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this component by key. Wins over the provider's `strings` and `translate`. |
 
@@ -49,7 +49,7 @@ A company with no credits, on a plan that draws on none, renders nothing.
 
 Each card shows the remaining balance, such as "3,100 AI credits remaining". When the plan grants the credit per license, a line under it shows the plan's total per period, the license count times the per-license amount that makes it up, any company grant on top, and the day it renews.
 
-"See balance details" opens the ledger: the live grants behind the balance, newest first. Each grant names where it came from (included in the plan, a bundle purchase, an auto top-up, or a promotional grant) and when it resets or expires. The ledger shows three grants, then "See all" for the rest. The server leaves expired and used-up grants out, so the ledger lists only what still counts. A credit with no grants shows neither the ledger nor usage by user.
+"See balance details" opens the ledger: the live grants behind the balance, newest first. Each grant names where it came from (included in the plan, a bundle purchase, an auto top-up, or a promotional grant) and when it resets or expires. The ledger shows three grants, then "See all" for the rest. The server leaves expired and zeroed-out grants out, though a used-up grant stays listed until it expires. A credit with no grants shows neither the ledger nor usage by user.
 
 ## Usage by user
 
@@ -57,7 +57,7 @@ Under the ledger, each credit lists who on the team spent it over the span of it
 
 ## Errors
 
-A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Credits are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under balances already loaded, reads "There was a problem retrieving your credits." In development the component logs the underlying error to the console beside the copy.
+A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Credits are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under balances already loaded, reads "There was a problem retrieving your credits." A refetch that fails with balances on screen is reported under them rather than replacing them. In development the component logs the underlying error to the console beside the copy.
 
 ## Strings
 
@@ -96,7 +96,7 @@ The per-user list shares the `usageByUser*` keys with [Metered Features](/compon
 This is what the component renders, for a host styling it without `SchematicStyles`. The root carries no card styling of its own; each credit is a `schematic-card`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-credit-usage" data-state="ready">
+<div class="schematic-element schematic-credit-usage" data-state="ready">
   <!-- with showHeader -->
   <div class="schematic-header">
     <h2 class="schematic-header__title">Credits</h2>
@@ -106,6 +106,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
     <section class="schematic-card schematic-credit-usage__credit" aria-label="AI credits">
       <div class="schematic-credit-usage__main">
         <span class="schematic-credit-usage__icon">
+          <!-- a schematic-icons glyph; an emoji renders as text in <i class="schematic-icon"> -->
           <i class="schematic-icon schematic-icon--…" aria-hidden="true"></i>
         </span>
         <div class="schematic-credit-usage__body">
@@ -153,6 +154,12 @@ This is what the component renders, for a host styling it without `SchematicStyl
             <span class="schematic-usage-by-user__name">Ada</span>
             <span class="schematic-muted schematic-usage-by-user__amount">…</span>
           </li>
+          <!-- expanded, usage no user claims: a "?" avatar and a muted name -->
+          <li class="schematic-usage-by-user__user">
+            <span class="schematic-usage-by-user__avatar" aria-hidden="true">?</span>
+            <span class="schematic-usage-by-user__name schematic-muted">Unattributed</span>
+            <span class="schematic-muted schematic-usage-by-user__amount">…</span>
+          </li>
         </ul>
         <button class="schematic-link-button schematic-usage-by-user__toggle" aria-expanded="false">…</button>
       </div>
@@ -161,7 +168,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
 </div>
 ```
 
-While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton` of two rows, each with a `name` and a `remaining` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton`: a heading bar when `showHeader` is set, then two rows, each with a `name` and a `remaining` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
 
 ## Build it yourself
 

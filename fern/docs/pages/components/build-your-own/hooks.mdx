@@ -9,7 +9,7 @@ Every read hook returns a handle with the same shape and reads through the sessi
 ```ts
 interface ResourceHandle<T> {
   data: T | undefined;      // undefined until the first successful load; retained across later errors
-  error: Error | undefined; // the latest failure; cleared by the next success
+  error: Error | undefined; // the latest failure; cleared when the next request starts
   isPending: boolean;       // a request is in flight and nothing has arrived yet, or a refetch is running
   refetch: () => void;
 }
@@ -17,7 +17,7 @@ interface ResourceHandle<T> {
 
 The three states a component renders follow from those fields. `data === undefined && isPending` is the first load. `data === undefined && error` is a failure with nothing to show. `data !== undefined` is ready, and a set `error` alongside it is a failure to report without replacing what is there.
 
-Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead, apart from [`useCatalog`](#usecatalog), which reads the public catalog meanwhile. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
+Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead, apart from [`useCatalog`](#usecatalog), which reads the public catalog meanwhile. Under `session={null}` they settle with no `data`, no `error`, and `isPending` false, again apart from `useCatalog`. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
 
 The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
 
@@ -57,7 +57,7 @@ The company and what it is subscribed to, read from `GET /company`:
 | `scheduledDowngrade` | `fromPlanId`, `fromPlanName`, `toPlanId`, and `toPlanName` for a downgrade that takes effect at period end. |
 | `customPlanBilling` | The newest pending custom plan invoice: `planId`, `planName`, `dueAt`, `invoiceUrl`, and `activationStrategy`. |
 
-[Plan Manager](/components/drop-in/plan-manager) and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) read this.
+[Plan Manager](/components/drop-in/plan-manager) and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) read this, and so does the [Pricing Table](/components/drop-in/pricing-table) once a session starts.
 
 ## useCatalog
 
@@ -73,7 +73,7 @@ Plans, add-ons, and credit bundles with prices per period and currency, tier sha
 
 The source follows the session. With a session it reads the company's view from `GET /catalog/view` (or `/catalogs/:catalog_id/view`), which adds each plan's and add-on's standing: `current`, `valid` with an `invalidReason` and `usageViolations` when false, and `companyCanTrial`, plus `capabilities.checkout` for whether the company can check out at all. With no session, or while the session is still `undefined`, it reads `GET /public/catalog` (or `/public/catalogs/:catalog_id`) with the provider's publishable key, so unlike the other hooks it does not wait on your auth. A session starting swaps the public catalog for the company's view. `data.source` says which one you have; the public catalog carries no standing, so check it before reading `current` or `valid`.
 
-A 404 from either means the account is not enabled for catalogs. The [Pricing Table](/components/drop-in/pricing-table) reads this, and [`derivePricingTable`](/components/build-your-own/derivations#pricing-table) takes it whole.
+A 404 from either means the account is not enabled for catalogs, or that `catalogId` names no catalog of the account's. The [Pricing Table](/components/drop-in/pricing-table) reads this, and [`derivePricingTable`](/components/build-your-own/derivations#pricing-table) takes it whole.
 
 ## useFeatureUsage
 
@@ -88,16 +88,16 @@ One row per feature the company is entitled to, read from `GET /company/usage`. 
 | `featureId`, `featureName`, `featureDescription`, `featureIcon` | The feature, with `featureSingularName` and `featurePluralName` where they are configured. |
 | `featureType` | `boolean`, `event`, `trait`, or `license`. |
 | `access` | Whether the company has access to the feature. |
-| `entitlementType` | `plan_entitlement` or `company_override`. Only an override carries `expiresAt`. |
+| `entitlementType`, `planEntitlementId`, `companyOverrideId` | `plan_entitlement` or `company_override`, with the id of whichever it is. Only an override carries `expiresAt`. |
 | `valueType`, `valueNumeric`, `valueBool` | The entitlement's value: `boolean`, `numeric`, `unlimited`, `trait`, or `credit`. |
 | `allocation`, `usage`, `softLimit`, `warningThreshold` | The limit, the usage against it, an overage's soft limit, and the warning threshold. |
-| `priceBehavior` | `pay_in_advance`, `pay_as_you_go`, `overage`, `tier`, or `credit_burndown`. |
-| `price`, `currentCost` | The metered price the company is billed at, tiers included, and what the feature costs at that price. |
+| `priceBehavior` | `pay_in_advance`, `pay_as_you_go`, `overage`, `tier`, or `credit_burndown`. Absent when the feature is not priced. |
+| `price`, `currentCost` | The metered price the company is billed at, tiers included, and what the feature costs at that price, in minor units. |
 | `metricPeriod`, `metricPeriodMonthReset`, `resetsAt` | The usage period and when it next resets. |
-| `creditId`, `creditName`, `consumptionRate` | The credit a credit-burndown feature draws on, and how much one use costs. |
-| `perLicenseCreditGrants` | The plan's per-license credit grants, on a license feature. |
+| `creditId`, `creditName`, `creditIcon`, `consumptionRate` | The credit a credit-burndown feature draws on, with `creditSingularName` and `creditPluralName` where they are configured, and how much one use costs. |
+| `licenseId`, `perLicenseCreditGrants` | The license and the plan's per-license credit grants, on a license feature. |
 
-[Included Features](/components/drop-in/included-features), [Metered Features](/components/drop-in/metered-features), and [Plan Manager](/components/drop-in/plan-manager) all read this, so a page showing all three makes one request.
+[Included Features](/components/drop-in/included-features), [Metered Features](/components/drop-in/metered-features), [Plan Manager](/components/drop-in/plan-manager), and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) all read this, so a page showing all four makes one request.
 
 ## useFeatureUserUsage
 
@@ -105,7 +105,7 @@ One row per feature the company is entitled to, read from `GET /company/usage`. 
 function useFeatureUserUsage(featureId: string): ResourceHandle<FeatureUserUsage>;
 ```
 
-One event-based feature's usage by user over its metric period, read from `GET /company/usage/:feature_id/users`. `users` holds the heaviest users, each with `userId`, `name`, `usage`, `share`, and `lastSeen`. `count` is how many users there are in all, `total` is the period's usage, `startTime` and `endTime` bound the period, and `unattributed` is usage from events sent without a user. A feature that is not an event-based entitlement of the company answers 404.
+One event-based feature's usage by user over its metric period, read from `GET /company/usage/:feature_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `usage`, `share`, and `lastSeen`. `count` is how many users there are in all, `total` is the period's usage, `startTime` and `endTime` bound the period, and `unattributed` is usage from events sent without a user. A feature that is not an event-based entitlement of the company answers 404.
 
 ## useCreditBalances
 
@@ -122,10 +122,10 @@ One balance per credit, read from `GET /company/credits`. An empty list is a loa
 | `resetsAt`, `expiresAt` | When the balance resets or runs out. |
 | `purchasable` | Whether a bundle of the credit is on offer to the company's plan. |
 | `autoTopup` | `enabled`, `selfService`, `amount`, and `thresholdCredits`. |
-| `composition` | How a per-license plan grant adds up per period: `licenseQuantity`, `perLicenseAmount`, `fixedQuantity`, `total`, `period`, and `renewsAt`. |
-| `grants` | Live grants, newest first, each with `grantReason`, `quantity`, `quantityUsed`, `quantityRemaining`, `createdAt`, `resetsAt` or `expiresAt`, and the plan or bundle behind it. |
+| `composition` | How a per-license plan grant adds up per period: `licenseId`, `licenseName` with `licenseSingularName` and `licensePluralName`, `licenseQuantity`, `perLicenseAmount`, `fixedQuantity`, `total`, `period`, and `renewsAt`. |
+| `grants` | Live grants, newest first, each with `id`, `grantReason`, `quantity`, `quantityUsed`, `quantityRemaining`, `createdAt`, `validFrom`, `renewalPeriod`, `resetsAt` or `expiresAt`, and the plan or bundle behind it. |
 
-A credit the plan draws on that the company holds none of is listed with a zero balance and no grants. Expired and fully used grants leave the list on the server.
+A credit the plan draws on that the company holds none of is listed with a zero balance and no grants. Expired and zeroed-out grants leave the list on the server; a used-up grant stays on it until it expires.
 
 ## useCreditUserUsage
 
@@ -133,7 +133,7 @@ A credit the plan draws on that the company holds none of is listed with a zero 
 function useCreditUserUsage(creditId: string): ResourceHandle<CreditUserUsage>;
 ```
 
-One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds the heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty.
+One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty, and only a credit that does not exist in the environment answers 404.
 
 ## useUpcomingInvoice
 
@@ -164,10 +164,10 @@ Each `Invoice`:
 | --- | --- | --- |
 | `id` | `string` | The invoice's identifier. |
 | `amountDue` | `number` | Signed, in the currency's minor units. A negative amount is a credit note. |
-| `currency` | `string` | Lowercase ISO 4217 code, such as `usd`. |
+| `currency` | `Currency` | Lowercase ISO 4217 code, such as `usd`. |
 | `createdAt` | `Date` | When the invoice was created. |
 | `dueDate` | `Date \| null`, optional | When it is due, if the billing provider set one. |
-| `status` | `InvoiceStatus \| null`, optional | `draft`, `open`, `paid`, `uncollectible`, or `void`. |
+| `status` | `InvoiceStatus \| null`, optional | `open` or `paid`. The server leaves draft, uncollectible, and void invoices out of the history. |
 | `url` | `string \| null`, optional | The hosted invoice page, if there is one. |
 
 The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
@@ -228,16 +228,16 @@ Each `PaymentMethod`:
 | --- | --- | --- |
 | `id` | `string` | Schematic's identifier. `remove` takes this. |
 | `externalId` | `string` | The billing provider's identifier. `setDefault` takes this. |
-| `type` | `string` | The provider's payment method type, such as `card`, `us_bank_account`, `apple_pay`, or `link`. |
+| `type` | `string` | The provider's payment method type, such as `card`, `us_bank_account`, or `link`. |
 | `isDefault` | `boolean` | The method the company is billed with: the subscription's own when it has one, else the customer's default. At most one is `true`, and none may be. |
-| `canRemove` | `boolean` | Whether `remove` would be accepted. `false` only for the last method while an active paid subscription needs it. |
-| `cardBrand`, `cardLast4`, `cardExpMonth`, `cardExpYear` | optional | The card behind a card, Apple Pay, or Google Pay method. |
+| `canRemove` | `boolean` | Whether `remove` would be accepted. `false` only for the last method while a paid subscription that is active, trialing, or past due needs it. |
+| `cardBrand`, `cardLast4`, `cardExpMonth`, `cardExpYear` | optional | The card behind a `card` method, which is also how Stripe saves an Apple Pay or Google Pay card. |
 | `bankName`, `accountLast4` | optional | A bank account's bank and last four digits. |
 | `accountName`, `billingName`, `billingEmail` | optional | The names and email the provider supplied, such as the email behind a Link account. |
 
 The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
 
-The server decides both flags, so a component never re-derives the provider's rules. Removing the default promotes nothing; the list then has no default until someone sets one. A method added through a setup intent is not made the default by the server; call `setDefault` with its id once Stripe confirms it.
+The server decides both flags, so a component never re-derives the provider's rules. Removing the default promotes nothing; the list then has no default until someone sets one. The server makes a method added through a setup intent the default only when the customer has no default and it is the only method on file; call `setDefault` with its id once Stripe confirms it.
 
 ```tsx
 import { usePaymentMethods } from "@schematichq/schematic-react";
@@ -363,7 +363,7 @@ function useUnsubscribe(): {
 };
 ```
 
-Sets the company's subscription to cancel at the end of its billing period. Once it lands, whichever of the company, the upcoming invoice, and the credit balances are loaded reload, so `useCompany` shows the cancellation date on its next render. `unsubscribe` rejects with the failure and records it on `mutationError`. The server refuses when the company has no subscription, when the subscription is already set to cancel, or when another Stripe app manages it.
+Sets the company's subscription to cancel at the end of its billing period. Once it lands, whichever of the company, the upcoming invoice, and the credit balances are loaded reload, so `useCompany` shows the cancellation date on its next render. `unsubscribe` rejects with the failure and records it on `mutationError`. The server refuses when the company has no subscription, when the subscription is already set to cancel at period end, or when another Stripe app manages it.
 
 ```tsx
 import { useCompany, useUnsubscribe } from "@schematichq/schematic-react";
@@ -413,8 +413,8 @@ import { BillingDataProvider } from "@schematichq/schematic-react";
 </BillingDataProvider>;
 ```
 
-`data` takes a value per resource: `company`, `featureUsage`, `creditBalances`, `upcomingInvoice`, `paymentMethods`, and `invoices`. A missing key reports as pending. `featureUserUsage` and `creditUserUsage` take the per-user breakdowns keyed by feature or credit id. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, `createSetupIntent`, and `unsubscribe` receive the calls `usePaymentMethods`, `useSetupIntent`, and `useUnsubscribe` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
+`data` takes a value per resource: `catalog`, `publicCatalog`, `company`, `featureUsage`, `creditBalances`, `upcomingInvoice`, `paymentMethods`, and `invoices`. A missing key reports as pending. Given `publicCatalog` without `catalog`, `useCatalog` reports the public source, as on a signed-out page. `featureUserUsage` and `creditUserUsage` take the per-user breakdowns keyed by feature or credit id. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, `createSetupIntent`, and `unsubscribe` receive the calls `usePaymentMethods`, `useSetupIntent`, and `useUnsubscribe` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
 
 ## Flags and entitlement checks
 
-The hooks above read billing state. Feature flags and entitlement checks keep their own hooks on the same provider: `useSchematicFlag`, `useSchematicEntitlement`, `useSchematicPlan`, `useSchematicCreditBalance`, and `useSchematicEvents`. See the [React SDK](/developer_resources/sdks/react).
+The hooks above read billing state. Feature flags and entitlement checks keep their own hooks on the same provider: `useSchematicFlag`, `useSchematicEntitlement`, `useSchematicIsPending`, `useSchematicPlan`, `useSchematicCreditBalance`, `useSchematicCreditSpendPolicies`, and `useSchematicEvents`. See the [React SDK](/developer_resources/sdks/react).

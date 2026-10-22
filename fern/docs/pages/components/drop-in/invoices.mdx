@@ -33,13 +33,13 @@ import {
 | `showDate`, `showAmount` | `true` | The date and the amount on each row. |
 | `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
 | `query` | | Which rows the server returns. `{ includePending: true }` includes unpaid invoices that are not yet due. |
-| `className` | | Added to the root alongside `schematic-card schematic-invoices`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-invoices`. |
 | `locale` | | BCP 47 tag for date and currency formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
 
 Each distinct `query` is its own list with its own paging, and the component keys by value, so an inline object literal is fine.
 
-Each row links its date to the hosted invoice and opens it in a new tab. The date is the due date, or the created date when the billing provider set none, formatted in the locale's long form such as "March 1, 2026". Every amount carries a tooltip saying whether it was a charge or a credit.
+Each row with a hosted invoice links its date to it and opens it in a new tab; a row without an `http` or `https` URL shows the date as plain text. The date is the due date, or the created date when the billing provider set none, formatted in the locale's long form such as "March 1, 2026". Every amount carries a tooltip saying whether it was a charge or a credit.
 
 ## Paging
 
@@ -47,7 +47,7 @@ The card collapses to `limit` rows and offers "See more". Once every loaded row 
 
 ## Errors
 
-A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Invoices are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under rows already loaded, reads "There was a problem retrieving your invoices."
+A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Invoices are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under rows already loaded, reads "There was a problem retrieving your invoices." A refetch that fails with rows on screen is reported under them rather than replacing them.
 
 Neither message is the error's own text. In development the component logs the underlying error to the console beside the copy, so a missing provider or a refused request is diagnosable from the page. In production, read the error from [useInvoices](/components/build-your-own/hooks#useinvoices) if you need it.
 
@@ -76,9 +76,9 @@ Every word the card renders resolves through `strings` on the component, then on
 This is what the component renders, for a host styling it without `SchematicStyles`. The root's class list is the same in every state, and `data-state` tells them apart. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-card schematic-invoices" data-state="ready">
+<div class="schematic-element schematic-card schematic-invoices" data-state="ready">
   <div class="schematic-header">
-    <h2 class="schematic-header__title">Invoices</h2>
+    <h2 class="schematic-header__title" id="…">Invoices</h2>
   </div>
 
   <!-- with no rows, in place of the list -->
@@ -94,7 +94,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
       </span>
       <!-- title carries the charge or credit tooltip; a credit note adds
            .schematic-invoices__credit and renders in parentheses -->
-      <span class="schematic-invoices__amount">$68.00</span>
+      <span class="schematic-invoices__amount" title="Charge — you were billed this amount">$68.00</span>
     </li>
   </ul>
 
@@ -108,7 +108,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
   </div>
 
   <!-- a failure with rows still on screen -->
-  <p class="schematic-status-note schematic-error">…</p>
+  <p class="schematic-status-note schematic-error" role="alert">…</p>
 </div>
 ```
 

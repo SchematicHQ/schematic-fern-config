@@ -128,11 +128,11 @@ function Portal() {
 
 Render `<SchematicStyles />` once. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add more, Buy more, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`. Drop any component the user does not need; each stands alone. Props per component are on its page: [Plan Manager](/components/drop-in/plan-manager), [Pricing Table](/components/drop-in/pricing-table), [Checkout](/components/drop-in/checkout), [Included Features](/components/drop-in/included-features), [Metered Features](/components/drop-in/metered-features), [Credit Usage](/components/drop-in/credit-usage), [Upcoming Bill](/components/drop-in/upcoming-bill), [Payment Methods](/components/drop-in/payment-methods), [Invoices](/components/drop-in/invoices), [Unsubscribe Button](/components/drop-in/unsubscribe-button). Append `.md` to any of those URLs for Markdown.
 
-For a pricing page, render `<PricingTable onSelectPlan={…} />`. With only the publishable key, or before the user signs in, it shows the public catalog and `onSelectPlan` should send the visitor to sign up. Signed in, it marks the company's current plan; under `CheckoutLauncherProvider`, have `onSelectPlan` call `open({ selection: { planId: id, period: period ?? undefined, currency } })` for a plan.
+For a public pricing page, render `<PricingTable onSelectPlan={…} />` under a provider that has only the publishable key.
 
 ### 4b. Build your own UI (when the user asks for it)
 
-One hook per resource, one derivation each, and the user's own JSX. The hooks come from `@schematichq/schematic-react` and the derivations from `@schematichq/schematic-components/elements`. Start from the [Hooks reference](/components/build-your-own/hooks) and adapt the code to the app's design system rather than copying it verbatim. Keep the derivations (`derivePlanManager`, `derivePricingTable`, `deriveIncludedFeatures`, `deriveMeteredFeatures`, `deriveCreditUsage`, `deriveUpcomingInvoice`, `derivePaymentMethods`, `deriveInvoiceList`, `deriveUnsubscribe`) as imports; they carry the display rules and their tests. For writes, use the handles: `usePaymentMethods()` returns `setDefault` and `remove`, `useSetupIntent()` starts adding a card, and `useUnsubscribe()` returns `unsubscribe`. For purchases, use `useCheckout` or mount `CheckoutLauncherProvider` and call `useCheckoutLauncher().open()`.
+One hook per resource, one derivation each, and the user's own JSX. The hooks come from `@schematichq/schematic-react` and the derivations from `@schematichq/schematic-components/elements`. Start from the [Hooks reference](/components/build-your-own/hooks) and adapt the code to the app's design system rather than copying it verbatim. Keep the derivations (`derivePlanManager`, `deriveIncludedFeatures`, `deriveMeteredFeatures`, `deriveCreditUsage`, `deriveUpcomingInvoice`, `derivePaymentMethods`, `deriveInvoiceList`, `deriveUnsubscribe`) as imports; they carry the display rules and their tests. For writes, use the handles: `usePaymentMethods()` returns `setDefault` and `remove`, `useSetupIntent()` starts adding a card, and `useUnsubscribe()` returns `unsubscribe`. For purchases, use `useCheckout` or mount `CheckoutLauncherProvider` and call `useCheckoutLauncher().open()`.
 
 ### 5. Theme it
 
@@ -177,7 +177,7 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 | --- | --- | --- | --- |
 | `<Checkout/>` | `useCheckout` | | /components/drop-in/checkout |
 | `<PlanManager/>` | `useCompany`, `useFeatureUsage`, `useCreditBalances` | `derivePlanManager` | /components/drop-in/plan-manager |
-| `<PricingTable/>` | `useCatalog`, `useCompany` | `derivePricingTable` | /components/drop-in/pricing-table |
+| `<PricingTable/>` | `useCatalog` | | /components/drop-in/pricing-table |
 | `<IncludedFeatures/>` | `useFeatureUsage` | `deriveIncludedFeatures` | /components/drop-in/included-features |
 | `<MeteredFeatures/>` | `useFeatureUsage`, `useFeatureUserUsage` | `deriveMeteredFeatures` | /components/drop-in/metered-features |
 | `<CreditUsage/>` | `useCreditBalances`, `useCreditUserUsage` | `deriveCreditUsage` | /components/drop-in/credit-usage |
