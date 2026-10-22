@@ -71,7 +71,7 @@ function Plans() {
 | `showHeader` | `true` | "Plans" and "Add-ons" above their cards. |
 | `showPlans` | `true` | The plans and the custom plan. |
 | `showAddOns` | `true` | The add-ons. |
-| `showPeriodToggle` | `true` | The period toggle, when there is more than one period. |
+| `showPeriodToggle` | `true` | The period toggle, when there is more than one period, with a tip saying what a longer period saves on the current plan. |
 | `showCurrencySelector` | `true` | The currency picker, when there is more than one currency. |
 | `showDescription` | `true` | Each card's description. |
 | `showEntitlements` | `true` | Each card's features. |
@@ -143,7 +143,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
       <div class="schematic-plan-card__header">
         <h3 class="schematic-plan-card__name">Starter</h3>
         <p class="schematic-plan-card__description">…</p>
-        <div class="schematic-plan-card__price">$30.00<sub class="schematic-plan-card__period">/mo</sub></div>
+        <div class="schematic-plan-card__price">$30.00<sub class="schematic-plan-card__period">/month</sub></div>
         <ul class="schematic-plan-card__credits">…</ul>
         <span class="schematic-badge schematic-plan-card__badge">Active</span>
       </div>
@@ -167,7 +167,7 @@ Every other card ends in a `schematic-plan-card__action` holding a `schematic-ct
 
 ## Localizing it
 
-The table's copy is under `pricingTable*`, among them `pricingTablePlans`, `pricingTableAddOns`, `pricingTableBilledMonthly`, `pricingTableBilledQuarterly`, `pricingTableBilledYearly`, `pricingTableChoosePlan`, `pricingTableChooseAddOn`, `pricingTableChangeAddOn`, `pricingTableRemoveAddOn`, `pricingTableCurrentPlan`, `pricingTableOverLimit`, `pricingTableActive`, `pricingTableTrialLeft`, `pricingTableUsageBased`, `pricingTableFree`, `pricingTableCustomPlan`, `pricingTableEverythingIn`, `pricingTableSeeAll`, `pricingTableError`, and `pricingTableUnavailable`. It shares `usageUnits`, `usagePerUnit`, `usagePerPackage`, `usageUnlimited`, and the tier and hard-limit tips with the usage components, the period names `periodDay` through `periodYear` and their `*Short` suffixes, and `retry`. See [Localization](/components/drop-in/localization) for how the chain works.
+The table's copy is under `pricingTable*`, among them `pricingTablePlans`, `pricingTableAddOns`, `pricingTableBilledMonthly`, `pricingTableBilledQuarterly`, `pricingTableBilledYearly`, `pricingTableChoosePlan`, `pricingTableChooseAddOn`, `pricingTableChangeAddOn`, `pricingTableRemoveAddOn`, `pricingTableCurrentPlan`, `pricingTableOverLimit`, `pricingTableOverLimitDetail`, `pricingTableActive`, `pricingTableTrialLeft`, `pricingTableUsageBased`, `pricingTableFree`, `pricingTableCustomPlan`, `pricingTableEverythingIn`, `pricingTableCreditsPerLicensePerPeriod`, `pricingTableCreditsPlusPerPeriod`, `pricingTableSaveYearly`, `pricingTableSavingYearly`, `pricingTableSeeAll`, `pricingTableError`, and `pricingTableUnavailable`. It shares `usageUnits`, `usagePerUnit`, `usagePerPackage`, `usageUnlimited`, and the tier and hard-limit tips with the usage components, the period names `periodDay` through `periodYear` and their `*Short` suffixes, and `retry`. See [Localization](/components/drop-in/localization) for how the chain works.
 
 ## Build it yourself
 
