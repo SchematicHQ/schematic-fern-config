@@ -76,7 +76,7 @@ Stripe's fields render in an iframe your CSS cannot reach, so the form themes th
 | --- | --- |
 | `collectEmail` | A required "Email" field under Stripe's, filled from `billingDetails.email` until the customer types. Sent as the method's billing email. |
 | `collectAddress` | Stripe's billing address fields, with the name filled from `billingDetails.name`. Save waits for them to be complete. |
-| `collectPhone` | The same address fields with a phone number among them. Without `collectAddress`, Save does not wait for them to be complete. |
+| `collectPhone` | The same address fields with a phone number among them. |
 
 The prefilled name is sent as the billing name whenever the address fields show. Each setting defaults to `false`.
 
@@ -84,7 +84,7 @@ The prefilled name is sent as the billing name whenever the address fields show.
 
 - Any method can be removed, the default included, except the last one on a paid subscription that is active, trialing, or past due. Each method's `canRemove` says which, and the remove controls show only where it is `true`.
 - Removing the default promotes nothing. The company has no default until someone sets one.
-- A method added through the form becomes the default: the form calls `setDefault` once Stripe confirms it. The server alone makes a new method the default only when the customer has no default and it is the only method on file, so a hand-built form has to call `setDefault` too.
+- A method added through the form becomes the default. A hand-built form should call `setDefault` once Stripe confirms the method.
 
 These rules live on the server, so a hand-built UI gets the same answers from [`usePaymentMethods`](/components/build-your-own/hooks#usepaymentmethods).
 
@@ -96,7 +96,7 @@ Neither message is the error's own text. In development the component logs the u
 
 ## Icons
 
-The brand marks, the dialog's close control, and the chevron on "Choose different payment method" are glyphs from the Schematic icon font, which `<SchematicStyles />` inlines as a `data:` URL. If your Content Security Policy sets `font-src`, add `data:` to it, or the glyphs render empty. Every glyph is `aria-hidden`. The marks and the chevron sit beside their text, so a blocked font loses only the glyph; the close and remove controls are a glyph alone, named only by `aria-label`, so they render empty.
+The brand marks, the dialog's close control, and the chevron on "Choose different payment method" are glyphs from the Schematic icon font, which `<SchematicStyles />` inlines as a `data:` URL. If your Content Security Policy sets `font-src`, add `data:` to it, or the glyphs render empty. Every glyph is `aria-hidden`; the close and remove controls are icon-only, so a blocked font leaves them empty.
 
 If you replace `SchematicStyles` with your own sheet, render `<style>{iconsCss}</style>` once, exported from the same entry point. The icon package's own stylesheet names its rules differently and does not light the glyphs up.
 

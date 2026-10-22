@@ -74,7 +74,7 @@ Its identity is the `(company, user)` pair, because that is what a token is mint
 
 `useCatalog` is the exception: under `null` or `undefined` it reads the public catalog with the publishable key, so a pricing page renders before anyone signs in.
 
-Auth libraries can blur these. Clerk's `useAuth` reports its ids as `undefined` while it loads and `null` when nobody is signed in, but its `orgId` is also `null` for a signed-in user with no active organization, so check `isSignedIn` before reading a missing `orgId` as signed out.
+Auth libraries can blur these: Clerk's `orgId` is `null` both when nobody is signed in and when no organization is active, so check `isSignedIn` too.
 
 ### Token providers and refresh
 
@@ -105,7 +105,7 @@ The client has one method per resource (`fetchCatalog`, `fetchPublicCatalog`, `f
 
 ## Server rendering
 
-`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render, provided that render states the session; its `token` can still be an async function that resolves later. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
+`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render, as long as that render states the session. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
 
 ```tsx
 import { SchematicBillingClient, fetchBillingData } from "@schematichq/schematic-js";

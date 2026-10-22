@@ -17,7 +17,7 @@ interface ResourceHandle<T> {
 
 The three states a component renders follow from those fields. `data === undefined && isPending` is the first load. `data === undefined && error` is a failure with nothing to show. `data !== undefined` is ready, and a set `error` alongside it is a failure to report without replacing what is there.
 
-Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead, apart from [`useCatalog`](#usecatalog), which reads the public catalog meanwhile. Under `session={null}` they settle with no `data`, no `error`, and `isPending` false, again apart from `useCatalog`. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
+Mounted outside any provider, every hook reports the missing source on its `error` rather than throwing, so a misconfigured page fails the same way a request would. Under a provider whose `session` is still `undefined`, the hooks stay pending instead, apart from [`useCatalog`](#usecatalog), which reads the public catalog meanwhile. Under `session={null}` they settle empty, again apart from `useCatalog`. The hooks never fetch during server rendering: without `initialData` they report pending on the server and load on the client.
 
 The company endpoints answer 404 for an account without company context enabled. Hooks surface that as an error rather than an empty answer, so a page cannot quietly report "nothing here" over real data. `httpStatus(error)` from `@schematichq/schematic-components/elements` reads the status off a billing error, and returns `undefined` for anything that was not an HTTP response.
 
@@ -125,7 +125,7 @@ One balance per credit, read from `GET /company/credits`. An empty list is a loa
 | `composition` | How a per-license plan grant adds up per period: `licenseId`, `licenseName` with `licenseSingularName` and `licensePluralName`, `licenseQuantity`, `perLicenseAmount`, `fixedQuantity`, `total`, `period`, and `renewsAt`. |
 | `grants` | Live grants, newest first, each with `id`, `grantReason`, `quantity`, `quantityUsed`, `quantityRemaining`, `createdAt`, `validFrom`, `renewalPeriod`, `resetsAt` or `expiresAt`, and the plan or bundle behind it. |
 
-A credit the plan draws on that the company holds none of is listed with a zero balance and no grants. Expired and zeroed-out grants leave the list on the server; a used-up grant stays on it until it expires.
+A credit the plan draws on that the company holds none of is listed with a zero balance and no grants. Expired and zeroed-out grants leave the list on the server.
 
 ## useCreditUserUsage
 
@@ -133,7 +133,7 @@ A credit the plan draws on that the company holds none of is listed with a zero 
 function useCreditUserUsage(creditId: string): ResourceHandle<CreditUserUsage>;
 ```
 
-One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty, and only a credit that does not exist in the environment answers 404.
+One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty; an unknown credit answers 404.
 
 ## useUpcomingInvoice
 
@@ -237,7 +237,7 @@ Each `PaymentMethod`:
 
 The optional fields arrive as `null` or are absent, so read them with `??` rather than a strict `null` check.
 
-The server decides both flags, so a component never re-derives the provider's rules. Removing the default promotes nothing; the list then has no default until someone sets one. The server makes a method added through a setup intent the default only when the customer has no default and it is the only method on file; call `setDefault` with its id once Stripe confirms it.
+The server decides both flags, so a component never re-derives the provider's rules. Removing the default promotes nothing; the list then has no default until someone sets one. Call `setDefault` with a new method's id once Stripe confirms it; the server only makes a customer's first method the default.
 
 ```tsx
 import { usePaymentMethods } from "@schematichq/schematic-react";

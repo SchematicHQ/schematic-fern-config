@@ -74,7 +74,7 @@ The group draws one card with a `card-divider` line between its components, and 
 
 Skip the stylesheet and write your own against the class names. They are API, and each component's page shows the tree it renders.
 
-The stylesheet carries the Schematic icon font inlined as a `data:` URL, for feature and credit icons, the brand marks on payment methods, the dialog's close control, the tooltips' info trigger, the current plan's check, and the chevrons. If your Content Security Policy sets `font-src`, add `data:` to it, or the glyphs render empty. Every glyph is `aria-hidden`. Most sit beside their text, so a blocked font loses only the mark; the dialog's close control, a payment method's remove control, and a tooltip's info trigger are a glyph alone, named only by `aria-label`, so they render empty.
+The stylesheet carries the Schematic icon font inlined as a `data:` URL, for feature and credit icons, the brand marks on payment methods, the dialog's close control, the tooltips' info trigger, the current plan's check, and the chevrons. If your Content Security Policy sets `font-src`, add `data:` to it, or the glyphs render empty. Every glyph is `aria-hidden`; the dialog's close control, a payment method's remove control, and a tooltip's info trigger are icon-only, so a blocked font leaves them empty.
 
 A sheet of your own has to bring the icon font too. Render `<style>{iconsCss}</style>` once, exported from the same entry as `SchematicStyles`, or the glyphs render empty. The icon package's own stylesheet names its rules differently and does not light them up.
 
