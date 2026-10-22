@@ -199,6 +199,7 @@ Each drop-in is the fullest version of a section like the ones above. Its page d
 | [Payment Methods](/components/drop-in/payment-methods) | `usePaymentMethods`, `useSetupIntent` | `derivePaymentMethods` |
 | [Invoices](/components/drop-in/invoices) | `useInvoices` | `deriveInvoiceList` |
 | [Unsubscribe Button](/components/drop-in/unsubscribe-button) | `useCompany`, `useFeatureUsage`, `useUnsubscribe` | `deriveUnsubscribe` |
+| [Pricing Table](/components/drop-in/pricing-table) | `useCatalog`, `useCompany` | `derivePricingTable` |
 
 The Components page in the Schematic dashboard has reference code for each drop-in in shadcn/ui, Tailwind, and plain CSS.
 
@@ -338,6 +339,8 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
             <p>{plan.price.kind === "amount" ? plan.price.amount : plan.price.kind}</p>
             {plan.action?.kind === "current" ? (
               <p>Current plan</p>
+            ) : plan.action?.kind === "downgradeBlocked" ? (
+              <a href={plan.action.url ?? undefined}>{plan.action.text ?? "Talk to support"}</a>
             ) : (
               <button
                 disabled={plan.action?.kind === "overLimit" || plan.action?.kind === "unavailable"}

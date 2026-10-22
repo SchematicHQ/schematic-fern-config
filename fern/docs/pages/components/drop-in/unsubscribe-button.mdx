@@ -30,7 +30,7 @@ import {
 | `onManagePlan` | | "Manage plan" in the confirmation calls this. |
 | `managePlanUrl`, `managePlanTarget` | | "Manage plan" links here when there is no `onManagePlan`. |
 | `onUnsubscribed` | | Called once the subscription is set to cancel. |
-| `className` | | Added to the root alongside `schematic-card schematic-unsubscribe`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-unsubscribe`. |
 | `locale` | | BCP 47 tag for currency and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for the button and its confirmation by key. Wins over the provider's `strings` and `translate`. |
 
@@ -40,7 +40,7 @@ The button renders nothing until the company and its feature usage load. It show
 
 ## The confirmation
 
-"Unsubscribe" opens a modal titled "Cancel subscription", closed by Escape, the backdrop, or the control in its header. It says the company keeps access until the end of the billing period and names the date: the scheduled cancellation date, else the next bill date. Beside that it lists the plan and its price, the add-ons, and the recurring total for the subscription's period, which counts the plan, recurring add-ons, and everything paid in advance. One-time add-ons are listed but left out of the total.
+"Unsubscribe" opens a modal titled "Cancel subscription", closed by Escape, the backdrop, or the control in its header. It says the company keeps access until the end of the billing period and names the date: the scheduled cancellation date, else the next bill date, else today. Beside that it lists the plan and its price, each add-on that has a price, and the recurring total for the subscription's period, which counts the plan, recurring add-ons, and everything paid in advance. One-time add-ons are listed but left out of the total.
 
 "Not ready to cancel?" and "Manage plan" show only when you pass `onManagePlan` or `managePlanUrl`, so you decide where a customer who changes their mind goes.
 
@@ -80,7 +80,7 @@ Prices carry the `periodMonthShort`, `periodQuarterShort`, and `periodYearShort`
 This is what the component renders, for a host styling it without `SchematicStyles`. The dialog renders inside the root while it is open. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-card schematic-unsubscribe">
+<div class="schematic-element schematic-card schematic-unsubscribe">
   <button class="schematic-cta schematic-unsubscribe__open">Unsubscribe</button>
 
   <!-- while open -->

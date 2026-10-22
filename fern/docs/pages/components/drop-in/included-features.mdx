@@ -38,7 +38,7 @@ import {
 | `showHardLimit` | `false` | An info tip with the hard limit on features billed past it. |
 | `showWarningThresholdAsLimit` | `false` | The warning threshold in place of the limit, where one is set. |
 | `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
-| `className` | | Added to the root alongside `schematic-card schematic-included-features`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-included-features`. |
 | `locale` | | BCP 47 tag for number, currency, and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
 
@@ -48,7 +48,7 @@ The first four features show, with "See all" for the rest. A company entitled to
 
 Every row names the feature, with its description under it. A license feature adds a line for each per-license credit grant, such as "Includes 10 AI credits per Seat", and a company override adds when it expires.
 
-Boolean features stop there. Event- and trait-based features add what the company gets on the right, by price behavior:
+Boolean and license features stop there. Event- and trait-based features add what the company gets on the right, by price behavior:
 
 | Price behavior | Entitlement | Usage beneath it |
 | --- | --- | --- |
@@ -63,7 +63,7 @@ The usage segments join with a bullet, as in "1,300 API calls used • Resets Oc
 
 ## Errors
 
-A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Features are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under rows already loaded, reads "There was a problem retrieving your features." In development the component logs the underlying error to the console beside the copy.
+A failure with nothing to show replaces the card's content with a short message and a "Try again" button. A 404 reads "Features are not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under rows already loaded, reads "There was a problem retrieving your features." A refetch that fails with rows on screen is reported under them rather than replacing them. In development the component logs the underlying error to the console beside the copy.
 
 ## Strings
 
@@ -80,7 +80,7 @@ Every word the card renders resolves through `strings` on the component, then on
 | `includedFeaturesPerLicense` | `Includes {{amount}} {{creditName}} per {{licenseName}}` |
 | `retry` | Try again |
 
-The usage lines are shared with [Metered Features](/components/drop-in/metered-features#strings), so renaming one renames it in both:
+The usage lines use these keys, shared in part with [Metered Features](/components/drop-in/metered-features#strings), [Plan Manager](/components/drop-in/plan-manager), and [Pricing Table](/components/drop-in/pricing-table), so renaming one renames it wherever it appears:
 
 | Key | Default |
 | --- | --- |
@@ -103,7 +103,7 @@ The usage lines are shared with [Metered Features](/components/drop-in/metered-f
 This is what the component renders, for a host styling it without `SchematicStyles`. The root's class list is the same in every state, and `data-state` tells them apart. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-card schematic-included-features" data-state="ready">
+<div class="schematic-element schematic-card schematic-included-features" data-state="ready">
   <div class="schematic-header">
     <h2 class="schematic-header__title">Included features</h2>
   </div>
@@ -114,8 +114,10 @@ This is what the component renders, for a host styling it without `SchematicStyl
       <i class="schematic-icon schematic-icon--… schematic-included-features__icon" aria-hidden="true"></i>
       <div class="schematic-included-features__details">
         <span class="schematic-included-features__name">API calls</span>
-        <!-- the description, per-license credit lines, and an override's expiry -->
+        <!-- the description and per-license credit lines -->
         <span class="schematic-muted schematic-small">…</span>
+        <!-- an override's expiry -->
+        <em class="schematic-muted schematic-small">Expires Oct 1, 2026</em>
       </div>
       <!-- event- and trait-based features -->
       <div class="schematic-included-features__usage">
@@ -133,7 +135,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
 </div>
 ```
 
-The hard limit and the tiered prices render as a `schematic-tooltip`: a `schematic-tooltip__trigger` button with an info glyph, and the text in `schematic-tooltip__content`. While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton` of three rows, each with a `name` and a `usage` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+An icon that is not a schematic-icons glyph name, such as an emoji, renders as text inside `<i class="schematic-icon schematic-included-features__icon">`. The hard limit and the tiered prices render as a `schematic-tooltip`: a `schematic-tooltip__trigger` button with an info glyph, and the text in `schematic-tooltip__content`. The tiers fill it with a `schematic-tiers` block: a `schematic-tiers__list` `<dl>` of `schematic-tiers__tier` rows, each a `schematic-tiers__range` and a `schematic-tiers__price`, then the tiers mode in `schematic-tiers__mode`. While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton`: a heading bar when `showHeader` is set, then three rows, each with a `name` and a `usage` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
 
 ## Build it yourself
 

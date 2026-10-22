@@ -39,7 +39,7 @@ import {
 | `onAddMore` | | "Add More" calls this with the feature's `FeatureUsage` row. |
 | `addMoreUrl`, `addMoreTarget` | | "Add More" links here when there is no `onAddMore`. |
 | `headingLevel` | `2` | The heading's level, `1` through `6`. Each feature's name sits one level below while the heading shows, and takes the level itself when it does not. |
-| `className` | | Added to the root alongside `schematic-metered-features`. |
+| `className` | | Added to the root alongside `schematic-element schematic-metered-features`. |
 | `locale` | | BCP 47 tag for number, currency, and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
 | `strings` | | Copy for this component by key. Wins over the provider's `strings` and `translate`. |
 
@@ -47,7 +47,7 @@ A company with no event- or trait-based feature renders nothing.
 
 ## How each card reads
 
-The headline says what is used, such as "1,300 API calls used", or for a feature paid in advance, the quantity bought. The limit line under it depends on the price behavior: "1,000 included" for an overage's soft limit, how much of a paid-in-advance quantity is in use, what pay-as-you-go usage has cost, the tier's ceiling, "Limit of 1,000", or "No limit". When the usage metric resets, "Resets Oct 1" follows it.
+The headline says what is used, such as "1,300 API calls used", or for a feature paid in advance, the quantity bought. The limit line under it depends on the price behavior: "1,000 included" for an overage's soft limit, how much of a paid-in-advance quantity is in use, what pay-as-you-go usage has cost, the tier's ceiling, a credit-burning feature's credits per use, "Limit of 1,000", or "No limit". When the usage metric resets, "Resets Oct 1" follows it.
 
 The meter fills by the share of the limit used. Its `data-tone` is `ok`, then `warning` from 60% and `critical` from 80%. Tiered features use the `tier` tone, and an overage feature switches to `overage` once usage passes its soft limit. Pay-as-you-go and credit-burning features have no meter.
 
@@ -63,7 +63,7 @@ Each event-based feature lists who on the team used it this period, heaviest fir
 
 ## Errors
 
-A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Usage is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under usage already loaded, reads "There was a problem retrieving your usage." In development the component logs the underlying error to the console beside the copy.
+A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Usage is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under usage already loaded, reads "There was a problem retrieving your usage." A refetch that fails with usage on screen is reported under it rather than replacing it. In development the component logs the underlying error to the console beside the copy.
 
 ## Strings
 
@@ -95,14 +95,14 @@ The per-user list's keys, shared with [Credit Usage](/components/drop-in/credit-
 | `usageByUserShowTop`, `usageByUserShowAllCount` | `Show top {{shown}} users`, `Show all {{shown}} users`, each with `_one` and `_other` forms |
 | `usageByUserShowAll`, `usageByUserShowFewer` | Show all, Show fewer |
 
-The usage lines share `usageUnits`, `usageTierUpTo`, `usageTierUnlimited`, `usagePerUse`, `usageResets`, `usageHardLimitLabel`, `usageHardLimit`, `usageTieredPricingLabel`, `usageTiersVolume`, `usageTiersGraduated`, and the `periodMonthShort`, `periodQuarterShort`, and `periodYearShort` suffixes with [Included Features](/components/drop-in/included-features#strings), so renaming one renames it in both.
+The usage lines share `usageUnits`, `usageTierUpTo`, `usageTierUnlimited`, `usagePerUse`, `usageResets`, `usageHardLimitLabel`, `usageHardLimit`, `usageTieredPricingLabel`, `usageTiersVolume`, `usageTiersGraduated`, and the `periodMonthShort`, `periodQuarterShort`, and `periodYearShort` suffixes with [Included Features](/components/drop-in/included-features#strings), and several with [Plan Manager](/components/drop-in/plan-manager) and [Pricing Table](/components/drop-in/pricing-table), so renaming one renames it wherever it appears.
 
 ## Markup
 
 This is what the component renders, for a host styling it without `SchematicStyles`. The root carries no card styling of its own; each feature is a `schematic-card`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
 
 ```html
-<div class="schematic-metered-features" data-state="ready">
+<div class="schematic-element schematic-metered-features" data-state="ready">
   <!-- with showHeader -->
   <div class="schematic-header">
     <h2 class="schematic-header__title">Usage</h2>
@@ -127,7 +127,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
           </div>
           <div class="schematic-metered-features__meter">
             <!-- .schematic-meter--warning, --over, --tier, or --overage by tone -->
-            <div class="schematic-meter" role="meter" data-tone="warning" aria-valuemin="0" aria-valuemax="2000" aria-valuenow="1300">
+            <div class="schematic-meter schematic-meter--warning" role="meter" data-tone="warning" aria-valuemin="0" aria-valuemax="2000" aria-valuenow="1300">
               <div class="schematic-meter__fill" style="width: 65%"></div>
             </div>
             <span class="schematic-metered-features__meter-label">1,300/2,000</span>
@@ -139,13 +139,35 @@ This is what the component renders, for a host styling it without `SchematicStyl
       <!-- event-based features: the per-user list, as in Credit Usage -->
       <div class="schematic-usage-by-user">…</div>
       <!-- overage and tiered features -->
-      <div class="schematic-metered-features__price-details">…</div>
+      <div class="schematic-metered-features__price-details">
+        <span class="schematic-metered-features__price-label">
+          Tier: 1–1,000
+          <!-- a tiered feature: the tooltip listing every tier -->
+          <span class="schematic-tooltip">
+            <button class="schematic-tooltip__trigger" aria-label="Tiered pricing" aria-describedby="…">
+              <i class="schematic-icon schematic-icon--info-rounded" aria-hidden="true"></i>
+            </button>
+            <span class="schematic-tooltip__content" id="…" role="tooltip">
+              <span class="schematic-tiers">
+                <dl class="schematic-tiers__list">
+                  <div class="schematic-tiers__tier">
+                    <dt class="schematic-tiers__range">1–1,000</dt>
+                    <dd class="schematic-tiers__price">$0.01<sub>/API call</sub></dd>
+                  </div>
+                </dl>
+                <span class="schematic-tiers__mode">Tiers apply progressively as quantity increases.</span>
+              </span>
+            </span>
+          </span>
+        </span>
+        <span class="schematic-metered-features__price-cost">$10.00</span>
+      </div>
     </li>
   </ul>
 </div>
 ```
 
-The meter's `warning` tone adds `schematic-meter--warning`, `critical` adds `schematic-meter--over`, and `tier` and `overage` add `schematic-meter--tier` and `schematic-meter--overage`. While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton` of two rows, each with a `name` and a `usage` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+An icon that is not a schematic-icons glyph name, such as an emoji, renders as text inside `<i class="schematic-icon">`. The meter's label shows only when the limit is above zero. The meter's `warning` tone adds `schematic-meter--warning`, `critical` adds `schematic-meter--over`, and `tier` and `overage` add `schematic-meter--tier` and `schematic-meter--overage`. While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton`: a heading bar when `showHeader` is set, then two rows, each with a `name` and a `usage` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
 
 ## Build it yourself
 
