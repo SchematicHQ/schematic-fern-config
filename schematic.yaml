@@ -217,55 +217,6 @@ components:
           description: Error message
       required:
         - error
-    ApiKeyCreateResponseData:
-      type: object
-      properties:
-        created_at:
-          type: string
-          format: date-time
-        description:
-          type: string
-          nullable: true
-        environment:
-          $ref: '#/components/schemas/EnvironmentResponseData'
-        environment_id:
-          type: string
-          nullable: true
-        id:
-          type: string
-        integration:
-          $ref: '#/components/schemas/ApiKeyIntegrationResponseData'
-        last_used_at:
-          type: string
-          format: date-time
-          nullable: true
-        name:
-          type: string
-        rate_limit_percent:
-          type: integer
-          format: int64
-          nullable: true
-        readonly:
-          type: boolean
-        scopes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApiKeyScope'
-          maxItems: 50
-        secret:
-          type: string
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - created_at
-        - name
-        - readonly
-        - scopes
-        - updated_at
-        - secret
-      title: ApiKeyCreateResponseData
     ApiKeyIntegrationResponseData:
       type: object
       properties:
@@ -7064,32 +7015,6 @@ components:
         - duration
         - duration_in_months
       title: CouponRequestBody
-    CreateApiKeyRequestBody:
-      type: object
-      properties:
-        description:
-          type: string
-          nullable: true
-          maxLength: 256
-        environment_id:
-          type: string
-          nullable: true
-        name:
-          type: string
-          maxLength: 512
-          minLength: 1
-        rate_limit_percent:
-          type: integer
-          format: int64
-          nullable: true
-          maximum: 99
-          minimum: 0
-        readonly:
-          type: boolean
-          nullable: true
-      required:
-        - name
-      title: CreateApiKeyRequestBody
     CreateBillingCreditRequestBody:
       type: object
       properties:
@@ -8589,19 +8514,6 @@ components:
         - hierarchy
         - trait_type
       title: CreateEntityTraitDefinitionRequestBody
-    CreateEnvironmentRequestBody:
-      type: object
-      properties:
-        environment_type:
-          $ref: '#/components/schemas/EnvironmentType'
-        name:
-          type: string
-          maxLength: 256
-          minLength: 1
-      required:
-        - name
-        - environment_type
-      title: CreateEnvironmentRequestBody
     CreateEventBatchRequestBody:
       type: object
       properties:
@@ -11466,37 +11378,6 @@ components:
       enum:
         - company
         - user
-    EnvironmentDetailResponseData:
-      type: object
-      properties:
-        api_keys:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApiKeyResponseData'
-          maxItems: 1000
-        created_at:
-          type: string
-          format: date-time
-        environment_type:
-          $ref: '#/components/schemas/EnvironmentType'
-        id:
-          type: string
-        name:
-          type: string
-        require_context_signature:
-          type: boolean
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - name
-        - environment_type
-        - require_context_signature
-        - created_at
-        - updated_at
-        - api_keys
-      title: EnvironmentDetailResponseData
     EnvironmentFeatureUsageTimeSeriesResponseData:
       type: object
       properties:
@@ -19586,25 +19467,6 @@ components:
         - add_on_id
         - price_id
       title: UpdateAddOnRequestBody
-    UpdateApiKeyRequestBody:
-      type: object
-      properties:
-        description:
-          type: string
-          nullable: true
-          maxLength: 256
-        name:
-          type: string
-          nullable: true
-          maxLength: 512
-          minLength: 1
-        rate_limit_percent:
-          type: integer
-          format: int64
-          nullable: true
-          maximum: 99
-          minimum: 0
-      title: UpdateApiKeyRequestBody
     UpdateAutoTopupOverrideRequestBody:
       type: object
       properties:
@@ -20274,22 +20136,6 @@ components:
       required:
         - trait_type
       title: UpdateEntityTraitDefinitionRequestBody
-    UpdateEnvironmentRequestBody:
-      type: object
-      properties:
-        environment_type:
-          allOf:
-            - $ref: '#/components/schemas/EnvironmentType'
-          nullable: true
-        name:
-          type: string
-          nullable: true
-          maxLength: 256
-          minLength: 1
-        require_context_signature:
-          type: boolean
-          nullable: true
-      title: UpdateEnvironmentRequestBody
     UpdateFeatureRequestBody:
       type: object
       properties:
@@ -22355,45 +22201,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    post:
-      operationId: createApiKey
-      summary: Create api key
-      tags:
-        - accounts
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateApiKeyRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ApiKeyCreateResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CreateApiKeyParams
-                required:
-                  - data
-                  - params
-                title: CreateApiKeyResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /api-keys/{api_key_id}:
     get:
       operationId: getApiKey
@@ -22425,92 +22232,6 @@ paths:
                   - data
                   - params
                 title: GetApiKeyResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    put:
-      operationId: updateApiKey
-      summary: Update api key
-      tags:
-        - accounts
-      parameters:
-        - name: api_key_id
-          in: path
-          description: api_key_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateApiKeyRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ApiKeyResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: UpdateApiKeyParams
-                required:
-                  - data
-                  - params
-                title: UpdateApiKeyResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      operationId: deleteApiKey
-      summary: Delete api key
-      tags:
-        - accounts
-      parameters:
-        - name: api_key_id
-          in: path
-          description: api_key_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/DeleteResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: DeleteApiKeyParams
-                required:
-                  - data
-                  - params
-                title: DeleteApiKeyResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -31900,45 +31621,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    post:
-      operationId: createEnvironment
-      summary: Create environment
-      tags:
-        - accounts
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEnvironmentRequestBody'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/EnvironmentDetailResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: CreateEnvironmentParams
-                required:
-                  - data
-                  - params
-                title: CreateEnvironmentResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
   /environments/{environment_id}:
     get:
       operationId: getEnvironment
@@ -31970,92 +31652,6 @@ paths:
                   - data
                   - params
                 title: GetEnvironmentResponse
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    put:
-      operationId: updateEnvironment
-      summary: Update environment
-      tags:
-        - accounts
-      parameters:
-        - name: environment_id
-          in: path
-          description: environment_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateEnvironmentRequestBody'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/EnvironmentResponseData'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: UpdateEnvironmentParams
-                required:
-                  - data
-                  - params
-                title: UpdateEnvironmentResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-    delete:
-      operationId: deleteEnvironment
-      summary: Delete environment
-      tags:
-        - accounts
-      parameters:
-        - name: environment_id
-          in: path
-          description: environment_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/DeleteResponse'
-                  params:
-                    type: object
-                    description: Input parameters
-                    title: DeleteEnvironmentParams
-                required:
-                  - data
-                  - params
-                title: DeleteEnvironmentResponse
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
