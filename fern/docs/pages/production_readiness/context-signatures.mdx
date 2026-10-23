@@ -34,14 +34,14 @@ While an environment does not require signatures, Schematic accepts every publis
 
 ## Sign the context on your backend
 
-Add an authenticated endpoint that takes no input. It builds the context from the signed-in session, in the same shape your frontend passes to `identify` or `setContext`, and signs it:
+Add an authenticated endpoint that takes no input. It builds the context from the logged-in user's company and user, in the same shape your frontend passes to `identify` or `setContext`, and signs it:
 
 ```json
 { "company": { "id": "comp_123" }, "user": { "id": "user_456" } }
 ```
 
 <Warning>
-Build the context from your session, not from the request. An endpoint that signs a company or user ID the browser sends lets anyone get a valid signature for any company, which removes the protection entirely.
+Sign only the company and user of the logged-in user, read from your session. This is what limits each visitor to signatures for their own company.
 </Warning>
 
 If a user can belong to several companies, the endpoint needs to know which one is active. Keep the active company in the server-side session if you can. If the browser has to send it, confirm the user is a member of that company before signing.
@@ -156,7 +156,7 @@ Sign with the secret half of the API key whose publishable half your frontend us
 
 ## Pass signatures to the browser SDK
 
-Upgrade `@schematichq/schematic-js` to the latest version and pass `getContextSignature` when you create the client. The SDK calls it whenever it needs a signature and expects the signature string back. The SDK passes the context it is about to use as an argument; leave it out of the request to your endpoint, which signs the session's context instead.
+Upgrade `@schematichq/schematic-js` to the latest version and pass `getContextSignature` when you create the client. The SDK calls it whenever it needs a signature and expects the signature string back. The SDK passes the context it is about to use as an argument. Your endpoint signs the logged-in user's context, so the function calls it without sending anything.
 
 <CodeBlocks>
 ```ts title="JavaScript"
