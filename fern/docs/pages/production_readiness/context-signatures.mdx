@@ -9,7 +9,7 @@ A publishable key identifies your environment, not a company. Anyone who copies 
 
 ## How it works
 
-Your backend already holds the secret API key that pairs with your publishable key. When the browser SDK needs to make requests for a company and user, it asks your backend to sign that context. Your backend confirms the context belongs to the signed-in user, signs it with HMAC-SHA256 using the secret key, and returns the signature. The SDK sends it in the `X-Schematic-Context-Sig` header, and Schematic recomputes the signature against the request's company and user keys.
+Your backend already holds the secret API key that pairs with your publishable key. When the browser SDK needs a signature, it asks your backend for one. Your backend reads the signed-in company and user from its own session, signs that context with HMAC-SHA256 using the secret key, and returns the signature. The SDK sends it in the `X-Schematic-Context-Sig` header, and Schematic recomputes the signature against the request's company and user keys.
 
 The signature covers only the company and user keys, not the rest of the request. One signature therefore covers every flag check and event the SDK sends for that context until it expires, and the SDK asks your backend for a new one shortly before then.
 
@@ -34,15 +34,17 @@ While an environment does not require signatures, Schematic accepts every publis
 
 ## Sign the context on your backend
 
-Add an endpoint the browser can call with a context. The SDK sends the context it is about to use, in the same shape you pass to `identify` or `setContext`:
+Add an authenticated endpoint that takes no input. It builds the context from the signed-in session, in the same shape your frontend passes to `identify` or `setContext`, and signs it:
 
 ```json
 { "company": { "id": "comp_123" }, "user": { "id": "user_456" } }
 ```
 
 <Warning>
-Check the context against your own session before you sign it. An endpoint that signs whatever the browser sends lets anyone get a valid signature for any company, which removes the protection entirely.
+Build the context from your session, not from the request. An endpoint that signs a company or user ID the browser sends lets anyone get a valid signature for any company, which removes the protection entirely.
 </Warning>
+
+If a user can belong to several companies, the endpoint needs to know which one is active. Keep the active company in the server-side session if you can. If the browser has to send it, confirm the user is a member of that company before signing.
 
 The signature is built in four steps:
 
@@ -55,7 +57,7 @@ signature = iat + "." + exp + "." + sig
 
 `iat` and `exp` are Unix timestamps in seconds. Schematic accepts a signature from 60 seconds before `iat` until 60 seconds after `exp`. A 10-minute lifetime works well. A shorter one shortens how long a leaked signature stays usable, and costs one more call to your endpoint per session each time it expires.
 
-Sign exactly the keys the SDK will send. Leave `company` or `user` out of the signed object when the SDK leaves it out of the request, and keep every value the same JSON type, so a string ID stays a string.
+Sign exactly the keys your frontend sets on the SDK. Leave `company` or `user` out of the signed object when the frontend leaves it out of the context, and keep every value the same JSON type, so a string ID stays a string.
 
 <CodeBlocks>
 ```js title="Node.js"
@@ -86,11 +88,11 @@ function signContext(secretApiKey, context, ttlSeconds = 600) {
 }
 
 app.post("/api/schematic/sign", requireSession, (req, res) => {
-  const { company, user } = req.body;
-  if (company?.id !== req.session.companyId || user?.id !== req.session.userId) {
-    return res.status(403).end();
-  }
-  const signature = signContext(process.env.SCHEMATIC_SECRET_KEY, { company, user });
+  const context = {
+    company: { id: req.session.companyId },
+    user: { id: req.session.userId },
+  };
+  const signature = signContext(process.env.SCHEMATIC_SECRET_KEY, context);
   res.json({ signature });
 });
 ```
@@ -154,19 +156,17 @@ Sign with the secret half of the API key whose publishable half your frontend us
 
 ## Pass signatures to the browser SDK
 
-Upgrade `@schematichq/schematic-js` to the latest version and pass `getContextSignature` when you create the client. The SDK calls it with the context it is about to use and expects the signature string back.
+Upgrade `@schematichq/schematic-js` to the latest version and pass `getContextSignature` when you create the client. The SDK calls it whenever it needs a signature and expects the signature string back. The SDK passes the context it is about to use as an argument; leave it out of the request to your endpoint, which signs the session's context instead.
 
 <CodeBlocks>
 ```ts title="JavaScript"
 import { Schematic } from "@schematichq/schematic-js";
 
 const schematic = new Schematic("api_pub_...", {
-  getContextSignature: async (context) => {
+  getContextSignature: async () => {
     const res = await fetch("/api/schematic/sign", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(context),
     });
     const { signature } = await res.json();
     return signature;
@@ -179,12 +179,10 @@ import { SchematicProvider } from "@schematichq/schematic-react";
 
 <SchematicProvider
   publishableKey="api_pub_..."
-  getContextSignature={async (context) => {
+  getContextSignature={async () => {
     const res = await fetch("/api/schematic/sign", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(context),
     });
     const { signature } = await res.json();
     return signature;
