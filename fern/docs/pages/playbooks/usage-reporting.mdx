@@ -10,6 +10,8 @@ Plenty of questions come down to one number per company: how much of a metered f
 Prefer this over `GET /feature-usage-timeseries`. Its points are **cumulative within the billing period**, so summing them double counts. Feature usage history reports **incremental** usage, so its rows can be summed.
 </Warning>
 
+Feature usage history reports event quantities. For the credits a company consumed, priced at the rates that applied at the time, see [Reporting credit consumption over time](/playbooks/credit-reporting).
+
 ## Getting a month
 
 Ask for the window and read the rows.
@@ -148,5 +150,6 @@ const candidates = [...totals.entries()]
 ## Related
 
 - [Creating a metered feature](/playbooks/metering), for setting up the event features this reports on
+- [Reporting credit consumption over time](/playbooks/credit-reporting), for credits consumed per day instead of event quantities
 - [Backfills and usage corrections](/playbooks/backfill-and-corrections), for importing historical usage or fixing events that arrived late
 - [Usage-based billing](/billing/usage-based-billing)
