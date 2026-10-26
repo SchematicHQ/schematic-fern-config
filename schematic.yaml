@@ -3338,6 +3338,11 @@ components:
           nullable: true
         scaling:
           $ref: '#/components/schemas/PlanCreditGrantScaling'
+        visible:
+          type: boolean
+          description: >-
+            Whether the catalog shows this credit on the plan. Display-only: a
+            hidden grant is still granted and priced at checkout.
       required:
         - company_credit_amount
         - credit_amount
@@ -3345,6 +3350,7 @@ components:
         - credit_name
         - id
         - scaling
+        - visible
       title: CatalogCreditGrantResponseData
     CatalogCurrencyPricesResponseData:
       type: object
