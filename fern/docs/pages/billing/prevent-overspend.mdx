@@ -119,7 +119,7 @@ Back to the six runs against 1,000 credits. With reservations, the first five ea
 A few things to plan around:
 
 - **A reservation is all or nothing.** A check is refused when the balance cannot fund the full amount, and nothing is consumed.
-- **Set the reservation lifetime above your longest run.** An unsettled reservation expires after `defaultReservationTTL`, 60 seconds by default, and its credits return to the balance. Without DataStream the API holds a reservation for at most one hour. A settle that arrives late still bills the usage once.
+- **Set the reservation lifetime above your longest run.** An unsettled reservation expires after `defaultReservationTTL`, 60 seconds by default, and its credits return to the balance. Without DataStream the API holds a reservation for at most 24 hours. A settle that arrives late still bills the usage once.
 - **Track what the check did not reserve.** A check allows without a reservation when the feature is not credit-metered or the check failed open, and that usage still has to be tracked.
 - **A check that cannot reserve fails closed.** When the API is unreachable or the balance cannot be reserved against, `allowed` is false. Pass `onAcquireFailure: "fail-open"` on a check where a denial is worse than letting the work through. Without DataStream, fail-open returns the flag's default value, so pass `defaultValue: true` with it.
 

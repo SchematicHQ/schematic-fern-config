@@ -195,7 +195,36 @@ The events pipeline settles asynchronously. Do not expect the balance or the res
 
 `PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole reserved amount. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the row unchanged.
 
-`expires_at` defaults to one minute from now and may be at most one hour out. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. Size `expires_at` above the operation's expected duration plus a few seconds of margin. A track that arrives after expiry is still billed, as a normal grant debit.
+`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` for the whole operation when you reserve. Size it above the operation's expected duration plus a few seconds of margin. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. A track that arrives after expiry is still billed, as a normal grant debit.
+
+A reservation that is never settled or released keeps its credits out of the balance until it expires. A long `expires_at` on work that can die without releasing parks those credits for that long.
+
+### Spend controls while a reservation is open
+
+[Usage controls](/billing/usage-controls) count the whole reserved amount when the reservation is taken. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) and [credit limit webhooks](/integrations/webhooks/entitlement-triggers#credit-trigger-events) do not act on the reservation; they wait for the settling track event. For a reservation open for several hours, a top-up or alert can lag the debit by that long.
+
+Credits [billed in arrears](/billing/empty-credit-balances#bill-in-arrears) behave the same way. A reservation taken against them draws on the [overdraft limit](/billing/empty-credit-balances#overdraft-limit) until it settles.
+
+### Reservations that cross a credit reset
+
+A reservation debits its credits from specific grants when it is taken. A grant that [resets](/billing/credit-burndown#reset-and-rollover) expires at the end of its period, and a plan change or cancellation can zero one out early. A reservation that is open when that happens keeps its credits until it settles, and settling it works as follows.
+
+- Usage up to the reserved amount is billed from the held credits.
+- The unspent remainder would return to the grant it came from, but that grant has expired, so the remainder expires instead, the same as if it had never been held. The [credit ledger](/use-cases/credit-ledger) records the expiry at settle time, not at the reset.
+- Usage beyond the reserved amount is drawn from the balance at settle time, which after a reset is the new period's.
+
+Credits held across a reset do not count toward rollover. Rollover is sized from what the grant had left when it expired, and the held credits were not on the grant then. The exception is a reservation that settles after the grant expires but before Schematic has processed the reset, in which case the remainder returns to the grant first and counts.
+
+Credits billed in arrears follow the same rules.
+
+For example, a company has a monthly grant with rollover enabled. An hour before the reset, a worker reserves 500 credits for a job, and the job settles after the reset with 100 used.
+
+1. The reservation debits 500 from the current period's grant.
+2. At the reset, the grant expires. Its rollover is sized from what it had left, which excludes the 500 held.
+3. The settling track event bills 100 as usage.
+4. The unspent 400 expires with the old grant, and the ledger records the expiry at settle time.
+
+None of the 500 rolls over, and the new period's grant is untouched. Had the job used 600, the 100 past the reservation would have come from the new period's balance.
 
 ### Checking and reserving in one call
 
@@ -307,7 +336,7 @@ curl -X POST https://api.schematichq.com/billing/credits/reservations \
   }'
 ```
 
-`amount` must be positive. The full amount is reserved, or the request fails. `expires_at` is optional, defaults to one minute out, and may be at most one hour out. The response carries the reservation's `id`, its `reserved_amount`, the `settled_amount` recorded so far, and `released_at`, which is null while the reservation is open.
+`amount` must be positive. The full amount is reserved, or the request fails. `expires_at` is optional, defaults to one minute out, and may be at most 24 hours out. The response carries the reservation's `id`, its `reserved_amount`, the `settled_amount` recorded so far, and `released_at`, which is null while the reservation is open.
 
 Settle the reservation with a track event carrying `reservation_id`:
 
@@ -333,7 +362,7 @@ curl -X PUT https://api.schematichq.com/billing/credits/reservations/crlse_EXAMP
   -H "X-Schematic-Api-Key: $SCHEMATIC_API_KEY"
 ```
 
-To check a flag and reserve credits in one call, [Check and reserve flag](/api-reference/features/check-and-reserve-flag) accepts the body a check accepts plus `quantity`, `expires_at`, and `preflight`. The reserved amount is the entitlement's consumption rate times the units the request states: `quantity` when it is given, otherwise `preflight.event_usage.quantity` when its `event_subtype` is the entitlement's, otherwise `preflight.usage`, otherwise 1. `preflight.credit_cost` takes precedence over all of those: when it names the entitlement's credit, that cost is reserved as given. Pass an `idempotency_key` to make the call safe to retry: a second request with the same key returns the reservation the first one took instead of reserving again, even when the first hold has since lowered the balance.
+To check a flag and reserve credits in one call, [Check and reserve flag](/api-reference/features/check-and-reserve-flag) accepts the body a check accepts plus `quantity`, `expires_at`, and `preflight`. `expires_at` has the same one-minute default and 24-hour limit as a reservation. The reserved amount is the entitlement's consumption rate times the units the request states: `quantity` when it is given, otherwise `preflight.event_usage.quantity` when its `event_subtype` is the entitlement's, otherwise `preflight.usage`, otherwise 1. `preflight.credit_cost` takes precedence over all of those: when it names the entitlement's credit, that cost is reserved as given. Pass an `idempotency_key` to make the call safe to retry: a second request with the same key returns the reservation the first one took instead of reserving again, even when the first hold has since lowered the balance.
 
 ## Ledger entries
 
@@ -348,6 +377,8 @@ Each operation is recorded in the [credit ledger](/use-cases/credit-ledger). Led
 | `track` | Usage is committed, against a lease or reservation, or otherwise |
 
 A lease that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied. Reservation rows are kept after they settle or release, so the ledger still reconciles against them.
+
+When a reservation settles after the grant it drew from has expired, the unspent remainder is recorded as an expiry dated at settle time. See [Reservations that cross a credit reset](#reservations-that-cross-a-credit-reset).
 
 ## Related
 
