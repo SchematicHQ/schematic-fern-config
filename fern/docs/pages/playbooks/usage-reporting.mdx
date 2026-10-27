@@ -39,7 +39,7 @@ Each row carries:
 | `periodStart` / `periodEnd` | The window the figure covers, clamped to what you asked for. |
 | `usage` | Incremental total for that period. Rows can be summed. |
 
-This endpoint scans every company in the environment, so it requires a **secret API key** (`sch_` prefix). Publishable keys and the Stripe app are deliberately shut out. See [Authentication](/api-reference/authentication).
+This endpoint returns usage for every company in the environment, so it requires a **secret API key** (`sch_` prefix). Publishable keys and the Stripe app are deliberately shut out. See [Authentication](/api-reference/authentication).
 
 ## The start is included, the end is not
 
@@ -142,7 +142,7 @@ const candidates = [...totals.entries()]
 ```
 
 <Info>
-`listFeatureUsageHistory` requires `@schematichq/schematic-typescript-node` **1.5.9 or newer**. Earlier releases predate the endpoint and do not have the method. Other SDKs may need a release cut before it appears.
+`listFeatureUsageHistory` requires `@schematichq/schematic-typescript-node` **1.5.9 or newer**. Earlier releases predate the endpoint and do not have the method. Other SDKs may not have the method yet.
 </Info>
 
 ## Related

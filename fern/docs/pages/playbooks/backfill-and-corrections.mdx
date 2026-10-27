@@ -27,7 +27,7 @@ When `true`, Schematic uses the `sent_at` you provide as the event's effective t
 - No more than 5 minutes in the future
 - No more than **34 days** in the past
 
-The 34-day past bound sits one day inside Stripe's meter-event 35-day cap, to absorb wall-clock skew between Schematic and Stripe. For older events, use `backfill`.
+For older events, use `backfill`.
 
 All normal processing still happens. Billing impact, webhooks, and activity updates fire as usual, anchored to the logical timestamp instead of the receipt time. Feature usage counters only count the event toward periods that the logical timestamp falls within, so an event timestamped yesterday won't show up in today's daily counter.
 
@@ -116,7 +116,7 @@ await client.track({
 
 ## Retention
 
-Events are retained for 365 days, measured from the event's effective `captured_at`. A `backfill` submitted near the 365-day past bound therefore lands with very little remaining retention, by design. Aggregated feature usage is preserved separately on the same logical-period anchor, so usage charts and entitlement counters stay intact even after the underlying event expires.
+Events are retained for 365 days, measured from the event's effective `captured_at`. A `backfill` submitted near the 365-day past bound therefore lands with very little remaining retention, by design. Usage charts and entitlement counters keep the event's usage after the event itself expires.
 
 ## Validation errors
 

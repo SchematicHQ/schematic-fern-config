@@ -36,7 +36,7 @@ All three require secret API key authentication. See [Authentication](/api-refer
 **You need IDs before you can build a payload.** Every entitlement references a `feature_id`, credit entitlements and grants reference a `credit_id`, and the plan itself references a `company_id`. See [Finding the IDs you need](#finding-the-ids-you-need).
 
 <Info>
-If you are not sure how to express a particular pricing shape in the payload, build it once in the Schematic app and copy the configuration over. The app calls these same endpoints, so anything you can construct in the UI can be expressed in the request body.
+If you are not sure how to express a particular pricing shape in the payload, build it once in the Schematic app and copy the configuration over. Anything you can construct in the UI can be expressed in the request body.
 </Info>
 
 ## Create a custom plan
@@ -314,7 +314,7 @@ To cap consumption, switch `value_type` to `numeric` and add a `value_numeric` h
 Charge up front for a committed quantity, the usual shape for seats. `usage_quantity` records the quantity the company is contractually committed to.
 
 <Note>
-`usage_quantity` is stored for downstream billing use, but it is not yet enforced or auto-provisioned as a true default. The quantity actually billed comes from the company's current trait value, so set that separately if you need the first invoice to reflect the committed number.
+`usage_quantity` records the committed quantity, but it is not enforced and does not set the company's quantity. The quantity actually billed comes from the company's current trait value, so set that separately if you need the first invoice to reflect the committed number.
 </Note>
 
 ```json
@@ -620,7 +620,7 @@ Choose `on_payment` when you want payment secured before granting access, and `o
 
 Finalizing creates a real invoice in Stripe for the company, and it will include the plan's base price plus any pay-in-advance entitlement quantities the company holds. A plan with a `$5,000` annual base price and one seat at `$50/year` produces a `$5,050.00` invoice.
 
-The invoice is created in the open state with a due date derived from `days_until_due`, and Stripe emails it to `customer_email` when `send_invoice` is true. You can find it under **Invoices** in the Stripe dashboard, where the billed-to address matches the email you sent. Stripe then handles payment collection and dunning from there, and reports the payment back to Schematic, which is what flips an `on_payment` plan to active.
+The invoice is created in the open state with a due date derived from `days_until_due`, and Stripe emails it to `customer_email` when `send_invoice` is true. You can find it under **Invoices** in the Stripe dashboard, where the billed-to address matches the email you sent. Stripe handles payment collection and dunning from there. When the invoice is paid, an `on_payment` plan becomes active.
 
 ## Confirming the result
 

@@ -34,8 +34,7 @@ Schematic is designed to be safe, fast, and reliable by default. Flag checks sit
 
 Out of the box, Schematic is built to:
 
-- Serve flag checks from cache, not live computation
-- Preemptively warm and maintain those caches
+- Answer flag checks quickly, including the first check for a company
 - Remain operational through most classes of service disruptions
 - Fail gracefully when parts of the system are unavailable
 
@@ -47,13 +46,11 @@ This guide outlines the three main ways you can run Schematic in a highly availa
 
 ## 1. Built-in High Availability (Default)
 
-By default, Schematic is designed so that flag checks are **always served from cache**. This ensures they are:
+By default, Schematic is designed so that flag checks are:
 
-- **Fast** - no expensive recomputation on read
+- **Fast** - low latency, including the first check for a company
 - **Reliable** - resilient to most backend disruptions
 - **Predictable** - consistent latency under load
-
-Flag values are also **preemptively cached**, meaning they are warmed ahead of time rather than computed on first access. This avoids cold-start behavior and helps ensure that even the first request is fast.
 
 In the event of *most* service disruptions:
 

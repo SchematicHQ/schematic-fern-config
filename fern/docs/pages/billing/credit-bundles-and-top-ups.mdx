@@ -73,7 +73,7 @@ Under User-controlled top-ups the customer changes their own threshold and amoun
 
 ### When a top-up fires
 
-A top-up fires while Schematic processes an event that draws from the balance, when the draw leaves the balance at or below the threshold. If several events arrive close together, only one top-up is purchased. If the purchase fails, Schematic retries the next time the balance is drawn from.
+A top-up fires when a draw leaves the balance at or below the threshold. If several draws cross the threshold close together, only one top-up is purchased. If the purchase fails, Schematic retries on the next draw from the balance.
 
 Three webhook events report each attempt: `auto.topup.success`, `auto.topup.hard.failure`, and `auto.topup.retry.exceeded`. A hard failure carries the Stripe error code when the failure originated there, so you can tell a declined card from a missing payment method. Subscribe to them under **Settings** > **Integrations** > **Webhooks**, and see [Entitlement & Credit Trigger Webhooks](/integrations/webhooks/entitlement-triggers#auto-topup-events) for the payloads.
 

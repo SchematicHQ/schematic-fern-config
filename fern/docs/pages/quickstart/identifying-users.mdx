@@ -84,7 +84,7 @@ Both upsert. Identify a company Schematic has never seen and it gets created eit
 | Runs | Frontend | Server side |
 | Behavior | Asynchronous | Synchronous |
 | Returns | Nothing | The created or updated record |
-| Side effect | Writes an `identify` event to the event table | None |
+| Side effect | Records an `identify` event, visible on the Events tab | None |
 | Best for | Setting session context | Programmatic and batch use |
 
 ## Last seen timestamps

@@ -181,7 +181,7 @@ Primary `key` in this context refers to an entity's first `key`. Your primary `k
 
 By committing to a primary `key` from the outset, you'll avoid the mental gymnastics of having to reconcile multiple IDs across different contexts and simplify your architecture.
 
-<Info>While Schematic generates IDs for users, customers, and other objects, these are meant for internal system operations or specific requests. Only use these IDs when necessary (e.g. some Schematic endpoints require them).</Info>
+<Info>Schematic generates IDs for users, companies, and other objects. Prefer your own keys, and only use these IDs when necessary (e.g. some Schematic endpoints require them).</Info>
 
 ### Lean into using Schematic as a `key` map
 
@@ -200,7 +200,7 @@ In each situation, be sure to submit any additional `keys`.
 
 ### Frontend SDKs only require settings keys once
 
-For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. Underneath the hood, the `identify` call calls the company upsert endpoint, so it will create or update the company with new keys, name, and traits (see [changing a company's keys](#changing-a-companys-keys) for more information).
+For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. The `identify` call creates or updates the company with new keys, name, and traits (see [changing a company's keys](#changing-a-companys-keys) for more information).
 
 ```tsx
 "use client";
