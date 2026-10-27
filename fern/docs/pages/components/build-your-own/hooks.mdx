@@ -26,7 +26,9 @@ The hooks are also re-exported from `@schematichq/schematic-components/elements`
 ## useCheckout
 
 ```ts
-function useCheckout(options?: { checkoutId?: string }): CheckoutHandle;
+import type { Checkout, CheckoutPriceSnapshot, CheckoutProblem, CheckoutResult, CheckoutSelections } from "@schematichq/schematic-react";
+
+declare function useCheckout(options?: { checkoutId?: string }): CheckoutHandle;
 
 interface CheckoutHandle {
   checkout: Checkout | undefined;      // as the last write left it: id, version, status, selections, priceSnapshot, problems, expiresAt
@@ -429,6 +431,7 @@ function UpgradeButton({ changePlan }: { changePlan: () => Promise<void> }) {
 
 `BillingDataProvider` serves fixed data to the hooks with no network and no session, so a component can be rendered in a test or a story with the rows you choose.
 
+{/* samples: nocheck InvoiceHistory is the component the recipe above defines */}
 ```tsx
 import { BillingDataProvider } from "@schematichq/schematic-react";
 

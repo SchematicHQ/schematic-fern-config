@@ -37,7 +37,9 @@ Every price answers with `problems`: a list with a `code`, whether it is `blocki
 ## With useCheckout
 
 ```ts
-function useCheckout(options?: { checkoutId?: string }): CheckoutHandle;
+import type { Checkout, CheckoutPriceSnapshot, CheckoutProblem, CheckoutResult, CheckoutSelections } from "@schematichq/schematic-react";
+
+declare function useCheckout(options?: { checkoutId?: string }): CheckoutHandle;
 
 interface CheckoutHandle {
   checkout: Checkout | undefined;      // as the last write left it: id, version, status, selections, priceSnapshot, problems, expiresAt

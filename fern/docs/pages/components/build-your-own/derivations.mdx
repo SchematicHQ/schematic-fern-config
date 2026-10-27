@@ -67,6 +67,7 @@ Each row has `id`, `externalId`, `kind`, `label`, `icon`, `brand`, `type`, `last
 
 `label` is either `{ key }`, copy to translate such as `paymentMethodsCardEndingIn` for "Card ending in", or `{ text }`, a value the provider supplied such as a bank's name or the email behind a Link account. That keeps the translatable words in your strings:
 
+{/* samples: nocheck data and t come from the reader's hook and i18n */}
 ```ts
 const { current, others } = derivePaymentMethods(data, { locale: "en-US" });
 const name = (row: PaymentMethodRow) =>
@@ -81,6 +82,7 @@ const name = (row: PaymentMethodRow) =>
 
 `deriveInvoiceList` and `deriveUpcomingInvoice` take `format`, which replaces one formatter at a time and receives the raw value. The `amount` formatter receives the signed amount, unlike `deriveInvoiceList`'s default text, which is absolute:
 
+{/* samples: nocheck page and myMoney come from the reader's hook and formatter */}
 ```ts
 deriveInvoiceList(page, {
   locale: "en-US",

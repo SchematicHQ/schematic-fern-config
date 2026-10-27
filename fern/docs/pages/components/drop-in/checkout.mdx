@@ -121,12 +121,23 @@ A trial that needs no card goes from the plan (and its top-ups) to the checkout 
 `steps.skip` passes over the steps it names, except a plan step with no plan to fall back on and any step a blocking problem points at: a refused finalize takes the customer to the first step that can fix it. Skipped steps stay in the step list, where choosing one returns to it, unless `steps.hideSkipped`. `steps.initial` opens on a later step; a step the checkout does not have falls back to the first.
 
 ```tsx
-<Checkout
-  open={open}
-  onOpenChange={setOpen}
-  selection={{ planId: "plan_pro", quantities: { feat_seats: 5 } }}
-  steps={{ skip: ["plan"], initial: "usage", hideSkipped: true }}
-/>
+import { Checkout } from "@schematichq/schematic-components/elements";
+import { useState } from "react";
+
+export function Seats() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)}>Add seats</button>
+      <Checkout
+        open={open}
+        onOpenChange={setOpen}
+        selection={{ planId: "plan_pro", quantities: { feat_seats: 5 } }}
+        steps={{ skip: ["plan"], initial: "usage", hideSkipped: true }}
+      />
+    </>
+  );
+}
 ```
 
 ## Layout
@@ -214,7 +225,20 @@ The root is `schematic-dialog schematic-checkout`, or a `section.schematic-check
 The dialog's copy lives under `checkout*` keys: `checkoutTitle`, the step names `checkoutStepPlan`, `checkoutStepAutoTopup`, `checkoutStepUsage`, `checkoutStepAddOns`, `checkoutStepAddOnUsage`, `checkoutStepCredits` and `checkoutStepPayment`, the actions `checkoutNext`, `checkoutPay`, `checkoutConfirm` and `checkoutConfirmPayment`, and the `checkoutPromo*`, `checkoutTaxId*`, `checkoutProration*`, `checkoutDisclaimer*` and `checkoutTrial*` groups. `locale` formats every amount and date, so `locale="de-DE"` renders `1.852,53 $` and a German date, and `strings` renames one key:
 
 ```tsx
-<Checkout open={open} onOpenChange={setOpen} locale="de-DE" strings={{ checkoutTitle: "Kasse", checkoutStepPayment: "Bezahlen" }} />
+import { Checkout } from "@schematichq/schematic-components/elements";
+import { useState } from "react";
+
+export function Kasse() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Checkout
+      open={open}
+      onOpenChange={setOpen}
+      locale="de-DE"
+      strings={{ checkoutTitle: "Kasse", checkoutStepPayment: "Bezahlen" }}
+    />
+  );
+}
 ```
 
 `translate` on the provider routes every key through your i18n instead. See [Localization](/components/drop-in/localization).

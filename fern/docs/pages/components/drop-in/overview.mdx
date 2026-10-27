@@ -80,6 +80,7 @@ Components that take a payment, such as Payment Methods and Checkout, render Str
 
 `session` says whose billing is being read and how. It has three states, and they mean different things:
 
+{/* samples: nocheck three values of one prop, not a component */}
 ```tsx
 session={{ company: company.id, token: fetchAccessToken }}  // signed in
 session={null}                                              // signed out
