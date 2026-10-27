@@ -1669,6 +1669,13 @@ components:
           type: string
           format: date-time
           nullable: true
+        feature_name:
+          type: string
+          description: >-
+            The feature the line bills for when its price belongs to a plan
+            entitlement, such as seats. Null on a plan's own price, an add-on's
+            and a credit's.
+          nullable: true
         id:
           type: string
         kind:
