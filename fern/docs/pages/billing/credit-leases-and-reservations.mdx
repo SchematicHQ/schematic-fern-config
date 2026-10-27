@@ -110,7 +110,7 @@ A lease lets the SDK gate many operations against credits it already has, instea
 
 Schematic maintains at most one active lease for a given company and credit type. A second acquire against the same company and credit type does not create a second lease; it returns the existing one, and both callers commit their usage against it.
 
-Acquire calls for the same company and credit type are serialized, so two callers arriving simultaneously receive the same lease rather than two leases backed by the same credits. This is the mechanism behind the concurrency guarantee: concurrent workers draw against a single lease that was debited from the balance once, rather than against separate leases that may overlap.
+Two callers that acquire for the same company and credit type at the same moment receive the same lease rather than two leases backed by the same credits. Concurrent workers therefore draw against a single lease that was debited from the balance once, rather than against separate leases that may overlap.
 
 The guarantee is scoped to a single company and credit type. Different credit types, and different companies, lease independently of one another.
 
@@ -149,7 +149,7 @@ Four things to account for when a lease spans a workflow rather than a single ca
 
 **Set `expires_at` to cover the whole workflow.** The default is five minutes, which is shorter than most multi-step flows. Set it explicitly, or extend the lease as the work proceeds if the duration is not predictable in advance.
 
-**A commit against a released lease debits the grant directly.** If the lease has already been released, whether explicitly or by the expiry sweep, a track event carrying its `lease_id` is not applied to the lease. It falls through and debits the company's grants instead, so the usage is billed once rather than dropped or debited twice. The remaining steps are no longer covered by a lease, and the lease's unspent portion has already been returned to the balance. The same fall-through applies to a `lease_id` belonging to a different company or credit type.
+**A commit against a released lease debits the grant directly.** If the lease has already been released, whether explicitly or at expiry, a track event carrying its `lease_id` is not applied to the lease. It falls through and debits the company's grants instead, so the usage is billed once rather than dropped or debited twice. The remaining steps are no longer covered by a lease, and the lease's unspent portion has already been returned to the balance. The same fall-through applies to a `lease_id` belonging to a different company or credit type.
 
 **Use a distinct idempotency key per step.** Each step is a separate commit, so a retry without its own key is recorded as an additional draw against the lease.
 
@@ -159,7 +159,7 @@ Four things to account for when a lease spans a workflow rather than a single ca
 
 Every lease has an expiry. If `expires_at` is not supplied, it defaults to five minutes. Set it explicitly for longer-running work, or extend the lease while the work is in progress.
 
-A lease that reaches its expiry without being released is released automatically, and its unspent portion returns to the balance. A sweep runs once per minute, so credits reserved by a process that terminated between acquire and release are returned within approximately a minute rather than at the end of the billing period. Expiry does not forfeit credits.
+A lease that reaches its expiry without being released is released automatically, and its unspent portion returns to the balance. Credits reserved by a process that terminated between acquire and release therefore return once the lease expires, not at the end of the billing period. Expiry does not forfeit credits.
 
 Released credits return to the specific grants they were drawn from and retain each grant's original expiry date. A lease drawn partly from a grant expiring this month and partly from one expiring next year returns to both, so [consumption order](/billing/credit-burndown#consumption-order) and [grant expiration](/billing/credit-burndown#credit-lifecycle) behave as they would have without the lease.
 
@@ -175,7 +175,7 @@ A reservation reserves credits for one operation. Taking it debits the full amou
 
 Take one with `POST /billing/credits/reservations`, passing the company, the credit type, and the amount.
 
-The debit happens under a row lock, so when two operations race for the last of a balance, exactly one succeeds. A balance that cannot cover the full amount returns a `402` and consumes nothing. Reservations are never partially funded, unlike leases; see [Partial funding](#partial-funding). Send an `idempotency_key` to make retries safe. The same key returns the original reservation, and the same key with a different company, credit type, or amount returns a `409`.
+When two operations race for the last of a balance, exactly one succeeds. A balance that cannot cover the full amount returns a `402` and consumes nothing. Reservations are never partially funded, unlike leases; see [Partial funding](#partial-funding). Send an `idempotency_key` to make retries safe. The same key returns the original reservation, and the same key with a different company, credit type, or amount returns a `409`.
 
 Many reservations can be open at once for one company and credit type, alongside a lease if one exists. The company's reserved balance is the sum of every open lease and reservation.
 
@@ -189,13 +189,13 @@ Settle a reservation by sending a normal track event with `reservation_id` set t
 
 Send exactly one settling track. A second track carrying the same `reservation_id` falls through to a normal grant debit, because the reservation is already closed, so use the events API's [idempotency key](/playbooks/metering) when you retry. A track body accepts `lease_id` and `reservation_id`, and `lease_id` takes precedence when both are present. Send one or the other.
 
-The events pipeline settles asynchronously. Do not expect the balance or the reservation's `settled_amount` to reflect a track the moment you send it.
+Settlement is asynchronous. Do not expect the balance or the reservation's `settled_amount` to reflect a track the moment you send it.
 
 ### Releasing and expiry
 
-`PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole reserved amount. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the row unchanged.
+`PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole reserved amount. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the reservation unchanged.
 
-`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` to cover the whole operation, with some padding, when you reserve. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. A track that arrives after expiry is still billed, as a normal grant debit.
+`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` to cover the whole operation, with some padding, when you reserve. A reservation that reaches its expiry unsettled is refunded. A track that arrives after expiry is still billed, as a normal grant debit.
 
 A reservation that is never settled or released keeps its credits out of the balance until it expires. A long `expires_at` on work that can die without releasing parks those credits for that long.
 
@@ -213,7 +213,7 @@ A reservation debits its credits from specific grants when it is taken. A grant 
 - The unspent remainder would return to the grant it came from, but that grant has expired, so the remainder expires instead, the same as if it had never been held. The [credit ledger](/use-cases/credit-ledger) records the expiry at settle time, not at the reset.
 - Usage beyond the reserved amount is drawn from the balance at settle time, which after a reset is the new period's.
 
-Credits held across a reset do not count toward rollover. Rollover is sized from what the grant had left when it expired, and the held credits were not on the grant then. The exception is a reservation that settles after the grant expires but before Schematic has processed the reset, in which case the remainder returns to the grant first and counts.
+Credits held across a reset do not count toward rollover. Rollover is sized from what the grant had left when it expired, and the held credits were not on the grant then.
 
 Credits billed in arrears follow the same rules.
 
@@ -255,7 +255,7 @@ In client mode the SDK keeps one lease per company and credit type and issues pe
 | Setting | Behavior | Default |
 | --- | --- | --- |
 | `defaultLeaseSize` | Credits requested per acquire or extend | 10,000 |
-| `defaultLeaseDuration` | How long the lease stays open before it is swept | 5 minutes |
+| `defaultLeaseDuration` | How long the lease stays open before it expires | 5 minutes |
 | `lowWaterMark` | The lease extends in the background once its unspent portion falls below this fraction, so a check does not wait on an acquire | 0.25 |
 | `defaultReservationTTL` | How long an unsettled reservation keeps its slice of the lease | 60 seconds |
 | `sweepIntervalMs` | How often expired reservations are returned to the lease | 1 second |
@@ -371,12 +371,12 @@ Each operation is recorded in the [credit ledger](/use-cases/credit-ledger). Led
 | Usage reason | Recorded when |
 | --- | --- |
 | `lease_hold` | Credits are debited at acquire or extend |
-| `lease_release` | The unspent portion is returned at release, expiry, or sweep |
+| `lease_release` | The unspent portion is returned at release or expiry |
 | `reservation_hold` | A reservation is taken, and again when settling it bills overage |
 | `reservation_release` | A reservation's unspent remainder is returned at settle, release, or expiry |
 | `track` | Usage is committed, against a lease or reservation, or otherwise |
 
-A lease that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied. Reservation rows are kept after they settle or release, so the ledger still reconciles against them.
+A lease that reserved 400 and consumed 350 produces three sets of entries: the 400 debit, the committed usage, and the 50 return, each with its own timestamp. No netting is applied.
 
 When a reservation settles after the grant it drew from has expired, the unspent remainder is recorded as an expiry dated at settle time. See [Reservations that cross a credit reset](#reservations-that-cross-a-credit-reset).
 
