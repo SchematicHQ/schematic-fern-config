@@ -775,6 +775,12 @@ analytics:
 
 css: ./styles.css
 
+# Report a link to a page that does not exist. `fern check --warnings` prints them;
+# `error` would fail every PR until the links to unpublished endpoints resolve.
+check:
+  rules:
+    broken-links: warn
+
 redirects:
   - source: "/catalog/configuration"
     destination: "/catalog/lifecycle"

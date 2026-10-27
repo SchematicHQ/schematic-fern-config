@@ -19,6 +19,18 @@ jobs:
       - name: Check API definition is valid
         run: fern check
 
+      # docs.yml sets `broken-links: warn`, so a dead link shows up here and in
+      # `fern check --warnings` without failing the job. Flip it to `error` once
+      # the links to unpublished endpoints resolve.
+      - name: Report broken links
+        if: always()
+        run: |
+          fern check --warnings 2>&1 | grep -A 1 "broken link to" > links.txt || true
+          {
+            echo "### Broken links"
+            if [ -s links.txt ]; then echo '```'; cat links.txt; echo '```'; else echo "none"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # Report-only until the Checkout docs pages land: drop `continue-on-error`
   # to make the type-check required.
   check-samples:
