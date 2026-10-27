@@ -481,6 +481,7 @@ navigation:
       - page: Rate limiting
         path: ./docs/pages/api_documentation/rate_limiting.mdx
       - api: API Reference
+        api-name: api
         audiences:
           - public
         skip-slug: true
@@ -664,6 +665,8 @@ navigation:
           - section: Payment
             contents:
               - POST /components/setup-intent
+              - POST /checkout/paymentmethod/update
+              - DELETE /checkout/paymentmethod/{checkout_id}
               - DELETE /checkout/unsubscribe
           - checkoutexternal:
               hidden: true

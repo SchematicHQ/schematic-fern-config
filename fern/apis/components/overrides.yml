@@ -2,7 +2,7 @@
 # generator emits no descriptions and no x-fern extensions, so the audience
 # tags, the prose and the corrected shapes live here and survive every
 # `fern api update`. `public` is what docs.yml shows; `internal` hides the
-# legacy embed routes the components no longer call.
+# legacy embed routes nothing shipped calls any more.
 info:
   title: Components API
   description: >-
@@ -237,12 +237,25 @@ paths:
         - internal
   /checkout/paymentmethod/{checkout_id}:
     delete:
+      summary: Remove a payment method
+      description: >-
+        Detaches a payment method from the company's billing customer. The
+        path parameter is the payment method's `id` from the list, not a
+        checkout's; `usePaymentMethods().remove` calls this and reloads the
+        list. The list says whether each method can be removed.
       x-fern-audiences:
-        - internal
+        - public
   /checkout/paymentmethod/update:
     post:
+      summary: Make a payment method the default
+      description: >-
+        Makes a method on file the one the company's charges use. The body's
+        `payment_method_id` is the provider's id of the method, the
+        `external_id` the list returns; `usePaymentMethods().setDefault`
+        calls this and reloads the list. A card saved during a checkout joins
+        the methods on file and becomes the default the same way.
       x-fern-audiences:
-        - internal
+        - public
   /checkout/preview:
     post:
       x-fern-audiences:
