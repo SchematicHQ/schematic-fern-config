@@ -3,6 +3,11 @@
 
 Covers only the mechanical rules. "Person in the subject slot" and "every setup
 paragraph needs a consequence" need a reader.
+
+Usage: ``prose_lint.py [--] [PAGE.mdx ...]``. With no arguments every page under
+``fern/docs/pages/`` is checked. CI passes the pages a PR changes after ``--``;
+an empty list after ``--`` exits 0, so a PR that touches no page passes.
+Generated SDK pages are skipped either way.
 """
 import re
 import sys
@@ -66,11 +71,17 @@ def bullet_term_dash(text):
     return out
 
 
-def main():
+def main(argv):
     root = pathlib.Path(__file__).resolve().parent.parent / "fern/docs/pages"
+    if argv[:1] == ["--"]:
+        argv = argv[1:]
+        if not argv:
+            print("prose lint: no pages to check")
+            return 0
+    paths = [pathlib.Path(a).resolve() for a in argv] or sorted(root.rglob("*.mdx"))
     findings = []
-    for path in sorted(root.rglob("*.mdx")):
-        if "api_documentation" in str(path) or path.name in GENERATED:
+    for path in paths:
+        if path.name in GENERATED:
             continue
         text = path.read_text()
         prose = body_prose(text)
@@ -81,8 +92,9 @@ def main():
         for line, snippet in bullet_term_dash(text):
             findings.append((path, line, "bullet-term-dash", snippet))
 
+    repo = root.parent.parent.parent
     for path, line, name, text in findings:
-        rel = path.relative_to(root.parent.parent.parent)
+        rel = path.relative_to(repo) if repo in path.parents else path
         print(f"{rel}:{line}: [{name}] {text.strip()[:60]}")
 
     if findings:
@@ -93,4 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

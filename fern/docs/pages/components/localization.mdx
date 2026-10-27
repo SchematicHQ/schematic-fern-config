@@ -77,6 +77,8 @@ Any key you leave out falls back to English, so you can ship a partial translati
 
 Pass your bundles to `translations`, keyed by language, and set `locale` to the customer's language:
 
+{/* samples: nocheck, imports the reader's own translation files */}
+
 ```tsx
 import {
   EmbedProvider,
@@ -107,6 +109,8 @@ The locale also sets how the components format numbers, currency, and dates. Wit
 ## Use your own i18next instance
 
 If your app already uses [i18next](https://www.i18next.com/), pass your instance to `i18n` instead of managing a separate set of bundles. Add the component strings to your instance under the `schematic` namespace, which is exported as `SCHEMATIC_NAMESPACE`:
+
+{/* samples: nocheck, the provider's children are elided */}
 
 ```tsx
 import i18n from "i18next";
