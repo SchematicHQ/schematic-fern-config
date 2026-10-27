@@ -203,7 +203,7 @@ jobs:
         working-directory: /tmp/sdk-repo
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          poetry install --extras datastream
+          poetry install --extras "datastream aiohttp"
           poetry run mypy .
 
       - name: Compile check (TypeScript)
