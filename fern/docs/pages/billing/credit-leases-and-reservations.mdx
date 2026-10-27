@@ -124,7 +124,7 @@ The operation still in flight sees three things.
 - Its release returns a 409, `credit lease has already been released`.
 - It runs unprotected from the moment the lease closed, so the balance it was gating against is drawable again by anything else.
 
-Scope the lease to the batch of work instead. Acquire once with an `expires_at` covering the whole batch and a `requested_amount` sized for all of it, commit per operation, and release when nothing is left in flight. An open lease costs the reserved credits and nothing else, and [expiry](#expiry) returns them within about a minute if the process dies before it releases.
+Scope the lease to the batch of work instead. Acquire once with an `expires_at` covering the whole batch and a `requested_amount` sized for all of it, commit per operation, and release when nothing is left in flight. If the process dies before it releases, [expiry](#expiry) returns the credits.
 
 Do not use a lease to reserve credits for a single operation. Once a second operation for the same company and credit type overlaps the first, the second acquire returns the existing lease rather than adding to it, so the second operation is not covered, and the first release closes the lease while the second operation is still running. Use a [reservation](#reservations) instead. Each reservation is independent, and several can be open for the same company and credit type at once.
 
@@ -159,7 +159,7 @@ Four things to account for when a lease spans a workflow rather than a single ca
 
 Every lease has an expiry. If `expires_at` is not supplied, it defaults to five minutes. Set it explicitly for longer-running work, or extend the lease while the work is in progress.
 
-A lease that reaches its expiry without being released is released automatically, and its unspent portion returns to the balance. Credits reserved by a process that terminated between acquire and release therefore return once the lease expires, not at the end of the billing period. Expiry does not forfeit credits.
+A lease that reaches its expiry without being released is released automatically, and its unspent portion returns to the balance.
 
 Released credits return to the specific grants they were drawn from and retain each grant's original expiry date. A lease drawn partly from a grant expiring this month and partly from one expiring next year returns to both, so [consumption order](/billing/credit-burndown#consumption-order) and [grant expiration](/billing/credit-burndown#credit-lifecycle) behave as they would have without the lease.
 
@@ -167,7 +167,7 @@ Released credits return to the specific grants they were drawn from and retain e
 
 An acquire for more than the balance can cover does not fail. It returns a lease for the amount the balance could back, reported as `granted_amount` on the response. An acquire fails only when no credits are drawable at all.
 
-Read `granted_amount` rather than assuming the requested amount was granted. A caller that requested 1,000 and received 340 must size its work to 340.
+Read `granted_amount` rather than assuming the requested amount was granted.
 
 ## Reservations
 
@@ -195,13 +195,13 @@ Settlement is asynchronous. Do not expect the balance or the reservation's `sett
 
 `PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole reserved amount. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the reservation unchanged.
 
-`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` to cover the whole operation, with some padding, when you reserve. A reservation that reaches its expiry unsettled is refunded. A track that arrives after expiry is still billed, as a normal grant debit.
+`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` to cover the whole operation when you reserve. A reservation that reaches its expiry unsettled is refunded. A track that arrives after expiry is still billed, as a normal grant debit.
 
-A reservation that is never settled or released keeps its credits out of the balance until it expires. A long `expires_at` on work that can die without releasing parks those credits for that long.
+Monitor the work a reservation covers, and release the reservation when that work fails.
 
 ### Spend controls while a reservation is open
 
-[Usage controls](/billing/usage-controls) count the whole reserved amount when the reservation is taken. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) and [credit limit webhooks](/integrations/webhooks/entitlement-triggers#credit-trigger-events) do not act on the reservation; they wait for the settling track event. For a reservation open for several hours, a top-up or alert can lag the debit by that long.
+[Usage controls](/billing/usage-controls) count the whole reserved amount when the reservation is taken. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) and [credit limit webhooks](/integrations/webhooks/entitlement-triggers#credit-trigger-events) respond to the settling track event, not to the reservation. A reservation that takes the balance below a top-up threshold does not trigger a top-up until it settles, so other operations can be refused in the meantime.
 
 Credits [billed in arrears](/billing/empty-credit-balances#bill-in-arrears) behave the same way. A reservation taken against them draws on the [overdraft limit](/billing/empty-credit-balances#overdraft-limit) until it settles.
 
