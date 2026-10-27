@@ -24,7 +24,7 @@ declare global {
   function getSession(): Promise<{ companyId?: string; userId?: string } | null>;
   function fetchAccessToken(): Promise<AccessTokenResult>;
   function openTopUp(creditId: string): void;
-  function openTopUpSettings(creditId: string): void;
+  function openTopUpSettings(): void;
   function showGoodbye(): void;
   const router: { push(url: string): void };
 
