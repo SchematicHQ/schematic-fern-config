@@ -207,7 +207,7 @@ Credits [billed in arrears](/billing/empty-credit-balances#bill-in-arrears) beha
 
 ### Reservations that cross a credit reset
 
-A reservation debits its credits from specific grants when it is taken. A grant that [resets](/billing/credit-burndown#reset-and-rollover) expires at the end of its period, and a plan change or cancellation can zero one out early. A reservation that is open when that happens keeps its credits until it settles, and settling it works as follows.
+A longer reservation can outlive the grant its credits came from. Most often the subscription enters a new billing period and the grant [resets](/billing/credit-burndown#reset-and-rollover); a plan change or cancellation can also end a grant early. The reservation keeps its credits until it settles, and settling it works as follows.
 
 - Usage up to the reserved amount is billed from the held credits.
 - The unspent remainder would return to the grant it came from, but that grant has expired, so the remainder expires instead, the same as if it had never been held. The [credit ledger](/use-cases/credit-ledger) records the expiry at settle time, not at the reset.
