@@ -1,0 +1,24 @@
+---
+title: Components API
+description: The browser-facing billing API behind the drop-in components and the schematic-react hooks, scoped to one company by a temporary access token.
+---
+
+The Components API is what `@schematichq/schematic-react` and the drop-in components call. It reads and writes one company's billing from the browser: the catalog as that company sees it, its checkouts, tax IDs, usage, credits, invoices and payment methods.
+
+## Authentication
+
+Every request carries a temporary access token in the `X-Schematic-Api-Key` header. Your server mints the token with `POST /temporary-access-tokens` on the secret-key API for a company, optionally for one of its users, and hands it to the page. The token fixes the company: a `company_id` in a request is ignored, and a checkout another company or another session opened reads as not found.
+
+## Checkout headers
+
+`X-Schematic-Session-ID` names the browser session that built a checkout. A checkout can be read and written only by the session that opened it.
+
+`X-Checkout-Session-ID` comes back on every priced update and goes out on the finalize that follows, so the purchase is charged under the price the customer saw and a double submit charges once.
+
+## Errors
+
+Every error body carries `error`. A checkout write or finalize the purchase rules refuse also carries `problems`, the same list the checkout's `problems` field holds: each problem has a `code`, whether it is `blocking`, a `message` safe to show the customer, and the ids of what it is about.
+
+## Account flags
+
+`GET /catalog/view` needs the `multi-product-catalog` flag on the account, and the `/company` reads need `company-context-api`. A read without its flag answers 404, which is how the components tell "not available" from an empty result. Ask Schematic to turn them on for the account.

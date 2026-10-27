@@ -1,0 +1,16 @@
+api:
+  specs:
+    - openapi: ./openapi.yml
+      overrides: ./overrides.yml
+      origin: https://openapi.schematichq.com/prod/api/temporaryaccesstoken.yml
+      settings:
+        optional-additional-properties: false
+        title-as-schema-name: true
+        respect-nullable-schemas: false
+        inline-path-parameters: false
+        idiomatic-request-names: false
+        type-dates-as-strings: false
+        wrap-references-to-nullable-in-optional: true
+        coerce-optional-schemas-to-nullable: true
+        object-query-parameters: false
+        coerce-enums-to-literals: true

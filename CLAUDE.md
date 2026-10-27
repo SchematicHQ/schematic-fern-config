@@ -6,6 +6,16 @@ Read `.claude/docs-conventions.md` before adding a page, adding a hub, or changi
 It covers the `npx fern-api check` gotcha, why a page's URL never follows its directory, and
 which SDK pages are generated and will be overwritten.
 
+## Two APIs
+
+`fern/apis/api/` is the secret-key API: `schematic.yaml` at the repo root, pulled by `fern api update`,
+feeding the API Reference and every SDK group. `fern/apis/components/` is the temporary-access-token
+surface the drop-in components and hooks call, published as the Components API reference and nothing
+else (no `groups`). The API repo's generator emits no descriptions and no `x-fern-*` extensions, so
+`fern/apis/components/overrides.yml` carries the audiences (`public` shows, `internal` hides the legacy
+embed routes), the summaries and descriptions, and the corrected request shapes; it survives every spec
+update. SDK commands take `--api api`.
+
 ## Writing rules
 
 These apply to every `.mdx` file under `fern/docs/pages/`. Nothing in CI blocks a merge on them,
