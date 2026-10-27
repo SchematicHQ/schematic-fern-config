@@ -354,8 +354,10 @@ components:
           minLength: 1
         resource_id:
           type: integer
+          description: Always null. Use resource_id_string.
           format: int64
           nullable: true
+          deprecated: true
         resource_id_string:
           type: string
           nullable: true
@@ -431,8 +433,10 @@ components:
           nullable: true
         resource_id:
           type: integer
+          description: Always null. Use resource_id_string.
           format: int64
           nullable: true
+          deprecated: true
         resource_id_string:
           type: string
           nullable: true
@@ -9960,7 +9964,16 @@ components:
           nullable: true
         source_id:
           type: integer
+          description: Always 0. Use source_id_string.
           format: int64
+          deprecated: true
+        source_id_string:
+          type: string
+          nullable: true
+        source_type:
+          allOf:
+            - $ref: '#/components/schemas/CreditLedgerSourceType'
+          nullable: true
         to_grant_id:
           type: string
           nullable: true
@@ -10130,6 +10143,13 @@ components:
         - settlement
         - transfer
         - zero_out
+    CreditLedgerSourceType:
+      type: string
+      enum:
+        - billing_charge
+        - billing_credit_grant
+        - billing_credit_transfer
+        - billing_settlement
     CreditReservationResponseData:
       type: object
       properties:
