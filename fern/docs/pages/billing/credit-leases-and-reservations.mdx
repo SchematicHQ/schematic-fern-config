@@ -195,7 +195,7 @@ The events pipeline settles asynchronously. Do not expect the balance or the res
 
 `PUT /billing/credits/reservations/{id}/release` cancels a reservation and returns the whole reserved amount. Use it only when the operation did not happen. It is idempotent, so releasing a reservation that is already released or settled returns the row unchanged.
 
-`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` for the whole operation when you reserve. Size it above the operation's expected duration plus a few seconds of margin. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. A track that arrives after expiry is still billed, as a normal grant debit.
+`expires_at` defaults to one minute from now and may be at most 24 hours out. A reservation cannot be extended, so set `expires_at` to cover the whole operation, with some padding, when you reserve. A sweep runs every ten seconds and refunds any reservation that reaches its expiry unsettled. A track that arrives after expiry is still billed, as a normal grant debit.
 
 A reservation that is never settled or released keeps its credits out of the balance until it expires. A long `expires_at` on work that can die without releasing parks those credits for that long.
 
