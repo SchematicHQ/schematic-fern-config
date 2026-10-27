@@ -20,7 +20,7 @@ By default, the backend SDK evaluates checks in your process. Teams whose infras
 
 ## In the browser
 
-When you call `identify`, the frontend SDK opens a WebSocket to Schematic's flag and entitlement service using your publishable key and sends the keys of the current company and user. Schematic evaluates every flag for that company and user on its side and sends back the results. The browser receives flag values and entitlement details. It never receives flag rules or data about other companies.
+When you call `identify`, the frontend SDK opens a WebSocket to Schematic using your publishable key and sends the keys of the current company and user. Schematic evaluates every flag for that company and user on its side and sends back the results. The browser receives flag values and entitlement details. It never receives flag rules or data about other companies.
 
 The SDK keeps those values in memory and in `localStorage`. A returning visitor sees the last known values immediately, and the SDK refreshes them over the socket in the background. When a plan, override, trait, or usage count changes, Schematic pushes the new values over the same socket, and the React, Vue, and Angular SDKs update your components without a reload. Until the first values arrive, a check returns the default you configured for that flag.
 
@@ -62,13 +62,13 @@ Run one Replicator per Redis. A second instance waits for the first to release i
 
 Replicator applies to backend SDKs. Browsers connect to Schematic directly in both setups, as the diagrams show.
 
-## Inside Schematic
+## Event processing
 
-Event processing accepts a `track` event and responds before working on it, so a `track` call never waits on metering. It then processes events asynchronously, dropping duplicates, updating each company's usage counts, and burning credits for credit-metered features.
+A `track` call returns as soon as Schematic accepts the event, so it never waits on metering. Schematic then processes events asynchronously, dropping duplicates, updating each company's usage counts, and burning credits for credit-metered features.
 
-Those results land as billing and entitlement updates, alongside every other change to a company's plan, overrides, traits, and credit grants. A company's credit balance is tracked in a ledger, and debits against a company's balance of one credit type are serialized, so two debits that race for the last of a balance cannot both succeed.
+Those results reach your SDKs the same way as every other change to a company's plan, overrides, traits, and credit grants. Schematic pushes each update to connected SDKs and Replicator instances, so a usage event tracked in your backend reaches every browser tab showing that company without anyone polling.
 
-Every update flows to the flag and entitlement service, which pushes it to connected SDKs and Replicator instances. A usage event tracked in your backend reaches every browser tab showing that company without anyone polling.
+A company's credit balance is tracked in a ledger. When two debits against one credit type race for the last of a balance, only one succeeds.
 
 Because event processing is asynchronous, usage and credit balances trail the `track` call slightly. For most gating that lag is invisible, because the SDK has already updated its own cache. When several workers spend from one credit balance at once, gate the work with a [credit lease or reservation](/billing/credit-leases-and-reservations). Both debit the balance before the work runs, so concurrent workers cannot overspend it.
 
@@ -76,9 +76,9 @@ Because event processing is asynchronous, usage and credit balances trail the `t
 
 Schematic targets 99.99% uptime and publishes its record on the [status page](https://schematic.statuspage.io/). See [Availability](/production_readiness/availability) for how that target relates to your contract.
 
-Flag checks that reach Schematic are evaluated against cached flag and company data, with a p99 latency under 50ms. In the default setup, most backend checks never make that trip, because the SDK evaluates them in your process. For environments where uptime is critical, Replicator keeps serving checks from your own Redis through a Schematic disruption.
+Flag checks that reach Schematic have a p99 latency under 50ms. In the default setup, most backend checks never make that trip, because the SDK evaluates them in your process. For environments where uptime is critical, Replicator keeps serving checks from your own Redis through a Schematic disruption.
 
-Event tracking runs separately from the core API. Schematic writes every event it accepts to a durable log before processing it, so events sent during an incident are processed once the pipeline recovers.
+Schematic processes every event it accepts, so events sent during an incident are processed once Schematic recovers.
 
 ## Further reading
 
