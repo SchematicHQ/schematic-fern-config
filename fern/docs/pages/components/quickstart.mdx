@@ -159,7 +159,7 @@ function Portal() {
 }
 ```
 
-Render `<SchematicStyles />` once and drop any card you do not need; each stands alone. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add more, Buy more, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`.
+Render `<SchematicStyles />` once and drop any card you do not need. `CheckoutLauncherProvider` renders one `<Checkout />` for the page, and the cards show their purchase actions only when you hand them `open`; the [Drop-in components overview](/components/drop-in/overview) walks through the portal card by card.
   </Tab>
   <Tab title="Build your own">
 ```tsx

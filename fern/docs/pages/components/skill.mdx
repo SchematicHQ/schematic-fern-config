@@ -132,7 +132,7 @@ For a public pricing page, render `<PricingTable onSelectPlan={…} />` under a 
 
 ### 4b. Build your own UI (when the user asks for it)
 
-One hook per resource, one derivation each, and the user's own JSX. The hooks come from `@schematichq/schematic-react` and the derivations from `@schematichq/schematic-components/elements`. Start from the [Hooks reference](/components/build-your-own/hooks) and adapt the code to the app's design system rather than copying it verbatim. Keep the derivations (`derivePlanManager`, `deriveIncludedFeatures`, `deriveMeteredFeatures`, `deriveCreditUsage`, `deriveUpcomingInvoice`, `derivePaymentMethods`, `deriveInvoiceList`, `deriveUnsubscribe`) as imports; they carry the display rules and their tests. For writes, use the handles: `usePaymentMethods()` returns `setDefault` and `remove`, `useSetupIntent()` starts adding a card, and `useUnsubscribe()` returns `unsubscribe`. For purchases, use `useCheckout` or mount `CheckoutLauncherProvider` and call `useCheckoutLauncher().open()`.
+One hook per resource, one derivation each, and the user's own JSX. The hooks come from `@schematichq/schematic-react` and the derivations from `@schematichq/schematic-components/elements`. Start from the [Hooks reference](/components/build-your-own/hooks) and adapt the code to the app's design system rather than copying it verbatim. Keep the derivations (`derivePlanManager`, `deriveIncludedFeatures`, `deriveMeteredFeatures`, `deriveCreditUsage`, `derivePricingTable`, `deriveCheckout`, `deriveUpcomingInvoice`, `derivePaymentMethods`, `deriveInvoiceList`, `deriveUnsubscribe`) as imports; they carry the display rules and their tests. For writes, use the handles: `usePaymentMethods()` returns `setDefault` and `remove`, `useSetupIntent()` starts adding a card, and `useUnsubscribe()` returns `unsubscribe`. For purchases, use `useCheckout` or mount `CheckoutLauncherProvider` and call `useCheckoutLauncher().open()`.
 
 ### 5. Theme it
 
@@ -175,7 +175,7 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 
 | Component | Hooks | Derivation | Page |
 | --- | --- | --- | --- |
-| `<Checkout/>` | `useCheckout` | | /components/drop-in/checkout |
+| `<Checkout/>` | `useCatalog`, `useCompany`, `useCheckout`, `useTaxIds` | `deriveCheckout` | /components/drop-in/checkout |
 | `<PlanManager/>` | `useCompany`, `useFeatureUsage`, `useCreditBalances` | `derivePlanManager` | /components/drop-in/plan-manager |
 | `<PricingTable/>` | `useCatalog` | | /components/drop-in/pricing-table |
 | `<IncludedFeatures/>` | `useFeatureUsage` | `deriveIncludedFeatures` | /components/drop-in/included-features |

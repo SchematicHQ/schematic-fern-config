@@ -45,11 +45,7 @@ function Plans() {
   const { open } = useCheckoutLauncher();
   return (
     <PricingTable
-      onSelectPlan={({ kind, id, period, currency }) =>
-        kind === "plan"
-          ? open({ selection: { planId: id, period: period ?? undefined, currency } })
-          : open({ steps: { initial: "addOns" } })
-      }
+      onSelectPlan={(selection) => open({ selection: selection.checkout })}
     />
   );
 }
@@ -91,13 +87,17 @@ function Plans() {
 ```ts
 interface PricingTableSelection {
   kind: "plan" | "addOn";
+  action: "choose" | "remove" | "change";      // what the card offered
   id: string;                                  // the plan's or add-on's id
   priceId: string | null;                      // the price the card shows
   period: "month" | "quarter" | "year" | null; // null for a one-time add-on
   currency: string;
   trialDays: number | null;                    // a trial the plan offers
+  checkout: CheckoutSelection;                 // the cart to open Checkout with
 }
 ```
+
+`checkout` is the selection [Checkout](/components/drop-in/checkout) starts from: the plan with its period and currency, or the company's add-ons with this one added, removed or kept. `priceId` and `trialDays` describe the card; the checkout prices the cart itself and offers the trial when the company can take it.
 
 Without `onSelectPlan`, `callToActionUrl` makes each action a link; without either, cards have no action apart from the two links that follow. The custom plan links to the catalog's own URL, and a blocked downgrade to the account's. Each card shows four features before "See all". A plan's included credits read a line per credit, such as "10 AI credits per Seat per month", and a credit the plan also grants the company outright adds that share beneath it: "Plus 100 AI credits per month for your company". When `onSelectPlan` opens a checkout that changes the plan without leaving the page, call the function [`useInvalidateBillingData`](/components/build-your-own/hooks#useinvalidatebillingdata) returns once it is done, and the table reloads with the new current plan.
 

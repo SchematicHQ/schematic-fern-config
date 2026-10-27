@@ -330,8 +330,12 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
 
   return (
     <>
-      <PeriodToggle options={table.periods} value={table.period} onChange={setPeriod} />
-      <CurrencyPicker options={table.currencies} value={table.currency} onChange={setCurrency} />
+      <select value={table.period ?? ""} onChange={(event) => setPeriod(event.target.value as PricingPeriod)}>
+        {table.periods.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select>
+      <select value={table.currency ?? ""} onChange={(event) => setCurrency(event.target.value)}>
+        {table.currencies.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select>
       <div className="grid md:grid-cols-3">
         {table.plans.map((plan) => (
           <article key={plan.id}>
@@ -359,6 +363,7 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
 
 Render from `table.period` and `table.currency` rather than your own state: when the catalog does not offer what you asked for, the derivation falls back and says which it chose. On a public page, `onSelect` sends the visitor to sign up. Signed in, mount `CheckoutLauncherProvider` above it and open Checkout from `onSelect`:
 
+{/* samples: nocheck */}
 ```tsx
 const { open } = useCheckoutLauncher();
 <Pricing onSelect={(planId, period) => open({ selection: { planId, period: period ?? undefined } })} />

@@ -4,7 +4,7 @@ description: The hooks, derivations, and checkout API behind the drop-in compone
 slug: components/build-your-own/overview
 ---
 
-Everything a drop-in component shows is available to your own code, one layer down. Read the data with a hook, reduce it with a derivation, and render whatever you like. The drop-ins are built on exactly this surface, so anything they can show, you can show.
+Everything a drop-in component shows is available to your own code, one layer down. Read the data with a hook, reduce it with a derivation, and render it in your own JSX. The drop-ins are built on the same surface.
 
 ## How it layers
 
@@ -19,7 +19,7 @@ Everything a drop-in component shows is available to your own code, one layer do
 
 The derivations are shipped code with tests, not copy-paste examples. The display decision trees behind them (which of seven ways an entitlement reads, how tiered pricing prices a quantity, how a credit's grants add up) are intricate and correctness-sensitive, and a copy would drift from the drop-ins the first time a rule changed. Import them.
 
-The JSX is reference code you own. Each [recipe](/components/build-your-own/recipes) is a complete component; copy the one closest to what you need and restyle it. The Components page in the Schematic dashboard has reference code for each drop-in in shadcn/ui, Tailwind, and plain CSS, plus a prompt for your coding agent. The drop-ins are the maximal example of the same seam.
+The JSX is reference code you own. Each [recipe](/components/build-your-own/recipes) is a complete component; copy the one closest to what you need and restyle it. The Components page in the Schematic dashboard has reference code for each drop-in in shadcn/ui, Tailwind, and plain CSS, plus a prompt for your coding agent.
 
 ## The recipe pattern
 
@@ -52,7 +52,7 @@ Every derivation returns structured parts with the raw value beside the formatte
 
 ## Mixing with drop-ins
 
-The hooks and the drop-ins share one provider and one cache, so a page can use both. A custom Plan Manager next to a drop-in `<Checkout/>` is a common shape: `useCheckoutLauncher().open()` opens the same dialog the drop-ins use. A page that shows Included Features and Metered Features beside your own usage chart still makes one request for feature usage.
+The hooks and the drop-ins share one provider and one cache, so a page can use both. A custom Plan Manager can open the drop-in `<Checkout/>` through `useCheckoutLauncher().open()`, the same dialog the drop-ins use. A page that shows Included Features and Metered Features beside your own usage chart still makes one request for feature usage.
 
 <CardGroup cols={2}>
   <Card title="Session and access tokens" href="/components/build-your-own/session">
