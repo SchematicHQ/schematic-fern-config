@@ -24,7 +24,7 @@ echo "=== Validating $GROUP against $DOWNSTREAM_REPO ==="
 
 # Step 1: Generate preview
 echo "Running fern generate --preview for group $GROUP..."
-if ! fern generate --group "$GROUP" --preview 2>&1; then
+if ! fern generate --api api --group "$GROUP" --preview 2>&1; then
   echo "RESULT:GENERATE_FAILED"
   exit 1
 fi
