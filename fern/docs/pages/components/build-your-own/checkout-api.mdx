@@ -4,7 +4,7 @@ description: A checkout is a persisted cart the server prices on every write and
 slug: components/build-your-own/checkout-api
 ---
 
-A checkout is a resource on the [Components API](/api-reference/components). Your UI opens one for the company, replaces its cart whenever the customer changes something, and finalizes it; the server prices every write and refuses what the catalog's purchase rules forbid, so the totals on screen are always its own. `<Checkout/>`, `useCheckout` and a [Stripe Elements flow](/components/build-your-own/checkout-with-stripe-elements) ride the same five routes.
+A checkout is a resource on the [Components API](/api-reference/components). Your UI opens one for the company, replaces its cart whenever the customer changes something, and finalizes it; the server prices every write and refuses what the catalog's purchase rules forbid, so the totals on screen are the server's. `<Checkout/>`, `useCheckout` and a [Stripe Elements flow](/components/build-your-own/checkout-with-stripe-elements) use the same five routes.
 
 ## The routes
 
@@ -24,9 +24,9 @@ The body of a create or update is the whole cart: an update replaces the stored 
 
 Each successful write advances `version` by one and answers with the checkout: `status`, `version`, `selections`, `price_snapshot`, `problems` and `expires_at`. The first write is the `POST`, which answers 201; every later one is a `PUT` at the version last read. A stale version answers 409 and changes nothing, so read the checkout and send the write again at its version. The status moves from `open` to `completed` on finalize, or to `expired` when `expires_at` passes; a write to a checkout that is no longer open is a 409 too.
 
-A `PUT` answers with the `X-Checkout-Session-ID` header, the session the price belongs to. Send it back on the finalize that follows: a finalize under the session the last price handed out is what turns a second submit of the same cart into a 409 rather than a second charge. A `POST` hands no session out, so a cart finalized straight after its create sends none and the server starts one of its own.
+A `PUT` answers with the `X-Checkout-Session-ID` header, the session the price belongs to. Send it back on the finalize that follows, so a second submit of the same cart answers 409 instead of charging again. A `POST` hands no session out, so a cart finalized straight after its create sends none and the server starts one of its own.
 
-The finalize prices the cart once more, then claims the version before the billing provider is called, so of two concurrent finalizes only one charges; the other gets a 409 and never reaches the provider. The claim is not released when the charge fails, because from there nothing can tell a refusal that never reached the provider from a failure after it did, so read the checkout before trying again. The answer is the subscription the charge made, with `confirm_payment_intent_client_secret` when the payment still needs the customer, as with 3-D Secure.
+The finalize prices the cart once more, then claims the version before the billing provider is called, so of two concurrent finalizes only one charges; the other gets a 409 and never reaches the provider. The claim stays after a failed charge, because the server cannot tell a refusal that never reached the provider from a failure after it did, so read the checkout before trying again. The answer is the subscription the charge made, with `confirm_payment_intent_client_secret` when the payment still needs the customer, as with 3-D Secure.
 
 ## Problems
 
@@ -36,26 +36,11 @@ Every price answers with `problems`: a list with a `code`, whether it is `blocki
 
 ## With useCheckout
 
-```ts
-import type { Checkout, CheckoutPriceSnapshot, CheckoutProblem, CheckoutResult, CheckoutSelections } from "@schematichq/schematic-react";
+[`useCheckout`](/components/build-your-own/hooks#usecheckout) holds one checkout and drives these routes from its handle: `checkout`, `snapshot` and `problems` as the last write left them, `isPricing`, `isFinalizing`, `error` and `result`, and `setSelections`, `finalize` and `reset` to move it.
 
-declare function useCheckout(options?: { checkoutId?: string }): CheckoutHandle;
+The first `setSelections` opens the checkout with the `POST`; every later one replaces the cart with a `PUT` at the version the hook holds. Calls made while a write is out fold into the newest, so a component can call it on every change. A 409 is replayed once, by reading the checkout and writing the same cart again at the version it came back with; a second conflict is somebody else's and surfaces on `error`.
 
-interface CheckoutHandle {
-  checkout: Checkout | undefined;      // as the last write left it: id, version, status, selections, priceSnapshot, problems, expiresAt
-  snapshot: CheckoutPriceSnapshot | undefined;
-  problems: CheckoutProblem[];         // the priced checkout's, or the list a refused finalize answered with
-  isPricing: boolean;                  // a write is in flight or waiting behind one
-  isFinalizing: boolean;
-  error: Error | undefined;            // a write or finalize that failed other than on its problems
-  result: CheckoutResult | undefined;  // what the finalize charged
-  setSelections(selections: CheckoutSelections): Promise<Checkout | undefined>;
-  finalize(): Promise<CheckoutResult>;
-  reset(): void;
-}
-```
-
-The first `setSelections` opens the checkout with the `POST`; every later one replaces the cart with a `PUT` at the version the hook holds. Calls made while a write is out fold into the newest, so a component can call it on every change. A 409 is replayed once, by reading the checkout and writing the same cart again at the version it came back with; a second conflict is somebody else's and surfaces on `error`. `finalize` waits for every write to land, sends the session the last price handed out, and reloads the billing data the purchase changed; a refusal puts the server's list on `problems` and rejects, and `checkoutProblemsOf(error)` returns that list. `reset` drops the checkout so the next write opens a new one. `{ checkoutId }` resumes a checkout instead of opening one: from js 1.16.1 the hook reads it back before its first write, so the version it writes at is the server's.
+`finalize` waits for every write to land, sends the session the last price handed out, and reloads the billing data the purchase changed. A refusal puts the server's list on `problems` and rejects, and `checkoutProblemsOf(error)` returns that list. `reset` drops the checkout so the next write opens a new one. `{ checkoutId }` resumes a checkout instead of opening one: from js 1.16.1 the hook reads it back before its first write, so the version it writes at is the server's.
 
 ```tsx
 import { checkoutProblemsOf, useCheckout, type CheckoutSelections } from "@schematichq/schematic-react";
@@ -127,8 +112,19 @@ try {
 const result = await billing.finalizeCheckout(checkout.id, checkout.version, { sessionId });
 ```
 
-`createCheckout(selections)`, `getCheckout(id)`, `updateCheckout(id, version, selections)` and `finalizeCheckout(id, version, { sessionId })` are the whole surface; `checkoutProblemsOf(error)` reads the problems off a refusal here too. The client does not replay a 409 for you.
+`createCheckout(selections)`, `getCheckout(id)`, `updateCheckout(id, version, selections)` and `finalizeCheckout(id, version, { sessionId })` are the whole surface; `checkoutProblemsOf(error)` reads the problems off a refusal here too. Replay a 409 yourself, as the sample's `catch` does: read the checkout, then write again at its version.
 
 ## Sibling routes
 
-The rest of the Components API stays beside a checkout and keeps its own hook: [`/catalog/view`](/api-reference/components/catalog/get-catalog-view) for what can be bought (`useCatalog`), [`/company`](/api-reference/components/company/get-company) for what the company holds (`useCompany`), [`/checkout/tax-id`](/api-reference/components/tax-id/update-checkout-tax-id) for the tax ID, which is saved on its own rather than on the cart (`useTaxIds`), [`/components/setup-intent`](/api-reference/components/payment/create-setup-intent) for a Stripe setup intent (`useSetupIntent`), [`/company/payment-methods`](/api-reference/components/company/get-company-payment-methods) with the [default](/api-reference/components/payment/update-payment-method) and [remove](/api-reference/components/payment/delete-payment-method) writes (`usePaymentMethods`), and [`DELETE /checkout/unsubscribe`](/api-reference/components/payment/checkout-unsubscribe) for cancelling (`useUnsubscribe`).
+The rest of the Components API sits beside a checkout, each route with its own hook:
+
+| Route | Reference | Hook |
+| --- | --- | --- |
+| `GET /catalog/view` | [Get the catalog view](/api-reference/components/catalog/get-catalog-view) | `useCatalog` |
+| `GET /company` | [Get the company](/api-reference/components/company/get-company) | `useCompany` |
+| `GET /checkout/tax-id`, `POST /checkout/tax-id` | [List tax IDs](/api-reference/components/tax-id/get-checkout-tax-id), [Set the tax ID](/api-reference/components/tax-id/update-checkout-tax-id) | `useTaxIds` |
+| `POST /components/setup-intent` | [Create a setup intent](/api-reference/components/payment/create-setup-intent) | `useSetupIntent` |
+| `GET /company/payment-methods`, `POST /checkout/paymentmethod/update`, `DELETE /checkout/paymentmethod/{checkout_id}` | [List payment methods](/api-reference/components/company/get-company-payment-methods), [Make a payment method the default](/api-reference/components/payment/update-payment-method), [Remove a payment method](/api-reference/components/payment/delete-payment-method) | `usePaymentMethods` |
+| `DELETE /checkout/unsubscribe` | [Cancel the subscription](/api-reference/components/payment/checkout-unsubscribe) | `useUnsubscribe` |
+
+Write the tax ID through its own route before the finalize that needs it; the cart does not carry it.

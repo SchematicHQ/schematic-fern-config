@@ -10,7 +10,7 @@ The drop-in's payment step is `useCheckout`, `useSetupIntent` and Stripe's Payme
 
 1. Your component writes the cart with `useCheckout().setSelections`; every write re-prices on the server, and `snapshot.dueNow` is what the finalize will charge.
 2. `useSetupIntent().create()` answers with a setup intent, the Stripe publishable key to load Stripe with, and the client secret the Payment Element mounts on.
-3. `stripe.confirmSetup` saves the card. `usePaymentMethods().setDefault` puts it on file for the company, which is how the company's list learns of it, and the cart names it as `paymentMethodId`.
+3. `stripe.confirmSetup` saves the card. `usePaymentMethods().setDefault` puts it on file for the company, so the company's methods on file include it, and the cart names it as `paymentMethodId`.
 4. `finalize()` charges the cart. When the result carries `confirmPaymentIntentClientSecret`, the payment needs the customer, as with 3-D Secure, and `stripe.confirmCardPayment` completes it.
 
 ## Recipe
@@ -116,8 +116,8 @@ A confirmation the customer fails or abandons leaves the checkout completed on t
 
 ## What stays enforced
 
-Downgrade protection, trial rules, bundle compatibility, currency availability, tax collection and the agreement text all apply on the server, so a cart the rules reject answers with `problems` and a finalize with a blocking one is refused with the fresh list. Show the reasons next to what they concern; the customer fixes the cart, not the rule. What the form collects beside the card, such as an address, email or phone, comes from the catalog's checkout settings on [`useCatalog`](/components/build-your-own/hooks#usecatalog), and the Payment Element's `fields` option follows them.
+Downgrade protection, trial rules, bundle compatibility, currency availability, tax collection and the agreement text all apply on the server, so a cart the rules reject answers with `problems` and a finalize with a blocking one is refused with the fresh list. Show the reasons next to what they concern. What the form collects beside the card, such as an address, email or phone, comes from the catalog's checkout settings on [`useCatalog`](/components/build-your-own/hooks#usecatalog), and the Payment Element's `fields` option follows them.
 
 ## Saved payment methods
 
-`usePaymentMethods` lists what the company already has on file. For a returning customer, skip the Payment Element and write one of those `externalId` values as `paymentMethodId` on the cart before `finalize()`; `snapshot.paymentMethodRequired` says whether the cart needs one at all, since a trial that needs no card and a purchase a credit balance covers charge nothing today.
+`usePaymentMethods` lists what the company already has on file. For a returning customer, skip the Payment Element and write one of those `externalId` values as `paymentMethodId` on the cart before `finalize()`; `snapshot.paymentMethodRequired` says whether the cart needs one at all, since a trial that needs no card and a purchase a credit balance covers charge nothing up front.

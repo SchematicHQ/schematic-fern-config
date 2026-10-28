@@ -177,7 +177,7 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 | --- | --- | --- | --- |
 | `<Checkout/>` | `useCatalog`, `useCompany`, `useCheckout`, `useTaxIds` | `deriveCheckout` | /components/drop-in/checkout |
 | `<PlanManager/>` | `useCompany`, `useFeatureUsage`, `useCreditBalances` | `derivePlanManager` | /components/drop-in/plan-manager |
-| `<PricingTable/>` | `useCatalog` | | /components/drop-in/pricing-table |
+| `<PricingTable/>` | `useCatalog`, `useCompany` | `derivePricingTable` | /components/drop-in/pricing-table |
 | `<IncludedFeatures/>` | `useFeatureUsage` | `deriveIncludedFeatures` | /components/drop-in/included-features |
 | `<MeteredFeatures/>` | `useFeatureUsage`, `useFeatureUserUsage` | `deriveMeteredFeatures` | /components/drop-in/metered-features |
 | `<CreditUsage/>` | `useCreditBalances`, `useCreditUserUsage` | `deriveCreditUsage` | /components/drop-in/credit-usage |

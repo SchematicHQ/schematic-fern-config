@@ -65,9 +65,9 @@ function Cards() {
 }
 ```
 
-`open(config)` lays each section of `config` (`selection`, `steps`, `display`, `catalogId`) over the same section of `defaults`, and every open starts a new cart. The launcher also exposes `close()` and `isOpen`. Outside a provider, `open` does nothing and says so on the console in development. The provider takes every `<Checkout />` prop except `open`, `onOpenChange` and the config sections, so `onComplete` and `formatProblem` sit on it once.
+`open(config)` lays each section of `config` (`selection`, `steps`, `display`, `catalogId`) over the same section of `defaults`. The launcher also exposes `close()` and `isOpen`. Outside a provider, `open` does nothing and says so on the console in development. The provider takes every `<Checkout />` prop except `open`, `onOpenChange` and the config sections, so `onComplete` and `formatProblem` sit on it once.
 
-No drop-in opens the checkout on its own. [Plan Manager](/components/drop-in/plan-manager), [Metered Features](/components/drop-in/metered-features), [Credit Usage](/components/drop-in/credit-usage) and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) show their purchase action only when you pass a handler, and the [Pricing Table](/components/drop-in/pricing-table) calls `onSelectPlan` with a selection whose `checkout` field is ready to pass: `open({ selection: selection.checkout })`.
+Each drop-in opens the checkout through a handler you pass. [Plan Manager](/components/drop-in/plan-manager), [Metered Features](/components/drop-in/metered-features), [Credit Usage](/components/drop-in/credit-usage) and the [Unsubscribe Button](/components/drop-in/unsubscribe-button) show their purchase action only when you pass one, and the [Pricing Table](/components/drop-in/pricing-table) calls `onSelectPlan` with a selection whose `checkout` field is ready to pass: `open({ selection: selection.checkout })`.
 
 ## Props
 
@@ -91,9 +91,9 @@ No drop-in opens the checkout on its own. [Plan Manager](/components/drop-in/pla
 
 | Field | Effect |
 | --- | --- |
-| `planId` | The plan to start on. Left out, the company's current plan, unless the company could start a trial on it, when it chooses. `null` is no plan: a purchase of credit bundles alone. |
+| `planId` | The plan to start on. Left out, the company's current plan, unless the company could still start a trial on that plan, in which case the customer chooses. `null` is no plan: a purchase of credit bundles alone. |
 | `period` | `"month"`, `"quarter"` or `"year"`. Left out, the subscription's period, else monthly. |
-| `currency` | ISO 4217 in any case. A subscription fixes the currency, so a change keeps it whatever `currency` says; a company without one gets the choice. |
+| `currency` | An ISO 4217 code in either case. A subscription fixes the currency, so a change keeps it whatever `currency` says; a company without one gets the choice. |
 | `addOnIds` | The add-ons to start with. Left out, the ones the company holds. |
 | `quantities` | Pay-in-advance quantities by feature id, for the plan and its add-ons alike. Left out, what the company has now. |
 | `creditBundles` | Bundles by bundle id with a count; a bundle sold one at a time takes any count above zero as one. |
@@ -102,11 +102,11 @@ No drop-in opens the checkout on its own. [Plan Manager](/components/drop-in/pla
 | `trial` | Start a trial when the plan offers one and the company can take it. Default `true`. |
 | `customFields` | Custom checkout field values by field id; they win over the company's saved ones. |
 
-What the checkout collects beside the card, such as a tax ID, custom fields, an address, email or phone, and whether bundles are bought one at a time, come from the catalog's checkout settings in the dashboard, not from props.
+The catalog's checkout settings in the dashboard decide what the checkout collects beside the card, such as a tax ID, custom fields, an address, email or phone, and whether bundles are bought one at a time.
 
 ## The steps
 
-The API has no steps. The dialog derives them from the catalog and the cart, in this order, each only when there is something to choose in it:
+The dialog derives its steps from the catalog and the cart, in this order, each only when there is something to choose in it:
 
 1. **Plan**, whenever the catalog sells plans, with the period toggle, a note on what a longer period saves, and the currency choice. A plan the company may not move to says why: the features it is over the limit for, or a downgrade rule, with a link to ask when the catalog names one. A catalog with a custom plan ends the cards with it and a link to ask in place of a price.
 2. **Auto top-up**, when the plan has included credits whose top-up the company may set itself.
@@ -142,13 +142,13 @@ export function Seats() {
 
 ## Layout
 
-From 768px up, the steps take the left and the summary the right, each scrolling on its own; below that the summary sits under the steps and the action keeps to the bottom of the screen. Three `display` props change that for a sheet that cannot:
+From 768px up, the steps take the left and the summary the right, each scrolling on its own; below that the summary sits under the steps and the action keeps to the bottom of the screen. Three `display` props change that:
 
 | `display` | Effect |
 | --- | --- |
 | `layout: "stacked"` | The summary stays under the steps at every width and the whole dialog scrolls. The root carries `schematic-checkout--stacked`. |
 | `summary: "payment"` | The summary shows on the payment step alone; the steps before it carry their Next action in `.schematic-checkout__nav`, and the layout carries `data-summary="payment"`. |
-| `container: "inline"` | The checkout renders in the page where you put it, as a `section` with no backdrop and no close control, as tall as its content. The root carries `schematic-checkout--inline`, and `open` still says whether it renders at all. A checkout page of its own is this. |
+| `container: "inline"` | The checkout renders in the page where you put it, as a `section` with no backdrop and no close control, as tall as its content. The root carries `schematic-checkout--inline`, and `open` still says whether it renders at all. This is the shape for a checkout page of its own. |
 
 `display.currencies` lists the currencies to offer, in order, with the first as the default, and `display.showCurrencySelector`, `showPeriodToggle` and `showBillingDisclaimer` hide the controls their names say. Everything else is CSS: the class names below are API, and a stylesheet rendered after `<SchematicStyles />` wins at equal specificity.
 
@@ -181,9 +181,9 @@ The codes are the `CheckoutProblemCode` values the [Components API](/api-referen
 
 The checkout pays with the company's default method on file, and lists any other method on file under it with a Use action. A new card goes through Stripe's Payment Element on a setup intent, so the checkout step needs `@stripe/stripe-js` and `@stripe/react-stripe-js`, the same peers as [Payment Methods](/components/drop-in/payment-methods); they load only when the form opens. A card saved there pays for this checkout and joins the company's methods on file as the default.
 
-When the charge needs the customer, as with 3-D Secure, the finalize answers with a client secret and the dialog confirms the payment with Stripe before `onComplete`. A confirmation the customer fails or abandons leaves the checkout completed on the server, so the action becomes Confirm payment and retries the confirmation alone, naming the card again, since Stripe takes it off a failed intent; `onComplete` fires once it goes through.
+When the charge needs the customer, as with 3-D Secure, the finalize answers with a client secret and the dialog confirms the payment with Stripe before `onComplete`. A confirmation the customer fails or abandons leaves the checkout completed on the server. The action then reads Confirm payment and retries the confirmation alone, naming the card again because Stripe takes it off a failed intent, and `onComplete` fires once it goes through.
 
-The tax ID is not part of the cart: it saves on its own when the field is left and again before a finalize. The agreement's text, when the catalog asks for one, may carry Markdown links, which render as links opening in a new tab; new copy clears the box, because accepting one wording is not accepting another.
+The tax ID saves on its own, when the field is left and again before a finalize, rather than on the cart. The agreement's text, when the catalog asks for one, may carry Markdown links, which render as links that open in a new tab; new copy clears the box, because accepting one wording is not accepting another.
 
 ## Before it can load
 

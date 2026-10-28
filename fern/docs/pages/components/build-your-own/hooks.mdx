@@ -44,7 +44,7 @@ interface CheckoutHandle {
 }
 ```
 
-A persisted checkout on `POST /checkouts`, `PUT /checkouts/{checkout_id}` and `POST /checkouts/{checkout_id}/finalize`. The first `setSelections` opens it and every later one replaces the cart and re-prices on the server; rapid calls fold into the newest, a stale version is replayed once, and `finalize` charges under the session the last price handed out, then reloads every billing resource. A refused finalize puts the server's list on `problems` and rejects, and `checkoutProblemsOf(error)` returns that list. `{ checkoutId }` resumes a checkout, which js 1.16.1 and later read back before the first write. The hook opens no dialog: the drop-in is opened through [`useCheckoutLauncher`](#usecheckoutlauncher). [Checkout API](/components/build-your-own/checkout-api) describes the resource and the wire shapes.
+A persisted checkout on `POST /checkouts`, `PUT /checkouts/{checkout_id}` and `POST /checkouts/{checkout_id}/finalize`. The first `setSelections` opens it and every later one replaces the cart and re-prices on the server; rapid calls fold into the newest, a stale version is replayed once, and `finalize` charges under the session the last price handed out, then reloads every billing resource. A refused finalize puts the server's list on `problems` and rejects, and `checkoutProblemsOf(error)` returns that list. `{ checkoutId }` resumes a checkout, which js 1.16.1 and later read back before the first write. The drop-in dialog opens through [`useCheckoutLauncher`](#usecheckoutlauncher). [Checkout API](/components/build-your-own/checkout-api) describes the resource and the wire shapes.
 
 ## useCheckoutLauncher
 
@@ -52,7 +52,7 @@ A persisted checkout on `POST /checkouts`, `PUT /checkouts/{checkout_id}` and `P
 function useCheckoutLauncher(): { open(config?: CheckoutConfig): void; close(): void; isOpen: boolean };
 ```
 
-From `@schematichq/schematic-components/elements`, not the react package. `CheckoutLauncherProvider` renders one `<Checkout />` and `useCheckoutLauncher()` below it opens that dialog on `config` (`selection`, `steps`, `display`, `catalogId`), each section laid over the provider's `defaults`; every open starts a new cart. Outside a provider `open` does nothing and says so in development. [Checkout](/components/drop-in/checkout#opening-it-from-anywhere) shows the pattern.
+Exported from `@schematichq/schematic-components/elements` alone, beside the dialog it opens. `CheckoutLauncherProvider` renders one `<Checkout />` and `useCheckoutLauncher()` below it opens that dialog on `config` (`selection`, `steps`, `display`, `catalogId`), each section laid over the provider's `defaults`; every open starts a new cart. Outside a provider `open` does nothing and says so in development. [Checkout](/components/drop-in/checkout#opening-it-from-anywhere) shows the pattern.
 
 ## useTaxIds
 
@@ -64,7 +64,7 @@ function useTaxIds(): ResourceHandle<TaxId[]> & {
 };
 ```
 
-The tax IDs on the company's billing customer, read from `GET /checkout/tax-id`: each has an `id`, its provider `type` such as `eu_vat` or `us_ein`, `value`, `country` and `verificationStatus`. `data` is empty when there are none. `update` posts one to `POST /checkout/tax-id` and reloads the list; it rejects with the failure and records it on `mutationError`. The tax ID is not part of a checkout's cart, so save it before the finalize that needs it, as the drop-in does when the field is left.
+The tax IDs on the company's billing customer, read from `GET /checkout/tax-id`: each has an `id`, its provider `type` such as `eu_vat` or `us_ein`, `value`, `country` and `verificationStatus`. `data` is empty when there are none. `update` posts one to `POST /checkout/tax-id` and reloads the list; it rejects with the failure and records it on `mutationError`. A finalize reads the tax ID from the billing customer rather than from the cart, so save it first, as the drop-in does when the field is left.
 
 ## useCompany
 
