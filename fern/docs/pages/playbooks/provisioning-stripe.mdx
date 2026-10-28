@@ -1,6 +1,6 @@
 ---
 title: Automatically provision customers using Stripe
-description: Map Stripe products to Schematic plans with plan audiences so new subscriptions provision entitlements without manual assignment.
+description: Link Stripe products to Schematic plans so new subscriptions provision entitlements without manual assignment.
 slug: playbooks/provisioning
 ---
 
@@ -12,7 +12,7 @@ Provisioning is the step between a customer paying and a customer having access,
 
 Stripe owns the subscription. When one is created or changed there, Stripe notifies Schematic. Schematic looks at the Stripe product on that subscription, resolves which Schematic plan it corresponds to, and assigns the company to that plan. Entitlements follow from the plan, so the company has access the moment the assignment lands.
 
-The mapping from Stripe product to Schematic plan is what makes this automatic, and it is configured once rather than per deal. See [Plan audiences](/catalog/managing-company-plans#plan-audiences-advanced) for how the rules work, including targeting by trait or by specific company when a billing product is not the right signal.
+The mapping from Stripe product to Schematic plan is what makes this automatic, and it is configured once rather than per deal. See [Stripe integration](/catalog/managing-company-plans#stripe-integration-recommended) for how to link a product to a plan.
 
 Because the sync is driven by Stripe rather than polled, the same path handles every subsequent change. An upgrade, a downgrade, or an added subscription item updates entitlements as it happens, and a cancellation removes them.
 
@@ -23,7 +23,7 @@ Because the sync is driven by Stripe rather than polled, the same path handles e
 To get setup, follow the steps below.
 
 1. Set up the Stripe integration [here](/integrations/stripe).
-2. Map Products from Stripe to Plans in Schematic using Plan Audiences.
+2. Link each Schematic plan to its Stripe product.
 
 <iframe
   width="560"
