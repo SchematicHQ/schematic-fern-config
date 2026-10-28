@@ -62,7 +62,7 @@ fi
 # even while the PR still has everything to merge.
 VERSIONS_BEFORE=$(mktemp)
 MAIN_GENERATORS=$(mktemp)
-git show origin/main:fern/generators.yml > "$MAIN_GENERATORS"
+git show origin/main:fern/apis/api/generators.yml > "$MAIN_GENERATORS"
 for group in $(yq '.groups | keys | .[]' "$MAIN_GENERATORS"); do
   version=$(yq ".groups.\"$group\".generators[0].version" "$MAIN_GENERATORS")
   echo "$group=$version" >> "$VERSIONS_BEFORE"
@@ -70,13 +70,13 @@ done
 
 # Upgrade all generators
 echo "Upgrading generators..."
-yq '.groups | keys | .[]' fern/generators.yml | xargs -I {} fern generator upgrade --group {}
+yq '.groups | keys | .[]' fern/apis/api/generators.yml | xargs -I {} fern generator upgrade --api api --group {}
 
 # Detect which groups had version changes
 CHANGED_GROUPS="["
 first=true
-for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
-  new_version=$(yq ".groups.\"$group\".generators[0].version" fern/generators.yml)
+for group in $(yq '.groups | keys | .[]' fern/apis/api/generators.yml); do
+  new_version=$(yq ".groups.\"$group\".generators[0].version" fern/apis/api/generators.yml)
   old_version=$(grep "^$group=" "$VERSIONS_BEFORE" | cut -d= -f2)
   if [ -z "$old_version" ]; then
     old_version="(absent on main)"
@@ -100,7 +100,7 @@ set_output "changed_groups" "$CHANGED_GROUPS"
 # Does the branch propose anything main does not already have? This is the
 # question the PR answers, so it is the one that decides whether to keep the PR
 # open -- an upgrade applied on an earlier run still counts.
-if ! git diff --quiet origin/main -- fern/generators.yml; then
+if ! git diff --quiet origin/main -- fern/apis/api/generators.yml; then
   echo "Changes detected against main"
   set_output "has_changes" "true"
 

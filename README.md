@@ -3,7 +3,8 @@
 This repository contains your Fern Configuration:
 
 - [OpenAPI spec](./schematic.yml)
-- [Generators config](./fern/generators.yml)
+- [Generators config](./fern/apis/api/generators.yml)
+- [Components API](./fern/apis/components/generators.yml), the token-scoped surface behind the drop-in components, published to the API Reference only; its curation lives in [overrides.yml](./fern/apis/components/overrides.yml)
 - [Public documentation](./fern/docs/)
 
 ## Validating your API Definition

@@ -33,7 +33,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = REPO_ROOT / "fern/docs/pages/developer_resources/sdks"
-GENERATORS = REPO_ROOT / "fern/generators.yml"
+GENERATORS = REPO_ROOT / "fern/apis/api/generators.yml"
 
 # SDK repo -> docs page. Explicit because the mapping is arbitrary
 # (schematic-node -> nodejs.mdx). Checked against generators.yml below.

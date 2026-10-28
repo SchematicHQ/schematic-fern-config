@@ -481,6 +481,7 @@ navigation:
       - page: Rate limiting
         path: ./docs/pages/api_documentation/rate_limiting.mdx
       - api: API Reference
+        api-name: api
         audiences:
           - public
         skip-slug: true
@@ -628,6 +629,46 @@ navigation:
           - events:
               hidden: true
           - plans:
+              hidden: true
+      - api: Components API
+        api-name: components
+        slug: components
+        audiences:
+          - public
+        summary: ./docs/pages/api_documentation/components-api.mdx
+        layout:
+          - section: Catalog
+            contents:
+              - GET /catalog/view
+              - GET /catalogs/{catalog_id}/view
+          - section: Checkouts
+            contents:
+              - POST /checkouts
+              - GET /checkouts/{checkout_id}
+              - PUT /checkouts/{checkout_id}
+              - POST /checkouts/{checkout_id}/finalize
+              - GET /checkouts
+          - section: Tax ID
+            contents:
+              - GET /checkout/tax-id
+              - POST /checkout/tax-id
+          - section: Company
+            contents:
+              - GET /company
+              - GET /company/usage
+              - GET /company/usage/{feature_id}/users
+              - GET /company/credits
+              - GET /company/credits/{credit_id}/users
+              - GET /company/invoices
+              - GET /company/upcoming-invoice
+              - GET /company/payment-methods
+          - section: Payment
+            contents:
+              - POST /components/setup-intent
+              - POST /checkout/paymentmethod/update
+              - DELETE /checkout/paymentmethod/{checkout_id}
+              - DELETE /checkout/unsubscribe
+          - checkoutexternal:
               hidden: true
   - tab: roadmap
   - tab: blog

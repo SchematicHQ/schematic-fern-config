@@ -130,7 +130,7 @@ jobs:
       - name: Generate preview
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-        run: fern generate --group ${{ matrix.group }} --preview
+        run: fern generate --api api --group ${{ matrix.group }} --preview
 
       # Clone downstream repo and overlay
       - name: Clone downstream repo

@@ -44,9 +44,9 @@ jobs:
             fi
           }
 
-          for group in $(yq '.groups | keys | .[]' fern/generators.yml); do
+          for group in $(yq '.groups | keys | .[]' fern/apis/api/generators.yml); do
             # Get the downstream repo from generators.yml
-            repo=$(yq ".groups.\"$group\".generators[0].github.repository" fern/generators.yml)
+            repo=$(yq ".groups.\"$group\".generators[0].github.repository" fern/apis/api/generators.yml)
             if [ -z "$repo" ] || [ "$repo" = "null" ]; then
               echo "Skipping $group: no github.repository configured"
               continue
@@ -77,8 +77,8 @@ jobs:
             if [ -n "$last_commit" ]; then
               spec_changed=$(git log "$last_commit..HEAD" --oneline -- \
                 schematic.yaml overrides.yaml openapi-overrides.yml)
-              current_block=$(yq ".groups.\"$group\"" fern/generators.yml)
-              prior_block=$(git show "$last_commit:fern/generators.yml" 2>/dev/null \
+              current_block=$(yq ".groups.\"$group\"" fern/apis/api/generators.yml)
+              prior_block=$(git show "$last_commit:fern/apis/api/generators.yml" 2>/dev/null \
                 | yq ".groups.\"$group\"" 2>/dev/null || echo "")
               if [ -z "$spec_changed" ] && [ "$current_block" = "$prior_block" ]; then
                 echo "Skipping $group: no input changes since $tag ($published)"

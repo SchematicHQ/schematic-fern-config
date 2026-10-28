@@ -2,9 +2,21 @@
 
 Fern docs config and MDX source for docs.schematichq.com.
 
-Read `.claude/docs-conventions.md` before adding a page, adding a hub, or changing navigation.
-It covers the `npx fern-api check` gotcha, why a page's URL never follows its directory, and
-which SDK pages are generated and will be overwritten.
+Three things trip people up. The check command is `npx fern-api check`, not `npx fern check`:
+the root `package.json` depends on an unrelated npm package named `fern`, so the short form runs
+the wrong tool. A page's URL follows its frontmatter `slug:`, never its directory. The SDK pages
+under `fern/docs/pages/developer_resources/sdks/` are written by `scripts/sync_sdk_readmes.py`
+from the SDK READMEs and overwritten on its weekly run, so edit the READMEs instead.
+
+## Two APIs
+
+`fern/apis/api/` is the secret-key API: `schematic.yaml` at the repo root, refreshed by
+`fern api update`, feeding the API Reference and every SDK group, which is why SDK commands take
+`--api api`. `fern/apis/components/` is the temporary-access-token surface the drop-in components
+and hooks call, published as the Components API reference with no SDK groups. The API repo's
+generator emits no descriptions and no `x-fern-*` extensions yet, so
+`fern/apis/components/overrides.yml` carries the audiences, the summaries and descriptions, and
+the corrected request shapes; it survives every spec update.
 
 ## Writing rules
 
@@ -73,6 +85,6 @@ guessing.`
 ## Verifying
 
 ```sh
-npx fern-api check          # not `npx fern check`, see docs-conventions.md
+npx fern-api check          # not `npx fern check`: the root package.json has an unrelated "fern" package
 python3 scripts/prose_lint.py
 ```
