@@ -14,7 +14,7 @@ Stripe owns the subscription. When one is created or changed there, Stripe notif
 
 The mapping from Stripe product to Schematic plan is what makes this automatic, and it is configured once rather than per deal. See [Stripe integration](/catalog/managing-company-plans#stripe-integration-recommended) for how to link a product to a plan.
 
-Because the sync is driven by Stripe rather than polled, the same path handles every subsequent change. An upgrade, a downgrade, or an added subscription item updates entitlements as it happens, and a cancellation removes them.
+The same path handles every subsequent change. An upgrade, a downgrade, or an added subscription item updates entitlements as it happens, and a cancellation removes them.
 
 <Info>This page covers the self-serve and subscription-driven path. Sales-led deals billed by invoice provision through [custom plans](/catalog/custom-plans) instead, where the activation strategy you choose at finalize time decides whether access starts on payment or immediately.</Info>
 

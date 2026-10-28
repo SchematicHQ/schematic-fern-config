@@ -57,7 +57,7 @@ Schematic does not store, process, or transmit payment card data. Schematic leve
 
 ### Encryption
 
-All customer-facing endpoints require TLS 1.2 or higher, terminated at the load balancer. Data at rest is encrypted with AES-256. API keys and service credentials are stored in encrypted secret stores and are never written to logs. Outbound webhooks are signed, and every Schematic SDK includes helpers for verifying webhook signatures before your application processes them.
+All customer-facing endpoints require TLS 1.2 or higher. Data at rest is encrypted with AES-256. API keys and service credentials are stored in encrypted secret stores and are never written to logs. Outbound webhooks are signed, and every Schematic SDK includes helpers for verifying webhook signatures before your application processes them.
 
 ### API access
 

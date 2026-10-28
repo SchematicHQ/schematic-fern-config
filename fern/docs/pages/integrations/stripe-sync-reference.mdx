@@ -52,7 +52,7 @@ Schematic listens to Stripe webhooks and applies each change as it arrives. The 
 | Stripe object | Events | What Schematic does |
 | --- | --- | --- |
 | Customer | `customer.created`, `customer.updated` | Creates or updates the company whose `stripe_customer_id` key matches, and sets the company name from the Stripe name when it isn't blank. See [company mapping](/integrations/stripe-integration-guide#schematic-company-mapping). |
-| Customer | `customer.deleted` | Deletes Schematic's copy of the Stripe customer. The company stays in Schematic. |
+| Customer | `customer.deleted` | Removes the Stripe customer from Schematic. The company stays in Schematic. |
 | Subscription | `customer.subscription.created`, `.updated`, `.deleted`, `.paused`, `.resumed`, `.trial_will_end`, `.pending_update_applied`, `.pending_update_expired` | Updates the company's subscription, plan, and entitlements. See [subscription statuses](/integrations/stripe#subscription-statuses) for how each status affects access. |
 | Subscription schedule | `subscription_schedule.created`, `.updated`, `.released`, `.canceled`, `.completed`, `.aborted`, `.expiring` | Updates the company's scheduled plan changes |
 | Product and price | `product.created`, `.updated`, `.deleted`, `price.created`, `.updated`, `.deleted` | Imports the product or price so you can map it to a plan, add-on, or feature |

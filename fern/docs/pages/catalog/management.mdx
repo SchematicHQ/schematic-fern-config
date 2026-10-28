@@ -85,7 +85,7 @@ This behavior is controlled by the **Billing Rule** under **On Downgrade** in [P
 
 ![Scheduled downgrade billing rule setting](../../assets/images/catalog/catalog-scheduled-downgrade-setting.png)
 
-Under the hood, scheduled downgrades use Stripe's [subscription schedule](https://docs.stripe.com/billing/subscriptions/subscription-schedules) phases to ensure the plan transition happens precisely at the billing period boundary.
+In Stripe, a scheduled downgrade appears as a [subscription schedule](https://docs.stripe.com/billing/subscriptions/subscription-schedules) on the company's subscription, which changes the plan at the billing period boundary.
 
 #### Behavior while a downgrade is scheduled
 

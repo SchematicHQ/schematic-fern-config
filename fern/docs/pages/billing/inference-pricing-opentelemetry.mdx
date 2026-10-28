@@ -130,7 +130,7 @@ A workflow that makes several calls for one feature can wrap the whole workflow 
 
 ## Which spans become inference events
 
-Schematic picks a reader for each batch of spans by the batch's instrumentation scope. Every scope without a reader of its own is read by the OpenTelemetry GenAI semantic conventions, which most LLM instrumentation follows.
+Schematic reads spans by the OpenTelemetry GenAI semantic conventions, which most LLM instrumentation follows.
 
 A span counts as a model call when its `gen_ai.operation.name` is `chat`, `text_completion`, `embeddings` or `generate_content`. Agent and tool spans such as `invoke_agent` and `execute_tool` are skipped, even when they carry rolled-up token totals, so an agent loop never counts the same tokens twice.
 

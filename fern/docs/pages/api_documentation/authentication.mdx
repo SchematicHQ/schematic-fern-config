@@ -20,7 +20,7 @@ All API requests must be made over HTTPS. API requests without authentication wi
 
 ### Readonly API Keys
 
-API keys can optionally be created as **readonly**. Readonly keys can access any non-mutative part of the API, including flag checks and GET requests, but cannot perform write operations. Readonly keys cannot submit events; while the event collector will accept events from readonly keys, those events will appear in your instance in an error state indicating that a readonly key was used.
+API keys can optionally be created as **readonly**. Readonly keys can access any non-mutative part of the API, including flag checks and GET requests, but cannot perform write operations. Readonly keys cannot submit events; events sent with a readonly key are accepted but appear in your instance in an error state indicating that a readonly key was used.
 
 Readonly is set at creation time via the "Read-only" toggle in the Create API Key dialog and cannot be changed after the key is created.
 

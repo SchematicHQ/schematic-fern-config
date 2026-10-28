@@ -50,7 +50,7 @@ You set three things:
 
 The credit type needs a per-unit price before either top-up policy can be chosen, because Schematic has nothing to charge without one.
 
-A top-up fires while Schematic processes a draw that leaves the balance at or below the threshold. A failed charge means the customer is about to be cut off, so subscribe to `auto.topup.hard.failure` before you rely on this policy. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) covers setup, retries, the webhook payloads, and per-company settings.
+A top-up fires when a draw leaves the balance at or below the threshold. A failed charge means the customer is about to be cut off, so subscribe to `auto.topup.hard.failure` before you rely on this policy. [Auto top-up](/billing/credit-bundles-and-top-ups#auto-top-up) covers setup, retries, the webhook payloads, and per-company settings.
 
 ## User-controlled top-ups
 
@@ -71,7 +71,7 @@ Bill in arrears lets a company keep using credit-metered features after its bala
 
 ### How the charges are invoiced
 
-Schematic tracks the credits consumed past zero in each invoice window. Shortly after a window closes, it raises a standalone Stripe invoice for that window, separate from the subscription invoice, with one line such as "AI Tokens used past your balance: 1,200 AI Tokens at \$0.02 each".
+After each invoice window closes, Schematic raises a standalone Stripe invoice for the credits consumed past zero in that window, separate from the subscription invoice, with one line such as "AI Tokens used past your balance: 1,200 AI Tokens at \$0.02 each".
 
 Stripe charges the invoice automatically when the customer has a payment method on file. Otherwise Stripe sends it to the customer, due in 30 days. Tax follows your catalog's tax collection setting.
 
