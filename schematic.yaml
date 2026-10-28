@@ -4032,7 +4032,7 @@ components:
           type: string
           description: >-
             When the hold lapses if no track or inference event settles it;
-            defaults to one minute from now and may be at most one hour out. The
+            defaults to one minute from now and may be at most 24 hours out. The
             unspent hold is refunded on expiry
           format: date-time
           nullable: true
@@ -17604,7 +17604,7 @@ components:
           type: string
           description: >-
             When the hold lapses if no track event settles it; defaults to one
-            minute from now and may be at most one hour out. The unspent hold is
+            minute from now and may be at most 24 hours out. The unspent hold is
             refunded on expiry
           format: date-time
           nullable: true
