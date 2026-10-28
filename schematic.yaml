@@ -2827,6 +2827,10 @@ components:
     BillingSubscriptionResponseData:
       type: object
       properties:
+        access_revoked_at:
+          type: string
+          format: date-time
+          nullable: true
         application_id:
           type: string
           nullable: true
@@ -2904,6 +2908,10 @@ components:
     BillingSubscriptionView:
       type: object
       properties:
+        access_revoked_at:
+          type: string
+          format: date-time
+          nullable: true
         application_id:
           type: string
           nullable: true
@@ -4645,6 +4653,10 @@ components:
     CheckoutSubscription:
       type: object
       properties:
+        access_revoked_at:
+          type: string
+          format: date-time
+          nullable: true
         application_id:
           type: string
           nullable: true
@@ -14652,10 +14664,13 @@ components:
     PlanChangeAction:
       type: string
       enum:
+        - access_reinstated
+        - access_revoked
         - amendment
         - checkout
         - company_upsert
         - fallback_plan
+        - invoice_past_due
         - manage_plan
         - migration
         - plan_billing_product_changed
@@ -17285,8 +17300,31 @@ components:
           items:
             type: string
           maxItems: 1000
+        gating_days:
+          type: integer
+          description: >-
+            With payment_gating revoke_after, how many days past due an invoice
+            may go before the company loses the plan. 0 revokes at once. Only
+            applies when Schematic bills the company. Applies to the company's
+            contract and never creates a plan version. Omitted keeps the
+            contract's setting.
+          format: int64
+          nullable: true
+          maximum: 365
+          minimum: 0
         migration_strategy:
           $ref: '#/components/schemas/PlanVersionMigrationStrategy'
+        payment_gating:
+          allOf:
+            - $ref: '#/components/schemas/PaymentGating'
+          description: >-
+            What happens to the company's access when an invoice passes its due
+            date: keep_serving keeps the plan and marks the subscription past
+            due; revoke_after takes the plan away after gating_days. Only
+            applies when Schematic bills the company, to every invoice on its
+            contract, and never creates a plan version. Omitted keeps the
+            contract's setting, which is keep_serving unless changed.
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -19913,6 +19951,12 @@ components:
           nullable: true
           maximum: 365
           minimum: 1
+        gating_days:
+          type: integer
+          format: int64
+          nullable: true
+          maximum: 365
+          minimum: 0
         is_default:
           type: boolean
           nullable: true
@@ -19920,6 +19964,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        payment_gating:
+          allOf:
+            - $ref: '#/components/schemas/PaymentGating'
+          nullable: true
         payment_method_id:
           type: string
           nullable: true
