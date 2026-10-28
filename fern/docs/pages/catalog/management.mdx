@@ -118,17 +118,6 @@ Simply mapping a Stripe product to a Schematic plan will ensure that those that 
 
 ![Stripe mapping](../../assets/images/catalog/management-stripe-mapping.png)
 
-### Plan audiences (advanced)
-
-Plan audiences allow you to assign plans to companies based on specific rules. Those rules can be based on explicit targeting (e.g. a specific company) or implicit targeting (e.g. based on traits, usage, or billing products).
-
-We offer this option if you have a billing set up that does not include Stripe, or one that includes multiple systems and more complex state management. Examples where plan audiences may be appropriate include:
-- A legacy plan that is a catch-all of products.
-- Offering different versions of a plan based on sales channel (e.g. sold via a reseller), geography, or other traits.
-- Multiple billing or GTM systems supply subscription information
-
-![Plan audiences](../../assets/images/catalog/management-plan-audiences.png)
-
 ## Changing Plans
 
 How plans are managed in Schematic depends on whether you've integrated Stripe or not.
@@ -162,33 +151,11 @@ If you prefer to make changes directly in Stripe, Schematic will automatically s
 
 ### Not using Stripe
 
-If you're not using Stripe or are otherwise using plan audiences, there are a few options.
-
-**On the company profile page in Schematic**
-
-You can manage a company's plan directly on the company profile page in Schematic. 
+If you're not using Stripe, manage a company's plan directly on the company profile page in Schematic.
 
 <Info>You currently are not able to move a company from a plan that is not associated with a Stripe product to a Stripe-associated plan.</Info>
 
 ![Manage plan (non-stripe)](../../assets/images/catalog/management-manage-plan-nonstripe.png)
-
-**Explicit company assignment using plan audience rules**
-
-Manually update plan audience rules to assign a new plan to a company. This is ideal for:
-- Testing
-- Managing exceptions or unique customer requirements
-
-![Plan audience company](../../assets/images/catalog/management-plan-audiences-company.png)
-
-**Updating company traits to match audience rules**
-
-You can uses traits to explicitly assign companies to plans. If you update those traits, you can add or remove a company from a plan. 
-
-![Plan audience trait](../../assets/images/catalog/management-plan-audiences-trait.png)
-
-For example:
-- Adding custom attributes that correspond to explicit plan assignments (e.g. a Plan trait that has values for legacy, basic, standard, and pro)
-- Updating a company's usage or attributes so they move into a new plan based on that attribute (e.g. a Geography trait)
 
 ## Invoicing a new subscription
 

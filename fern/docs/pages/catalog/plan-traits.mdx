@@ -1,0 +1,40 @@
+---
+title: Assigning Plans with Traits
+slug: catalog/plan-traits
+description: Assign companies to a plan or add-on automatically when a company trait matches a value set on the plan.
+---
+
+<Info>Plan traits are available on a limited set of accounts. To assign plans from Stripe subscriptions instead, link each plan to its Stripe product as described in [Managing Company Plans](/catalog/managing-company-plans).</Info>
+
+Plan traits assign plans from data you already send Schematic. You set a trait and value on a plan, and when a company's trait changes to that value, Schematic moves the company onto the plan. This fits plans sold outside Stripe, such as through an app store or a reseller, where the system that knows what the customer bought can report it as a trait.
+
+A common setup is one `plan` trait with a value per plan, such as `basic`, `standard`, and `pro`. Your application updates the company's `plan` trait when the customer buys or changes tiers, and Schematic keeps the company's plan in step. You can also assign on an attribute that isn't a purchase, such as a `region` trait that puts companies on a regional version of a plan.
+
+## Editing a plan's traits
+
+Traits belong to the plan rather than to a plan version, so changing them does not create a new version.
+
+1. Open **Plans** or **Add-ons** and select the plan. If you are looking at a plan version, click the plan's name in the breadcrumb to return to the plan.
+2. In the **Traits** section, click **Edit traits**.
+3. Choose a **Trait** and enter the **Value** a company must have. Click **Add another trait** to add more pairs.
+4. To re-evaluate companies that already exist, check **Apply trait changes to existing companies on this plan**. The checkbox appears once you change a trait.
+5. Click **Save Changes**.
+
+Custom plans have no Traits section, because each one is pinned to a single company.
+
+## How matching works
+
+Schematic checks plan traits whenever a company's traits change, whether through `identify`, `upsertCompany`, `upsertCompanyTrait`, or an integration such as Segment.
+
+- A plan with several trait pairs matches when any one of them matches.
+- String values must match exactly, including case. Boolean traits match on `true` or `false`.
+- A company with an empty value for the trait never matches.
+- When a trait matches a base plan, Schematic moves the company to that plan's latest published version, replacing its current base plan. A company already on the plan keeps its current version.
+- When a trait matches an add-on, Schematic adds it to the company. When the trait changes to a value that matches none of the add-on's pairs, Schematic removes it.
+- When a trait stops matching a base plan, the company stays on that plan until something else assigns it a new one.
+
+A new company whose traits match a plan starts on that plan instead of the [initial plan](/catalog/lifecycle#initial-plan).
+
+### Applying changes to existing companies
+
+When you save with **Apply trait changes to existing companies on this plan** checked, Schematic evaluates every company in the environment against the plan's new traits. Companies that match move onto the plan, and companies on the plan that no longer match are removed from it. Leave the box unchecked and the new values only take effect the next time a company's traits change.
