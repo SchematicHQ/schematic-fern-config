@@ -11790,6 +11790,28 @@ components:
         company_id:
           type: string
           nullable: true
+        cost:
+          type: string
+          description: >-
+            What the inference call cost, as a decimal amount in currency
+            (dollars, not cents, for usd). Absent when the call has no price,
+            for other event types, and when listing events.
+          nullable: true
+        cost_source:
+          allOf:
+            - $ref: '#/components/schemas/InferenceCostSource'
+          description: >-
+            Where the inference call's cost came from: provided when the request
+            reported it, list_price when Schematic priced it from the model's
+            list price, unpriced when neither applied. Absent for other event
+            types and when listing events.
+          nullable: true
+        currency:
+          type: string
+          description: >-
+            Lowercase ISO currency code for cost. Absent for other event types
+            and when listing events.
+          nullable: true
         enriched_at:
           type: string
           format: date-time
@@ -13415,6 +13437,12 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    InferenceCostSource:
+      type: string
+      enum:
+        - list_price
+        - provided
+        - unpriced
     InsightsSummaryResponseData:
       type: object
       properties:
