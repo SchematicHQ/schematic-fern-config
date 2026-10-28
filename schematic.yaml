@@ -1375,8 +1375,9 @@ components:
         description:
           type: string
           description: >-
-            What the line bills for: the product, plan, add-on or credit. Null
-            when the line has no subscription line behind it.
+            What the line bills for: the product, plan, add-on or credit, and
+            for part of a period, which part. Null when the line has no
+            subscription line behind it.
           nullable: true
         external_id:
           type: string
@@ -1395,6 +1396,12 @@ components:
         period_start:
           type: string
           format: date-time
+          nullable: true
+        proration_fraction:
+          type: string
+          description: >-
+            The share of a full billing period the line bills, as a decimal from
+            0 to 1. Null when the line bills a whole period.
           nullable: true
         quantity:
           type: integer
@@ -2674,6 +2681,12 @@ components:
           type: integer
           description: In minor units of the statement's currency.
           format: int64
+        description:
+          type: string
+          description: >-
+            What the line bills for, and for part of a period, which part. Null
+            when the line has no subscription line behind it.
+          nullable: true
         kind:
           $ref: '#/components/schemas/InvoiceLineKind'
         period_end:
@@ -2683,6 +2696,12 @@ components:
         period_start:
           type: string
           format: date-time
+          nullable: true
+        proration_fraction:
+          type: string
+          description: >-
+            The share of a full billing period the line bills, as a decimal from
+            0 to 1. Null when the line bills a whole period.
           nullable: true
         quantity:
           type: integer
