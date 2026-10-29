@@ -778,6 +778,12 @@ analytics:
 
 css: ./styles.css
 
+# `error` would fail every PR until the links to unpublished endpoints resolve;
+# `fern check --warnings` prints them.
+check:
+  rules:
+    broken-links: warn
+
 redirects:
   - source: "/catalog/configuration"
     destination: "/catalog/lifecycle"

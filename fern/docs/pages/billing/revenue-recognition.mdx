@@ -131,7 +131,7 @@ curl -G https://api.schematichq.com/billing/credits/ledger \
 
 Two constraints apply. `company_id` is required, so no single call returns an entire environment's ledger for a period; a close process iterates companies. Pages are capped at 250 entries, so use `offset` to page through them, and set `end_time` to the period boundary so that pagination is not affected by entries written while the job runs.
 
-Grants are available separately through [List credit grants](/api-reference/billing-credits/list-credit-grants). For a period-end schedule this is usually the better starting point, because one row already summarizes granted, used, and remaining amounts.
+Grants are available separately through [List credit grants](/api-reference/billing-credits/list-billing-plan-credit-grants). For a period-end schedule this is usually the better starting point, because one row already summarizes granted, used, and remaining amounts.
 
 Bundle purchases, plan charges, and the invoices behind them come from [Stripe](/integrations/stripe).
 
