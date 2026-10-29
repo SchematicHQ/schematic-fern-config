@@ -14,6 +14,7 @@ A derivation is a pure function from a hook's data to a display model: `(serverD
 | `deriveIncludedFeatures(features, { locale, visibleFeatures?, showCredits?, showWarningThresholdAsLimit? })` | `useFeatureUsage` | One row per feature: `featureId`, `name`, `description`, `icon`, `entitlement`, `usage`, `usageSummary`, `expiresAt`, `perLicenseCredits`, `hardLimit`, `tiers`, `source` |
 | `deriveMeteredFeatures(features, { locale, visibleFeatures?, showCredits?, showWarningThresholdAsLimit? })` | `useFeatureUsage` | One row per event or trait feature: `featureId`, `name`, `description`, `icon`, `headline`, `limit`, `resetsAt`, `meter`, `priceDetails`, `hardLimit`, `canAddMore`, `hasUsageByUser`, `unit`, `source` |
 | `deriveCreditUsage(balances, { locale, visibleCredits? })` | `useCreditBalances` | One row per credit: `creditId`, `name`, `description`, `icon`, `remaining`, `purchasable`, `ledger`, `composition`, `unit`, `source` |
+| `deriveCheckout({ catalog, cart, checkout?, company?, featureUsage?, isPricing?, display?, locale })` | `useCatalog`, `useCompany`, `useCheckout`, `useFeatureUsage` | `{ currency, period, plans, customPlan, downgradeContact, addOns, usage, addOnUsage, bundles, bundleMode, autoTopups, lines, totals, ... }`, the rows and summary the Checkout dialog renders |
 | `derivePricingTable(view, { locale, period?, currency?, company?, now?, showCredits?, showZeroPriceAsFree?, showWarningThresholdAsLimit? })` | `useCatalog`, and `useCompany` when signed in | `{ source, periods, period, currencies, currency, plans, addOns, customPlan, savings, trialDaysLeft }`; each card has `id`, `name`, `description`, `price`, `priceId`, `period`, `credits`, `entitlements`, `action`, `active`, `trialDays`, `source` |
 | `deriveUpcomingInvoice(invoice, { locale, format? })` | `useUpcomingInvoice` | `amountDueMinor`, `amountDueText`, `subtotalMinor`, `subtotalText`, `currency`, `dueAt`, `balanceApplied`, `balanceRemaining`, `discounts[]` |
 | `derivePaymentMethods(methods, { locale, now? })` | `usePaymentMethods` | `{ rows, current, others, monthsToExpiration, expiryWarning }` |
@@ -44,6 +45,10 @@ Selection state such as the period toggle stays in your component; `derivePricin
 
 `action` is `null` in the public catalog. In the company's view it is one of `current`; `choose` with `upgrade` for a plan above the current one; `remove` or `change` for a held add-on; `overLimit` with the `violations`; `downgradeBlocked` with the account's `text` and `url`; or `unavailable` when the company cannot check out. `active` marks the company's plan in the period shown, and `trialDaysLeft` counts down its trial. `customPlan` is the catalog's custom-plan call to action, with `priceText`, `ctaText`, and `ctaUrl`, or `null`.
 
+### Checkout
+
+`deriveCheckout` turns the catalog, the cart and the checkout the server last priced into what the [Checkout dialog](/components/drop-in/checkout) shows: the plan and add-on rows with their standing, the quantity, bundle and auto top-up rows, and the summary's lines and totals from `checkout.priceSnapshot`. The cart is its own small model: `initialCart({ catalog, company, config })` builds it from what the company holds and a `CheckoutConfig`, `cartReducer` applies each choice, and `checkoutSelections(cart, catalog, company)` turns it into the `CheckoutSelections` that `useCheckout().setSelections` writes, picking the price ids for the period and currency. `planSteps` derives the steps the cart has, and `stepOfProblem(problem, { cart, catalog })` names the step that can fix a problem, which is how a refused finalize lands the customer in the right place. `lines` are the cart's rows at the catalog's prices, the plan, each quantity bought ahead at its unit price, the add-ons and the bundles, and `totals` the snapshot's figures formatted, so a summary can show what makes up the total the server priced. The `autoTopups` rows name the credit and price one top-up on `costText`, which the catalog's own `autoTopups` do not. [Checkout API](/components/build-your-own/checkout-api) describes the resource these write to.
+
 ### Upcoming bill
 
 `deriveUpcomingInvoice` formats the parts without doing the arithmetic, because the server sends how much balance the invoice consumes and how much survives. `balanceApplied` comes back negative, as a deduction, and `null` when none of the balance applies. Each entry in `discounts` has `couponName`, `code`, a `kind` of `percent` or `amount`, `valueText` such as "20%" or "$5.00", and `months` for a discount that repeats, with the raw `percentOff`, `amountOffMinor`, and `duration` beside them.
@@ -62,6 +67,7 @@ Each row has `id`, `externalId`, `kind`, `label`, `icon`, `brand`, `type`, `last
 
 `label` is either `{ key }`, copy to translate such as `paymentMethodsCardEndingIn` for "Card ending in", or `{ text }`, a value the provider supplied such as a bank's name or the email behind a Link account. That keeps the translatable words in your strings:
 
+{/* samples: nocheck data and t come from the reader's hook and i18n */}
 ```ts
 const { current, others } = derivePaymentMethods(data, { locale: "en-US" });
 const name = (row: PaymentMethodRow) =>
@@ -76,6 +82,7 @@ const name = (row: PaymentMethodRow) =>
 
 `deriveInvoiceList` and `deriveUpcomingInvoice` take `format`, which replaces one formatter at a time and receives the raw value. The `amount` formatter receives the signed amount, unlike `deriveInvoiceList`'s default text, which is absolute:
 
+{/* samples: nocheck page and myMoney come from the reader's hook and formatter */}
 ```ts
 deriveInvoiceList(page, {
   locale: "en-US",

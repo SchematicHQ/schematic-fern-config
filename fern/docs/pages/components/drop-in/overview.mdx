@@ -68,7 +68,7 @@ function Portal() {
 }
 ```
 
-That is the whole customer portal. Drop any card you do not need; each stands alone. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add More, Buy More, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`.
+Drop any card you do not need; each stands alone. `CheckoutLauncherProvider` renders one `<Checkout />` for the page and `useCheckoutLauncher().open()` opens it. Plan Manager, Metered Features, Credit Usage, and Unsubscribe Button show Change plan, Add More, Buy More, and Manage plan only when you pass a handler or URL, so `Portal` hands each of them `open`.
 
 Copy and formatting stay yours. `locale` on the provider formats every component through `Intl`, and each string resolves through `strings` on the component, then `strings` on the provider, then your `translate`, then the component's English. Nothing has to be configured, and renaming one string is one prop. See [Localization](/components/drop-in/localization).
 
@@ -80,6 +80,7 @@ Components that take a payment, such as Payment Methods and Checkout, render Str
 
 `session` says whose billing is being read and how. It has three states, and they mean different things:
 
+{/* samples: nocheck three values of one prop, not a component */}
 ```tsx
 session={{ company: company.id, token: fetchAccessToken }}  // signed in
 session={null}                                              // signed out

@@ -10,6 +10,7 @@ Copy and formatting are yours. `locale` formats every component through `Intl`, 
 
 `locale` is a BCP 47 tag. Set it on the provider for every component, or on one component to override. Dates, amounts, numbers, and plurals go through `Intl` against it; a viewer's language is the fallback.
 
+{/* samples: nocheck the other props are elided */}
 ```tsx
 <SchematicProvider locale="de-DE" …>
 ```
@@ -22,6 +23,7 @@ Copy and formatting are yours. `locale` formats every component through `Intl`, 
 
 Each component's page lists the keys it renders. The same keys on the provider apply everywhere:
 
+{/* samples: nocheck the other props are elided */}
 ```tsx
 <SchematicProvider strings={{ retry: "Retry" }} …>
 ```
@@ -32,6 +34,7 @@ A key that takes a count can vary by it with i18next's plural suffixes, so `upco
 
 Pass `translate` on the provider and every string routes through it with its key and its variables:
 
+{/* samples: nocheck the provider props are elided */}
 ```tsx
 import { useTranslation } from "react-i18next";
 

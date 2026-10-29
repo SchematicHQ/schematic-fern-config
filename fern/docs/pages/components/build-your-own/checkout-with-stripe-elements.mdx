@@ -1,82 +1,123 @@
 ---
 title: Checkout with Stripe Elements
-description: Build the cart in your own UI, take payment with Stripe's Payment Element, and let Schematic finalize the subscription.
+description: Build the cart in your own UI, take the card with Stripe's Payment Element on a Schematic setup intent, and let the finalize charge it.
 slug: components/build-your-own/checkout-with-stripe-elements
 ---
 
-Build the cart experience yourself and take payment with Stripe's Payment Element, the payment UI your customers already know, with Link support. Schematic stays between your product and Stripe: it prices the cart, validates it, creates the subscription, and updates entitlements as soon as payment completes.
-
-<Warning>
-  Payment collection is an account setting, not reference code. Choosing Stripe Elements changes how Schematic processes payment for your account. Set it under Checkout Options before wiring this flow.
-</Warning>
+The drop-in's payment step is `useCheckout`, `useSetupIntent` and Stripe's Payment Element; this page builds the same step by hand so the cart, the card form and the pay button live in your own layout. Schematic stays between your product and Stripe: it prices the cart, saves the card on the company, charges it on finalize and updates entitlements as soon as the subscription changes.
 
 ## The flow
 
-1. Your app builds the cart with `useCheckout().setSelections`, and every change re-prices on the server.
-2. Your app asks Schematic for a SetupIntent and renders Stripe's `<PaymentElement/>` with the client secret.
-3. Your app finalizes with the resulting payment method. Schematic validates the cart, creates or changes the subscription, and updates entitlements. You run no webhooks.
+1. Your component writes the cart with `useCheckout().setSelections`; every write re-prices on the server, and `snapshot.dueNow` is what the finalize will charge.
+2. `useSetupIntent().create()` answers with a setup intent, the Stripe publishable key to load Stripe with, and the client secret the Payment Element mounts on.
+3. `stripe.confirmSetup` saves the card. `usePaymentMethods().setDefault` puts it on file for the company, so the company's methods on file include it, and the cart names it as `paymentMethodId`.
+4. `finalize()` charges the cart. When the result carries `confirmPaymentIntentClientSecret`, the payment needs the customer, as with 3-D Secure, and `stripe.confirmCardPayment` completes it.
 
 ## Recipe
 
 ```tsx
+import { usePaymentMethods, useCheckout, useSetupIntent, type CheckoutSelections, type SetupIntent } from "@schematichq/schematic-react";
+import { formatCurrency } from "@schematichq/schematic-components/elements";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useCatalog, useCheckout } from "@schematichq/schematic-react";
-import { derivePricingTable, formatCurrency } from "@schematichq/schematic-components/elements";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+// A connected account loads through Schematic's key with the account named; any other through its own key.
+function stripeFor(intent: SetupIntent): Promise<Stripe | null> {
+  return intent.accountId
+    ? loadStripe(intent.schematicPublishableKey, { stripeAccount: intent.accountId })
+    : loadStripe(intent.publishableKey ?? intent.schematicPublishableKey);
+}
 
-export function Upgrade({ planId }) {
+export function Upgrade({ selections }: { selections: CheckoutSelections }) {
   const checkout = useCheckout();
-  const [clientSecret, setClientSecret] = useState<string>();
+  const { create } = useSetupIntent();
+  const [intent, setIntent] = useState<SetupIntent>();
+  const [stripe, setStripe] = useState<Promise<Stripe | null>>();
 
+  // 1. The cart, priced on the server on every write.
   useEffect(() => {
-    checkout
-      .setSelections({ planId, period: "month" })              // 1. cart, priced on the server
-      .then(() => checkout.createSetupIntent())                // 2. Stripe client secret
-      .then(({ clientSecret }) => setClientSecret(clientSecret));
-  }, [planId]);
+    checkout.setSelections(selections).catch(() => {});
+  }, [JSON.stringify(selections)]);
 
-  if (!checkout.snapshot || !clientSecret) return <Skeleton />;
+  // 2. One setup intent for the card form, and Stripe loaded with the key it names.
+  useEffect(() => {
+    create().then((created) => {
+      setIntent(created);
+      setStripe(stripeFor(created));
+    });
+  }, []);
+
+  const clientSecret = intent?.setupIntentClientSecret;
+  if (checkout.snapshot === undefined || !clientSecret || stripe === undefined) return <Skeleton />;
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Summary snapshot={checkout.snapshot} />
-      <Elements stripe={stripePromise} options={{ clientSecret }}>
-        <PayForm checkout={checkout} />
+      <Summary snapshot={checkout.snapshot} problems={checkout.problems} />
+      <Elements stripe={stripe} options={{ clientSecret }}>
+        <PayForm checkout={checkout} selections={selections} />
       </Elements>
     </div>
   );
 }
 
-function PayForm({ checkout }) {
+function PayForm({ checkout, selections }: { checkout: ReturnType<typeof useCheckout>; selections: CheckoutSelections }) {
   const stripe = useStripe();
   const elements = useElements();
+  const { setDefault } = usePaymentMethods();
+  const [message, setMessage] = useState<string>();
+  const blocked = checkout.problems.some((problem) => problem.blocking);
 
   async function pay() {
-    const { setupIntent, error } = await stripe.confirmSetup({ elements, redirect: "if_required" });
-    if (error) return;                                            // Stripe shows it inline
-    await checkout.finalize({ paymentMethodId: setupIntent.payment_method });  // 3. Schematic finalizes
+    if (!stripe || !elements) return;
+
+    // 3. Save the card, put it on file for the company, and name it on the cart.
+    const saved = await stripe.confirmSetup({ elements, redirect: "if_required" });
+    if (saved.error) {
+      setMessage(saved.error.message);
+      return;
+    }
+    const method = saved.setupIntent.payment_method;
+    const paymentMethodId = typeof method === "string" ? method : method?.id;
+    if (!paymentMethodId) return;
+    await setDefault(paymentMethodId);
+    await checkout.setSelections({ ...selections, paymentMethodId });
+
+    // 4. Charge it; confirm with Stripe when the payment needs the customer.
+    const result = await checkout.finalize();
+    if (result.confirmPaymentIntentClientSecret) {
+      const confirmed = await stripe.confirmCardPayment(result.confirmPaymentIntentClientSecret, {
+        payment_method: paymentMethodId,
+      });
+      if (confirmed.error) {
+        setMessage(confirmed.error.message);
+        return;
+      }
+    }
+    setMessage("Subscribed");
   }
 
+  const amount = checkout.snapshot === undefined ? "" : formatCurrency(checkout.snapshot.dueNow, checkout.snapshot.currency, "en-US");
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); pay(); }}>
+    <form onSubmit={(event) => { event.preventDefault(); void pay(); }}>
       <PaymentElement />
-      <button disabled={checkout.isPending}>
-        Pay {formatCurrency(checkout.snapshot.dueToday.amountMinor, checkout.snapshot.currency, { locale: "en-US" })}
-      </button>
+      <button disabled={blocked || checkout.isPricing || checkout.isFinalizing}>Pay {amount}</button>
+      {message && <p role="alert">{message}</p>}
       {checkout.error && <p role="alert">{checkout.error.message}</p>}
     </form>
   );
 }
 ```
 
-`Summary` renders `snapshot.lineItems`, `snapshot.proration`, and `snapshot.dueToday`, never a total of its own.
+`Summary` renders `snapshot.dueNow`, `snapshot.totalPerBillingPeriod`, `snapshot.proration` and `snapshot.discounts`, and lists `problems` beside them; it never totals the cart itself. [Derivations](/components/build-your-own/derivations#checkout) has `deriveCheckout` for the lines and totals the drop-in shows.
+
+A confirmation the customer fails or abandons leaves the checkout completed on the server, so a retry confirms the payment again rather than finalizing again, which the server would refuse. Stripe takes the card off an intent whose authentication failed, which is why the retry names `payment_method`.
 
 ## What stays enforced
 
-Downgrade protection, trial rules, bundle purchasing rules, currency availability, and tax collection all apply on the server, so a cart the rules reject comes back with `snapshot.validation` populated and finalize refuses it. Show the reasons; the customer fixes the cart, not the rule.
+Downgrade protection, trial rules, bundle compatibility, currency availability, tax collection and the agreement text all apply on the server, so a cart the rules reject answers with `problems` and a finalize with a blocking one is refused with the fresh list. Show the reasons next to what they concern. What the form collects beside the card, such as an address, email or phone, comes from the catalog's checkout settings on [`useCatalog`](/components/build-your-own/hooks#usecatalog), and the Payment Element's `fields` option follows them.
 
 ## Saved payment methods
 
-`usePaymentMethods` lists what the company already has on file. Pass one of those ids to `finalize` to skip the Payment Element entirely for a returning customer.
+`usePaymentMethods` lists what the company already has on file. For a returning customer, skip the Payment Element and write one of those `externalId` values as `paymentMethodId` on the cart before `finalize()`; `snapshot.paymentMethodRequired` says whether the cart needs one at all, since a trial that needs no card and a purchase a credit balance covers charge nothing up front.
