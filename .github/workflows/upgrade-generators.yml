@@ -140,9 +140,9 @@ jobs:
 
       - name: Overlay preview output
         run: |
-          PREVIEW_SUBDIR=$(ls -d fern/.preview/*/ 2>/dev/null | head -1)
+          PREVIEW_SUBDIR=$(ls -d fern/apis/api/.preview/*/ 2>/dev/null | head -1)
           if [ -z "$PREVIEW_SUBDIR" ]; then
-            echo "No preview output found in fern/.preview/"
+            echo "No preview output found in fern/apis/api/.preview/"
             exit 1
           fi
           echo "Overlaying $PREVIEW_SUBDIR onto /tmp/sdk-repo/"

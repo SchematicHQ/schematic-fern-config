@@ -12,7 +12,7 @@ GROUP="$1"
 DOWNSTREAM_REPO="$2"
 COMPILE_CMD="$3"
 
-PREVIEW_DIR="fern/.preview"
+PREVIEW_DIR="fern/apis/api/.preview"
 WORK_DIR=$(mktemp -d)
 
 cleanup() {
@@ -30,7 +30,7 @@ if ! fern generate --api api --group "$GROUP" --preview 2>&1; then
 fi
 
 # Step 2: Find the preview output directory
-# Fern puts output in fern/.preview/<sanitized-generator-name>/
+# Fern puts output in fern/apis/api/.preview/<sanitized-generator-name>/
 # where sanitization replaces non-alphanumeric (except - and _) with _
 PREVIEW_SUBDIR=$(ls -d "$PREVIEW_DIR"/*/ 2>/dev/null | head -1)
 if [ -z "$PREVIEW_SUBDIR" ]; then
