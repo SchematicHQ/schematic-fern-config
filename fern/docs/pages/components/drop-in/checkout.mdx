@@ -187,7 +187,7 @@ The tax ID saves on its own, when the field is left and again before a finalize,
 
 ## Before it can load
 
-`GET /catalog/view` is gated on the `multi-product-catalog` flag and the `/company` reads on `company-context-api`, both per account. Without the first, the dialog says checkout is not available; without the second it still sells, without the currency lock and the company's current quantities. A catalog whose `capabilities.checkout` is false, because there is no Stripe integration, more than one subscription, or one managed elsewhere, shows the same notice. Ask Schematic to enable either flag for the account.
+`GET /catalog/view` is gated on the `multi-product-catalog` flag and the `/company` reads on `company-context-api`, both per account; a route behind a flag that is off answers 404, not 403. Without the first, the dialog says checkout is not available; without the second it still sells, without the currency lock and the company's current quantities. A catalog whose `capabilities.checkout` is false, because there is no Stripe integration, more than one subscription, or one managed elsewhere, shows the same notice. Ask Schematic to enable either flag for the account.
 
 ## Theming
 

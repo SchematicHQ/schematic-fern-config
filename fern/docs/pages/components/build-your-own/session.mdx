@@ -49,6 +49,12 @@ curl -X POST https://api.schematichq.com/temporary-access-tokens \
 
 The Node.js and Python SDKs fill in the `company` resource type themselves; the Go SDK and a raw request state it as `resource_type`. Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
 
+The client sends the token in the `X-Schematic-Api-Key` header, the same header the secret key went in above, which is worth knowing when you call a component route by hand:
+
+```bash
+curl https://api.schematichq.com/company -H "X-Schematic-Api-Key: $TOKEN"
+```
+
 ## The session
 
 `session` on the provider says whose billing is being read and how:
