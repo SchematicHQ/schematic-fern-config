@@ -1,0 +1,137 @@
+---
+title: Session and Access Tokens
+description: How a company's billing state is read on its behalf. Minting temporary access tokens, the session identity, refresh, and server rendering.
+slug: components/build-your-own/session
+---
+
+Every hook and drop-in reads one company's own billing state, so it authenticates with a short-lived, company-scoped temporary access token rather than your publishable key. Your server mints the token with your secret key; the browser sees only the token.
+
+## Minting a token
+
+<Tabs>
+  <Tab title="Node.js">
+```typescript
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+export async function issueToken(companyId: string) {
+  const response = await client.accesstokens.issueTemporaryAccessToken({
+    lookup: { id: companyId }, // the lookup matches how you key companies
+  });
+  return { token: response.data.token, expiresAt: response.data.expiredAt };
+}
+```
+  </Tab>
+  <Tab title="Python">
+```python
+import os
+
+from schematic import Schematic
+
+client = Schematic(os.environ["SCHEMATIC_SECRET_KEY"])
+
+response = client.accesstokens.issue_temporary_access_token(
+    lookup={"id": company_id},  # the lookup matches how you key companies
+)
+token, expires_at = response.data.token, response.data.expired_at
+```
+  </Tab>
+  <Tab title="cURL">
+```bash
+curl -X POST https://api.schematichq.com/temporary-access-tokens \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resource_type": "company", "lookup": {"id": "acme-inc"}}'
+```
+  </Tab>
+</Tabs>
+
+The Node.js and Python SDKs fill in the `company` resource type themselves; the Go SDK and a raw request state it as `resource_type`. Tokens are valid for fifteen minutes. Put the endpoint behind your own auth, and resolve the company from the signed-in user rather than from the request.
+
+The client sends the token in the `X-Schematic-Api-Key` header, the same header the secret key went in above, which is worth knowing when you call a component route by hand:
+
+```bash
+curl https://api.schematichq.com/company -H "X-Schematic-Api-Key: $TOKEN"
+```
+
+## The session
+
+`session` on the provider says whose billing is being read and how:
+
+{/* samples: nocheck the provider tag is shown open; the session prop is the point */}
+```tsx
+<SchematicProvider
+  publishableKey="pk_…"
+  session={{ company: company.id, user: user.id, token: fetchAccessToken }}
+>
+```
+
+Its identity is the `(company, user)` pair, because that is what a token is minted for: the same person reads one company's billing and then another's, and the same company is read by several people. A different pair drops every loaded resource and reads the new one's. The same pair with a different token is the same session with a fresh credential, so an inline `token: async () => …` costs nothing; rebuilding that closure every render is not a change.
+
+`user` is optional. Leave it out where your tokens are company-wide, and every reader of that company shares one session. State it where you mint per person; omitting it later is a different session, not the same one.
+
+### Three states
+
+| `session` | Meaning | What renders |
+| --- | --- | --- |
+| `{ company, user?, token }` | Signed in | Data for that pair |
+| `null` | Signed out | Every card empties, and nothing is read until a session returns |
+| `undefined` | Still finding out | Cards hold their loading state rather than reporting an error |
+
+`useCatalog` is the exception: under `null` or `undefined` it reads the public catalog with the publishable key, so a pricing page renders before anyone signs in.
+
+Auth libraries can blur these: Clerk's `orgId` is `null` both when nobody is signed in and when no organization is active, so check `isSignedIn` too.
+
+### Token providers and refresh
+
+`token` is a string or an async function called for one, and called again after a 401. The function returns the token alone or `{ token, expiresAt, company, user }`. With an expiry the client stops reusing the token once it passes and mints again on the next request. Stating `company` or `user` lets the client check that the token it received is for the pair it asked for. Concurrent readers share one in-flight resolution.
+
+```ts
+async function fetchAccessToken() {
+  const response = await fetch("/api/schematic-token", { method: "POST" });
+  const { token, expiresAt } = await response.json();
+  return { token, expiresAt };
+}
+```
+
+## Using the client directly
+
+Outside React, or in a framework of your own, the same session drives `SchematicBillingClient`:
+
+```ts
+import { SchematicBillingClient, SchematicSession } from "@schematichq/schematic-js";
+
+const session = new SchematicSession({ session: { company: "acme-inc", token: fetchAccessToken } });
+const billing = new SchematicBillingClient(session);
+
+const { invoices, count } = await billing.fetchInvoices({ limit: 12, offset: 0 });
+```
+
+The client has one method per resource (`fetchCatalog`, `fetchPublicCatalog`, `fetchCompany`, `fetchFeatureUsage`, `fetchFeatureUserUsage`, `fetchCreditBalances`, `fetchCreditUserUsage`, `fetchUpcomingInvoice`, `fetchPaymentMethods`, `fetchInvoices`, `fetchTaxIds`), the writes the hooks call (`updatePaymentMethod`, `deletePaymentMethod`, `createSetupIntent`, `cancelSubscription`, `updateTaxId`), and the checkout's `createCheckout`, `getCheckout`, `updateCheckout` and `finalizeCheckout`, described on [Checkout API](/components/build-your-own/checkout-api#with-the-client). `fetchPublicCatalog` reads with the `publishableKey` in its options, and `apiUrl` and `additionalHeaders` route requests to a staging or self-hosted API. Pass a client you built as `billingClient` on `SchematicProvider`, and the hooks read through it.
+
+## Server rendering
+
+`fetchBillingData` returns an `initialData` bag the provider seeds from, so rows show on the first render, as long as that render states the session. Name the resources the page renders in `names`, since each is a request on the server and there is no default set:
+
+{/* samples: nocheck the provider tag at the end is shown open; the initialData prop is the point */}
+```tsx
+import { SchematicBillingClient, fetchBillingData } from "@schematichq/schematic-js";
+
+const client = new SchematicBillingClient({ session: { company: company.id, token } });
+const initialData = await fetchBillingData(client, {
+  names: ["upcomingInvoice", "invoices"],
+  invoices: { includePending: true },
+});
+
+<SchematicProvider
+  publishableKey="pk_…"
+  session={{ company: company.id, token: fetchAccessToken }}
+  initialData={initialData}
+  locale="en-US"
+>
+```
+
+Pass the same invoice query your component asks, or the seed answers a question nothing asked and the component fetches again. A resource that fails on the server is left out of the bag rather than thrown, and the client loads it as usual. For a page of drop-ins, `billingResources(UpcomingBill, Invoices)` from `@schematichq/schematic-components/elements` collects the names each one reads.
+
+The seed records which `(company, user)` pair it fetched for. Rows stamped with a different pair than the session names are refetched rather than shown, which covers a cached page and a tab that switched company. A prefetch you build yourself carries no stamp and is taken at face value, so pair it with the session it belongs to. State the session on the first client render, since a stamped seed waits for its session before it paints. Pass `locale` explicitly for a server-rendered page, so the server and the browser format dates and amounts the same way.

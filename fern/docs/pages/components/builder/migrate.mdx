@@ -1,0 +1,95 @@
+---
+title: Migrate to Drop-in Components
+description: Move an embedded customer portal from the component builder to drop-in components, one card at a time.
+slug: components/builder/migrate
+---
+
+A portal embedded with `<SchematicEmbed/>` keeps working. When you want props instead of a builder, your own fonts and colors through CSS variables, or a custom card next to the standard ones, move to drop-in components. Both ship in the same `@schematichq/schematic-components` 2.x package, the embed from the package root and the drop-ins from `@schematichq/schematic-components/elements`, so a migration needs no version change and is mostly a list of tags.
+
+## Before
+
+```tsx
+import { EmbedProvider, SchematicEmbed } from "@schematichq/schematic-components";
+
+<EmbedProvider>
+  <SchematicEmbed id="cmpn_…" accessToken={token} />
+</EmbedProvider>
+```
+
+## After
+
+Install the React SDK and the Stripe peers beside the components package. Payment Methods uses the Stripe packages for its add-card form.
+
+```sh
+npm install @schematichq/schematic-react @schematichq/schematic-components @stripe/stripe-js @stripe/react-stripe-js
+```
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  CheckoutLauncherProvider, CreditUsage, IncludedFeatures, Invoices, MeteredFeatures,
+  PaymentMethods, PlanManager, SchematicStyles, UnsubscribeButton, UpcomingBill,
+  useCheckoutLauncher,
+} from "@schematichq/schematic-components/elements";
+
+export function Billing() {
+  return (
+    <SchematicProvider publishableKey="pk_…" session={{ company: company.id, token: fetchAccessToken }}>
+      <SchematicStyles />
+      <CheckoutLauncherProvider>
+        <Portal />
+      </CheckoutLauncherProvider>
+    </SchematicProvider>
+  );
+}
+
+function Portal() {
+  const { open } = useCheckoutLauncher();
+  return (
+    <>
+      <PlanManager onChangePlan={() => open()} />
+      <IncludedFeatures />
+      <MeteredFeatures onAddMore={() => open({ steps: { initial: "usage" } })} />
+      <CreditUsage onBuyMore={() => open({ steps: { initial: "credits" } })} />
+      <UpcomingBill />
+      <PaymentMethods />
+      <Invoices />
+      <UnsubscribeButton onManagePlan={() => open()} />
+    </>
+  );
+}
+```
+
+## What maps to what
+
+| Builder element | Drop-in | Builder options become |
+| --- | --- | --- |
+| Current Plan | [`<PlanManager/>`](/components/drop-in/plan-manager) | `showHeader`, `showDescription`, `showPrice`, `showAddOns`, `showLabels` |
+| Included Features | [`<IncludedFeatures/>`](/components/drop-in/included-features) | `visibleFeatures`, `showHeader`, `showIcon`, `showDescription`, `showEntitlement`, `showExpiration`, `showUsage` |
+| Next Bill Due | [`<UpcomingBill/>`](/components/drop-in/upcoming-bill) | `showHeader`, `showAmount`, plus `showBalance` and `showDiscounts` |
+| Payment Methods | [`<PaymentMethods/>`](/components/drop-in/payment-methods) | `showHeader`, `allowEdit`, `showExpiration` |
+| Invoices | [`<Invoices/>`](/components/drop-in/invoices) | `showHeader`, `showDate`, `showAmount`, `limit`, `collapsible` |
+| Metered Features | [`<MeteredFeatures/>`](/components/drop-in/metered-features) for features and [`<CreditUsage/>`](/components/drop-in/credit-usage) for credit balances | `visibleFeatures`, `showDescription`, `showIcon`, `showAllocation`, `showUsage`, `showUsageByUser`; `visibleCredits` on Credit Usage |
+| Unsubscribe Button | [`<UnsubscribeButton/>`](/components/drop-in/unsubscribe-button) | Button text through `strings`, size and style through your CSS; `managePlanUrl` or `onManagePlan` adds "Manage plan" to the confirmation |
+| Pricing Table | [`<PricingTable/>`](/components/drop-in/pricing-table) | `catalogId`, `showPeriodToggle`, `showAddOns` |
+| Checkout dialog | [`<Checkout/>`](/components/drop-in/checkout) | `stages`, `collectTaxId`, theme tokens |
+| Text, Button | your own JSX | |
+
+Header text you set in the builder becomes `strings` on the component, or on the provider for every component at once. The builder's theme (fonts, colors, card style) becomes a block of `--schematic-*` overrides in your stylesheet; [Styling](/components/drop-in/styling) lists the tokens.
+
+## Token exchange
+
+The token endpoint you already run keeps working. The provider takes it as a function instead of a string, calls it again after a 401, and expects `{ token, expiresAt }` back, so map your endpoint's fields if they differ:
+
+```tsx
+async function fetchAccessToken() {
+  const { accessToken, expiredAt } = await (await fetch("/api/accessToken")).json();
+  return { token: accessToken, expiresAt: expiredAt };
+}
+```
+
+The drop-ins read the company endpoints, which answer 404 for an account that has not enabled them. If a card reports `failed with status 404`, ask Schematic to enable company context (the `company-context-api` flag) for your account.
+
+## One card at a time
+
+`EmbedProvider` and `SchematicProvider` can mount on the same page, so you can replace one element, ship, and continue. Both read the same company's billing with the same kind of token, so the customer sees the same plan, invoices, and payment methods between steps.

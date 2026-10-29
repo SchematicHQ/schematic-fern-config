@@ -1,0 +1,136 @@
+---
+title: Checkout API
+description: A checkout is a persisted cart the server prices on every write and charges once. The routes, the version rule, the session header and the refusals, with useCheckout and the client on top of them.
+slug: components/build-your-own/checkout-api
+---
+
+A checkout is a resource on the [Components API](/api-reference/components). Your UI opens one for the company, replaces its cart whenever the customer changes something, and finalizes it; the server prices every write and refuses what the catalog's purchase rules forbid, so the totals on screen are the server's. `<Checkout/>`, `useCheckout` and a [Stripe Elements flow](/components/build-your-own/checkout-with-stripe-elements) use the same five routes.
+
+## The routes
+
+| Route | Reference | What it does |
+| --- | --- | --- |
+| `POST /checkouts` | [Create a checkout](/api-reference/components/checkouts/create-checkout) | Opens a checkout for the token's company from the cart in the body and prices it when it is priceable. A cart the rules reject is still created, open, with the one problem that says why. |
+| `GET /checkouts/{checkout_id}` | [Get a checkout](/api-reference/components/checkouts/get-checkout) | Reads the checkout as the server holds it. A checkout another session opened, or another company's, reads as not found. |
+| `PUT /checkouts/{checkout_id}` | [Update a checkout](/api-reference/components/checkouts/update-checkout) | Replaces the cart at the `version` in the body and prices it again. |
+| `POST /checkouts/{checkout_id}/finalize` | [Finalize a checkout](/api-reference/components/checkouts/finalize-checkout) | Charges the cart at `version` and applies it to the subscription. |
+| `GET /checkouts` | [List checkouts](/api-reference/components/checkouts/list-checkouts) | The checkouts this session opened, filtered by `statuses`. |
+
+Every route takes the temporary access token your server mints for the company, in the `X-Schematic-Api-Key` header, as [Session and access tokens](/components/build-your-own/session) describes, so the token fixes the company and a checkout cannot name another payer.
+
+## Lifecycle
+
+The body of a create or update is the whole cart: an update replaces the stored cart, so a field left out is a field cleared. The wire fields are `new_plan_id` and `new_price_id`, `add_on_ids` (each an `add_on_id` with a `price_id`), `pay_in_advance` (a `price_id` with a `quantity`), `credit_bundles` (a `bundle_id` with a `quantity`), `auto_topup_overrides`, `custom_field_values`, `promo_code`, `payment_method_id`, `currency`, `skip_trial`, `intent` and `opt_in_accepted`. The client types below spell the same cart in camelCase. `auto_topup_overrides` is the one exception to the rule: the server upserts each override it names and leaves the rest as they were, so a plan change that sends none keeps the company's saved top-up settings.
+
+A plan or add-on with a pay-in-advance entitlement, seats say, needs a `pay_in_advance` line for each such price, or the price answers with the `pay_in_advance_required` problem. The drop-in starts each quantity at the company's current allocation from `GET /company/usage`, and at one where it holds none; `checkoutSelections(initialCart({ catalog, company, featureUsage }), catalog, company)` from `@schematichq/schematic-components/elements` builds that cart, seat lines included. There is no write for the top-up settings alone: to change them, send that same cart for the plan the company is on, its current price and its quantities as they stand, with the `auto_topup_overrides`. A cart that changes nothing on the subscription prices with nothing due, and a quantity sent differently is a quantity changed.
+
+Each successful write advances `version` by one and answers with the checkout: `status`, `version`, `selections`, `price_snapshot`, `problems` and `expires_at`. The first write is the `POST`, which answers 201; every later one is a `PUT` at the version last read. A stale version answers 409 and changes nothing, so read the checkout and send the write again at its version. The status moves from `open` to `completed` on finalize, or to `expired` when `expires_at` passes; a write to a checkout that is no longer open is a 409 too.
+
+A `PUT` answers with the `X-Checkout-Session-ID` header, the session the price belongs to. Send it back on the finalize that follows, so a second submit of the same cart answers 409 instead of charging again. A `POST` hands no session out, so a cart finalized straight after its create sends none and the server starts one of its own.
+
+The finalize prices the cart once more, then claims the version before the billing provider is called, so of two concurrent finalizes only one charges; the other gets a 409 and never reaches the provider. The claim stays after a failed charge, because the server cannot tell a refusal that never reached the provider from a failure after it did, so read the checkout before trying again. The answer is the subscription the charge made, with `confirm_payment_intent_client_secret` when the payment still needs the customer, as with 3-D Secure.
+
+## Problems
+
+Every price answers with `problems`: a list with a `code`, whether it is `blocking`, a `message` safe to show and the ids of what it concerns (`plan_id`, `price_id`, `bundle_id`, `feature_id`, `field_id`, `payment_method_id`). A cart the rules reject at a write is saved with its price cleared and one problem saying why, and the version still advances. A finalize with a blocking problem is refused with 400 and the fresh list beside `error`; a checkout priced before a sibling completed is refused with 409 and `checkout_superseded`. The codes are `CheckoutProblemCode` in the reference: `payment_method_required`, `selection_invalid`, `usage_over_limit`, `downgrade_not_permitted`, `plan_unavailable`, `currency_mismatch`, `opt_in_required`, `custom_field_required` and the rest.
+
+`price_snapshot` is what a dialog shows and what a finalize charges: `due_now`, `total_per_billing_period`, `new_charges`, `proration` with `proration_detail`, `discounts` with `discount_amount`, `tax_amount`, `customer_balance_applied` and `customer_balance_remaining`, `payment_method_required`, the opt-in title and text when the catalog asks for an agreement, `trial_end`, `period_start`, `scheduled_change_time` and `priced_at`. It is absent until the cart is priceable. Render it; never total the cart yourself.
+
+The three figures a summary shows answer different questions. `total_per_billing_period` is what renews each period at the cart's prices. `proration` is the net of the unused time credited on what the cart leaves and the remainder charged on what it takes, itemized in `proration_detail`. `due_now` is what is charged now, after the proration, the discounts, the tax and the customer's balance, and it is 0 when the change is prorated onto the next invoice (`proration_detail.billed_at` says when) or the balance covers it, so a per-period total beside a proration beside nothing due is a normal answer, not a sum that fails. The snapshot carries no line items: `deriveCheckout` from `@schematichq/schematic-components/elements` prices the cart's `lines` at the catalog's prices, the plan, each quantity bought ahead at its unit price, the add-ons and the bundles, so a summary can show what makes up the total it renders from the snapshot.
+
+## With useCheckout
+
+[`useCheckout`](/components/build-your-own/hooks#usecheckout) holds one checkout and drives these routes from its handle: `checkout`, `snapshot` and `problems` as the last write left them, `isPricing`, `isFinalizing`, `error` and `result`, and `setSelections`, `finalize` and `reset` to move it.
+
+The first `setSelections` opens the checkout with the `POST`; every later one replaces the cart with a `PUT` at the version the hook holds. Calls made while a write is out fold into the newest, so a component can call it on every change. A 409 is replayed once, by reading the checkout and writing the same cart again at the version it came back with; a second conflict is somebody else's and surfaces on `error`.
+
+While `isPricing` is true, `snapshot` and `problems` are still the previous cart's, so dim them or mark the summary busy until the write lands, as the drop-in does, rather than show the old plan's price under the new plan's name.
+
+`finalize` waits for every write to land, sends the session the last price handed out, and reloads the billing data the purchase changed. A refusal puts the server's list on `problems` and rejects, and `checkoutProblemsOf(error)` returns that list. `reset` drops the checkout so the next write opens a new one. `{ checkoutId }` resumes a checkout instead of opening one: from js 1.16.1 the hook reads it back before its first write, so the version it writes at is the server's.
+
+```tsx
+import { checkoutProblemsOf, useCheckout, type CheckoutSelections } from "@schematichq/schematic-react";
+import { useEffect } from "react";
+
+export function PayButton({ selections }: { selections: CheckoutSelections }) {
+  const { finalize, isPricing, problems, setSelections, snapshot } = useCheckout();
+
+  useEffect(() => {
+    setSelections(selections).catch(() => {});
+  }, [JSON.stringify(selections)]);
+
+  const blocked = problems.some((problem) => problem.blocking);
+
+  async function pay() {
+    try {
+      const result = await finalize();
+      console.log("subscribed", result.status);
+    } catch (error) {
+      const refused = checkoutProblemsOf(error);
+      if (refused === undefined) throw error;
+    }
+  }
+
+  return (
+    <>
+      {problems.map((problem) => (
+        <p key={problem.code} role="alert">{problem.message}</p>
+      ))}
+      <button disabled={blocked || isPricing || snapshot === undefined} onClick={pay}>
+        Pay {snapshot === undefined ? "" : snapshot.dueNow}
+      </button>
+    </>
+  );
+}
+```
+
+`CheckoutSelections` is the cart in camelCase: `planId` and `priceId`, `addOns` (each an `addOnId` with a `priceId`), `payInAdvance` (a `priceId` with a `quantity`), `creditBundles` (a `bundleId` with a `quantity`), `autoTopupOverrides`, `customFieldValues`, `promoCode`, `paymentMethodId` (the provider's id of a method on file), `currency`, `skipTrial`, `intent` (`"change"` or `"cancel"`) and `optInAccepted`. The price ids come from the catalog: `plan.yearlyPrice.id`, say, from [`useCatalog`](/components/build-your-own/hooks#usecatalog). `checkoutSelections` from `@schematichq/schematic-components/elements` builds this from the same cart model the drop-in uses; see [Derivations](/components/build-your-own/derivations#checkout).
+
+## With the client
+
+Outside React the same routes are four methods on `SchematicBillingClient`. A write answers with the checkout and the session the server priced it under:
+
+```ts
+import { SchematicApiError, SchematicBillingClient } from "@schematichq/schematic-js";
+
+const billing = new SchematicBillingClient({
+  session: { company: "acme-inc", token: fetchAccessToken },
+});
+
+const opened = await billing.createCheckout({ planId: "plan_pro", priceId: "bilpp_pro_yearly" });
+let checkout = opened.checkout;
+let sessionId = opened.sessionId;
+
+try {
+  const priced = await billing.updateCheckout(checkout.id, checkout.version, {
+    planId: "plan_pro",
+    priceId: "bilpp_pro_yearly",
+    addOns: [{ addOnId: "plan_sso", priceId: "bilpp_sso_yearly" }],
+  });
+  checkout = priced.checkout;
+  sessionId = priced.sessionId;
+} catch (error) {
+  if (error instanceof SchematicApiError && error.status === 409) {
+    checkout = await billing.getCheckout(checkout.id); // then write again at checkout.version
+  }
+}
+
+const result = await billing.finalizeCheckout(checkout.id, checkout.version, { sessionId });
+```
+
+`createCheckout(selections)`, `getCheckout(id)`, `updateCheckout(id, version, selections)` and `finalizeCheckout(id, version, { sessionId })` are the whole surface; `checkoutProblemsOf(error)` reads the problems off a refusal here too. Replay a 409 yourself, as the sample's `catch` does: read the checkout, then write again at its version.
+
+## Sibling routes
+
+The rest of the Components API sits beside a checkout, each route with its own hook:
+
+| Route | Reference | Hook |
+| --- | --- | --- |
+| `GET /catalog/view` | [Get the catalog view](/api-reference/components/catalog/get-catalog-view) | `useCatalog` |
+| `GET /company` | [Get the company](/api-reference/components/company/get-company) | `useCompany` |
+| `GET /checkout/tax-id`, `POST /checkout/tax-id` | [List tax IDs](/api-reference/components/tax-id/get-checkout-tax-id), [Set the tax ID](/api-reference/components/tax-id/update-checkout-tax-id) | `useTaxIds` |
+| `POST /components/setup-intent` | [Create a setup intent](/api-reference/components/payment/create-setup-intent) | `useSetupIntent` |
+| `GET /company/payment-methods`, `POST /checkout/paymentmethod/update`, `DELETE /checkout/paymentmethod/{checkout_id}` | [List payment methods](/api-reference/components/company/get-company-payment-methods), [Make a payment method the default](/api-reference/components/payment/update-payment-method), [Remove a payment method](/api-reference/components/payment/delete-payment-method) | `usePaymentMethods` |
+| `DELETE /checkout/unsubscribe` | [Cancel the subscription](/api-reference/components/payment/checkout-unsubscribe) | `useUnsubscribe` |
+
+Write the tax ID through its own route before the finalize that needs it; the cart does not carry it.
