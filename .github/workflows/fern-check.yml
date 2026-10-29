@@ -19,9 +19,8 @@ jobs:
       - name: Check API definition is valid
         run: fern check
 
-      # docs.yml sets `broken-links: warn`, so a dead link shows up here and in
-      # `fern check --warnings` without failing the job. Flip it to `error` once
-      # the links to unpublished endpoints resolve.
+      # `broken-links: warn` in docs.yml, so a dead link lands here and in
+      # `fern check --warnings` without failing the job.
       - name: Report broken links
         if: always()
         run: |
@@ -31,8 +30,7 @@ jobs:
             if [ -s links.txt ]; then echo '```'; cat links.txt; echo '```'; else echo "none"; fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # Report-only until the Checkout docs pages land: drop `continue-on-error`
-  # to make the type-check required.
+  # Report-only: drop `continue-on-error` to make it required.
   check-samples:
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -73,9 +71,8 @@ jobs:
           comment_tag: check-samples
           create_if_not_exists: ${{ steps.check.outcome == 'failure' }}
 
-  # Report-only until the Checkout docs pages land: drop `continue-on-error`
-  # to make the lint required. Only the pages this PR changes are linted, so
-  # older pages do not block it.
+  # Report-only: drop `continue-on-error` to make it required. Only the pages
+  # this PR changes are linted, so older pages do not block it.
   prose-lint:
     runs-on: ubuntu-latest
     continue-on-error: true

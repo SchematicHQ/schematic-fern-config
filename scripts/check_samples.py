@@ -18,14 +18,11 @@ How a fence is wrapped, decided in this order:
 4. statement: anything else, wrapped in ``export async function sample() {}``.
 
 Before wrapping, every identifier the fence uses that a package exports, and
-the fence does not declare itself, gets an import. A fence then reads the way
-it would in an app that imports what it uses, and an invented name fails with
-TS2304. A name one of the page's own fences imports comes from that package;
-any other is searched for in this order:
-``@schematichq/schematic-components/elements``, ``@schematichq/schematic-react``,
-``@schematichq/schematic-components``, ``@schematichq/schematic-js``, then
-``react`` for its hooks. The export lists come from the published ``.d.ts``
-rollups in ``scripts/samples/node_modules``.
+the fence does not declare itself, gets an import, so an invented name fails
+with TS2304. Exports are read from the published ``.d.ts`` rollups in
+``scripts/samples/node_modules``, searched in the order ``PACKAGES`` lists and
+then ``react`` for its hooks; a name one of the page's own fences imports
+comes from that package instead (``page_imports``).
 
 Host-owned placeholders (the reader's ``company``, ``router``,
 ``fetchAccessToken``, ...) are declared once in ``scripts/samples/host.d.ts``.
@@ -589,8 +586,6 @@ def main(argv):
                 print(f"{page_label(page)}:{block.fence_line}: {block.kind} -> {block.out.name}")
 
     diagnostics = run_tsc(blocks) if blocks else []
-    if diagnostics is None:
-        return 2
     for d in diagnostics:
         print(d)
     print(f"check_samples: {len(blocks)} fence(s) checked, {skipped} skipped, {len(diagnostics)} diagnostic(s)")
