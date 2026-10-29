@@ -156,10 +156,10 @@ Run the app, sign in as a company that has a subscription, and open the billing 
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Every card reports `failed with status 404` | Company context (the `company-context-api` flag) is not enabled for the account | Ask Schematic to enable it |
+| Every card reads "… is not available for this account.", or every hook's `error` is a 404 reading "Not found" | Company context (the `company-context-api` flag) is not enabled for the account | Ask Schematic to enable it |
 | Cards stay in the loading state | `session` is `undefined` | The auth mapping never resolves; check the loaded flag |
 | Cards are empty after sign-in | `session` is `null` | The mapping returns `null` for a signed-in user |
-| `Schematic billing hooks need a SchematicProvider with a session…` | A component rendered outside the provider, or the provider has no `publishableKey` | Move the provider above the route and pass the publishable key |
+| `Schematic billing hooks need a SchematicProvider with a session…` | A component rendered outside the provider | Move the provider above the route |
 | 401 on the token endpoint | Endpoint not behind auth, or the secret key is missing | Check `SCHEMATIC_SECRET_KEY` on the server |
 | Checkout totals differ from Stripe | The app computed totals itself | Render `snapshot` from `useCheckout`; never sum client-side |
 

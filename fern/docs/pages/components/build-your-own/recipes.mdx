@@ -310,9 +310,14 @@ The same component serves a public page and a signed-in one. Signed out, `useCat
 ```tsx
 import { useState } from "react";
 import { useCatalog, useCompany } from "@schematichq/schematic-react";
-import { derivePricingTable, type PricingPeriod } from "@schematichq/schematic-components/elements";
+import {
+  checkoutSelectionFor,
+  derivePricingTable,
+  type CheckoutSelection,
+  type PricingPeriod,
+} from "@schematichq/schematic-components/elements";
 
-export function Pricing({ onSelect }: { onSelect: (planId: string, period: PricingPeriod | null) => void }) {
+export function Pricing({ onSelect }: { onSelect: (selection: CheckoutSelection) => void }) {
   const catalog = useCatalog();
   const company = useCompany();
   const [period, setPeriod] = useState<PricingPeriod>();
@@ -320,12 +325,17 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
   if (catalog.data === undefined) {
     return catalog.error ? <button onClick={catalog.refetch}>Retry</button> : <div className="skeleton" />;
   }
+  // The company's period decides which plan is current, so wait for it.
+  const companyMode = catalog.data.source === "company";
+  if (companyMode && company.data === undefined && company.error === undefined) {
+    return <div className="skeleton" />;
+  }
 
   const table = derivePricingTable(catalog.data, {
     locale: "en-US",
     period,
     currency,
-    company: catalog.data.source === "company" ? company.data : undefined,
+    company: companyMode ? company.data : undefined,
   });
 
   return (
@@ -348,7 +358,7 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
             ) : (
               <button
                 disabled={plan.action?.kind === "overLimit" || plan.action?.kind === "unavailable"}
-                onClick={() => onSelect(plan.id, plan.period)}
+                onClick={() => onSelect(checkoutSelectionFor(table, plan, "plan"))}
               >
                 Choose plan
               </button>
@@ -361,12 +371,12 @@ export function Pricing({ onSelect }: { onSelect: (planId: string, period: Prici
 }
 ```
 
-Render from `table.period` and `table.currency` rather than your own state: when the catalog does not offer what you asked for, the derivation falls back and says which it chose. On a public page, `onSelect` sends the visitor to sign up. Signed in, mount `CheckoutLauncherProvider` above it and open Checkout from `onSelect`:
+Render from `table.period` and `table.currency` rather than your own state: when the catalog does not offer what you asked for, the derivation falls back and says which it chose. `checkoutSelectionFor` builds the cart for a card, with its plan, period, and currency. On a public page, `onSelect` sends the visitor to sign up. Signed in, mount `CheckoutLauncherProvider` above it and open Checkout from `onSelect`:
 
 {/* samples: nocheck */}
 ```tsx
 const { open } = useCheckoutLauncher();
-<Pricing onSelect={(planId, period) => open({ selection: { planId, period: period ?? undefined } })} />
+<Pricing onSelect={(selection) => open({ selection })} />
 ```
 
 ## Implement with AI

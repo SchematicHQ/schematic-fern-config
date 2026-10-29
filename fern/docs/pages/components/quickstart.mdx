@@ -187,7 +187,7 @@ export function InvoiceHistory() {
 </Tabs>
 
 <Info>
-  The company endpoints answer 404 for an account that has not enabled them. If a correctly configured page reports `failed with status 404`, ask Schematic to enable company context (the `company-context-api` flag) for your account.
+  The company endpoints answer 404 for an account that has not enabled them. If a correctly configured page shows a drop-in's unavailable message, such as "Your plan is not available for this account.", or a hook's `error` is a 404 reading "Not found" (`httpStatus(error) === 404`), ask Schematic to enable company context (the `company-context-api` flag) for your account.
 </Info>
 
 ## Where to go next

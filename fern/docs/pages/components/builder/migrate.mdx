@@ -79,7 +79,7 @@ Header text you set in the builder becomes `strings` on the component, or on the
 
 ## Token exchange
 
-The token endpoint you already run keeps working. The provider takes it as a function instead of a string, calls it again after a 401, and expects `{ token, expiresAt }` back, so map your endpoint's fields if they differ:
+The token endpoint you already run keeps working. The provider takes the token as a string or as a function. Pass a function so it can fetch a fresh token after a 401; it expects `{ token, expiresAt }` back, so map your endpoint's fields if they differ:
 
 ```tsx
 async function fetchAccessToken() {
@@ -88,7 +88,7 @@ async function fetchAccessToken() {
 }
 ```
 
-The drop-ins read the company endpoints, which answer 404 for an account that has not enabled them. If a card reports `failed with status 404`, ask Schematic to enable company context (the `company-context-api` flag) for your account.
+The drop-ins read the company endpoints, which answer 404 for an account that has not enabled them. If a card shows its unavailable message, such as "Your plan is not available for this account.", or a hook's `error` is a 404 reading "Not found", ask Schematic to enable company context (the `company-context-api` flag) for your account.
 
 ## One card at a time
 
