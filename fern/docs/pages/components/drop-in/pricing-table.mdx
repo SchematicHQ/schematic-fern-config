@@ -120,7 +120,7 @@ In either mode, a card with prices but none in the selected currency is left out
 
 With nothing to show, the table replaces the content with a message and "Try again": a 404 reads "Plans are not available for this account.", because that status means the account is not enabled for catalogs or `catalogId` names no catalog of the account's, and every other failure reads "Plans could not be loaded." A refetch that fails with plans on screen is reported under them as "Plans could not be loaded."
 
-Server-rendered, prefetch with `fetchBillingData(client, { names: billingResources(PricingTable) })`, adding `catalog: { catalogId }` when the table sets `catalogId` so the seed matches the catalog it asks for. A resource the client cannot read, the company's view with no session or the public catalog with no key, is left out rather than failing the page.
+Server-rendered, prefetch with `fetchBillingData(client, { names: billingResources(PricingTable) })` from `@schematichq/schematic-js` ([Session and access tokens](/components/build-your-own/session) walks through it), adding `catalog: { catalogId }` when the table sets `catalogId` so the seed matches the catalog it asks for. A resource the client cannot read, the company's view with no session or the public catalog with no key, is left out rather than failing the page.
 
 ## Markup
 
