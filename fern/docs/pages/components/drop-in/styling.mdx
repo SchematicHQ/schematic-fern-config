@@ -13,13 +13,14 @@ slug: components/drop-in/styling
 | `--schematic-accent` | Links, icons, meters, and focus rings |
 | `--schematic-accent-contrast` | Text on an accent fill, for your own styles; no element sets one |
 | `--schematic-primary`, `--schematic-primary-contrast` | The filled action, `schematic-cta` |
-| `--schematic-background`, `--schematic-border`, `--schematic-card-divider` | Card surface |
+| `--schematic-background`, `--schematic-card-divider` | Card surface |
+| `--schematic-border` | Outlines on controls and small surfaces: chips, the period toggle, selects, notices, tooltips, and form inputs. Cards have no border; they use `--schematic-shadow`. |
 | `--schematic-text`, `--schematic-muted` | Text and secondary text |
 | `--schematic-danger`, `--schematic-warning`, `--schematic-meter-track` | Status colors and the meter track |
 | `--schematic-font-body`, `--schematic-font-heading`, `--schematic-font-link` | Typefaces: body text, headings, and link actions |
 | `--schematic-line-height`, `--schematic-line-height-heading` | Line heights |
-| `--schematic-surface` | The tint behind the payment method pill, feature and credit icons, user avatars, and Metered Features' price strip |
-| `--schematic-inset` | A lighter tint for panels set into a card, such as a credit's grants and a plan's auto top-up |
+| `--schematic-surface` | The tint behind the payment method pill, feature and credit icons (Pricing Table's included), user avatars, and Metered Features' price strip |
+| `--schematic-inset` | A lighter tint for panels set into a card: a credit's grants, Plan Manager's notice and auto top-up, and the Unsubscribe Button dialog's sidebar |
 | `--schematic-backdrop` | The dialog backdrop, drawn over an 8px blur |
 | `--schematic-radius`, `--schematic-shadow`, `--schematic-space`, `--schematic-card-padding` | Shape and spacing |
 
@@ -54,7 +55,7 @@ The defaults are not declared in a rule; they are `var()` fallbacks inlined at e
 
 The cost is that `--schematic-*` is undefined until you set it, so your own CSS cannot read our defaults. `schematicTokensCss` is the palette as a `:root` block if you want them globally; import it deliberately, and put it where your own tokens can still win. `SCHEMATIC_TOKENS` is the same data as an object.
 
-Overriding `background` and `text` alone leaves a card looking half-themed; `border`, `card-divider`, and `shadow` carry the rest.
+Overriding `background` and `text` alone leaves a card looking half-themed; `card-divider`, `shadow`, and `border` carry the rest.
 
 ## One card or several
 
@@ -104,6 +105,6 @@ A sheet of your own has to bring the icon font too. Render `<style>{iconsCss}</s
 
 A component's root keeps the same class list in every state, and `data-state` is `pending`, `error`, or `ready`. Unsubscribe Button sets `data-state` only on a failed read.
 
-## The theme editor
+## In the dashboard
 
-The Components tab in the dashboard edits these tokens visually against a live checkout and emits the CSS block to paste into your app. It writes exactly the overrides above and nothing else.
+The Theming page under Components in the dashboard lists every token with its light and dark default and what it paints.

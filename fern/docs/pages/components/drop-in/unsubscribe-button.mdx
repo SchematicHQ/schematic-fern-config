@@ -40,7 +40,7 @@ The button renders nothing until the company and its feature usage load. It show
 
 ## The confirmation
 
-"Unsubscribe" opens a modal titled "Cancel subscription", closed by Escape, the backdrop, or the control in its header. It says the company keeps access until the end of the billing period and names the date: the scheduled cancellation date, else the next bill date. Beside that it lists the plan and its price, each add-on that has a price, and the recurring total for the subscription's period, which counts the plan, recurring add-ons, and everything paid in advance. One-time add-ons are listed but left out of the total.
+"Unsubscribe" opens a modal titled "Cancel subscription", closed by Escape, the backdrop, or the control in its header. It says the company keeps access until the end of the billing period and names the date, the next bill date. Beside that it lists the plan and its price, each add-on that has a price, and the recurring total for the subscription's period, which counts the plan, recurring add-ons, and everything paid in advance. One-time add-ons are listed but left out of the total.
 
 "Not ready to cancel?" and "Manage plan" show only when you pass `onManagePlan` or `managePlanUrl`, so you decide where a customer who changes their mind goes.
 
@@ -61,7 +61,7 @@ Every word the component renders resolves through `strings` on the component, th
 | `unsubscribeAccessUntil` | `You will retain access to your plan until the end of the billing period, on {{date}}` |
 | `unsubscribeNotReady`, `unsubscribeManagePlan` | Not ready to cancel?, Manage plan |
 | `unsubscribePlan`, `unsubscribeAddOns` | Plan, Add-ons |
-| `unsubscribeMonthlyTotal`, `unsubscribeQuarterlyTotal`, `unsubscribeYearlyTotal` | Monthly total:, Quarterly total:, Yearly total: |
+| `unsubscribeMonthlyTotal`, `unsubscribeQuarterlyTotal`, `unsubscribeYearlyTotal` | Monthly total:, Quarterly total:, Yearly total:. Any period other than a quarter or a year uses the monthly label. |
 | `unsubscribeConfirm` | Cancel subscription |
 | `unsubscribeFailed` | Unsubscribe failed |
 | `unsubscribeClose` | Close, the dialog close control's accessible name |

@@ -51,7 +51,7 @@ A company with no event- or trait-based feature renders nothing.
 
 The headline says what is used, such as "1,300 API calls used", or for a feature paid in advance, the quantity bought. The limit line under it depends on the price behavior: "1,000 included" for an overage's soft limit, how much of a paid-in-advance quantity is in use, what pay-as-you-go usage has cost, the tier's ceiling, a credit-burning feature's credits per use, "Limit of 1,000", or "No limit". When the usage metric resets, "Resets Oct 1" follows it.
 
-The meter fills by the share of the limit used. Its `data-tone` is `ok`, then `warning` from 60% and `critical` from 80%. Tiered features use the `tier` tone, and an overage feature switches to `overage` once usage passes its soft limit. Pay-as-you-go and credit-burning features have no meter.
+The meter fills by the share of the limit used. Its `data-tone` is `ok`, then `warning` from 60% and `critical` from 80%. Tiered features use the `tier` tone, and an overage feature switches to `overage` once usage passes its soft limit. Pay-as-you-go and credit-burning features have no meter, and neither does a feature with no usage figure or no limit to measure it against. The `1,300/2,000` label beside the meter is left out when the limit is zero.
 
 An overage feature carries a footer with the price past the soft limit and what the usage beyond it costs. A tiered feature's footer names the current tier, with a tooltip listing every tier's price.
 

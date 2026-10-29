@@ -99,7 +99,7 @@ interface PricingTableSelection {
 
 `checkout` is the selection [Checkout](/components/drop-in/checkout) starts from: the plan with its period and currency, or the company's add-ons with this one added, removed or kept. `priceId` and `trialDays` describe the card; the checkout prices the cart itself and offers the trial when the company can take it.
 
-Without `onSelectPlan`, `callToActionUrl` makes each action a link; without either, cards have no action apart from the two links that follow. The custom plan links to the catalog's own URL, and a blocked downgrade to the account's. Each card shows four features before "See all". A plan's included credits read a line per credit, such as "10 AI credits per Seat per month", and a credit the plan also grants the company outright adds that share beneath it: "Plus 100 AI credits per month for your company". When `onSelectPlan` opens a checkout that changes the plan without leaving the page, call the function [`useInvalidateBillingData`](/components/build-your-own/hooks#useinvalidatebillingdata) returns once it is done, and the table reloads with the new current plan.
+Without `onSelectPlan`, `callToActionUrl` makes each action a link; without either, cards have no action apart from the custom plan and blocked downgrades. The custom plan links to the catalog's own URL. A blocked downgrade links to the account's URL, else to `callToActionUrl`, else shows its text on a disabled button. Each card shows four features before "See all". A plan's included credits read a line per credit, such as "10 AI credits per Seat per month", and a credit the plan also grants the company outright adds that share beneath it: "Plus 100 AI credits per month for your company". When `onSelectPlan` opens a checkout that changes the plan without leaving the page, call the function [`useInvalidateBillingData`](/components/build-your-own/hooks#useinvalidatebillingdata) returns once it is done, and the table reloads with the new current plan.
 
 ## Public and company modes
 
@@ -113,7 +113,7 @@ In company mode the table also reads the company, for the period its subscriptio
 | "Choose plan", "Choose add-on" | Any other plan or add-on. A plan is filled above the current plan and outlined below it. |
 | "Remove add-on", "Change add-on" | An add-on the company holds, in this period or another, respectively. |
 | "Over plan limit" | The company's usage is over a limit the plan would set. Disabled, with the features named. |
-| The account's downgrade text, else "Talk to support" | A downgrade the account does not allow in self-service. Links to the account's URL. |
+| The account's downgrade text, else "Talk to support" | A downgrade the account does not allow in self-service. Links to the account's URL, else `callToActionUrl`; disabled with neither. |
 | Disabled "Choose plan" or "Choose add-on" | The company cannot check out. |
 
 In either mode, a card with prices but none in the selected currency is left out, and a recurring one with none in the selected period. The period toggle offers only the periods the catalog prices, months before quarters before years, and a one-time add-on is priced once.

@@ -74,7 +74,7 @@ Under the plan, each section has a label you can hide with `showLabels`:
 
 - Add-ons lists each held add-on at its price, per the plan's period, or once for a one-time add-on.
 - Usage-based lists each feature with a price behavior: its limit or the quantity paid for, its unit or package price, its credits per use, and what an allocation paid in advance costs. Tiered features carry a tooltip with every tier's price.
-- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
+- Credits in plan sums the plan's grants of each credit, worded per license where the plan grants per license, with how much is used and, when the credit tops up automatically, an info tip with its threshold and top-up amount. When the plan lets the company top up its credits, an auto top-up box follows with each credit's threshold and top-up amount, or that its auto top-up is disabled, and "Edit".
 - Top-ups, Credit bundles, and Promotional credits list the company's auto top-up, purchased, and free grants, a row per bundle (or per grant outside one), newest first.
 
 Each credit section shows three rows, then "See all" for the rest. `showCredits={false}` hides every credit section.
@@ -171,10 +171,19 @@ This is what the component renders, for a host styling it without `SchematicStyl
       <ul class="schematic-plan-manager__rows">
         <li class="schematic-plan-manager__row schematic-plan-manager__row--stacked">
           <div class="schematic-plan-manager__row-main">
-            <span class="schematic-plan-manager__item">1,000 AI credits per month</span>
-            <span class="schematic-muted schematic-small schematic-plan-manager__used">400 used</span>
+            <!-- a flat grant reads "1,000 AI credits per month" and has no line below -->
+            <span class="schematic-plan-manager__item">10 AI credits per Seat + 100 AI credits per month</span>
+            <span class="schematic-muted schematic-small schematic-plan-manager__used">
+              400 used
+              <!-- when the credit tops up automatically -->
+              <span class="schematic-tooltip">
+                <button class="schematic-tooltip__trigger" aria-label="Auto top-up" aria-describedby="…">
+                  <i class="schematic-icon schematic-icon--info-rounded" aria-hidden="true"></i>
+                </button>
+                <span class="schematic-tooltip__content" id="…" role="tooltip">When credit balance reaches 50 remaining, an auto top-up of 500 credits will be processed.</span>
+              </span>
+            </span>
           </div>
-          <!-- a per-license grant -->
           <span class="schematic-muted schematic-small">12 Seats × 10 + 100 = 220 AI credits/mo</span>
         </li>
       </ul>
@@ -201,7 +210,7 @@ This is what the component renders, for a host styling it without `SchematicStyl
 </div>
 ```
 
-While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton` with a heading bar and two rows, each with a `name` and a `price` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton` with a heading bar and two rows, each with a `name` and a `price` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row. Credits that fail to load render in place of the credit sections as their own `<div class="schematic-element schematic-plan-manager__section">`, carrying `data-state="error"` with a `schematic-status` row and "Try again", then `data-state="pending"` with a skeleton while it retries.
 
 ## Build it yourself
 

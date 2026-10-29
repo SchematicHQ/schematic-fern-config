@@ -89,7 +89,7 @@ session={undefined}                                         // still finding out
 
 The identity is the `(company, user)` pair, because that is what a token is minted for. `company` is your id for the company. `user` is optional: leave it out where your tokens are company-wide, and state it where you mint per person.
 
-`null` signs out: every card empties until a session returns. `undefined` says you do not know yet, which is what an auth resolving asynchronously renders first: the cards hold their loading state rather than reporting an error. Pricing Table shows the public catalog in both. Auth libraries can blur the two, so read their loaded and signed-in flags before deciding which you mean. [Session and access tokens](/components/build-your-own/session) covers token providers, refresh, and server rendering.
+`null` signs out: every card empties until a session returns. `undefined` says you do not know yet, which is what an auth resolving asynchronously renders first. It changes nothing: before any session the cards hold their loading state rather than reporting an error, and after one they keep showing it until you pass a new session or `null`. Pricing Table shows the public catalog in both. Auth libraries can blur the two, so read their loaded and signed-in flags before deciding which you mean. [Session and access tokens](/components/build-your-own/session) covers token providers, refresh, and server rendering.
 
 ## Before it can load
 

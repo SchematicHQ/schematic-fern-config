@@ -32,7 +32,7 @@ Adding a method renders Stripe's Payment Element from `@stripe/stripe-js` and `@
 | `showHeader` | `true` | The "Payment Details" heading, and the expiry warning beside it, on the card. The dialog always shows both. |
 | `showExpiration` | `true` | The warning when the default card has fewer than four months left, on the card. The dialog always shows it. |
 | `allowEdit` | `true` | The Edit (or Add) action on the pill, and the dialog behind it. `false` shows the method on file with no way to change it. |
-| `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
+| `headingLevel` | `2` | The card's heading level, `1` through `6`, so the card fits your page's outline. The dialog's copy of the heading is always an `h3`. |
 | `checkoutSettings` | | What the Add form collects beyond the payment fields. See [Checkout settings](#checkout-settings). |
 | `checkoutPrefill` | | Values the Add form starts with. See [Checkout settings](#checkout-settings). |
 | `className` | | Added to the root alongside `schematic-element schematic-card schematic-payment-methods`. |
@@ -51,13 +51,13 @@ The default is whichever method the server marks: the subscription's own payment
 
 Edit opens a modal titled "Edit payment details", closed by Escape, the backdrop, or the control in its header. It repeats the heading and the expiry warning, then the pill, with Remove in place of Edit. "Choose different payment method" unfolds the other methods, each with when a card expires ("Expires 8/27"), Set default, and a remove control where `canRemove` allows, then a full-width "Add new payment method" that opens the form.
 
-Every action is disabled while a change is in flight. A change that lands leaves the dialog as it was over the refreshed list. One that fails is reported at the foot of the dialog, "Error updating payment method. Please try again." or "Error deleting payment method. Please try again.", with "Try again" to re-run it.
+Remove, Set default, "Add new payment method", and "Try again" are disabled while a change is in flight; the toggle, the close control, and the card's Edit stay available. A change that lands leaves the dialog as it was over the refreshed list. One that fails is reported at the foot of the dialog, "Error updating payment method. Please try again." or "Error deleting payment method. Please try again.", with "Try again" to re-run it.
 
 ## Adding a method
 
 The form mints a Stripe SetupIntent, mounts Stripe's Payment Element on it, and confirms the setup in place. The saved method becomes the default, and the dialog returns to it. "Save payment method" waits until Stripe calls the fields complete and reads "Loading" while it saves. "Select existing payment method" goes back without saving. With nothing on file the dialog opens straight onto the form.
 
-Stripe's own wording shows for a declined card or an invalid field. Any other failure reads "A problem occurred while saving your payment method." If the SetupIntent cannot be minted, the form reads "Error initializing payment method change. Please try again." If the form cannot load, including when the browser blocks Stripe or its fields do not come up within ten seconds, it says so and suggests the browser's privacy settings may be the cause.
+Stripe's own wording shows for a declined card or an invalid field. Any other failure reads "A problem occurred while saving your payment method." If minting the SetupIntent fails, the form reads "Error initializing payment method change. Please try again." If the form cannot load, including when the SetupIntent comes back without a client secret, including when the browser blocks Stripe or its fields do not come up within ten seconds, it says so and suggests the browser's privacy settings may be the cause.
 
 Stripe's fields render in an iframe your CSS cannot reach, so the form themes them from the `--schematic-*` tokens as the browser resolves them, dark mode included.
 
@@ -76,7 +76,7 @@ Stripe's fields render in an iframe your CSS cannot reach, so the form themes th
 | --- | --- |
 | `collectEmail` | A required "Email" field under Stripe's, filled from `billingDetails.email` until the customer types. Sent as the method's billing email. |
 | `collectAddress` | Stripe's billing address fields, with the name filled from `billingDetails.name`. Save waits for them to be complete. |
-| `collectPhone` | The same address fields with a phone number among them. |
+| `collectPhone` | The same address fields with a phone number among them. Unlike `collectAddress`, Save does not wait for the address to be complete. |
 
 The prefilled name is sent as the billing name whenever the address fields show. Each setting defaults to `false`.
 

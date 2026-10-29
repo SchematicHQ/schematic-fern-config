@@ -133,7 +133,7 @@ One row per feature the company is entitled to, read from `GET /company/usage`. 
 function useFeatureUserUsage(featureId: string): ResourceHandle<FeatureUserUsage>;
 ```
 
-One event-based feature's usage by user over its metric period, read from `GET /company/usage/:feature_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `usage`, `share`, and `lastSeen`. `count` is how many users there are in all, `total` is the period's usage, `startTime` and `endTime` bound the period, and `unattributed` is usage from events sent without a user. A feature that is not an event-based entitlement of the company answers 404.
+One event-based feature's usage by user over its metric period, read from `GET /company/usage/:feature_id/users`. `users` holds up to `FEATURE_USER_USAGE_LIMIT` (20) of the heaviest users, each with `userId`, `name`, `usage`, `share`, and `lastSeen`. `count` is how many users there are in all, `total` is the period's usage, `startTime` and `endTime` bound the period, and `unattributed` is usage from events sent without a user. A feature that is not an event-based entitlement of the company answers 404.
 
 ## useCreditBalances
 
@@ -161,7 +161,7 @@ A credit the plan draws on that the company holds none of is listed with a zero 
 function useCreditUserUsage(creditId: string): ResourceHandle<CreditUserUsage>;
 ```
 
-One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to the 20 heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty; an unknown credit answers 404.
+One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to `FEATURE_USER_USAGE_LIMIT` (20) of the heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty; an unknown credit answers 404.
 
 ## useUpcomingInvoice
 
@@ -180,7 +180,7 @@ type InvoiceQuery = { includePending?: boolean };
 type InvoicePage = { invoices: Invoice[]; count: number; hasMore: boolean };
 ```
 
-The invoice history, paged. `count` is how many invoices the query matches on the server, so a list showing four rows can say how many the company has. `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `isPending` is true while the page is on the wire, so a button can disable itself without awaiting anything, and clicking twice makes one request. `refetch` re-requests every page loaded so far, not only the first.
+The invoice history, `INVOICE_PAGE_SIZE` (12) invoices a page. `count` is how many invoices the query matches on the server, so a list showing four rows can say how many the company has. `hasMore` is that count set against the rows loaded, and an empty page ends the list regardless. `loadMore` appends the next page, settles when it lands, and never rejects; read `error` for the failure, and the rows already fetched stay put. `isPending` is true while the page is on the wire, so a button can disable itself without awaiting anything, and clicking twice makes one request. `refetch` re-requests every page loaded so far, not only the first.
 
 `{ includePending: true }` includes unpaid invoices that are not yet due. Each distinct query is its own list with its own paging, so `useInvoices({ includePending: true })` and `useInvoices()` never share rows. The hook keys by value, so an inline object literal is fine.
 
@@ -336,14 +336,21 @@ function AddPaymentMethod({ onDone }: { onDone: () => void }) {
   const { create } = useSetupIntent();
   // Stripe is loaded once per intent: <Elements> must keep the same promise.
   const [ready, setReady] = useState<{ clientSecret: string; stripe: Promise<Stripe | null> }>();
+  const [error, setError] = useState<Error>();
   useEffect(() => {
-    void create().then((intent) => {
-      if (intent.setupIntentClientSecret) {
-        setReady({ clientSecret: intent.setupIntentClientSecret, stripe: stripeFor(intent) });
-      }
-    });
+    create().then(
+      (intent) => {
+        if (intent.setupIntentClientSecret) {
+          setReady({ clientSecret: intent.setupIntentClientSecret, stripe: stripeFor(intent) });
+        } else {
+          setError(new Error("The payment form could not be loaded."));
+        }
+      },
+      (failure: Error) => setError(failure),
+    );
   }, [create]);
 
+  if (error) return <p role="alert">{error.message}</p>;
   if (!ready) return <p>Loading…</p>;
   return (
     <Elements stripe={ready.stripe} options={{ clientSecret: ready.clientSecret }}>
@@ -429,6 +436,28 @@ function UpgradeButton({ changePlan }: { changePlan: () => Promise<void> }) {
 }
 ```
 
+## Locale and copy
+
+The drop-ins format and word everything through the `locale`, `strings`, and `translate` on `SchematicProvider`. These read the same settings, so a component of your own follows the same overrides. [Localization](/components/drop-in/localization) covers the settings themselves.
+
+```ts
+// @schematichq/schematic-react
+function useSchematicI18n(): { locale?: string; translate?: Translate; strings?: StringOverrides; onMissingString?: (key: string) => void };
+function useSchematicLocale(): string | undefined;
+function useSchematicTranslate(): Translate | undefined;
+function useSchematicStrings(): StringOverrides | undefined;
+
+// @schematichq/schematic-components/elements
+function useResolvedLocale(locale?: string): string;
+function useTranslator(strings?: StringOverrides, locale?: string): (key: StringKey, vars?: StringVars) => string;
+```
+
+The `useSchematic*` hooks return the provider's settings as given: `useSchematicLocale` is `undefined` when the provider sets no locale, and outside any provider `useSchematicI18n` returns an empty object. `useResolvedLocale` applies the drop-ins' fallback: the argument, else the provider's locale, else the viewer's. The viewer's language is left out of a server render and its hydration, so set `locale` on the provider for a server-rendered page.
+
+`useTranslator` returns the function the drop-ins word their copy with. It looks a key up in the `strings` you pass, then the provider's `strings`, then the provider's `translate`, then the English default, so it always returns a string. The [customer portal recipe](/components/build-your-own/recipes#customer-portal) uses it to word a payment method's label.
+
+`SchematicI18nProvider` sets `locale`, `translate`, `strings`, and `onMissingString` for the part of the tree below it. `SchematicProvider` renders one, so you need it only to change the settings for one part of a page. A nested provider merges with the one above it: one that sets only `locale` keeps the `translate` above it, and `strings` combine key by key.
+
 ## Testing and fixtures
 
 `BillingDataProvider` serves fixed data to the hooks with no network and no session, so a component can be rendered in a test or a story with the rows you choose.
@@ -442,7 +471,7 @@ import { BillingDataProvider } from "@schematichq/schematic-react";
 </BillingDataProvider>;
 ```
 
-`data` takes a value per resource: `catalog`, `publicCatalog`, `company`, `featureUsage`, `creditBalances`, `upcomingInvoice`, `paymentMethods`, and `invoices`. A missing key reports as pending. Given `publicCatalog` without `catalog`, `useCatalog` reports the public source, as on a signed-out page. `featureUserUsage` and `creditUserUsage` take the per-user breakdowns keyed by feature or credit id. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, `createSetupIntent`, and `unsubscribe` receive the calls `usePaymentMethods`, `useSetupIntent`, and `useUnsubscribe` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
+`data` takes a value per resource: `catalog`, `publicCatalog`, `company`, `featureUsage`, `creditBalances`, `upcomingInvoice`, `paymentMethods`, and `invoices`. A missing key reports as pending. Given `publicCatalog` without `catalog`, `useCatalog` reports the public source, as on a signed-out page. The per-user breakdowns are not part of `data`: they have their own props, `featureUserUsage` and `creditUserUsage`, each keyed by feature or credit id. `status` overrides a resource's `isPending` or `error`, so the loading and failure states render on demand, and `onRefetch` and `onLoadMoreInvoices` receive the calls a component makes. `actions` stands in for the writes: `setDefaultPaymentMethod`, `removePaymentMethod`, `createSetupIntent`, and `unsubscribe` receive the calls `usePaymentMethods`, `useSetupIntent`, and `useUnsubscribe` make, and whatever they resolve or reject with is what the component sees. The provider also accepts `locale`, `strings`, `translate`, and `onMissingString`, so a fixture can exercise copy overrides too.
 
 ## Flags and entitlement checks
 
