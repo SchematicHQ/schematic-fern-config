@@ -1,7 +1,10 @@
 info:
-  title: Schematic API
+  title: Components API
   version: '0.1'
-  description: Schematic API
+  description: >-
+    The browser-facing billing API behind the drop-in components and the
+    schematic-react hooks. A temporary access token scopes every call to one
+    company.
 openapi: 3.0.0
 security:
   - ApiKeyAuth: []
@@ -13,6 +16,11 @@ components:
       type: apiKey
       in: header
       name: X-Schematic-Api-Key
+      description: >-
+        A temporary access token in the `X-Schematic-Api-Key` header. Your
+        server mints it with `POST /temporary-access-tokens` on the secret-key
+        API for a company, optionally for one of its users, and hands it to the
+        page. The token fixes the company every request reads and writes.
   responses:
     BadRequest:
       description: Bad request
@@ -9047,7 +9055,13 @@ paths:
   /catalog/view:
     get:
       operationId: getCatalogView
-      summary: Get catalog view
+      summary: Get the catalog view
+      description: >-
+        The environment's catalog as the company sees it: plans, add-ons and
+        credit bundles, each with the company's standing against it (`current`,
+        `valid`, `invalid_reason`, `company_can_trial`), the checkout settings,
+        and `capabilities.checkout`. Needs the `multi-product-catalog` flag on
+        the account.
       tags:
         - checkoutexternal
       responses:
@@ -9076,10 +9090,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: catalog
   /catalogs/{catalog_id}/view:
     get:
       operationId: getCatalogViewByID
-      summary: Get catalog view by ID
+      summary: Get a catalog view by ID
+      description: >-
+        The same view for the catalog `catalog_id` names rather than the
+        environment's default catalog.
       tags:
         - checkoutexternal
       parameters:
@@ -9115,6 +9135,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: catalog
   /checkout:
     post:
       operationId: checkout
@@ -9165,6 +9188,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /checkout/balance:
     get:
       operationId: fetchCustomerBalance
@@ -9197,6 +9222,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /checkout/custom-field-values:
     post:
       operationId: updateCheckoutFieldValues
@@ -9237,10 +9264,17 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /checkout/paymentmethod/{checkout_id}:
     delete:
       operationId: deletePaymentMethod
-      summary: Delete payment method
+      summary: Remove a payment method
+      description: >-
+        Detaches a payment method from the company's billing customer. The path
+        parameter is the payment method's `id` from the list, not a checkout's;
+        `usePaymentMethods().remove` calls this and reloads the list. The list
+        says whether each method can be removed.
       tags:
         - checkoutexternal
       parameters:
@@ -9278,10 +9312,19 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: payment
   /checkout/paymentmethod/update:
     post:
       operationId: updatePaymentMethod
-      summary: Update payment method
+      summary: Make a payment method the default
+      description: >-
+        Makes a method on file the one the company's charges use. The body's
+        `payment_method_id` is the provider's id of the method, the
+        `external_id` the list returns; `usePaymentMethods().setDefault` calls
+        this and reloads the list. A card saved during a checkout joins the
+        methods on file and becomes the default the same way.
       tags:
         - checkoutexternal
       requestBody:
@@ -9318,6 +9361,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: payment
   /checkout/preview:
     post:
       operationId: previewCheckout
@@ -9365,10 +9411,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /checkout/tax-id:
     get:
       operationId: getCheckoutTaxID
-      summary: Get checkout tax ID
+      summary: List tax IDs
+      description: The company's tax IDs on file with the billing provider.
       tags:
         - checkoutexternal
       responses:
@@ -9397,9 +9446,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: taxIds
     post:
       operationId: updateCheckoutTaxID
-      summary: Update checkout tax ID
+      summary: Set the tax ID
+      description: >-
+        Saves a tax ID on the company's billing customer and answers with every
+        tax ID now on file. The tax ID is not part of a checkout's cart; save it
+        before the finalize that needs it.
       tags:
         - checkoutexternal
       requestBody:
@@ -9436,10 +9492,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: taxIds
   /checkout/unsubscribe:
     delete:
       operationId: checkoutUnsubscribe
-      summary: Checkout unsubscribe
+      summary: Cancel the subscription
+      description: Cancels the company's subscription at the end of the current period.
       tags:
         - checkoutexternal
       responses:
@@ -9470,10 +9530,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: payment
   /checkouts:
     get:
       operationId: listCheckouts
       summary: List checkouts
+      description: >-
+        The checkouts this session opened for the token's company. Filter by
+        `statuses`.
       tags:
         - checkoutexternal
       parameters:
@@ -9558,9 +9624,18 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: checkouts
     post:
       operationId: createCheckout
-      summary: Create checkout
+      summary: Create a checkout
+      description: >-
+        Opens a checkout for the token's company and prices the cart when it is
+        priceable. A cart the purchase rules reject is still created, open, with
+        the one problem that says why; a refusal creates nothing. The response
+        carries the `version` every later write must send, and `expires_at` says
+        when an open checkout closes on its own.
       tags:
         - checkoutexternal
       requestBody:
@@ -9597,10 +9672,18 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: checkouts
   /checkouts/{checkout_id}:
     get:
       operationId: getCheckout
-      summary: Get checkout
+      summary: Get a checkout
+      description: >-
+        Reads a checkout this session opened. Resume from here before writing:
+        the `version` it returns is the one the next update must send. A
+        checkout another session built, or one for another company, reads as not
+        found.
       tags:
         - checkoutexternal
       parameters:
@@ -9636,9 +9719,20 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: checkouts
     put:
       operationId: updateCheckout
-      summary: Update checkout
+      summary: Update a checkout
+      description: >-
+        Replaces the cart and prices it again. Send the `version` last read; a
+        stale one answers 409 and changes nothing, so read the checkout and send
+        the write again at its version. A cart the purchase rules reject is
+        saved with its price cleared and one problem saying why, and the version
+        still advances. The `X-Checkout-Session-ID` response header names the
+        session this price belongs to; send it back on the finalize that
+        follows.
       tags:
         - checkoutexternal
       parameters:
@@ -9691,10 +9785,23 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: checkouts
   /checkouts/{checkout_id}/finalize:
     post:
       operationId: finalizeCheckout
-      summary: Finalize checkout
+      summary: Finalize a checkout
+      description: >-
+        Charges the cart at `version` and applies it to the subscription. The
+        version is claimed before the billing provider is called, so of two
+        concurrent finalizes only one charges. The cart is priced once more
+        first: a blocking problem refuses the purchase with 400 and the fresh
+        `problems` list, and a checkout priced before a sibling completed is
+        refused with 409. The claim is not released when the charge fails, so
+        read the checkout before trying again. When the charge needs the
+        customer, as with 3-D Secure, the response carries
+        `confirm_payment_intent_client_secret` to confirm with Stripe.
       tags:
         - checkoutexternal
       parameters:
@@ -9747,10 +9854,18 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: checkouts
   /company:
     get:
       operationId: getCompany
-      summary: Get company
+      summary: Get the company
+      description: >-
+        The token's company: its plan and add-ons, the subscription's period and
+        currency, and the payment method on file. Needs the
+        `company-context-api` flag on the account; without it every `/company`
+        read answers 404.
       tags:
         - checkoutexternal
       responses:
@@ -9779,10 +9894,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/credits:
     get:
       operationId: getCompanyCreditBalances
-      summary: Get company credit balances
+      summary: List credit balances
+      description: >-
+        The company's credit balances, with what each grant holds and what is
+        purchasable.
       tags:
         - checkoutexternal
       responses:
@@ -9811,10 +9932,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/credits/{credit_id}/users:
     get:
       operationId: getCompanyCreditUserUsage
-      summary: Get company credit user usage
+      summary: List credit usage by user
+      description: Who in the company consumed the credit, and how much each.
       tags:
         - checkoutexternal
       parameters:
@@ -9881,10 +10006,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/invoices:
     get:
       operationId: getCompanyInvoices
-      summary: Get company invoices
+      summary: List invoices
+      description: >-
+        The company's invoices, newest first. An empty list is a company with
+        none.
       tags:
         - checkoutexternal
       parameters:
@@ -9965,10 +10096,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/payment-methods:
     get:
       operationId: getCompanyPaymentMethods
-      summary: Get company payment methods
+      summary: List payment methods
+      description: >-
+        The company's payment methods on file, with the default marked and
+        whether each can be removed.
       tags:
         - checkoutexternal
       responses:
@@ -9997,10 +10134,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/upcoming-invoice:
     get:
       operationId: getCompanyUpcomingInvoice
-      summary: Get company upcoming invoice
+      summary: Get the upcoming invoice
+      description: >-
+        A live preview of the company's next invoice from the billing provider.
+        A company with nothing to bill answers 204.
       tags:
         - checkoutexternal
       responses:
@@ -10031,10 +10174,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/usage:
     get:
       operationId: getCompanyFeatureUsage
-      summary: Get company feature usage
+      summary: List feature usage
+      description: The company's entitlements and usage against each metered feature.
       tags:
         - checkoutexternal
       responses:
@@ -10063,10 +10210,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /company/usage/{feature_id}/users:
     get:
       operationId: getCompanyFeatureUserUsage
-      summary: Get company feature user usage
+      summary: List feature usage by user
+      description: Who in the company used the feature, and how much each.
       tags:
         - checkoutexternal
       parameters:
@@ -10133,6 +10284,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
   /components/{component_id}/hydrate:
     get:
       operationId: hydrateComponent
@@ -10200,6 +10354,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/{component_id}/hydrate/upcoming-invoice:
     get:
       operationId: hydrateUpcomingInvoice
@@ -10239,6 +10395,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/{component_id}/setup-intent:
     get:
       operationId: getSetupIntent
@@ -10278,6 +10436,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/hydrate:
     get:
       operationId: hydrate
@@ -10318,6 +10478,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/invoices:
     get:
       operationId: listInvoices
@@ -10388,10 +10550,16 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/setup-intent:
     post:
       operationId: createSetupIntent
-      summary: Create setup intent
+      summary: Create a setup intent
+      description: >-
+        A Stripe SetupIntent for collecting a new payment method with Stripe's
+        Payment Element. Confirm it with `stripe.confirmSetup`; the method it
+        saves joins the company's methods on file.
       tags:
         - checkoutexternal
       responses:
@@ -10422,6 +10590,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: payment
   /components/usage-by-user/credits/{billing_credit_id}:
     get:
       operationId: getCreditUsageByUser
@@ -10492,6 +10663,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /components/usage-by-user/features/{feature_id}:
     get:
       operationId: getFeatureUsageByUser
@@ -10562,5 +10735,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
 tags:
   - name: checkoutexternal

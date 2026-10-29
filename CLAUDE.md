@@ -82,9 +82,19 @@ Description, not a point: `Each one is a separate lookup, and the call comes bac
 A point: `Each one is a separate lookup, so plenty of CSMs skip it and walk into the call
 guessing.`
 
+**Samples on the components pages compile.** `scripts/check_samples.py` type-checks every
+`ts`, `tsx` and `typescript` fence under `fern/docs/pages/components/` against the published
+packages pinned in `scripts/samples/package.json`, and CI runs it on every PR. A block that is
+partial on purpose, because it leans on a component an earlier block defines or elides a
+reader-owned file, carries `{/* samples: nocheck <reason> */}` on the line above its fence.
+Names a reader's own app provides, such as `company`, `router` and `fetchAccessToken`, are
+declared once in `scripts/samples/host.d.ts`; a name a page defines itself never goes there,
+because a placeholder hides a sample that forgot its import.
+
 ## Verifying
 
 ```sh
 npx fern-api check          # not `npx fern check`: the root package.json has an unrelated "fern" package
 python3 scripts/prose_lint.py
+npm ci --prefix scripts/samples && python3 scripts/check_samples.py
 ```

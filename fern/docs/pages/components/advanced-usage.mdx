@@ -37,6 +37,7 @@ import {
   useEmbed,
 } from "@schematichq/schematic-components";
 import { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 const PLAN_ID = ""; // plan to be preselected
 
@@ -77,6 +78,8 @@ The key element is `initializeWithPlan`, an alternate entry point to the checkou
 
 In the above example, while the plan is pre-selected, the user will still be able to navigate the full checkout flow. A common desire is to take the user directly to the payment step, and remove the options to change plan or add-on choices. To achieve this, `initializeWithPlan` can be called with an object of additional options. The full set of options are below.
 
+{/* samples: nocheck, initializeWithPlan comes from the useEmbed() call in the block above */}
+
 ```ts
 const config = {
   planId: 'plan_abc123',           // pre-select a Plan
@@ -115,6 +118,8 @@ When the pre-selected plan offers a trial and the company is eligible, `initiali
 ### Pre-filling checkout fields
 
 If your application already knows the customer's billing email or name, you can pre-populate those fields in the checkout payment form so the user does not have to retype them. Pass a `checkoutPrefill` prop to `EmbedProvider`:
+
+{/* samples: nocheck, Checkout is the component the first block on this page defines */}
 
 ```tsx
 <EmbedProvider

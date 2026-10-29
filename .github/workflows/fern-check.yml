@@ -18,3 +18,91 @@ jobs:
 
       - name: Check API definition is valid
         run: fern check
+
+      # `broken-links: warn` in docs.yml, so a dead link lands here and in
+      # `fern check --warnings` without failing the job.
+      - name: Report broken links
+        if: always()
+        run: |
+          fern check --warnings 2>&1 | grep -A 1 "broken link to" > links.txt || true
+          {
+            echo "### Broken links"
+            if [ -s links.txt ]; then echo '```'; cat links.txt; echo '```'; else echo "none"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Report-only: drop `continue-on-error` to make it required.
+  check-samples:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/samples/package-lock.json
+
+      - name: Install the pinned packages
+        run: npm ci --prefix scripts/samples
+
+      - name: Type-check the components docs samples
+        id: check
+        run: python3 scripts/check_samples.py | tee samples.txt
+
+      - name: Write the findings into the job summary
+        if: always()
+        run: |
+          { echo "### Sample type-check"; echo '```'; cat samples.txt; echo '```'; } | tee samples-comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment the findings on the PR
+        if: always() && github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2.4.3
+        with:
+          filePath: samples-comment.md
+          comment_tag: check-samples
+          create_if_not_exists: ${{ steps.check.outcome == 'failure' }}
+
+  # Report-only: drop `continue-on-error` to make it required. Only the pages
+  # this PR changes are linted, so older pages do not block it.
+  prose-lint:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Lint the prose of the pages this PR changes
+        id: check
+        run: |
+          base="${{ github.event.pull_request.base.sha || 'origin/main' }}"
+          python3 scripts/prose_lint.py -- $(git diff --name-only --diff-filter=AMR "$base"...HEAD -- 'fern/docs/pages/**/*.mdx') | tee prose.txt
+
+      - name: Write the findings into the job summary
+        if: always()
+        run: |
+          { echo "### Prose lint"; echo '```'; cat prose.txt; echo '```'; } | tee prose-comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment the findings on the PR
+        if: always() && github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2.4.3
+        with:
+          filePath: prose-comment.md
+          comment_tag: prose-lint
+          create_if_not_exists: ${{ steps.check.outcome == 'failure' }}
