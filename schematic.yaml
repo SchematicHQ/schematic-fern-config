@@ -19992,6 +19992,10 @@ components:
       properties:
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
         days_until_due:
           type: integer
           format: int64
@@ -20011,6 +20015,11 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        overdraft_limit:
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
         payment_gating:
           allOf:
             - $ref: '#/components/schemas/PaymentGating'
