@@ -1220,6 +1220,12 @@ components:
     BillingInvoiceDetailResponseData:
       type: object
       properties:
+        amount_due:
+          type: integer
+          description: >-
+            What the company is asked to pay: the total less any balance applied
+            to it, never below zero. Zero on a draft.
+          format: int64
         amount_paid:
           type: integer
           format: int64
@@ -1263,6 +1269,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        ending_balance:
+          type: integer
+          description: >-
+            The company's balance after this invoice, in minor units. Below zero
+            is credit the next invoice takes off what is due.
+          format: int64
         external_id:
           type: string
           description: >-
@@ -1306,6 +1318,12 @@ components:
           items:
             $ref: '#/components/schemas/BillingInvoiceSettlementResponseData'
           maxItems: 1000
+        starting_balance:
+          type: integer
+          description: >-
+            The company's balance before this invoice, in minor units. Below
+            zero is credit applied to this invoice.
+          format: int64
         status:
           $ref: '#/components/schemas/InvoiceStatus'
         subscription_external_id:
@@ -1344,13 +1362,16 @@ components:
             Schematic issued.
           nullable: true
       required:
+        - amount_due
         - amount_paid
         - amount_remaining
         - company_id
         - created_at
         - currency
+        - ending_balance
         - id
         - provider_type
+        - starting_balance
         - status
         - subtotal
         - total
@@ -1425,6 +1446,12 @@ components:
     BillingInvoiceResponseData:
       type: object
       properties:
+        amount_due:
+          type: integer
+          description: >-
+            What the company is asked to pay: the total less any balance applied
+            to it, never below zero. Zero on a draft.
+          format: int64
         amount_paid:
           type: integer
           format: int64
@@ -1462,6 +1489,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        ending_balance:
+          type: integer
+          description: >-
+            The company's balance after this invoice, in minor units. Below zero
+            is credit the next invoice takes off what is due.
+          format: int64
         external_id:
           type: string
           description: >-
@@ -1489,6 +1522,12 @@ components:
           nullable: true
         provider_type:
           $ref: '#/components/schemas/BillingProviderType'
+        starting_balance:
+          type: integer
+          description: >-
+            The company's balance before this invoice, in minor units. Below
+            zero is credit applied to this invoice.
+          format: int64
         status:
           $ref: '#/components/schemas/InvoiceStatus'
         subscription_external_id:
@@ -1510,13 +1549,16 @@ components:
             Schematic issued.
           nullable: true
       required:
+        - amount_due
         - amount_paid
         - amount_remaining
         - company_id
         - created_at
         - currency
+        - ending_balance
         - id
         - provider_type
+        - starting_balance
         - status
         - subtotal
         - total
@@ -1737,6 +1779,13 @@ components:
     BillingNativeSubscriptionResponseData:
       type: object
       properties:
+        balance:
+          type: integer
+          description: >-
+            The company's balance on its contract, in minor units of the
+            currency. Below zero is credit the next invoice takes off what is
+            due. Zero when the company has no billing profile.
+          format: int64
         cancel_at:
           type: string
           format: date-time
@@ -1784,6 +1833,7 @@ components:
             The contract terms in force. Null when the company has no billing
             profile.
       required:
+        - balance
         - company_id
         - currency
         - id
