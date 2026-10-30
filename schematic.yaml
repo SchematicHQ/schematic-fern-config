@@ -5288,6 +5288,13 @@ components:
     CompanyFeatureUsageExportMetadata:
       type: object
       properties:
+        cancel_at_period_end:
+          type: boolean
+          description: >-
+            If true, restrict the export to companies with an active
+            subscription that is set to cancel at the end of the current period;
+            if false, restrict it to companies without one
+          nullable: true
         company_ids:
           type: array
           description: >-
@@ -27847,6 +27854,18 @@ paths:
       tags:
         - companies
       parameters:
+        - name: cancel_at_period_end
+          in: query
+          description: >-
+            If true, filter companies with an active subscription that is set to
+            cancel at the end of the current period; if false, filter companies
+            without one
+          schema:
+            type: boolean
+            description: >-
+              If true, filter companies with an active subscription that is set
+              to cancel at the end of the current period; if false, filter
+              companies without one
         - name: credit_type_ids
           in: query
           description: >-
@@ -27862,10 +27881,14 @@ paths:
             maxItems: 100
         - name: has_scheduled_downgrade
           in: query
-          description: Filter companies that have a pending scheduled downgrade
+          description: >-
+            If true, filter companies that have a pending scheduled downgrade;
+            if false, filter companies that do not
           schema:
             type: boolean
-            description: Filter companies that have a pending scheduled downgrade
+            description: >-
+              If true, filter companies that have a pending scheduled downgrade;
+              if false, filter companies that do not
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -28040,6 +28063,12 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      cancel_at_period_end:
+                        type: boolean
+                        description: >-
+                          If true, filter companies with an active subscription
+                          that is set to cancel at the end of the current
+                          period; if false, filter companies without one
                       credit_type_ids:
                         type: array
                         description: >-
@@ -28051,8 +28080,9 @@ paths:
                       has_scheduled_downgrade:
                         type: boolean
                         description: >-
-                          Filter companies that have a pending scheduled
-                          downgrade
+                          If true, filter companies that have a pending
+                          scheduled downgrade; if false, filter companies that
+                          do not
                       ids:
                         type: array
                         description: >-
@@ -28430,6 +28460,18 @@ paths:
       tags:
         - companies
       parameters:
+        - name: cancel_at_period_end
+          in: query
+          description: >-
+            If true, filter companies with an active subscription that is set to
+            cancel at the end of the current period; if false, filter companies
+            without one
+          schema:
+            type: boolean
+            description: >-
+              If true, filter companies with an active subscription that is set
+              to cancel at the end of the current period; if false, filter
+              companies without one
         - name: credit_type_ids
           in: query
           description: >-
@@ -28445,10 +28487,14 @@ paths:
             maxItems: 100
         - name: has_scheduled_downgrade
           in: query
-          description: Filter companies that have a pending scheduled downgrade
+          description: >-
+            If true, filter companies that have a pending scheduled downgrade;
+            if false, filter companies that do not
           schema:
             type: boolean
-            description: Filter companies that have a pending scheduled downgrade
+            description: >-
+              If true, filter companies that have a pending scheduled downgrade;
+              if false, filter companies that do not
         - name: ids
           in: query
           description: Filter companies by multiple company IDs (starts with comp_)
@@ -28619,6 +28665,12 @@ paths:
                     type: object
                     description: Input parameters
                     properties:
+                      cancel_at_period_end:
+                        type: boolean
+                        description: >-
+                          If true, filter companies with an active subscription
+                          that is set to cancel at the end of the current
+                          period; if false, filter companies without one
                       credit_type_ids:
                         type: array
                         description: >-
@@ -28630,8 +28682,9 @@ paths:
                       has_scheduled_downgrade:
                         type: boolean
                         description: >-
-                          Filter companies that have a pending scheduled
-                          downgrade
+                          If true, filter companies that have a pending
+                          scheduled downgrade; if false, filter companies that
+                          do not
                       ids:
                         type: array
                         description: >-
