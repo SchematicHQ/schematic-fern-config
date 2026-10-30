@@ -284,6 +284,18 @@ components:
         - capture
         - read
         - write
+    AuditLogCompanyResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          maxLength: 255
+      required:
+        - id
+        - name
+      title: AuditLogCompanyResponseData
     AuditLogExportMetadata:
       type: object
       properties:
@@ -333,6 +345,11 @@ components:
         api_key:
           $ref: '#/components/schemas/ApiKeyResponseData'
         api_key_id:
+          type: string
+          nullable: true
+        company:
+          $ref: '#/components/schemas/AuditLogCompanyResponseData'
+        company_id:
           type: string
           nullable: true
         ended_at:
@@ -409,6 +426,11 @@ components:
         api_key:
           $ref: '#/components/schemas/ApiKeyResponseData'
         api_key_id:
+          type: string
+          nullable: true
+        company:
+          $ref: '#/components/schemas/AuditLogCompanyResponseData'
+        company_id:
           type: string
           nullable: true
         ended_at:
@@ -1352,6 +1374,7 @@ components:
           description: >-
             The contract's terms, copied when the invoice was finalized. Null on
             a draft and on a Stripe invoice.
+          nullable: true
         total:
           type: integer
           format: int64
@@ -1606,6 +1629,7 @@ components:
           description: >-
             Who invoices are addressed to. On an invoice, these are the details
             copied when it was finalized. Null when the contract holds none.
+          nullable: true
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
         collector:
@@ -1677,10 +1701,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingNativeSubscriptionLineResponseData'
           description: The line added, or the line removed. Null on a cancellation.
+          nullable: true
         replaces:
           allOf:
             - $ref: '#/components/schemas/BillingNativeSubscriptionLineResponseData'
           description: The line a replacement ends. Null unless the action is replace.
+          nullable: true
       required:
         - action
         - effective_at
@@ -1824,6 +1850,7 @@ components:
           description: >-
             The charges not yet invoiced on the company's contract. Null when
             the company has no billing profile.
+          nullable: true
         status:
           $ref: '#/components/schemas/SubscriptionStatus'
         terms:
@@ -1832,6 +1859,7 @@ components:
           description: >-
             The contract terms in force. Null when the company has no billing
             profile.
+          nullable: true
       required:
         - balance
         - company_id
@@ -2058,6 +2086,7 @@ components:
           description: >-
             The Stripe price a billed grant bills through. Minted when the plan
             version is published.
+          nullable: true
         price_tiers:
           type: array
           description: >-
@@ -3505,6 +3534,7 @@ components:
           description: >-
             Present when the catalog offers a custom plan; absent when custom
             plans are hidden.
+          nullable: true
         default_currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
@@ -4131,6 +4161,7 @@ components:
             consumption rate and quantity rates, and quantity is ignored;
             otherwise the hold is the entitlement's consumption rate times
             quantity, or, when quantity is omitted, times the usage stated here
+          nullable: true
         quantity:
           type: number
           description: >-
@@ -4163,6 +4194,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureEntitlement'
           description: If a feature entitlement rule was matched, its entitlement details
+          nullable: true
         error:
           type: string
           description: If an error occurred while checking the flag, the error message
@@ -4214,6 +4246,7 @@ components:
             when the flag allowed it and the feature is credit-metered. Settle
             it by sending a track or inference event carrying its ID as
             reservation_id; the unspent hold is refunded at expires_at otherwise
+          nullable: true
         rule_id:
           type: string
           description: If a rule was found, its ID
@@ -4258,6 +4291,7 @@ components:
             input here when the result gates access. Only the flag value
             reflects the preflight; the entitlement and usage figures in the
             response are the company's current, unsimulated ones
+          nullable: true
         user:
           additionalProperties:
             type: string
@@ -4277,6 +4311,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/FeatureEntitlement'
           description: If a feature entitlement rule was matched, its entitlement details
+          nullable: true
         error:
           type: string
           description: If an error occurred while checking the flag, the error message
@@ -5512,6 +5547,60 @@ components:
       required:
         - export_type
       title: CompanyFeatureUsageExportMetadata
+    CompanyInferenceCostResponseData:
+      type: object
+      properties:
+        by_model:
+          type: array
+          description: >-
+            Cost and event counts per provider and response model, busiest model
+            first
+          items:
+            $ref: '#/components/schemas/InferenceModelCostResponseData'
+          maxItems: 1000
+        company_id:
+          type: string
+          description: The company the cost belongs to
+        costs:
+          type: array
+          description: >-
+            Summed cost of priced inference events, one entry per currency.
+            Amounts in different currencies are not converted or combined. Empty
+            when no event in the window was priced
+          items:
+            $ref: '#/components/schemas/InferenceCostAmountResponseData'
+          maxItems: 1000
+        end_time:
+          type: string
+          description: End of the window (exclusive)
+          format: date-time
+        event_count:
+          type: integer
+          description: >-
+            Number of inference events the company sent in the window, priced or
+            not
+          format: int64
+        start_time:
+          type: string
+          description: Start of the window (inclusive)
+          format: date-time
+        unpriced_event_count:
+          type: integer
+          description: >-
+            Number of inference events in the window with no known cost: the
+            event carried none and none could be derived from a price for its
+            model. These add nothing to costs, so a non-zero count means the
+            real cost is higher than reported
+          format: int64
+      required:
+        - by_model
+        - company_id
+        - costs
+        - end_time
+        - event_count
+        - start_time
+        - unpriced_event_count
+      title: CompanyInferenceCostResponseData
     CompanyLedgerResponseData:
       type: object
       properties:
@@ -6278,6 +6367,7 @@ components:
             Consumption from events sent without a user; not a user, so it is
             excluded from rows and from the count, and returned on every page.
             Null when the window has none
+          nullable: true
       required:
         - end_time
         - rows
@@ -6308,6 +6398,7 @@ components:
           description: >-
             The user the consumption is attributed to; null for consumption from
             events sent without a user
+          nullable: true
         user_id:
           type: string
           description: >-
@@ -10329,6 +10420,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreditSpendWindow'
           description: For a windowed limit, the period it accumulates over
+          nullable: true
       required:
         - id
         - credit_id
@@ -12233,6 +12325,7 @@ components:
           description: >-
             Aggregated credit usage by time period (day, week, month, billing
             period)
+          nullable: true
         credit_used:
           type: number
           format: double
@@ -12404,6 +12497,7 @@ components:
             environment. Set for license features once they have been priced in
             a plan; a feature priced in several environments has a different
             product in each.
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -12960,6 +13054,7 @@ components:
           description: >-
             Aggregated credit usage by time period (day, week, month, billing
             period)
+          nullable: true
         credit_used:
           type: number
           format: double
@@ -13494,12 +13589,62 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    InferenceCostAmountResponseData:
+      type: object
+      properties:
+        cost:
+          type: string
+          description: >-
+            Summed cost as a decimal string in the currency's major unit
+            (dollars, not cents), with up to 8 decimal places
+        currency:
+          type: string
+          description: Lowercase ISO 4217 currency code of the cost
+        event_count:
+          type: integer
+          description: Number of priced events summed into this cost
+          format: int64
+      required:
+        - cost
+        - currency
+        - event_count
+      title: InferenceCostAmountResponseData
     InferenceCostSource:
       type: string
       enum:
         - list_price
         - provided
         - unpriced
+    InferenceModelCostResponseData:
+      type: object
+      properties:
+        costs:
+          type: array
+          description: Summed cost of this model's priced events, one entry per currency
+          items:
+            $ref: '#/components/schemas/InferenceCostAmountResponseData'
+          maxItems: 1000
+        event_count:
+          type: integer
+          description: Number of inference events for this model, priced or not
+          format: int64
+        provider:
+          type: string
+          description: The model provider the events reported, such as openai or anthropic
+        response_model:
+          type: string
+          description: The model the provider reported answering the call
+        unpriced_event_count:
+          type: integer
+          description: Number of this model's events with no known cost
+          format: int64
+      required:
+        - costs
+        - event_count
+        - provider
+        - response_model
+        - unpriced_event_count
+      title: InferenceModelCostResponseData
     InsightsSummaryResponseData:
       type: object
       properties:
@@ -14845,6 +14990,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanVersionSnapshotView'
           description: The plan version that was assigned during this change.
+          nullable: true
         company:
           $ref: '#/components/schemas/CompanyResponseData'
         company_id:
@@ -14862,6 +15008,7 @@ components:
           description: >-
             The integration that performed this change, when the actor is an
             integration-owned API key (e.g. a billing-provider sync).
+          nullable: true
         is_version_upgrade:
           type: boolean
           description: >-
@@ -14881,6 +15028,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanVersionSnapshotView'
           description: The plan version of the previous base plan before this change.
+          nullable: true
         request_id:
           type: string
           nullable: true
@@ -16239,6 +16387,7 @@ components:
           description: >-
             Set when the version's billing product changed; null when it is the
             same on both versions.
+          nullable: true
         credit_grants:
           type: array
           description: Credit grants added, removed, or changed, keyed by credit.
@@ -16257,6 +16406,7 @@ components:
           description: >-
             The version compared against, or null when the plan has no published
             version.
+          nullable: true
         has_billing_changes:
           type: boolean
           description: >-
@@ -16280,6 +16430,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanVersionResponseData'
           description: The version being compared.
+          nullable: true
       required:
         - credit_grants
         - entitlements
@@ -16808,6 +16959,7 @@ components:
             Applies only to credit balance conditions whose event subtype
             matches, where it takes precedence over event_usage and usage;
             credit_cost for the same credit still wins
+          nullable: true
         event_usage:
           allOf:
             - $ref: '#/components/schemas/PreflightEventUsageRequestBody'
@@ -16815,6 +16967,7 @@ components:
             Usage of a specific event subtype. Preferred over usage when the
             subtype is known, since it only affects conditions measuring that
             subtype
+          nullable: true
         usage:
           type: integer
           description: >-
@@ -17065,6 +17218,7 @@ components:
             The proration itemized in the cart's terms, by plan and price. Null
             when the change prorates nothing. upcoming_invoice_line_items stays
             as the billing provider reported it.
+          nullable: true
         tax_amount:
           type: integer
           format: int64
@@ -17237,6 +17391,7 @@ components:
           description: >-
             Present when the catalog offers a custom plan; absent when custom
             plans are hidden.
+          nullable: true
         default_currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
@@ -18576,6 +18731,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/RulesengineCreditSpendWindow'
           description: For a windowed limit, the period it accumulates over
+          nullable: true
       required:
         - id
         - credit_id
@@ -21480,6 +21636,7 @@ components:
           description: >-
             The user the consumption is attributed to; null for consumption from
             events sent without a user
+          nullable: true
         user_id:
           type: string
           description: >-
@@ -21592,6 +21749,7 @@ components:
           description: >-
             The user the usage is attributed to; null for usage from events sent
             without a user
+          nullable: true
         user_id:
           type: string
           description: The user the usage is attributed to; null for unattributed usage
@@ -22524,6 +22682,10 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/ActorType'
+        - name: company_id
+          in: query
+          schema:
+            type: string
         - name: end_time
           in: query
           schema:
@@ -22581,6 +22743,8 @@ paths:
                     properties:
                       actor_type:
                         $ref: '#/components/schemas/ActorType'
+                      company_id:
+                        type: string
                       end_time:
                         type: string
                         format: date-time
@@ -22669,6 +22833,10 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/ActorType'
+        - name: company_id
+          in: query
+          schema:
+            type: string
         - name: end_time
           in: query
           schema:
@@ -22722,6 +22890,8 @@ paths:
                     properties:
                       actor_type:
                         $ref: '#/components/schemas/ActorType'
+                      company_id:
+                        type: string
                       end_time:
                         type: string
                         format: date-time
@@ -28456,6 +28626,82 @@ paths:
                 title: UpdateCompanyBillingDetailsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/inference-cost:
+    get:
+      operationId: getCompanyInferenceCost
+      summary: Get company inference cost
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          description: >-
+            End of the window (exclusive). Pass together with start_time; when
+            both are omitted, the company's current billing period is used
+          schema:
+            type: string
+            description: >-
+              End of the window (exclusive). Pass together with start_time; when
+              both are omitted, the company's current billing period is used
+            format: date-time
+        - name: start_time
+          in: query
+          description: >-
+            Start of the window (inclusive). Pass together with end_time; when
+            both are omitted, the company's current billing period is used
+          schema:
+            type: string
+            description: >-
+              Start of the window (inclusive). Pass together with end_time; when
+              both are omitted, the company's current billing period is used
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyInferenceCostResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        description: >-
+                          End of the window (exclusive). Pass together with
+                          start_time; when both are omitted, the company's
+                          current billing period is used
+                        format: date-time
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the window (inclusive). Pass together with
+                          end_time; when both are omitted, the company's current
+                          billing period is used
+                        format: date-time
+                    title: GetCompanyInferenceCostParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyInferenceCostResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

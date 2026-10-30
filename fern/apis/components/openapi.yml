@@ -602,6 +602,7 @@ components:
           description: >-
             The Stripe price a billed grant bills through. Minted when the plan
             version is published.
+          nullable: true
         price_tiers:
           type: array
           description: >-
@@ -1453,6 +1454,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/CatalogPriceResponseData'
           description: The credit's price per unit, which a top-up is charged at.
+          nullable: true
       required:
         - availability
         - credit_id
@@ -1507,6 +1509,7 @@ components:
             The plan a trialing company lands on when its trial ends, when
             configured and offered by this catalog. Catalog configuration,
             surfaced here so the trial notice can render before any plan change.
+          nullable: true
         trial_payment_method_required:
           type: boolean
           description: >-
@@ -1831,6 +1834,7 @@ components:
           description: >-
             Present when the catalog offers a custom plan; absent when custom
             plans are hidden.
+          nullable: true
         default_currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
@@ -2998,6 +3002,7 @@ components:
           description: >-
             Present when the catalog offers a custom plan; absent when custom
             plans are hidden.
+          nullable: true
         default_currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
@@ -3037,6 +3042,7 @@ components:
             The plan a trialing company lands on when its trial ends, when
             configured and offered by this catalog. Catalog configuration,
             surfaced here so the trial notice can render before any plan change.
+          nullable: true
         trial_payment_method_required:
           type: boolean
           description: >-
@@ -3132,6 +3138,7 @@ components:
           description: >-
             The newest custom plan billing awaiting payment or activation; null
             when none is pending.
+          nullable: true
         id:
           type: string
         name:
@@ -3140,6 +3147,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/CompanyContextPlanResponseData'
           description: The company's base plan; null when it has none.
+          nullable: true
         scheduled_downgrade:
           allOf:
             - $ref: >-
@@ -3147,10 +3155,12 @@ components:
           description: >-
             A plan change scheduled for the end of the billing period; null when
             none is.
+          nullable: true
         subscription:
           allOf:
             - $ref: '#/components/schemas/CompanyContextSubscriptionResponseData'
           description: The company's subscription; null when it has none, or several.
+          nullable: true
       required:
         - add_ons
         - id
@@ -3250,12 +3260,14 @@ components:
           description: >-
             How the credit tops itself up; null unless the company's base plan
             grants it.
+          nullable: true
         composition:
           allOf:
             - $ref: '#/components/schemas/CompanyCreditCompositionResponseData'
           description: >-
             How the plan's grants of this credit add up per period; null unless
             the plan grants it per license and the license count is known.
+          nullable: true
         credit_description:
           type: string
         credit_icon:
@@ -3835,6 +3847,7 @@ components:
             period, in the subscription's currency, or in none when the price
             predates multi-currency (any currency without a subscription). Null
             when the feature has no such price for that period.
+          nullable: true
         price_behavior:
           allOf:
             - $ref: '#/components/schemas/EntitlementPriceBehavior'
@@ -5450,6 +5463,7 @@ components:
             Consumption from events sent without a user; not a user, so it is
             excluded from entries and total_users and returned on every page.
             Null when the window has none
+          nullable: true
       required:
         - billing_credit_id
         - credit_name
@@ -6419,6 +6433,7 @@ components:
           description: >-
             Aggregated credit usage by time period (day, week, month, billing
             period)
+          nullable: true
         credit_used:
           type: number
           format: double
@@ -6558,6 +6573,7 @@ components:
             Usage from events sent without a user; not a user, so it is excluded
             from rows and total_users and returned on every page. Null when the
             period has none
+          nullable: true
       required:
         - end_time
         - rows
@@ -7921,6 +7937,7 @@ components:
             The proration itemized in the cart's terms, by plan and price. Null
             when the change prorates nothing. upcoming_invoice_line_items stays
             as the billing provider reported it.
+          nullable: true
         tax_amount:
           type: integer
           format: int64
@@ -8950,6 +8967,7 @@ components:
           description: >-
             The user the consumption is attributed to; null for consumption from
             events sent without a user
+          nullable: true
         user_id:
           type: string
           description: >-
@@ -8983,6 +9001,7 @@ components:
           description: >-
             The user the usage is attributed to; null for usage from events sent
             without a user
+          nullable: true
         user_id:
           type: string
           description: The user the usage is attributed to; null for unattributed usage
