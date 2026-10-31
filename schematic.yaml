@@ -1652,6 +1652,70 @@ components:
         - collector
         - payment_gating
       title: BillingInvoiceTermsResponseData
+    BillingInvoiceWebhook:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+          format: int64
+        amount_paid:
+          type: integer
+          format: int64
+        amount_remaining:
+          type: integer
+          format: int64
+        company_id:
+          type: string
+        contract_id:
+          type: string
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/Currency'
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        number:
+          type: string
+          nullable: true
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceStatus'
+          nullable: true
+        subtotal:
+          type: integer
+          format: int64
+        tax:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+        url:
+          type: string
+          description: The invoice's hosted page. Null until the invoice has one.
+          nullable: true
+      required:
+        - amount_due
+        - amount_paid
+        - amount_remaining
+        - company_id
+        - currency
+        - id
+        - subtotal
+        - tax
+        - total
+      title: BillingInvoiceWebhook
     BillingLinkedResourceResponseData:
       type: object
       properties:
@@ -2922,6 +2986,70 @@ components:
         - duration
         - is_active
       title: BillingSubscriptionDiscountView
+    BillingSubscriptionPeriodLineWebhook:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        currency:
+          $ref: '#/components/schemas/Currency'
+        id:
+          type: string
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        quantity:
+          type: integer
+          format: int64
+          nullable: true
+        source_id:
+          type: string
+          description: The plan or add-on the line bills for.
+        unit_amount:
+          type: integer
+          format: int64
+          nullable: true
+      required:
+        - amount
+        - currency
+        - id
+        - period_end
+        - period_start
+        - source_id
+      title: BillingSubscriptionPeriodLineWebhook
+    BillingSubscriptionPeriodWebhook:
+      type: object
+      properties:
+        company_id:
+          type: string
+        contract_id:
+          type: string
+        lines:
+          type: array
+          description: The lines charged in advance when the period started.
+          items:
+            $ref: '#/components/schemas/BillingSubscriptionPeriodLineWebhook'
+          maxItems: 1000
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        subscription_id:
+          type: string
+      required:
+        - company_id
+        - contract_id
+        - lines
+        - period_end
+        - period_start
+        - subscription_id
+      title: BillingSubscriptionPeriodWebhook
     BillingSubscriptionResponseData:
       type: object
       properties:
@@ -22083,6 +22211,10 @@ components:
         - flag.deleted
         - flag_rules.updated
         - flag.updated
+        - invoice.finalized
+        - invoice.paid
+        - invoice.past_due
+        - invoice.voided
         - plan.created
         - plan.deleted
         - plan.entitlement.created
@@ -22091,6 +22223,7 @@ components:
         - plan.updated
         - plan_version.deleted
         - rule.deleted
+        - subscription.period.started
         - test.send
         - user.created
         - user.deleted
