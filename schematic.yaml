@@ -5857,6 +5857,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry replaces consumption_rate and quantity_rates
+            for events from that model. Absent when every model burns at the
+            entitlement's own rates.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          maxItems: 1000
         notes:
           type: array
           items:
@@ -7530,6 +7540,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -8274,6 +8300,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         note:
           type: string
           nullable: true
@@ -8606,6 +8648,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -8787,6 +8845,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         quantity_rates:
           additionalProperties:
             type: number
@@ -9394,6 +9468,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         monthly_metered_price_id:
           type: string
           nullable: true
@@ -9958,6 +10048,10 @@ components:
           format: double
         key:
           type: string
+        model:
+          type: string
+        provider:
+          type: string
         quantity:
           type: number
           format: double
@@ -10186,8 +10280,10 @@ components:
           type: array
           description: >-
             The part of the draw this row covers: one line per priced quantity,
-            including the request line, summing to the row amount. Set on
-            inference-driven draws only.
+            including the request line, summing to the row amount. When one of
+            the entitlement's per-model rates priced the draw, every line
+            carries that rate's provider and model; both are absent when the
+            default rates priced it. Set on inference-driven draws only.
           items:
             $ref: '#/components/schemas/CreditBurnBreakdownLine'
           maxItems: 1000
@@ -10461,6 +10557,26 @@ components:
         - billing_credit_grant
         - billing_credit_transfer
         - billing_settlement
+    CreditModelRate:
+      type: object
+      properties:
+        consumption_rate:
+          type: number
+          format: double
+        model:
+          type: string
+        provider:
+          type: string
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+      required:
+        - consumption_rate
+        - model
+        - provider
+      title: CreditModelRate
     CreditReservationResponseData:
       type: object
       properties:
@@ -15674,6 +15790,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry replaces consumption_rate and quantity_rates
+            for events from that model. Absent when every model burns at the
+            entitlement's own rates.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          maxItems: 1000
         overage_billing_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsCadence'
@@ -20406,6 +20532,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         note:
           type: string
           nullable: true
@@ -20581,6 +20723,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         quantity_rates:
           additionalProperties:
             type: number
@@ -20785,6 +20943,22 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry is a complete rate card: its consumption_rate
+            and quantity_rates replace the entitlement's credit_consumption_rate
+            and quantity_rates for events from that provider and model. An event
+            matches an entry by exact model name first, then by its model name
+            without a trailing snapshot date (claude-sonnet-4-5-20250929 matches
+            claude-sonnet-4-5). Models with no entry burn at the entitlement's
+            own rates. Omit to leave the overrides as they are; send null to
+            clear them.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          nullable: true
+          maxItems: 50
         monthly_metered_price_id:
           type: string
           nullable: true

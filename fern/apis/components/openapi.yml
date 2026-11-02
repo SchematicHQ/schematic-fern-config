@@ -4039,6 +4039,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry replaces consumption_rate and quantity_rates
+            for events from that model. Absent when every model burns at the
+            entitlement's own rates.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          maxItems: 1000
         notes:
           type: array
           items:
@@ -5371,6 +5381,26 @@ components:
         - grant_reason
         - quantity
       title: CreditGrantDetail
+    CreditModelRate:
+      type: object
+      properties:
+        consumption_rate:
+          type: number
+          format: double
+        model:
+          type: string
+        provider:
+          type: string
+        quantity_rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+      required:
+        - consumption_rate
+        - model
+        - provider
+      title: CreditModelRate
     CreditTransferView:
       type: object
       properties:
@@ -7340,6 +7370,16 @@ components:
           allOf:
             - $ref: '#/components/schemas/MetricPeriodMonthReset'
           nullable: true
+        model_rates:
+          type: array
+          description: >-
+            Per-model rate overrides for inference features, keyed by provider
+            and model. Each entry replaces consumption_rate and quantity_rates
+            for events from that model. Absent when every model burns at the
+            entitlement's own rates.
+          items:
+            $ref: '#/components/schemas/CreditModelRate'
+          maxItems: 1000
         overage_billing_cadence:
           allOf:
             - $ref: '#/components/schemas/BillingArrearsCadence'
