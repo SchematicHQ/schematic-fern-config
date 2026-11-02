@@ -215,7 +215,7 @@ import java.time.Duration;
 Schematic schematic = Schematic.builder()
     .apiKey("YOUR_API_KEY")
     .creditLeases(CreditLeaseConfig.builder()
-        .defaultReservationTtl(Duration.ofSeconds(60))      // just under an hour at most, which is as far out as the API will reserve credits
+        .defaultReservationTtl(Duration.ofSeconds(60))      // just under 24 hours at most, which is as far out as the API will reserve credits
         .build())
     .build();
 ```
@@ -379,6 +379,46 @@ public void verifyWebhookManually(String body, String signature, String timestam
     }
 }
 ```
+
+## Context Signatures
+
+A browser SDK uses a publishable key, which anyone can read from your page, so on its own it can't prove which company or user it's acting for. When an environment requires context signatures, the API only accepts a publishable-key request whose company and user your backend has signed with the environment's secret API key. The browser SDK asks your backend for the signature through its `getContextSignature` option and sends it in the `X-Schematic-Context-Sig` header.
+
+### Signing a Context
+
+Sign the logged-in user's own company and user, read from your session. Don't sign whatever company or user the browser asks for, or anyone could get a signature for another company.
+
+```java
+import com.schematic.contextsig.ContextSignature;
+import java.io.IOException;
+import java.util.Collections;
+
+// In your signing endpoint handler:
+public void signSchematicContext(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    YourSession session = yourSession(request); // however your app identifies the logged-in user
+    if (session == null) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+    }
+
+    String signature = ContextSignature.sign(
+            System.getenv("SCHEMATIC_SECRET_KEY"),
+            Collections.singletonMap("id", session.getCompanyId()),
+            Collections.singletonMap("id", session.getUserId()));
+
+    response.setContentType("application/json");
+    response.getWriter().write("{\"signature\":\"" + signature + "\"}");
+}
+```
+
+The company and user keys must match the context you give the browser SDK exactly, or the API rejects the signature. A signature is valid for 10 minutes by default; set a different lifetime, up to an hour, with `ContextSignature.options().lifetimeSeconds(...)`, and a start time other than now with `issuedAt(...)`:
+
+```java
+String signature = ContextSignature.sign(
+        secret, company, user, ContextSignature.options().lifetimeSeconds(1800));
+```
+
+The browser SDK reuses a signature until shortly before it expires, then asks for a new one. `sign` throws a `ContextSignatureException` when the secret is missing, the lifetime is out of range, or a key's value is null.
 
 ## Configuration Options
 
