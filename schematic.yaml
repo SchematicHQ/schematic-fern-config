@@ -2812,10 +2812,14 @@ components:
     BillingSettingsResponseData:
       type: object
       properties:
+        default_collector:
+          $ref: '#/components/schemas/Collector'
         default_provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
+      required:
+        - default_collector
       title: BillingSettingsResponseData
     BillingStatementLineResponseData:
       type: object
@@ -20240,6 +20244,10 @@ components:
     UpdateBillingSettingsRequestBody:
       type: object
       properties:
+        default_collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
         default_provider_type:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
@@ -20333,6 +20341,10 @@ components:
       properties:
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
+        collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
         currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
