@@ -410,7 +410,7 @@ Server mode needs only a TTL:
 client = Schematic::SchematicClient.new(
   api_key: ENV["SCHEMATIC_API_KEY"],
   credit_leases: {
-    default_reservation_ttl: 60 * 1000 # how long the server holds the credits if no track settles them (ms, max 1 hour)
+    default_reservation_ttl: 60 * 1000 # how long the server holds the credits if no track settles them (ms, max 24 hours)
   }
 )
 ```
@@ -603,6 +603,31 @@ SCHEMATIC_WEBHOOK_SECRET=your-secret ruby scripts/webhook_test_server.rb
 ```
 
 This starts a WEBrick server on port 8080 (configurable via `PORT` env var) that listens for POST requests at `/webhook`, verifies signatures, and prints the payload.
+
+## Context Signatures
+
+A browser SDK uses a publishable key, which anyone can read from your page, so on its own it can't prove which company or user it's acting for. When an environment requires context signatures, the API only accepts a publishable-key request whose company and user your backend has signed with the environment's secret API key. The browser SDK asks your backend for the signature through its `getContextSignature` option and sends it in the `X-Schematic-Context-Sig` header.
+
+### Signing a context
+
+Sign the logged-in user's own company and user, read from your session. Don't sign whatever company or user the browser asks for, or anyone could get a signature for another company.
+
+```ruby
+require "schematichq"
+
+# In a Rails controller
+def schematic_signature
+  signature = Schematic::ContextSignature.sign(
+    ENV.fetch("SCHEMATIC_SECRET_KEY"),
+    company: { "id" => current_user.company_id },
+    user: { "id" => current_user.id.to_s }
+  )
+
+  render json: { signature: signature }
+end
+```
+
+The company and user keys must match the context you give the browser SDK exactly, or the API rejects the signature. Values must be strings. A signature is valid for 10 minutes by default; set a different lifetime, up to an hour, with `lifetime_seconds:`, and the start time with `issued_at:`. The browser SDK reuses a signature until shortly before it expires, then asks for a new one. `sign` raises `Schematic::ContextSignature::ContextSignatureError` when the secret is missing, the lifetime is out of range, or a key's value isn't a string.
 
 ## DataStream
 
