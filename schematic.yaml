@@ -64,6 +64,53 @@ components:
           schema:
             $ref: '#/components/schemas/ApiError'
   schemas:
+    AccountInferenceCostRateResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        environment_id:
+          type: string
+        id:
+          type: string
+        provider:
+          type: string
+        rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: Cost of a single token in the row's currency, keyed by quantity key.
+        repriced_at:
+          type: string
+          description: >-
+            When the stored events this rate governs were last brought to its
+            price. Null until the hourly reprice reaches the row after a create
+            or update.
+          format: date-time
+          nullable: true
+        response_model:
+          type: string
+        starting_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - created_at
+        - currency
+        - environment_id
+        - id
+        - provider
+        - rates
+        - response_model
+        - starting_at
+        - updated_at
+      title: AccountInferenceCostRateResponseData
     AccountMemberPermission:
       type: string
       enum:
@@ -7353,6 +7400,53 @@ components:
         - duration
         - duration_in_months
       title: CouponRequestBody
+    CreateAccountInferenceCostRateRequestBody:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: >-
+            Three-letter currency code the rates are in, matched against the
+            event's currency. Defaults to usd.
+          nullable: true
+        provider:
+          type: string
+          description: >-
+            Provider the event reports, such as anthropic or openai. Matched
+            case-insensitively.
+          maxLength: 255
+        rates:
+          additionalProperties:
+            type: number
+            format: double
+            minimum: 0
+          type: object
+          description: >-
+            Cost of a single token in the row's currency, keyed by input_tokens,
+            cached_input_tokens, cache_creation_input_tokens and output_tokens.
+            input_tokens prices only the input left after the cached and
+            cache-creation subsets, and output_tokens includes reasoning.
+          maxProperties: 4
+          minProperties: 1
+        response_model:
+          type: string
+          description: >-
+            Model the response reports. A dated snapshot such as
+            claude-sonnet-4-5-20250929 falls back to the undated name when the
+            sheet has no row for the dated one.
+          maxLength: 255
+        starting_at:
+          type: string
+          description: >-
+            When the rate takes effect. It applies to events captured from then
+            until the next row for the same provider, model and currency.
+          format: date-time
+      required:
+        - provider
+        - rates
+        - response_model
+        - starting_at
+      title: CreateAccountInferenceCostRateRequestBody
     CreateBillingCreditRequestBody:
       type: object
       properties:
@@ -20045,6 +20139,25 @@ components:
         - subtotal
         - updated_at
       title: UpcomingInvoiceResponseData
+    UpdateAccountInferenceCostRateRequestBody:
+      type: object
+      properties:
+        rates:
+          additionalProperties:
+            type: number
+            format: double
+            minimum: 0
+          type: object
+          description: >-
+            Cost of a single token in the row's currency, keyed by input_tokens,
+            cached_input_tokens, cache_creation_input_tokens and output_tokens.
+            input_tokens prices only the input left after the cached and
+            cache-creation subsets, and output_tokens includes reasoning.
+          maxProperties: 4
+          minProperties: 1
+      required:
+        - rates
+      title: UpdateAccountInferenceCostRateRequestBody
     UpdateAddOnRequestBody:
       type: object
       properties:
@@ -34782,6 +34895,219 @@ paths:
                   - data
                   - params
                 title: CountFlagsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /inference-rate-sheet:
+    get:
+      operationId: listAccountInferenceCostRates
+      summary: List account inference cost rates
+      tags:
+        - events
+      parameters:
+        - name: provider
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: response_model
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/AccountInferenceCostRateResponseData
+                    title: ListAccountInferenceCostRatesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      provider:
+                        type: string
+                        maxLength: 255
+                      response_model:
+                        type: string
+                        maxLength: 255
+                    title: ListAccountInferenceCostRatesParams
+                required:
+                  - data
+                  - params
+                title: ListAccountInferenceCostRatesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createAccountInferenceCostRate
+      summary: Create account inference cost rate
+      tags:
+        - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountInferenceCostRateRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AccountInferenceCostRateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateAccountInferenceCostRateParams
+                required:
+                  - data
+                  - params
+                title: CreateAccountInferenceCostRateResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /inference-rate-sheet/{inference_rate_sheet_id}:
+    put:
+      operationId: updateAccountInferenceCostRate
+      summary: Update account inference cost rate
+      tags:
+        - events
+      parameters:
+        - name: inference_rate_sheet_id
+          in: path
+          description: inference_rate_sheet_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountInferenceCostRateRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AccountInferenceCostRateResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateAccountInferenceCostRateParams
+                required:
+                  - data
+                  - params
+                title: UpdateAccountInferenceCostRateResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteAccountInferenceCostRate
+      summary: Delete account inference cost rate
+      tags:
+        - events
+      parameters:
+        - name: inference_rate_sheet_id
+          in: path
+          description: inference_rate_sheet_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteAccountInferenceCostRateParams
+                required:
+                  - data
+                  - params
+                title: DeleteAccountInferenceCostRateResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
