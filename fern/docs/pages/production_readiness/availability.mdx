@@ -1,6 +1,6 @@
 ---
 title: Availability
-description: Schematic's uptime target and 24/7 support, plus built-in caching, Replicator, SDK fallbacks, and a self-hosted cache as ways to keep flag checks serving.
+description: Schematic's uptime target and 24/7 support, plus built-in caching, a shared Redis cache, Replicator, SDK fallbacks, and a self-hosted cache as ways to keep flag checks serving.
 
 slug: production_readiness/availability
 ---
@@ -40,7 +40,7 @@ Out of the box, Schematic is built to:
 
 For most teams, these guarantees are enough. But some applications require even stronger assurances around freshness, latency, or independence from external services.
 
-This guide outlines the three main ways you can run Schematic in a highly available configuration, ranging from fully managed to fully self-hosted.
+This guide outlines the main ways you can run Schematic in a highly available configuration, ranging from fully managed to fully self-hosted.
 
 ---
 
@@ -62,7 +62,19 @@ This model prioritizes simplicity and operational safety. If your application ca
 
 ---
 
-## 2. Replicator (Fully Local, Always Fresh)
+## 2. Shared Redis Cache (Middle Ground)
+
+Backend SDKs can keep their DataStream cache in a Redis you run instead of in each process's memory. Every instance of your app then shares one copy, so a company loaded by one instance is ready for all of them.
+
+This sits between the default setup and Replicator. Most checks are evaluated locally without a call to Schematic, and the only extra infrastructure is a Redis your app can reach. The first check for a company that no instance has loaded yet still goes to Schematic, because the cache fills as your app checks companies rather than up front.
+
+Usage-based checks stay local too. After each `track` call, the SDK optimistically updates the cached usage for that company, so the next check sees the new count without waiting on Schematic. Schematic's processed value replaces it when it arrives.
+
+This is a good fit when each request to Schematic adds noticeable latency for your app, or when you run many instances, and you do not need the full incident resilience of Replicator. See the SDK page for your language, such as [Node.js](/developer_resources/sdks/nodejs#datastream), for setup.
+
+---
+
+## 3. Replicator (Fully Local, Always Fresh)
 
 For teams that need stronger guarantees around freshness, latency, and fault tolerance, Schematic provides **Replicator**.
 
@@ -92,7 +104,7 @@ That's it. The Replicator container handles:
 - Persistence into your local store
 - Retry and reconnect behavior
 
-## 3. SDK Fallbacks (Simple Offline Resilience)
+## 4. SDK Fallbacks (Simple Offline Resilience)
 
 For teams that want a simple way to ensure their application continues to function when the SDK cannot connect to Schematic, the SDKs include built-in fallback behavior. These fallbacks allow you to set what values Schematic uses should the SDK not be able to connect, whether due to network issues, service disruptions, or other connectivity problems.
 
@@ -107,7 +119,7 @@ By configuring fallback values at initialization or at the callsite, you can ens
 
 This approach provides a lightweight way to handle connectivity issues without requiring additional infrastructure or complex setup.
 
-## 4. Self-Hosted Cache (DIY Replication)
+## 5. Self-Hosted Cache (DIY Replication)
 
 Some customers combine Schematic's SDK fallbacks and their own local caching layer using Schematic's APIs and to build a DIY replication setup. 
 
@@ -133,12 +145,13 @@ DIY replication makes sense when you need highly custom behavior. For most teams
 
 ## Choosing the Right Strategy
 
-| Strategy          | Freshness        | Latency  | Complexity | Incident Resilience |
-|-------------------|------------------|----------|------------|-------------------|
-| Built-in caching  | Eventually fresh | Low      | Minimal    | High              |
-| SDK Fallbacks     | Static defaults  | Low      | Minimal    | Moderate          |
-| Self-hosted cache | Configurable     | Low      | Highest    | High              |
-| Replicator        | Real-time        | Lowest   | Moderate   | Highest           |
+| Strategy           | Freshness        | Latency  | Complexity | Incident Resilience |
+|--------------------|------------------|----------|------------|---------------------|
+| Built-in caching   | Eventually fresh | Low      | Minimal    | High                |
+| Shared Redis cache | Eventually fresh | Lower    | Low        | High                |
+| SDK Fallbacks      | Static defaults  | Low      | Minimal    | Moderate            |
+| Self-hosted cache  | Configurable     | Low      | Highest    | High                |
+| Replicator         | Real-time        | Lowest   | Moderate   | Highest             |
 
 For most teams, Schematic's default high-availability behavior is sufficient. If you need stronger freshness guarantees, lower latency, or full independence from Schematic's runtime availability, Replicator is usually the right next step.
 
