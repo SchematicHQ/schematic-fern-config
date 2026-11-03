@@ -36,7 +36,47 @@ OTEL_EXPORTER_OTLP_TRACES_HEADERS=X-Schematic-Api-Key=sch_your_secret_key
 OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
 ```
 
-Schematic derives events only from model-call spans and spans you tag with an event name, so you can export whole traces and the rest of each trace bills nothing.
+These variables configure the process's one OTLP trace exporter. If it already sends traces to another backend, setting them sends the traces to Schematic instead. To send to both, add a second exporter in your app, as shown in [Set up the Anthropic TypeScript SDK](#set-up-the-anthropic-typescript-sdk), or in your Collector, as shown below.
+
+Schematic derives events only from model-call spans and spans you tag with an event name, so you can export whole traces and the rest of each trace bills nothing. To keep the rest of each trace from leaving your network, filter it out in a Collector.
+
+### Send through an OpenTelemetry Collector
+
+If your app already exports to an OpenTelemetry Collector, add a pipeline that sends to Schematic. The app keeps exporting to the Collector, and the Collector sends each span to your existing backends and to Schematic.
+
+```yaml title="otel-collector.yaml"
+exporters:
+  otlphttp/schematic:
+    traces_endpoint: https://c.schematichq.com/v1/traces
+    headers:
+      X-Schematic-Api-Key: ${env:SCHEMATIC_SECRET_KEY}
+    compression: gzip
+
+processors:
+  filter/schematic:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["schematic.event"] == nil and not IsMatch(attributes["gen_ai.operation.name"], "^(chat|text_completion|embeddings|generate_content)$")'
+  batch/schematic:
+    send_batch_size: 512
+    send_batch_max_size: 512
+
+service:
+  pipelines:
+    traces/schematic:
+      receivers: [otlp]
+      processors: [filter/schematic, batch/schematic]
+      exporters: [otlphttp/schematic]
+```
+
+Use the receiver from your existing traces pipeline in `receivers`. A receiver can feed several pipelines, so your current pipeline is unchanged.
+
+The filter drops every span that is neither a model call nor tagged with `schematic.event`, so only the spans Schematic reads are sent. It sits in its own pipeline so your other backends still receive whole traces. The `filter` processor ships in the Collector's contrib distribution, `otelcol-contrib`.
+
+The batch processor caps each export. Schematic accepts up to 16,384 spans and 16 MB, decompressed, per export, and rejects a larger one with a `413`, which the Collector does not retry. Keep `compression` at `gzip`. Schematic does not accept other encodings.
+
+The Collector forwards spans as it receives them. The `schematic.company.*` and `schematic.event` attributes must already be on each span when it leaves your app, so set them up as described in [Tag spans with the company and event name](#tag-spans-with-the-company-and-event-name).
 
 ## Tag spans with the company and event name
 
@@ -109,7 +149,17 @@ export function registerTracing() {
 
 The SDK sets `gen_ai.operation.name` when it starts a span, so `tagModelCalls` tags only the `chat` spans of real model calls. Wrapper spans such as a tool runner's `invoke_agent` span stay untagged, which matters because a non-model span that carries `schematic.event` becomes a separate event (see [Which spans become inference events](#which-spans-become-inference-events)). The context manager keeps the context that `withSchematic` sets active across every `await` inside its callback.
 
-If you already run a tracer provider, add `tagModelCalls` and the Schematic exporter's `BatchSpanProcessor` to its `spanProcessors` instead of registering a second provider.
+If you already run a tracer provider, add `tagModelCalls` and the Schematic exporter's `BatchSpanProcessor` to its `spanProcessors` instead of registering a second provider. Each span then goes to both exporters:
+
+```typescript
+new TracerProvider({
+  spanProcessors: [
+    tagModelCalls,
+    new BatchSpanProcessor({ exporter: yourExistingExporter }),
+    new BatchSpanProcessor({ exporter: schematicExporter }),
+  ],
+});
+```
 
 Wrap each model call in `withSchematic`:
 
