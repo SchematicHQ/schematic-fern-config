@@ -1,25 +1,25 @@
 ---
-title: Setting up your First Plans
+title: Setting up your first plans
 description: Build a free and a paid plan with two boolean features, entitle them, and reach a working checkout flow.
 slug: catalog/guides/first-plans
 ---
 
 Schematic is able to support many different types of pricing models. This guide will walk through the process of setting up a basic pricing model with 2 plans (free and paid) and a few features. The goal is to walk through the process of setting up a basic pricing model in Schematic ending with a working checkout flow that your users can use.
 
-## Getting Started: Stripe
+## Getting started: Stripe
 
 Before we get started, you should link your Stripe account to the Schematic environment. We recommend starting with a Sandbox Stripe account connected to your Dev Schematic environment for testing.
 
 For more details, see our [Stripe Integration Guide](/integrations/stripe-integration-guide).
 
-## Setting up your Plans
+## Setting up your plans
 
 Let's first setup 2 plans:
 
 1. A free plan we'll call "Starter" which all new customers will start on. This will have access to some, but not all of the features we'll be creating.
 2. A paid plan we'll call "Pro" which will have access to all of the features we'll be creating.
 
-### Creating the Starter Plan
+### Creating the Starter plan
 
 To create a plan, navigate to the **Plans** tab in the Catalog and click the **Create Plan** button.
 
@@ -32,7 +32,7 @@ Now click "Save" in the top right to save this version, and then "Publish" to pu
 
 ![Starter Plan 2](../../assets/images/catalog/guides-starter-plan-2.png)
 
-### Creating the Pro Plan
+### Creating the Pro plan
 
 To create a plan, navigate to the **Plans** tab in the Catalog and click the **Create Plan** button.
 
@@ -48,7 +48,7 @@ For this example, we'll create a new product in Stripe and new prices for monthl
 
 We'll skip setuping up a Trial for now. Click "Done" to create the plan draft. Then Save and publish the draft as before.
 
-### Creating Features and Adding them to your plans
+### Creating features and adding them to your plans
 
 We'll create 2 features:
 
@@ -69,7 +69,7 @@ Next, we'll set the flag key to "reporting" (this will autofill based on the fea
 
 Now make a second feature called "AI Suggestions" and set the flag key to "ai-suggestions".
 
-### Entitle Features to Plans
+### Entitle features to plans
 
 Next, we'll "entitle" these features to our plans. An "Entitlement" is the billing term for the features that a plan allows it's customers access to.
 
@@ -89,7 +89,7 @@ Next, go to the "Pro" plan page and follow the same steps to add the "Reporting"
 
 ![Pro Entitlement](../../assets/images/catalog/guides-pro-entitlements.png)
 
-### Configuring our Catalog
+### Configuring our catalog
 
 There are a few steps we want to take to make these plans available to our customers.
 

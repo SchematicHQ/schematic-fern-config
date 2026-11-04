@@ -10,15 +10,15 @@ As a business implementing Schematic, we understand you are trusting the solutio
 
 Your application connects to Schematic using our SDKs to share context about companies and users, and to retrieve flags values based on policies set up in Schematic. Our SDKs are [here](/developer_resources/sdks/overview). If you need support for an SDK that is not listed, please [let us know](https://roadmap.schematichq.com/roadmap).
 
-# Status Page
+# Status page
 
 Live and historical uptime is published at [schematic.statuspage.io](https://schematic.statuspage.io/), broken out by API, App, Event processing, and Checkout Flow / Customer Portal. It is the fastest way to confirm whether something you are seeing is an incident on our side, and you can subscribe there to be notified when one is opened or resolved.
 
-<Card title="Schematic Status Page" icon="fa-solid fa-signal" href="https://schematic.statuspage.io/">
+<Card title="Schematic status page" icon="fa-solid fa-signal" href="https://schematic.statuspage.io/">
   Current status, incident history, and notification signup.
 </Card>
 
-# Uptime, Support, and Backups
+# Uptime, support, and backups
 
 Schematic targets 99.99% uptime. This is an operational target, and the status page above is the public record of performance against it.
 
@@ -28,7 +28,7 @@ The team is on call 24 hours a day, 7 days a week, and can be reached in your sh
 
 Continuous point-in-time backups run against our datastores, and the recovery procedure has been validated end-to-end.
 
-# High Availability Strategies
+# High availability strategies
 
 Schematic is designed to be safe, fast, and reliable by default. Flag checks sit directly in the critical path of your application, so we treat availability and performance as first-order concerns.
 
@@ -44,13 +44,13 @@ This guide outlines the three main ways you can run Schematic in a highly availa
 
 ---
 
-## 1. Built-in High Availability (Default)
+## 1. Built-in high availability (default)
 
 By default, Schematic is designed so that flag checks are:
 
-- **Fast** - low latency, including the first check for a company
-- **Reliable** - resilient to most backend disruptions
-- **Predictable** - consistent latency under load
+- **Fast**, with low latency, including the first check for a company
+- **Reliable**, resilient to most backend disruptions
+- **Predictable**, with consistent latency under load
 
 In the event of *most* service disruptions:
 
@@ -62,7 +62,7 @@ This model prioritizes simplicity and operational safety. If your application ca
 
 ---
 
-## 2. Replicator (Fully Local, Always Fresh)
+## 2. Replicator (fully local, always fresh)
 
 For teams that need stronger guarantees around freshness, latency, and fault tolerance, Schematic provides **Replicator**.
 
@@ -72,9 +72,9 @@ For teams that need stronger guarantees around freshness, latency, and fault tol
 
 Replicator provides three key benefits:
 
-1. **Lower latency** - Flag checks do not require external API calls.
-2. **Always warm data** - Updates are pushed in real time, so the first read is fast.
-3. **Full incident resilience** - If Schematic experiences an interruption, your application continues operating using your complete local cache.
+1. **Lower latency**, because flag checks do not require external API calls.
+2. **Always warm data**, because updates are pushed in real time, so the first read is fast.
+3. **Full incident resilience**, because your application keeps operating from its complete local cache if Schematic experiences an interruption.
 
 This is the strongest availability and performance model we offer.
 
@@ -92,7 +92,7 @@ That's it. The Replicator container handles:
 - Persistence into your local store
 - Retry and reconnect behavior
 
-## 3. SDK Fallbacks (Simple Offline Resilience)
+## 3. SDK fallbacks (simple offline resilience)
 
 For teams that want a simple way to ensure their application continues to function when the SDK cannot connect to Schematic, the SDKs include built-in fallback behavior. These fallbacks allow you to set what values Schematic uses should the SDK not be able to connect, whether due to network issues, service disruptions, or other connectivity problems.
 
@@ -107,7 +107,7 @@ By configuring fallback values at initialization or at the callsite, you can ens
 
 This approach provides a lightweight way to handle connectivity issues without requiring additional infrastructure or complex setup.
 
-## 4. Self-Hosted Cache (DIY Replication)
+## 4. Self-hosted cache (DIY replication)
 
 Some customers combine Schematic's SDK fallbacks and their own local caching layer using Schematic's APIs and to build a DIY replication setup. 
 
@@ -131,7 +131,7 @@ Replicator provides the same core architecture of local reads, real-time updates
 
 DIY replication makes sense when you need highly custom behavior. For most teams, Replicator is the safer and more maintainable solution.
 
-## Choosing the Right Strategy
+## Choosing the right strategy
 
 | Strategy          | Freshness        | Latency  | Complexity | Incident Resilience |
 |-------------------|------------------|----------|------------|-------------------|

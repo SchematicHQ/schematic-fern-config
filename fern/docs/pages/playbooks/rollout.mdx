@@ -1,5 +1,5 @@
 ---
-title: Rolling out beta functionality with Flags
+title: Rolling out beta functionality with flags
 description: Tag beta customers with a company trait, target them with flag rules, then promote the flag to a plan entitlement.
 slug: playbooks/rollout
 ---
@@ -8,7 +8,7 @@ slug: playbooks/rollout
 
 Beta functionality are typically released to select customers for early access. With Schematic, you can not only roll beta functionality out using Flags, but also subsequently entitle them into Plans you already offer your customers with no additional code changes. 
 
-## Setting up a Flag
+## Setting up a flag
 
 Flags are the primary building block in Schematic, and they allow you to turn features on or off without modifying application code.
 
@@ -52,7 +52,7 @@ response = client.companies.upsert_company(
 )
 ```
 
-## Targeting your beta segment with Flag Rules
+## Targeting your beta segment with flag rules
 
 Once you've segmented companies within Schematic, you can set up a rule to target them.
 
@@ -73,7 +73,7 @@ To set up a Flag Rule, do the following:
   allowFullScreen
 ></iframe>
 
-## Adding a beta Flag to your application
+## Adding a beta flag to your application
 
 Adding a beta flag from Schematic in your application is relatively straightforward. The following code performs a Flag check for a Flag with a key `beta-flag`. Schematic only requires a Company key and a Flag key to evaluate Flag conditions, and this is possible because context associated with companies is stored within Schematic (e.g. the trait we set up above). When a `check_flag` request is performed, Schematic will refer to the data already stored on the Company or User profile to evaluate Flag Rules.
 
@@ -94,7 +94,7 @@ else:
     do something else
 ```
 
-## Turning Flags into Plan Entitlements
+## Turning flags into plan entitlements
 
 Once you are ready to fully release a beta feature, you can easily convert it within Schematic so that you can add it to a plan to offer it more widely.
 

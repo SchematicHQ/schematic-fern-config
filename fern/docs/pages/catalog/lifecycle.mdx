@@ -1,5 +1,5 @@
 ---
-title: Lifecycle Settings
+title: Lifecycle settings
 description: Set the initial, fallback, and trial expiry plans, plus the trial, checkout, display, and plan change rules that apply across every catalog.
 
 slug: catalog/lifecycle
@@ -17,7 +17,7 @@ src="../../assets/images/catalog/configure-table.png"
 
 To change any of these settings, open **Manage > Lifecycle**, make your changes, and click **Save Changes**.
 
-## Fallback Plan
+## Fallback plan
 
 The plan assigned to any company that does not have another base plan. This replaces the deprecated Default Plan functionality, and allows you to specify a default set of entitlements.
 
@@ -26,7 +26,7 @@ These plans cannot be linked to a billing product (even a free plan).
 **When Applied:**
 Companies are automatically moved to this plan when their subscription becomes inactive (unpaid, cancelled).
 
-## Initial Plan
+## Initial plan
 
 The plan assigned to new companies when they are created. This plan determines how new customers begin their journey with your service.
 
@@ -53,7 +53,7 @@ You turn on a trial for an individual plan when you [edit the plan](/catalog/tri
 
 **Trial Eligibility** sets who Schematic offers a trial to: one trial per company, which is the default, or one trial per plan. See [Trial eligibility](/catalog/trials#trial-eligibility) for what each rule counts and how to choose between them.
 
-### Trial Expiry Plan
+### Trial expiry plan
 
 The plan companies are moved to when their trial period expires.
 
@@ -64,7 +64,7 @@ The plan companies are moved to when their trial period expires.
   - A plan with a free price
 - Cannot be a trialable plan (companies can't go onto a second trial)
 
-## Component Display Settings
+## Component display settings
 
 These settings control how plans, features, and billing data render in every component in your account.
 
@@ -80,7 +80,7 @@ These settings control how plans, features, and billing data render in every com
 | **Show hard limits** | Shows the hard limit on entitlements that define one |
 | **Show estimated total** | Shows what each plan would cost at the customer's current usage in checkout and the pricing table |
 
-## Checkout Settings
+## Checkout settings
 
 These settings decide what Schematic collects from a customer during checkout and what it passes to Stripe.
 
@@ -94,7 +94,7 @@ These settings decide what Schematic collects from a customer during checkout an
 | **Custom Opt-In** | Requires the customer to accept your terms or other conditions before completing their first paid subscription |
 | **Custom Checkout Fields** | Collects extra fields from every customer and passes each one to Stripe as customer metadata under the key you configure |
 
-## Plan Change Rules
+## Plan change rules
 
 Schematic validates every self-serve plan change against these rules. Switching to a higher-cost plan or adding an add-on counts as an upgrade. Switching to a lower-cost plan or removing an add-on counts as a downgrade.
 
