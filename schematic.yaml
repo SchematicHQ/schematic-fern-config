@@ -1364,6 +1364,13 @@ components:
         number:
           type: string
           nullable: true
+        payment_method_id:
+          type: string
+          description: >-
+            The card a charge takes the amount left to pay from: the card on the
+            invoice's contract. Null unless Stripe Payments collects the invoice
+            and the contract has a card.
+          nullable: true
         pdf_url:
           type: string
           description: >-
@@ -1428,8 +1435,9 @@ components:
         url:
           type: string
           description: >-
-            The billing provider's hosted invoice page. Null on an invoice
-            Schematic issued.
+            The hosted invoice page, which opens with no login. On an invoice
+            Schematic issued, null while it is a draft or after its link is
+            revoked.
           nullable: true
       required:
         - amount_due
@@ -1615,8 +1623,9 @@ components:
         url:
           type: string
           description: >-
-            The billing provider's hosted invoice page. Null on an invoice
-            Schematic issued.
+            The hosted invoice page, which opens with no login. On an invoice
+            Schematic issued, null while it is a draft or after its link is
+            revoked.
           nullable: true
       required:
         - amount_due
@@ -36797,6 +36806,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/charge:
+    post:
+      operationId: chargeNativeInvoice
+      summary: Charge native invoice
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ChargeNativeInvoiceParams
+                required:
+                  - data
+                  - params
+                title: ChargeNativeInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /invoices/{invoice_id}/export:
     get:
       operationId: exportNativeInvoice
@@ -36869,6 +36919,88 @@ paths:
                   - data
                   - params
                 title: FinalizeNativeInvoiceResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/link/reissue:
+    post:
+      operationId: reissueNativeInvoiceLink
+      summary: Reissue native invoice link
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ReissueNativeInvoiceLinkParams
+                required:
+                  - data
+                  - params
+                title: ReissueNativeInvoiceLinkResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /invoices/{invoice_id}/link/revoke:
+    post:
+      operationId: revokeNativeInvoiceLink
+      summary: Revoke native invoice link
+      tags:
+        - billing
+      parameters:
+        - name: invoice_id
+          in: path
+          description: invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingInvoiceDetailResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: RevokeNativeInvoiceLinkParams
+                required:
+                  - data
+                  - params
+                title: RevokeNativeInvoiceLinkResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
