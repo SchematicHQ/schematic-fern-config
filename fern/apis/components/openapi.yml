@@ -5670,6 +5670,12 @@ components:
             invoice is raised on this date.
           format: date-time
           nullable: true
+        billing_entity_id:
+          type: string
+          description: >-
+            The company that pays for the subscription, when it isn't the plan's
+            company. Null when the company pays for itself.
+          nullable: true
         billing_start_date:
           type: string
           description: >-

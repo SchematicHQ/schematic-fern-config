@@ -7371,6 +7371,23 @@ components:
         - plan_versions
         - users
       title: ConditionView
+    CopyCustomPlanRequestBody:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: >-
+            The company the copy is for, such as a location the plan's company
+            pays for.
+        name:
+          type: string
+          description: The copy's name. Defaults to the source plan's.
+          nullable: true
+          maxLength: 256
+          minLength: 1
+      required:
+        - company_id
+      title: CopyCustomPlanRequestBody
     CountResponse:
       type: object
       properties:
@@ -11355,6 +11372,12 @@ components:
             invoice is raised on this date.
           format: date-time
           nullable: true
+        billing_entity_id:
+          type: string
+          description: >-
+            The company that pays for the subscription, when it isn't the plan's
+            company. Null when the company pays for itself.
+          nullable: true
         billing_start_date:
           type: string
           description: >-
@@ -13946,6 +13969,166 @@ components:
         - company_id
         - user_id
       title: GetOrCreateCompanyMembershipRequestBody
+    GroupRolloutChangeResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: GroupRolloutChangeResponseData
+    GroupRolloutChangesResponseData:
+      type: object
+      properties:
+        credit_grants_added:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        credit_grants_changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        credit_grants_removed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        entitlements_added:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        entitlements_changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        entitlements_removed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutChangeResponseData'
+          maxItems: 1000
+        price_changed:
+          type: boolean
+      required:
+        - credit_grants_added
+        - credit_grants_changed
+        - credit_grants_removed
+        - entitlements_added
+        - entitlements_changed
+        - entitlements_removed
+        - price_changed
+      title: GroupRolloutChangesResponseData
+    GroupRolloutCompanyResponseData:
+      type: object
+      properties:
+        company:
+          $ref: '#/components/schemas/CompanyResponseData'
+        plan_id:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          description: Why the rollout can't reach this company; null when it can.
+          nullable: true
+      title: GroupRolloutCompanyResponseData
+    GroupRolloutCompanyResultResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        error:
+          type: string
+          nullable: true
+        plan_id:
+          type: string
+          nullable: true
+        plan_version_id:
+          type: string
+          description: >-
+            The version the rollout published, which the company moves to at its
+            next renewal.
+          nullable: true
+        status:
+          type: string
+          description: >-
+            pending until the company's change has run, then changed, unchanged
+            (its plan already had the change) or failed.
+      required:
+        - company_id
+        - status
+      title: GroupRolloutCompanyResultResponseData
+    GroupRolloutPreviewResponseData:
+      type: object
+      properties:
+        changes:
+          $ref: '#/components/schemas/GroupRolloutChangesResponseData'
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutCompanyResponseData'
+          maxItems: 1000
+        from_plan_version_id:
+          type: string
+        payer_company_id:
+          type: string
+        to_plan_version_id:
+          type: string
+      required:
+        - companies
+        - from_plan_version_id
+        - payer_company_id
+        - to_plan_version_id
+      title: GroupRolloutPreviewResponseData
+    GroupRolloutResponseData:
+      type: object
+      properties:
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRolloutCompanyResultResponseData'
+          maxItems: 1000
+        created_at:
+          type: string
+          format: date-time
+        from_plan_version_id:
+          type: string
+        id:
+          type: string
+        payer_company_id:
+          type: string
+        plan_id:
+          type: string
+        to_plan_version_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - companies
+        - created_at
+        - from_plan_version_id
+        - id
+        - payer_company_id
+        - plan_id
+        - to_plan_version_id
+        - updated_at
+      title: GroupRolloutResponseData
+    GroupRolloutVersionsRequestBody:
+      type: object
+      properties:
+        from_plan_version_id:
+          type: string
+          nullable: true
+        to_plan_version_id:
+          type: string
+          nullable: true
+      title: GroupRolloutVersionsRequestBody
     InferenceCostAmountResponseData:
       type: object
       properties:
@@ -17861,12 +18044,30 @@ components:
           nullable: true
         address:
           $ref: '#/components/schemas/CustomerBillingAddress'
+        align_with_billing_entity:
+          type: boolean
+          description: >-
+            When true, the subscription renews on the same date as the
+            subscriptions billing_entity_id pays for, and the partial first
+            period is billed pro rata unless prorate_first_period is false.
+            Requires billing_entity_id, and can't be combined with
+            billing_cycle_anchor. Only honored on a first publish that starts a
+            subscription.
+          nullable: true
         billing_cycle_anchor:
           type: string
           description: >-
             The date the subscription's billing period renews on. Only honored
             on a first publish that starts a subscription.
           format: date-time
+          nullable: true
+        billing_entity_id:
+          type: string
+          description: >-
+            The company that pays for the subscription a custom plan's first
+            publish starts. Must already have a Stripe customer. Only honored on
+            a first publish that starts a subscription, and not when Schematic
+            bills the company.
           nullable: true
         billing_start_date:
           type: string
@@ -18083,6 +18284,17 @@ components:
       properties:
         billing_email:
           type: string
+          nullable: true
+        billing_entity_id:
+          type: string
+          description: >-
+            The company that pays for the subscription, when it isn't the plan's
+            company. The amendment invoice is raised on its customer, so
+            payment_method and billing_email are its.
+          nullable: true
+        billing_entity_name:
+          type: string
+          description: The name of the company in billing_entity_id.
           nullable: true
         currency:
           allOf:
@@ -19683,6 +19895,26 @@ components:
       required:
         - integration_id
       title: StartDataImportRequestBody
+    StartGroupRolloutRequestBody:
+      type: object
+      properties:
+        excluded_company_ids:
+          type: array
+          description: >-
+            Companies the payer pays for whose custom plans keep their current
+            version.
+          items:
+            type: string
+          maxItems: 1000
+        from_plan_version_id:
+          type: string
+          nullable: true
+        to_plan_version_id:
+          type: string
+          nullable: true
+      required:
+        - excluded_company_ids
+      title: StartGroupRolloutRequestBody
     StripeEmbedInfo:
       type: object
       properties:
@@ -31453,6 +31685,92 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /custom-plan-group-rollouts:
+    get:
+      operationId: listGroupRollouts
+      summary: List group rollouts
+      tags:
+        - customplangrouprollouts
+      parameters:
+        - name: plan_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GroupRolloutResponseData'
+                    title: ListGroupRolloutsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      plan_id:
+                        type: string
+                    title: ListGroupRolloutsParams
+                required:
+                  - data
+                  - params
+                title: ListGroupRolloutsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plan-group-rollouts/{custom_plan_group_rollout_id}:
+    get:
+      operationId: getGroupRollout
+      summary: Get group rollout
+      tags:
+        - customplangrouprollouts
+      parameters:
+        - name: custom_plan_group_rollout_id
+          in: path
+          description: custom_plan_group_rollout_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupRolloutResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetGroupRolloutParams
+                required:
+                  - data
+                  - params
+                title: GetGroupRolloutResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /custom-plans:
     post:
       operationId: createCustomPlan
@@ -31483,6 +31801,152 @@ paths:
                   - data
                   - params
                 title: CreateCustomPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plans/{plan_id}/copies:
+    post:
+      operationId: copyCustomPlan
+      summary: Copy custom plan
+      tags:
+        - customplangrouprollouts
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopyCustomPlanRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PlanVersionResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CopyCustomPlanParams
+                required:
+                  - data
+                  - params
+                title: CopyCustomPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plans/{plan_id}/group-rollout-preview:
+    get:
+      operationId: previewGroupRollout
+      summary: Preview group rollout
+      tags:
+        - customplangrouprollouts
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+        - name: from_plan_version_id
+          in: query
+          schema:
+            type: string
+        - name: to_plan_version_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupRolloutPreviewResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      from_plan_version_id:
+                        type: string
+                      to_plan_version_id:
+                        type: string
+                    title: PreviewGroupRolloutParams
+                required:
+                  - data
+                  - params
+                title: PreviewGroupRolloutResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /custom-plans/{plan_id}/group-rollouts:
+    post:
+      operationId: startGroupRollout
+      summary: Start group rollout
+      tags:
+        - customplangrouprollouts
+      parameters:
+        - name: plan_id
+          in: path
+          description: plan_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartGroupRolloutRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupRolloutResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: StartGroupRolloutParams
+                required:
+                  - data
+                  - params
+                title: StartGroupRolloutResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -42845,6 +43309,7 @@ tags:
   - name: components
   - name: componentspublic
   - name: credits
+  - name: customplangrouprollouts
   - name: dataexports
   - name: entitlements
   - name: events
