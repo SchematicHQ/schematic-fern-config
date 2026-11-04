@@ -31,31 +31,11 @@ Schematic gives you two ways to put billing UI in your app. Both read one data l
 | You write | A provider, a session, and one tag per card. | A hook call, a derivation, and the JSX. Reference code gets you most of the way. |
 | Styling | `--schematic-*` tokens, `color-scheme`, or your own CSS on stable class names. | Anything. The derivations return structured parts, not sentences. |
 | Checkout | `<Checkout/>`, opened through `useCheckoutLauncher()` from the handlers on Plan Manager, Credit Usage, Metered Features, and Unsubscribe Button. | `useCheckout` on the checkout API. Take payment with Stripe Elements if you like. |
-| Frameworks | React. | React hooks from `@schematichq/schematic-react`. The billing client in `@schematichq/schematic-js` is plain TypeScript for any framework. |
+| Frameworks | React. Vue and Angular are coming soon. | React hooks from `@schematichq/schematic-react`. The billing client in `@schematichq/schematic-js` is plain TypeScript for any framework. |
 
 ## One setup for both
 
-Install the React SDK and the components package. `@stripe/stripe-js` and `@stripe/react-stripe-js` are peers of the components, used by the add-card form in Payment Methods.
-
-```sh
-npm install @schematichq/schematic-react @schematichq/schematic-components @stripe/stripe-js @stripe/react-stripe-js
-```
-
-Every component and every hook reads from one provider. Your server mints a short-lived access token for the signed-in company with your secret key, so the key never reaches the browser.
-
-```tsx
-import { SchematicProvider } from "@schematichq/schematic-react";
-
-<SchematicProvider
-  publishableKey="pk_…"
-  // Whose billing is being read: signed in, null for signed out, undefined while auth resolves.
-  session={{ company: company.id, user: user.id, token: fetchAccessToken }}
->
-  {children}
-</SchematicProvider>
-```
-
-The [Quickstart](/components/quickstart) walks through the token exchange and the first component, and [Add Schematic billing to your app](/components/skill) is the same setup written for an agent.
+Every component and every hook reads from one provider, `SchematicProvider` from `@schematichq/schematic-react`. Your server mints a short-lived access token for the signed-in company with your secret key, so the key never reaches the browser. The [Quickstart](/components/quickstart) walks through the install, the token endpoint, and the first component, and [Add Schematic billing to your app](/components/skill) is the same setup written for an agent.
 
 ## What's in the box
 
