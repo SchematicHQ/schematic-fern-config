@@ -8,7 +8,7 @@ description: Metered features have a pre-defined limit either set globally or on
 
 Metered features are features that have a pre-defined limit either set globally or on a per-company basis. This is a common packaging model in SaaS, and is often paired with features that may simply be on or off.
 
-## Trait-based vs. Event-based features
+## Trait-based vs. event-based features
 
 There are two types of metered features in Schematic - trait-based and event-based.
 
@@ -28,7 +28,7 @@ To safely retry network calls without double-counting usage, you can submit an o
 You can read more about feature types [here](/feature-management/feature-types).
 </Info>
 
-## Setting up an Event-based metered feature
+## Setting up an event-based metered feature
 
 To set up an event-based metered feature, do the following:
 1. Create a Feature and choose "Event-based" in the control dropdown
@@ -73,7 +73,7 @@ console.log(`Usage: ${resp.entitlement.usage} of ${resp.entitlement.allocation}`
 console.log(resp.value ? "More usage allowed" : "Limit hit");
 ```
 
-## Setting up a Trait-based metered feature
+## Setting up a trait-based metered feature
 
 To set up a trait-based metered feature, do the following:
 1. Create a Feature and choose "Trait-based" in the control dropdown

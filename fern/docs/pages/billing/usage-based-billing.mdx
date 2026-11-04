@@ -1,5 +1,5 @@
 ---
-title: Usage Based Billing Models
+title: Usage-based billing models
 description: Configure pay as you go, pay in advance, overage, volume, and graduated pricing on an individual entitlement.
 
 slug: billing/usage-based-billing
@@ -17,7 +17,7 @@ While base charges (e.g. a subscription fee) are defined at the plan level, as d
 
 Usage-based billing is a pricing model where customers are charged based on their usage of a particular feature. This model is useful for businesses offering variable or consumption-based products, such as APIs, cloud services, or subscription tiers with metered features.
 
-## Supported Billing Models
+## Supported billing models
 
 Schematic supports a number of usage-based models. If the one you care about is missing, please send us a note at `hi@schematichq.com`.
 
@@ -168,7 +168,7 @@ you invoice. On the line item for that feature, in both checkout and the [pricin
 component, Schematic renders an info icon next to the price. The customer hovers it to read the
 threshold that triggers an early invoice and to see that the rest is billed monthly.
 
-## Negative Quantities (Usage Adjustments)
+## Negative quantities (usage adjustments)
 
 Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key**. Publishable API keys will reject them.
 

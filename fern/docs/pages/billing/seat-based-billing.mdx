@@ -1,5 +1,5 @@
 ---
-title: Seat Based Billing Models
+title: Seat-based billing models
 description: Bill seats with pay in advance or overage pricing, and enforce the seat limit as companies grow.
 
 slug: billing/seat-based-billing
@@ -11,7 +11,7 @@ In addition to usage-based billing, Schematic enables you to implement seat-base
 - [Override](/feature-management/overrides) the base number of seats for a specific company
 - Allow customers to purchase additional seats at a per-seat price
 
-## Pricing models for Seat Based Billing
+## Pricing models for seat-based billing
 
 The 2 most common pricing models for seat-based billing are [Pay in advance](/billing/usage-based-billing#pay-in-advance) and [Overage](/billing/usage-based-billing#fixed-fee-with-overage).
 
@@ -23,7 +23,7 @@ Traditionally, pay in advance models have been the most common pricing model for
 
 Recently, overage models have become more common for seat-based billing. In overage models, customers are charged a per-seat price for each seat they use beyond the base number of seats included in the plan. Instead of requiring a checkout flow to purchase additional seats, customers simply use as many seats as they need, and are charged accordingly at the end of the billing period. The lower friction to add seats has made this popular for products like Figma.
 
-## Implementing Seat Based Billing
+## Implementing seat-based billing
 
 Seat-based billing in Schematic is implemented using **trait-based entitlements**. A trait tracks the current number of seats in use for each company, and Schematic compares that value against the entitlement limit to determine whether to enable or disable the corresponding feature flag.
 

@@ -1,5 +1,5 @@
 ---
-title: Managing Company Plans
+title: Managing company plans
 description: Move a company between plans, and see how Schematic classifies upgrades and downgrades, prorates, and defers scheduled downgrades.
 
 slug: catalog/managing-company-plans
@@ -23,7 +23,7 @@ When a company changes plans, whether an upgrade or a downgrade, Schematic autom
 - A customer's trial period ends, and they are converted to the default plan
 - A customer fails to pay their bill, their subscription is marked `unpaid` in Stripe, and they are downgraded to the default plan
 
-### Plan Change Basics
+### Plan change basics
 
 Whenever a plan changes, Schematic will automatically update the company's entitlements and usage limits. Accrued usage is fully preserved. All company overrides are preserved and re-applied. If a company override is less generous than the current plan entitlement, the more generous amount will be applied. 
 
@@ -37,15 +37,15 @@ Using the "Manage Plan" button in the Schematic App, you are able to downgrade a
 
 ![Downgrade to over limit](../../assets/images/catalog/catalog-changing-plans-over-limit-2.png)
 
-### Stripe-Linked Plans
+### Stripe-linked plans
 
 Stripe-linked plans have additional considerations concerning how usage based charges are synced to Stripe. 
 
-### Upgrade vs. Downgrades
+### Upgrade vs. downgrades
 
 For Stripe-linked plans, Schematic handles upgrades and downgrades differently. A plan change is considered an upgrade if the new plan has a higher base price (or the same base price) as the current plan. A downgrade is considered a plan change to a plan with a lower base price.
 
-### Upgrade/Downgrade logic
+### Upgrade/downgrade logic
 
 When determining if a plan change is an upgrade or downgrade, the following logic is used. Below are the steps for determining if a change is an upgrade, whereas the inverse is considered a downgrade.
 
@@ -56,7 +56,7 @@ When determining if a plan change is an upgrade or downgrade, the following logi
 5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
 6. If the new plan includes the purchase of a credit bundle, it's an upgrade.
 
-### Period Changes 
+### Period changes
 
 When a company upgrades to a new plan, Schematic will maintain the current billing period (e.g. if you are 15 days into your billing period, you will remain on day 15 after the upgrade). 
 
@@ -68,13 +68,13 @@ Additionally, when changing plans, Schematic will use Stripe's proration logic t
 
 For usage-based features, Schematic will carry over usage from the current plan to the new plan.
 
-### Preventing Downgrades
+### Preventing downgrades
 
 Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is the **Prevent downgrades when over the limit** setting under [Plan Change Rules](/catalog/lifecycle#plan-change-rules), and it is turned on by default.
 
 Additionally, you can require customers reach out to you before they can downgrade to a plan (preventing self-service downgrades). This is the **Disallow self-service downgrades** setting in the same section, and it is turned off by default.
 
-### Scheduled Downgrades
+### Scheduled downgrades
 
 If this setting is selected, when a customer downgrades their plan, the downgrade is scheduled for the end of the current billing period rather than applied immediately. The customer retains full access to their current plan until the billing period ends, and no proration or credits are applied.
 
@@ -118,7 +118,7 @@ Simply mapping a Stripe product to a Schematic plan will ensure that those that 
 
 ![Stripe mapping](../../assets/images/catalog/management-stripe-mapping.png)
 
-## Changing Plans
+## Changing plans
 
 How plans are managed in Schematic depends on whether you've integrated Stripe or not.
 

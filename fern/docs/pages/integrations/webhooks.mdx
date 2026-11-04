@@ -193,7 +193,7 @@ Test sends from the dashboard go out once, stay out of the webhook log, and carr
 
 If an endpoint fails consistently, Schematic automatically deactivates it so it stops sending to a broken destination. Our threshold for deactivation is a failure rate of 90% or higher across at least 25 events in a rolling 24-hour window. A delivery counts toward that rate once it has failed three attempts, roughly half an hour in, so Schematic catches a broken endpoint without waiting out every event's full retry window. You can re-enable the endpoint from the webhooks page in the dashboard once the issue is resolved.
 
-## Developer Tooling
+## Developer tooling
 
 On the webhooks page in Schematic, you can find a log of all webhooks Schematic has sent for your account. We will only show events that have an associated webhook configured.
 

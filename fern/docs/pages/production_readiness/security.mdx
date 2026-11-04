@@ -26,7 +26,7 @@ Our most recent report is from Feb 14, 2026 and can be provided upon request.
 
 For the full compliance overview, see our [Trust Center](https://trust.schematichq.com).
 
-### Customer Data
+### Customer data
 
 Customer Data is the information you submit to Schematic for processing on your behalf. It includes the identity keys your systems use to refer to a company or user, optional profile traits (name, email, role, or any custom field you send), usage events recorded through the `track` API, and the subscription state Schematic mirrors from your billing provider.
 
@@ -51,7 +51,7 @@ Schematic maintains a data inventory map, a completed Data Protection Impact Ass
 
 The third parties that process Customer Data on our behalf are listed at [Subprocessors](https://schematichq.com/subprocessors). Data deletion is governed by the Data Deletion Policy listed below.
 
-### Payment Security (PCI Compliance)
+### Payment security (PCI compliance)
 
 Schematic does not store, process, or transmit payment card data. Schematic leverages Stripe for all payment processing, and Stripe is certified as a PCI Level 1 Service Provider, ensuring industry-standard protection for all payment data.
 
@@ -63,7 +63,7 @@ All customer-facing endpoints require TLS 1.2 or higher. Data at rest is encrypt
 
 API access is segmented by environment and key type. Publishable keys are scoped for client-side SDKs and carry limited authority. Secret keys are used by server-side SDKs and grant the access required to call privileged endpoints. Embedded components render with short-lived JWT session tokens minted on your server, which avoids exposing secret keys to the browser.
 
-### Application Security Measures
+### Application security measures
 
 Schematic has implemented the following security measures:
 
@@ -71,7 +71,7 @@ Schematic has implemented the following security measures:
 - **Static Application Security Testing (SAST)**: Regular analysis of source code to detect and remediate potential vulnerabilities before deployment.
 - **Dynamic Application Security Testing (DAST)**: Runtime scanning of deployed environments to detect vulnerabilities such as XSS, SQL injection, and other common attack vectors.
 
-### Monitoring and Logging
+### Monitoring and logging
 
 Schematic has internal and external monitoring in place to ensure the security of our application.
 
@@ -116,7 +116,7 @@ We have a number of policies in place to support SOC 2 compliance. All of these 
 - Vendor Management Policy
 - Vulnerability Management Policy
 
-### Reporting a Vulnerability / Bug
+### Reporting a vulnerability / bug
 
 Please report security vulnerabilities or bugs to `security@schematichq.com`.
 
