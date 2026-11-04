@@ -25,10 +25,10 @@ Your catalog lives in Schematic: plans, add-ons, prices, usage-based billing mod
 
 What this means in practice:
 
-- **Pricing and packaging live in Schematic** - Plans, limits, usage-based billing models, credit bundles, and customer overrides
-- **Stripe processes payments** - Invoices, payment methods, retries, receipts, and tax
-- **Two-way sync** - Changes on either side land on the other, with no webhook handlers to maintain and no billing state to reconcile
-- **Clean separation** - GTM can change packaging and pricing in Schematic without touching Stripe configuration
+- **Schematic holds pricing and packaging**: plans, limits, usage-based billing models, credit bundles, and customer overrides.
+- **Stripe processes payments**: invoices, payment methods, retries, receipts, and tax.
+- **Two-way sync** carries changes on either side to the other, with no webhook handlers to maintain and no billing state to reconcile.
+- **GTM teams change packaging and pricing** in Schematic without touching Stripe configuration.
 
 This lets you run sophisticated pricing models (usage-based, credit-based, hybrid, seat-based, feature-gated) without building metering, enforcement, and reconciliation yourself, and without coupling pricing logic into your application code.
 
