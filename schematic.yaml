@@ -5180,6 +5180,17 @@ components:
       required:
         - has_own_stripe_customer
       title: CompanyBillingEntityResponseData
+    CompanyBillingEntitySettingsResponseData:
+      type: object
+      properties:
+        children_may_change_plan:
+          type: boolean
+        company_id:
+          type: string
+      required:
+        - children_may_change_plan
+        - company_id
+      title: CompanyBillingEntitySettingsResponseData
     CompanyBillingEntitySubscriptionResponseData:
       type: object
       properties:
@@ -20246,6 +20257,19 @@ components:
         - name
         - description
       title: UpdateBillingCreditRequestBody
+    UpdateBillingEntitySettingsRequestBody:
+      type: object
+      properties:
+        children_may_change_plan:
+          type: boolean
+          description: >-
+            Whether the companies this company pays for may change their own
+            plan and add-ons in components. The change is billed to this
+            company. When false, they may only cancel.
+          nullable: true
+      required:
+        - children_may_change_plan
+      title: UpdateBillingEntitySettingsRequestBody
     UpdateBillingPlanCreditGrantRequestBody:
       type: object
       properties:
@@ -29691,6 +29715,93 @@ paths:
                   - data
                   - params
                 title: GetCompanyBillingEntityResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /company-billing-entity-settings/{company_id}:
+    get:
+      operationId: getBillingEntitySettings
+      summary: Get billing entity settings
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/CompanyBillingEntitySettingsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetBillingEntitySettingsParams
+                required:
+                  - data
+                  - params
+                title: GetBillingEntitySettingsResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateBillingEntitySettings
+      summary: Update billing entity settings
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBillingEntitySettingsRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/CompanyBillingEntitySettingsResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateBillingEntitySettingsParams
+                required:
+                  - data
+                  - params
+                title: UpdateBillingEntitySettingsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
