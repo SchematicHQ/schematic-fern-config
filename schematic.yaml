@@ -5183,6 +5183,10 @@ components:
     CompanyBillingEntitySettingsResponseData:
       type: object
       properties:
+        billing_date:
+          type: string
+          format: date-time
+          nullable: true
         children_may_change_plan:
           type: boolean
         company_id:
@@ -14582,6 +14586,15 @@ components:
           items:
             $ref: '#/components/schemas/PlanSelection'
           maxItems: 100
+        align_with_billing_entity:
+          type: boolean
+          description: >-
+            When true, the new subscription renews on the same date as the
+            subscriptions billing_entity_id pays for, and the partial first
+            period is billed pro rata. Requires billing_entity_id, and can't be
+            combined with billing_cycle_anchor. Only honored when starting a new
+            subscription.
+          nullable: true
         base_plan_id:
           type: string
           nullable: true
