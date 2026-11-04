@@ -1,0 +1,105 @@
+---
+title: Reporting credit consumption over time
+slug: playbooks/credit-reporting
+description: Chart how many credits a company consumed each day, broken out by feature, along with its balance. Use the credit balance time series, not feature usage multiplied by a burn rate.
+---
+
+[`GET /billing/credits/balance-timeseries`](/api-reference/billing-credits/get-credit-balance-time-series) returns one point per UTC day for one company and one credit. Each point carries the credits consumed that day, the same figure broken out by feature, and the balance at the end of the day.
+
+The figures come from the credit ledger, so they are the credits Schematic actually drew. Use this endpoint instead of multiplying [feature usage history](/playbooks/usage-reporting) by a burn rate. A burn rate can change, and a company can move between plans with different rates, so today's rate does not price last month's usage correctly.
+
+## Getting a month
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const { data: series } = await client.credits.getCreditBalanceTimeSeries({
+  companyId: "comp_...",
+  billingCreditId: "bilcr_...",
+  startTime: new Date("2026-06-01T00:00:00Z"),
+  endTime: new Date("2026-06-30T00:00:00Z"),
+});
+
+for (const point of series.balancePoints) {
+  console.log(point.timestamp, point.consumed, point.balance);
+}
+```
+
+The endpoint takes a Schematic company ID. If you identify companies by your own keys, resolve the ID once with [`lookupCompany`](/api-reference/companies/lookup-company) and cache it. [`listBillingCredits`](/api-reference/billing-credits/list-billing-credits) returns the credit IDs in the environment.
+
+Each entry in `balancePoints` carries:
+
+| Field               | Notes                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `timestamp`         | The start of the UTC day the point covers.                                              |
+| `consumed`          | Credits drawn during the day, as a positive number.                                     |
+| `consumedByFeature` | The day's consumption per feature, as `featureId`, `featureName` and `amount`.          |
+| `balance`           | The balance at the end of the day.                                                      |
+
+The response also carries `events`, the grants, transfers and zero-outs inside the range, each with its `timestamp`, `eventType`, `amount` and, where it applies, `grantReason` or `zeroedOutReason`. Days with no activity still get a point, with `consumed` at zero and the balance carried forward from the day before.
+
+This endpoint requires a **secret API key** (`sch_` prefix). See [Authentication](/api-reference/authentication).
+
+## Both days are included
+
+`startTime` and `endTime` are truncated to UTC days, and both days are included. June is `2026-06-01` to `2026-06-30`. A start and end on the same day return that one day.
+
+This differs from feature usage history, where the end of the window is excluded. Passing the first of the next month here returns one extra day.
+
+The start can be at most one year in the past, and the end at most one day in the future. A start after the end is rejected.
+
+## Days follow when Schematic processed the usage
+
+Consumption is dated by when Schematic processed the event, in UTC. That is normally within seconds of the event's own timestamp. Usage sent with an earlier timestamp counts on the day it was processed.
+
+Feature usage history dates usage by the event's timestamp instead. Near midnight, a day's credits here and the same day's usage there can cover slightly different events, so dividing one by the other does not give an exact per-day rate.
+
+## One company and one credit per request
+
+There is no form of this endpoint that covers several companies or several credits at once. To chart more than one credit for a company, make one request per credit. To compare usage across many companies, use [feature usage history](/playbooks/usage-reporting), which reports event quantities rather than credits.
+
+Responses are cached for 30 seconds, so a request made immediately after usage may not include it yet.
+
+## Worked example: a company's credit burn by feature
+
+Pull the last 30 days and shape them into one series per feature, ready for a stacked chart.
+
+```ts
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_API_KEY });
+
+const today = new Date();
+const start = new Date(today);
+start.setUTCDate(start.getUTCDate() - 29);
+
+const { data: series } = await client.credits.getCreditBalanceTimeSeries({
+  companyId,
+  billingCreditId,
+  startTime: start,
+  endTime: today,
+});
+
+// featureName -> one value per day, in order
+const byFeature = new Map<string, number[]>();
+series.balancePoints.forEach((point, day) => {
+  for (const { featureName, amount } of point.consumedByFeature) {
+    if (!byFeature.has(featureName)) {
+      byFeature.set(featureName, new Array(series.balancePoints.length).fill(0));
+    }
+    byFeature.get(featureName)![day] += amount;
+  }
+});
+```
+
+<Info>
+`getCreditBalanceTimeSeries` requires `@schematichq/schematic-typescript-node` **1.6.5 or newer**. Other SDKs may need a release cut before it appears.
+</Info>
+
+## Related
+
+- [Reporting usage across companies](/playbooks/usage-reporting), for event quantities across every company
+- [Credit burndown](/billing/credit-burndown), for how features consume credits
+- [Revenue recognition data](/billing/revenue-recognition), for the row-level credit ledger

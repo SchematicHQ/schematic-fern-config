@@ -477,6 +477,9 @@ navigation:
           - page: Reporting usage across companies
             slug: usage-reporting
             path: ./docs/pages/playbooks/usage-reporting.mdx
+          - page: Reporting credit consumption over time
+            slug: credit-reporting
+            path: ./docs/pages/playbooks/credit-reporting.mdx
           - page: Backfills and usage corrections
             slug: backfill-and-corrections
             path: ./docs/pages/playbooks/backfill-and-corrections.mdx
@@ -655,6 +658,7 @@ navigation:
               - POST /billing/credits/plan-grants
               - DELETE /billing/credits/plan-grants/{plan_grant_id}
               - GET /billing/credits/ledger
+              - GET /billing/credits/balance-timeseries
               - POST /billing/credits/lease
               - PUT /billing/credits/lease/{lease_id}/extend
               - PUT /billing/credits/lease/{lease_id}/release
