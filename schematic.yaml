@@ -2874,6 +2874,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
+        invoice_reply_to_email:
+          type: string
+          description: >-
+            Where a payer's reply to an invoice email goes. Null until set, and
+            Schematic sends no invoice email while it is null.
+          nullable: true
       required:
         - default_collector
       title: BillingSettingsResponseData
@@ -3288,6 +3294,125 @@ components:
       enum:
         - graduated
         - volume
+    BillingUpcomingInvoiceResponseData:
+      type: object
+      properties:
+        amount_due:
+          type: integer
+          description: >-
+            What the company will be asked to pay: the total less the balance
+            applied to it, never below zero.
+          format: int64
+        at:
+          type: string
+          description: >-
+            When the invoice is raised. On a Schematic invoice, before now when
+            a period has turned and its invoice is not raised yet.
+          format: date-time
+        change_id:
+          type: string
+          description: >-
+            The subscription change that raises the invoice. Null on an invoice
+            that closes a billing period, and on a Stripe invoice.
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/Currency'
+        discount:
+          type: integer
+          description: >-
+            What discounts take off the subtotal, in minor units of the
+            invoice's currency. Zero on a Schematic invoice.
+          format: int64
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        ending_balance:
+          type: integer
+          description: >-
+            The company's balance after this invoice, in minor units. Below zero
+            is credit the next invoice takes off what is due.
+          format: int64
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementLineResponseData'
+          maxItems: 1000
+        period_end:
+          type: string
+          format: date-time
+        period_start:
+          type: string
+          format: date-time
+        provider_type:
+          allOf:
+            - $ref: '#/components/schemas/BillingProviderType'
+          description: >-
+            Who raises the invoice: schematic for a subscription Schematic
+            bills, stripe for a Stripe subscription.
+        starting_balance:
+          type: integer
+          description: >-
+            The company's balance before this invoice, in minor units. Below
+            zero is credit applied to this invoice.
+          format: int64
+        subscription_external_id:
+          type: string
+          description: >-
+            The Stripe subscription the invoice bills. Null on a Schematic
+            invoice.
+          nullable: true
+        subscription_id:
+          type: string
+          description: >-
+            The Schematic subscription the invoice's lines bill for. Null on a
+            Stripe invoice.
+          nullable: true
+        subtotal:
+          type: integer
+          format: int64
+        tax:
+          type: integer
+          description: In minor units of the invoice's currency.
+          format: int64
+        total:
+          type: integer
+          format: int64
+      required:
+        - amount_due
+        - at
+        - currency
+        - discount
+        - ending_balance
+        - lines
+        - period_end
+        - period_start
+        - provider_type
+        - starting_balance
+        - subtotal
+        - tax
+        - total
+      title: BillingUpcomingInvoiceResponseData
+    BillingUpcomingInvoicesResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        invoices:
+          type: array
+          description: >-
+            The invoices the company will be billed next, earliest first. For a
+            subscription Schematic bills, every invoice up to and including the
+            next one that closes a billing period, priced from the subscription,
+            its scheduled changes and its usage as they stand now. For a Stripe
+            subscription, Stripe's upcoming invoice.
+          items:
+            $ref: '#/components/schemas/BillingUpcomingInvoiceResponseData'
+          maxItems: 1000
+      required:
+        - company_id
+        - invoices
+      title: BillingUpcomingInvoicesResponseData
     BindCatalogRequestBody:
       type: object
       properties:
@@ -20788,6 +20913,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/BillingProviderType'
           nullable: true
+        invoice_reply_to_email:
+          type: string
+          description: >-
+            Where a payer's reply to an invoice email goes. Schematic sends no
+            invoice email until it is set. Send null to clear it.
+          nullable: true
+          maxLength: 255
       title: UpdateBillingSettingsRequestBody
     UpdateCatalogConfigurationRequestBody:
       type: object
@@ -29473,6 +29605,45 @@ paths:
                   - data
                   - params
                 title: GetCompanyNativeSubscriptionResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/upcoming-invoices:
+    get:
+      operationId: getCompanyUpcomingInvoices
+      summary: Get company upcoming invoices
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingUpcomingInvoicesResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCompanyUpcomingInvoicesParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyUpcomingInvoicesResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
