@@ -1617,6 +1617,18 @@ components:
           maxItems: 1000
         current:
           type: boolean
+        custom:
+          type: boolean
+          description: >-
+            True for the catalog's custom plan, the one sold by quote: show
+            custom_plan_cta in place of its price and action.
+        custom_plan_cta:
+          allOf:
+            - $ref: '#/components/schemas/CatalogCustomPlanCTAResponseData'
+          description: >-
+            The custom plan's price text and call to action; set only where
+            custom is true.
+          nullable: true
         description:
           type: string
         entitlements:
@@ -1665,6 +1677,7 @@ components:
         - billing_strategy
         - charge_type
         - currency_prices
+        - custom
         - description
         - entitlements
         - icon
@@ -2104,6 +2117,18 @@ components:
           items:
             $ref: '#/components/schemas/CatalogCurrencyPricesResponseData'
           maxItems: 1000
+        custom:
+          type: boolean
+          description: >-
+            True for the catalog's custom plan, the one sold by quote: show
+            custom_plan_cta in place of its price and action.
+        custom_plan_cta:
+          allOf:
+            - $ref: '#/components/schemas/CatalogCustomPlanCTAResponseData'
+          description: >-
+            The custom plan's price text and call to action; set only where
+            custom is true.
+          nullable: true
         description:
           type: string
         entitlements:
@@ -2141,6 +2166,7 @@ components:
         - billing_strategy
         - charge_type
         - currency_prices
+        - custom
         - description
         - entitlements
         - icon
