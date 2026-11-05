@@ -1226,6 +1226,12 @@ components:
         - duration
         - is_active
       title: BillingSubscriptionDiscountView
+    BillingSubscriptionPauseBehavior:
+      type: string
+      enum:
+        - keep_as_draft
+        - mark_uncollectible
+        - void
     BillingSubscriptionResponseData:
       type: object
       properties:
@@ -1265,6 +1271,18 @@ components:
           type: string
         metadata:
           type: object
+        pause_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionPauseBehavior'
+          nullable: true
+        pause_resumes_at:
+          type: integer
+          format: int64
+          nullable: true
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
         period_end:
           type: integer
           format: int64
@@ -1353,6 +1371,18 @@ components:
           $ref: '#/components/schemas/InvoiceResponseData'
         metadata:
           type: object
+        pause_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionPauseBehavior'
+          nullable: true
+        pause_resumes_at:
+          type: integer
+          format: int64
+          nullable: true
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
         payment_method:
           $ref: '#/components/schemas/PaymentMethodResponseData'
         period_end:
@@ -2793,6 +2823,18 @@ components:
           type: string
         metadata:
           type: object
+        pause_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionPauseBehavior'
+          nullable: true
+        pause_resumes_at:
+          type: integer
+          format: int64
+          nullable: true
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
         period_end:
           type: integer
           format: int64
@@ -4673,8 +4715,28 @@ components:
           type: boolean
         latest_invoice:
           $ref: '#/components/schemas/InvoiceResponseData'
+        pause_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionPauseBehavior'
+          nullable: true
+        pause_resumes_at:
+          type: string
+          format: date-time
+          nullable: true
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
         payment_method:
           $ref: '#/components/schemas/PaymentMethodResponseData'
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
         products:
           type: array
           items:
