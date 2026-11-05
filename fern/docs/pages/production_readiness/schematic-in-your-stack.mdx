@@ -38,17 +38,27 @@ Your app code calls the backend SDK with a secret key. The SDK is a typed client
 
 Your backend uses the API for writes, such as identifying companies and users, changing a company's plan, and starting checkout. Each write becomes a billing and entitlement update, and the change reaches every connected SDK the same way usage does.
 
-The SDK buffers `track` events in memory and sends them to Schematic in batches, retrying a batch that fails. Close the client when your process shuts down so it flushes what it is holding. After a `track`, the SDK optimistically updates its own cache, the same way the frontend SDK does.
+The SDK buffers `track` events in memory and sends them to Schematic in batches, retrying a batch that fails. Close the client when your process shuts down so it flushes what it is holding.
+
+In every setup below, the SDK also optimistically updates its cached usage for the company after each `track`, the same way the frontend SDK does. The next check against a usage limit sees the new count right away, without waiting for Schematic to process the event and push the result back. When that result arrives, it replaces the optimistic value, so usage is never counted twice. This keeps metered checks local and current even when the round trip to Schematic is slow.
 
 When a check cannot complete, the SDK returns the default value you configured for that flag, or `false`, instead of throwing. Set defaults for flags that gate something important, so an outage fails the way you choose. [Availability](/production_readiness/availability) covers how each setup behaves during an interruption.
 
-Where the SDK gets the data for a check depends on whether you run Replicator.
+Where the SDK gets the data for a check depends on whether you add Redis or run Replicator.
 
 ### Default
 
-The SDK holds a WebSocket to Schematic and keeps a local copy of your flags and rules, plus every company and user it has checked. It evaluates checks locally with the same rules engine Schematic runs, compiled to WebAssembly. The first check for a company fetches that company over the socket. Later checks for it never leave your process, and Schematic pushes changes to the company, its usage, and your flags as they happen.
+The SDK holds a WebSocket to Schematic and keeps a local copy of your flags and rules, plus every company and user it has checked. It evaluates checks locally with the same rules engine Schematic runs, compiled to WebAssembly. The SDKs call this mode DataStream. The first check for a company fetches that company over the socket. Later checks for it never leave your process, and Schematic pushes changes to the company, its usage, and your flags as they happen.
 
-Each process keeps its own copy unless you point the SDK at Redis, which shares one copy across instances so that a company loaded by one instance is ready for all of them. See the SDK page for your language, such as [Node.js](/developer_resources/sdks/nodejs#datastream), for setup.
+Each process keeps its own copy unless you point the SDK at Redis.
+
+### Default with Redis
+
+Pointing DataStream at a Redis you run gives every instance of your app one shared copy, so a company loaded by one instance is ready for all of them. This is a middle ground between the default setup and Replicator. Checks stay local for most requests, and the only extra infrastructure is a Redis your app can reach, with no Replicator container to deploy. It suits apps that run many instances, and apps where each request to Schematic adds noticeable latency.
+
+The difference from Replicator is how companies get into the cache. Redis fills as your app checks companies, so the first check for a company that no instance has loaded yet still goes to Schematic. Replicator loads every company up front, and keeps serving the full set from your network if Schematic has a service disruption.
+
+See the SDK page for your language, such as [Node.js](/developer_resources/sdks/nodejs#datastream), for setup.
 
 ### Replicator
 
