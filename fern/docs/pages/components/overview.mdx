@@ -1,5 +1,5 @@
 ---
-title: Components Overview
+title: Components overview
 description: Two ways to put billing UI in your app, both on one data layer. Drop in Schematic's components and theme them, or build your own on the hooks and checkout API.
 slug: components/overview
 ---
@@ -31,7 +31,7 @@ Schematic gives you two ways to put billing UI in your app. Both read one data l
 | You write | A provider, a session, and one tag per card. | A hook call, a derivation, and the JSX. Reference code gets you most of the way. |
 | Styling | `--schematic-*` tokens, `color-scheme`, or your own CSS on stable class names. | Anything. The derivations return structured parts, not sentences. |
 | Checkout | `<Checkout/>`, opened through `useCheckoutLauncher()` from the handlers on Plan Manager, Credit Usage, Metered Features, and Unsubscribe Button. | `useCheckout` on the checkout API. Take payment with Stripe Elements if you like. |
-| Frameworks | React. | React hooks from `@schematichq/schematic-react`. The billing client in `@schematichq/schematic-js` is plain TypeScript for any framework. |
+| Frameworks | React. Vue and Angular are coming soon. | React hooks from `@schematichq/schematic-react`. The billing client in `@schematichq/schematic-js` is plain TypeScript for any framework. |
 
 ## One setup for both
 

@@ -1,5 +1,5 @@
 ---
-title: Stripe Integration
+title: Stripe integration
 description: Sync customers, products, and subscriptions two ways with Stripe, and see how subscription statuses map onto plans.
 
 slug: integrations/stripe
@@ -26,7 +26,7 @@ This means companies do not need to exist in Stripe in order to check out. They 
 
 If you want all companies to be synced to Stripe from the moment they are created, you can configure the [Initial Plan](/catalog/lifecycle#initial-plan) to use a plan with a $0 price.
 
-# Setting up Product Catalog and features
+# Setting up product catalog and features
 
 ## Plans
 
@@ -49,7 +49,7 @@ To create a new plan and a corresponding Stripe product, follow the steps below:
 
 ![Stripe New Product and Prices](../../assets/images/stripe/stripe-new-product-prices.png)
 
-## Plan Add-ons
+## Plan add-ons
 
 In addition to plans, Schematic add-ons can similarly be mapped to Stripe products and prices. This is useful for offering additional features or services to your customers. Schematic supports configuring both monthly and yearly prices for add-ons.
 
@@ -66,7 +66,7 @@ To create a new add-on and a corresponding Stripe product, follow the steps belo
 
 ![Stripe New Add-on and Prices](../../assets/images/stripe/stripe-new-addon.png)
 
-## Usage Based Features
+## Usage-based features
 
 Usage based features are core feature in most modern SaaS applications. Schematic usage based features are mapped to Stripe metered products, either existing or new. Usage is tracked in real time, and will be reflected within Schematic web app, Stripe, and any Schematic components (e.g. customer portal).
 
@@ -89,7 +89,7 @@ To add a usage-based feature to a plan and create a new price for it, follow the
 See the [Usage Based Features](/feature-management/feature-types) page for more details on how to set up usage-based features.
 </Info>
 
-## Schematic Components
+## Schematic components
 
 Schematic components are the easiest way to power your checkout flow and customer portal. These components allow your customers to easily:
 
@@ -110,7 +110,7 @@ See the [Schematic Components](/components/overview) page for more details on ho
 
 ![Pricing table](../../assets/images/components/components-pricing-table.png)
 
-## Viewing Company Data in Schematic
+## Viewing company data in Schematic
 
 For companies in Schematic that have an associated Stripe subscription, you can view that data in the Subscription tab within a company profile. Data will include:
 
@@ -124,7 +124,7 @@ For companies in Schematic that have an associated Stripe subscription, you can 
 
 ![Stripe Details in Schematic](../../assets/images/stripe/stripe-subscription-view-2.png)
 
-## Subscription Statuses
+## Subscription statuses
 
 Stripe supports a number of statuses that correspond to the subscription lifecycle. Schematic treats subscriptions differently based on that status. The table below summarizes how Schematic handles a Stripe subscription based on each status.
 
@@ -143,7 +143,7 @@ More on Stripe subscription statuses [here](https://docs.stripe.com/billing/subs
 | unpaid | inactive | If a subscription moves from past_due to unpaid, we will treat the subscription as inactive and any corresponding entitlements will be revoked. |
 | paused | inactive | Schematic treats paused subscriptions as inactive. |
 
-### Handling Missed Stripe Payments
+### Handling missed Stripe payments
 
 When a customer misses a payment, they will be marked `past_due` in Stripe, but Schematic will continue to treat the subscription as active (see table above). Stripe will attempt multiple retries to collect payment, and after these have failed, will mark the subscription as `cancelled`, at which point Schematic will cancel the subscription, revoke the entitlements, and move the company to the fallback plan (if one is configured).
 
@@ -153,7 +153,7 @@ This payment retry logic is configurable in Stripe and defaults to 3 retries ove
 
 If you wish to change this behavior, you can configure it in Stripe by navigating to `Settings > Billing > Subscriptions & Email`. 
 
-## Deleting Companies within Schematic
+## Deleting companies within Schematic
 
 By default, when a company is deleted within Schematic, the associated subscription in Stripe is not deleted. This is to preserve other data and workflows that may be configured within Stripe. If you would like to delete the subscription as well, you can do so by toggling "Cancel Stripe subscription upon deletion" when deleting the company.
 

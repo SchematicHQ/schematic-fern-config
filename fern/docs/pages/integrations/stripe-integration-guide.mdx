@@ -1,5 +1,5 @@
 ---
-title: Stripe Integration Guide
+title: Stripe integration guide
 description: Map Schematic companies, plans, add-ons, and prices onto their Stripe counterparts so the two-way sync avoids duplicates.
 
 slug: integrations/stripe-integration-guide
@@ -20,7 +20,7 @@ The end goal of setting up Stripe integration is that Schematic has the followin
   - This can be used to map to the company's Stripe Subscription as well
 2. Schematic Plan, Add-ons, and Prices ↔ Stripe product, Stripe price
 
-### Schematic Plan, Add-on, and Price Mapping
+### Schematic plan, add-on, and price mapping
 
 Schematic Plans, Add-ons, and Prices are mapped to Stripe's Products and prices. 
 
@@ -46,7 +46,7 @@ When you setup one of these Schematic concepts, you are given the option to map 
 
 ![Stripe Existing Product and Prices](../../assets/images/stripe/stripe-existing-product-prices.png)
 
-### Schematic Company Mapping
+### Schematic company mapping
 
 To properly map companies between Stripe and Schematic, Schematic needs a key called `stripe_customer_id` set for each company that has a corresponding Stripe Customer. It's common and fully supported to have some customers not mapped to Stripe (most often, for non-paying customers that will be added to Stripe only when they upgrade to a paid plan).
 
@@ -65,7 +65,7 @@ Before setting up the integration, you will need to ensure that each company rec
 To understand more about `identify` and keys, see the [Developer Resources - Keys Management](/developer_resources/key_management) page.
 </Info>
 
-#### Using a Company identifier from Stripe metadata
+#### Using a company identifier from Stripe metadata
 
 If you have have a company identifier already stored in Stripe metadata, Schematic can import that along with the companies. After connecting Stripe, choose the 2nd option so that Schematic can pull the correct key from Stripe. 
 
@@ -80,7 +80,7 @@ When importing companies this way, a few things to note:
 2. When a new company is created, it will set both `stripe_customer_id` and the metadata key you selected.
 3. Going forward, Schematic will still prioritize `stripe_customer_id` as the key it uses to sync companies with Stripe.
 
-### Prod vs. Dev Stripe Accounts
+### Prod vs. dev Stripe accounts
 
 Schematic supports Stripe accounts, sandboxes, and legacy test accounts. Each account is scoped to a specific Schematic Environment (e.g. you can connect a normal Stripe account to your production Schematic environment, a Sandbox to your development Schematic environment, and a different Sandbox to your QA environment). We don't recommend connecting the same Sandbox to multiple Schematic environments.
 

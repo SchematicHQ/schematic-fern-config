@@ -1,23 +1,23 @@
 ---
-title: Feature Types
+title: Feature types
 slug: feature-management/feature-types
 description: The 3 different types of features in Schematic -- Boolean, Trait-based, and Event-based.
 ---
 
 There are 3 different types of features in Schematic
-- **Boolean** - A simple on/off feature.
-- **Event-based** - A feature that is metered against events reported to Schematic (e.g. api calls, reports generated).
-- **Trait-based** - A feature that is based off of information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size).
+- **Boolean** features switch on or off.
+- **Event-based** features are metered against events reported to Schematic (e.g. api calls, reports generated).
+- **Trait-based** features read information reported to Schematic. This can be usage (e.g. seats) or metadata (e.g. company size).
 
 <Info>
 You can define all three types before your application sends Schematic anything. Event and trait names are declared when you create the feature. See [Defining features before you send data](#defining-features-before-you-send-data).
 </Info>
 
-## Boolean Features
+## Boolean features
 
 Boolean features are the simplest type of feature. They are often used to represent features that are either available or not available to a user or company. They are the most commonly used type of feature and are the backbone of most plans. 
 
-## Event-based Features
+## Event-based features
 
 Event-based features are features that are metered against user events reported to Schematic. This can be usage (e.g. api calls, reports generated). Events are sent to Schematic via the `track` function provided by each SDK. Schematic automatically aggregates these events to dynamically determine whether a company has exceeded their entitlement.
 
@@ -25,7 +25,7 @@ Event-based features are features that are metered against user events reported 
 You can read more about tracking usage [here](/feature-management/feature-analytics).
 </Info>
 
-## Trait-based Features
+## Trait-based features
 
 Trait-based features are features based off of information reported to Schematic. Common examples includes seats, projects, or devices. In each case, the value is something you track outside of Schematic, and then report to Schematic when it changes. 
 
@@ -34,7 +34,7 @@ Traits can be updated in 3 ways:
 2. The [upsert company endpoint](/api-reference/companies/upsert-company) or the `upsertCompany` function in the SDKs. 
 3. Calling `identify` to identify a company in the SDKs (or manually creating an identify event via the [events endpoint](/api-reference/events/create-event)). 
 
-### Why Report Trait Usage to Schematic?
+### Why report trait usage to Schematic?
 
 We strongly recommend reporting trait usage to Schematic and leveraging Schematic to enforce limits for trait based features. Doing so provides you:
 

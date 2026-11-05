@@ -1,5 +1,5 @@
 ---
-title: Customer Portal and Checkout Flow
+title: Customer Portal and checkout flow
 description: See what Schematic checkout handles beyond Stripe Checkout, how it syncs subscriptions, and which lifecycle events it emits.
 
 slug: components/customer-portal
@@ -17,7 +17,7 @@ Additionally, Schematic provides a component builder so the content and styling 
 
 ![Customer portal demo](../../assets/images/components/components-customer-portal-demo.png)
 
-## What Checkout Does
+## What Checkout does
 
 Schematic's checkout flow is a multi-step experience that handles the full subscription lifecycle, including subscription and plan changes. Depending on context, a customer may be:
 
@@ -34,7 +34,7 @@ The checkout flow itself walks customers through up to four steps:
 4. **Enter or confirm a payment method** via Stripe's secure payment form
 5. **Review and confirm the order** to complete the transaction
 
-## Why Use Schematic Checkout Instead of Stripe
+## Why use Schematic Checkout instead of Stripe
 
 Stripe Checkout and Payment Links are great for one-time purchases and simple new subscriptions, but they weren't built to manage an ongoing subscription lifecycle inside a product. Schematic checkout is:
 
@@ -48,7 +48,7 @@ Stripe Checkout and Payment Links are great for one-time purchases and simple ne
 
 **Trials, proration, and billing intervals included.** Switching from monthly to annual, handling trial-to-paid conversion, and calculating proration are all managed out of the box.
 
-## How It Works with Stripe
+## How it works with Stripe
 
 Schematic checkout is built on top of Stripe. When a customer completes a checkout flow:
 
@@ -74,7 +74,7 @@ Schematic checkout is configurable at several levels:
 
 **Tax collection.** Schematic supports Stripe Tax to collect billing address information and calculate taxes at checkout. This is configured under [Checkout Settings](/catalog/lifecycle#checkout-settings) in Manage > Lifecycle. See [Advanced Usage](/components/advanced-usage) for details.
 
-## Checkout Flow Events
+## Checkout flow events
 
 After a customer completes a checkout flow (whether that's a new customer, upgrade, or downgrade), we post an event to the window that you can listen for. This event will include some key information, such as the `id` of the new plan.
 
