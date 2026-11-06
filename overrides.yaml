@@ -171,6 +171,21 @@ paths:
     post:
       x-fern-audiences:
         - public
+  /data-exports:
+    get:
+      x-fern-audiences:
+        - public
+    post:
+      x-fern-audiences:
+        - public
+  /data-exports/{data_export_id}:
+    get:
+      x-fern-audiences:
+        - public
+  /data-exports/{data_export_id}/artifact:
+    get:
+      x-fern-audiences:
+        - public
   /event-batch:
     post:
       x-fern-audiences:

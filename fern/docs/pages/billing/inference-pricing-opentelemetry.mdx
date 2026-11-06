@@ -200,7 +200,7 @@ The semantic conventions count cache reads and cache writes inside `gen_ai.usage
 
 Reasoning tokens bill at your output rate, because the GenAI conventions count them inside `gen_ai.usage.output_tokens`. Leave the reasoning rate on the plan at 0.
 
-A span carries no cost, so Schematic prices each event it derives from the list price for the span's provider and model. See [Track what calls cost you](/billing/inference-pricing#track-what-calls-cost-you) for the models that have one and how to read a company's cost.
+A span carries no cost, so Schematic prices each event it derives from your rate sheet, or from the list price when the rate sheet has no price for the span's provider and model. See [Track what calls cost you](/billing/inference-pricing#track-what-calls-cost-you) for the models that have a list price, how to add your own prices, and how to read a company's cost.
 
 <Warning>Use one instrumentation per provider. If you also install a vendor or OpenLLMetry instrumentation for the Anthropic SDK, every call produces two model-call spans and burns credits twice. Turn the SDK's own spans off with `new Anthropic({ openTelemetry: false })` or `ANTHROPIC_OPEN_TELEMETRY=false` if you keep the other one.</Warning>
 
