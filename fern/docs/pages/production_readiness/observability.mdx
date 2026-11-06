@@ -1,6 +1,6 @@
 ---
 title: Observability & support
-description: Trace events, flag evaluations, and the audit log in Schematic, see where rule evaluation runs, and find the support channels.
+description: Trace events, flag evaluations, and the audit log in Schematic, export audit history to CSV, see where rule evaluation runs, and find the support channels.
 
 slug: production_readiness/observability
 ---
@@ -8,9 +8,74 @@ slug: production_readiness/observability
 
 All events sent to Schematic are available in the Events tab to users. The latest flag evaluation is visible in the UI as it occurs to determine when the evaluation occurred and how Schematic evaluated the flag.
 
-The Audit Log is also available within Settings, which shows the following separated by environment:
-- A log of actions taken by users within Schematic
-- A log of create, update, and delete API requests
+### Audit log
+
+The Audit Log under **Settings → Audit Log** records, for each environment, the actions users take within Schematic and the create, update, and delete requests made to the API. The request-type filter above the table narrows the list to **User**, **API**, or **Component** entries, or shows **All**. Schematic keeps audit log entries for 60 days.
+
+Embedded components authenticate with a temporary access token, so their entries are labeled **Component** in the Author column, followed by the API key that issued the token and the company the token was issued for, which links to that company's profile. In the API, these entries carry `company_id` and a `company` object with the company's `id` and `name`, and the audit log list accepts a `company_id` filter. API and dashboard requests whose response is a company also carry its `company_id`. Entries recorded before October 30, 2026 have no company.
+
+Each entry identifies the resource it acted on by `resource_type` and `resource_id_string`, which holds the Schematic ID, such as `feat_GwmRSakgUe3`. The integer `resource_id` field is deprecated and is always null.
+
+### Exporting the audit log
+
+To keep audit history longer than 60 days, export it to CSV through the API with a secret key and store the file yourself. An export runs in the background, and you retrieve it in three steps:
+
+1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` set to `audit-log` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
+2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
+3. Call [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) to download the file. The response body is the file itself, and its `Content-Disposition` header names it after the export type and creation time, for example `audit-log-20261106-143000.csv`.
+
+```bash
+curl -X POST https://api.schematichq.com/data-exports \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "export_type": "audit-log",
+    "output_file_type": "csv",
+    "metadata": {
+      "export_type": "audit-log",
+      "start_time": "2026-10-01T00:00:00Z",
+      "end_time": "2026-11-01T00:00:00Z"
+    }
+  }'
+
+curl https://api.schematichq.com/data-exports/$DATA_EXPORT_ID \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+
+curl -OJ https://api.schematichq.com/data-exports/$DATA_EXPORT_ID/artifact \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+```
+
+Schematic deletes the file three days after the export completes, so download it within that window. [List data exports](/api-reference/data-exports/list-data-exports) returns earlier exports, filtered by `export_type` and `status`.
+
+An export covers the environment the secret key belongs to. The `metadata` object takes the same filters as the audit log list, and omitting it exports every retained entry in the environment:
+
+| Field | Effect |
+|---|---|
+| `export_type` | Required whenever `metadata` is present, and must be `audit-log` |
+| `start_time` | Includes entries that started at or after this time |
+| `end_time` | Includes entries that started before this time; must be later than `start_time` |
+| `actor_type` | Includes only one actor type: `api_key`, `app_user`, `stripe_app`, `system`, or `temporary_access_token` |
+| `q` | Free-text search over entries, up to 512 characters |
+| `notification_email_recipient_email_addresses` | Up to 100 account member emails that receive a message when the export completes |
+
+A range that starts more than 60 days back returns only the entries still retained.
+
+The CSV has one row per entry, newest first, with these columns:
+
+| Column | Contents |
+|---|---|
+| ID | The request ID, shown as **Request ID** in the dashboard |
+| Started At, Ended At | When the request started and finished, as RFC 3339 timestamps |
+| Actor Type | `api_key`, `app_user`, `stripe_app`, `system`, or `temporary_access_token` |
+| User Name | The dashboard user's name, or the API key's name for API key requests |
+| API Key ID, API Key Name | The key that made the request or issued the temporary access token |
+| Environment ID, Environment Name | The environment the request ran in |
+| Method, URL | The HTTP method and request path |
+| Resource Type, Resource Name, Resource ID | The resource the request acted on; Resource ID holds the Schematic ID string |
+| Secondary Resource | A second resource recorded on the entry, when there is one |
+| Response Code | The HTTP status code |
+
+Request and response bodies are not part of the export. Open an entry in the dashboard to read them.
 
 ### Where flag evaluation happens
 
