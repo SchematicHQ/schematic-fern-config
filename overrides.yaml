@@ -11,17 +11,8 @@ paths:
     get:
       x-fern-audiences:
         - public
-    post:
-      x-fern-audiences:
-        - public
   /api-keys/{api_key_id}:
     get:
-      x-fern-audiences:
-        - public
-    put:
-      x-fern-audiences:
-        - public
-    delete:
       x-fern-audiences:
         - public
   /billing/credits:
@@ -193,17 +184,6 @@ paths:
         - public
   /data-exports/{data_export_id}/artifact:
     get:
-      x-fern-audiences:
-        - public
-  /environments:
-    post:
-      x-fern-audiences:
-        - public
-  /environments/{environment_id}:
-    put:
-      x-fern-audiences:
-        - public
-    delete:
       x-fern-audiences:
         - public
   /event-batch:

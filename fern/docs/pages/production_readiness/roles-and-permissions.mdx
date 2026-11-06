@@ -43,10 +43,11 @@ These are granted per environment:
 | **Overrides** | Create, edit, and delete company-level overrides |
 | **Plan Entitlements** | Create, edit, and delete the entitlements attached to a plan |
 | **Plan Versions** | Create, edit, and delete plan versions |
-| **Plan & Billing** | Manage plan billing configuration, and grant credits to companies |
+| **Plan & Billing** | Manage plan billing configuration, grant credits to companies, and view and change your organization's Schematic subscription under **Settings → Plans** and **Settings → Usage & Billing** |
 | **Credits** | Create, edit, and delete credits |
 | **Components** | Create, edit, and delete embedded UI components |
-| **Webhooks** | Create, edit, and delete webhooks, and reveal webhook signing secrets |
+| **Webhooks** (Create, edit and delete) | Create, edit, and delete webhooks |
+| **Webhooks** (Reveal secret) | View a webhook's signing secret after the webhook is created |
 
 ## Assigning roles and permissions
 
@@ -56,7 +57,7 @@ These are granted per environment:
 4. Toggle the account permissions and, for each environment, the environment permissions you want to grant. Use **Select all** / **Unselect all** to set a whole group at once.
 5. Save. The teammate's access updates immediately.
 
-Only admins can add teammates and change roles or permissions.
+Only admins can add teammates and change roles or permissions. Admins are also the only teammates who can create, edit, or delete API keys and environments, and a request authenticated with an API key cannot make those changes.
 
 ![Teams page](../../assets/images/production_readiness/rbac.png)
 
