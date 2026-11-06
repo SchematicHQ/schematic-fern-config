@@ -46,113 +46,148 @@ Sign only the company and user of the logged-in user, read from your session. Th
 
 If a user can belong to several companies, the endpoint needs to know which one is active. Keep the active company in the server-side session if you can. If the browser has to send it, confirm the user is a member of that company before signing.
 
-The signature is built in four steps:
+The Node.js, Python, Go, Ruby, Java and C# SDKs each include a helper that signs the context and returns the value for the `X-Schematic-Context-Sig` header:
+
+| SDK | Helper | Lifetime option | Added in |
+| --- | --- | --- | --- |
+| Node.js | `signContext` from `@schematichq/schematic-typescript-node` | `lifetimeSeconds` | 1.6.9 |
+| Python | `sign_context` from `schematic.context_signature` | `lifetime_seconds` | 1.4.8 |
+| Go | `contextsig.Sign` from `github.com/schematichq/schematic-go/contextsig` | `contextsig.WithLifetime` | v1.6.13 |
+| Ruby | `Schematic::ContextSignature.sign` | `lifetime_seconds:` | 1.5.7 |
+| Java | `ContextSignature.sign` from `com.schematic.contextsig` | `ContextSignature.options().lifetimeSeconds(...)` | 1.6.7 |
+| C# | `ContextSignature.Sign` from `SchematicHQ.Client.ContextSignatures` | `ContextSignatureOptions.Lifetime` | 1.7.2 |
+
+<CodeBlocks>
+```js title="Node.js"
+import { signContext } from "@schematichq/schematic-typescript-node";
+
+app.post("/api/schematic/sign", requireSession, (req, res) => {
+  const signature = signContext(process.env.SCHEMATIC_SECRET_KEY, {
+    company: { id: req.session.companyId },
+    user: { id: req.session.userId },
+  });
+  res.json({ signature });
+});
+```
+
+```python title="Python"
+import os
+
+from flask import jsonify
+from schematic.context_signature import sign_context
+
+
+@app.route("/api/schematic/sign", methods=["POST"])
+def sign_schematic_context():
+    session = get_session()
+    if session is None:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    signature = sign_context(
+        os.environ["SCHEMATIC_SECRET_KEY"],
+        {
+            "company": {"id": session.company_id},
+            "user": {"id": session.user_id},
+        },
+    )
+    return jsonify({"signature": signature})
+```
+
+```go title="Go"
+import (
+	"encoding/json"
+	"net/http"
+	"os"
+
+	"github.com/schematichq/schematic-go/contextsig"
+)
+
+func signSchematicContext(w http.ResponseWriter, r *http.Request) {
+	session := getSession(r)
+	if session == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	signature, err := contextsig.Sign(os.Getenv("SCHEMATIC_SECRET_KEY"), contextsig.Context{
+		Company: map[string]string{"id": session.CompanyID},
+		User:    map[string]string{"id": session.UserID},
+	})
+	if err != nil {
+		http.Error(w, "Could not sign context", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"signature": signature})
+}
+```
+
+```ruby title="Ruby"
+def schematic_signature
+  signature = Schematic::ContextSignature.sign(
+    ENV.fetch("SCHEMATIC_SECRET_KEY"),
+    company: { "id" => current_user.company_id },
+    user: { "id" => current_user.id.to_s }
+  )
+
+  render json: { signature: signature }
+end
+```
+
+```java title="Java"
+import com.schematic.contextsig.ContextSignature;
+import java.util.Collections;
+
+String signature = ContextSignature.sign(
+        System.getenv("SCHEMATIC_SECRET_KEY"),
+        Collections.singletonMap("id", session.getCompanyId()),
+        Collections.singletonMap("id", session.getUserId()));
+```
+
+```csharp title="C#"
+using SchematicHQ.Client.ContextSignatures;
+
+app.MapPost("/api/schematic/sign", (HttpContext http) =>
+{
+    var session = GetSession(http);
+    if (session == null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var signature = ContextSignature.Sign(
+        Environment.GetEnvironmentVariable("SCHEMATIC_SECRET_KEY")!,
+        company: new Dictionary<string, string> { ["id"] = session.CompanyId },
+        user: new Dictionary<string, string> { ["id"] = session.UserId });
+
+    return Results.Json(new { signature });
+});
+```
+</CodeBlocks>
+
+Sign exactly the keys your frontend sets on the SDK. Leave `company` or `user` out of the signed context when the frontend leaves it out, and pass every value as a string, converting a numeric ID before you sign it. Each helper fails with an error when the secret key is missing or the lifetime is out of range, and the Node.js, Python and Ruby helpers also fail on a value that is not a string.
+
+Sign with the secret half of the API key whose publishable half your frontend uses. Schematic also accepts a signature from any other active secret key in the same environment, so you can rotate without an outage: create a new API key, switch your backend to sign with its secret, switch your frontend to its publishable key, and delete the old API key once no browser is still using the old publishable key.
+
+### Signature lifetime
+
+A signature has the form `iat.exp.sig`, where `iat` and `exp` are Unix timestamps in seconds for when it was issued and when it expires. Schematic accepts a signature from 60 seconds before `iat` until 60 seconds after `exp`.
+
+The lifetime, `exp` minus `iat`, can be at most one hour. Schematic rejects a signature with a longer lifetime even while the current time falls between its `iat` and `exp`, and rejects one whose `exp` is earlier than its `iat` as invalid. The helpers sign for 10 minutes, the lifetime Schematic recommends, and accept a lifetime option from one second to one hour. A shorter lifetime shortens how long a leaked signature stays usable, and costs one more call to your endpoint per session each time it expires.
+
+### Sign without a helper
+
+A backend in a language without a helper, such as PHP, builds the signature in four steps:
 
 ```
-canonical = the context as JSON, object keys sorted at every level, no whitespace, no HTML escaping
+canonical = the context as JSON, object keys sorted by Unicode code point at every level, no whitespace, no HTML escaping
 payload   = canonical + "." + iat + "." + exp
 sig       = base64url(HMAC-SHA256(secret_api_key, payload)), with no padding
 signature = iat + "." + exp + "." + sig
 ```
 
-`iat` and `exp` are Unix timestamps in seconds. Schematic accepts a signature from 60 seconds before `iat` until 60 seconds after `exp`. A 10-minute lifetime works well. A shorter one shortens how long a leaked signature stays usable, and costs one more call to your endpoint per session each time it expires.
-
-Sign exactly the keys your frontend sets on the SDK. Leave `company` or `user` out of the signed object when the frontend leaves it out of the context, and keep every value the same JSON type, so a string ID stays a string.
-
-<CodeBlocks>
-```js title="Node.js"
-import crypto from "node:crypto";
-
-function canonicalize(value) {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
-  return `{${Object.keys(value)
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`)
-    .join(",")}}`;
-}
-
-function signContext(secretApiKey, context, ttlSeconds = 600) {
-  const signed = {};
-  if (context.company) signed.company = context.company;
-  if (context.user) signed.user = context.user;
-
-  const iat = Math.floor(Date.now() / 1000);
-  const exp = iat + ttlSeconds;
-  const payload = `${canonicalize(signed)}.${iat}.${exp}`;
-  const sig = crypto
-    .createHmac("sha256", secretApiKey)
-    .update(payload)
-    .digest("base64url");
-  return `${iat}.${exp}.${sig}`;
-}
-
-app.post("/api/schematic/sign", requireSession, (req, res) => {
-  const context = {
-    company: { id: req.session.companyId },
-    user: { id: req.session.userId },
-  };
-  const signature = signContext(process.env.SCHEMATIC_SECRET_KEY, context);
-  res.json({ signature });
-});
-```
-
-```go title="Go"
-import (
-	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"time"
-)
-
-// context holds the "company" and "user" keys maps. encoding/json sorts map keys,
-// so a map gives the canonical key order without extra work.
-func signContext(secretAPIKey string, context map[string]map[string]string, ttl time.Duration) (string, error) {
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	if err := enc.Encode(context); err != nil {
-		return "", err
-	}
-	canonical := bytes.TrimRight(buf.Bytes(), "\n")
-
-	iat := time.Now().Unix()
-	exp := iat + int64(ttl.Seconds())
-	payload := fmt.Sprintf("%s.%d.%d", canonical, iat, exp)
-
-	mac := hmac.New(sha256.New, []byte(secretAPIKey))
-	mac.Write([]byte(payload))
-	sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
-	return fmt.Sprintf("%d.%d.%s", iat, exp, sig), nil
-}
-```
-
-```python title="Python"
-import base64
-import hashlib
-import hmac
-import json
-import time
-
-
-def sign_context(secret_api_key: str, context: dict, ttl_seconds: int = 600) -> str:
-    signed = {k: context[k] for k in ("company", "user") if context.get(k)}
-    canonical = json.dumps(signed, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-
-    iat = int(time.time())
-    exp = iat + ttl_seconds
-    payload = f"{canonical}.{iat}.{exp}".encode()
-
-    digest = hmac.new(secret_api_key.encode(), payload, hashlib.sha256).digest()
-    sig = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
-    return f"{iat}.{exp}.{sig}"
-```
-</CodeBlocks>
-
-Sign with the secret half of the API key whose publishable half your frontend uses. Schematic also accepts a signature from any other active secret key in the same environment, so you can rotate without an outage: create a new API key, switch your backend to sign with its secret, switch your frontend to its publishable key, and delete the old API key once no browser is still using the old publishable key.
+Test your implementation against the shared test vectors in [`context-signing.json`](https://github.com/SchematicHQ/schematic-go/blob/main/contextsig/testdata/context-signing.json), which every SDK helper passes. Each vector gives a context, a secret, `iat` and `exp`, and the canonical JSON and signature they produce. The vectors cover the cases where common JSON encoders differ from the canonical form, including key order by code point rather than UTF-16 code unit, the escaping of control characters and of U+2028 and U+2029, and non-ASCII text written as raw UTF-8.
 
 ## Pass signatures to the browser SDK
 
@@ -211,8 +246,9 @@ Flag checks and the WebSocket fail loudly. A `401` carries one of these messages
 | Message | Cause |
 | --- | --- |
 | `Context signature required for this environment` | The request had no `X-Schematic-Context-Sig` header. Usually `getContextSignature` is missing or threw. |
-| `Context signature invalid` | The signature does not match the request's company and user keys under any active secret key in the environment. |
+| `Context signature invalid` | The signature does not match the request's company and user keys under any active secret key in the environment, or it is malformed, for example with an `exp` earlier than its `iat`. |
 | `Context signature expired` | The current time is more than 60 seconds past `exp`. |
+| `Context signature is valid for too long. Sign it to expire no more than one hour after it was issued` | `exp` is more than one hour after `iat`. |
 | `Context signature not yet valid; check the signing clock` | Your backend's clock is more than 60 seconds ahead of Schematic's. |
 
 Events fail quietly. The SDK sends events to the capture endpoint, which accepts them with a `200` and checks the signature later, so a signing problem shows up as failed events in Schematic rather than as an error in the browser. If flags work but events go missing, look for failed events first.
@@ -223,3 +259,5 @@ A signature that works for some sessions and fails for others usually means your
 - Your backend signs a numeric ID (`888`) while the SDK sends a string (`"888"`). These produce different JSON and different signatures.
 - Your JSON encoder escapes `<`, `>`, and `&`, or non-ASCII characters, so names containing them sign differently. Go's `json.Marshal` and Python's default `json.dumps` both do one of these.
 - The signature uses standard base64 (`+`, `/`, `=`) instead of base64url without padding.
+
+The SDK helpers already handle the last two. If you sign without a helper, run your code against the [test vectors](#sign-without-a-helper).
