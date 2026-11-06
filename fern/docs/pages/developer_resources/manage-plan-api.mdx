@@ -162,7 +162,7 @@ The company that pays for this subscription, when it is different from `company_
 </ParamField>
 
 <ParamField path="trial_end" type="datetime">
-An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain usage-based entitlements. Additionally, new add-ons cannot be added when putting a company onto a trial.
+An ISO 8601 timestamp for when the trial should end. Must be in the future. To be eligible for a trial the plan must be marked as trialable, and cannot contain pay-as-you-go, overage, or tiered entitlements, billed credit grants, or credit grants that top up or bill in arrears. Pay-in-advance entitlements are allowed, and their `pay_in_advance` quantities bill nothing until the trial ends. Additionally, new add-ons cannot be added when putting a company onto a trial. See [What a plan with a trial can include](/catalog/trials#what-a-plan-with-a-trial-can-include).
 </ParamField>
 
 <ParamField path="collection_method" type="string">
@@ -435,7 +435,7 @@ If the invoice goes past due before it is paid, Schematic cancels the subscripti
 The Manage Plan API validates the full request before applying any changes. If validation fails, the entire request is rejected and the company's state is left untouched. Common error cases include:
 
 - **Externally managed subscription**: If the company's subscription is managed outside of Schematic (e.g. directly in Stripe without the Schematic integration), the API will return an error. You must manage the subscription through whichever system owns it.
-- **Invalid trial configuration**: Trials require a trialable plan with no add-ons and no usage-based entitlements. If the plan is not marked as trialable, or you include add-ons or usage-based entitlements while setting `trial_end`, the request will be rejected. The `trial_end` timestamp must also be in the future.
+- **Invalid trial configuration**: Trials require a trialable plan with no add-ons, no pay-as-you-go, overage, or tiered entitlements, and no credit grants that bill or charge on usage. A plan that is not trialable returns `The selected plan does not allow trials.` Add-ons return `A trial can't be combined with add-ons.` A pay-as-you-go, overage, or tiered entitlement, or a billed credit grant, returns `A trial can't be combined with pay-as-you-go, overage, or tiered entitlements, or with billed credit grants.` A credit grant with automatic or user-controlled top-ups, or one that bills in arrears, returns `A trial can't be combined with credit grants that bill in arrears or top up automatically.` Pay-in-advance quantities are accepted. The `trial_end` timestamp must also be in the future.
 - **Missing price for billing-linked add-on**: Billing-linked add-ons require a `price_id`. Look up the available prices via [`GET /plans/:id`](/api-reference/plans/get-plan).
 - **Price specified for non-billing add-on**: You cannot specify a `price_id` for an add-on that is not linked to a billing product. Omit the `price_id` for these add-ons.
 - **Plan not found or not available to company**: The base plan or an add-on does not exist, or the company is not eligible for it.

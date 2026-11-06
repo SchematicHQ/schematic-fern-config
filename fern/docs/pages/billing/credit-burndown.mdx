@@ -243,6 +243,8 @@ A billed grant has four requirements:
 - **Reset** is Monthly, Quarterly, or Yearly.
 - The grant is a fixed amount for the company. Choosing Billed turns off the per-license scaling described in [Seat and Agent Budgets](/billing/seat-and-agent-budgets).
 
+Manage Plan refuses a trial on a plan with a billed grant, with "Cannot use trial with billed credit grants", because the credits are issued as soon as the plan is assigned.
+
 ### How the invoice quantity is calculated
 
 The grant keeps its own reset cadence, and billing follows the plan's billing period. Each invoice bills every credit the grant issues during that period, so the quantity is the **Credit Amount** multiplied by the number of resets in one billing period.
