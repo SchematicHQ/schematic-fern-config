@@ -109,7 +109,7 @@ Sending the event after the response reaches your user keeps Schematic off the r
 | `reasoning_tokens` | No | Reasoning tokens, priced at the reasoning rate on top of output |
 | `requests` | No | How many calls this event covers. Defaults to 1 |
 | `reservation_id` | No | Settles a credit reservation, see [Leases and reservations](/billing/credit-leases-and-reservations) |
-| `cost` | No | What the call cost you, as a decimal string such as `"0.01245"` with up to 8 decimal places. Takes the place of the list price, see [Track what calls cost you](#track-what-calls-cost-you) |
+| `cost` | No | What the call cost you, as a decimal string such as `"0.01245"` with up to 8 decimal places. Takes the place of your rate sheet and the list price, see [Track what calls cost you](#track-what-calls-cost-you) |
 | `currency` | No | The lowercase ISO 4217 code of `cost`, such as `usd`. Defaults to `usd` |
 
 ### Count input tokens the way Schematic does
@@ -278,11 +278,54 @@ When an entry prices a burn, each line of the ledger entry's `burn_breakdown` ca
 
 Apart from the credits it burns, every inference event records what the call cost you, so you can check that your rates cover your model spend. An event takes its cost from the first of these that applies:
 
-1. The `cost` your app sent, in the event's `currency`. Send it when you know the exact amount, such as a negotiated rate or a cost your model gateway reports.
-2. Schematic's list price for the event's `provider` and `response_model` at the time of the call. Schematic keeps list prices in USD for Anthropic and OpenAI models, and applies them to the token counts the same way the credit burn applies your rates.
-3. Neither, and the event is unpriced. That happens for models Schematic has no list price for, including every Gemini model, and for an event that names a currency other than `usd` without sending a cost.
+1. The `cost` your app sent, in the event's `currency`. Send it when your model gateway reports the exact amount of each call.
+2. Your environment's [rate sheet](#price-models-at-your-own-rates), when it has a price for the event's `provider`, `response_model` and `currency` at the time of the call.
+3. Schematic's list price for the event's `provider` and `response_model` at the time of the call. Schematic keeps list prices in USD for Anthropic and OpenAI models, and applies them to the token counts the same way the credit burn applies your rates.
+4. None of these, and the event is unpriced. That happens for models with neither a rate sheet price nor a list price, including every Gemini model until you add one, and for an event that names a currency other than `usd` without sending a cost or matching a rate sheet price in that currency.
 
-When a list price changes or Schematic corrects one, Schematic reprices the events it already priced at the old rate. An event that carried its own cost keeps it. Cost never changes the credits an event burns.
+When a list price changes or Schematic corrects one, Schematic reprices the events it already priced at the old rate. An event that carried its own cost keeps it, and so does an event your rate sheet prices. Cost never changes the credits an event burns.
+
+### Price models at your own rates
+
+Each environment has a rate sheet of per-token prices you set for a provider and model. A rate sheet price takes precedence over Schematic's list price, so add one when you pay a negotiated rate, or when you call a model Schematic has no list price for, such as a Gemini model or one you host yourself. The rate sheet sets only what calls cost you, and credit burns still use the rates on the plan.
+
+To add a price, call [Create account inference cost rate](/api-reference/events/create-account-inference-cost-rate) with a secret API key, or ask the Schematic MCP server, which uses its `create_inference_cost_rate` tool. Changing the rate sheet through the MCP server requires an admin.
+
+```bash title="cURL"
+curl -X POST https://api.schematichq.com/inference-rate-sheet \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "anthropic",
+    "response_model": "claude-sonnet-5-5",
+    "starting_at": "2026-11-01T00:00:00Z",
+    "rates": {
+      "input_tokens": 0.0000024,
+      "cached_input_tokens": 0.00000024,
+      "cache_creation_input_tokens": 0.000003,
+      "output_tokens": 0.000012
+    }
+  }'
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `provider` | Yes | The provider as your events report it, matched without regard to case |
+| `response_model` | Yes | The model as your events report it in `response_model`. A dated name such as `claude-sonnet-4-5-20250929` uses the price for the undated name when the rate sheet has none for the dated one |
+| `rates` | Yes | The cost of one token, keyed by `input_tokens`, `cached_input_tokens`, `cache_creation_input_tokens` and `output_tokens` |
+| `starting_at` | Yes | When the price takes effect, as an RFC 3339 timestamp |
+| `currency` | No | The three-letter currency code of the rates, matched against each event's `currency`. Defaults to `usd` |
+
+Each rate is the cost of a single token, so divide a per-million price by 1,000,000: \$3 per million input tokens is an `input_tokens` rate of 0.000003. As in the credit burn, `input_tokens` prices only the part of the prompt that was neither read from nor written to a cache, and `output_tokens` covers reasoning. A token type you leave out costs nothing.
+
+A price applies to events captured from its `starting_at` until the next price for the same provider, model and currency starts, and an event captured before the first one falls back to the list price. To change a price from a date onward, add a second price with a later `starting_at`. The rate sheet rejects a second price with the same provider, model, currency and `starting_at`, and [Update account inference cost rate](/api-reference/events/update-account-inference-cost-rate) changes the rates of an existing one instead. [Delete account inference cost rate](/api-reference/events/delete-account-inference-cost-rate) removes a price, and its events go back to the list price, or to unpriced when there is none.
+
+Every create, update and delete reprices the stored events in that price's window, so a price with a `starting_at` in the past reprices calls you already sent. An hourly job does the repricing, and each price's `repriced_at` stays null until the job has brought its events to the new price. New events pick up a change within five minutes. Events that carried their own `cost` keep it.
+
+To see the rate sheet, call [List account inference cost rates](/api-reference/events/list-account-inference-cost-rates), which filters by `provider` and `response_model`, or ask the Schematic MCP server, which uses its `list_inference_cost_rates` tool. Each environment keeps its own rate sheet, so prices you add in development do not price production events.
+
+### Read a company's cost
+
 
 To read a company's cost for a period, call [Get company inference cost](/api-reference/companies/get-company-inference-cost), or ask the Schematic MCP server, which answers with its `get_company_inference_cost` tool:
 
