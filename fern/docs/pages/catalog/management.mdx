@@ -216,15 +216,9 @@ Pick a length from 1 to 6 months under **Pause For**, and the dialog shows the d
 
 ![Pause subscription dialog](../../assets/images/catalog/catalog-pause-subscription-dialog.png)
 
-The pause starts when the current billing period ends, so the customer keeps the period they already paid for. Billing resumes the chosen number of months later on the same day of the month, or on the last day of a shorter month. A subscription whose period ends on October 10 and is paused for 6 months resumes on April 10.
+The pause starts when the current billing period ends, so the customer keeps the period they already paid for. Billing resumes the chosen number of months later on the same day of the month. The company keeps its plan and entitlements throughout, and no invoices are collected while the subscription is paused, including usage-based charges for the period that ends as the pause begins.
 
-Schematic pauses the subscription by setting Stripe's [`pause_collection`](https://docs.stripe.com/billing/subscriptions/pause-payment) with the `void` behavior. Stripe keeps the subscription `active`, so the company keeps its plan and entitlements throughout, and Stripe voids every invoice it raises while collection is paused.
-
-<Warning>
-The invoice Stripe raises when the current period ends falls inside the pause, so Stripe voids it. Usage-based charges for that period are billed on that invoice, so the customer is never charged for them.
-</Warning>
-
-**Pause subscription** appears in the menu when the subscription is billed through Stripe, is `active`, renews monthly, and is not scheduled to cancel. A yearly or quarterly subscription can't be paused, because the renewal invoice Stripe voids would cover the whole term instead of one month.
+**Pause subscription** appears in the menu when the subscription is billed through Stripe, is active, renews monthly, and is not scheduled to cancel.
 
 ### While a subscription is paused
 
@@ -240,11 +234,11 @@ To end a pause early, choose **Resume subscription** from the same menu. The con
 
 | When you resume | What happens to billing |
 |--------|--------------|
-| Before the current period ends | Schematic removes the pause, and the subscription renews at the end of the period as if it had never been paused. |
-| After the pause has started | Billing restarts today. A new billing period starts today, and Stripe invoices the customer for the full period with no proration. |
+| Before the current period ends | The pause is removed, and the subscription renews at the end of the period as if it had never been paused. |
+| After the pause has started | A new billing period starts today, and the customer is invoiced for it in full. |
 
-When nobody resumes the subscription, Stripe lifts the pause on the resume date and billing continues on the subscription's monthly cycle.
+A subscription nobody resumes early starts billing again on its own on the resume date.
 
 ### Pauses made in Stripe
 
-Schematic syncs a pause you set in the Stripe dashboard or API and shows it on the subscription card the same way, whichever of Stripe's three pause behaviors it uses (`keep_as_draft`, `mark_uncollectible`, or `void`). A pause with no resume date shows as "Paused indefinitely". You can resume these from Schematic, and a resume made in Stripe clears the pause in Schematic when the webhook arrives.
+When you pause payment collection on a subscription in Stripe, Schematic shows it on the subscription card the same way, and you can resume it from Schematic. A pause with no resume date shows as "Paused indefinitely".
