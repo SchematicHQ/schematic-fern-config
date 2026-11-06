@@ -20,7 +20,7 @@ Inference features meter through credits. Each feature's entitlement is either c
 
 ## Set up pricing in Schematic
 
-This guide uses one AI feature, a support chat, priced in a credit type where one credit is worth one cent. If you have several AI features, repeat steps 2 and 3 for each. Giving each its own feature lets you set different rates when they run on different models.
+This guide uses one AI feature, a support chat, priced in a credit type where one credit is worth one cent. If you have several AI features, repeat steps 2 and 3 for each. Giving each its own feature lets you price and track them separately. When one feature calls more than one model, give it [rates per model](#set-rates-per-model).
 
 ### 1. Create a credit type
 
@@ -210,6 +210,69 @@ Chat and other multi-turn features resend the same system prompt and conversatio
 When a cache entry expires between turns, the next turn reads nothing from the cache. On Anthropic that turn writes the prompt to the cache again and reports it as cache creation, so it burns at the cache creation rate. OpenAI and Gemini report no cache creation tokens, so on those providers the same tokens arrive as ordinary input.
 
 One-shot features such as classification, extraction or a single summary send a different, often short prompt each time. They rarely repeat a prompt long enough to cache, so their events carry input and output only, and those two rates cover them.
+
+## Set rates per model
+
+When one feature sends calls to more than one model, such as a small model for short questions and a larger one for long conversations, a single set of token rates overcharges for one model or undercharges for the other. An inference feature's credit burndown entitlement can carry `model_rates`, a list of rate cards keyed by provider and model. The entitlement's own consumption rate and token rates are the default, and they price every model that has no entry.
+
+Each entry names a `provider` and a `model` and carries its own `consumption_rate` and `quantity_rates`. An entry is a complete rate card: its rates replace the default rates for that model and are not added to them, so a token type the entry leaves out burns no credits for that model.
+
+Schematic picks the rates for each event from its `provider` and `response_model`, ignoring case and surrounding whitespace, in this order:
+
+1. An entry for the exact model name, such as `claude-sonnet-4-5-20250929`.
+2. An entry for the model name with its trailing snapshot date removed, such as `claude-sonnet-4-5`. Both the `20250929` and `2025-09-29` date forms are removed.
+3. The entitlement's default rates.
+
+An entry for the undated name therefore covers every snapshot of that model, and an entry for a dated name takes precedence for that one snapshot.
+
+Set `model_rates` with [Create plan entitlement](/api-reference/entitlements/create-plan-entitlement) or [Update plan entitlement](/api-reference/entitlements/update-plan-entitlement). Company overrides accept the same field through [Create company override](/api-reference/entitlements/create-company-override) and [Update company override](/api-reference/entitlements/update-company-override). The request below keeps the default rates from the example above and adds lower rates for two smaller models:
+
+```bash title="cURL"
+curl -X PUT https://api.schematichq.com/plan-entitlements/pltl_xxxxxxxx \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "value_type": "credit",
+    "price_behavior": "credit_burndown",
+    "value_credit_id": "bilcr_xxxxxxxx",
+    "credit_consumption_rate": 0,
+    "quantity_rates": {
+      "input_tokens": 0.0002,
+      "output_tokens": 0.001,
+      "cached_input_tokens": 0.00002,
+      "cache_creation_input_tokens": 0.00025
+    },
+    "model_rates": [
+      {
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5",
+        "consumption_rate": 0,
+        "quantity_rates": {
+          "input_tokens": 0.0001,
+          "output_tokens": 0.0005,
+          "cached_input_tokens": 0.00001,
+          "cache_creation_input_tokens": 0.000125
+        }
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5-mini",
+        "consumption_rate": 0,
+        "quantity_rates": {
+          "input_tokens": 0.000025,
+          "output_tokens": 0.0002,
+          "cached_input_tokens": 0.0000025
+        }
+      }
+    ]
+  }'
+```
+
+An entitlement takes up to 50 entries, with one entry per provider and model. Sending `model_rates` replaces the whole list, leaving it out of an update keeps the stored list, and sending `null` clears it. The Schematic MCP server sets the same rate cards through the `modelRates` input of its `add_entitlements_to_plan` tool.
+
+When an entry prices a burn, each line of the ledger entry's `burn_breakdown` carries that entry's `provider` and `model` as you stored them. Lines priced at the default rates carry neither.
+
+[Preflight checks](/feature-management/preflight-checks) and the check-and-reserve call in [Leases and reservations](/billing/credit-leases-and-reservations) price a call before it runs, when the model that serves it is not yet known, so they use the entitlement's default rates.
 
 ## Track what calls cost you
 
