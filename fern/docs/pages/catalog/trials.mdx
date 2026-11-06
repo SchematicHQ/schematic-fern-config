@@ -14,6 +14,38 @@ src="../../assets/images/catalog/catalog-plans-trial.png"
 
 <Info>If you change trial configuration (e.g. whether a trial is a part of a plan, credit card requirement), any companies currently in a trial will be unaffected, and the new setting will apply going forward.</Info>
 
+## What a plan with a trial can include
+
+A company on a trial may have no payment method on file, so Schematic only lets a plan carry a trial when nothing on it charges for usage during the trial window. It applies the same rule when you save the plan, when you add an entitlement or credit grant to a plan with a trial, and when you start a trial for a company from Manage Plan, and it refuses the change if anything on the plan would bill during the trial.
+
+| On the plan | Allowed with a trial | Why |
+| --- | --- | --- |
+| Entitlement with no price | Yes | Nothing is billed for it. |
+| [Pay in advance](/billing/usage-based-billing#pay-in-advance) entitlement | Yes | The purchased quantity is a licensed price, like the plan price, and bills \$0 during the trial. |
+| [Credit burndown](/billing/credit-burndown) entitlement | Yes | Usage draws on granted credits. |
+| [Pay as you go](/billing/usage-based-billing#pay-as-you-go) entitlement | No | Usage bills during the trial. |
+| [Fixed fee with overage](/billing/usage-based-billing#fixed-fee-with-overage) entitlement | No | Usage past the included amount bills during the trial. |
+| Tiered entitlement, [volume](/billing/usage-based-billing#volume-pricing) or [graduated](/billing/usage-based-billing#graduated-pricing) | No | Usage bills during the trial. |
+| Credit grant set to [Block usage](/billing/empty-credit-balances#block-usage) | Yes | Credit-metered features stop at zero and nothing is charged. |
+| Credit grant with [Automatic top-ups](/billing/empty-credit-balances#automatic-top-ups) or [User-controlled top-ups](/billing/empty-credit-balances#user-controlled-top-ups) | No | A top-up charges the company during the trial. User-controlled top-ups count because they run until the company turns them off. |
+| Credit grant set to [Bill in arrears](/billing/empty-credit-balances#bill-in-arrears) | No | Usage past zero is invoiced. |
+| [Billed credit grant](/billing/credit-burndown#billed-credit-grants) on a custom plan | No trial from Manage Plan | The grant's credits are issued as soon as the plan is assigned, so a \$0 trial would hand them over unpaid. |
+
+A pay-in-advance entitlement, such as a seat count, bills nothing until the trial ends. At the end of the trial it follows the same **Payment Method** rule in [Lifecycle settings](/catalog/lifecycle#trials) as the plan price: a company that converts is billed for its quantity along with the plan, and a company that moves to the Trial Expiry Plan is not billed for it.
+
+### Where the rule is checked
+
+| Where | What Schematic does |
+| --- | --- |
+| **Plan Trial** step of the plan editor | Shows "Plans with **usage-based entitlements** (pay as you go, overages, tiered) cannot be trial enabled because they bill on usage during the trial." when the plan has one, and "A plan with a trial can't have **credit grants that bill in arrears or top up automatically**, because they bill on usage during the trial." when a grant tops up or bills in arrears. Saving the trial returns "A plan with a trial can't have pay-as-you-go, overage, or tiered entitlements." or "A plan with a trial can't have credit grants that bill in arrears or top up automatically." |
+| Entitlement form on a plan with a trial | Refuses pay as you go, overage, and tiered with "Usage-based entitlements (pay as you go, overages, tiered) cannot be added to trial plans." Pay in advance can be added. |
+| Credit grant form on a plan with a trial | **When credits run out** offers only Block usage, with the note "A plan with a trial can only block usage at zero, since top-ups and billing in arrears would charge during the trial." |
+| Manage Plan, with **Enable Trial** turned on for a company | Shows "Cannot use trial with pay-as-you-go entitlements" or "Cannot use trial with billed credit grants". A plan with a top-up or arrears grant is refused on submit with "A trial can't be combined with credit grants that bill in arrears or top up automatically." Pay-in-advance quantities, such as seats, can be set on a trial. |
+
+The plan editor applies grant changes before it checks the trial, so you can change the last top-up or arrears grant to Block usage and turn on the trial in the same save.
+
+A credit grant that already tops up or bills in arrears on a plan with a trial keeps its policy in the credit grant form and stays editable. Schematic only refuses a change that moves a grant from Block usage to a top-up or arrears policy while the plan has a trial.
+
 ## Trial eligibility
 
 Trial eligibility decides whether Schematic offers a company a trial at all, and you choose the rule under **Trial Eligibility** in [Lifecycle settings](/catalog/lifecycle#trials).
