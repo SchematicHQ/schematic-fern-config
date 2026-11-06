@@ -1815,6 +1815,25 @@ components:
         - id
         - provider_type
       title: BillingMeterResponseData
+    BillingMovedToDefaultPlanResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        plan_id:
+          type: string
+          description: The default plan the company is on now.
+        voided_invoices:
+          type: array
+          description: The past-due invoices the move voided.
+          items:
+            type: string
+          maxItems: 1000
+      required:
+        - company_id
+        - plan_id
+        - voided_invoices
+      title: BillingMovedToDefaultPlanResponseData
     BillingNativeSubscriptionChangeResponseData:
       type: object
       properties:
@@ -15927,6 +15946,7 @@ components:
         - invoice_past_due
         - manage_plan
         - migration
+        - past_due_default_plan
         - plan_billing_product_changed
         - plan_deleted
         - plan_trait_change
@@ -30106,6 +30126,47 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/native-subscription/move-to-default-plan:
+    post:
+      operationId: moveToDefaultPlan
+      summary: Move to default plan
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingMovedToDefaultPlanResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: MoveToDefaultPlanParams
+                required:
+                  - data
+                  - params
+                title: MoveToDefaultPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /companies/{company_id}/upcoming-invoices:
     get:
       operationId: getCompanyUpcomingInvoices
@@ -42785,6 +42846,20 @@ paths:
             type: string
             description: Search for users by name, keys or string traits
             maxLength: 512
+        - name: sort_order_column
+          in: query
+          description: Column to sort by (e.g. name, created_at, last_seen_at)
+          schema:
+            type: string
+            description: Column to sort by (e.g. name, created_at, last_seen_at)
+            maxLength: 255
+        - name: sort_order_direction
+          in: query
+          description: Direction to sort by (asc or desc)
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/SortDirection'
+            description: Direction to sort by (asc or desc)
         - name: limit
           in: query
           description: Page limit (default 100)
@@ -42849,6 +42924,16 @@ paths:
                         type: string
                         description: Search for users by name, keys or string traits
                         maxLength: 512
+                      sort_order_column:
+                        type: string
+                        description: >-
+                          Column to sort by (e.g. name, created_at,
+                          last_seen_at)
+                        maxLength: 255
+                      sort_order_direction:
+                        allOf:
+                          - $ref: '#/components/schemas/SortDirection'
+                        description: Direction to sort by (asc or desc)
                     title: ListUsersParams
                 required:
                   - data
