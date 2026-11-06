@@ -1,6 +1,6 @@
 ---
 title: Managing company plans
-description: Move a company between plans, and see how Schematic classifies upgrades and downgrades, prorates, and defers scheduled downgrades.
+description: Move a company between plans, pause its subscription, and see how Schematic classifies upgrades and downgrades, prorates, and defers scheduled downgrades.
 
 slug: catalog/managing-company-plans
 ---
@@ -12,6 +12,7 @@ This doc covers
 - [Automatically assigning plans to companies](#ways-to-assign-plans-to-companies)
 - [Manually changing a company's plan](#changing-plans)
 - [Invoicing a new subscription](#invoicing-a-new-subscription)
+- [Pausing a subscription](#pausing-a-subscription)
 
 ## Company initiated plan changes
 
@@ -200,3 +201,44 @@ The time between today and the renewal date becomes a shortened first period, an
 **Paid outside of Stripe** disappears from **Payment method** while the first period is free, because there is no invoice to record as paid. Once a subscription exists, the panel shows its renewal date read-only, and changing it means cancelling and restarting the subscription.
 
 To set up the same terms from code, see [Invoicing a subscription](/developer_resources/manage-plan-api#invoicing-a-subscription) in the Manage Plan API.
+
+## Pausing a subscription
+
+Seasonal customers often cancel for their off months, and when they come back they have to buy the plan again. Pausing the subscription instead stops Stripe collecting payment for one to six months while the company keeps its plan, add-ons, and entitlements, so the customer picks up where they left off.
+
+### Pausing from the company profile
+
+On the company's profile, open the **Subscription** tab, open the menu on the subscription card, and choose **Pause subscription**.
+
+![Pause subscription in the subscription card menu](../../assets/images/catalog/catalog-pause-subscription-menu.png)
+
+Pick a length from 1 to 6 months under **Pause For**, and the dialog shows the date billing pauses and the date it resumes.
+
+![Pause subscription dialog](../../assets/images/catalog/catalog-pause-subscription-dialog.png)
+
+The pause starts when the current billing period ends, so the customer keeps the period they already paid for. Billing resumes the chosen number of months later on the same day of the month. The company keeps its plan and entitlements throughout, and no invoices are collected while the subscription is paused, including usage-based charges for the period that ends as the pause begins.
+
+**Pause subscription** appears in the menu when the subscription is billed through Stripe, is active, renews monthly, and is not scheduled to cancel.
+
+### While a subscription is paused
+
+As soon as you confirm, the subscription card shows a **Paused** pill and, under **Period**, the date the pause ends, such as "Paused until April 10, 2027". Both appear while the customer is still in the period they paid for.
+
+![A paused subscription with Manage Plan disabled](../../assets/images/catalog/catalog-paused-subscription.png)
+
+Schematic refuses plan changes on a paused subscription. In the app, **Manage Plan** and the plan and add-on edit buttons are disabled. A customer who tries to change plans in the [customer portal](/components/customer-portal) sees "Plan changes are unavailable while this subscription is paused." To change the plan, resume the subscription first. You can still cancel a paused subscription.
+
+### Resuming a subscription
+
+To end a pause early, choose **Resume subscription** from the same menu. The confirmation dialog tells you which of these happens before you confirm:
+
+| When you resume | What happens to billing |
+|--------|--------------|
+| Before the current period ends | The pause is removed, and the subscription renews at the end of the period as if it had never been paused. |
+| After the pause has started | A new billing period starts today, and the customer is invoiced for it in full. |
+
+A subscription nobody resumes early starts billing again on its own on the resume date.
+
+### Pauses made in Stripe
+
+When you pause payment collection on a subscription in Stripe, Schematic shows it on the subscription card the same way, and you can resume it from Schematic. A pause with no resume date shows as "Paused indefinitely".
