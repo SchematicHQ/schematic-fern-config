@@ -99,7 +99,7 @@ The signature is computed as:
 HMAC-SHA256(secret, rawBody + "+" + timestamp)  →  hex-encoded
 ```
 
-where `secret` is the webhook secret shown in the Schematic dashboard when you create the webhook endpoint.
+where `secret` is the webhook secret shown in the Schematic dashboard when you create the webhook endpoint. After that, admins and members with the Webhooks **Reveal secret** permission can view it in the webhook's details. Reading a webhook through the API returns the secret to a secret key that is not readonly, and returns an empty string to a [readonly key](/api-reference/authentication#readonly-api-keys).
 
 Each SDK ships a built-in helper to handle verification for you:
 
