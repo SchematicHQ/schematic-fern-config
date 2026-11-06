@@ -33,7 +33,7 @@ Once there, do the following:
     - `organization.created`, `organization.updated`, `organization.deleted`
     - `organization_membership.created`, `organization_membership.updated`, `organization_membership.deleted`
     - `user.created`, `user.updated`, `user.deleted`
-3. Once you've created the webhook, WorkOS will provide a signing secret. Copy it and add it to the **WorkOS Webhook signing secret** field in Schematic.
+3. Once you've created the webhook, WorkOS will provide a signing secret. Copy it into the **WorkOS Webhook signing secret** field in Schematic. The field is required, and Schematic rejects any webhook delivery it can't verify against this secret.
 4. Create a WorkOS secret API key and add it to the **WorkOS API key** field in Schematic. Click **Connect to WorkOS**.
 
 Once you're connected, Schematic will import organizations, users, and memberships from WorkOS. A `workos_organization_id` will be added as a unique key to companies, and a `workos_user_id` will be added as a unique key to users along with an additional key, `email`. The following data will be imported and kept up-to-date automatically:
@@ -49,20 +49,6 @@ Once you're connected, Schematic will import organizations, users, and membershi
 On initial import, if an organization or user in Schematic already exists with a `workos_organization_id` or `workos_user_id` that matches data from WorkOS, the record will simply be updated.
 
 You will now be able to assign entitlements and enforce them in your application using Schematic flags, features, and plans.
-
-### Webhook signing secret
-
-Schematic checks the signature on every WorkOS webhook delivery against the signing secret saved with the integration. The **WorkOS Webhook signing secret** field is required, and an install through the API without a `webhook_secret` fails with a `400` and the error `WorkOS webhook secret is required`.
-
-A WorkOS integration saved without a signing secret receives no updates from WorkOS. Schematic answers each delivery with a `401` and the message `This WorkOS integration has no webhook secret, so its webhooks cannot be verified.`, and organization, membership, and user changes stop reaching Schematic. If the WorkOS dashboard shows deliveries to the Schematic endpoint failing with that message, reconnect the integration with its secret:
-
-1. In your WorkOS dashboard, open the webhook endpoint that points to Schematic and copy its signing secret.
-2. On the WorkOS integration page in Schematic, click **Remove Connection**, then **Remove Integration** to confirm. Organizations and users already imported from WorkOS stay in Schematic.
-3. Enter your WorkOS secret API key and the signing secret, and click **Connect to WorkOS**.
-
-The webhook URL stays the same, so the existing WorkOS endpoint keeps working. Connecting runs the import again and updates each company and user whose `workos_organization_id` or `workos_user_id` matches a record in WorkOS.
-
-Schematic accepts WorkOS webhook deliveries of up to 1 MB and answers a larger one with a `413`.
 
 ### Migrating from a manual WorkOS integration
 
