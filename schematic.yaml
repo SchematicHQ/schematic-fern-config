@@ -1275,6 +1275,12 @@ components:
         email:
           type: string
           nullable: true
+        legal_name:
+          type: string
+          description: >-
+            Who invoices are addressed to. Null to address them to the company
+            by name.
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -5476,6 +5482,118 @@ components:
         - cancel_at_period_end
         - plan_name
       title: CompanyBillingEntitySubscriptionResponseData
+    CompanyBillingProfileContractResponseData:
+      type: object
+      properties:
+        account_id:
+          type: string
+        billing_customer_id:
+          type: string
+          nullable: true
+        billing_details:
+          allOf:
+            - $ref: '#/components/schemas/BillingInvoiceBillingDetailsResponseData'
+          description: >-
+            Who invoices issued under the contract are addressed to, as the
+            contract holds them now. Null when it holds none.
+          nullable: true
+        collection_method:
+          $ref: '#/components/schemas/BillingCollectionMethod'
+        collector:
+          allOf:
+            - $ref: '#/components/schemas/Collector'
+          nullable: true
+        company_id:
+          type: string
+        contract_document:
+          allOf:
+            - $ref: '#/components/schemas/CompanyBillingProfileDocumentResponseData'
+          description: >-
+            The signed order form or MSA kept with the contract. Null when none
+            is attached.
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
+        days_until_due:
+          type: integer
+          format: int64
+          nullable: true
+        environment_id:
+          type: string
+        gating_days:
+          type: integer
+          format: int64
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+          nullable: true
+        overdraft_limit:
+          type: integer
+          format: int64
+          nullable: true
+        payment_gating:
+          $ref: '#/components/schemas/PaymentGating'
+        payment_method_id:
+          type: string
+          nullable: true
+        postpaid:
+          allOf:
+            - $ref: '#/components/schemas/ContractPostpaidResponseData'
+          description: >-
+            What the company owes on postpaid usage, which the contract's
+            overdraft_limit caps. Set only when reading the company's default
+            contract that Schematic bills, and the company has postpaid credits.
+          nullable: true
+        proration_behavior:
+          allOf:
+            - $ref: '#/components/schemas/ProrationBehavior'
+          nullable: true
+        provider_type:
+          $ref: '#/components/schemas/BillingProviderType'
+        purchase_order:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - account_id
+        - collection_method
+        - company_id
+        - created_at
+        - environment_id
+        - gating_days
+        - id
+        - is_default
+        - payment_gating
+        - provider_type
+        - updated_at
+      title: CompanyBillingProfileContractResponseData
+    CompanyBillingProfileDocumentResponseData:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+          description: In bytes.
+          format: int64
+        uploaded_at:
+          type: string
+          format: date-time
+      required:
+        - name
+        - size
+        - uploaded_at
+      title: CompanyBillingProfileDocumentResponseData
     CompanyBillingProfileResponseData:
       type: object
       properties:
@@ -7606,6 +7724,97 @@ components:
         - plan_versions
         - users
       title: ConditionView
+    ContractBillingDetailsRequestBody:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/CustomerBillingAddress'
+        email:
+          type: string
+          nullable: true
+          maxLength: 255
+        legal_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        phone:
+          type: string
+          nullable: true
+          maxLength: 255
+        tax_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxIDInput'
+          maxItems: 10
+      required:
+        - tax_ids
+      title: ContractBillingDetailsRequestBody
+    ContractPostpaidCreditResponseData:
+      type: object
+      properties:
+        counts_toward_limit:
+          type: boolean
+          description: >-
+            Whether owed counts against the contract's overdraft limit: only a
+            credit priced in the contract's currency does.
+        credit_id:
+          type: string
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
+        debt:
+          type: number
+          description: Credits drawn past zero and not yet settled.
+          format: double
+        grant_cap:
+          type: number
+          description: The plan grant's cap on credits drawn past zero. Null for no cap.
+          format: double
+          nullable: true
+        owed:
+          type: integer
+          description: >-
+            debt at rate_per_unit, in minor units of currency. Null when the
+            credit has no rate.
+          format: int64
+          nullable: true
+        rate_per_unit:
+          type: string
+          description: >-
+            What one credit past zero costs, in minor units of currency, as a
+            decimal. Null when the credit has no rate.
+          nullable: true
+      required:
+        - counts_toward_limit
+        - credit_id
+        - debt
+      title: ContractPostpaidCreditResponseData
+    ContractPostpaidResponseData:
+      type: object
+      properties:
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractPostpaidCreditResponseData'
+          maxItems: 1000
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          description: >-
+            The contract's currency. Null when neither the contract nor its
+            credits name one.
+          nullable: true
+        owed:
+          type: integer
+          description: >-
+            Owed across the credits priced in currency, each at its own rate, in
+            minor units of currency.
+          format: int64
+      required:
+        - credits
+        - owed
+      title: ContractPostpaidResponseData
     CopyCustomPlanRequestBody:
       type: object
       properties:
@@ -20224,6 +20433,13 @@ components:
             Onboarding URL returned during the v2 (Connect) install flow before
             activation
           nullable: true
+        payments_only:
+          type: boolean
+          description: >-
+            Whether Stripe is connected only to collect payments on the invoices
+            Schematic issues. Customers and their cards sync; subscriptions,
+            invoices, products, prices and coupons do not, and plans are not
+            created in Stripe.
         return_to:
           type: string
           description: >-
@@ -21104,6 +21320,8 @@ components:
     UpdateCompanyBillingProfileRequestBody:
       type: object
       properties:
+        billing_details:
+          $ref: '#/components/schemas/ContractBillingDetailsRequestBody'
         collection_method:
           $ref: '#/components/schemas/BillingCollectionMethod'
         collector:
@@ -21149,6 +21367,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ProrationBehavior'
           nullable: true
+        purchase_order:
+          type: string
+          nullable: true
+          maxLength: 255
       required:
         - collection_method
       title: UpdateCompanyBillingProfileRequestBody
@@ -28201,6 +28423,183 @@ paths:
                   - data
                   - params
                 title: UpdateCompanyBillingProfileResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/profiles/{billing_profile_id}/contract:
+    get:
+      operationId: getCompanyContract
+      summary: Get company contract
+      tags:
+        - billing
+      parameters:
+        - name: billing_profile_id
+          in: path
+          description: billing_profile_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/CompanyBillingProfileContractResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCompanyContractParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyContractResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/profiles/{billing_profile_id}/document:
+    get:
+      operationId: downloadContractDocument
+      summary: Download contract document
+      tags:
+        - billing
+      parameters:
+        - name: billing_profile_id
+          in: path
+          description: billing_profile_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: >-
+                Indicates whether the content is expected to be displayed inline
+                by the client or treated as an attachment to be downloaded.
+              schema:
+                type: string
+                example: attachment; filename="file.pdf"
+        '302':
+          description: Found
+          headers:
+            Location:
+              description: A short-lived URL the file can be downloaded from.
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: uploadContractDocument
+      summary: Upload contract document
+      tags:
+        - billing
+      parameters:
+        - name: billing_profile_id
+          in: path
+          description: billing_profile_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/CompanyBillingProfileContractResponseData
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UploadContractDocumentParams
+                required:
+                  - data
+                  - params
+                title: UploadContractDocumentResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteContractDocument
+      summary: Delete contract document
+      tags:
+        - billing
+      parameters:
+        - name: billing_profile_id
+          in: path
+          description: billing_profile_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteContractDocumentParams
+                required:
+                  - data
+                  - params
+                title: DeleteContractDocumentResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
