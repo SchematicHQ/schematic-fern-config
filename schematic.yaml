@@ -15676,6 +15676,31 @@ components:
       required:
         - plan_id
       title: OrderedPlansInGroup
+    PauseSubscriptionRequest:
+      type: object
+      properties:
+        company_id:
+          type: string
+        months:
+          type: integer
+          description: >-
+            How many months to pause for, counted from the end of the current
+            billing period. Between 1 and 6.
+          format: int64
+          maximum: 6
+          minimum: 1
+        subscription_external_id:
+          type: string
+          description: >-
+            The payment provider's ID for the subscription to pause. Required
+            when the company has more than one subscription; otherwise defaults
+            to its only one.
+          nullable: true
+          maxLength: 255
+      required:
+        - company_id
+        - months
+      title: PauseSubscriptionRequest
     PaymentGating:
       type: string
       enum:
@@ -18981,6 +19006,22 @@ components:
         - company_id
         - credit_type_id
       title: ReserveCreditsRequestBody
+    ResumeSubscriptionRequest:
+      type: object
+      properties:
+        company_id:
+          type: string
+        subscription_external_id:
+          type: string
+          description: >-
+            The payment provider's ID for the subscription to resume. Required
+            when the company has more than one subscription; otherwise defaults
+            to its only one.
+          nullable: true
+          maxLength: 255
+      required:
+        - company_id
+      title: ResumeSubscriptionRequest
     RetryCustomPlanBillingRequestBody:
       type: object
       properties:
@@ -38374,6 +38415,86 @@ paths:
                   - data
                   - params
                 title: CancelSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /manage-plan/subscription/pause:
+    post:
+      operationId: pauseSubscription
+      summary: Pause subscription
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PauseSubscriptionRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: PauseSubscriptionParams
+                required:
+                  - data
+                  - params
+                title: PauseSubscriptionResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /manage-plan/subscription/resume:
+    post:
+      operationId: resumeSubscription
+      summary: Resume subscription
+      tags:
+        - checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeSubscriptionRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ManagePlanResponseResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ResumeSubscriptionParams
+                required:
+                  - data
+                  - params
+                title: ResumeSubscriptionResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
