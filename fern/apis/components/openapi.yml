@@ -5259,6 +5259,49 @@ components:
         - pay_in_advance
         - skip_trial
       title: CreateCheckoutRequest
+    CreateCompanySpendPolicyRequestBody:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        label:
+          type: string
+          nullable: true
+          maxLength: 255
+        max_per_draw:
+          type: number
+          description: >-
+            The largest number of credits a single draw may spend. Set either
+            this or window_amount.
+          format: double
+          nullable: true
+        user_id:
+          type: string
+          description: >-
+            The user the cap applies to, who must belong to the company. Leave
+            it out to cap the whole company.
+          nullable: true
+        window_amount:
+          type: number
+          description: >-
+            The number of credits the company or user may spend in one window.
+            Set either this or max_per_draw.
+          format: double
+          nullable: true
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          description: >-
+            The window that window_amount applies to: one UTC hour, one UTC day,
+            one week from Monday 00:00 UTC, one calendar month from the 1st
+            00:00 UTC, or the company's current billing period. billing_period
+            applies to company policies only, and a company without an active
+            subscription falls back to the calendar month. Required with
+            window_amount.
+          nullable: true
+      required:
+        - billing_credit_id
+      title: CreateCompanySpendPolicyRequestBody
     CreditBundleCurrencyPrice:
       type: object
       properties:
@@ -5489,6 +5532,90 @@ components:
         - model
         - provider
       title: CreditModelRate
+    CreditSpendPolicyResponseData:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+        company_id:
+          type: string
+          description: The company the policy applies in
+          nullable: true
+        consumed:
+          type: number
+          description: >-
+            Credits spent in the current window. Set only by the routes that
+            read usage, and only for a window cap.
+          format: double
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        headroom:
+          type: number
+          description: >-
+            Credits left in the current window. Set only by the routes that read
+            usage, and only for a window cap.
+          format: double
+          nullable: true
+        id:
+          type: string
+        label:
+          type: string
+          nullable: true
+        max_per_draw:
+          type: number
+          format: double
+          nullable: true
+        resets_at:
+          type: string
+          description: >-
+            When the current window ends. Set only by the routes that read
+            usage, and only for a window cap.
+          format: date-time
+          nullable: true
+        scope_type:
+          $ref: '#/components/schemas/CreditSpendPolicyScope'
+        updated_at:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          description: For a user policy, the user whose spend in the company it limits
+          nullable: true
+        window_amount:
+          type: number
+          format: double
+          nullable: true
+        window_count:
+          type: integer
+          format: int64
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          nullable: true
+      required:
+        - id
+        - billing_credit_id
+        - scope_type
+        - window_count
+        - created_at
+        - updated_at
+      title: CreditSpendPolicyResponseData
+    CreditSpendPolicyScope:
+      type: string
+      enum:
+        - company
+        - user
+        - group
+    CreditSpendWindowUnit:
+      type: string
+      enum:
+        - hour
+        - day
+        - week
+        - month
+        - billing_period
     CreditTransferView:
       type: object
       properties:
@@ -8994,6 +9121,26 @@ components:
         - bundle_id
         - quantity
       title: UpdateCreditBundleRequestBody
+    UpdateCreditSpendPolicyRequestBody:
+      type: object
+      properties:
+        label:
+          type: string
+          nullable: true
+          maxLength: 255
+        max_per_draw:
+          type: number
+          format: double
+          nullable: true
+        window_amount:
+          type: number
+          format: double
+          nullable: true
+        window_unit:
+          allOf:
+            - $ref: '#/components/schemas/CreditSpendWindowUnit'
+          nullable: true
+      title: UpdateCreditSpendPolicyRequestBody
     UpdatePayInAdvanceRequestBody:
       type: object
       properties:
@@ -10162,6 +10309,186 @@ paths:
       x-fern-audiences:
         - public
       x-fern-sdk-group-name: company
+  /company/credits/spend-policies:
+    get:
+      operationId: listCompanySpendPolicies
+      summary: List company spend policies
+      tags:
+        - checkoutexternal
+      parameters:
+        - name: billing_credit_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                    title: ListCompanySpendPoliciesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      billing_credit_id:
+                        type: string
+                    title: ListCompanySpendPoliciesParams
+                required:
+                  - data
+                  - params
+                title: ListCompanySpendPoliciesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
+    post:
+      operationId: createCompanySpendPolicy
+      summary: Create company spend policy
+      tags:
+        - checkoutexternal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanySpendPolicyRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateCompanySpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: CreateCompanySpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
+  /company/credits/spend-policies/{spend_policy_id}:
+    put:
+      operationId: updateCompanySpendPolicy
+      summary: Update company spend policy
+      tags:
+        - checkoutexternal
+      parameters:
+        - name: spend_policy_id
+          in: path
+          description: spend_policy_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreditSpendPolicyRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditSpendPolicyResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCompanySpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: UpdateCompanySpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
+    delete:
+      operationId: deleteCompanySpendPolicy
+      summary: Delete company spend policy
+      tags:
+        - checkoutexternal
+      parameters:
+        - name: spend_policy_id
+          in: path
+          description: spend_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DeleteResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: DeleteCompanySpendPolicyParams
+                required:
+                  - data
+                  - params
+                title: DeleteCompanySpendPolicyResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
   /company/invoices:
     get:
       operationId: getCompanyInvoices

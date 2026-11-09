@@ -11289,8 +11289,8 @@ components:
         consumed:
           type: number
           description: >-
-            Credits spent in the current window. Set only by the usage route,
-            and only for a window cap.
+            Credits spent in the current window. Set only by the routes that
+            read usage, and only for a window cap.
           format: double
           nullable: true
         created_at:
@@ -11299,8 +11299,8 @@ components:
         headroom:
           type: number
           description: >-
-            Credits left in the current window. Set only by the usage route, and
-            only for a window cap.
+            Credits left in the current window. Set only by the routes that read
+            usage, and only for a window cap.
           format: double
           nullable: true
         id:
@@ -11315,8 +11315,8 @@ components:
         resets_at:
           type: string
           description: >-
-            When the current window ends. Set only by the usage route, and only
-            for a window cap.
+            When the current window ends. Set only by the routes that read
+            usage, and only for a window cap.
           format: date-time
           nullable: true
         scope_type:
