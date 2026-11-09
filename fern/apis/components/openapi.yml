@@ -6958,6 +6958,17 @@ components:
         - id
         - name
       title: GenericPreviewObject
+    InvoiceLink:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+      required:
+        - id
+        - url
+      title: InvoiceLink
     InvoiceResponseData:
       type: object
       properties:
@@ -11022,6 +11033,47 @@ paths:
                 title: ListInvoicesResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - internal
+  /components/invoices/{billing_invoice_id}/link:
+    get:
+      operationId: getInvoiceLink
+      summary: Get invoice link
+      tags:
+        - checkoutexternal
+      parameters:
+        - name: billing_invoice_id
+          in: path
+          description: billing_invoice_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/InvoiceLink'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetInvoiceLinkParams
+                required:
+                  - data
+                  - params
+                title: GetInvoiceLinkResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
