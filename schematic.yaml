@@ -15636,6 +15636,7 @@ components:
       type: string
       enum:
         - ambiguous_subscription_item
+        - mixed_billing_intervals
         - multiple_subscriptions
         - no_price_for_interval
         - not_on_origin_version
@@ -16195,6 +16196,13 @@ components:
             - $ref: '#/components/schemas/PlanVersionSnapshotView'
           description: The plan version that was assigned during this change.
           nullable: true
+        billing_interval:
+          type: string
+          description: >-
+            The billing interval this change moved the subscription to: monthly,
+            quarterly or yearly. Set only when the interval changed, as when a
+            custom plan amendment's new version is priced on another interval.
+          nullable: true
         company:
           $ref: '#/components/schemas/CompanyResponseData'
         company_id:
@@ -16232,6 +16240,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/PlanVersionSnapshotView'
           description: The plan version of the previous base plan before this change.
+          nullable: true
+        previous_billing_interval:
+          type: string
+          description: >-
+            The billing interval the subscription was on before this change:
+            monthly, quarterly or yearly. Set only alongside billing_interval.
           nullable: true
         request_id:
           type: string
@@ -18882,6 +18896,23 @@ components:
         - excluded_company_ids
         - migration_strategy
       title: PublishPlanVersionRequestBody
+    PublishPreviewIntervalChangeResponseData:
+      type: object
+      properties:
+        from:
+          type: string
+          description: >-
+            The billing interval the subscription is on now: monthly, quarterly
+            or yearly.
+        to:
+          type: string
+          description: >-
+            The billing interval the subscription moves to: monthly, quarterly
+            or yearly.
+      required:
+        - from
+        - to
+      title: PublishPreviewIntervalChangeResponseData
     PublishPreviewPayInAdvanceResponseData:
       type: object
       properties:
@@ -19024,6 +19055,15 @@ components:
             Stripe raises a credit invoice with nothing due, and the credit goes
             to the customer's balance against later invoices.
           format: int64
+          nullable: true
+        interval_change:
+          allOf:
+            - $ref: '#/components/schemas/PublishPreviewIntervalChangeResponseData'
+          description: >-
+            Set when finalizing moves the subscription to another billing
+            interval. Stripe starts a period on the new interval when the change
+            lands and invoices it there, so an immediate change bills the new
+            period now and next_invoice_at is a full new period later.
           nullable: true
         lands_on:
           $ref: '#/components/schemas/AmendmentProrationLandsOn'
