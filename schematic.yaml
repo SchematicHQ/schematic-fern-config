@@ -8793,6 +8793,10 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        billing_cycle_anchor:
+          type: string
+          format: date-time
+          nullable: true
         cancel_at:
           type: integer
           format: int64
@@ -11231,6 +11235,72 @@ components:
         - settlement
         - transfer
         - zero_out
+    CreditLedgerExportMetadata:
+      type: object
+      properties:
+        billing_credit_id:
+          type: string
+          description: Restrict the export to ledger entries for this billing credit ID
+          nullable: true
+        company_id:
+          type: string
+          description: >-
+            Restrict the export to ledger entries for this company ID (starting
+            with 'comp_'); omit to export every company in the environment
+          nullable: true
+        end_time:
+          type: string
+          description: Restrict the export to ledger entries that occurred before this time
+          format: date-time
+          nullable: true
+        event_type:
+          type: string
+          description: Restrict the export to ledger entries of this event type
+          nullable: true
+          enum:
+            - adjustment
+            - charge
+            - grant
+            - settlement
+            - transfer
+            - usage
+            - zero_out
+        export_type:
+          type: string
+          description: 'Discriminator: always "credit-ledger" for this variant'
+          enum:
+            - credit-ledger
+        feature_id:
+          type: string
+          description: >-
+            Restrict the export to ledger entries for this feature ID (starting
+            with 'feat_')
+          nullable: true
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        source_event_id:
+          type: string
+          description: >-
+            Restrict the export to ledger entries drawn by this track or
+            inference event, using the event ID that POST /events returned for
+            it
+          nullable: true
+        start_time:
+          type: string
+          description: >-
+            Restrict the export to ledger entries that occurred at or after this
+            time
+          format: date-time
+          nullable: true
+      required:
+        - export_type
+      title: CreditLedgerExportMetadata
     CreditLedgerSourceType:
       type: string
       enum:
@@ -12127,10 +12197,12 @@ components:
         mapping:
           audit-log: '#/components/schemas/AuditLogExportMetadata'
           company-feature-usage: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+          credit-ledger: '#/components/schemas/CreditLedgerExportMetadata'
           event: '#/components/schemas/EventExportMetadata'
       oneOf:
         - $ref: '#/components/schemas/CompanyFeatureUsageExportMetadata'
         - $ref: '#/components/schemas/AuditLogExportMetadata'
+        - $ref: '#/components/schemas/CreditLedgerExportMetadata'
         - $ref: '#/components/schemas/EventExportMetadata'
       title: DataExportMetadata
     DataExportOutputFileType:
@@ -12182,6 +12254,7 @@ components:
       enum:
         - audit-log
         - company-feature-usage
+        - credit-ledger
         - event
     DatastreamCompanyPlan:
       type: object
