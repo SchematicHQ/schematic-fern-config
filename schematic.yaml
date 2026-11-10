@@ -2005,6 +2005,20 @@ components:
             The contract terms in force. Null when the company has no billing
             profile.
           nullable: true
+        trial_end:
+          type: string
+          description: >-
+            When the subscription's trial ends, or ended. Null when it never had
+            a trial.
+          format: date-time
+          nullable: true
+        trial_end_setting:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
+          description: >-
+            What happens when the trial ends: subscribe starts billing, cancel
+            ends the subscription.
+          nullable: true
       required:
         - balance
         - company_id
@@ -6879,6 +6893,72 @@ components:
         - type
         - value
       title: CompanyTaxIDView
+    CompanyTrialResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        end_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
+          description: >-
+            What happens when the trial reaches its end date: subscribe starts
+            billing, cancel moves the company off the plan.
+        ended_at:
+          type: string
+          description: When the trial actually ended. Null while it runs.
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          description: When the trial is set to end.
+          format: date-time
+        id:
+          type: string
+        plan_id:
+          type: string
+        plan_version_id:
+          type: string
+          nullable: true
+        source:
+          allOf:
+            - $ref: '#/components/schemas/TrialSource'
+          description: Where the trial was started.
+        started_at:
+          type: string
+          format: date-time
+        status:
+          allOf:
+            - $ref: '#/components/schemas/CompanyTrialStatus'
+          description: active while the trial runs, then converted, expired or canceled.
+        subscription_id:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - company_id
+        - created_at
+        - end_behavior
+        - ends_at
+        - id
+        - plan_id
+        - source
+        - started_at
+        - status
+        - updated_at
+      title: CompanyTrialResponseData
+    CompanyTrialStatus:
+      type: string
+      enum:
+        - active
+        - canceled
+        - converted
+        - expired
     CompanyUserUsageMetricsResponseData:
       type: object
       properties:
@@ -15978,6 +16058,7 @@ components:
         - plan_version_migration
         - quickstart
         - subscription_change
+        - trial
     PlanChangeAmendmentStatus:
       type: string
       enum:
@@ -18707,6 +18788,23 @@ components:
           nullable: true
         tax_id:
           $ref: '#/components/schemas/TaxIDInput'
+        trial_end:
+          type: string
+          description: >-
+            Starts the custom plan with a trial that ends at this time. Nothing
+            is invoiced until the trial ends, and the billing period renews from
+            then. Only for a company Schematic bills itself, on a first publish
+            that starts a subscription.
+          format: date-time
+          nullable: true
+        trial_end_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
+          description: >-
+            What happens when the trial reaches its end date: subscribe starts
+            billing, cancel moves the company off the plan. Defaults to
+            subscribe. Requires trial_end.
+          nullable: true
       required:
         - excluded_company_ids
         - migration_strategy
@@ -20397,6 +20495,35 @@ components:
       enum:
         - asc
         - desc
+    StartCompanyTrialRequestBody:
+      type: object
+      properties:
+        cadence:
+          allOf:
+            - $ref: '#/components/schemas/BillingProductPriceInterval'
+          description: 'How often the plan bills once the trial converts: month or year.'
+        end_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
+          description: >-
+            What happens when the trial reaches its end date: subscribe starts
+            billing, cancel moves the company off the plan. Defaults to the plan
+            group's trial setting.
+          nullable: true
+        plan_id:
+          type: string
+        trial_end:
+          type: string
+          description: >-
+            When the trial ends. Defaults to the plan's trial length, then the
+            plan group's, then 14 days. Setting it grants the trial even when
+            the company has used its trial before.
+          format: date-time
+          nullable: true
+      required:
+        - cadence
+        - plan_id
+      title: StartCompanyTrialRequestBody
     StartDataImportRequestBody:
       type: object
       properties:
@@ -20831,6 +20958,11 @@ components:
         - number
         - string
         - url
+    TrialSource:
+      type: string
+      enum:
+        - api
+        - custom_plan
     TrialStatus:
       type: string
       enum:
@@ -21520,6 +21652,19 @@ components:
       required:
         - add_on_ids
       title: UpdateCompanyPlansRequestBody
+    UpdateCompanyTrialRequestBody:
+      type: object
+      properties:
+        end_behavior:
+          allOf:
+            - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
+          nullable: true
+        trial_end:
+          type: string
+          description: Moves the end of the trial, and the first billing date with it.
+          format: date-time
+          nullable: true
+      title: UpdateCompanyTrialRequestBody
     UpdateComponentRequestBody:
       type: object
       properties:
@@ -30198,6 +30343,219 @@ paths:
                   - data
                   - params
                 title: MoveToDefaultPlanResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/trial:
+    get:
+      operationId: getCompanyTrial
+      summary: Get company trial
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTrialResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetCompanyTrialParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyTrialResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: startCompanyTrial
+      summary: Start company trial
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartCompanyTrialRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTrialResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: StartCompanyTrialParams
+                required:
+                  - data
+                  - params
+                title: StartCompanyTrialResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: updateCompanyTrial
+      summary: Update company trial
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyTrialRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTrialResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateCompanyTrialParams
+                required:
+                  - data
+                  - params
+                title: UpdateCompanyTrialResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/trial/convert:
+    post:
+      operationId: convertCompanyTrial
+      summary: Convert company trial
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTrialResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ConvertCompanyTrialParams
+                required:
+                  - data
+                  - params
+                title: ConvertCompanyTrialResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/trial/end:
+    post:
+      operationId: endCompanyTrial
+      summary: End company trial
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTrialResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: EndCompanyTrialParams
+                required:
+                  - data
+                  - params
+                title: EndCompanyTrialResponse
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
