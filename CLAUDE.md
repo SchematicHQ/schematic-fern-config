@@ -54,6 +54,15 @@ gerund, and a past participle into one sentence makes the reader hold three time
 matters more than it looks" announce that a point is coming rather than making it. Cut the
 announcement.
 
+**Say what to do, then the consequences as facts. Don't narrate the reader's mistake.** Don't
+tell the story of how a naive approach "reads naturally" and then "comes apart the moment"
+something happens, with the fix arriving at the end. Lead with the instruction ("Scope a lease to
+a batch of work. Acquire once, commit per operation, and release when nothing is left in
+flight."), then list what happens otherwise as plain statements ("Its release returns a 409.").
+This also rules out editorial asides about the material: "worth understanding", "the subtle part
+is", "this is the mechanism behind", "the consequence is that", and dramatized phrasing like "runs
+unprotected".
+
 **Give the reader verbs, not a pile of nouns.** "means the plan, the entitlements attached to it,
 and usage against each metered feature" hands over three nouns and leaves the reader to work out
 what to do with them.
