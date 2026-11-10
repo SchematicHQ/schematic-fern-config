@@ -16,13 +16,13 @@ A request is checked against every limit that applies to it. A write, for exampl
 | Global | Every request | 300 / second | 600 |
 | Mutation | `POST`, `PUT`, `PATCH`, and `DELETE` requests, except event submission and flag checks | 120 / second | 120 |
 | Events ingest | `POST /events` and `POST /event-batch` | 50 / second | 150 |
-| Analytics | Usage and event reads that scan history: `GET /events`, `GET /feature-usage-timeseries`, `GET /feature-usage-history`, `GET /user-usage-by-company`, `GET /user-usage-detail` | 12 / second | 30 |
+| Analytics | Usage and event reads that scan history: `GET /events`, `GET /feature-usage-timeseries`, `GET /feature-usage-history`, `GET /user-usage-by-company`, `GET /user-usage-detail`, `GET /companies/:id/inference-cost`, plan simulations | 2 / second | 5 |
 
 Flag checks are reads that happen to use `POST`, so they count only against the global limit. Event submission counts against the events-ingest limit instead of the mutation limit.
 
 ## Environments
 
-The global and mutation limits are tracked separately for production and non-production environments. Your production environment has its own budget; development and staging environments share a second budget with the same numbers. Load testing in staging cannot starve production, and adding more non-production environments does not add capacity.
+The global and mutation limits are tracked separately for production and non-production environments. Your production environment gets the full limits above. Development and staging environments share a second budget at 25% of production: 75 requests per second with a burst of 150 for the global limit, and 30 per second with a burst of 30 for the mutation limit. Load testing in staging cannot starve production, and adding more non-production environments does not add capacity.
 
 The events-ingest and analytics limits are account-wide: one budget covers every environment.
 
