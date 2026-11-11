@@ -1,0 +1,92 @@
+---
+title: Single sign-on (SSO)
+description: Set up SAML single sign-on for the Schematic dashboard with Okta, Microsoft Entra ID, or another SAML 2.0 identity provider, with optional SCIM provisioning.
+
+slug: production_readiness/sso
+---
+
+Schematic supports SAML 2.0 single sign-on for dashboard login. Once a connection is enabled for your email domain, everyone with an address on that domain signs in through your identity provider (IdP) instead of a password, Google, or GitHub.
+
+SSO covers the dashboard only. API access uses [environment-scoped API keys](/api-reference/authentication) and is not affected.
+
+<Info>
+SAML SSO is available on the Enterprise plan. Google and GitHub sign-in are available to all customers and keep working for domains without an SSO connection.
+</Info>
+
+## How setup works
+
+Setup is a short exchange between your IT team and Schematic:
+
+1. You tell us the email domain to route through SSO and which IdP you use.
+2. We create the connection and send you two values: a **Single sign-on URL** (the ACS URL) and an **Audience URI** (the SP entity ID).
+3. Your IT team creates a SAML app in your IdP with those values and sends us the app's **metadata URL**.
+4. We attach the metadata, test a login with you, and enable the connection.
+
+Nothing changes for your users until step 4. Plan for about 30 minutes of IdP admin time.
+
+To start, email `security@schematichq.com` with your email domain and IdP.
+
+## Okta
+
+Create the app before we enable the connection, so there is no window where your users are routed to an app that does not exist yet.
+
+1. In the Okta Admin Console, go to **Applications** > **Applications** and click **Create App Integration**.
+2. Choose **SAML 2.0** and click **Next**.
+3. Name the app (for example, "Schematic") and click **Next**.
+4. On **Configure SAML**, paste the two values from Schematic:
+   - **Single sign on URL**: the Single sign-on URL we sent you. Leave **Use this for Recipient URL and Destination URL** checked.
+   - **Audience URI (SP Entity ID)**: the Audience URI we sent you.
+5. Under **Attribute Statements**, add these using the expression option:
+
+   | Name | Value |
+   |---|---|
+   | `mail` | `user.profile.email` |
+   | `firstName` | `user.profile.firstName` |
+   | `lastName` | `user.profile.lastName` |
+
+   `mail` is required. The other two fill in the user's name on first sign-in.
+6. Click **Next**, choose **This is an internal app that we have created**, and click **Finish**.
+7. On the app's **Assignments** tab, assign the users or groups who should have access to Schematic. Users who are not assigned cannot sign in.
+8. On the app's **Sign On** tab, copy the **Metadata URL** under "Sign on methods" and send it to us.
+
+## Microsoft Entra ID and other SAML providers
+
+The same values apply. In Entra ID, create an **Enterprise application** with a custom SAML configuration, set the **Reply URL** to our Single sign-on URL and the **Identifier** to our Audience URI, and add claims named `mail`, `firstName`, and `lastName`. Send us the **App Federation Metadata Url**.
+
+Any SAML 2.0 provider that can publish a metadata URL works the same way.
+
+## What happens at sign-in
+
+- **Domain routing.** Once enabled, anyone who enters an email on your domain at sign-in or sign-up is redirected to your IdP. The domain must match exactly; subdomains are not included unless you ask for them.
+- **Existing accounts.** A user who already has a Schematic account with that verified email is linked to the SSO identity on first sign-in and keeps their roles and settings.
+- **New users.** Accounts are created on first sign-in (just-in-time provisioning) and added to your Schematic account with the default role. We can turn this off if you want only directory-synced users to be able to sign in.
+- **Bypass.** If your IdP is unavailable, we can allow named users to sign in with an email code instead, so an IdP outage does not lock everyone out.
+
+<Warning>
+If the SAML app is misconfigured after the connection is enabled, users on your domain cannot sign in until it is fixed. Test the login with us before rolling it out to your whole team.
+</Warning>
+
+## Directory sync (SCIM)
+
+For customers who want provisioning managed from the IdP, we support SCIM 2.0 with Okta and Microsoft Entra ID, and the Admin SDK for Google Workspace. Directory sync requires an enabled SAML connection and adds:
+
+- **Provisioning.** Users assigned in the IdP get a Schematic account before they first sign in.
+- **Updates.** Name and email changes in the IdP sync to Schematic.
+- **Deprovisioning.** Removing or disabling a user in the IdP deactivates them in Schematic and revokes their sessions.
+- **Group to role mapping.** IdP groups can map to Schematic [roles](/production_readiness/roles-and-permissions). Okta requires Push Groups for this; nested groups are not supported.
+
+When directory sync is on we recommend disabling just-in-time provisioning so that only synced users can sign in. Ask for SCIM when you request the connection and we will send the SCIM base URL and bearer token alongside the SAML values.
+
+## Frequently asked questions
+
+**Can some users on our domain keep using Google sign-in?**
+No. Domain routing applies to the whole domain. Users who need access during an IdP outage can be added to the bypass list.
+
+**Can we use the same domain in two Schematic accounts?**
+No. A domain can be attached to one SSO connection.
+
+**Does SSO change anything for the API or SDKs?**
+No. API keys and SDK calls are unaffected.
+
+**Do you support OIDC?**
+Yes, on request. SAML is the default because every major IdP publishes a SAML metadata URL, which makes setup a single value exchange.
