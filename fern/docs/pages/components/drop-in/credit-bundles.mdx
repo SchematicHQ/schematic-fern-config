@@ -1,0 +1,176 @@
+---
+title: Credit Bundles
+description: The credit bundles the company's plan can buy, each with a button that opens checkout with that bundle staged.
+slug: components/drop-in/credit-bundles
+---
+
+`CreditBundles` lists the credit bundles the signed-in company's plan can buy, each with a button that opens [Checkout](/components/drop-in/checkout) with that one bundle staged on the company's current plan. It reads the company's catalog and the company itself, so it needs a `session` on the provider as described in the [Drop-in components overview](/components/drop-in/overview#the-session).
+
+## Usage
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  CheckoutLauncherProvider,
+  CreditBundles,
+  SchematicStyles,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider publishableKey={publishableKey} session={session}>
+  <SchematicStyles />
+  <CheckoutLauncherProvider>
+    <CreditBundles credits={["bcr_ai"]} />
+  </CheckoutLauncherProvider>
+</SchematicProvider>;
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `credits` | | Credit ids whose bundles to show. Every credit's bundles show when it is absent. |
+| `catalogId` | | The catalog to read and buy from. The account's default catalog when absent. |
+| `onBuy` | | Called with the catalog bundle instead of opening the launcher's checkout. |
+| `showHeader` | `true` | The "Credit bundles" heading. |
+| `headingLevel` | `2` | The heading's level, `1` through `6`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-credit-bundles`. |
+| `locale` | | BCP 47 tag for number and currency formatting. Falls back to the provider's `locale`, then the viewer's language. |
+| `strings` | | Copy for this component by key. Wins over the provider's `strings` and `translate`. |
+
+## What is on offer
+
+The list holds the bundles checkout would offer, in catalog order. A bundle is left out when the company's plan cannot buy it, or when it has no price in the currency the company pays in: the subscription's currency, else the catalog's first. A company on no plan sees only the bundles every plan may buy.
+
+Each row shows the bundle's name, the credits one purchase grants and when they expire, such as "500 AI credits · Never expire", and a button showing its price, such as "$10.00". A bundle sold by the credit reads "$0.02 per AI credit" and "Buy". With nothing on offer the card reads "No credit bundles for your plan" and points the customer to their account team.
+
+## Buy
+
+The button opens the checkout of the nearest `CheckoutLauncherProvider` on its credits step, with the bundle staged and every step but checkout hidden. The cart keeps the company's current plan: a paid plan's subscription takes the bundle and nothing else changes, and a company on a free or unbilled plan pays for the bundle alone. A catalog that sells bundles in a quantity lets the customer change the count in checkout.
+
+Pass `onBuy` to send the customer somewhere else, such as your own checkout. Without a provider or `onBuy`, the button only logs a warning in development.
+
+A card that requires 3-D Secure cannot buy bundles yet.
+
+## When it renders nothing
+
+The component renders nothing without a session, when the catalog answers 403 or 404 (the account is not enabled for catalogs, or has none), and when the catalog cannot sell through checkout.
+
+## Errors
+
+Any other failure replaces the content with "There was a problem retrieving credit bundles." and a "Try again" button. In development the component logs the underlying error to the console beside the copy.
+
+## Strings
+
+Every word the component renders resolves through `strings` on the component, then on the provider, then the provider's `translate`, then English. See [Localization](/components/drop-in/localization) for how the chain works. These are the component's own keys:
+
+| Key | Default |
+| --- | --- |
+| `creditBundlesHeader` | Credit bundles |
+| `creditBundlesLoading` | Loading credit bundles, read by assistive technology while the skeleton shows |
+| `creditBundlesError` | There was a problem retrieving credit bundles. |
+| `creditBundlesEmpty` | No credit bundles for your plan |
+| `creditBundlesEmptyNote` | Contact your account team to add credits. |
+| `creditBundlesCredits` | `{{amount}} {{credits}}` |
+| `creditBundlesPerUnit` | `{{price}} per {{credit}}` |
+| `creditBundlesNeverExpire` | Never expire |
+| `creditBundlesExpireAfterDays` | `Expire after {{count}} days`, with `_one` and `_other` forms |
+| `creditBundlesExpireAfterPeriods` | `Expire after {{count}} billing periods`, with `_one` and `_other` forms |
+| `creditBundlesExpirePeriodEnd` | Expire at period end |
+| `creditBundlesExpireNextPeriodEnd` | Expire at the end of next period |
+| `creditBundlesExpireTrialEnd` | Expire when the trial ends |
+| `creditBundlesBuyUnpriced` | Buy, the button of a bundle sold by the credit |
+| `creditBundlesBuyPriceLabel` | `Buy {{name}} for {{price}}`, the accessible name of a priced bundle's button |
+| `creditBundlesBuyLabel` | `Buy {{name}}`, the accessible name of a bundle sold by the credit |
+| `retry` | Try again |
+
+```tsx
+<CreditBundles strings={{ creditBundlesHeader: "Top up", creditBundlesBuyUnpriced: "Choose amount" }} />
+```
+
+## Markup
+
+This is what the component renders, for a host styling it without `SchematicStyles`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
+
+```html
+<div class="schematic-element schematic-card schematic-credit-bundles" data-state="ready">
+  <!-- with showHeader -->
+  <div class="schematic-header">
+    <h2 class="schematic-header__title" id="…">Credit bundles</h2>
+  </div>
+
+  <ul class="schematic-credit-bundles__list" aria-labelledby="…">
+    <li class="schematic-credit-bundles__row">
+      <span class="schematic-credit-bundles__what">
+        <span class="schematic-credit-bundles__name">Booster</span>
+        <span class="schematic-muted schematic-small schematic-credit-bundles__detail">500 AI credits · Never expire</span>
+      </span>
+      <button class="schematic-cta schematic-cta--small schematic-credit-bundles__buy" aria-label="Buy Booster for $10.00">$10.00</button>
+    </li>
+  </ul>
+
+  <!-- with nothing on offer, in place of the list -->
+  <div class="schematic-credit-bundles__empty">
+    <p class="schematic-credit-bundles__empty-title">No credit bundles for your plan</p>
+    <p class="schematic-muted schematic-small schematic-credit-bundles__empty-note">Contact your account team to add credits.</p>
+  </div>
+
+  <!-- a failure with bundles still on screen -->
+  <p class="schematic-status-note schematic-error" role="alert">…</p>
+</div>
+```
+
+With `showHeader` off, the list carries `aria-label="Credit bundles"` in place of `aria-labelledby`.
+
+While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton`: a heading bar when `showHeader` is set, then three rows, each with a `name` and a `buy` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+
+## Build it yourself
+
+[`useCatalog`](/components/build-your-own/hooks#usecatalog) returns the company's catalog with its `creditBundles`, and `useCompany` the plan and subscription they are judged against. [`deriveCreditBundles`](/components/build-your-own/derivations#credit-bundles) keeps the bundles on offer and formats them, and `useCheckoutLauncher().open` stages one the way the component does. Render it inside a `CheckoutLauncherProvider`.
+
+```tsx
+import {
+  deriveCreditBundles,
+  useCatalog,
+  useCheckoutLauncher,
+  useCompany,
+} from "@schematichq/schematic-components/elements";
+
+function BuyCredits() {
+  const catalog = useCatalog();
+  const company = useCompany();
+  const { open } = useCheckoutLauncher();
+  if (catalog.data?.source !== "company" || company.isPending) {
+    return <Skeleton />;
+  }
+
+  const { rows } = deriveCreditBundles(catalog.data.catalog, company.data, {
+    locale: "en-US",
+  });
+  return (
+    <ul>
+      {rows.map((row) => (
+        <li key={row.id}>
+          {row.name} ·{" "}
+          {row.credits === null
+            ? `${row.priceText} per ${row.unitName}`
+            : `${row.creditsText} ${row.unitName}`}{" "}
+          <button
+            onClick={() =>
+              open({
+                selection: { creditBundles: { [row.id]: 1 } },
+                steps: {
+                  hideSkipped: true,
+                  initial: "credits",
+                  skip: ["plan", "autoTopup", "usage", "addOns", "addOnUsage"],
+                },
+              })
+            }
+          >
+            {row.credits === null ? "Buy" : row.priceText}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
