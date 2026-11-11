@@ -14,6 +14,7 @@ A derivation is a pure function from a hook's data to a display model: `(serverD
 | `deriveIncludedFeatures(features, { locale, visibleFeatures?, showCredits?, showWarningThresholdAsLimit? })` | `useFeatureUsage` | One row per feature: `featureId`, `name`, `description`, `icon`, `entitlement`, `usage`, `usageSummary`, `expiresAt`, `perLicenseCredits`, `hardLimit`, `tiers`, `source` |
 | `deriveMeteredFeatures(features, { locale, visibleFeatures?, showCredits?, showWarningThresholdAsLimit? })` | `useFeatureUsage` | One row per event or trait feature: `featureId`, `name`, `description`, `icon`, `headline`, `limit`, `resetsAt`, `meter`, `priceDetails`, `hardLimit`, `canAddMore`, `hasUsageByUser`, `unit`, `source` |
 | `deriveCreditUsage(balances, { locale, visibleCredits? })` | `useCreditBalances` | One row per credit: `creditId`, `name`, `description`, `icon`, `remaining`, `purchasable`, `ledger`, `composition`, `unit`, `source` |
+| `deriveCreditBundles(catalog, company, { locale, credits? })` | `useCatalog`, `useCompany` | `{ rows, credit, currency }`; each row has `id`, `name`, `creditId`, `credits`, `creditsText`, `unitName`, `expiry`, `priceText`, `bundle` |
 | `deriveCheckout({ catalog, cart, checkout?, company?, featureUsage?, isPricing?, display?, locale })` | `useCatalog`, `useCompany`, `useCheckout`, `useFeatureUsage` | `{ currency, period, plans, customPlan, downgradeContact, addOns, usage, addOnUsage, bundles, bundleMode, autoTopups, lines, totals, ... }`, the rows and summary the Checkout dialog renders |
 | `derivePricingTable(view, { locale, period?, currency?, company?, now?, showCredits?, showZeroPriceAsFree?, showWarningThresholdAsLimit? })` | `useCatalog`, and `useCompany` when signed in | `{ source, periods, period, currencies, currency, plans, addOns, customPlan, savings, trialDaysLeft, heldAddOnIds }`; each card has `id`, `name`, `description`, `price`, `priceId`, `period`, `credits`, `entitlements`, `action`, `custom`, `active`, `trialDays`, `source` |
 | `checkoutSelectionFor(table, card, kind)` | A `derivePricingTable` result, one of its cards, and `"plan"` or `"addOn"` | The `CheckoutSelection` for the card's action: the plan with its period and currency, or the add-ons the company would hold after it |
@@ -37,6 +38,10 @@ Most rows keep the server's row on `source`, so a component that needs a field t
 ### Credits
 
 `deriveCreditUsage` gives each credit its `remaining` amount and unit name, and a `ledger` of its live grants, newest first. Each ledger row has a `kind` of `plan`, `bundle`, `autoTopup`, or `promotional` for any other grant, the granted `amount` with the credit's name for it in `item`, its `createdAt` date, a `date` that says when the grant resets or expires, and the server's grant on `source`. `composition` spells out a per-license grant, such as 12 seats at 10 credits each.
+
+### Credit bundles
+
+`deriveCreditBundles` keeps the bundles the [Credit Bundles component](/components/drop-in/credit-bundles) offers, in catalog order: the ones the plan may buy, priced in the subscription's currency (else the catalog's first), in the `credits` asked for. The plan is the catalog's current plan unless the company could start a trial on it, else the company's own, as `bundlePlanId(catalog, company)` returns. `credits` is what one purchase grants, or `null` for a bundle sold by the credit, which `priceText` then prices per credit. `unitName` is the credit's name inflected for that count. `expiry` is `{ kind: "never" }`, `{ kind: "afterDays", count }`, `{ kind: "afterPeriods", count }`, `{ kind: "periodEnd" }`, `{ kind: "nextPeriodEnd" }`, `{ kind: "trialEnd" }`, or `null` when the bundle does not say.
 
 ### Pricing table
 
