@@ -15436,6 +15436,15 @@ components:
             The company that pays for this subscription. Must already have a
             Stripe customer. Only honored when starting a new subscription.
           nullable: true
+        billing_period:
+          allOf:
+            - $ref: '#/components/schemas/PlanPriceCadence'
+          description: >-
+            How often the plan renews. Only used when Schematic bills the
+            company: the plan's published price for this billing period and the
+            currency is charged, and base_plan_price_id must be left empty.
+            Defaults to the subscription's current billing period.
+          nullable: true
         cancel_immediately:
           type: boolean
           description: >-
@@ -15544,6 +15553,14 @@ components:
           items:
             $ref: '#/components/schemas/CheckoutProblemResponseData'
           maxItems: 1000
+        scheduled_change_at:
+          type: string
+          description: >-
+            When a scheduled plan change takes effect. The company stays on its
+            current plan until then. Empty when the change took effect straight
+            away.
+          format: date-time
+          nullable: true
         success:
           type: boolean
       required:
