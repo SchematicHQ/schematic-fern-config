@@ -15442,8 +15442,9 @@ components:
           description: >-
             How often the plan renews. Only used when Schematic bills the
             company: the plan's published price for this billing period and the
-            currency is charged, and base_plan_price_id must be left empty.
-            Defaults to the subscription's current billing period.
+            currency is charged, and base_plan_price_id must be left empty. A
+            new billing period starts where the current one ends. Defaults to
+            the subscription's current billing period.
           nullable: true
         cancel_immediately:
           type: boolean
@@ -15475,7 +15476,10 @@ components:
             - $ref: '#/components/schemas/Currency'
           description: >-
             ISO 4217 currency this change is being built in. Prices are still
-            selected by id; this records the intent.
+            selected by id; this records the intent. When Schematic bills the
+            company, the plan is charged in this currency from the next billing
+            period, and the company's contract moves to it; defaults to the
+            subscription's current currency.
           nullable: true
         custom_field_values:
           type: array
