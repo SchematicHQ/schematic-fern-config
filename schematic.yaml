@@ -2653,6 +2653,9 @@ components:
           nullable: true
         plan_id:
           type: string
+        quarterly_price_id:
+          type: string
+          nullable: true
         trial_days:
           type: integer
           format: int64
@@ -20638,7 +20641,17 @@ components:
         cadence:
           allOf:
             - $ref: '#/components/schemas/BillingProductPriceInterval'
-          description: 'How often the plan bills once the trial converts: month or year.'
+          description: >-
+            The unit of how often the plan bills once the trial converts: month
+            or year.
+        cadence_interval_count:
+          type: integer
+          description: >-
+            How many cadence units one billing period spans. Defaults to 1; use
+            3 with month for quarterly.
+          format: int64
+          nullable: true
+          minimum: 1
         end_behavior:
           allOf:
             - $ref: '#/components/schemas/BillingSubscriptionTrialEndSetting'
