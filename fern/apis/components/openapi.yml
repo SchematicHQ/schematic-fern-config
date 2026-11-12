@@ -3516,6 +3516,148 @@ components:
         - quantity_remaining
         - quantity_used
       title: CompanyCreditGrantResponseData
+    CompanyCreditLedgerBundleResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CompanyCreditLedgerBundleResponseData
+    CompanyCreditLedgerCreditResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        plural_name:
+          type: string
+          description: >-
+            How an amount of the credit reads in the plural; null when unset, or
+            once the credit is deleted.
+          nullable: true
+        singular_name:
+          type: string
+          description: >-
+            How one of the credit reads; null when unset, or once the credit is
+            deleted.
+          nullable: true
+      required:
+        - id
+        - name
+      title: CompanyCreditLedgerCreditResponseData
+    CompanyCreditLedgerEntryResponseData:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: >-
+            Signed change to the balance: negative for draws and expiries,
+            positive for grants and refunded draws.
+          format: double
+        bundle:
+          allOf:
+            - $ref: '#/components/schemas/CompanyCreditLedgerBundleResponseData'
+          description: >-
+            The bundle a purchased or auto top-up grant came from; null
+            otherwise, or once the bundle is deleted.
+          nullable: true
+        credit:
+          $ref: '#/components/schemas/CompanyCreditLedgerCreditResponseData'
+        event_at:
+          type: string
+          format: date-time
+        feature:
+          allOf:
+            - $ref: '#/components/schemas/CompanyCreditLedgerFeatureResponseData'
+          description: >-
+            The feature a draw was for; null on grants and expiries, and once
+            the feature is deleted.
+          nullable: true
+        grant_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantReason'
+          description: >-
+            Why the grant was made, on grants and on the expiries of grants;
+            null on draws.
+          nullable: true
+        id:
+          type: string
+          description: >-
+            Stable across pages. A draw written against several grants is one
+            entry.
+        kind:
+          allOf:
+            - $ref: '#/components/schemas/CreditLedgerEntryKind'
+          description: drawdown, grant or zero_out.
+        usage_reason:
+          allOf:
+            - $ref: '#/components/schemas/CreditUsageReason'
+          description: >-
+            On draws: track, inference or manual_adjustment; null on draws
+            recorded before reasons were.
+          nullable: true
+        user:
+          allOf:
+            - $ref: '#/components/schemas/CompanyCreditLedgerUserResponseData'
+          description: >-
+            The user a draw is attributed to; null when the usage was sent
+            without a user.
+          nullable: true
+        zeroed_out_reason:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
+          description: 'On expiries: why the remaining credits were removed.'
+          nullable: true
+      required:
+        - amount
+        - credit
+        - event_at
+        - id
+        - kind
+      title: CompanyCreditLedgerEntryResponseData
+    CompanyCreditLedgerFeatureResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CompanyCreditLedgerFeatureResponseData
+    CompanyCreditLedgerResponseData:
+      type: object
+      properties:
+        entries:
+          type: array
+          description: This page, newest first.
+          items:
+            $ref: '#/components/schemas/CompanyCreditLedgerEntryResponseData'
+          maxItems: 250
+        next_cursor:
+          type: string
+          description: Pass as cursor to read the next page; null on the last page.
+          nullable: true
+      required:
+        - entries
+      title: CompanyCreditLedgerResponseData
+    CompanyCreditLedgerUserResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+      title: CompanyCreditLedgerUserResponseData
     CompanyCreditUserUsageResponseData:
       type: object
       properties:
@@ -5513,6 +5655,16 @@ components:
         - grant_reason
         - quantity
       title: CreditGrantDetail
+    CreditLedgerEntryKind:
+      type: string
+      enum:
+        - adjustment
+        - charge
+        - drawdown
+        - grant
+        - settlement
+        - transfer
+        - zero_out
     CreditModelRate:
       type: object
       properties:
@@ -5666,6 +5818,17 @@ components:
           format: double
           nullable: true
       title: CreditUsageAggregation
+    CreditUsageReason:
+      type: string
+      enum:
+        - inference
+        - lease_hold
+        - lease_release
+        - manual_adjustment
+        - reconciliation
+        - reservation_hold
+        - reservation_release
+        - track
     CreditUserUsageResponseData:
       type: object
       properties:
@@ -10310,6 +10473,108 @@ paths:
                   - data
                   - params
                 title: GetCompanyCreditUserUsageResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      x-fern-audiences:
+        - public
+      x-fern-sdk-group-name: company
+  /company/credits/ledger:
+    get:
+      operationId: getCompanyCreditLedger
+      summary: List credit activity
+      description: >-
+        The company's credit activity, newest first: draws by feature and user,
+        grants, and credits removed when they expired or reset. A draw written
+        against several grants is one entry. Pass the response's `next_cursor`
+        as `cursor` to read the next page.
+      tags:
+        - checkoutexternal
+      parameters:
+        - name: credit_ids
+          in: query
+          description: Only entries for these credits. All credits when omitted.
+          schema:
+            type: array
+            description: Only entries for these credits. All credits when omitted.
+            items:
+              type: string
+            maxItems: 100
+        - name: cursor
+          in: query
+          description: The previous page's next_cursor. The newest page when omitted.
+          schema:
+            type: string
+            description: The previous page's next_cursor. The newest page when omitted.
+            maxLength: 512
+        - name: include_grants
+          in: query
+          description: Include grants and expiries alongside draws. Default true.
+          schema:
+            type: boolean
+            description: Include grants and expiries alongside draws. Default true.
+        - name: limit
+          in: query
+          description: Entries per page (default 100).
+          schema:
+            type: integer
+            description: Entries per page (default 100).
+            format: int64
+            example: '20'
+            maximum: 250
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyCreditLedgerResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      credit_ids:
+                        type: array
+                        description: >-
+                          Only entries for these credits. All credits when
+                          omitted.
+                        items:
+                          type: string
+                        maxItems: 100
+                      cursor:
+                        type: string
+                        description: >-
+                          The previous page's next_cursor. The newest page when
+                          omitted.
+                        maxLength: 512
+                      include_grants:
+                        type: boolean
+                        description: >-
+                          Include grants and expiries alongside draws. Default
+                          true.
+                      limit:
+                        type: integer
+                        description: Entries per page (default 100).
+                        format: int64
+                        example: '20'
+                        maximum: 250
+                        minimum: 1
+                    title: GetCompanyCreditLedgerParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyCreditLedgerResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
