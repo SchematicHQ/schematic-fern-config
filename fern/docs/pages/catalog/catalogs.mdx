@@ -45,10 +45,10 @@ A plan can belong to more than one catalog. The **Plans** list has a Catalogs co
 
 ### Showing a plan without a price
 
-An enterprise tier often has negotiated pricing that you do not publish, but you still want it on the pricing table so buyers know it exists. Tick **Custom** on the plan's card in Live Plans, and a **Custom Plan Rules** panel opens below the list:
+An enterprise tier often has negotiated pricing that you do not publish, but you still want it on the pricing table so buyers know it exists. Tick **Custom** on the plan's card in Live Plans. A catalog has one plan marked Custom, so ticking it on a second plan clears it from the first. Once a plan is marked, a **Custom Plan Rules** panel opens below the list:
 
-- **Show custom plans on the checkout component** puts these plans in checkout. They are hidden from checkout until you turn it on.
-- **Pricing Model** is the text a customer sees in place of a price, such as "Talk to sales" or "Volume-based pricing".
+- **Show custom plans on the checkout component** puts that plan in checkout. It is hidden from checkout until you turn this on.
+- **Pricing Model** describes how the plan is priced, such as "Volume-based pricing". The API returns it on the catalog as `pricing_model` for a pricing page you build yourself, and the Schematic components do not display it.
 - **Pricing URL** is where a customer goes to learn more, such as your contact-sales page.
 - **Price Text** replaces the plan's price on its [Pricing Table](/components/drop-in/pricing-table) card, such as "Talk to us". The card reads "Custom price" without it.
 - **Call to Action Text** and **Call to Action URL** set the button on that card, such as "Book a demo" linking to your demo-booking page. The button reads "Talk to support" without text, and without a URL it links to the table's `callToActionUrl`.
