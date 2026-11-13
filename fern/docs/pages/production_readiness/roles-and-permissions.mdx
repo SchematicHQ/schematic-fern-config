@@ -51,6 +51,8 @@ These are granted per environment:
 | **Webhooks** (Create, edit and delete) | Create, edit, and delete webhooks |
 | **Webhooks** (Reveal secret) | View a webhook's signing secret after the webhook is created |
 
+![Environment permissions for a member](../../assets/images/production_readiness/rbac-environment-permissions.png)
+
 When a member saves a plan, Schematic checks each part of the change against its own permission. A save that changes entitlements needs **Plan Entitlements**, and a save that changes credit grants needs **Plan & Billing**, on top of **Plans & Add-ons**. If any part fails the check, Schematic refuses the whole save. On a custom plan, **Custom Plans** takes the place of all three, and it also replaces **Plan Versions** for that plan's migrations.
 
 ## Assigning roles and permissions
@@ -77,4 +79,4 @@ A common setup is a teammate who can manage customer accounts and exceptions but
 | **Overrides** | Create company-level overrides |
 | **Plan & Billing** | Grant existing credits to companies |
 
-Leave the account permissions (**Flags**, **Features**, **Plans & Add-ons**) off so they cannot change your catalog, and leave **Users**, **Plan Entitlements**, and **Plan Versions** off as well. 
+Grant the **Custom Plans** account permission as well, so they can build and change a custom plan for a single company. Leave the other account permissions (**Flags**, **Features**, **Plans & Add-ons**) off so they cannot change your catalog, and leave **Users**, **Plan Entitlements**, and **Plan Versions** off as well. 
