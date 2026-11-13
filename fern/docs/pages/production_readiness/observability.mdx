@@ -14,6 +14,8 @@ The Audit Log under **Settings → Audit Log** records, for each environment, th
 
 Embedded components authenticate with a temporary access token, so their entries are labeled **Component** in the Author column, followed by the API key that issued the token and the company the token was issued for, which links to that company's profile. In the API, these entries carry `company_id` and a `company` object with the company's `id` and `name`, and the audit log list accepts a `company_id` filter. API and dashboard requests whose response is a company also carry its `company_id`. Entries recorded before October 30, 2026 have no company.
 
+Changes made through the [MCP server](/building-with-ai#model-context-protocol-mcp) are described by the tool that made them and the resource it acted on, such as **Update plan pricing: Acme**, with the resource linked. Only tool calls that change data are recorded, so an assistant that only reads leaves no entries. In the API and in a CSV export, the entry's URL is `/mcp/` followed by the tool name, for example `/mcp/update_plan_pricing`. An assistant that signed in with OAuth records its changes under the user who granted access, listed under **User**, and one that connects with a secret API key records them under that key, listed under **API**.
+
 Each entry identifies the resource it acted on by `resource_type` and `resource_id_string`, which holds the Schematic ID, such as `feat_GwmRSakgUe3`. The integer `resource_id` field is deprecated and is always null.
 
 ### Exporting the audit log
