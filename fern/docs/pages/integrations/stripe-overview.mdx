@@ -30,7 +30,7 @@ If you want all companies to be synced to Stripe from the moment they are create
 
 ## Plans
 
-Plans are the core element of a product catalog. Schematic plans can be mapped to Stripe products and prices. When configuring a plan, you can choose to map to an existing Stripe product and price or create a new one. Schematic supports configuring both monthly and yearly prices for plans.
+Plans are the core element of a product catalog. Schematic plans can be mapped to Stripe products and prices. When configuring a plan, you can choose to map to an existing Stripe product and price or create a new one. A plan can carry a monthly, quarterly, or yearly price, or any combination of the three, including a quarterly price on its own. Schematic creates a quarterly price in Stripe as a price billed every 3 months, and when you sync an existing Stripe product, a price billed every 3 months is offered as the quarterly price.
 
 Because plans are [versioned](/catalog/plans#plan-versions), the underlying Stripe **product** is shared across a plan's versions, while each plan **version** has its own Stripe **prices**. Publishing a new version with a pricing change creates new Stripe prices for that version; companies on prior versions keep their existing prices until they are migrated. When a version is archived, its prices are deactivated in Stripe.
 
@@ -44,14 +44,14 @@ To create a new plan and a corresponding Stripe product, follow the steps below:
 1. Navigate to the Plans page in Schematic (Catalog > Plans)
 2. Click the "Create Plan" button
 3. Name your plan and click "Continue" to setup pricing details.
-4. Select "Paid" for "Type", then supply a monthly and/or yearly price. (Screenshot below)
+4. Select "Paid" for "Type", then supply a monthly, quarterly, or yearly price, or any combination of them. (Screenshot below)
 5. Finally, click "Save"
 
 ![Stripe New Product and Prices](../../assets/images/stripe/stripe-new-product-prices.png)
 
 ## Plan add-ons
 
-In addition to plans, Schematic add-ons can similarly be mapped to Stripe products and prices. This is useful for offering additional features or services to your customers. Schematic supports configuring both monthly and yearly prices for add-ons.
+In addition to plans, Schematic add-ons can similarly be mapped to Stripe products and prices. This is useful for offering additional features or services to your customers. A recurring add-on can carry a monthly, quarterly, or yearly price, or any combination of the three.
 
 {/* This video is a quick walkthrough of how to set up a plan add-on in Schematic and map it to Stripe products and prices.
 
@@ -61,7 +61,7 @@ To create a new add-on and a corresponding Stripe product, follow the steps belo
 1. Navigate to the Add-ons page in Schematic (Catalog > Add-ons)
 2. Click the "Create Add-on" button
 3. Name your add-on and click "Continue" to setup pricing details.
-4. Select "Paid, Recurring" for "Type", then supply a monthly and/or yearly price. (Screenshot below)
+4. Select "Paid, Recurring" for "Type", then supply a monthly, quarterly, or yearly price, or any combination of them. (Screenshot below)
 5. Finally, click "Save"
 
 ![Stripe New Add-on and Prices](../../assets/images/stripe/stripe-new-addon.png)
