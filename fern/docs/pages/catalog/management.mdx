@@ -38,7 +38,7 @@ Using the "Manage Plan" button in the Schematic App, you are able to downgrade a
 
 ![Downgrade to over limit](../../assets/images/catalog/catalog-changing-plans-over-limit-2.png)
 
-Schematic refuses a plan change for a company with more than one live subscription, since it has no single subscription to change. A subscription counts as live until it is canceled or reaches its scheduled end. The refusal covers **Manage Plan** in the app, the [Manage Plan API](/developer_resources/manage-plan-api), and checkout, and it appears on the preview before anyone confirms. In the app and through the API, the change fails with "This company has more than one active subscription. Cancel the extra subscriptions before changing plans." A customer who tries to change plans in the [customer portal](/components/customer-portal) sees "Plan changes are unavailable for this account. Contact support." To change the company's plan, cancel the extra subscriptions first.
+Schematic supports one active subscription per company, and refuses a plan change for a company that has more than one.
 
 ### Stripe-linked plans
 
