@@ -203,8 +203,6 @@ The CSV has one row per ledger entry, newest first, and carries the same values 
 | Environment ID | The environment the entry belongs to |
 | Burn Breakdown | The priced lines of an inference-driven draw, as JSON |
 
-New columns are added at the end, so a loader that reads columns by position keeps working.
-
 ## Closing a period
 
 Teams closing the books on credit-based pricing load the ledger export and the grant list into their accounting system or warehouse on a schedule, and apply their policy there with their accountants, rather than encoding a treatment in application code where it is hard to see and harder to correct.
