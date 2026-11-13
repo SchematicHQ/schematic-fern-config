@@ -228,6 +228,8 @@ As soon as you confirm, the subscription card shows a **Paused** pill and, under
 
 Schematic refuses plan changes on a paused subscription. In the app, **Manage Plan** and the plan and add-on edit buttons are disabled. A customer who tries to change plans in the [customer portal](/components/customer-portal) sees "Plan changes are unavailable while this subscription is paused." To change the plan, resume the subscription first. You can still cancel a paused subscription.
 
+Seat counts still follow the company's traits while the subscription is paused. When a trait behind an overage or tiered entitlement changes, Schematic updates the quantity on the subscription without proration and without raising an invoice, and the customer is billed for the count in place when billing resumes.
+
 ### Resuming a subscription
 
 To end a pause early, choose **Resume subscription** from the same menu. The confirmation dialog tells you which of these happens before you confirm:
@@ -242,3 +244,7 @@ A subscription nobody resumes early starts billing again on its own on the resum
 ### Pauses made in Stripe
 
 When you pause payment collection on a subscription in Stripe, Schematic shows it on the subscription card the same way, and you can resume it from Schematic. A pause with no resume date shows as "Paused indefinitely".
+
+### Pausing through the API
+
+To pause and resume from your own code, call [`POST /manage-plan/subscription/pause` and `POST /manage-plan/subscription/resume`](/developer_resources/manage-plan-api#pause-subscription) with a secret API key. The rules are the same as in the app.
