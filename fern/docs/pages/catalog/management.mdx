@@ -65,8 +65,6 @@ However, if the plan change is a downgrade, Schematic will reset the billing per
 
 A change to a different billing period, such as monthly to quarterly, starts a new period on the day of the change. The first invoice charges the new period's price and credits the unused part of the old one.
 
-A plan and its recurring add-ons bill on the same period. While a company's subscription holds a recurring add-on, Schematic refuses a change to a different billing period with the error "Add-on price interval must match the base plan's price interval" (code `add_on_interval_mismatch`). This applies to monthly to quarterly the same way it applies to monthly to yearly. One-time add-ons are not affected.
-
 ### Proration
 
 Additionally, when changing plans, Schematic will use Stripe's proration logic to refund the remaining **base** cost of the current plan and the **base** cost of the new plan. These costs are presented to the user during the checkout flow or to you while using the "Manage Plan" button in the Schematic App.
