@@ -114,7 +114,7 @@ The rows above cover three different recognition cases: credits included in a pl
 
 Each entry carries its event type, the signed amount, the credit type, and details, which for a grant is the grant reason, quantity, and expiry, and for a draw is the feature and the quantity consumed. The filters cover credit type, feature, event type, and a date range.
 
-This view is for inspection rather than for closing a period. It pages a screen at a time and has no export, so period-end numbers come from the API.
+This view is for inspection rather than for closing a period. It pages a screen at a time, so period-end numbers come from the API or from a [ledger export](#exporting-the-ledger).
 
 ## Reading the data
 
@@ -129,17 +129,83 @@ curl -G https://api.schematichq.com/billing/credits/ledger \
   --data-urlencode "limit=250"
 ```
 
-Two constraints apply. `company_id` is required, so no single call returns an entire environment's ledger for a period; a close process iterates companies. Pages are capped at 250 entries, so use `offset` to page through them, and set `end_time` to the period boundary so that pagination is not affected by entries written while the job runs.
+Three constraints apply. `company_id` is required, so each call returns one company's entries. `start_time` and `end_time` can be at most 90 days apart. Pages are capped at 250 entries, so use `offset` to page through them, and set `end_time` to the period boundary so that pagination is not affected by entries written while the job runs. To read every company's entries for a period in one file, use a [ledger export](#exporting-the-ledger) instead.
 
 Grants are available separately through [List credit grants](/api-reference/billing-credits/list-billing-plan-credit-grants). For a period-end schedule this is usually the better starting point, because one row already summarizes granted, used, and remaining amounts.
 
 Bundle purchases, plan charges, and the invoices behind them come from [Stripe](/integrations/stripe).
 
-## Not currently available
+## Exporting the ledger
 
-There is no ASC 606 report, deferred revenue schedule, or journal entry export. Schematic's data exports cover audit logs, events, and company feature usage; the credit ledger is not among the export types, so it is read through the API.
+A ledger export writes the entries for every company in an environment to one CSV file, with no limit on the time range, so a close process reads a single file rather than calling the ledger once per company. Create it through the API with a secret key. The export runs in the background, and you retrieve it in three steps:
 
-Teams closing the books on credit-based pricing read the ledger and the grant list into their accounting system or warehouse on a schedule, and apply their policy there with their accountants, rather than encoding a treatment in application code where it is hard to see and harder to correct.
+1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` set to `credit-ledger` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
+2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
+3. Call [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) to download the file. The response body is the file itself, and its `Content-Disposition` header names it after the export type and creation time, for example `credit-ledger-20261201-090000.csv`.
+
+```bash
+curl -X POST https://api.schematichq.com/data-exports \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "export_type": "credit-ledger",
+    "output_file_type": "csv",
+    "metadata": {
+      "export_type": "credit-ledger",
+      "start_time": "2026-11-01T00:00:00Z",
+      "end_time": "2026-12-01T00:00:00Z"
+    }
+  }'
+
+curl https://api.schematichq.com/data-exports/$DATA_EXPORT_ID \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+
+curl -OJ https://api.schematichq.com/data-exports/$DATA_EXPORT_ID/artifact \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+```
+
+Schematic deletes the file three days after the export completes, so download it within that window. [List data exports](/api-reference/data-exports/list-data-exports) returns earlier exports, filtered by `export_type` and `status`.
+
+An export covers the environment the secret key belongs to. The `metadata` object takes the same filters as the ledger, with `company_id` optional, and omitting it exports every entry in the environment:
+
+| Field | Effect |
+|---|---|
+| `export_type` | Required whenever `metadata` is present, and must be `credit-ledger` |
+| `company_id` | Includes only this company's entries; omit it to include every company |
+| `billing_credit_id` | Includes only entries for this credit type |
+| `feature_id` | Includes only entries for this feature |
+| `event_type` | Includes only one event type: `adjustment`, `charge`, `grant`, `settlement`, `transfer`, `usage`, or `zero_out` |
+| `source_event_id` | Includes only the entries drawn by this track or inference event, using the event ID that `POST /events` returned for it |
+| `start_time` | Includes entries that occurred at or after this time |
+| `end_time` | Includes entries that occurred before this time; must be later than `start_time` |
+| `notification_email_recipient_email_addresses` | Up to 100 account member emails that receive a message when the export completes |
+
+Set `end_time` to the period boundary, the same as when reading through the API, so that entries written while the export runs fall outside it.
+
+The CSV has one row per ledger entry, newest first, and carries the same values the ledger API returns for each entry:
+
+| Column | Contents |
+|---|---|
+| Event ID, Event Type, Kind, Event At | The entry's ID, its event type and kind, and when it occurred as an RFC 3339 timestamp in UTC |
+| Company ID, Company Name | The company the entry belongs to |
+| Billing Credit ID, Credit Name, Currency | The credit type and its currency |
+| Feature ID, Feature Name | The feature that caused a draw |
+| Amount, Quantity Consumed | The signed amount, and the quantity consumed on a draw |
+| Source Type, Source ID, Source Event IDs | The record the entry came from, and the IDs of the events behind it, separated by semicolons |
+| Usage Reason, Grant Reason, Transfer Reason, Zeroed Out Reason | The `usage_reason`, `grant_reason`, `transfer_reason`, or `zeroed_out_reason` that applies to the entry |
+| User ID | The user attributed to a draw |
+| Grant ID, From Grant ID, To Grant ID | The grant the entry applies to, and the source and destination grants of a transfer |
+| Grant Quantity, Grant Quantity Remaining, Grant Valid From, Grant Expires At | The grant's size, its balance, and its validity window |
+| Expiry Type, Expiry Unit, Expiry Unit Count | How the grant expires |
+| Plan ID, Billing Credit Bundle ID, Auto Topup Log ID | The plan, bundle, or automatic top-up that produced a grant |
+| Usage Event ID | The usage event behind a draw |
+| Quantity Remaining At Zero Out | The balance a write-off removed |
+| Environment ID | The environment the entry belongs to |
+| Burn Breakdown | The priced lines of an inference-driven draw, as JSON |
+
+## Closing a period
+
+Teams closing the books on credit-based pricing load the ledger export and the grant list into their accounting system or warehouse on a schedule, and apply their policy there with their accountants, rather than encoding a treatment in application code where it is hard to see and harder to correct.
 
 ## Related
 
