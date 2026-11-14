@@ -289,7 +289,11 @@ When a list price changes or Schematic corrects one, Schematic reprices the even
 
 Each environment has a rate sheet of per-token prices you set for a provider and model. A rate sheet price takes precedence over Schematic's list price, so add one when you pay a negotiated rate, or when you call a model Schematic has no list price for, such as a Gemini model or one you host yourself. The rate sheet sets only what calls cost you, and credit burns still use the rates on the plan.
 
-To add a price, call [Create account inference cost rate](/api-reference/events/create-account-inference-cost-rate) with a secret API key, or ask the Schematic MCP server, which uses its `create_inference_cost_rate` tool. Changing the rate sheet through the MCP server requires an admin.
+To add a price in the dashboard, go to **Catalog** > **Model Prices** and click **Add Price**. Enter the provider and model as your events report them, the currency, a **Starts On** date, and a price per million tokens for any of **Input**, **Cached Input**, **Cache Creation Input** and **Output**. Leave a price blank when the model does not charge for that token type, and fill in at least one. The price starts at midnight UTC on the date you pick. When the rate sheet already has a price for the same model and currency on that date, the form shows "A price for this model and currency already starts on this date."
+
+The table marks your own prices with an **Account** tag. Their row menu has **Edit**, which changes the prices and leaves the provider, model, currency and start date as they are, and **Delete**, which asks you to confirm. Schematic's list prices have no menu. In the dashboard and through the MCP server, only admins can add, edit or delete a price.
+
+To add a price through the API, call [Create account inference cost rate](/api-reference/events/create-account-inference-cost-rate) with a secret API key. The Schematic MCP server adds one with its `create_inference_cost_rate` tool.
 
 ```bash title="cURL"
 curl -X POST https://api.schematichq.com/inference-rate-sheet \
@@ -322,7 +326,7 @@ A price applies to events captured from its `starting_at` until the next price f
 
 Every create, update and delete reprices the stored events in that price's window, so a price with a `starting_at` in the past reprices calls you already sent. An hourly job does the repricing, and each price's `repriced_at` stays null until the job has brought its events to the new price. New events pick up a change within five minutes. Events that carried their own `cost` keep it.
 
-To see the rate sheet, call [List account inference cost rates](/api-reference/events/list-account-inference-cost-rates), which filters by `provider` and `response_model`, or ask the Schematic MCP server, which uses its `list_inference_cost_rates` tool. Each environment keeps its own rate sheet, so prices you add in development do not price production events.
+**Catalog** > **Model Prices** lists your prices beside Schematic's list prices. To read the rate sheet from code, call [List account inference cost rates](/api-reference/events/list-account-inference-cost-rates), which filters by `provider` and `response_model`, or ask the Schematic MCP server, which uses its `list_inference_cost_rates` tool. Each environment keeps its own rate sheet, so prices you add in development do not price production events.
 
 ### Read a company's cost
 
