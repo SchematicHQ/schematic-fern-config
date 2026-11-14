@@ -127,6 +127,8 @@ Time-limited overrides are the safer instrument for anything granted as a conces
 
 A write connection can never do more than you can do in the Schematic app. If your account cannot change a plan, neither can an assistant connected as you.
 
+Every change an assistant makes appears in the [audit log](/production_readiness/observability#audit-log) under your name, described by the tool that made it.
+
 ## Where this fits
 
 The MCP server is for ad-hoc questions and human-in-the-loop workflows. For automation that needs to run reliably without someone asking, use [webhooks](/integrations/webhooks) instead, which push events to Slack, your CRM, or any endpoint as they happen.
