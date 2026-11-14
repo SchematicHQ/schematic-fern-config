@@ -51,7 +51,7 @@ For Stripe-linked plans, Schematic handles upgrades and downgrades differently. 
 When determining if a plan change is an upgrade or downgrade, the following logic is used. Below are the steps for determining if a change is an upgrade, whereas the inverse is considered a downgrade.
 
 1. Both plans need to be paid (otherwise it's a subscribe/unsubscribe)
-2. If the new plan has a longer billing period (e.g. monthly -> yearly), it's an upgrade.
+2. If the new plan has a longer billing period, it's an upgrade. Schematic compares the length of the term in months, so monthly to quarterly, quarterly to yearly, and monthly to yearly are all upgrades, and the reverse of each is a downgrade.
 3. If the new plan has a higher base price, it's an upgrade.
 4. If the new plan includes a new add-on, it's an upgrade.
 5. If the new plan includes more Pay-in-advance usage (typically representing user seats), it's an upgrade.
@@ -62,6 +62,8 @@ When determining if a plan change is an upgrade or downgrade, the following logi
 When a company upgrades to a new plan, Schematic will maintain the current billing period (e.g. if you are 15 days into your billing period, you will remain on day 15 after the upgrade). 
 
 However, if the plan change is a downgrade, Schematic will reset the billing period (e.g. the new plan will start on day 1 of the new billing period). If [scheduled downgrades](#scheduled-downgrades) are enabled, the downgrade is deferred to the end of the current billing period and the customer retains access to their current plan until then.
+
+A change to a different billing period, such as monthly to quarterly, starts a new period on the day of the change. The first invoice charges the new period's price and credits the unused part of the old one.
 
 ### Proration
 
