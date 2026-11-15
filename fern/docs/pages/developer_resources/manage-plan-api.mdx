@@ -26,6 +26,8 @@ When upgrading or making any change, you almost always want to **read the compan
 | `POST /manage-plan` | Apply a plan change |
 | `POST /manage-plan/preview` | Preview the financial impact of a plan change without applying it. Useful for custom checkout scenarios. |
 | `POST /manage-plan/subscription/cancel` | Cancel a company's active subscription |
+| `POST /manage-plan/subscription/pause` | Pause payment collection on a company's subscription for 1 to 6 months |
+| `POST /manage-plan/subscription/resume` | End a pause before its resume date |
 
 All endpoints require API key authentication.
 
@@ -291,6 +293,87 @@ If `true` and `cancel_immediately` is `true`, a prorated credit is issued for th
 
 Same format as `POST /manage-plan`, returning the updated company object.
 
+## Pause subscription
+
+`POST /manage-plan/subscription/pause`
+
+Stops collecting payment on a company's Stripe subscription for a number of months. The pause starts when the current billing period ends, so the customer keeps the period they already paid for, and the company keeps its plan, add-ons, and entitlements throughout. See [Pausing a subscription](/catalog/managing-company-plans#pausing-a-subscription) for how a pause behaves in the app and on invoices.
+
+### Request body
+
+```json
+{
+  "company_id": "comp_abc123",
+  "months": 3
+}
+```
+
+<ParamField path="company_id" type="string" required>
+The ID of the company whose subscription you want to pause.
+</ParamField>
+
+<ParamField path="months" type="integer" required>
+How many months to pause for, between 1 and 6, counted from the end of the current billing period. Billing resumes that many months later on the same day of the month.
+</ParamField>
+
+<ParamField path="subscription_external_id" type="string">
+Stripe's ID for the subscription to pause. Required when the company has more than one subscription. Otherwise the company's only subscription is paused.
+</ParamField>
+
+Only an active, monthly subscription that is not scheduled to cancel can be paused. A request that breaks one of these rules returns a `400` with one of these messages:
+
+| Message | Cause |
+|---------|-------|
+| `A subscription can be paused for between one and six months.` | `months` is outside 1 to 6. |
+| `This subscription is already paused.` | The subscription has a pause in place. Resume it before pausing again. |
+| `This subscription is already scheduled to cancel, so it cannot be paused.` | The subscription cancels at the end of the period or on a set date. |
+| `A subscription that is still in its trial cannot be paused.` | The subscription is trialing. |
+| `Only an active subscription can be paused.` | The subscription is canceled, unpaid, or incomplete. |
+| `Only monthly subscriptions can be paused.` | The subscription renews yearly or quarterly. |
+| `This subscription is between billing periods, so it cannot be paused right now. Try again in a few minutes.` | The current period has ended and the next has not started yet. |
+| `This company has no subscription to pause.` | The company has no subscription. |
+| `This company has more than one subscription. Choose which one to pause.` | The company has several subscriptions and the request has no `subscription_external_id`. |
+| `The selected subscription doesn't belong to this company.` | `subscription_external_id` does not match any of the company's subscriptions. |
+
+### Response
+
+Same format as `POST /manage-plan`, returning the updated company object. The subscription shows the pause as soon as the call returns.
+
+## Resume subscription
+
+`POST /manage-plan/subscription/resume`
+
+Ends a pause before its resume date. What happens to billing depends on whether the pause has started:
+
+| When you resume | What happens to billing |
+|--------|--------------|
+| Before the current period ends | The pause is removed, and the subscription renews at the end of the period as if it had never been paused. |
+| After the pause has started | A new billing period starts today, and the customer is invoiced for it in full. |
+
+The subscription's period in the response tells you which one happened. It is unchanged in the first case and starts today in the second.
+
+### Request body
+
+```json
+{
+  "company_id": "comp_abc123"
+}
+```
+
+<ParamField path="company_id" type="string" required>
+The ID of the company whose subscription you want to resume.
+</ParamField>
+
+<ParamField path="subscription_external_id" type="string">
+Stripe's ID for the subscription to resume. Required when the company has more than one subscription. Otherwise the company's only subscription is resumed.
+</ParamField>
+
+A subscription that is not paused returns a `400` with `This subscription is not paused.` A request that names no subscription, or the wrong one, returns the same messages as a pause, with "resume" in place of "pause".
+
+### Response
+
+Same format as `POST /manage-plan`, returning the updated company object.
+
 ## Common patterns
 
 ### Upgrading a plan
@@ -444,6 +527,7 @@ The Manage Plan API validates the full request before applying any changes. If v
 - **Invoicing without a billed base plan**: An invoiced subscription needs a base plan that is linked to a billing product. Without one, the request returns `Payment by invoice requires a base plan that has billing configured.` A request that sets `billing_cycle_anchor` while removing all of the company's plans returns `The billing period renewal date can't be set on a request that removes the company's plans.`
 - **Conflicting invoice terms**: Trials cannot be combined with `collection_method: send_invoice` or `billing_cycle_anchor`. `prorate_first_period` needs `billing_cycle_anchor`, and `prorate_first_period: false` cannot be combined with `activate_on_payment` or `paid_outside_stripe`, since a free first period raises no invoice before the renewal date. Any two of `paid_outside_stripe`, `activate_on_payment`, and `credit_bundles` together are rejected. Each conflict returns a `400` whose message names the conflict.
 - **Missing billing email**: An invoiced subscription needs a `billing_email`, or a Stripe customer that already has one. Without either, the request returns `A billing email is required to send an invoice.` [`POST /manage-plan/preview`](#preview-manage-plan) skips this check, so a preview can succeed for a request that the apply call then rejects.
+- **Paused subscription**: A company whose subscription is [paused](#pause-subscription) cannot change plans. The request returns `Resume the subscription before changing plans.` Resume the subscription first, then send the change.
 - **Stripe errors**: Any error returned by Stripe during the subscription update (e.g. payment method declined, customer not found, currency mismatch) will be surfaced back to you. If the Stripe call fails, the company's state in Schematic is left unchanged.
 
 For all errors, the response will include a descriptive message indicating what went wrong. We recommend using [`POST /manage-plan/preview`](#preview-manage-plan) before applying changes in production flows so users can be shown the financial impact and any validation issues up front.
