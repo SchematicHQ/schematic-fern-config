@@ -10,15 +10,19 @@ All events sent to Schematic are available in the Events tab to users. The lates
 
 ### Audit log
 
-The Audit Log under **Settings → Audit Log** records, for each environment, the actions users take within Schematic and the create, update, and delete requests made to the API. The request-type filter above the table narrows the list to **User**, **API**, or **Component** entries, or shows **All**. Schematic keeps audit log entries for 60 days.
+The Audit Log under **Settings → Audit Log** records, for each environment, the actions users take within Schematic and the create, update, and delete requests made to the API. The request-type filter above the table narrows the list to **User**, **API**, or **Component** entries, or shows **All**.
 
 Embedded components authenticate with a temporary access token, so their entries are labeled **Component** in the Author column, followed by the API key that issued the token and the company the token was issued for, which links to that company's profile. In the API, these entries carry `company_id` and a `company` object with the company's `id` and `name`, and the audit log list accepts a `company_id` filter. API and dashboard requests whose response is a company also carry its `company_id`. Entries recorded before October 30, 2026 have no company.
+
+Changes made through the [MCP server](/building-with-ai#model-context-protocol-mcp) are described by the tool that made them and the resource it acted on, such as **Update plan pricing: Acme**, with the resource linked. Only tool calls that change data are recorded, so an assistant that only reads leaves no entries. In the API and in a CSV export, the entry's URL is `/mcp/` followed by the tool name, for example `/mcp/update_plan_pricing`. An assistant that signed in with OAuth records its changes under the user who granted access, listed under **User**, and one that connects with a secret API key records them under that key, listed under **API**.
+
+![Audit log entries written through the MCP server](../../assets/images/production_readiness/audit-log-mcp-entries.png)
 
 Each entry identifies the resource it acted on by `resource_type` and `resource_id_string`, which holds the Schematic ID, such as `feat_GwmRSakgUe3`. The integer `resource_id` field is deprecated and is always null.
 
 ### Exporting the audit log
 
-To keep audit history longer than 60 days, export it to CSV through the API with a secret key and store the file yourself. An export runs in the background, and you retrieve it in three steps:
+To keep audit history longer than Schematic retains it, export it to CSV through the API with a secret key and store the file yourself. An export runs in the background, and you retrieve it in three steps:
 
 1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` set to `audit-log` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
 2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
@@ -58,7 +62,7 @@ An export covers the environment the secret key belongs to. The `metadata` objec
 | `q` | Free-text search over entries, up to 512 characters |
 | `notification_email_recipient_email_addresses` | Up to 100 account member emails that receive a message when the export completes |
 
-A range that starts more than 60 days back returns only the entries still retained.
+A range that starts before the oldest retained entry returns only the entries still retained.
 
 The CSV has one row per entry, newest first, with these columns:
 
