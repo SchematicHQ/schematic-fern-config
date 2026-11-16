@@ -960,6 +960,10 @@ components:
         subscription_item_external_id:
           type: string
           nullable: true
+        tiers_mode:
+          allOf:
+            - $ref: '#/components/schemas/BillingTiersMode'
+          nullable: true
         updated_at:
           type: string
           format: date-time
