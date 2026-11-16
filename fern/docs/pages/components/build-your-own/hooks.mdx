@@ -163,6 +163,30 @@ function useCreditUserUsage(creditId: string): ResourceHandle<CreditUserUsage>;
 
 One credit's consumption by user over the span of its live grants, read from `GET /company/credits/:credit_id/users`. `users` holds up to `FEATURE_USER_USAGE_LIMIT` (20) of the heaviest users, each with `userId`, `name`, `used`, and `share`, alongside `count`, `total`, `startTime`, `endTime`, and `unattributed`. A credit the company holds no live grant of comes back empty; an unknown credit answers 404.
 
+## useCreditLedger
+
+```ts
+function useCreditLedger(query?: CreditLedgerQuery): ResourceHandle<CreditLedgerPage> & { loadMore: () => Promise<void> };
+
+type CreditLedgerQuery = { credits?: string[]; includeGrants?: boolean };
+type CreditLedgerPage = { entries: CreditLedgerEntry[]; nextCursor?: string };
+```
+
+The company's credit activity, newest first, read from `GET /company/credits/ledger`, `CREDIT_LEDGER_PAGE_SIZE` (20) entries a page. `nextCursor` is set while an older page follows. `loadMore` appends it, as [`useInvoices`](#useinvoices) does: it settles when the page lands, never rejects, and leaves the entries already fetched in place on a failure. `refetch` re-reads every entry loaded so far.
+
+`credits` narrows the log to some credit ids, and `includeGrants: false` to draws alone. Each distinct query is its own list with its own paging, and the hook keys by value, so the same credits in another order are the same list and an inline object literal is fine.
+
+The server folds the ledger before it arrives. A draw written against several grants is one entry, and each user's share of a draw is its own. Lease and reservation holds, postpaid bookkeeping grants, and the zero-outs a billing provider's sync writes are left out.
+
+| Field | Meaning |
+| --- | --- |
+| `id`, `eventAt` | The entry and when it happened. |
+| `amount` | Signed: negative for draws and expiries, positive for grants and draws given back. |
+| `kind` | `drawdown`, `grant`, or `zero_out`, with `usageReason`, `grantReason`, or `zeroedOutReason` beside it. |
+| `credit` | The credit, with `id`, `name`, and its singular and plural names where they are configured. |
+| `feature`, `user` | The feature a draw was for and the user it is attributed to, where there is one. |
+| `bundle` | The bundle a purchase or auto top-up came from, where there is one. |
+
 ## useUpcomingInvoice
 
 ```ts

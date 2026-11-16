@@ -1,0 +1,275 @@
+---
+title: Credit Log
+description: The company's recent credit activity, newest first. What drew credits and who, plus grants, top-ups and expiries, with the full log a click away.
+slug: components/drop-in/credit-log
+---
+
+`CreditLog` renders the signed-in company's recent credit activity, newest first: what drew credits and who, plus grants, top-ups and expiries. A few rows show at first, and "See full log" opens a table that pages back through the rest. The card loads from the company billing API, so it needs a `session` on the provider as described in the [Drop-in components overview](/components/drop-in/overview#the-session).
+
+## Usage
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  CreditLog,
+  SchematicStyles,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider publishableKey={publishableKey} session={session}>
+  <SchematicStyles />
+  <CreditLog credits={["bcr_ai"]} limit={5} />
+</SchematicProvider>;
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `credits` | | Credit ids whose activity to show. Every credit's activity shows when it is absent. |
+| `limit` | `3` | Rows shown before "See full log". Also sizes the loading skeleton, up to three rows. |
+| `showUser` | `true` | Who each row is attributed to, and the table's "By" column. |
+| `showGrants` | `true` | Grants, top-ups and expiries beside the draws. Without them the server returns draws alone. |
+| `showHeader` | `true` | The "Credit activity" heading. |
+| `headingLevel` | `2` | The heading's level, `1` through `6`, so the card fits your page's outline. |
+| `onSeeAll` | | "See all" calls this instead of "See full log" opening the log in place. |
+| `seeAllUrl`, `seeAllTarget` | | "See all" links here when there is no `onSeeAll`. |
+| `className` | | Added to the root alongside `schematic-element schematic-card schematic-credit-log`. |
+| `locale` | | BCP 47 tag for number and time formatting. Falls back to the provider's `locale`, then the viewer's language. |
+| `strings` | | Copy for this card by key. Wins over the provider's `strings` and `translate`. |
+
+## Rows
+
+Each row names what happened and when, with the amount beside it. Amounts are bare numbers with their sign, such as "−20" for a draw and "+500" for a grant, shown to up to ten fraction digits. A log in one credit names the credit once, beside the heading. A log across several credits, or one with `showHeader` off, names each row's credit instead.
+
+A draw reads as the feature it was for, or "Usage" when it names none. A refunded draw reads "Refund: Image generation", and a manual correction to usage reads "Usage adjustment". A grant reads as where it came from: "Plan grant", "Free credits", "Credit adjustment", "Rolled over", "Purchased Booster" for a bundle, or "Auto top-up, Booster". An expiry says why the credits left: "Unused grant expired", "Unused credits reset", "Removed on plan change", "Removed with license", or "Credits removed".
+
+Under each row, the time reads "Today, 3:40 PM", "Yesterday, 3:40 PM", or "Oct 26, 3:40 PM" in the viewer's time zone. Beside it is who the row is attributed to: the user behind a draw, or for a grant and its expiry where the credits came from, "Plan", "Purchase", "Auto top-up", or "Manual". A draw sent without a user names no one. The server already folds the ledger, so a draw written against several grants is one row, and each user's share of a draw is its own.
+
+## The full log
+
+"See full log" shows when there are more rows than `limit`, or more on the server. It opens a table in place with Date, Activity, By, and Amount columns, and a Credit column before Amount when the rows name their credit. "Load more" fetches the next page until the server has nothing older, and disables while a page is on the wire. "See less" collapses back to `limit` rows.
+
+Long names in the By and Credit columns stop at two lines with an ellipsis, and show in full on hover. A table too wide for the card scrolls sideways, and takes keyboard focus so it can. In a card narrower than 30rem, the table stacks each row: the activity and the amount, then the date, who, and credit beneath.
+
+Pass `onSeeAll` or `seeAllUrl` to send the customer to a page of your own instead. The button then reads "See all", and the table never opens in place.
+
+```tsx
+<CreditLog onSeeAll={() => router.push("/billing/credits")} />
+```
+
+An empty log reads "No credit activity yet".
+
+## Errors
+
+A failure with nothing to show replaces the content with a short message and a "Try again" button. A 404 reads "Credit activity is not available for this account.", because that status means the account is not enabled for the company billing endpoints. Every other failure, and a 404 under rows already loaded, reads "There was a problem retrieving your credit activity." A page or refetch that fails with rows on screen is reported under them rather than replacing them. In development the component logs the underlying error to the console beside the copy.
+
+## Strings
+
+Every word the card renders resolves through `strings` on the component, then on the provider, then the provider's `translate`, then English. See [Localization](/components/drop-in/localization) for how the chain works. These are the component's own keys:
+
+| Key | Default |
+| --- | --- |
+| `creditLogHeader` | Credit activity |
+| `creditLogLoading` | Loading credit activity, read by assistive technology while the skeleton shows |
+| `creditLogError` | There was a problem retrieving your credit activity. |
+| `creditLogUnavailable` | Credit activity is not available for this account. |
+| `creditLogEmpty` | No credit activity yet |
+| `creditLogSeeMore` | See full log |
+| `creditLogSeeLess` | See less |
+| `creditLogSeeAll` | See all |
+| `creditLogLoadMore` | Load more |
+| `creditLogToday` | `Today, {{time}}` |
+| `creditLogYesterday` | `Yesterday, {{time}}` |
+| `creditLogColumnDate` | Date |
+| `creditLogColumnActivity` | Activity |
+| `creditLogColumnBy` | By |
+| `creditLogColumnCredit` | Credit |
+| `creditLogColumnAmount` | Amount |
+| `creditLogActionUsage` | Usage, a draw that names no feature |
+| `creditLogActionRefund` | `Refund: {{feature}}` |
+| `creditLogActionRefundUnnamed` | Refund |
+| `creditLogActionUsageAdjustment` | Usage adjustment |
+| `creditLogActionAutoTopup` | `Auto top-up, {{bundle}}` |
+| `creditLogActionAutoTopupUnnamed` | Auto top-up |
+| `creditLogActionPurchase` | `Purchased {{bundle}}` |
+| `creditLogActionPurchaseUnnamed` | Credits purchased |
+| `creditLogActionPlanGrant` | Plan grant |
+| `creditLogActionFreeGrant` | Free credits |
+| `creditLogActionAdjustmentGrant` | Credit adjustment |
+| `creditLogActionRollover` | Rolled over |
+| `creditLogActionExpired` | Unused grant expired |
+| `creditLogActionReset` | Unused credits reset |
+| `creditLogActionPlanChange` | Removed on plan change |
+| `creditLogActionLicenseRetired` | Removed with license |
+| `creditLogActionRemoved` | Credits removed |
+| `creditLogWhoPlan` | Plan |
+| `creditLogWhoPurchase` | Purchase |
+| `creditLogWhoAutoTopup` | Auto top-up |
+| `creditLogWhoManual` | Manual |
+| `retry` | Try again |
+
+The `Unnamed` forms stand in when the refund names no feature or the top-up no bundle.
+
+```tsx
+<CreditLog strings={{ creditLogHeader: "Credit history", creditLogSeeMore: "Show everything" }} />
+```
+
+## Markup
+
+This is what the component renders, for a host styling it without `SchematicStyles`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
+
+```html
+<div class="schematic-element schematic-card schematic-credit-log" data-state="ready">
+  <!-- with showHeader -->
+  <div class="schematic-header">
+    <h2 class="schematic-header__title" id="…">Credit activity</h2>
+    <!-- a log in one credit -->
+    <span class="schematic-muted schematic-small schematic-credit-log__credit-name">AI credits</span>
+  </div>
+
+  <ul class="schematic-credit-log__list" aria-labelledby="…">
+    <li class="schematic-credit-log__row">
+      <span class="schematic-credit-log__what">
+        <span class="schematic-credit-log__action">Image generation</span>
+        <span class="schematic-muted schematic-small schematic-credit-log__detail">Today, 3:40 PM · Ada</span>
+      </span>
+      <span class="schematic-credit-log__amount">−20</span>
+    </li>
+    <li class="schematic-credit-log__row">
+      <span class="schematic-credit-log__what">
+        <span class="schematic-credit-log__action">Purchased Booster</span>
+        <span class="schematic-muted schematic-small schematic-credit-log__detail">Oct 26, 9:15 AM · Purchase</span>
+      </span>
+      <span class="schematic-credit-log__amount schematic-credit-log__amount--positive">+500</span>
+    </li>
+  </ul>
+
+  <!-- more rows than limit, or more on the server -->
+  <div class="schematic-credit-log__actions">
+    <button class="schematic-link-button schematic-credit-log__toggle" aria-expanded="false">
+      <i class="schematic-icon schematic-icon--chevron-down schematic-chevron" aria-hidden="true"></i>
+      <span class="schematic-link-button__label">See full log</span>
+    </button>
+    <!-- with onSeeAll, in place of the toggle -->
+    <button class="schematic-link-button schematic-credit-log__see-all-button">See all</button>
+    <!-- with seeAllUrl -->
+    <a class="schematic-link-button schematic-credit-log__see-all-link" href="…">See all</a>
+  </div>
+
+  <!-- an empty log, in place of the list -->
+  <p class="schematic-muted schematic-credit-log__empty">No credit activity yet</p>
+
+  <!-- a failure with rows still on screen -->
+  <p class="schematic-status-note schematic-error" role="alert">…</p>
+</div>
+```
+
+The full log replaces the list and its actions:
+
+```html
+<div class="schematic-credit-log__scroll" role="region" tabindex="0" aria-labelledby="…">
+  <table class="schematic-small schematic-credit-log__table" aria-labelledby="…">
+    <thead>
+      <tr class="schematic-credit-log__heading-row">
+        <th class="schematic-credit-log__heading" scope="col">Date</th>
+        <th class="schematic-credit-log__heading" scope="col">Activity</th>
+        <!-- with showUser -->
+        <th class="schematic-credit-log__heading" scope="col">By</th>
+        <!-- when rows name their credit -->
+        <th class="schematic-credit-log__heading" scope="col">Credit</th>
+        <th class="schematic-credit-log__heading schematic-credit-log__amount-heading" scope="col">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="schematic-credit-log__table-row">
+        <td class="schematic-muted schematic-credit-log__cell schematic-credit-log__date">
+          <span class="schematic-credit-log__when">Today,</span> <span class="schematic-credit-log__when">3:40 PM</span>
+        </td>
+        <td class="schematic-credit-log__cell schematic-credit-log__activity">Image generation</td>
+        <!-- schematic-credit-log__by--none and "—" for a draw without a user -->
+        <td class="schematic-muted schematic-credit-log__cell schematic-credit-log__by">
+          <span class="schematic-credit-log__truncate" title="Ada">Ada</span>
+        </td>
+        <td class="schematic-muted schematic-credit-log__cell schematic-credit-log__credit">
+          <span class="schematic-credit-log__truncate" title="AI credits">AI credits</span>
+        </td>
+        <td class="schematic-credit-log__cell schematic-credit-log__amount-cell">
+          <span class="schematic-credit-log__amount">−20</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="schematic-credit-log__actions">
+  <button class="schematic-link-button schematic-credit-log__toggle" aria-expanded="true">
+    <i class="schematic-icon schematic-icon--chevron-up schematic-chevron" aria-hidden="true"></i>
+    <span class="schematic-link-button__label">See less</span>
+  </button>
+  <!-- while the server has more -->
+  <button class="schematic-link-button schematic-credit-log__load-more">Load more</button>
+</div>
+```
+
+With `showHeader` off, the list, the scroll region, and the table carry `aria-label="Credit activity"` in place of `aria-labelledby`.
+
+While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and a `schematic-skeleton`: a heading bar when `showHeader` is set, then `limit` rows up to three, each with an `action` and an `amount` cell. On a failure with nothing to show, the root carries `data-state="error"` and holds a `schematic-status` row.
+
+## Build it yourself
+
+[`useCreditLedger`](/components/build-your-own/hooks#usecreditledger) returns the company's credit activity a page at a time, with `loadMore` for the next. [`deriveCreditLog`](/components/build-your-own/derivations#credit-log) turns a page into rows keyed for copy, with the amounts and times formatted beside the raw values.
+
+```tsx
+import {
+  deriveCreditLog,
+  useCreditLedger,
+  type CreditLogAction,
+  type CreditLogRow,
+} from "@schematichq/schematic-components/elements";
+
+const ACTION: Record<CreditLogAction, (subject: string | null) => string> = {
+  usage: (feature) => feature ?? "Usage",
+  refund: (feature) => (feature ? `Refund: ${feature}` : "Refund"),
+  usageAdjustment: () => "Usage adjustment",
+  autoTopup: (bundle) => (bundle ? `Auto top-up, ${bundle}` : "Auto top-up"),
+  purchase: (bundle) => (bundle ? `Purchased ${bundle}` : "Credits purchased"),
+  planGrant: () => "Plan grant",
+  freeGrant: () => "Free credits",
+  adjustmentGrant: () => "Credit adjustment",
+  rollover: () => "Rolled over",
+  expired: () => "Unused grant expired",
+  reset: () => "Unused credits reset",
+  planChange: () => "Removed on plan change",
+  licenseRetired: () => "Removed with license",
+  removed: () => "Credits removed",
+};
+
+const when = (row: CreditLogRow) =>
+  row.day === "today"
+    ? `Today, ${row.whenText}`
+    : row.day === "yesterday"
+      ? `Yesterday, ${row.whenText}`
+      : row.whenText;
+
+function Activity() {
+  const { data, isPending, loadMore } = useCreditLedger({ credits: ["bcr_ai"] });
+  if (data === undefined) return <Skeleton />;
+
+  const { rows, hasMore } = deriveCreditLog(data, { locale: "en-US" });
+  return (
+    <>
+      {rows.map((row) => (
+        <p key={row.id}>
+          {ACTION[row.action](row.subject)} · {when(row)}{" "}
+          {row.positive ? "+" : "−"}
+          {row.amountText} {row.unit}
+        </p>
+      ))}
+      {hasMore && (
+        <button disabled={isPending} onClick={() => void loadMore()}>
+          Load more
+        </button>
+      )}
+    </>
+  );
+}
+```
