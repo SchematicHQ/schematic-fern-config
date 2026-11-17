@@ -4858,6 +4858,14 @@ components:
           nullable: true
         interval:
           type: string
+        interval_count:
+          type: integer
+          description: >-
+            With interval, the subscription's billing period: 3 with month is
+            quarterly. Read from the subscription's line items, since interval
+            alone is month for monthly and quarterly alike.
+          format: int64
+          nullable: true
         is_initial:
           type: boolean
         latest_invoice:
