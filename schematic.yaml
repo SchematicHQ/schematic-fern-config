@@ -6136,7 +6136,8 @@ components:
           type: array
           description: >-
             Cost and event counts per provider and response model, busiest model
-            first
+            first, for at most the 500 busiest models; the totals count every
+            model
           items:
             $ref: '#/components/schemas/InferenceModelCostResponseData'
           maxItems: 1000
@@ -14857,6 +14858,58 @@ components:
         - currency
         - event_count
       title: InferenceCostAmountResponseData
+    InferenceCostResponseData:
+      type: object
+      properties:
+        by_model:
+          type: array
+          description: >-
+            Cost and event counts per provider and response model, busiest model
+            first, for at most the 500 busiest models; the totals count every
+            model. A model with a non-zero unpriced_event_count has calls with
+            no known cost
+          items:
+            $ref: '#/components/schemas/InferenceModelCostResponseData'
+          maxItems: 1000
+        costs:
+          type: array
+          description: >-
+            Summed cost of priced inference events, one entry per currency.
+            Amounts in different currencies are not converted or combined. Empty
+            when no event in the window was priced
+          items:
+            $ref: '#/components/schemas/InferenceCostAmountResponseData'
+          maxItems: 1000
+        end_time:
+          type: string
+          description: End of the window (exclusive)
+          format: date-time
+        event_count:
+          type: integer
+          description: >-
+            Number of inference events the environment received in the window,
+            priced or not
+          format: int64
+        start_time:
+          type: string
+          description: Start of the window (inclusive)
+          format: date-time
+        unpriced_event_count:
+          type: integer
+          description: >-
+            Number of inference events in the window with no known cost: the
+            event carried none and none could be derived from a price for its
+            model. These add nothing to costs, so a non-zero count means the
+            real cost is higher than reported
+          format: int64
+      required:
+        - by_model
+        - costs
+        - end_time
+        - event_count
+        - start_time
+        - unpriced_event_count
+      title: InferenceCostResponseData
     InferenceCostSource:
       type: string
       enum:
@@ -36977,6 +37030,76 @@ paths:
                 title: CountFlagsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /inference-cost:
+    get:
+      operationId: getInferenceCost
+      summary: Get inference cost
+      tags:
+        - events
+      parameters:
+        - name: end_time
+          in: query
+          description: >-
+            End of the window (exclusive). Pass together with start_time; when
+            both are omitted, the current calendar month in UTC is used
+          schema:
+            type: string
+            description: >-
+              End of the window (exclusive). Pass together with start_time; when
+              both are omitted, the current calendar month in UTC is used
+            format: date-time
+        - name: start_time
+          in: query
+          description: >-
+            Start of the window (inclusive). Pass together with end_time; when
+            both are omitted, the current calendar month in UTC is used
+          schema:
+            type: string
+            description: >-
+              Start of the window (inclusive). Pass together with end_time; when
+              both are omitted, the current calendar month in UTC is used
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/InferenceCostResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        description: >-
+                          End of the window (exclusive). Pass together with
+                          start_time; when both are omitted, the current
+                          calendar month in UTC is used
+                        format: date-time
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the window (inclusive). Pass together with
+                          end_time; when both are omitted, the current calendar
+                          month in UTC is used
+                        format: date-time
+                    title: GetInferenceCostParams
+                required:
+                  - data
+                  - params
+                title: GetInferenceCostResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
