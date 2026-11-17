@@ -12068,7 +12068,7 @@ components:
           type: string
           description: >-
             When a custom plan that doesn't renew ends: the renewal the
-            subscription stops on and the company moves to the default plan.
+            subscription stops on and the company moves to the fallback plan.
             Null for a plan that renews.
           format: date-time
           nullable: true
@@ -18852,12 +18852,12 @@ components:
         end_date:
           type: string
           description: >-
-            When a custom plan that doesn't renew ends: the company moves to the
-            default plan then, and no renewal invoice is raised. Required when
-            the version's renewal_policy is expire_to_default, and refused
-            otherwise. Moved back to the last renewal on or before it, which
-            must leave at least one whole billing period. Only honored on a
-            first publish that starts a subscription.
+            When a custom plan that doesn't renew ends: the subscription is
+            canceled, the company moves to the fallback plan, and no renewal
+            invoice is raised. Required when the version's renewal_policy is
+            expire_to_default, and refused otherwise. Moved back to the last
+            renewal on or before it, which must leave at least one whole billing
+            period. Only honored on a first publish that starts a subscription.
           format: date-time
           nullable: true
         excluded_company_ids:
@@ -19088,6 +19088,16 @@ components:
           description: >-
             Whether the amendment invoice is emailed when the publish request
             leaves send_invoice out.
+        earliest_end_date:
+          type: string
+          description: >-
+            For a version that doesn't renew, the soonest end_date the publish
+            accepts: the first renewal after now, or after the amendment applies
+            when that is later, on the interval the subscription has once it
+            applies. The term's last day is the day before. Reported whether or
+            not the request sends an end date. Null when the version renews.
+          format: date-time
+          nullable: true
         effective_at:
           type: string
           description: >-
