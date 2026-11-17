@@ -10647,6 +10647,41 @@ components:
         - event_type
         - timestamp
       title: CreditBalanceEventResponseData
+    CreditBalanceExportMetadata:
+      type: object
+      description: >-
+        Rows are consistent within a page of 250 companies. The As Of column
+        marks when the export started; in a large environment, later pages may
+        include usage recorded after that time.
+      properties:
+        billing_credit_id:
+          type: string
+          description: >-
+            Restrict the export to balances of this credit type ID (starting
+            with 'bilcr_')
+          nullable: true
+        company_id:
+          type: string
+          description: >-
+            Restrict the export to balances for this company ID (starting with
+            'comp_')
+          nullable: true
+        export_type:
+          type: string
+          description: 'Discriminator: always "credit-balance" for this variant'
+          enum:
+            - credit-balance
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+      required:
+        - export_type
+      title: CreditBalanceExportMetadata
     CreditBalanceFeatureConsumptionResponseData:
       type: object
       properties:
@@ -12236,13 +12271,17 @@ components:
         mapping:
           audit-log: '#/components/schemas/AuditLogExportMetadata'
           company-feature-usage: '#/components/schemas/CompanyFeatureUsageExportMetadata'
+          credit-balance: '#/components/schemas/CreditBalanceExportMetadata'
           credit-ledger: '#/components/schemas/CreditLedgerExportMetadata'
           event: '#/components/schemas/EventExportMetadata'
+          user: '#/components/schemas/UserExportMetadata'
       oneOf:
         - $ref: '#/components/schemas/CompanyFeatureUsageExportMetadata'
         - $ref: '#/components/schemas/AuditLogExportMetadata'
+        - $ref: '#/components/schemas/CreditBalanceExportMetadata'
         - $ref: '#/components/schemas/CreditLedgerExportMetadata'
         - $ref: '#/components/schemas/EventExportMetadata'
+        - $ref: '#/components/schemas/UserExportMetadata'
       title: DataExportMetadata
     DataExportOutputFileType:
       type: string
@@ -12293,8 +12332,10 @@ components:
       enum:
         - audit-log
         - company-feature-usage
+        - credit-balance
         - credit-ledger
         - event
+        - user
     DatastreamCompanyPlan:
       type: object
       properties:
@@ -23332,6 +23373,69 @@ components:
         - entity_traits
         - company_memberships
       title: UserDetailResponseData
+    UserExportMetadata:
+      type: object
+      description: >-
+        Exports one row per user, oldest first. Omitting every filter exports
+        every user in the environment.
+      properties:
+        company_id:
+          type: string
+          description: >-
+            Restrict the export to members of this company ID (starting with
+            'comp_')
+          nullable: true
+        entity_key_definition_ids:
+          type: array
+          description: >-
+            User key definition IDs (starting with 'ekt_') to include as
+            columns, one per key
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        entity_trait_definition_ids:
+          type: array
+          description: >-
+            User trait definition IDs (starting with 'trt_') to include as
+            columns, one per trait
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        export_type:
+          type: string
+          description: 'Discriminator: always "user" for this variant'
+          enum:
+            - user
+        ids:
+          type: array
+          description: Restrict the export to these user IDs (starting with 'user_')
+          items:
+            type: string
+          nullable: true
+          maxItems: 100
+        notification_email_recipient_email_addresses:
+          type: array
+          description: >-
+            Account member emails to notify when the export completes; empty
+            means the artifact is only retrievable via the API
+          items:
+            type: string
+          maxItems: 100
+        plan_id:
+          type: string
+          description: >-
+            Restrict the export to users in a company on this plan or add-on ID
+            (starting with 'plan_')
+          nullable: true
+        q:
+          type: string
+          description: Search users by name, keys or string traits
+          nullable: true
+      required:
+        - export_type
+      title: UserExportMetadata
     UserFeatureUsageResponseData:
       type: object
       properties:
@@ -23682,6 +23786,8 @@ components:
         - credit.limit.warning
         - credit.purchase.success
         - credit.usage_warning_reached
+        - data_export.completed
+        - data_export.failed
         - entitlement.limit.reached
         - entitlement.limit.warning
         - entitlement.soft_limit.reached
