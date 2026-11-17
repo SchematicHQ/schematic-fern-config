@@ -31,6 +31,7 @@ These apply across all environments:
 | **Flags** | Create, edit, and delete feature flags |
 | **Features** | Create, edit, and delete features |
 | **Plans & Add-ons** | Create, edit, and delete plans and add-ons |
+| **Custom Plans** | Create, edit, and delete custom plans, including their entitlements, credit grants, versions, and migrations |
 
 ## Environment permissions
 
@@ -42,12 +43,17 @@ These are granted per environment:
 | **Users** | Create, edit, and delete users |
 | **Overrides** | Create, edit, and delete company-level overrides |
 | **Plan Entitlements** | Create, edit, and delete the entitlements attached to a plan |
-| **Plan Versions** | Create, edit, and delete plan versions |
+| **Plan Versions** | Create, edit, and delete plan versions, and create, retry, cancel, or complete the migrations that move subscribers between them |
 | **Plan & Billing** | Manage plan billing configuration, grant credits to companies, and view and change your organization's Schematic subscription under **Settings → Plans** and **Settings → Usage & Billing** |
 | **Credits** | Create, edit, and delete credits |
 | **Components** | Create, edit, and delete embedded UI components |
+| **Data Exports** | Create data exports, including the export from the **Export** button on the **Companies** list, which members without this permission do not see |
 | **Webhooks** (Create, edit and delete) | Create, edit, and delete webhooks |
 | **Webhooks** (Reveal secret) | View a webhook's signing secret after the webhook is created |
+
+![Environment permissions for a member](../../assets/images/production_readiness/rbac-environment-permissions.png)
+
+When a member saves a plan, Schematic checks each part of the change against its own permission. A save that changes entitlements needs **Plan Entitlements**, and a save that changes credit grants needs **Plan & Billing**, on top of **Plans & Add-ons**. If any part fails the check, Schematic refuses the whole save. On a custom plan, **Custom Plans** takes the place of all three, and it also replaces **Plan Versions** for that plan's migrations.
 
 ## Assigning roles and permissions
 
@@ -58,6 +64,8 @@ These are granted per environment:
 5. Save. The teammate's access updates immediately.
 
 Only admins can add teammates and change roles or permissions. Admins are also the only teammates who can create, edit, or delete API keys and environments, and a request authenticated with an API key cannot make those changes.
+
+Only admins can connect or disconnect an integration such as Stripe, Orb, Metronome, Clerk, or WorkOS from a dashboard session. A request authenticated with a secret API key can install one through the API.
 
 ![Teams page](../../assets/images/production_readiness/rbac.png)
 
@@ -71,4 +79,4 @@ A common setup is a teammate who can manage customer accounts and exceptions but
 | **Overrides** | Create company-level overrides |
 | **Plan & Billing** | Grant existing credits to companies |
 
-Leave the account permissions (**Flags**, **Features**, **Plans & Add-ons**) off so they cannot change your catalog, and leave **Users**, **Plan Entitlements**, and **Plan Versions** off as well. 
+Grant the **Custom Plans** account permission as well, so they can build and change a custom plan for a single company. Leave the other account permissions (**Flags**, **Features**, **Plans & Add-ons**) off so they cannot change your catalog, and leave **Users**, **Plan Entitlements**, and **Plan Versions** off as well. 
