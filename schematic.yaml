@@ -343,6 +343,18 @@ components:
         - id
         - name
       title: AuditLogCompanyResponseData
+    AuditLogEndUserResponseData:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          maxLength: 255
+      required:
+        - id
+        - name
+      title: AuditLogEndUserResponseData
     AuditLogExportMetadata:
       type: object
       properties:
@@ -398,6 +410,20 @@ components:
           $ref: '#/components/schemas/AuditLogCompanyResponseData'
         company_id:
           type: string
+          nullable: true
+        end_user:
+          allOf:
+            - $ref: '#/components/schemas/AuditLogEndUserResponseData'
+          description: >-
+            The user of your app the request's temporary access token was issued
+            for. Absent when the token named no user or the user has since been
+            deleted.
+          nullable: true
+        end_user_id:
+          type: string
+          description: >-
+            The ID of the user of your app the request's temporary access token
+            was issued for
           nullable: true
         ended_at:
           type: string
@@ -479,6 +505,20 @@ components:
           $ref: '#/components/schemas/AuditLogCompanyResponseData'
         company_id:
           type: string
+          nullable: true
+        end_user:
+          allOf:
+            - $ref: '#/components/schemas/AuditLogEndUserResponseData'
+          description: >-
+            The user of your app the request's temporary access token was issued
+            for. Absent when the token named no user or the user has since been
+            deleted.
+          nullable: true
+        end_user_id:
+          type: string
+          description: >-
+            The ID of the user of your app the request's temporary access token
+            was issued for
           nullable: true
         ended_at:
           type: string
@@ -15401,8 +15441,22 @@ components:
           additionalProperties:
             type: string
           type: object
+          description: >-
+            Key-value pairs that identify the company the token is for, such as
+            {"id": "your-company-id"}.
         resource_type:
           $ref: '#/components/schemas/TemporaryAccessTokenResourceType'
+        user_lookup:
+          additionalProperties:
+            type: string
+          type: object
+          description: >-
+            Optional key-value pairs that identify the user of your app the
+            token is for, such as {"email": "user@example.com"}. The user must
+            belong to the company named by lookup. Writes made with the token
+            are attributed to this user in the audit log; the token's access is
+            the same either way.
+          maxProperties: 20
       required:
         - resource_type
         - lookup
@@ -15432,6 +15486,12 @@ components:
         updated_at:
           type: string
           format: date-time
+        user_id:
+          type: string
+          description: >-
+            The user the token was issued for, when the request named one in
+            user_lookup.
+          nullable: true
       required:
         - id
         - environment_id
@@ -21164,6 +21224,12 @@ components:
         updated_at:
           type: string
           format: date-time
+        user_id:
+          type: string
+          description: >-
+            The user the token was issued for, when the request named one in
+            user_lookup.
+          nullable: true
       required:
         - id
         - environment_id
@@ -24467,6 +24533,14 @@ paths:
           schema:
             type: string
             format: date-time
+        - name: end_user_id
+          in: query
+          description: Only entries made with a temporary access token issued for this user
+          schema:
+            type: string
+            description: >-
+              Only entries made with a temporary access token issued for this
+              user
         - name: environment_id
           in: query
           schema:
@@ -24524,6 +24598,11 @@ paths:
                       end_time:
                         type: string
                         format: date-time
+                      end_user_id:
+                        type: string
+                        description: >-
+                          Only entries made with a temporary access token issued
+                          for this user
                       environment_id:
                         type: string
                       limit:
@@ -24618,6 +24697,14 @@ paths:
           schema:
             type: string
             format: date-time
+        - name: end_user_id
+          in: query
+          description: Only entries made with a temporary access token issued for this user
+          schema:
+            type: string
+            description: >-
+              Only entries made with a temporary access token issued for this
+              user
         - name: environment_id
           in: query
           schema:
@@ -24671,6 +24758,11 @@ paths:
                       end_time:
                         type: string
                         format: date-time
+                      end_user_id:
+                        type: string
+                        description: >-
+                          Only entries made with a temporary access token issued
+                          for this user
                       environment_id:
                         type: string
                       limit:
