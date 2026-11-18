@@ -14898,6 +14898,77 @@ components:
         - currency
         - event_count
       title: InferenceCostAmountResponseData
+    InferenceCostRateResponseData:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          type: string
+          description: Lowercase ISO currency code the rates are priced in.
+        id:
+          type: string
+          description: >-
+            The rate's ID. An account rate's ID is the one its update and delete
+            routes take.
+        pinned:
+          type: boolean
+          description: >-
+            Whether Schematic's daily list-price update leaves this price alone.
+            Always false for an account rate.
+        provider:
+          type: string
+          description: The inference provider, such as anthropic or openai.
+        rates:
+          additionalProperties:
+            type: number
+            format: double
+          type: object
+          description: Cost of a single token in the row's currency, keyed by quantity key.
+        repriced_at:
+          type: string
+          description: >-
+            When the stored events this rate governs were last brought to its
+            price. Null until Schematic reprices them after the rate is created
+            or changed.
+          format: date-time
+          nullable: true
+        response_model:
+          type: string
+          description: The model name the provider reports on its responses.
+        scope:
+          allOf:
+            - $ref: '#/components/schemas/InferenceCostRateScope'
+          description: >-
+            Which sheet the rate belongs to. An account rate prices an event
+            ahead of the list price.
+        starting_at:
+          type: string
+          description: >-
+            When this price takes effect. It applies until the next rate for the
+            same provider, model and currency starts.
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - created_at
+        - currency
+        - id
+        - pinned
+        - provider
+        - rates
+        - response_model
+        - scope
+        - starting_at
+        - updated_at
+      title: InferenceCostRateResponseData
+    InferenceCostRateScope:
+      type: string
+      enum:
+        - account
+        - list_price
     InferenceCostResponseData:
       type: object
       properties:
@@ -37192,6 +37263,110 @@ paths:
                   - data
                   - params
                 title: GetInferenceCostResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /inference-cost-rates:
+    get:
+      operationId: listInferenceCostRates
+      summary: List inference cost rates
+      tags:
+        - events
+      parameters:
+        - name: provider
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: response_model
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+        - name: scope
+          in: query
+          description: >-
+            Only list rates from this sheet: list_price for Schematic's list
+            prices, account for the environment's own rate sheet.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/InferenceCostRateScope'
+            description: >-
+              Only list rates from this sheet: list_price for Schematic's list
+              prices, account for the environment's own rate sheet.
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InferenceCostRateResponseData'
+                    title: ListInferenceCostRatesResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      provider:
+                        type: string
+                        maxLength: 255
+                      response_model:
+                        type: string
+                        maxLength: 255
+                      scope:
+                        allOf:
+                          - $ref: '#/components/schemas/InferenceCostRateScope'
+                        description: >-
+                          Only list rates from this sheet: list_price for
+                          Schematic's list prices, account for the environment's
+                          own rate sheet.
+                    title: ListInferenceCostRatesParams
+                required:
+                  - data
+                  - params
+                title: ListInferenceCostRatesResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
