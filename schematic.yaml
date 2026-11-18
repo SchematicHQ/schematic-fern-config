@@ -15154,12 +15154,14 @@ components:
           orb: '#/components/schemas/OrbIntegrationConfig'
           stripe: '#/components/schemas/StripeIntegrationConfig'
           workos: '#/components/schemas/WorkOSIntegrationConfig'
+          zuora: '#/components/schemas/ZuoraIntegrationConfig'
       oneOf:
         - $ref: '#/components/schemas/StripeIntegrationConfig'
         - $ref: '#/components/schemas/OrbIntegrationConfig'
         - $ref: '#/components/schemas/ClerkIntegrationConfig'
         - $ref: '#/components/schemas/WorkOSIntegrationConfig'
         - $ref: '#/components/schemas/MetronomeIntegrationConfig'
+        - $ref: '#/components/schemas/ZuoraIntegrationConfig'
       title: IntegrationConfig
     IntegrationInstallConfig:
       type: object
@@ -15249,6 +15251,7 @@ components:
         - stripe
         - unknown
         - workos
+        - zuora
     IntegrationWebhookUrlResponseData:
       type: object
       properties:
@@ -24139,6 +24142,42 @@ components:
             - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
           nullable: true
       title: ZeroOutGrantRequestBody
+    ZuoraConnectionHealth:
+      type: object
+      properties:
+        checked_at:
+          type: string
+          format: date-time
+        healthy:
+          type: boolean
+        message:
+          type: string
+          nullable: true
+      required:
+        - checked_at
+        - healthy
+      title: ZuoraConnectionHealth
+    ZuoraIntegrationConfig:
+      type: object
+      properties:
+        base_url:
+          type: string
+          description: >-
+            REST endpoint of the connected Zuora tenant, such as
+            https://rest.zuora.com
+          nullable: true
+        client_id:
+          type: string
+          description: OAuth client ID Schematic uses to authenticate with the Zuora tenant
+          nullable: true
+        type:
+          type: string
+          description: 'Discriminator: always "zuora" for this variant'
+          enum:
+            - zuora
+      required:
+        - type
+      title: ZuoraIntegrationConfig
 paths:
   /account-members:
     get:
@@ -38493,6 +38532,38 @@ paths:
                 title: UninstallIntegrationResponse
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/zuora/health:
+    get:
+      operationId: getZuoraConnectionHealth
+      summary: Get zuora connection health
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ZuoraConnectionHealth'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetZuoraConnectionHealthParams
+                required:
+                  - data
+                  - params
+                title: GetZuoraConnectionHealthResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
