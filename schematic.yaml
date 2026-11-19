@@ -18610,6 +18610,15 @@ components:
           format: date-time
           nullable: true
           deprecated: true
+        unbilled_usage_feature_ids:
+          type: array
+          description: >-
+            Features whose usage so far this billing period is not billed if
+            this change is made, because the new plan does not charge for them
+            and the billing period continues.
+          items:
+            type: string
+          maxItems: 1000
         usage_violations:
           type: array
           items:
@@ -18627,6 +18636,7 @@ components:
         - opt_in_required
         - payment_method_required
         - problems
+        - unbilled_usage_feature_ids
         - usage_violations
       title: PreviewSubscriptionChangeResponseData
     PreviewSubscriptionDiscountResponseData:
