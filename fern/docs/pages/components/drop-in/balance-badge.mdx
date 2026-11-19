@@ -1,0 +1,163 @@
+---
+title: Balance Badge
+description: One credit's balance as a pill for the app shell. What is left, a meter of the share used, and when it resets, turning amber near a limit and red at one.
+slug: components/drop-in/balance-badge
+---
+
+`BalanceBadge` shows one of the signed-in company's credits as a pill for your app's header: what is left, a meter of the share used, and when it resets. It turns amber near a limit and red at one, and hovering or focusing it shows the exact reset and the viewer's spend limits. The balance loads from the company billing API, so it needs a `session` on the provider as described in the [Drop-in components overview](/components/drop-in/overview#the-session).
+
+## Usage
+
+```tsx
+import { SchematicProvider } from "@schematichq/schematic-react";
+import {
+  BalanceBadge,
+  SchematicStyles,
+} from "@schematichq/schematic-components/elements";
+
+<SchematicProvider publishableKey={publishableKey} session={session}>
+  <SchematicStyles />
+  <BalanceBadge creditId="bcr_ai" href="/billing" />
+</SchematicProvider>;
+```
+
+## It needs `SchematicProvider`
+
+Unlike the other drop-ins, the badge also reads the live balance and the viewer's spend limits from Schematic's real-time connection, so it throws under a bare `BillingProvider` or `BillingDataProvider`. The billing balance shows first. Once you call `identify` from `useSchematicEvents`, the live balance replaces it and the viewer's spend limits count toward the state. Without `identify` the badge shows the billing balance alone.
+
+The live side follows the keys you pass to `identify`, and the billing side follows the company the `session` names. The badge cannot check that they agree, so identify the same company the session names.
+
+```tsx
+import { useEffect } from "react";
+import { useSchematicEvents } from "@schematichq/schematic-react";
+
+function IdentifyViewer({ userId, companyId }: { userId: string; companyId: string }) {
+  const { identify } = useSchematicEvents();
+  useEffect(() => {
+    void identify({ keys: { id: userId }, company: { keys: { id: companyId } } });
+  }, [identify, userId, companyId]);
+  return null;
+}
+```
+
+## Props
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `creditId` | | The credit to show. The company's only credit when absent. |
+| `href`, `target` | | The pill links here. |
+| `onClick` | | The pill is a button that calls this. Wins over `href`. |
+| `showMeter` | `true` | The meter of the share used. |
+| `showReset` | `true` | When the balance or limit resets. |
+| `warnAt` | `80` | Percent used that turns the badge amber. |
+| `className` | | Added to the root alongside `schematic-balance-badge`. |
+| `locale` | | BCP 47 tag for number and date formatting. Falls back to the provider's `locale`, then the viewer's language. |
+| `strings` | | Copy for this component by key. Wins over the provider's `strings` and `translate`. |
+
+Without `href` or `onClick` the pill does nothing when clicked, but it still takes focus so the tooltip reaches a keyboard.
+
+## States
+
+The pill follows whichever is closer to running out: the balance, or a daily, weekly, monthly, or hourly spend limit that binds the viewer. A limit takes over once it is tighter than the balance and at `warnAt` or over; until then the pill shows the balance.
+
+| State | Pill |
+| --- | --- |
+| Under `warnAt` | "2,450 AI credits", the meter, "Resets Aug 31" |
+| At `warnAt` or over | The meter turns amber; a reset within a day reads "Resets in 6h" |
+| Balance ran out | Red, "Out of AI credits · Unlocks Aug 31" |
+| A limit reached | Red, "Daily limit reached · Unlocks 12:00 AM" |
+| Loading | An empty pill with a pulsing bar |
+
+The meter fills with the share used. The tooltip lists the balance with its reset, each spend limit with its reset in the viewer's time zone, and the smallest per-use limit. A company's billing-period limit reads as monthly. Escape hides the tooltip until the pill is hovered or focused again.
+
+## When it renders nothing
+
+The component renders nothing when the company holds no credit, when it holds several and `creditId` is absent, when it holds none of the `creditId` asked for, and on any error, since a pill has no room for a retry. In development it logs why to the console.
+
+## Strings
+
+Every word the component renders resolves through `strings` on the component, then on the provider, then the provider's `translate`, then English. See [Localization](/components/drop-in/localization) for how the chain works. These are the component's own keys:
+
+| Key | Default |
+| --- | --- |
+| `balanceBadgeLoading` | Loading credit balance, read by assistive technology while the skeleton shows |
+| `balanceBadgeAmount` | `{{amount}} {{units}}` |
+| `balanceBadgeResetsOn` | `Resets {{date}}` |
+| `balanceBadgeResetsIn` | `Resets in {{duration}}` |
+| `balanceBadgeUnlocksOn` | `Unlocks {{date}}` |
+| `balanceBadgeUnlocksAt` | `Unlocks {{time}}` |
+| `balanceBadgeOutOf` | `Out of {{units}}` |
+| `balanceBadgeLimitReachedHourly` | Hourly limit reached |
+| `balanceBadgeLimitReachedDaily` | Daily limit reached |
+| `balanceBadgeLimitReachedWeekly` | Weekly limit reached |
+| `balanceBadgeLimitReachedMonthly` | Monthly limit reached |
+| `balanceBadgeLeft` | `{{remaining}} of {{total}} {{units}} left.` |
+| `balanceBadgeResetsExact` | `Resets {{dateTime}}.` |
+| `balanceBadgeLimitUser` | `Your {{period}} limit: {{consumed}} of {{limit}} used.` |
+| `balanceBadgeLimitCompany` | `Your team's {{period}} limit: {{consumed}} of {{limit}} used.` |
+| `balanceBadgePeriodHourly` | hourly |
+| `balanceBadgePeriodDaily` | daily |
+| `balanceBadgePeriodWeekly` | weekly |
+| `balanceBadgePeriodMonthly` | monthly |
+| `balanceBadgePerUse` | `Up to {{limit}} {{units}} per use.` |
+
+```tsx
+<BalanceBadge strings={{ balanceBadgeResetsOn: "Renews {{date}}" }} />
+```
+
+## Markup
+
+This is what the component renders, for a host styling it without `SchematicStyles`. [Styling and theming](/components/drop-in/styling) lists the shared classes.
+
+```html
+<span class="schematic-balance-badge" data-state="ready" data-tone="ok">
+  <span class="schematic-tooltip" data-placement="bottom" data-align="end">
+    <!-- an <a> with href, a <button> with onClick, else a <span tabindex="0"> -->
+    <a class="schematic-cta schematic-cta--small schematic-cta--ghost schematic-balance-badge__pill" href="/billing" aria-describedby="…">
+      <!-- also schematic-error when blocked -->
+      <span class="schematic-balance-badge__amount">2,450 AI credits</span>
+      <!-- with showMeter; schematic-meter--warning or schematic-meter--over by tone -->
+      <span class="schematic-meter schematic-balance-badge__meter" role="meter" aria-label="AI credit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="51">
+        <span class="schematic-meter__fill" style="width: 51%"></span>
+      </span>
+      <!-- with showReset -->
+      <span class="schematic-muted schematic-small schematic-balance-badge__reset">Resets Aug 31</span>
+    </a>
+    <span class="schematic-tooltip__content" id="…" role="tooltip">
+      2,450 of 5,000 AI credits left. Resets Aug 31, 12:00 AM EDT.<br />
+      Your daily limit: 10 of 50 used. Resets 6:00 PM EDT.
+    </span>
+  </span>
+</span>
+```
+
+`data-tone` is `ok`, `warning`, or `blocked`. `data-placement` (`top` or `bottom`) and `data-align` (`start`, `center`, or `end`) say where the tooltip opened; it prefers below the pill, end-aligned, and moves to fit the viewport.
+
+While loading, the root carries `data-state="pending"` and `aria-busy="true"`, with a visually hidden `schematic-hidden` loading label and an `aria-hidden` pill holding a `schematic-skeleton` with one `schematic-skeleton__cell` of `data-column="badge"`.
+
+## Build it yourself
+
+[`useCreditBalances`](/components/build-your-own/hooks#usecreditbalances) returns the billing balances, and `useSchematicCreditSpendPolicies` the spend limits that bind the identified viewer. [`deriveBalanceBadge`](/components/build-your-own/derivations#balance-badge) picks the credit and works out the state the component shows. Render it inside `SchematicProvider`.
+
+```tsx
+import {
+  deriveBalanceBadge,
+  useCreditBalances,
+  useSchematicCreditSpendPolicies,
+} from "@schematichq/schematic-components/elements";
+
+function Balance() {
+  const { data } = useCreditBalances();
+  const { policies } = useSchematicCreditSpendPolicies();
+  const view = data && deriveBalanceBadge(data, { locale: "en-US", policies });
+  if (!view) {
+    return null;
+  }
+
+  return (
+    <a href="/billing" data-tone={view.tone}>
+      {view.remaining.amount} {view.remaining.units} · {view.percent}% used
+    </a>
+  );
+}
+```
