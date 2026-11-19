@@ -9323,6 +9323,13 @@ components:
           maxItems: 100
         plan:
           $ref: '#/components/schemas/CreateCustomPlanBundlePlanRequestBody'
+        renewal_destination:
+          allOf:
+            - $ref: '#/components/schemas/RenewalDestinationRequestBody'
+          description: >-
+            Where the company moves at term end when renewal_policy is
+            migrate_to_plan. Required for that policy and refused for any other.
+          nullable: true
         renewal_policy:
           allOf:
             - $ref: '#/components/schemas/RenewalPolicy'
@@ -18196,6 +18203,13 @@ components:
           nullable: true
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        renewal_destination:
+          allOf:
+            - $ref: '#/components/schemas/RenewalDestinationResponseData'
+          description: >-
+            Where the company moves at term end when renewal_policy is
+            migrate_to_plan. Null for any other policy.
+          nullable: true
         renewal_policy:
           $ref: '#/components/schemas/RenewalPolicy'
         status:
@@ -19486,12 +19500,43 @@ components:
         - remote_ip
         - user_agent
       title: RawEventResponseData
+    RenewalDestinationRequestBody:
+      type: object
+      properties:
+        billing_period:
+          allOf:
+            - $ref: '#/components/schemas/PlanPriceCadence'
+          description: >-
+            The billing period the company moves to. Optional when the plan has
+            one price in the custom plan's currency; required when it has
+            several.
+          nullable: true
+        plan_id:
+          type: string
+          description: >-
+            A published standard base plan in the plan group, priced in the
+            custom plan's currency.
+      required:
+        - plan_id
+      title: RenewalDestinationRequestBody
+    RenewalDestinationResponseData:
+      type: object
+      properties:
+        billing_period:
+          $ref: '#/components/schemas/PlanPriceCadence'
+        plan_id:
+          type: string
+      required:
+        - billing_period
+        - plan_id
+      title: RenewalDestinationResponseData
     RenewalPolicy:
       type: string
       enum:
         - auto_renew
         - expire_to_default
         - hold_with_grace
+        - migrate_to_plan
     ReserveCreditsRequestBody:
       type: object
       properties:
@@ -22429,6 +22474,14 @@ components:
           $ref: '#/components/schemas/UpdatePlanRequestBody'
         plan_version_id:
           type: string
+          nullable: true
+        renewal_destination:
+          allOf:
+            - $ref: '#/components/schemas/RenewalDestinationRequestBody'
+          description: >-
+            Where the company moves at term end when the version's
+            renewal_policy is migrate_to_plan. Left out, the version keeps the
+            destination it has; refused for any other policy.
           nullable: true
         renewal_policy:
           allOf:

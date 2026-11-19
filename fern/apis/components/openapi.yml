@@ -8139,6 +8139,13 @@ components:
           nullable: true
         plan_type:
           $ref: '#/components/schemas/PlanType'
+        renewal_destination:
+          allOf:
+            - $ref: '#/components/schemas/RenewalDestinationResponseData'
+          description: >-
+            Where the company moves at term end when renewal_policy is
+            migrate_to_plan. Null for any other policy.
+          nullable: true
         renewal_policy:
           $ref: '#/components/schemas/RenewalPolicy'
         status:
@@ -8547,12 +8554,24 @@ components:
       enum:
         - charge
         - credit
+    RenewalDestinationResponseData:
+      type: object
+      properties:
+        billing_period:
+          $ref: '#/components/schemas/PlanPriceCadence'
+        plan_id:
+          type: string
+      required:
+        - billing_period
+        - plan_id
+      title: RenewalDestinationResponseData
     RenewalPolicy:
       type: string
       enum:
         - auto_renew
         - expire_to_default
         - hold_with_grace
+        - migrate_to_plan
     Rule:
       type: object
       properties:
