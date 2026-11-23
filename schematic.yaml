@@ -24424,6 +24424,14 @@ components:
             - $ref: '#/components/schemas/BillingCreditGrantZeroedOutReason'
           nullable: true
       title: ZeroOutGrantRequestBody
+    ZuoraCalloutSigningSecret:
+      type: object
+      properties:
+        callout_signing_secret:
+          type: string
+      required:
+        - callout_signing_secret
+      title: ZuoraCalloutSigningSecret
     ZuoraConnectionHealth:
       type: object
       properties:
@@ -24448,10 +24456,28 @@ components:
             REST endpoint of the connected Zuora tenant, such as
             https://rest.zuora.com
           nullable: true
+        callout_signing_secret_masked:
+          type: string
+          description: >-
+            The callout signing secret's first three characters followed by ten
+            asterisks; absent when no secret is set
+          nullable: true
+        callout_signing_secret_set_at:
+          type: string
+          description: >-
+            When the callout signing secret was last set; absent when no secret
+            is set
+          format: date-time
+          nullable: true
         client_id:
           type: string
           description: OAuth client ID Schematic uses to authenticate with the Zuora tenant
           nullable: true
+        has_callout_signing_secret:
+          type: boolean
+          description: >-
+            Whether a callout signing secret is set. The secret itself is never
+            returned.
         type:
           type: string
           description: 'Discriminator: always "zuora" for this variant'
@@ -24459,7 +24485,34 @@ components:
             - zuora
       required:
         - type
+        - has_callout_signing_secret
       title: ZuoraIntegrationConfig
+    ZuoraNotification:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        name:
+          type: string
+        zuora_id:
+          type: string
+      required:
+        - created_at
+        - name
+        - zuora_id
+      title: ZuoraNotification
+    ZuoraNotifications:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ZuoraNotification'
+          maxItems: 1000
+      required:
+        - notifications
+      title: ZuoraNotifications
 paths:
   /account-members:
     get:
@@ -39217,6 +39270,38 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /integrations/zuora/callout-signing-secret:
+    get:
+      operationId: getZuoraCalloutSigningSecret
+      summary: Get zuora callout signing secret
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ZuoraCalloutSigningSecret'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetZuoraCalloutSigningSecretParams
+                required:
+                  - data
+                  - params
+                title: GetZuoraCalloutSigningSecretResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /integrations/zuora/health:
     get:
       operationId: getZuoraConnectionHealth
@@ -39241,6 +39326,38 @@ paths:
                   - data
                   - params
                 title: GetZuoraConnectionHealthResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /integrations/zuora/notifications:
+    get:
+      operationId: getZuoraNotifications
+      summary: Get zuora notifications
+      tags:
+        - integrationsapi
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ZuoraNotifications'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: GetZuoraNotificationsParams
+                required:
+                  - data
+                  - params
+                title: GetZuoraNotificationsResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
