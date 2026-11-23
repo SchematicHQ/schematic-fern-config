@@ -401,7 +401,7 @@ else
 
 `Usage` may be fractional, but a fraction of an event is not something the server bills, so everything that moves credits rounds up to whole units. A client-mode reservation holds `ceil(Usage)` times the consumption rate, and a settle debits `ceil` of the actual quantity, so the local ledger moves by exactly what the track event charges. The preflight quantity and the quantity a track event bills round the same way. A check for 2.5 units at a rate of 10 holds 30 credits and bills 3 units, while the reservation still records the `Usage` the caller declared.
 
-A check can allow without reserving credits (the feature is not credit-metered, `Usage` is 0, or the check failed open), and that usage still has to be tracked.
+A check can allow without reserving credits (the feature is not credit-metered, `Usage` is 0, the check failed open, or, in replicator mode, the replicator cache is not ready yet), and that usage still has to be tracked.
 
 An unsettled reservation expires after `DefaultReservationTTL` and its credits return to the lease. A late settle still bills the usage (the track event carries a deterministic idempotency key, so it never double-bills) but does not re-debit the local lease, so set `DefaultReservationTTL` above the longest expected gap between `Check` and `TrackWithReservation`.
 
@@ -921,6 +921,8 @@ The difference is that with Datastream enabled, after the initial data load, sub
 Replicator mode is an advanced Datastream configuration that maintains a local replica of your Schematic data using a persistent cache layer. This mode provides enhanced performance and reliability for high-throughput applications.
 
 The SDK serves flag checks from the replicator cache only once the replicator reports the cache ready, which it does by answering its health endpoint with `ready: true`. While it loads the cache it answers `503` with `ready: false`. Until the SDK has seen `ready: true`, and after it sees `ready: false`, `CheckFlag`, `CheckFlagWithEntitlement` and `CheckFlags` skip the cache and use the Schematic API, falling back to your flag defaults if the API call fails. A health check that gets no answer (the replicator can't be reached, the request times out, or the body has no boolean `ready` field) keeps the readiness and cache version from the last answer, so a replicator restart or a missed poll does not send every check to the API. Once the cache is ready, single and bulk flag checks both evaluate from it, and a flag missing from the cache is checked via the API. `schematic.IsCacheReady()` reports whether the cache is ready; outside replicator mode it is always true when Datastream is enabled.
+
+The same gate applies to `Check` with a `Usage` in client credit-lease mode: while the cache is not ready, it runs as a plain check through the API and holds no credits, rather than gating on a local lease. Prewarming leases is not a flag check and still resolves companies without waiting for readiness.
 
 #### Enabling Replicator Mode
 

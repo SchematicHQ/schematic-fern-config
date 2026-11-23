@@ -443,7 +443,7 @@ else
 end
 ```
 
-A check can allow without reserving credits (the feature is not credit-metered, `usage` is 0, or the check failed open), and that usage still has to be tracked.
+A check can allow without reserving credits (the feature is not credit-metered, `usage` is 0, the check failed open, or in Replicator Mode the cache is not ready yet), and that usage still has to be tracked.
 
 Without `credit_leases` configured, or without a `usage`, `check` falls through to a plain flag check with no reservation. `usage` is still sent as a preflight, locally or to the API, so the verdict accounts for what the call is about to spend. Preflighted verdicts are not cached.
 
@@ -736,7 +736,11 @@ When running in Replicator Mode, the client will:
 
 The client serves flag checks from the cache only once the replicator reports that its cache is ready. The replicator's health endpoint returns `ready: true` once it has fully loaded the cache for its current `cache_version`, and `ready: false` (HTTP 503) before that. Until the client sees `ready: true`, `check_flag`, `check_flag_with_entitlement` and `check_flags` all skip the cache and call the Schematic API, falling back to your flag defaults if the API call fails. Single and bulk checks follow the same rule. Only an explicit answer changes readiness. If the health endpoint can't be reached, times out, or returns a body without a `ready` field the client can read, the client keeps the readiness and `cache_version` from the last answer it got. Before the first answer, the cache counts as not ready.
 
-Once the cache is ready, flag checks evaluate locally from the cache. A flag that isn't in the cache still falls back to the API. The DataStream client's `cache_ready?` reports the same readiness the flag checks use.
+Once the cache is ready, flag checks evaluate locally from the cache. A flag that isn't in the cache still falls back to the API.
+
+The same gate applies to `check` with `usage` in client credit-lease mode: while the cache is not ready, it runs as a plain check through the API and holds no credits, the same as when the flag or company is missing from the cache. Prewarming leases is not a flag check and still resolves companies without waiting for readiness.
+
+The DataStream client's `cache_ready?` reports the same readiness the flag checks use.
 
 ## Testing
 
