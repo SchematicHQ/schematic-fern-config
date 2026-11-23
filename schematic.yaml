@@ -331,6 +331,21 @@ components:
         - capture
         - read
         - write
+    ApplyDiscountRequestBody:
+      type: object
+      properties:
+        discount_id:
+          type: string
+        start:
+          allOf:
+            - $ref: '#/components/schemas/DiscountStart'
+          description: >-
+            When the discount begins. Defaults to the subscription's next
+            period.
+          nullable: true
+      required:
+        - discount_id
+      title: ApplyDiscountRequestBody
     AuditLogCompanyResponseData:
       type: object
       properties:
@@ -593,6 +608,51 @@ components:
         - started_at
         - url
       title: AuditLogResponseData
+    BillingAppliedDiscountResponseData:
+      type: object
+      properties:
+        applies_to:
+          $ref: '#/components/schemas/DiscountTarget'
+        company_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        discount:
+          $ref: '#/components/schemas/BillingDiscountResponseData'
+        ended_at:
+          type: string
+          description: When the discount was ended. Null while it runs or waits to begin.
+          format: date-time
+          nullable: true
+        id:
+          type: string
+        periods_used:
+          type: integer
+          description: How many billing periods the discount has taken money off.
+          format: int64
+        starts_at:
+          type: string
+          format: date-time
+        status:
+          allOf:
+            - $ref: '#/components/schemas/DiscountStatus'
+          description: >-
+            scheduled until it begins, active while it reduces what is billed,
+            then used_up when its duration has run out or ended when it was
+            ended.
+        subscription_id:
+          type: string
+      required:
+        - applies_to
+        - company_id
+        - created_at
+        - id
+        - periods_used
+        - starts_at
+        - status
+        - subscription_id
+      title: BillingAppliedDiscountResponseData
     BillingArrearsAnchor:
       type: string
       enum:
@@ -1288,6 +1348,68 @@ components:
         - subscriptions
         - updated_at
       title: BillingCustomerWithSubscriptionsResponseData
+    BillingDiscountResponseData:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+          description: For a fixed discount, the amount off in minor units of currency.
+          format: int64
+          nullable: true
+        applies_to:
+          allOf:
+            - $ref: '#/components/schemas/DiscountTarget'
+          description: >-
+            What the discount reduces: the plan base price, or the whole
+            subscription after any discount on a line.
+        archived_at:
+          type: string
+          description: >-
+            When the discount stopped being offered. Subscriptions that carry it
+            keep it.
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          nullable: true
+        description:
+          type: string
+          description: A note for dashboard users.
+          nullable: true
+        duration:
+          $ref: '#/components/schemas/DiscountDuration'
+        duration_periods:
+          type: integer
+          description: For a discount that repeats, how many billing periods it lasts.
+          format: int64
+          nullable: true
+        id:
+          type: string
+        kind:
+          $ref: '#/components/schemas/DiscountKind'
+        name:
+          type: string
+        percent_off:
+          type: number
+          description: For a percentage discount, the percentage off.
+          format: double
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - applies_to
+        - created_at
+        - duration
+        - id
+        - kind
+        - name
+        - updated_at
+      title: BillingDiscountResponseData
     BillingInvoiceAddressResponseData:
       type: object
       properties:
@@ -1377,7 +1499,7 @@ components:
           type: integer
           description: >-
             What discounts took off the subtotal, in minor units of the
-            invoice's currency. Zero on an invoice Schematic issued.
+            invoice's currency.
           format: int64
         document_state:
           allOf:
@@ -1777,6 +1899,10 @@ components:
           nullable: true
         currency:
           $ref: '#/components/schemas/Currency'
+        discount:
+          type: integer
+          description: What discounts took off the subtotal, before tax.
+          format: int64
         due_date:
           type: string
           format: date-time
@@ -1817,6 +1943,7 @@ components:
         - amount_remaining
         - company_id
         - currency
+        - discount
         - id
         - subtotal
         - tax
@@ -2009,6 +2136,14 @@ components:
           type: string
         currency:
           $ref: '#/components/schemas/Currency'
+        discounts:
+          type: array
+          description: >-
+            Every discount the subscription has carried, oldest first, with
+            where each is in its duration.
+          items:
+            $ref: '#/components/schemas/BillingAppliedDiscountResponseData'
+          maxItems: 1000
         id:
           type: string
         lines:
@@ -2067,6 +2202,7 @@ components:
         - balance
         - company_id
         - currency
+        - discounts
         - id
         - lines
         - period_end
@@ -3441,7 +3577,7 @@ components:
           type: integer
           description: >-
             What discounts take off the subtotal, in minor units of the
-            invoice's currency. Zero on a Schematic invoice.
+            invoice's currency.
           format: int64
         due_at:
           type: string
@@ -12416,6 +12552,34 @@ components:
         deleted:
           type: boolean
           description: Whether the delete was successful
+    DiscountDuration:
+      type: string
+      enum:
+        - forever
+        - once
+        - repeating
+    DiscountKind:
+      type: string
+      enum:
+        - fixed
+        - percent
+    DiscountStart:
+      type: string
+      enum:
+        - next_period
+        - now
+    DiscountStatus:
+      type: string
+      enum:
+        - active
+        - ended
+        - scheduled
+        - used_up
+    DiscountTarget:
+      type: string
+      enum:
+        - base
+        - subscription
     DuplicatePlanEntitlementsRequestBody:
       type: object
       properties:
@@ -15353,6 +15517,7 @@ components:
       type: string
       enum:
         - adjustment
+        - discount
         - purchase
         - reconciliation
         - subscription
@@ -23103,6 +23268,59 @@ components:
       required:
         - keys
       title: UpsertCompanyRequestBody
+    UpsertDiscountRequestBody:
+      type: object
+      properties:
+        amount_off:
+          type: integer
+          description: For a fixed discount, the amount off in minor units of currency.
+          format: int64
+          nullable: true
+          minimum: 1
+        applies_to:
+          allOf:
+            - $ref: '#/components/schemas/DiscountTarget'
+          description: >-
+            What the discount reduces: the plan base price, or the whole
+            subscription after any discount on a line.
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/Currency'
+          description: >-
+            For a fixed discount, the currency of amount_off. It must match the
+            subscriptions it is applied to.
+          nullable: true
+        description:
+          type: string
+          description: A note for dashboard users. Customers never see it.
+          nullable: true
+          maxLength: 1000
+        duration:
+          $ref: '#/components/schemas/DiscountDuration'
+        duration_periods:
+          type: integer
+          description: For a discount that repeats, how many billing periods it lasts.
+          format: int64
+          nullable: true
+          minimum: 1
+        kind:
+          $ref: '#/components/schemas/DiscountKind'
+        name:
+          type: string
+          maxLength: 255
+        percent_off:
+          type: number
+          description: >-
+            For a percentage discount, the percentage off, above 0 and up to
+            100.
+          format: double
+          nullable: true
+      required:
+        - applies_to
+        - duration
+        - kind
+        - name
+      title: UpsertDiscountRequestBody
     UpsertOTLPEnvironmentSettingsRequestBody:
       type: object
       properties:
@@ -27737,6 +27955,321 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /billing/discounts:
+    get:
+      operationId: listDiscounts
+      summary: List discounts
+      tags:
+        - billing
+      parameters:
+        - name: archived
+          in: query
+          description: >-
+            Only archived discounts, or only those still offered. Leave empty
+            for both.
+          schema:
+            type: boolean
+            description: >-
+              Only archived discounts, or only those still offered. Leave empty
+              for both.
+        - name: q
+          in: query
+          description: Search by name.
+          schema:
+            type: string
+            description: Search by name.
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BillingDiscountResponseData'
+                    title: ListDiscountsResponseData
+                    maxItems: 250
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      archived:
+                        type: boolean
+                        description: >-
+                          Only archived discounts, or only those still offered.
+                          Leave empty for both.
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      q:
+                        type: string
+                        description: Search by name.
+                        maxLength: 512
+                    title: ListDiscountsParams
+                required:
+                  - data
+                  - params
+                title: ListDiscountsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createDiscount
+      summary: Create discount
+      tags:
+        - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertDiscountRequestBody'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingDiscountResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: CreateDiscountParams
+                required:
+                  - data
+                  - params
+                title: CreateDiscountResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/discounts/{discount_id}:
+    put:
+      operationId: updateDiscount
+      summary: Update discount
+      tags:
+        - billing
+      parameters:
+        - name: discount_id
+          in: path
+          description: discount_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertDiscountRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingDiscountResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: UpdateDiscountParams
+                required:
+                  - data
+                  - params
+                title: UpdateDiscountResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/discounts/{discount_id}/archive:
+    post:
+      operationId: archiveDiscount
+      summary: Archive discount
+      tags:
+        - billing
+      parameters:
+        - name: discount_id
+          in: path
+          description: discount_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingDiscountResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ArchiveDiscountParams
+                required:
+                  - data
+                  - params
+                title: ArchiveDiscountResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /billing/discounts/count:
+    get:
+      operationId: countDiscounts
+      summary: Count discounts
+      tags:
+        - billing
+      parameters:
+        - name: archived
+          in: query
+          description: >-
+            Only archived discounts, or only those still offered. Leave empty
+            for both.
+          schema:
+            type: boolean
+            description: >-
+              Only archived discounts, or only those still offered. Leave empty
+              for both.
+        - name: q
+          in: query
+          description: Search by name.
+          schema:
+            type: string
+            description: Search by name.
+            maxLength: 512
+        - name: limit
+          in: query
+          description: Page limit (default 100)
+          schema:
+            type: integer
+            description: Page limit (default 100)
+            format: int64
+            example: '100'
+            maximum: 250
+            minimum: 0
+        - name: offset
+          in: query
+          description: Page offset (default 0)
+          schema:
+            type: integer
+            description: Page offset (default 0)
+            format: int64
+            example: '0'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CountResponse'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      archived:
+                        type: boolean
+                        description: >-
+                          Only archived discounts, or only those still offered.
+                          Leave empty for both.
+                      limit:
+                        type: integer
+                        description: Page limit (default 100)
+                        format: int64
+                        example: '100'
+                        maximum: 250
+                        minimum: 0
+                      offset:
+                        type: integer
+                        description: Page offset (default 0)
+                        format: int64
+                        example: '0'
+                      q:
+                        type: string
+                        description: Search by name.
+                        maxLength: 512
+                    title: CountDiscountsParams
+                required:
+                  - data
+                  - params
+                title: CountDiscountsResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /billing/invoices:
     get:
       operationId: listInvoices
@@ -30960,6 +31493,86 @@ paths:
                   - data
                   - params
                 title: GetCompanyNativeSubscriptionResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/native-subscription/discounts:
+    post:
+      operationId: applyCompanyDiscount
+      summary: Apply company discount
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyDiscountRequestBody'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillingAppliedDiscountResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    title: ApplyCompanyDiscountParams
+                required:
+                  - data
+                  - params
+                title: ApplyCompanyDiscountResponse
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/native-subscription/discounts/{applied_discount_id}/end:
+    post:
+      operationId: endAppliedDiscount
+      summary: End applied discount
+      tags:
+        - billing
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+        - name: applied_discount_id
+          in: path
+          description: applied_discount_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
