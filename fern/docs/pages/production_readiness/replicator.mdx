@@ -22,7 +22,7 @@ The Replicator is published as a multi-architecture image (`linux/amd64` and `li
 | Docker Hub | [`getschematic/schematic-replicator`](https://hub.docker.com/r/getschematic/schematic-replicator) |
 | Amazon ECR Public | [`public.ecr.aws/n5h3a7j9/schematic-replicator`](https://gallery.ecr.aws/n5h3a7j9/schematic-replicator) |
 
-Each release is tagged with its full version (`0.2.7`), its minor version (`0.2`), its major version (`0`), and `latest`. In production, pin a full version (`0.2.7`) so a new release only reaches you when you choose to upgrade. A minor version tag (`0.2`, as in the examples below) moves with each patch release, so it picks up fixes automatically the next time the image is pulled.
+Each release is tagged with its full version (`0.3.2`), its minor version (`0.3`), its major version (`0`), and `latest`. In production, pin a full version (`0.3.2`) so a new release only reaches you when you choose to upgrade. A minor version tag (`0.3`, as in the examples below) moves with each patch release, so it picks up fixes automatically the next time the image is pulled.
 
 | Property | Value |
 |---|---|
@@ -41,12 +41,12 @@ docker run -d \
   -p 8090:8090 \
   -e SCHEMATIC_API_KEY="your-api-key" \
   -e REDIS_ADDR="your-redis-host:6379" \
-  getschematic/schematic-replicator:0.2
+  getschematic/schematic-replicator:0.3
 
 # Liveness
 curl http://localhost:8090/health
 
-# Readiness: returns 200 once connected to the datastream
+# Readiness: returns 200 once the Redis cache is complete
 curl http://localhost:8090/ready
 ```
 
@@ -67,10 +67,10 @@ Exactly **one** Replicator instance may write to a given Redis. A second writer 
 
 The Replicator enforces this with a lease in Redis. An instance acquires the lease at startup, renews it while it runs, and releases it on shutdown. A crashed instance's lease expires after `WRITER_LOCK_TTL` (15 seconds by default) so a replacement can take over.
 
-A starting instance that finds the lease held waits up to `WRITER_LOCK_ACQUIRE_TIMEOUT` (5 minutes by default) for it to be released, then exits with an error. While it waits, `/health` returns `200` and `/ready` returns `503`. In practice:
+A starting instance that finds the lease held waits up to `WRITER_LOCK_ACQUIRE_TIMEOUT` (5 minutes by default) for it to be released, then exits with an error. While it waits, `/health` returns `200`. `/ready` returns `200` if Redis already holds a complete cache for the instance's cache version, and `503` otherwise (see [Health checks](#health-checks)). In practice:
 
 - Run **one replica** per Redis.
-- Use a deployment strategy that stops the old instance before or while the new one waits. On Kubernetes, use `strategy: Recreate`: the default `RollingUpdate` waits for the new pod to become ready before stopping the old one, which never happens while the old pod holds the lease.
+- Use a deployment strategy that stops the old instance before or while the new one waits. On Kubernetes, use `strategy: Recreate`. The default `RollingUpdate` waits for the new pod to become ready before stopping the old one. A waiting pod is ready only when the cache version is unchanged, so after an upgrade that changes the cache version, the new pod never becomes ready while the old pod holds the lease.
 - On platforms that drain and stop the old task once the new one passes a liveness check (for example, Amazon ECS with a load balancer health check on `/health`), a rolling deploy hands the lease over within the acquire timeout.
 - For high availability, run Redis in a highly available configuration and let your orchestrator restart a failed Replicator promptly. Do not run several Replicators against the same Redis.
 - To run more than one Replicator, for example one per Schematic environment, give each its own Redis, or its own `REDIS_DB` on a single-node Redis, and point each environment's SDKs at the matching one. Changing `WRITER_LOCK_KEY` does not separate them: every Replicator writes the same `schematic:` keys, so two Replicators in one Redis database overwrite each other's data.
@@ -88,7 +88,7 @@ services:
       - redis-data:/data
 
   schematic-replicator:
-    image: getschematic/schematic-replicator:0.2
+    image: getschematic/schematic-replicator:0.3
     restart: unless-stopped
     depends_on:
       - redis
@@ -130,7 +130,7 @@ spec:
         runAsGroup: 65534
       containers:
         - name: replicator
-          image: getschematic/schematic-replicator:0.2
+          image: getschematic/schematic-replicator:0.3
           ports:
             - containerPort: 8090
           env:
@@ -161,6 +161,8 @@ spec:
             periodSeconds: 10
 ```
 
+The readiness probe keeps the pod in its Service only while `/ready` returns `200`, which it does once the cache is complete. SDKs read Redis directly and reach the Replicator only to poll `/ready`, so the probe decides whether those polls get through. A pod that loses its datastream connection stays ready, because Redis still holds a complete cache.
+
 Add resource requests and limits based on the usage you observe. Memory use grows with the number of companies and users, and with the buffer sizes in [Performance tuning](#performance-tuning).
 
 # Health checks
@@ -168,9 +170,11 @@ Add resource requests and limits based on the usage you observe. Memory use grow
 | Endpoint | Purpose | Status codes |
 |---|---|---|
 | `GET /health` | Liveness: the process is running. It does not re-check Redis or the datastream. | Always `200` while the process is up. |
-| `GET /ready` | Readiness: connected to the datastream and subscribed to updates. | `200` when ready; `503` while connecting or waiting for the writer lease. |
+| `GET /ready` | Readiness: the Redis cache is complete for the current `cache_version`. | `200` when the cache is complete; `503` before that. |
 
-In the default asynchronous loading mode, `/ready` returns `200` as soon as the datastream subscription is set up, while companies and users are still loading in the background (see [Initial load and reconnects](#initial-load-and-reconnects)). With `USE_ASYNC_LOADING=false`, it waits for the full load.
+The `ready` field in both responses carries the same value. It becomes `true` once the Replicator has written the full set of flags and finished loading companies and users. In the default asynchronous loading mode the datastream connects first and companies and users load in the background (see [Initial load and reconnects](#initial-load-and-reconnects)), so `/ready` returns `503` until that background load finishes.
+
+Once `ready` is `true`, it stays `true` while the datastream is disconnected, including through a Schematic outage, and while the Replicator reloads its cache, because Redis still holds a complete copy. The Replicator records each completed load in Redis under `schematic:datastream:load_complete`, tagged with the cache version. A restarted Replicator reads that record before it waits for the writer lease, so on a complete cache it reports ready right away. After an upgrade that changes the cache version, it reports not ready until it completes a load for the new version.
 
 Both endpoints return the same JSON shape:
 
@@ -180,7 +184,7 @@ Both endpoints return the same JSON shape:
   "ready": true,
   "connected": true,
   "components": {
-    "datastream": "ready",
+    "datastream": "connected",
     "redis": "connected"
   },
   "cache_version": "3f9a1c2e",
@@ -188,7 +192,7 @@ Both endpoints return the same JSON shape:
 }
 ```
 
-`components.datastream` on `/ready` is `ready`, `connected_loading` (connected, still setting up), or `disconnected`; on `/health` it is `connected`, `disconnected`, or `unknown` (still starting). `status` is always `healthy` and `components.redis` is always `connected`; use the status code, not these fields, to judge health. `cache_version` is an 8-character hash that forms the version segment of the Redis keys the Replicator writes (see [Redis key layout](#redis-key-layout)).
+`connected` and `components.datastream` report the datastream connection on both endpoints, separately from `ready`. `components.datastream` is `connected`, `disconnected`, or `unknown` (still starting, for example while waiting for the writer lease). `status` is always `healthy` and `components.redis` is always `connected`; use the status code and `ready`, not these fields, to judge health. `cache_version` is an 8-character hash that forms the version segment of the Redis keys the Replicator writes (see [Redis key layout](#redis-key-layout)).
 
 The image has no HTTP client installed. For a container-level health check, use the binary's built-in probe, which exits `0` when the endpoint returns `200` and respects `HEALTH_PORT`:
 
@@ -206,6 +210,25 @@ healthcheck:
   retries: 3
   start_period: 10s
 ```
+
+## How SDKs use readiness
+
+Backend SDKs in Replicator mode poll the Replicator's `/ready` endpoint, every 30 seconds by default, and read `ready` and `cache_version` from the response body, including the body of a `503`. Until the SDK has seen `ready: true`, and after it sees `ready: false`, single and bulk flag checks skip Redis and call the Schematic API, falling back to your flag defaults if that call fails. Once the cache is ready, flag checks evaluate from Redis, and a flag missing from Redis still falls back to the API.
+
+Only an answer from the Replicator changes the SDK's readiness. A poll that cannot reach the Replicator, times out, or gets a body without a boolean `ready` keeps the readiness and `cache_version` from the last answer, so a Replicator restart does not move flag checks off a complete cache. Before the first answer, the cache counts as not ready. Because the SDK polls on an interval, it can start serving from Redis up to one interval after `/ready` first returns `200`.
+
+Credit checks in client lease mode follow the same rule: while the cache is not ready, they run as plain checks through the API and hold no credits. The readiness check needs Replicator 0.3.0 or later and these SDK versions or later. Earlier SDK versions can evaluate checks from Redis while the Replicator is still loading, and treat a company that has not loaded yet as unknown.
+
+| SDK | Flag checks | Credit checks in client lease mode |
+|---|---|---|
+| Go | 1.6.15 | 1.6.15 |
+| Node.js | 1.6.11 | 1.6.12 |
+| Python | 1.4.10 | 1.4.10 |
+| Java | 1.6.9 | 1.6.9 |
+| C# | 1.7.4 | 1.7.5 |
+| Ruby | 1.5.9 | 1.5.10 |
+
+Flag checks are safe to call before the cache is ready, because they go to the API in the meantime. If your app should not take traffic until it can evaluate checks from Redis, have its own startup or readiness check wait until the Replicator's `/ready` returns `200`. Most SDKs also expose the readiness they use for checks. See the cache readiness section of your SDK's page: [Go](/developer_resources/sdks/go#cache-readiness), [Node.js](/developer_resources/sdks/nodejs#cache-readiness), [Python](/developer_resources/sdks/python#cache-readiness), [Java](/developer_resources/sdks/java#cache-readiness), [C#](/developer_resources/sdks/csharp#replicator-mode), or [Ruby](/developer_resources/sdks/ruby#replicator-mode).
 
 # Configuration
 
@@ -246,7 +269,7 @@ The Replicator is configured entirely through environment variables. Durations u
 
 ## Initial load and reconnects
 
-By default the Replicator loads all companies and users from the Schematic API in the background, so the datastream connects quickly. It saves its position in the datastream to Redis, so after a reconnect or a restart it resumes from the last message it processed instead of reloading everything. A full reload happens only on a first start against an empty Redis, or when the saved position is too old to resume from.
+By default the Replicator loads all companies and users from the Schematic API in the background, so the datastream connects quickly. It saves its position in the datastream to Redis, so after a reconnect or a restart it resumes from the last message it processed instead of reloading everything. It resumes only when Redis also holds a completed load for the current cache version (see [Health checks](#health-checks)). A full reload happens on a first start against an empty Redis, after an upgrade that changes the cache version, after a start whose initial load did not finish, and when the saved position is too old to resume from.
 
 | Variable | Default | Description |
 |---|---|---|
@@ -336,8 +359,8 @@ The `schematic:` prefix is fixed. If your SDK's Redis cache is configured with a
 
 **The container exits after a few minutes with "Could not acquire writer lock".** Another Replicator is holding the lease on this Redis. Make sure only one instance runs, and on Kubernetes use `strategy: Recreate`. See [One writer per Redis](#one-writer-per-redis).
 
-**`/ready` stays at `503`.** Check the logs first: the Replicator may be waiting for the writer lease (see above). Otherwise `components.datastream` is usually `disconnected`, which means the API key is wrong or the container cannot reach `datastream.schematichq.com` over `wss://`.
+**`/ready` stays at `503`.** The Replicator has not completed a load for its cache version. Check the logs first: it may be waiting for the writer lease (see above), or still loading companies and users from `api.schematichq.com`. If `components.datastream` is `disconnected`, the API key is wrong or the container cannot reach `datastream.schematichq.com` over `wss://`.
 
 **The connection drops every 30 or 60 seconds.** A load balancer or proxy is closing idle connections. Lower `WS_PING_INTERVAL` and `WS_PONG_WAIT`; see [Connection keepalive](#connection-keepalive).
 
-**Your SDK still calls the Schematic API.** Confirm the SDK is in Replicator mode, can reach the Replicator's `/ready` endpoint, uses the same Redis, and uses the default key prefix. Set `LOG_LEVEL=debug` on the Replicator to log each batch it writes to Redis.
+**Your SDK still calls the Schematic API.** Confirm the SDK is in Replicator mode, can reach the Replicator's `/ready` endpoint and gets `ready: true` from it, uses the same Redis, and uses the default key prefix. Set `LOG_LEVEL=debug` on the Replicator to log each batch it writes to Redis.
