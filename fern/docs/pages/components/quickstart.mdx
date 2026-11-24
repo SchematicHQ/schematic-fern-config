@@ -96,6 +96,8 @@ curl -X POST https://api.schematichq.com/temporary-access-tokens \
   </Tab>
 </Tabs>
 
+To see in the audit log which of the company's users made each change, also pass the signed-in user in `user_lookup` (`userLookup` in Node.js). [Naming the user](/components/build-your-own/session#naming-the-user) covers the requirements.
+
 ### 3. Wrap your app in the provider
 
 ```tsx

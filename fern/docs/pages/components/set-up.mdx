@@ -78,6 +78,8 @@ func GetTemporaryAccessToken(ctx context.Context, client schematicClient.Schemat
 
 Temporary access tokens are valid for 15 minutes.
 
+To attribute writes made with the token to one of the company's users in the audit log, pass that user in `user_lookup` (`userLookup` in Node.js, `UserLookup` in Go), as [Naming the user](/components/build-your-own/session#naming-the-user) describes.
+
 ### 3. Use the SchematicEmbed component in your React frontend application
 
 Once you've issued a temporary access token and provided it to your frontend React application, you can simply pass it to the SchematicEmbed component along with your Component ID to render it:

@@ -55,6 +55,46 @@ The client sends the token in the `X-Schematic-Api-Key` header, the same header 
 curl https://api.schematichq.com/company -H "X-Schematic-Api-Key: $TOKEN"
 ```
 
+### Naming the user
+
+`user_lookup` is optional and names the user of your app the token is for, with the same kind of key-value pairs `lookup` uses for the company. Schematic records that user on the [audit log](/production_readiness/observability#audit-log) entry for each write made with the token, and the dashboard shows the user next to the company. The token reads and writes the same data whether or not it names a user.
+
+<Tabs>
+  <Tab title="Node.js">
+```typescript
+import { SchematicClient } from "@schematichq/schematic-typescript-node";
+
+const client = new SchematicClient({ apiKey: process.env.SCHEMATIC_SECRET_KEY });
+
+export async function issueToken(companyId: string, userId: string) {
+  const response = await client.accesstokens.issueTemporaryAccessToken({
+    lookup: { id: companyId },
+    userLookup: { id: userId }, // the lookup matches how you key users
+  });
+  return { token: response.data.token, expiresAt: response.data.expiredAt };
+}
+```
+  </Tab>
+  <Tab title="Python">
+```python
+response = client.accesstokens.issue_temporary_access_token(
+    lookup={"id": company_id},
+    user_lookup={"id": user_id},  # the lookup matches how you key users
+)
+```
+  </Tab>
+  <Tab title="cURL">
+```bash
+curl -X POST https://api.schematichq.com/temporary-access-tokens \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resource_type": "company", "lookup": {"id": "acme-inc"}, "user_lookup": {"id": "jane-doe"}}'
+```
+  </Tab>
+</Tabs>
+
+The user must already exist in Schematic and belong to the company `lookup` names. A lookup that matches no user returns 404, and a user who belongs to a different company returns 400. `user_lookup` takes up to 20 pairs, and each key and value can be up to 256 characters. A token that names a user is minted for one person, so pass the same user as `user` in the [session](#the-session).
+
 ## The session
 
 `session` on the provider says whose billing is being read and how:
