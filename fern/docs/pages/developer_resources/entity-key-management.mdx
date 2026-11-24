@@ -107,6 +107,21 @@ When setting up Schematic, you can import your customers directly from Stripe. T
 
 By using both, you'll ensure Schematic (and anyone using Schematic) knows that your UUID and the Stripe `customer_id` refer to the same company.
 
+### Set billing customer keys from your server
+
+A billing customer key links a company to its customer record in your billing provider. Schematic treats `stripe_customer_id`, `orb_customer_id`, and `metronome_customer_id` as billing customer keys. Only a request authenticated with a secret key can set or change one, so set them from your backend with `upsert_company` or a server-side `identify`.
+
+```python
+client.companies.upsert_company(
+    keys={
+        "company_id": "company_abc123",
+        "stripe_customer_id": "stripe_abc123",
+    },
+)
+```
+
+A request authenticated with a publishable key, such as an `identify` from a frontend SDK, can use a billing customer key to find a company that already has it. Schematic uses the billing customer key for that lookup only and writes the request's other keys, name, and traits. When the request matches no existing company and its only company keys are billing customer keys, the `identify` event fails with the error `Setting stripe_customer_id on a company requires a secret API key`.
+
 ### More advanced use cases
 
 If you do not plan to use Stripe with Schematic or would like to use another `key` as a common key (e.g. from your authentication provider, or your application), you can simply create companies with that `key`.
@@ -200,7 +215,7 @@ In each situation, be sure to submit any additional `keys`.
 
 ### Frontend SDKs only require settings keys once
 
-For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. The `identify` call creates or updates the company with new keys, name, and traits (see [changing a company's keys](#changing-a-companys-keys) for more information).
+For the frontend SDKs, keys are set when you first call `identify`, and are then correctly passed through to Schematic on subsequent SDK calls. The `identify` call creates or updates the company with new keys, name, and traits (see [changing a company's keys](#changing-a-companys-keys) for more information). The frontend SDKs authenticate with a publishable key, so their `identify` calls do not write billing customer keys. Set those from your backend, as described in [set billing customer keys from your server](#set-billing-customer-keys-from-your-server).
 
 ```tsx
 "use client";
@@ -216,7 +231,7 @@ const SchematicWrapper: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     identify({
       company: {
-        keys: { "stripe_customer_id": "stripe_abc123" }
+        keys: { "company_id": "company_abc123" }
       },
       keys: { "key": "value"},
     })

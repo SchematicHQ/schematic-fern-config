@@ -26,6 +26,8 @@ useEffect(() => {
 
 This identifies the company `demo-company` and the user `demo-user`.
 
+The frontend SDKs authenticate with your publishable key, so a frontend `identify` can find a company by a billing customer key such as `stripe_customer_id` but does not set one. Set billing customer keys from your backend, as described in [key management](/developer_resources/key_management#set-billing-customer-keys-from-your-server).
+
 ## Identify on the backend
 
 The backend SDKs wrap API calls that all take a `keys` argument. Below is `upsertCompany` in Python.

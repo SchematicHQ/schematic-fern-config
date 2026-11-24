@@ -9,7 +9,7 @@ The Schematic API uses API keys to authenticate requests. You can view and manag
 
 *Secret Keys* are used only for server-side integrations. These keys are meant to be confidential, so they should not be used on clients.
 
-*Publishable Keys* are used in applications and websites to submit identify and track calls, as well as perform client-side feature evaluations. They can be embedded in your application and website.
+*Publishable Keys* are used in applications and websites to submit identify and track calls, as well as perform client-side feature evaluations. They can be embedded in your application and website. An identify call made with a publishable key can find a company by a billing customer key such as `stripe_customer_id`, but only a secret key can set one. See [set billing customer keys from your server](/developer_resources/key_management#set-billing-customer-keys-from-your-server).
 
 API keys are environment scoped and Secret Keys are namespaced accordingly:
 * Production environments will have the prefix sch_prod
