@@ -261,6 +261,8 @@ Use this endpoint to preview the financial impact of a plan change before applyi
 
 The preview includes details like prorated charges, credits, and the new subscription amount. This is useful for showing users what a plan change will cost before they confirm.
 
+`unbilled_usage_feature_ids` lists the features whose usage so far this billing period is never billed if the change goes ahead. A feature appears there when the current subscription meters it, the new plan does not charge for it, and the change keeps the billing period, as an upgrade does. A downgrade or a change of billing period starts a new period, which bills that usage, so the list is empty for those. See [Usage in the Manage Plan preview](/catalog/managing-company-plans#usage-in-the-manage-plan-preview) for how the dashboard shows the same field.
+
 ## Cancel subscription
 
 `POST /manage-plan/subscription/cancel`

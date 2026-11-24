@@ -73,6 +73,19 @@ Additionally, when changing plans, Schematic will use Stripe's proration logic t
 
 For usage-based features, Schematic will carry over usage from the current plan to the new plan.
 
+#### Usage in the Manage Plan preview
+
+Stripe bills metered usage in arrears, so a plan change can bill usage on its own invoice or leave it unbilled. The **Subscription changes** pane in Manage Plan shows which, so you see the usage charge before you save. Its **Usage-Based** section lists each pay-as-you-go, overage, and tiered price on the new selection with the usage so far this period and what it costs, priced through the tiers for a tiered price.
+
+What Stripe does with the usage so far this period depends on whether the change keeps the billing period:
+
+| Change | Usage so far this period | What the pane shows |
+| --- | --- | --- |
+| Keeps the billing period, such as an upgrade | The new plan prices it when the period ends. Usage of a feature the new plan leaves out, or includes without a usage price, is never billed. | That feature's row struck through, with "Not billed after this change" |
+| Closes the billing period, such as a downgrade that is not [scheduled](#scheduled-downgrades) | Stripe bills it on the change's own invoice. | The charges under **Usage billed now**, and the new plan's usage rows with none used this period |
+
+When you move a paying company onto a plan with no base price, the pane previews the change and shows "No billing" for the new plan. If the move ends the subscription, Manage Plan hides the **Billing period renewal date** field.
+
 ### Preventing downgrades
 
 Schematic allows you to prevent customers from downgrading to a plan if they are over the usage limits of the new plan. This is the **Prevent downgrades when over the limit** setting under [Plan Change Rules](/catalog/lifecycle#plan-change-rules), and it is turned on by default.
