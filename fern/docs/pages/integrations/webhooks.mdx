@@ -1,6 +1,6 @@
 ---
 title: Webhooks
-description: Subscribe to Schematic's company, catalog, billing, and usage trigger events, with the SDK payload type for each.
+description: Subscribe to Schematic's company, catalog, billing, usage trigger, and data export events, with the SDK payload type for each.
 
 slug: integrations/webhooks
 ---
@@ -47,6 +47,14 @@ For usage-based trigger events, see [Entitlement & Credit Trigger Webhooks](/int
 | `auto.topup.hard.failure` | [`CreditsAutoTopupHardFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupHardFailure.ts) |
 | `auto.topup.retry.exceeded` | [`CreditsAutoTopupRetryFailure`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupRetryFailure.ts) |
 | `auto.topup.success` | [`CreditsAutoTopupSuccess`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/CreditsAutoTopupSuccess.ts) |
+
+**Data export events**
+
+A [data export](/production_readiness/data-exports#webhooks-for-finished-exports) sends one of these events when it finishes. The body carries no download link, so your handler fetches the file through the API with a secret key.
+
+| Event | Body type |
+| --- | --- |
+| `data_export.completed`, `data_export.failed` | [`DataExportResponseData`](https://github.com/SchematicHQ/schematic-node/blob/main/src/api/types/DataExportResponseData.ts), plus `artifact_filename` |
 
 ## Payload types
 
