@@ -6,7 +6,7 @@ slug: catalog/custom-plans
 
 A custom plan is a plan scoped to a single company. It is built for sales-led, invoice-based deals, where a customer negotiates their own pricing and packaging and you bill them by invoice rather than through self-service checkout.
 
-Unlike a standard [plan](/catalog/plans), a custom plan is only ever assigned to one company. It never appears in your [Components](/components/overview) checkout flow, and no other company is moved onto it. The company stays on its custom plan until you move it to another plan.
+Unlike a standard [plan](/catalog/plans), a custom plan is only ever assigned to one company. It never appears in your [Components](/components/overview) checkout flow, and no other company is moved onto it. The company stays on its custom plan until you move it to another plan, or until the term ends on a plan you set not to [renew](#renewal).
 
 ![Custom plans list](../../assets/images/catalog/catalog-custom-plans-list.png)
 
@@ -54,7 +54,31 @@ Either way the invoice has a Stripe-hosted page where the customer can pay by ca
 
 Schematic tracks the result. The plan's **Billing** tab shows the invoice status, and when it is paid the company activates on the plan without anyone assigning it. A failed or expired invoice can be retried against the same plan, so a payment problem does not mean rebuilding the deal.
 
+The **Custom plan invoice** card on the company's profile shows the same status. When billing setup stops before Stripe raises an invoice, the card reads "Billing setup didn't finish, so no invoice was created" under a red **Not set up** pill and lists the problems that blocked it. **Retry billing** opens the plan's **Billing** tab, where you fix the cause and try again.
+
 <Info>In sandbox environments, Stripe does not send invoice emails by default. See the [Stripe FAQ](/integrations/stripe-troubleshooting) if an expected invoice email does not arrive.</Info>
+
+## Renewal
+
+The **Renewal** setting, under the plan's price when you create or edit a custom plan, decides what happens to the company when the term ends.
+
+| Option | What happens when the term ends |
+| --- | --- |
+| Auto-renew | The default. The company stays on the custom plan, the period restarts, and the renewal invoice is sent on the payment terms set at finalization. |
+| Don't renew · Cancel subscription | The subscription is canceled and the company moves to your [fallback plan](/catalog/lifecycle#fallback-plan). With no fallback plan set, the company has no plan and loses the custom plan's entitlements. |
+| Don't renew · Migrate to another plan | The company moves to a standard plan you choose and is billed on that plan from then on. |
+
+Neither **Don't renew** option sends a renewal invoice for the custom plan. Each needs an **End Date**, the last day the company has the plan, which you set when you finalize. The finalize step then summarizes the term, the invoices left in it, and where the company lands. A plan that doesn't renew starts its subscription with that end date, so it can't be finalized for a company that already has a subscription. Cancel the subscription first, or set the plan to auto-renew.
+
+Renewal belongs to the plan version. To change it on a live custom plan, edit the plan and publish the new version, which also lets you switch a plan back to **Auto-renew** any time before its end date.
+
+### Moving to another plan at term end
+
+When you choose **Don't renew · Migrate to another plan**, pick the destination in **Move to Plan** and its period in **Billing Period**. The list offers published standard plans with a price in the custom plan's currency, and **Billing Period** offers the periods the chosen plan has a price for. **Currency** stays fixed to the custom plan's currency, because Stripe can't change a subscription's currency partway through.
+
+On the end date, the company moves to the latest published version of the destination plan at the chosen period, without proration. Its payment terms, payment method, and per-seat quantities carry over. Add-ons, custom usage prices, and discounts stay with the custom plan, and the destination plan starts without a trial. Until then, the plan card on the company's profile names the move, such as "Ends Dec 22 · moves to Enterprise (Annual)".
+
+While a custom plan version moves companies to a plan, Schematic refuses to delete that plan or to publish a version of it without a price at the chosen period.
 
 ## Versions and migrations
 

@@ -44,6 +44,8 @@ Every subscription Schematic creates carries metadata that ties it back to Schem
 | `schematic_plan_version_id` | The version of that plan |
 | `schematic_billing_entity_id` | The company paying for the subscription, present only when a billing entity pays |
 
+When a [plan version migration](/catalog/plans#plan-versions) moves a company to a new version, Schematic updates `schematic_plan_id` and `schematic_plan_version_id` on its subscription to match, so these keys agree with the company's plan version in Schematic.
+
 When a billing entity pays, the subscription sits on the billing entity's Stripe customer rather than the subscribing company's, so resolve the subscribing company from `schematic_company_id`. See [billing entities](/billing/billing-entities#on-the-billing-entity) for an example.
 
 ## Stripe to Schematic
