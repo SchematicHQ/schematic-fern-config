@@ -55,6 +55,14 @@ When specifying a base plan or add-on:
 - If the company is already on that plan and you omit the version, the company's current version is preserved
 - If it's a new plan and you omit the version, the latest published version is used
 
+Every version of a plan shares one billing product, but each version has its own prices, and Schematic checks the price you send against the version the company lands on:
+
+- With `base_plan_version_id` set, `base_plan_price_id` must be one of that version's prices. Moving a company to another version of its plan therefore means sending the new version's price, and the subscription switches to it.
+- Without a version, a company staying on its plan may send a price from its current version or from the latest published version.
+- Without a version, a company moving to a different plan must send a price from that plan's latest published version.
+
+A company already billed at a price that no version lists keeps that price as long as it stays on its plan and version, so it can still change seats or add-ons. A new add-on's `price_id` must be on the add-on's current published version. Add-ons the company already has keep the price they are billed at.
+
 ### Default (fallback) plan
 
 If you clear all plans from a company (by omitting `base_plan_id`), Schematic will assign the configured [default/fallback plan](/catalog/lifecycle#fallback-plan) if one exists.
@@ -122,11 +130,11 @@ The plan to assign as the company's base plan. Omit or set to `null` to clear th
 </ParamField>
 
 <ParamField path="base_plan_price_id" type="string">
-The specific price to use for the base plan. Required for billing-linked plans with multiple price options (e.g. monthly vs. yearly).
+The specific price to use for the base plan. Required for billing-linked plans with multiple price options (e.g. monthly vs. yearly). The price must belong to the version the company lands on; see [Plan version behavior](#plan-version-behavior).
 </ParamField>
 
 <ParamField path="base_plan_version_id" type="string">
-A specific version of the base plan. If omitted, the company's current version is preserved (same plan) or the latest published version is used (new plan).
+A specific version of the base plan. If omitted, the company's current version is preserved (same plan) or the latest published version is used (new plan). When set, `base_plan_price_id` must be one of this version's prices.
 </ParamField>
 
 <ParamField path="add_on_selections" type="array">
@@ -153,6 +161,8 @@ A Stripe coupon ID to apply to the subscription. On an existing subscription, om
 
 <ParamField path="promo_code" type="string">
 A Stripe promotion code to apply to the subscription. On an existing subscription, omitting this field keeps whatever discount the subscription already has, and sending one replaces the subscription's discounts with what you send in this request.
+
+Schematic redeems the promotion code itself on new subscriptions and on changes, so Stripe applies the code's own rules, such as its expiry, its redemption limit, and the customer it is restricted to. Stripe does not accept a promotion code with a minimum order amount on a subscription, so a request carrying one is refused.
 </ParamField>
 
 <ParamField path="payment_method_external_id" type="string">
@@ -203,30 +213,28 @@ Whether Stripe emails the invoice to `billing_email` when it is finalized. Set i
 
 The `base_plan_price_id` and add-on `price_id` fields are Schematic billing product price IDs (prefixed `bprice_`), not Stripe price IDs.
 
-To find them, fetch a plan via [`GET /plans/:id`](/api-reference/plans/get-plan) (or list plans via [`GET /plans`](/api-reference/plans/list-plans)). The response includes a `billing_product` object with a `prices` array. Each entry has an `id` along with metadata like `interval` (`month`, `year`, `one_time`) and `currency`, so you can pick the right one.
+To find them, fetch a plan via [`GET /plans/:id`](/api-reference/plans/get-plan) (or list plans via [`GET /plans`](/api-reference/plans/list-plans)). The `monthly_price`, `quarterly_price`, `yearly_price` and `one_time_price` fields hold the latest published version's prices, and `currency_prices` holds the same set for each other currency the plan sells in. Each price has an `id` along with `interval` and `currency`, so you can pick the right one. To read an older version's prices, pass its `plan_version_id` to `GET /plans/:id`.
 
 ```json
 {
   "id": "plan_xyz789",
   "name": "Pro",
-  "billing_product": {
-    "prices": [
-      {
-        "id": "bprice_def456",
-        "interval": "month",
-        "currency": "usd",
-        "price": 4900
-      },
-      {
-        "id": "bprice_ghi789",
-        "interval": "year",
-        "currency": "usd",
-        "price": 49000
-      }
-    ]
+  "monthly_price": {
+    "id": "bprice_def456",
+    "interval": "month",
+    "currency": "usd",
+    "price": 4900
+  },
+  "yearly_price": {
+    "id": "bprice_ghi789",
+    "interval": "year",
+    "currency": "usd",
+    "price": 49000
   }
 }
 ```
+
+Avoid picking from `billing_product.prices`. Every version of a plan shares one billing product, so that array lists the prices of archived versions too, and Schematic refuses an archived version's price for a company that is not on that version.
 
 ### Response
 
@@ -520,6 +528,9 @@ The Manage Plan API validates the full request before applying any changes. If v
 - **Externally managed subscription**: If the company's subscription is managed outside of Schematic (e.g. directly in Stripe without the Schematic integration), the API will return an error. You must manage the subscription through whichever system owns it.
 - **Invalid trial configuration**: Trials require a trialable plan with no add-ons, no pay-as-you-go, overage, or tiered entitlements, and no credit grants that bill or charge on usage. A plan that is not trialable returns `The selected plan does not allow trials.` Add-ons return `A trial can't be combined with add-ons.` A pay-as-you-go, overage, or tiered entitlement, or a billed credit grant, returns `A trial can't be combined with pay-as-you-go, overage, or tiered entitlements, or with billed credit grants.` A credit grant with automatic or user-controlled top-ups, or one that bills in arrears, returns `A trial can't be combined with credit grants that bill in arrears or top up automatically.` Pay-in-advance quantities are accepted. The `trial_end` timestamp must also be in the future.
 - **Missing price for billing-linked add-on**: Billing-linked add-ons require a `price_id`. Look up the available prices via [`GET /plans/:id`](/api-reference/plans/get-plan).
+- **Price from another plan version**: A `base_plan_price_id` that is not on the version the company lands on returns `This price isn't on the selected version of Pro. Choose one of that version's prices.` when `base_plan_version_id` is set, and `This price isn't on the current version of Pro. Choose one of its current prices.` when it is not. A new add-on whose `price_id` is not on the add-on's current version returns the second message with the add-on's name. This usually means the price ID was saved before the plan was republished. Read the version's prices again as [Finding price IDs](#finding-price-ids) describes. See [Plan version behavior](#plan-version-behavior) for which version each request lands on.
+- **Unsupported plan billing period**: A base plan price must renew monthly, quarterly, or yearly. A price that Stripe bills on any other period, such as every 2 or 6 months, returns `A plan price must be monthly, quarterly, or yearly, and the selected price is billed every 2 months.`, with the period of the price you sent.
+- **Invalid promo code**: A `promo_code` that does not match an active Stripe promotion code available to the paying customer returns `Invalid promo code`. A code that exists but that Stripe will not apply to this subscription, for example one past its expiry or one with a minimum order amount, also returns a `400`.
 - **Price specified for non-billing add-on**: You cannot specify a `price_id` for an add-on that is not linked to a billing product. Omit the `price_id` for these add-ons.
 - **Plan not found or not available to company**: The base plan or an add-on does not exist, or the company is not eligible for it.
 - **Billing entity on an existing subscription**: `billing_entity_id` can only be set when a subscription is created. Sending it for a company that already has an active subscription returns `billing entity can only be set when starting a new subscription`. The billing entity must also already have a Stripe customer.

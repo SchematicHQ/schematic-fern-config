@@ -175,7 +175,7 @@ export function Upgrade() {
 }
 ```
 
-The codes are the `CheckoutProblemCode` values the [Components API](/api-reference/components) reference lists on the checkout responses, such as `payment_method_required`, `selection_invalid` for a promotion code the server rejects, `usage_over_limit`, `downgrade_not_permitted` and `checkout_superseded`.
+The codes are the `CheckoutProblemCode` values the [Components API](/api-reference/components) reference lists on the checkout responses, such as `payment_method_required`, `selection_invalid` for a promotion code the server rejects, `usage_over_limit`, `downgrade_not_permitted` and `checkout_superseded`. A rejected promotion code is reported even while another blocking problem, such as a missing seat quantity, keeps the cart from pricing, so the customer learns about both at once.
 
 ## Payment
 
