@@ -6360,6 +6360,38 @@ components:
         - start_time
         - unpriced_event_count
       title: CompanyInferenceCostResponseData
+    CompanyInferenceUsageResponseData:
+      type: object
+      properties:
+        company_id:
+          type: string
+          description: The company the usage belongs to
+        end_time:
+          type: string
+          description: End of the window (exclusive)
+          format: date-time
+        event_subtype:
+          type: string
+          description: The inference event label the usage was read for
+        points:
+          type: array
+          description: >-
+            One entry per UTC day that had events, oldest first. Days with no
+            events are omitted
+          items:
+            $ref: '#/components/schemas/InferenceUsagePointResponseData'
+          maxItems: 1000
+        start_time:
+          type: string
+          description: Start of the window (inclusive)
+          format: date-time
+      required:
+        - company_id
+        - end_time
+        - event_subtype
+        - points
+        - start_time
+      title: CompanyInferenceUsageResponseData
     CompanyLedgerResponseData:
       type: object
       properties:
@@ -15228,6 +15260,43 @@ components:
         - response_model
         - unpriced_event_count
       title: InferenceModelCostResponseData
+    InferenceUsagePointResponseData:
+      type: object
+      properties:
+        costs:
+          type: array
+          description: Summed cost of the day's priced events, one entry per currency
+          items:
+            $ref: '#/components/schemas/InferenceCostAmountResponseData'
+          maxItems: 1000
+        event_count:
+          type: integer
+          description: Number of inference events captured on the day
+          format: int64
+        input_tokens:
+          type: integer
+          description: Input tokens summed over the day's events
+          format: int64
+        output_tokens:
+          type: integer
+          description: Output tokens summed over the day's events
+          format: int64
+        requests:
+          type: integer
+          description: Requests summed over the day's events
+          format: int64
+        timestamp:
+          type: string
+          description: Start of the UTC day
+          format: date-time
+      required:
+        - costs
+        - event_count
+        - input_tokens
+        - output_tokens
+        - requests
+        - timestamp
+      title: InferenceUsagePointResponseData
     InsightsSummaryResponseData:
       type: object
       properties:
@@ -31507,6 +31576,100 @@ paths:
                   - data
                   - params
                 title: GetCompanyInferenceCostResponse
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /companies/{company_id}/inference-usage:
+    get:
+      operationId: getCompanyInferenceUsage
+      summary: Get company inference usage
+      tags:
+        - companies
+      parameters:
+        - name: company_id
+          in: path
+          description: company_id
+          required: true
+          schema:
+            type: string
+        - name: end_time
+          in: query
+          description: >-
+            End of the window (exclusive). Pass together with start_time; when
+            both are omitted, the company's current billing period is used
+          schema:
+            type: string
+            description: >-
+              End of the window (exclusive). Pass together with start_time; when
+              both are omitted, the company's current billing period is used
+            format: date-time
+        - name: event_subtype
+          in: query
+          description: >-
+            The inference event label to read, as set on an inference feature's
+            event_subtype
+          required: true
+          schema:
+            type: string
+            description: >-
+              The inference event label to read, as set on an inference
+              feature's event_subtype
+            maxLength: 255
+        - name: start_time
+          in: query
+          description: >-
+            Start of the window (inclusive). Pass together with end_time; when
+            both are omitted, the company's current billing period is used
+          schema:
+            type: string
+            description: >-
+              Start of the window (inclusive). Pass together with end_time; when
+              both are omitted, the company's current billing period is used
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyInferenceUsageResponseData'
+                  params:
+                    type: object
+                    description: Input parameters
+                    properties:
+                      end_time:
+                        type: string
+                        description: >-
+                          End of the window (exclusive). Pass together with
+                          start_time; when both are omitted, the company's
+                          current billing period is used
+                        format: date-time
+                      event_subtype:
+                        type: string
+                        description: >-
+                          The inference event label to read, as set on an
+                          inference feature's event_subtype
+                        maxLength: 255
+                      start_time:
+                        type: string
+                        description: >-
+                          Start of the window (inclusive). Pass together with
+                          end_time; when both are omitted, the company's current
+                          billing period is used
+                        format: date-time
+                    title: GetCompanyInferenceUsageParams
+                required:
+                  - data
+                  - params
+                title: GetCompanyInferenceUsageResponse
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
