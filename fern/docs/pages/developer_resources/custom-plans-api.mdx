@@ -355,6 +355,8 @@ Include a quota in the base price and charge per unit beyond it. `soft_limit` is
 
 Add a hard limit by setting `value_type` to `numeric` and `value_numeric` to the ceiling. Overage is then charged between the soft limit and the hard limit, and the feature is turned off above it.
 
+When Stripe bills the plan, a request with a `current_day` or `current_week` period returns a `400`. When the plan also has a quarterly or yearly price, Schematic bills a monthly allowance like this one each month on its own invoice. See [Overage on quarterly and yearly prices](/billing/usage-based-billing#overage-on-quarterly-and-yearly-prices).
+
 ### Volume and graduated pricing
 
 Tiered pricing uses `price_behavior: "tier"` with a `tier_mode` of either `volume` or `graduated`, plus a tier list for the relevant interval. Each tier has an `up_to` boundary, and the final tier omits `up_to` to mean unbounded. `flat_amount` and `per_unit_price` are both in cents, and either may be omitted.
@@ -515,7 +517,7 @@ The `action` field on each entitlement and credit grant is what drives the chang
 
 `create` adds a new record, with the details in `req` (entitlements) or `create_req` (credit grants).
 
-`update` modifies an existing record, and requires the `entitlement_id` or `credit_grant_id` alongside the changed fields.
+`update` modifies an existing record, and requires the `entitlement_id` or `credit_grant_id` alongside the changed fields. An entitlement update that sets `metric_period` also sets `metric_period_month_reset`: the reset you send, or the default, for `current_month`, and `null` for any other period. An update that leaves out `metric_period` leaves both fields unchanged.
 
 `delete` removes an existing record, and needs only the `entitlement_id` or `credit_grant_id`.
 

@@ -62,12 +62,22 @@ This is ideal for scenarios where many customers will fall into the plan's quota
 ![Steps 1-4](../../assets/images/billing/ubp-entitlement-configuration-overage-1.png)
 
 5. The Soft Limit represents the amount of usage included in the plan. Below this is set to 500, which means the first 500 fast requests are included.
-6. Next, select the duration of the period to track usage. Monthly is by far the most common, and Schematic also supports daily and weekly.
+6. Next, select the duration of the period to track usage. Monthly is by far the most common, and Schematic also supports daily and weekly. When Stripe bills the overage, the period must be monthly, because Stripe applies one allowance to each billing period. On a daily or weekly period the editor shows a warning, and saving returns `Overage can't be billed on an allowance that resets daily or weekly, because Stripe gives one allowance per billing period. Reset the allowance monthly instead.`
 7. If monthly is selected (as is done here), you will need to determine if the period should reset at the beginning of the month or based off of the billing period of the subscription (e.g. if the customer signed up on the 15th, the period would be measured 15th-14th of next month). Basing it off of the billing period is the most common choice.
 8. The Overage price is the amount to charge for each unit of usage over the soft limit. Here, we set that to $.01 (1 cent) per usage.
 9. Finally, you can optionally configure a Hard Limit (here 5,000) -- this represents the maximum amount of usage, at which Schematic will always turn off the flag. Hard Limits can be helpful if there are global resource limits you're trying to manage or you want to force conversion into a higher plan at a specific usage threshold.
 
 ![Steps 5-9](../../assets/images/billing/ubp-entitlement-configuration-overage-2.png)
+
+#### Overage on quarterly and yearly prices
+
+Stripe's metered price applies one allowance to each billing period and does not reset it inside the period. If Stripe billed a monthly allowance on a yearly price, a customer who stays under the limit every month would still be charged at renewal for the year's usage past a single month's allowance. Schematic bills these entitlements monthly instead.
+
+When Stripe is connected and a plan has a quarterly or yearly price, Schematic saves each overage entitlement on an event-based feature with a monthly period to be billed monthly. At the end of each month, Schematic measures that month's usage against the allowance and invoices any overage on its own Stripe invoice, separate from the plan's invoice. The month follows the date the allowance resets. Every subscription to the plan is billed this way, including subscriptions on the plan's monthly price.
+
+The editor shows a note when this applies: "This plan has a quarterly or yearly price, so overage on this monthly allowance is assessed each month and invoiced separately from the plan, for every subscription."
+
+Schematic applies this when you create, edit, or copy an entitlement, and when you add a quarterly or yearly price to a plan version. Restoring an entitlement or creating a new plan version keeps the billing each entitlement was saved with. A subscription that already carries the entitlement's Stripe metered price keeps it, and Stripe continues to bill that subscription's overage at the end of its billing period.
 
 ### Volume pricing
 
