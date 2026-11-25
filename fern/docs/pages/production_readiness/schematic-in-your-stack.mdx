@@ -28,7 +28,7 @@ The SDK keeps those values in memory and in `localStorage`. A returning visitor 
 
 ### Publishable keys
 
-Your publishable key ships in your frontend, so anyone who loads your app can read it. Schematic limits it to what a browser needs: checking flags for one company and user at a time, opening the WebSocket, sending `identify` and `track` events, and reading your public plans. Everything else needs a secret key, including reading or changing companies, users, and credits, checking many companies in one request, reserving credits, and sending negative or backfilled usage.
+Your publishable key ships in your frontend, so anyone who loads your app can read it. Schematic limits it to what a browser needs: checking flags for one company and user at a time, opening the WebSocket, sending `identify` and `track` events, and reading your public plans. Everything else needs a secret key, including reading or changing companies, users, and credits, checking many companies in one request, reserving credits, and sending negative or backfilled usage. An `identify` sent with the publishable key can find a company by a billing customer key such as `stripe_customer_id`, but only a secret key can set one on a company.
 
 The key is not tied to one company. Anyone holding it can check flags or send `track` events for any company key they know, so use browser checks to shape the UI and make the check that protects a feature in your backend. Send usage you bill for from your backend too, where a user cannot forge the event.
 

@@ -24,7 +24,7 @@ The connection itself, with the connected account ID and how it was connected. T
 
 ![Customers imported from Stripe](../../assets/images/use-cases/stripe-imported-customers.png)
 
-Connecting pulls your existing customers across with their subscriptions and their Stripe IDs, so companies in Schematic are matched to the records that already bill them. New customers stay matched by passing the Stripe customer ID on API requests and events.
+Connecting pulls your existing customers across with their subscriptions and their Stripe IDs, so companies in Schematic are matched to the records that already bill them. New customers stay matched when your backend sets the Stripe customer ID on the company with a secret key, or when they check out through Schematic.
 
 ![A company's subscription with its line items](../../assets/images/use-cases/subscription-stripe.png)
 

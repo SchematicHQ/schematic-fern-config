@@ -16,7 +16,7 @@ For a more general overview of the Stripe integration and it's capabilities, see
 The end goal of setting up Stripe integration is that Schematic has the following values correctly linked so that Schematic can 2-way sync data with Stripe. This ensures that newly created records in either system are mirrored into the other and that no duplicate records are created. The mapped data is
 
 1. Schematic Company ↔ Stripe Customer
-  - This is mapped via the `stripe_customer_id` trait on the company
+  - This is mapped via the `stripe_customer_id` key on the company
   - This can be used to map to the company's Stripe Subscription as well
 2. Schematic Plan, Add-ons, and Prices ↔ Stripe product, Stripe price
 
@@ -57,9 +57,11 @@ After the integration is setup, Schematic will automatically setup the `stripe_c
 Before setting up the integration, you will need to ensure that each company record in Schematic is setup to link to it's corresponding record in Stripe. To achieve this there are a few options:
 
 1. A one-time job to set `stripe_customer_id` on your companies already in Schematic.
-2. Always `identify` companies with `stripe_customer_id` and an additional key (typically a database id). *This works best if implemented before you launch to ensure each company in Schematic will have a `stripe_customer_id` set.* 
-3. Use `stripe_customer_id` as the main key you `identify` companies. *This requires that all companies will have a corresponding Stripe Customer.*
+2. Always `identify` companies from your backend with `stripe_customer_id` and an additional key (typically a database id). *This works best if implemented before you launch to ensure each company in Schematic will have a `stripe_customer_id` set.* 
+3. Use `stripe_customer_id` as the main key you `identify` companies with from your backend. *This requires that all companies will have a corresponding Stripe Customer.*
 4. (Less common) If you have an identifier set in your companies's Stripe metadata (often your application database's id), Schematic can import this and use it to sync companies during setup. 
+
+Only a request made with a secret key can set `stripe_customer_id` on a company. An `identify` from a frontend SDK uses your publishable key, so it can find a company by `stripe_customer_id` but does not set it. Make the calls in options 1 through 3 from your server with a secret key, as described in [set billing customer keys from your server](/developer_resources/key_management#set-billing-customer-keys-from-your-server).
 
 <Info>
 To understand more about `identify` and keys, see the [Developer Resources - Keys Management](/developer_resources/key_management) page.
