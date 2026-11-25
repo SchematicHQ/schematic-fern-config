@@ -56,6 +56,8 @@ export async function GET() {
 
 Other servers: the Python, Go, Ruby, Java, and C# SDKs expose the same call under `accesstokens`. Without an SDK, send `POST https://api.schematichq.com/temporary-access-tokens` with the secret key in the `X-Schematic-Api-Key` header and a body of `{"resource_type": "company", "lookup": {"id": "…"}}`; the token is at `data.token` and its expiry at `data.expired_at`. See [Session and access tokens](/components/build-your-own/session).
 
+If the app keeps its users in Schematic and the user wants the audit log to show which of the company's users made each change, add `userLookup: { id: session.userId }` (`user_lookup` in a raw request) with a user key configured in Schematic. The user must belong to the company, or the token request fails. See [Naming the user](/components/build-your-own/session#naming-the-user).
+
 ### 3. Wrap the app in the provider
 
 One `SchematicProvider` above every page that shows billing UI. `session` says whose billing is being read.
