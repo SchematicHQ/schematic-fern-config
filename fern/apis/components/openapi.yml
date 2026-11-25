@@ -1858,6 +1858,64 @@ components:
       required:
         - currency
       title: CatalogCurrencyPricesResponseData
+    CatalogCustomCreditAmountResponseData:
+      type: object
+      properties:
+        catalog_id:
+          type: string
+        credit_icon:
+          type: string
+          nullable: true
+        credit_id:
+          type: string
+        credit_name:
+          type: string
+        credit_plural_name:
+          type: string
+          nullable: true
+        credit_singular_name:
+          type: string
+          nullable: true
+        currency_prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogBundleCurrencyPriceResponseData'
+          maxItems: 1000
+        expiry_type:
+          $ref: '#/components/schemas/BillingCreditExpiryType'
+        expiry_unit:
+          allOf:
+            - $ref: '#/components/schemas/BillingCreditExpiryUnit'
+          nullable: true
+        expiry_unit_count:
+          type: integer
+          format: int64
+          nullable: true
+        max_quantity:
+          type: integer
+          description: The most credits a buyer may purchase at once.
+          format: int64
+        min_quantity:
+          type: integer
+          description: The fewest credits a buyer may purchase at once.
+          format: int64
+        unit_price:
+          allOf:
+            - $ref: '#/components/schemas/CatalogPriceResponseData'
+          description: >-
+            The price of one credit in the credit's primary currency. A price
+            the catalog sets replaces the credit's own price. currency_prices
+            carries every currency.
+          nullable: true
+      required:
+        - catalog_id
+        - credit_id
+        - credit_name
+        - currency_prices
+        - expiry_type
+        - max_quantity
+        - min_quantity
+      title: CatalogCustomCreditAmountResponseData
     CatalogCustomPlanCTAResponseData:
       type: object
       properties:
@@ -2338,6 +2396,14 @@ components:
             selected by id; this records the intent, and a cart that prices in
             another currency is reported as a problem.
           nullable: true
+        custom_credit_amounts:
+          type: array
+          description: >-
+            Credits bought in a custom amount, each under a catalog's custom
+            credit amount rule for that credit type.
+          items:
+            $ref: '#/components/schemas/UpdateCustomCreditAmountRequestBody'
+          maxItems: 100
         custom_field_values:
           type: array
           items:
@@ -2369,6 +2435,7 @@ components:
         - add_on_ids
         - auto_topup_overrides
         - credit_bundles
+        - custom_credit_amounts
         - custom_field_values
         - new_plan_id
         - new_price_id
@@ -2699,6 +2766,8 @@ components:
         - credit_bundle_unavailable
         - credit_bundles_activate_on_payment
         - currency_mismatch
+        - custom_credit_amount_out_of_range
+        - custom_credit_amount_unavailable
         - custom_field_required
         - discount_ineligible
         - downgrade_not_permitted
@@ -2740,6 +2809,9 @@ components:
           nullable: true
         code:
           $ref: '#/components/schemas/CheckoutProblemCode'
+        credit_id:
+          type: string
+          nullable: true
         currency:
           allOf:
             - $ref: '#/components/schemas/Currency'
@@ -2915,6 +2987,11 @@ components:
             The currency the cart is being built in, as the create or last
             update named it; null when neither did.
           nullable: true
+        custom_credit_amounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateCustomCreditAmountRequestBody'
+          maxItems: 1000
         custom_field_values:
           type: array
           items:
@@ -2950,6 +3027,7 @@ components:
         - add_on_ids
         - auto_topup_overrides
         - credit_bundles
+        - custom_credit_amounts
         - custom_field_values
         - intent
         - pay_in_advance
@@ -3070,6 +3148,11 @@ components:
           items:
             $ref: '#/components/schemas/CatalogCreditBundleResponseData'
           maxItems: 1000
+        custom_credit_amounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCustomCreditAmountResponseData'
+          maxItems: 1000
         custom_plan_cta:
           allOf:
             - $ref: '#/components/schemas/CatalogCustomPlanCTAResponseData'
@@ -3132,6 +3215,7 @@ components:
         - prevent_self_service_downgrade
         - add_ons
         - credit_bundles
+        - custom_credit_amounts
         - plans
       title: CompanyCatalogResponseData
     CompanyContextCustomPlanBillingResponseData:
@@ -5152,6 +5236,11 @@ components:
           items:
             $ref: '#/components/schemas/CheckoutFieldWithValue'
           maxItems: 1000
+        custom_credit_amounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogCustomCreditAmountResponseData'
+          maxItems: 1000
         default_plan:
           $ref: '#/components/schemas/PlanDetailResponseData'
         display_settings:
@@ -5199,6 +5288,7 @@ components:
         - custom_checkout_fields
         - credit_bundles
         - credit_grants
+        - custom_credit_amounts
         - prevent_self_service_downgrade
         - show_as_monthly_prices
         - show_credits
@@ -5371,6 +5461,14 @@ components:
             selected by id; this records the intent, and a cart that prices in
             another currency is reported as a problem.
           nullable: true
+        custom_credit_amounts:
+          type: array
+          description: >-
+            Credits bought in a custom amount, each under a catalog's custom
+            credit amount rule for that credit type.
+          items:
+            $ref: '#/components/schemas/UpdateCustomCreditAmountRequestBody'
+          maxItems: 100
         custom_field_values:
           type: array
           items:
@@ -5409,6 +5507,7 @@ components:
         - add_on_ids
         - auto_topup_overrides
         - credit_bundles
+        - custom_credit_amounts
         - custom_field_values
         - new_plan_id
         - new_price_id
@@ -9272,6 +9371,14 @@ components:
             selected by id; this records the intent, and a cart that prices in
             another currency is reported as a problem.
           nullable: true
+        custom_credit_amounts:
+          type: array
+          description: >-
+            Credits bought in a custom amount, each under a catalog's custom
+            credit amount rule for that credit type.
+          items:
+            $ref: '#/components/schemas/UpdateCustomCreditAmountRequestBody'
+          maxItems: 100
         custom_field_values:
           type: array
           items:
@@ -9314,6 +9421,7 @@ components:
         - add_on_ids
         - auto_topup_overrides
         - credit_bundles
+        - custom_credit_amounts
         - custom_field_values
         - new_plan_id
         - new_price_id
@@ -9373,6 +9481,23 @@ components:
             - $ref: '#/components/schemas/CreditSpendWindowUnit'
           nullable: true
       title: UpdateCreditSpendPolicyRequestBody
+    UpdateCustomCreditAmountRequestBody:
+      type: object
+      properties:
+        catalog_id:
+          type: string
+        credit_id:
+          type: string
+        quantity:
+          type: integer
+          description: The number of credits to buy.
+          format: int64
+          minimum: 1
+      required:
+        - catalog_id
+        - credit_id
+        - quantity
+      title: UpdateCustomCreditAmountRequestBody
     UpdatePayInAdvanceRequestBody:
       type: object
       properties:
