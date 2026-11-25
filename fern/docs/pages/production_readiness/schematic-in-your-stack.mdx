@@ -66,7 +66,7 @@ See the SDK page for your language, such as [Node.js](/developer_resources/sdks/
 
 Replicator is a container you run alongside your app. It loads every flag, company, and user in your environment into Redis, then holds a WebSocket to Schematic and writes each change as it arrives. The SDK runs in Replicator mode, reads from Redis, and evaluates checks locally. Because every company is already loaded, even the first check for a company is served locally.
 
-The SDK polls the Replicator's readiness endpoint to know whether the data in Redis is current. If a flag is missing from Redis, the SDK falls back to a REST call for that check. After a restart or a dropped connection, Replicator resumes from its last saved position rather than reloading everything.
+The SDK polls the Replicator's readiness endpoint to learn whether Redis holds a complete copy of your data, and sends flag checks to the Schematic API until it does. If a flag is missing from Redis, the SDK falls back to a REST call for that check. After a restart or a dropped connection, Replicator resumes from its last saved position rather than reloading everything.
 
 Run one Replicator per Redis. A second instance waits for the first to release its lock before it writes.
 
