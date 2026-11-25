@@ -6372,7 +6372,9 @@ components:
           format: date-time
         event_subtype:
           type: string
-          description: The inference event label the usage was read for
+          description: >-
+            The inference event label the usage was read for; empty when it
+            covers every label
         points:
           type: array
           description: >-
@@ -31612,13 +31614,12 @@ paths:
           in: query
           description: >-
             The inference event label to read, as set on an inference feature's
-            event_subtype
-          required: true
+            event_subtype. Omit to read every label together
           schema:
             type: string
             description: >-
               The inference event label to read, as set on an inference
-              feature's event_subtype
+              feature's event_subtype. Omit to read every label together
             maxLength: 255
         - name: start_time
           in: query
@@ -31656,7 +31657,8 @@ paths:
                         type: string
                         description: >-
                           The inference event label to read, as set on an
-                          inference feature's event_subtype
+                          inference feature's event_subtype. Omit to read every
+                          label together
                         maxLength: 255
                       start_time:
                         type: string
