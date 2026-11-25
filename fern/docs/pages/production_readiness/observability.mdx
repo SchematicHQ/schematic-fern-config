@@ -25,7 +25,7 @@ Each entry identifies the resource it acted on by `resource_type` and `resource_
 To keep audit history longer than Schematic retains it, export it to CSV through the API with a secret key and store the file yourself. An export runs in the background, and you retrieve it in three steps:
 
 1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` set to `audit-log` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
-2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
+2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`, or subscribe to the [`data_export.completed` and `data_export.failed` webhooks](/production_readiness/data-exports#webhooks-for-finished-exports) instead. A `failure` status means no file was produced, and you can create a new export to try again.
 3. Call [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) to download the file. The response body is the file itself, and its `Content-Disposition` header names it after the export type and creation time, for example `audit-log-20261106-143000.csv`.
 
 ```bash

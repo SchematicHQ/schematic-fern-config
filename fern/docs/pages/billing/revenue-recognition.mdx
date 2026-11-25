@@ -140,7 +140,7 @@ Bundle purchases, plan charges, and the invoices behind them come from [Stripe](
 A ledger export writes the entries for every company in an environment to one CSV file, with no limit on the time range, so a close process reads a single file rather than calling the ledger once per company. Create it through the API with a secret key. The export runs in the background, and you retrieve it in three steps:
 
 1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` set to `credit-ledger` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
-2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
+2. Call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`, or subscribe to the [`data_export.completed` and `data_export.failed` webhooks](/production_readiness/data-exports#webhooks-for-finished-exports) instead. A `failure` status means no file was produced, and you can create a new export to try again.
 3. Call [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) to download the file. The response body is the file itself, and its `Content-Disposition` header names it after the export type and creation time, for example `credit-ledger-20261201-090000.csv`.
 
 ```bash
@@ -213,3 +213,4 @@ Teams closing the books on credit-based pricing load the ledger export and the g
 - [Meter on a real-time credit ledger](/use-cases/credit-ledger) - why the ledger is transactional rather than a warehouse snapshot.
 - [Credit Leases and Reservations](/billing/credit-leases-and-reservations) - why a reserved credit is not a delivered one.
 - [Stripe integration](/integrations/stripe) - what syncs to Stripe and what comes back.
+- [Data exports](/production_readiness/data-exports) - the credit balance export, and the webhooks a finished export sends.

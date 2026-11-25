@@ -1,0 +1,135 @@
+---
+title: Data exports
+description: Export users, credit balances, the credit ledger, events, and the audit log to CSV through the API, and receive a webhook when each export completes or fails.
+slug: production_readiness/data-exports
+---
+
+A data export writes one environment's records to a CSV file in the background. A warehouse load or a scheduled job reads that one file, where it would otherwise page through a list endpoint one company at a time. You create exports through the API with a secret key, and each export covers the environment the key belongs to.
+
+## Export types
+
+Set `export_type` to one of the values below. The `metadata` object for each type is listed under [Create data export](/api-reference/data-exports/create-data-export).
+
+| `export_type` | Contents |
+|---|---|
+| `audit-log` | Audit log entries, described in [Exporting the audit log](/production_readiness/observability#exporting-the-audit-log) |
+| `company-feature-usage` | Companies with their plan and feature usage, the same export the **Export** button on the **Companies** list creates |
+| `credit-balance` | Each company's balance of each credit type, described in [Credit balance export](#credit-balance-export) |
+| `credit-ledger` | Credit ledger entries, described in [Exporting the ledger](/billing/revenue-recognition#exporting-the-ledger) |
+| `event` | Track, identify, and inference events, plus flag check events when you request them |
+| `user` | Users with their keys, traits, and companies, described in [User export](#user-export) |
+
+## Creating and retrieving an export
+
+An export runs in the background, and you retrieve it in three steps:
+
+1. Call [Create data export](/api-reference/data-exports/create-data-export) with `export_type` and `output_file_type` set to `csv` or `csv.gz`. The response returns the export's `id` with a `status` of `pending`.
+2. Wait for the export to finish. Subscribe to the [`data_export.completed` and `data_export.failed` webhooks](#webhooks-for-finished-exports), or call [Get data export](/api-reference/data-exports/get-data-export) until `status` is `success` or `failure`. A `failure` status means no file was produced, and you can create a new export to try again.
+3. Call [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) to download the file. The response body is the file itself, and its `Content-Disposition` header names it after the export type and creation time, for example `user-20261201-090000.csv`.
+
+```bash
+curl -X POST https://api.schematichq.com/data-exports \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "export_type": "credit-balance",
+    "output_file_type": "csv"
+  }'
+
+curl https://api.schematichq.com/data-exports/$DATA_EXPORT_ID \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+
+curl -OJ https://api.schematichq.com/data-exports/$DATA_EXPORT_ID/artifact \
+  -H "X-Schematic-Api-Key: $SCHEMATIC_SECRET_KEY"
+```
+
+Schematic deletes the file three days after the export completes, so download it within that window. [List data exports](/api-reference/data-exports/list-data-exports) returns earlier exports, filtered by `export_type` and `status`.
+
+When you send `metadata`, its `export_type` must match the request's `export_type`. Every type accepts `notification_email_recipient_email_addresses`, a list of up to 100 account member emails that receive a message when the export completes. An ID filter sent as an empty string fails the create request with a `400`, so omit a filter you do not want to apply.
+
+## Webhooks for finished exports
+
+Schematic sends `data_export.completed` when an export's file is ready to download, and `data_export.failed` when an export fails. Both events fire for every export in the environment, including exports created from the dashboard, so read `export_type` in the body to route each one. Create the endpoint and subscribe to the events as described in [Webhooks](/integrations/webhooks).
+
+Schematic retries an export job that fails partway through, and sends `data_export.failed` only after the last attempt fails. An export that succeeds on a retry sends only `data_export.completed`.
+
+The body is the data export as [Get data export](/api-reference/data-exports/get-data-export) returns it, with `artifact_filename` added. The body carries no download link, so your handler downloads the file from [Get data export artifact](/api-reference/data-exports/get-data-export-artifact) with a secret key.
+
+```json
+{
+  "action": "data_export.completed",
+  "account_id": "acct_xxxxxxxx",
+  "environment_id": "env_xxxxxxxx",
+  "event_id": "whe_xxxxxxxx",
+  "object_type": "data_export",
+  "body": {
+    "id": "dtexp_xxxxxxxx",
+    "account_id": "acct_xxxxxxxx",
+    "environment_id": "env_xxxxxxxx",
+    "export_type": "credit-balance",
+    "output_file_type": "csv",
+    "status": "success",
+    "metadata": { "export_type": "credit-balance" },
+    "artifact_filename": "credit-balance-20261201-090000.csv",
+    "created_at": "2026-12-01T09:00:00Z",
+    "updated_at": "2026-12-01T09:01:12Z"
+  }
+}
+```
+
+## Credit balance export
+
+A `credit-balance` export writes one row for each company and credit type where the company holds a live grant of that credit, meaning a grant that has not expired or been zeroed out. With no `metadata`, it covers every company in the environment.
+
+| Field | Effect |
+|---|---|
+| `export_type` | Required whenever `metadata` is present, and must be `credit-balance` |
+| `company_id` | Includes only this company |
+| `billing_credit_id` | Includes only this credit type |
+| `notification_email_recipient_email_addresses` | Up to 100 account member emails that receive a message when the export completes |
+
+The CSV has these columns:
+
+| Column | Contents |
+|---|---|
+| Company ID, Company Name | The company |
+| Billing Credit ID, Billing Credit Name | The credit type |
+| Balance | The credits remaining on the company's grants that have started and not expired |
+| Consumed This Period | The credits drawn by usage from the start of the company's current billing period up to the As Of time. It is blank when the company does not have exactly one active subscription. |
+| Reserved | The credits held by open [credit leases](/billing/credit-leases-and-reservations) |
+| Next Grant Valid From | When the company's next grant of this credit starts, blank when no grant is waiting to start |
+| As Of | When the export started, as an RFC 3339 timestamp in UTC |
+
+The export reads companies 250 at a time, so in a large environment the rows for later companies can include usage recorded after the As Of time. The export reads the grants Schematic holds, so a credit balance that an external billing provider such as Orb or Metronome manages does not appear in it.
+
+## User export
+
+A `user` export writes one row per user, oldest first. With no `metadata`, it covers every user in the environment. The filters work the same way as on `GET /users`.
+
+| Field | Effect |
+|---|---|
+| `export_type` | Required whenever `metadata` is present, and must be `user` |
+| `company_id` | Includes only members of this company |
+| `plan_id` | Includes only users in a company on this plan or add-on |
+| `ids` | Includes only these user IDs, up to 100 |
+| `q` | Includes only users whose name, keys, or string traits match this search |
+| `entity_key_definition_ids` | Adds a column for each of these user key definitions, up to 100 |
+| `entity_trait_definition_ids` | Adds a column for each of these user trait definitions, up to 100 |
+| `notification_email_recipient_email_addresses` | Up to 100 account member emails that receive a message when the export completes |
+
+A key or trait definition ID that matches no user key or trait fails the create request with a `400`. If someone deletes a definition after the export is created, the export leaves its column out.
+
+The CSV has these columns:
+
+| Column | Contents |
+|---|---|
+| User ID, User Name | The user |
+| One column per selected key | The user's value for that key, headed by the key's name |
+| One column per selected trait | The user's value for that trait, headed by the trait's name |
+| Companies, Company Names | The IDs and names of the companies the user belongs to, separated by semicolons and sorted by company name, so the two columns line up |
+| Last Seen | When the user was last seen, as an RFC 3339 timestamp in UTC, blank if never |
+| Created | When the user was created, as an RFC 3339 timestamp in UTC |
+
+## Permissions
+
+In the dashboard, a member needs the **Data Exports** permission for an environment to create exports in it, and admins can always create them. See [Roles & permissions](/production_readiness/roles-and-permissions).
