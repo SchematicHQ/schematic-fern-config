@@ -38,7 +38,7 @@ Create a feature with the type **Event-based**. In the **Event** section, set **
 
 ### 3. Add the feature to a plan with token rates
 
-Open the plan, add the feature, and set **Monetization Type** to **Credit burndown** against your credit type. Then fill in the rates, each in credits.
+Open the plan, add the feature, and set **Monetization Type** to **Credit burndown** against your credit type. Then fill in the rates under **Token Rates**, in the **Default Rates** card, each in credits.
 
 The example rates below assume **one credit is worth one cent (\$0.01)**. At that value, a rate of 0.0002 credits per token costs the customer \$0.000002 per token, or \$2 per million tokens. If your credit is worth something else, divide each dollar price by your credit's value to get its rate.
 
@@ -225,7 +225,9 @@ Schematic picks the rates for each event from its `provider` and `response_model
 
 An entry for the undated name therefore covers every snapshot of that model, and an entry for a dated name takes precedence for that one snapshot.
 
-Set `model_rates` with [Create plan entitlement](/api-reference/entitlements/create-plan-entitlement) or [Update plan entitlement](/api-reference/entitlements/update-plan-entitlement). Company overrides accept the same field through [Create company override](/api-reference/entitlements/create-company-override) and [Update company override](/api-reference/entitlements/update-company-override). The request below keeps the default rates from the example above and adds lower rates for two smaller models:
+In the app, add rates per model in the plan entitlement or company override form. Under **Token Rates**, the **Default Rates** card holds the default rates, and each model with its own rates has a card below it. Click **Add Model Rate** and pick a model. The picker suggests models that the feature's events named in the last 30 days, with their event counts, followed by models Schematic has a list price for. For a model it does not list, type the provider and model as your events send them, such as `acme/my-model`. A new card starts with a copy of the default rates, so change only the rates that differ for that model. The model on a card cannot be changed, so to rate a different model, remove the card and add another. While the feature has model rates, the example on a recent call says which rates priced that call.
+
+To set the same rate cards through the API, send `model_rates` with [Create plan entitlement](/api-reference/entitlements/create-plan-entitlement) or [Update plan entitlement](/api-reference/entitlements/update-plan-entitlement). Company overrides accept the same field through [Create company override](/api-reference/entitlements/create-company-override) and [Update company override](/api-reference/entitlements/update-company-override). The request below keeps the default rates from the example above and adds lower rates for two smaller models:
 
 ```bash title="cURL"
 curl -X PUT https://api.schematichq.com/plan-entitlements/pltl_xxxxxxxx \
@@ -270,7 +272,7 @@ curl -X PUT https://api.schematichq.com/plan-entitlements/pltl_xxxxxxxx \
 
 An entitlement takes up to 50 entries, with one entry per provider and model. Sending `model_rates` replaces the whole list, leaving it out of an update keeps the stored list, and sending `null` clears it. The Schematic MCP server sets the same rate cards through the `modelRates` input of its `add_entitlements_to_plan` tool.
 
-When an entry prices a burn, each line of the ledger entry's `burn_breakdown` carries that entry's `provider` and `model` as you stored them. Lines priced at the default rates carry neither.
+When an entry prices a burn, each line of the ledger entry's `burn_breakdown` carries that entry's `provider` and `model` as you stored them. Lines priced at the default rates carry neither. In the app, the credit event and the inference event that burned it name the model rate that priced the burn, or show that the default rates priced it.
 
 [Preflight checks](/feature-management/preflight-checks) and the check-and-reserve call in [Leases and reservations](/billing/credit-leases-and-reservations) price a call before it runs, when the model that serves it is not yet known, so they use the entitlement's default rates.
 
@@ -289,7 +291,9 @@ When a list price changes or Schematic corrects one, Schematic reprices the even
 
 Each environment has a rate sheet of per-token prices you set for a provider and model. A rate sheet price takes precedence over Schematic's list price, so add one when you pay a negotiated rate, or when you call a model Schematic has no list price for, such as a Gemini model or one you host yourself. The rate sheet sets only what calls cost you, and credit burns still use the rates on the plan.
 
-To add a price, call [Create account inference cost rate](/api-reference/events/create-account-inference-cost-rate) with a secret API key, or ask the Schematic MCP server, which uses its `create_inference_cost_rate` tool. Changing the rate sheet through the MCP server requires an admin.
+To manage the rate sheet in the app, mouse over **Catalog**, select **Credits**, and open the **Model Prices** tab. The table lists the price in effect today for each provider, model and currency, per million tokens. It shows Schematic's list prices and your rate sheet together, and marks your rate sheet's prices with an **Account** tag. Admins click **Add Price** and enter the provider, the model, the currency, a **Starts On** date, and a price per million tokens for each token type. The form converts each price to a per-token rate, and the start date takes effect at midnight UTC. On an **Account** row, **Edit** in the row menu changes the prices only, and **Delete** removes the price. List prices cannot be edited.
+
+To add a price through the API, call [Create account inference cost rate](/api-reference/events/create-account-inference-cost-rate) with a secret API key, or ask the Schematic MCP server, which uses its `create_inference_cost_rate` tool. Changing the rate sheet through the MCP server requires an admin.
 
 ```bash title="cURL"
 curl -X POST https://api.schematichq.com/inference-rate-sheet \
@@ -322,7 +326,7 @@ A price applies to events captured from its `starting_at` until the next price f
 
 Every create, update and delete reprices the stored events in that price's window, so a price with a `starting_at` in the past reprices calls you already sent. An hourly job does the repricing, and each price's `repriced_at` stays null until the job has brought its events to the new price. New events pick up a change within five minutes. Events that carried their own `cost` keep it.
 
-To see the rate sheet, call [List account inference cost rates](/api-reference/events/list-account-inference-cost-rates), which filters by `provider` and `response_model`, or ask the Schematic MCP server, which uses its `list_inference_cost_rates` tool. Each environment keeps its own rate sheet, so prices you add in development do not price production events.
+To see the rate sheet, call [List account inference cost rates](/api-reference/events/list-account-inference-cost-rates), which filters by `provider` and `response_model`. To see it beside Schematic's list prices, call [List inference cost rates](/api-reference/events/list-inference-cost-rates). It returns every price window from both, each with a `scope` of `account` for your rate sheet or `list_price` for Schematic's list price, and its `scope` filter narrows the list to one of them. The Schematic MCP server reads the same list with its `list_inference_cost_rates` tool, which returns your rate sheet unless you ask it for list prices. Each environment keeps its own rate sheet, so prices you add in development do not price production events.
 
 ### Read a company's cost
 
@@ -340,7 +344,9 @@ With no `start_time` and `end_time`, the period is the company's current billing
 - `by_model`, the cost and event count per provider and response model.
 - `unpriced_event_count`, the events with no known cost. They add nothing to `costs`, so a count above 0 means the real cost is higher than reported. Send `cost` on those events to close the gap.
 
-To find which models those are across every company, call [List unpriced inference models](/api-reference/events/list-unpriced-inference-models), or ask the Schematic MCP server, which answers with its `list_unpriced_inference_models` tool. It lists each provider and model whose events went unpriced, with the event count and when they were first and last seen, covering the last 30 days unless you pass `start_time` and `end_time`.
+To read the cost across every company in the environment, call [Get inference cost](/api-reference/events/get-inference-cost), or ask the Schematic MCP server, which answers with its `get_inference_cost` tool. The response has the same fields as the company read. With no `start_time` and `end_time`, the period is the current calendar month in UTC, and an explicit period can be at most 366 days long. A `by_model` entry with an `unpriced_event_count` above 0 names a model whose calls have no known cost, so add a rate sheet price for it, or send `cost` on its events.
+
+The **Model Prices** tab lists the same models in its **Unpriced Models** section, with the count of unpriced events each had in the last 30 days. The section is hidden when no model went unpriced.
 
 In the app, the inference event and the credit ledger entry it burned each show the call's **Cost**, with whether it came from the cost you sent or the model's list price. An event with no cost reads **Unpriced**, never \$0.00.
 
