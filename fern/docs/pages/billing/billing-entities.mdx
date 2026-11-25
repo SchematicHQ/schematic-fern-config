@@ -17,6 +17,31 @@ Billing entities are most common in sales-led motions where the contract and the
 
 In all of these cases the alternative is to collapse everyone into a single company record, which means giving up separate plans, separate entitlements, and separate usage reporting. Billing entities let you keep that separation while consolidating payment.
 
+## Modeling a parent organization and its sub-groups
+
+When a university's departments each buy a plan, or an enterprise's teams each subscribe, you create one Schematic company per department or team. Each sub-group's company has its own keys, plan, entitlements, and usage. Your app passes the sub-group's company keys to `identify` and to every flag check, so a department on Starter and a department on Enterprise see different features in the same product, and each department's usage counts against its own limits. You also create the parent organization as a company when it pays for any sub-group or has a plan of its own.
+
+### Choosing who pays
+
+You choose the payer for each subscription, so one parent organization can have some sub-groups that pay for themselves and others it pays for:
+
+| Who pays | How you set it up |
+|----------|-------------------|
+| The sub-group | Start the subscription on the sub-group's company the usual way. The sub-group's own Stripe customer and payment method are charged, and the parent company has no part in billing. |
+| The parent organization | Start the sub-group's subscription with the parent as its billing entity, as described in [Setting up a billing entity](#setting-up-a-billing-entity). The parent's payment method is charged, and the parent's **Subscription** tab lists every subscription it pays for. |
+
+Stripe issues a separate invoice for each subscription, so a parent that pays for ten departments receives ten invoices each billing period, all charged to its payment method.
+
+### How the parent relates to its sub-groups
+
+Schematic links a parent to a sub-group through the subscriptions the parent pays for. Each sub-group's entitlements come from its own plan, so a plan on the parent grants nothing to its sub-groups, and usage that a sub-group tracks counts only against that sub-group's limits.
+
+To group sub-groups that pay for themselves, or to target every sub-group of one organization with a flag, store the parent's ID on each sub-group as a company trait, such as `parent_organization_id`, when you upsert the company. [Flag rules](/feature-management/flags) can then match on that trait.
+
+A person who works in more than one sub-group can be a member of each sub-group's company. Your app identifies the company the person is acting in, and that company's plan decides what they can use.
+
+When the parent pays, it decides whether its sub-groups can change their own plan in components. See [Letting subscribing companies change their own plan](#letting-subscribing-companies-change-their-own-plan).
+
 ## How it works
 
 When you assign a billing entity to a company:
@@ -89,6 +114,19 @@ The paying company's **Subscription** tab gains a **Subscriptions billed to this
 
 ![Subscriptions billed to this company table on the parent](../../assets/images/billing/billing-entity-parent-subscriptions.png)
 
+## Letting subscribing companies change their own plan
+
+The billing entity decides whether the companies it pays for can change their own plan and add-ons in [components](/components/overview). The **Let these companies change their own plan** switch sits above the **Subscriptions billed to this company** table on the billing entity's **Subscription** tab, and it applies to every subscription that company pays for.
+
+| Setting | What a subscribing company can do in components |
+|---------|-------------------------------------------------|
+| Off (the default) | Cancel its subscription. A plan or add-on change returns "Another company pays for this subscription, so it can't be changed here. Ask them to change it." |
+| On | Change its plan and add-ons. The billing entity's payment method is charged, and the subscribing company's own cards are never used. |
+
+With either setting, your team can change a subscribing company's plan from **Manage Plan**, and your backend can change it through `POST /manage-plan` with a secret key. The billing entity is charged in both cases.
+
+When a company with no subscription buys a plan in components, the new subscription bills that company itself, because only the app and secret-key API requests can name a billing entity. To have a parent pay for a new subscription, start it from **Manage Plan** or from `POST /manage-plan` with `billing_entity_id`.
+
 ## How billing entities appear in Stripe
 
 The subscription lives on the **billing entity's** Stripe customer, so you will find it under the paying company in Stripe, not the subscribing company. Two pieces of metadata on the Stripe subscription tell you which company is which:
@@ -129,6 +167,18 @@ Pass `billing_entity_id` to [`POST /manage-plan`](/developer_resources/manage-pl
 
 `GET /company-billing-entity-subscriptions?company_id={company_id}` returns every subscription a company pays for on behalf of others. This is the data behind the **Subscriptions billed to this company** table in the app.
 
+### Reading and setting the plan-change switch
+
+`PUT /company-billing-entity-settings/{company_id}` sets the **Let these companies change their own plan** switch for the billing entity named by `company_id`:
+
+```json
+{
+  "children_may_change_plan": true
+}
+```
+
+`GET /company-billing-entity-settings/{company_id}` returns the current value. A billing entity that has never changed the setting returns `false`.
+
 ## Frequently asked questions
 
 **Does the subscribing company still get its own entitlements?**
@@ -139,6 +189,9 @@ No. Once a billing entity is set, the subscription is charged to the billing ent
 
 **Can a billing entity pay for more than one company?**
 Yes. A billing entity can cover any number of subscriptions, and all of them appear in the **Subscriptions billed to this company** table.
+
+**Can the subscribing company change its own plan?**
+In components, only when the billing entity turns on **Let these companies change their own plan**. Otherwise the subscribing company can only cancel there. See [Letting subscribing companies change their own plan](#letting-subscribing-companies-change-their-own-plan).
 
 **Can I change who pays after the fact?**
 Not on an existing subscription. Cancel the subscription and start a new one with the billing entity you want.
