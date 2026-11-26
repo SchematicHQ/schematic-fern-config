@@ -6579,8 +6579,8 @@ components:
         points:
           type: array
           description: >-
-            One entry per UTC day that had events, oldest first. Days with no
-            events are omitted
+            One entry per UTC day that had events or credit burns, oldest first.
+            Days with neither are omitted
           items:
             $ref: '#/components/schemas/InferenceUsagePointResponseData'
           maxItems: 1000
@@ -15445,6 +15445,20 @@ components:
         - list_price
         - provided
         - unpriced
+    InferenceCreditBurnResponseData:
+      type: object
+      properties:
+        credit_id:
+          type: string
+          description: The credit that was burned
+        quantity:
+          type: number
+          description: Credits burned, net of refunds
+          format: double
+      required:
+        - credit_id
+        - quantity
+      title: InferenceCreditBurnResponseData
     InferenceModelCostResponseData:
       type: object
       properties:
@@ -15484,6 +15498,15 @@ components:
           items:
             $ref: '#/components/schemas/InferenceCostAmountResponseData'
           maxItems: 1000
+        credit_burns:
+          type: array
+          description: >-
+            Credits that inference events burned on the day, one entry per
+            credit. A burn counts on the day it was recorded, which for a
+            backdated event is later than the day the event counts on
+          items:
+            $ref: '#/components/schemas/InferenceCreditBurnResponseData'
+          maxItems: 1000
         event_count:
           type: integer
           description: Number of inference events captured on the day
@@ -15506,6 +15529,7 @@ components:
           format: date-time
       required:
         - costs
+        - credit_burns
         - event_count
         - input_tokens
         - output_tokens
