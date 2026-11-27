@@ -168,6 +168,14 @@ you invoice. On the line item for that feature, in both checkout and the [pricin
 component, Schematic renders an info icon next to the price. The customer hovers it to read the
 threshold that triggers an early invoice and to see that the rest is billed monthly.
 
+## Usage when a company changes plans
+
+When a company changes plans partway through a billing period, what happens to the usage it has recorded so far depends on whether the change starts a new billing period.
+
+A change that keeps the billing period, such as an upgrade at the same billing interval, carries the period's usage over to the new plan. The new plan's price for the feature applies to all of it at the end of the period, so usage that was over the old plan's allowance can fall inside a larger one. If the new plan doesn't charge for the feature, because it's unlimited or not included, the usage recorded so far this period is not billed. Manage Plan lists that usage as not billed before you save the change.
+
+A change that starts a new billing period, such as a downgrade or a move to a different billing interval, bills the usage recorded so far at the old plan's price on the invoice for the change. The new period starts with no usage.
+
 ## Negative quantities (usage adjustments)
 
 Schematic supports submitting track events with **negative quantities** to reduce usage, for use cases such as refunds, corrections, or reversals. Negative quantity events must be submitted using a **secret API key**. Publishable API keys will reject them.
